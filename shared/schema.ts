@@ -66,6 +66,16 @@ export const chatMessages = pgTable("chat_messages", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+export const posts = pgTable("posts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  authorUserId: varchar("author_user_id"),
+  type: text("type").notNull(),
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  region: text("region").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertEntrepreneurSchema = createInsertSchema(entrepreneurs).omit({
   id: true,
   createdAt: true,
@@ -91,6 +101,11 @@ export const insertChatRoomSchema = createInsertSchema(chatRooms).omit({
 });
 
 export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertPostSchema = createInsertSchema(posts).omit({
   id: true,
   createdAt: true,
 });
@@ -122,3 +137,6 @@ export type ChatRoom = typeof chatRooms.$inferSelect;
 
 export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
 export type ChatMessage = typeof chatMessages.$inferSelect;
+
+export type InsertPost = z.infer<typeof insertPostSchema>;
+export type Post = typeof posts.$inferSelect;
