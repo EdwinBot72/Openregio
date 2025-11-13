@@ -10,6 +10,7 @@ import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home";
 import DashboardPage from "@/pages/dashboard";
 import NetworkPage from "@/pages/network";
+import CommunityPage from "@/pages/community";
 import RegioBotPage from "@/pages/regiobot";
 import CooperativePage from "@/pages/cooperative";
 import ChatPage from "@/pages/chat";
@@ -20,6 +21,7 @@ function Router() {
       <Route path="/" component={HomePage} />
       <Route path="/dashboard" component={DashboardPage} />
       <Route path="/network" component={NetworkPage} />
+      <Route path="/community" component={CommunityPage} />
       <Route path="/chat" component={ChatPage} />
       <Route path="/regiobot" component={RegioBotPage} />
       <Route path="/cooperative" component={CooperativePage} />

@@ -10,7 +10,7 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Home, Users, Bot, Building2, User, LogOut, MessageCircle } from "lucide-react";
+import { Home, Users, Bot, Building2, User, LogOut, MessageCircle, Newspaper } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
@@ -24,6 +24,11 @@ const menuItems = [
     title: "Netwerk",
     icon: Users,
     url: "/network",
+  },
+  {
+    title: "Community",
+    icon: Newspaper,
+    url: "/community",
   },
   {
     title: "Chat",
