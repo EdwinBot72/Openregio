@@ -3,10 +3,12 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Check, Sparkles, Euro, Users, TrendingUp, Shield } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Subscription } from "@shared/schema";
+import { useAuth } from "@/hooks/useAuth";
 
 const PLAN_FEATURES = {
   basic: [
@@ -28,15 +30,44 @@ const PLAN_FEATURES = {
 };
 
 export default function LidmaatschapPage() {
+  const { profile, isLoading: authLoading } = useAuth();
+
+  if (authLoading) {
+    return (
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="text-center space-y-4">
+          <Skeleton className="h-8 w-48 mx-auto" />
+          <Skeleton className="h-12 w-96 mx-auto" />
+          <Skeleton className="h-6 w-full max-w-2xl mx-auto" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <Skeleton className="h-96" />
+          <Skeleton className="h-96" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="max-w-7xl mx-auto">
+        <Card className="p-8 text-center">
+          <CardTitle className="mb-4">Geen profiel gevonden</CardTitle>
+          <p className="text-muted-foreground">Log in om verder te gaan.</p>
+        </Card>
+      </div>
+    );
+  }
+
+  return <LidmaatschapContent userId={profile.id} />;
+}
+
+function LidmaatschapContent({ userId }: { userId: string }) {
   const { toast } = useToast();
   const [isCreatingCheckout, setIsCreatingCheckout] = useState(false);
 
-  // NOTE: Hardcoded user ID for MVP - will be replaced with authentication
-  const userId = "user-jan";
-
-  const { data: subscription, isLoading } = useQuery<Subscription>({
+  const { data: subscription, isLoading: subscriptionLoading } = useQuery<Subscription>({
     queryKey: ["/api/billing/subscription", { search: { userId } }],
-    enabled: !!userId,
   });
 
   const createCheckoutMutation = useMutation({
@@ -77,11 +108,17 @@ export default function LidmaatschapPage() {
 
   const hasActiveSubscription = subscription && ["trialing", "active"].includes(subscription.status);
 
-  if (isLoading) {
+  if (subscriptionLoading) {
     return (
-      <div className="max-w-7xl mx-auto">
-        <div className="text-center py-12">
-          <p className="text-muted-foreground">Laden...</p>
+      <div className="max-w-7xl mx-auto space-y-8">
+        <div className="text-center space-y-4">
+          <Skeleton className="h-8 w-48 mx-auto" />
+          <Skeleton className="h-12 w-96 mx-auto" />
+          <Skeleton className="h-6 w-full max-w-2xl mx-auto" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <Skeleton className="h-96" />
+          <Skeleton className="h-96" />
         </div>
       </div>
     );

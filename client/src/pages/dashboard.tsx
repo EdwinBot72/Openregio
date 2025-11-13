@@ -3,11 +3,13 @@ import { PaywallBanner } from "@/components/PaywallBanner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Bell, Calendar, ThumbsUp, MessageSquare, TrendingUp, Sparkles } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import type { Proposal, Activity, UserProfile } from "@shared/schema";
 import { formatDistance } from "date-fns";
 import { nl } from "date-fns/locale";
+import { useAuth } from "@/hooks/useAuth";
 
 const PAIN_POINT_LABELS: Record<string, string> = {
   visibility: "Zichtbaarheid",
@@ -100,9 +102,38 @@ function getCardHighlights(painPoints: string[]): {
 }
 
 export default function DashboardPage() {
-  // NOTE: Hardcoded user ID for MVP - will be replaced with authentication context when implemented
+  const { profile, isLoading: authLoading } = useAuth();
+
+  if (authLoading) {
+    return (
+      <div className="max-w-7xl mx-auto space-y-6">
+        <Skeleton className="h-24 w-full" />
+        <Skeleton className="h-64 w-full" />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Skeleton className="h-96 lg:col-span-2" />
+          <Skeleton className="h-96" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="max-w-7xl mx-auto">
+        <Card className="p-8 text-center">
+          <CardTitle className="mb-4">Geen profiel gevonden</CardTitle>
+          <p className="text-muted-foreground">Log opnieuw in om door te gaan.</p>
+        </Card>
+      </div>
+    );
+  }
+
+  return <DashboardContent profile={profile} />;
+}
+
+function DashboardContent({ profile }: { profile: NonNullable<ReturnType<typeof useAuth>["profile"]> }) {
   const { data: userProfile } = useQuery<UserProfile>({
-    queryKey: ["/api/user-profile", "user-jan"],
+    queryKey: ["/api/user-profile", profile.id],
   });
 
   const { data: proposals } = useQuery<Proposal[]>({
@@ -125,7 +156,7 @@ export default function DashboardPage() {
           <Calendar className="h-4 w-4" />,
   }));
 
-  const painPoints = userProfile?.painPoints || [];
+  const painPoints = userProfile?.painPoints || profile.painPoints || [];
   const highlights = getCardHighlights(painPoints);
 
   return (
@@ -139,7 +170,7 @@ export default function DashboardPage() {
 
       <div className="space-y-8">
         <PaywallBanner
-          userId="user-jan"
+          userId={profile.id}
           message="Ontgrendel alle functies en word lid van de OpenRegio coöperatie"
           ctaText="Bekijk lidmaatschappen"
         />
