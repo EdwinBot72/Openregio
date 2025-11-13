@@ -987,4 +987,6 @@ class DbStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// NOTE: Switched to DbStorage for persistent data and testing compatibility
+// Use DbStorage instead of MemStorage to persist data to PostgreSQL
+export const storage = new DbStorage();
