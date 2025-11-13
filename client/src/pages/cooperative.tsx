@@ -6,38 +6,42 @@ import { CooperativeStats } from "@/components/CooperativeStats";
 import { Vote, Users, Euro, FileText, CheckCircle2, Clock } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
-import type { Proposal } from "@shared/schema";
+import type { Proposal, ProposalSummary } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistance } from "date-fns";
 import { nl } from "date-fns/locale";
 
 export default function CooperativePage() {
   const { toast } = useToast();
-  const { data: proposals, isLoading } = useQuery<Proposal[]>({
-    queryKey: ["/api/proposals"],
+  const { data: summaries, isLoading } = useQuery<ProposalSummary[]>({
+    queryKey: ["/api/proposals/summary"],
   });
 
   const voteMutation = useMutation({
-    mutationFn: async ({ id, voteType }: { id: string; voteType: "for" | "against" | "abstain" }) => {
-      return apiRequest("POST", `/api/proposals/${id}/vote`, { voteType });
+    mutationFn: async ({ id, choice }: { id: string; choice: "yes" | "no" | "abstain" }) => {
+      return apiRequest("POST", `/api/proposals/${id}/vote`, { choice });
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/proposals"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/proposals/summary"] });
       toast({
         title: "Stem geregistreerd",
         description: "Je stem is succesvol opgeslagen.",
       });
     },
-    onError: () => {
+    onError: (error: any) => {
+      const errorMessage = error?.message === "User has already voted on this proposal"
+        ? "Je hebt al gestemd op dit voorstel."
+        : "Er is iets misgegaan bij het registreren van je stem.";
       toast({
         title: "Fout",
-        description: "Er is iets misgegaan bij het registreren van je stem.",
+        description: errorMessage,
         variant: "destructive",
       });
     },
   });
 
-  const activeProposals = proposals?.filter((p) => p.status === "active") || [];
+  const openSummaries = summaries?.filter((s) => s.proposal.status === "open") || [];
+  const closedSummaries = summaries?.filter((s) => s.proposal.status === "closed") || [];
 
   const contributions = [
     { category: "Platformonderhoud", amount: "45%", color: "bg-chart-1" },
@@ -58,6 +62,44 @@ export default function CooperativePage() {
       <div className="space-y-8">
         <CooperativeStats />
 
+        {closedSummaries.length > 0 && (
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-5 w-5" />
+                Besluitlogboek
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {closedSummaries.map((summary) => {
+                const { proposal, voteCounts } = summary;
+                const totalVotes = voteCounts.yes + voteCounts.no + voteCounts.abstain;
+                const yesPercentage = totalVotes > 0 ? (voteCounts.yes / totalVotes) * 100 : 0;
+
+                return (
+                  <div
+                    key={proposal.id}
+                    className="p-4 rounded-lg border space-y-2"
+                    data-testid={`closed-proposal-${proposal.id}`}
+                  >
+                    <h4 className="font-semibold">{proposal.title}</h4>
+                    <p className="text-sm text-muted-foreground">{proposal.description}</p>
+                    <div className="flex items-center gap-2 text-sm">
+                      <Badge variant="secondary">Gesloten</Badge>
+                      <span className="text-muted-foreground">
+                        Resultaat: {yesPercentage >= 50 ? "Aangenomen" : "Afgewezen"}
+                      </span>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Ja: {voteCounts.yes} | Nee: {voteCounts.no} | Onthouding: {voteCounts.abstain}
+                    </div>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 space-y-6">
             <Card>
@@ -75,15 +117,17 @@ export default function CooperativePage() {
                   <div className="text-center py-8">
                     <p className="text-muted-foreground">Laden...</p>
                   </div>
-                ) : activeProposals.length === 0 ? (
+                ) : openSummaries.length === 0 ? (
                   <div className="text-center py-8">
                     <p className="text-muted-foreground">Geen actieve voorstellen op dit moment.</p>
                   </div>
                 ) : (
-                  activeProposals.map((proposal) => {
-                    const totalVotes = Number(proposal.votesFor) + Number(proposal.votesAgainst) + Number(proposal.votesAbstain);
-                    const forPercentage = totalVotes > 0 ? (Number(proposal.votesFor) / totalVotes) * 100 : 0;
-                    const daysUntilDeadline = formatDistance(new Date(proposal.deadline), new Date(), { addSuffix: false, locale: nl });
+                  openSummaries.map((summary) => {
+                    const { proposal, voteCounts, userVoteChoice } = summary;
+                    const totalVotes = voteCounts.yes + voteCounts.no + voteCounts.abstain;
+                    const yesPercentage = totalVotes > 0 ? (voteCounts.yes / totalVotes) * 100 : 0;
+                    const hasVoted = !!userVoteChoice;
+                    const daysUntilDeadline = formatDistance(new Date(proposal.closesAt), new Date(), { addSuffix: false, locale: nl });
 
                     return (
                       <div
@@ -110,35 +154,50 @@ export default function CooperativePage() {
                             <span className="text-muted-foreground">Stemmen</span>
                             <span className="font-medium">{totalVotes} totaal</span>
                           </div>
-                          <Progress value={forPercentage} className="h-2" />
+                          <Progress value={yesPercentage} className="h-2" />
                           <div className="flex justify-between text-xs text-muted-foreground">
-                            <span className="text-green-600">Voor: {proposal.votesFor}</span>
-                            <span className="text-red-600">Tegen: {proposal.votesAgainst}</span>
-                            <span>Blanco: {proposal.votesAbstain}</span>
+                            <span className="text-green-600">Ja: {voteCounts.yes}</span>
+                            <span className="text-red-600">Nee: {voteCounts.no}</span>
+                            <span>Onthouding: {voteCounts.abstain}</span>
                           </div>
                         </div>
 
+                        {hasVoted && (
+                          <Badge variant="secondary" className="w-full justify-center" data-testid={`badge-voted-${proposal.id}`}>
+                            Gestemd: {userVoteChoice === "yes" ? "Ja" : userVoteChoice === "no" ? "Nee" : "Onthouding"}
+                          </Badge>
+                        )}
+
                         <div className="flex gap-2">
                           <Button
-                            variant="default"
+                            variant={userVoteChoice === "yes" ? "default" : "outline"}
                             size="sm"
                             className="flex-1"
-                            onClick={() => voteMutation.mutate({ id: proposal.id, voteType: "for" })}
-                            disabled={voteMutation.isPending}
+                            onClick={() => voteMutation.mutate({ id: proposal.id, choice: "yes" })}
+                            disabled={hasVoted || voteMutation.isPending}
+                            data-testid={`button-vote-yes-${proposal.id}`}
                           >
-                            Stem voor
+                            Ja
                           </Button>
                           <Button
-                            variant="outline"
+                            variant={userVoteChoice === "no" ? "default" : "outline"}
                             size="sm"
                             className="flex-1"
-                            onClick={() => voteMutation.mutate({ id: proposal.id, voteType: "against" })}
-                            disabled={voteMutation.isPending}
+                            onClick={() => voteMutation.mutate({ id: proposal.id, choice: "no" })}
+                            disabled={hasVoted || voteMutation.isPending}
+                            data-testid={`button-vote-no-${proposal.id}`}
                           >
-                            Stem tegen
+                            Nee
                           </Button>
-                          <Button variant="ghost" size="sm">
-                            Details
+                          <Button
+                            variant={userVoteChoice === "abstain" ? "default" : "outline"}
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => voteMutation.mutate({ id: proposal.id, choice: "abstain" })}
+                            disabled={hasVoted || voteMutation.isPending}
+                            data-testid={`button-vote-abstain-${proposal.id}`}
+                          >
+                            Onthouding
                           </Button>
                         </div>
                       </div>

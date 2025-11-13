@@ -175,6 +175,12 @@ export type Proposal = typeof proposals.$inferSelect;
 export type InsertVote = z.infer<typeof insertVoteSchema>;
 export type Vote = typeof votes.$inferSelect;
 
+export type ProposalSummary = {
+  proposal: Proposal;
+  voteCounts: { yes: number; no: number; abstain: number };
+  userVoteChoice?: "yes" | "no" | "abstain";
+};
+
 export type InsertActivity = z.infer<typeof insertActivitySchema>;
 export type Activity = typeof activities.$inferSelect;
 

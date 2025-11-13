@@ -106,6 +106,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Proposals routes
+  app.get("/api/proposals/summary", async (req, res) => {
+    try {
+      const userId = "user-jan";
+      const summaries = await storage.getProposalSummaries(userId);
+      res.json(summaries);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch proposal summaries" });
+    }
+  });
+
   app.get("/api/proposals", async (req, res) => {
     try {
       const { status } = req.query;
@@ -153,10 +163,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/proposals/:id/vote", async (req, res) => {
     try {
       const { choice } = req.body;
+      const userId = "user-jan";
       
       const validatedVote = insertVoteSchema.parse({
         proposalId: req.params.id,
-        userId: "user-jan",
+        userId,
         choice,
       });
       

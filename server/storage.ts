@@ -16,6 +16,7 @@ import {
   type InsertPost,
   type UserProfile,
   type InsertUserProfile,
+  type ProposalSummary,
   entrepreneurs,
   proposals,
   votes,
@@ -27,7 +28,7 @@ import {
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
-import { eq, ilike, or, desc, sql, and } from "drizzle-orm";
+import { eq, ilike, or, desc, sql, and, inArray } from "drizzle-orm";
 
 // Haversine formula to calculate distance between two lat/lng points in km
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -42,6 +43,8 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c;
 }
 
+import type { ProposalSummary } from "@shared/schema";
+
 export interface IStorage {
   // Entrepreneurs
   getEntrepreneurs(search?: string, category?: string, lat?: number, lng?: number, radius?: number): Promise<Entrepreneur[]>;
@@ -55,6 +58,7 @@ export interface IStorage {
   getProposal(id: string): Promise<Proposal | undefined>;
   createProposal(proposal: InsertProposal): Promise<Proposal>;
   updateProposalStatus(id: string, status: "open" | "closed"): Promise<Proposal | undefined>;
+  getProposalSummaries(userId: string): Promise<ProposalSummary[]>;
 
   // Votes
   getVotes(proposalId: string): Promise<Vote[]>;
@@ -597,6 +601,23 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
+  async getProposalSummaries(userId: string): Promise<ProposalSummary[]> {
+    const allProposals = await this.getProposals();
+    
+    return Promise.all(allProposals.map(async (proposal) => {
+      const [voteCounts, userVote] = await Promise.all([
+        this.getVoteCounts(proposal.id),
+        this.getUserVote(proposal.id, userId),
+      ]);
+      
+      return {
+        proposal,
+        voteCounts,
+        userVoteChoice: userVote?.choice as "yes" | "no" | "abstain" | undefined,
+      };
+    }));
+  }
+
   async getVotes(proposalId: string): Promise<Vote[]> {
     const proposalVotes = this.votesByProposal.get(proposalId);
     return proposalVotes ? Array.from(proposalVotes.values()) : [];
@@ -896,6 +917,46 @@ class DbStorage implements IStorage {
       .where(eq(proposals.id, id))
       .returning();
     return updated[0];
+  }
+
+  async getProposalSummaries(userId: string): Promise<ProposalSummary[]> {
+    const allProposals = await this.getProposals();
+    
+    if (allProposals.length === 0) {
+      return [];
+    }
+    
+    const proposalIds = allProposals.map(p => p.id);
+    
+    // Batch fetch all votes for all proposals in one query
+    const allVotes = await db.select().from(votes)
+      .where(inArray(votes.proposalId, proposalIds));
+    
+    // Group votes by proposal ID
+    const votesByProposal = new Map<string, Vote[]>();
+    for (const vote of allVotes) {
+      if (!votesByProposal.has(vote.proposalId)) {
+        votesByProposal.set(vote.proposalId, []);
+      }
+      votesByProposal.get(vote.proposalId)!.push(vote);
+    }
+    
+    // Compute summaries
+    return allProposals.map(proposal => {
+      const proposalVotes = votesByProposal.get(proposal.id) || [];
+      const voteCounts = {
+        yes: proposalVotes.filter(v => v.choice === "yes").length,
+        no: proposalVotes.filter(v => v.choice === "no").length,
+        abstain: proposalVotes.filter(v => v.choice === "abstain").length,
+      };
+      const userVote = proposalVotes.find(v => v.userId === userId);
+      
+      return {
+        proposal,
+        voteCounts,
+        userVoteChoice: userVote?.choice as "yes" | "no" | "abstain" | undefined,
+      };
+    });
   }
 
   async getVotes(proposalId: string): Promise<Vote[]> {
