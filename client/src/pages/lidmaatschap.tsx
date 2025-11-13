@@ -4,11 +4,12 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Check, Sparkles, Euro, Users, TrendingUp, Shield } from "lucide-react";
+import { Check, Sparkles, Euro, Users, TrendingUp, Shield, LogIn } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import type { Subscription } from "@shared/schema";
 import { useAuth } from "@/hooks/useAuth";
+import { getLoginUrl } from "@/lib/authUtils";
 
 const PLAN_FEATURES = {
   basic: [
@@ -48,26 +49,16 @@ export default function LidmaatschapPage() {
     );
   }
 
-  if (!profile) {
-    return (
-      <div className="max-w-7xl mx-auto">
-        <Card className="p-8 text-center">
-          <CardTitle className="mb-4">Geen profiel gevonden</CardTitle>
-          <p className="text-muted-foreground">Log in om verder te gaan.</p>
-        </Card>
-      </div>
-    );
-  }
-
-  return <LidmaatschapContent userId={profile.id} />;
+  return <LidmaatschapContent userId={profile?.id} />;
 }
 
-function LidmaatschapContent({ userId }: { userId: string }) {
+function LidmaatschapContent({ userId }: { userId?: string }) {
   const { toast } = useToast();
   const [isCreatingCheckout, setIsCreatingCheckout] = useState(false);
 
   const { data: subscription, isLoading: subscriptionLoading } = useQuery<Subscription>({
     queryKey: ["/api/billing/subscription", { search: { userId } }],
+    enabled: !!userId,
   });
 
   const createCheckoutMutation = useMutation({
@@ -140,6 +131,72 @@ function LidmaatschapContent({ userId }: { userId: string }) {
         </p>
       </div>
 
+      <Card className="mb-12" data-testid="card-what-we-do">
+        <CardHeader>
+          <CardTitle className="font-accent text-2xl">Wat doet OpenRegio?</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-foreground">
+            OpenRegio is een coöperatief platform voor lokale ondernemers die hun digitale onafhankelijkheid terug willen pakken. We zijn geen Big Tech-platform — we zijn van en voor ondernemers.
+          </p>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+            <div>
+              <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-primary" />
+                Lokale Zichtbaarheid
+              </h3>
+              <p className="text-muted-foreground text-sm">
+                Jouw bedrijf vindbaar voor klanten in de buurt, zonder Google-advertenties of algoritmes die tegen je werken.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
+                <Users className="h-5 w-5 text-primary" />
+                Ondernemersnetwerk
+              </h3>
+              <p className="text-muted-foreground text-sm">
+                Ontdek andere lokale bedrijven, deel leads, werk samen aan projecten en versterk elkaar.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
+                <Sparkles className="h-5 w-5 text-primary" />
+                AI-Assistent RegioBot
+              </h3>
+              <p className="text-muted-foreground text-sm">
+                Hulp bij marketing, content, lokale SEO en klantbereik — speciaal getraind voor lokale ondernemers.
+              </p>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
+                <Shield className="h-5 w-5 text-primary" />
+                Democratische Coöperatie
+              </h3>
+              <p className="text-muted-foreground text-sm">
+                Stem mee over beslissingen, geen verborgen algoritmes, transparante bijdragen. Het platform is van ons allemaal.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-6 p-4 rounded-lg bg-muted/50">
+            <p className="text-sm text-muted-foreground">
+              <strong className="text-foreground">Contact:</strong> Vragen over OpenRegio? Mail ons op{" "}
+              <a 
+                href="mailto:info@openregio.nl" 
+                className="text-primary hover:underline"
+                data-testid="link-contact-email"
+              >
+                info@openregio.nl
+              </a>
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+
       {hasActiveSubscription && (
         <Card className="mb-8 border-primary/50 bg-primary/5" data-testid="card-current-subscription">
           <CardHeader>
@@ -194,18 +251,31 @@ function LidmaatschapContent({ userId }: { userId: string }) {
             </ul>
           </CardContent>
           <CardFooter>
-            <Button
-              className="w-full"
-              onClick={() => handleStartSubscription("basic")}
-              disabled={isCreatingCheckout || (hasActiveSubscription && subscription?.plan === "basic")}
-              data-testid="button-subscribe-basic"
-            >
-              {hasActiveSubscription && subscription?.plan === "basic" 
-                ? "Huidig plan" 
-                : isCreatingCheckout 
-                ? "Bezig..." 
-                : "Word Basic lid"}
-            </Button>
+            {!userId ? (
+              <Button
+                className="w-full"
+                asChild
+                data-testid="button-subscribe-basic"
+              >
+                <a href={getLoginUrl()}>
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Log in om lid te worden
+                </a>
+              </Button>
+            ) : (
+              <Button
+                className="w-full"
+                onClick={() => handleStartSubscription("basic")}
+                disabled={isCreatingCheckout || (hasActiveSubscription && subscription?.plan === "basic")}
+                data-testid="button-subscribe-basic"
+              >
+                {hasActiveSubscription && subscription?.plan === "basic" 
+                  ? "Huidig plan" 
+                  : isCreatingCheckout 
+                  ? "Bezig..." 
+                  : "Word Basic lid"}
+              </Button>
+            )}
           </CardFooter>
         </Card>
 
@@ -236,19 +306,33 @@ function LidmaatschapContent({ userId }: { userId: string }) {
             </ul>
           </CardContent>
           <CardFooter>
-            <Button
-              className="w-full"
-              variant="default"
-              onClick={() => handleStartSubscription("pro")}
-              disabled={isCreatingCheckout || (hasActiveSubscription && subscription?.plan === "pro")}
-              data-testid="button-subscribe-pro"
-            >
-              {hasActiveSubscription && subscription?.plan === "pro" 
-                ? "Huidig plan" 
-                : isCreatingCheckout 
-                ? "Bezig..." 
-                : "Word Pro lid"}
-            </Button>
+            {!userId ? (
+              <Button
+                className="w-full"
+                variant="default"
+                asChild
+                data-testid="button-subscribe-pro"
+              >
+                <a href={getLoginUrl()}>
+                  <LogIn className="h-4 w-4 mr-2" />
+                  Log in om lid te worden
+                </a>
+              </Button>
+            ) : (
+              <Button
+                className="w-full"
+                variant="default"
+                onClick={() => handleStartSubscription("pro")}
+                disabled={isCreatingCheckout || (hasActiveSubscription && subscription?.plan === "pro")}
+                data-testid="button-subscribe-pro"
+              >
+                {hasActiveSubscription && subscription?.plan === "pro" 
+                  ? "Huidig plan" 
+                  : isCreatingCheckout 
+                  ? "Bezig..." 
+                  : "Word Pro lid"}
+              </Button>
+            )}
           </CardFooter>
         </Card>
       </div>
@@ -297,7 +381,7 @@ function LidmaatschapContent({ userId }: { userId: string }) {
           <a 
             href="mailto:info@openregio.nl" 
             className="text-primary hover:underline font-medium"
-            data-testid="link-contact-email"
+            data-testid="link-contact-email-footer"
           >
             info@openregio.nl
           </a>

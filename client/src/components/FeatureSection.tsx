@@ -45,15 +45,22 @@ export function FeatureSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {features.map((feature, idx) => (
-            <Card key={idx} className="hover-elevate" data-testid={`card-feature-${idx}`}>
-              <CardContent className="p-6">
-                <div className="p-3 rounded-lg bg-primary/10 text-primary w-fit mb-4">
-                  {feature.icon}
-                </div>
-                <h3 className="font-accent text-xl font-semibold mb-3">{feature.title}</h3>
-                <p className="text-muted-foreground">{feature.description}</p>
-              </CardContent>
-            </Card>
+            <a 
+              key={idx} 
+              href="/lidmaatschap"
+              className="block"
+              data-testid={`link-feature-${idx}`}
+            >
+              <Card className="hover-elevate active-elevate-2 h-full" data-testid={`card-feature-${idx}`}>
+                <CardContent className="p-6">
+                  <div className="p-3 rounded-lg bg-primary/10 text-primary w-fit mb-4">
+                    {feature.icon}
+                  </div>
+                  <h3 className="font-accent text-xl font-semibold mb-3">{feature.title}</h3>
+                  <p className="text-muted-foreground">{feature.description}</p>
+                </CardContent>
+              </Card>
+            </a>
           ))}
         </div>
       </div>
