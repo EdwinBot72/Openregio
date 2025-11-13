@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEntrepreneurSchema, insertProposalSchema, insertChatRoomSchema, insertChatMessageSchema } from "@shared/schema";
+import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertChatRoomSchema, insertChatMessageSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -66,7 +66,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/entrepreneurs", async (req, res) => {
     try {
-      const validatedData = insertEntrepreneurSchema.parse(req.body);
+      const validatedData = strictEntrepreneurSchema.parse(req.body);
       const entrepreneur = await storage.createEntrepreneur(validatedData);
       res.status(201).json(entrepreneur);
     } catch (error) {

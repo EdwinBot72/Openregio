@@ -98,6 +98,13 @@ export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
 export type InsertEntrepreneur = z.infer<typeof insertEntrepreneurSchema>;
 export type Entrepreneur = typeof entrepreneurs.$inferSelect;
 
+export const strictEntrepreneurSchema = insertEntrepreneurSchema.extend({
+  lat: z.number({ required_error: "Latitude is verplicht" }).min(-90, "Latitude moet tussen -90 en 90 zijn").max(90, "Latitude moet tussen -90 en 90 zijn"),
+  lng: z.number({ required_error: "Longitude is verplicht" }).min(-180, "Longitude moet tussen -180 en 180 zijn").max(180, "Longitude moet tussen -180 en 180 zijn"),
+});
+
+export type StrictInsertEntrepreneur = z.infer<typeof strictEntrepreneurSchema>;
+
 export type InsertProposal = z.infer<typeof insertProposalSchema>;
 export type Proposal = typeof proposals.$inferSelect;
 

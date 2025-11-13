@@ -1,27 +1,14 @@
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import { Icon } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Phone, Mail, Globe } from "lucide-react";
+import { MapPin, Phone, Mail, Globe, Navigation, MessageSquare, BadgeCheck, Clock } from "lucide-react";
 import type { Entrepreneur } from "@shared/schema";
 
 interface MapViewProps {
   entrepreneurs: Entrepreneur[];
 }
-
-const locationCoordinates: Record<string, [number, number]> = {
-  "Amsterdam": [52.3676, 4.9041],
-  "Rotterdam": [51.9225, 4.47917],
-  "Utrecht": [52.0907, 5.1214],
-  "Den Haag": [52.0705, 4.3007],
-  "Eindhoven": [51.4416, 5.4697],
-  "Groningen": [53.2194, 6.5665],
-  "Tilburg": [51.5555, 5.0913],
-  "Almere": [52.3508, 5.2647],
-  "Breda": [51.5719, 4.7683],
-  "Nijmegen": [51.8126, 5.8372],
-};
 
 const customIcon = new Icon({
   iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
@@ -35,6 +22,10 @@ const customIcon = new Icon({
 
 export function MapView({ entrepreneurs }: MapViewProps) {
   const defaultCenter: [number, number] = [52.1326, 5.2913];
+  
+  const entrepreneursWithCoords = entrepreneurs.filter(
+    (e) => e.lat !== null && e.lng !== null
+  );
 
   return (
     <div className="h-[600px] w-full rounded-lg overflow-hidden border" data-testid="map-view">
@@ -49,9 +40,8 @@ export function MapView({ entrepreneurs }: MapViewProps) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
-        {entrepreneurs.map((entrepreneur) => {
-          const coords = locationCoordinates[entrepreneur.location];
-          if (!coords) return null;
+        {entrepreneursWithCoords.map((entrepreneur) => {
+          const coords: [number, number] = [entrepreneur.lat!, entrepreneur.lng!];
 
           return (
             <Marker
@@ -60,52 +50,114 @@ export function MapView({ entrepreneurs }: MapViewProps) {
               icon={customIcon}
             >
               <Popup>
-                <div className="min-w-[250px]" data-testid={`map-popup-${entrepreneur.id}`}>
-                  <h3 className="font-semibold text-base mb-2">{entrepreneur.name}</h3>
-                  
-                  <div className="space-y-2 text-sm">
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <MapPin className="h-3 w-3" />
-                      <span>{entrepreneur.location}</span>
+                <div className="min-w-[280px]" data-testid={`map-popup-${entrepreneur.id}`}>
+                  <div className="flex items-start gap-3 mb-3">
+                    {entrepreneur.logoUrl && (
+                      <img 
+                        src={entrepreneur.logoUrl} 
+                        alt={`${entrepreneur.name} logo`}
+                        className="w-12 h-12 rounded object-cover"
+                        data-testid={`logo-${entrepreneur.id}`}
+                      />
+                    )}
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-base">{entrepreneur.name}</h3>
+                        {entrepreneur.isVerified && (
+                          <BadgeCheck className="h-4 w-4 text-primary" data-testid={`verified-${entrepreneur.id}`} />
+                        )}
+                      </div>
+                      <Badge variant="secondary" className="text-xs">
+                        {entrepreneur.category}
+                      </Badge>
                     </div>
-                    
-                    <Badge variant="secondary" className="text-xs">
-                      {entrepreneur.category}
-                    </Badge>
-                    
-                    {entrepreneur.description && (
-                      <p className="text-muted-foreground mt-2 text-xs">
-                        {entrepreneur.description.slice(0, 100)}...
-                      </p>
+                  </div>
+                  
+                  <div className="space-y-2 text-sm mb-3">
+                    {entrepreneur.address && (
+                      <div className="flex items-start gap-2 text-muted-foreground">
+                        <MapPin className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                        <span className="text-xs">{entrepreneur.address}, {entrepreneur.location}</span>
+                      </div>
                     )}
                     
-                    <div className="flex flex-col gap-1 pt-2 border-t">
-                      {entrepreneur.phone && (
-                        <div className="flex items-center gap-2 text-xs">
-                          <Phone className="h-3 w-3" />
-                          <span>{entrepreneur.phone}</span>
-                        </div>
-                      )}
-                      {entrepreneur.email && (
-                        <div className="flex items-center gap-2 text-xs">
-                          <Mail className="h-3 w-3" />
-                          <span>{entrepreneur.email}</span>
-                        </div>
-                      )}
-                      {entrepreneur.website && (
-                        <div className="flex items-center gap-2 text-xs">
-                          <Globe className="h-3 w-3" />
-                          <a 
-                            href={entrepreneur.website} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline"
-                          >
-                            Website
-                          </a>
-                        </div>
-                      )}
-                    </div>
+                    {entrepreneur.openingHours && (
+                      <div className="flex items-start gap-2 text-muted-foreground">
+                        <Clock className="h-3 w-3 mt-0.5 flex-shrink-0" />
+                        <span className="text-xs">{entrepreneur.openingHours}</span>
+                      </div>
+                    )}
+                    
+                    {entrepreneur.description && (
+                      <p className="text-muted-foreground text-xs leading-relaxed">
+                        {entrepreneur.description.slice(0, 120)}...
+                      </p>
+                    )}
+                  </div>
+                  
+                  <div className="grid grid-cols-2 gap-2 pt-3 border-t">
+                    {entrepreneur.phone && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs"
+                        asChild
+                        data-testid={`button-call-${entrepreneur.id}`}
+                      >
+                        <a href={`tel:${entrepreneur.phone}`}>
+                          <Phone className="h-3 w-3 mr-1" />
+                          Bellen
+                        </a>
+                      </Button>
+                    )}
+                    
+                    {entrepreneur.lat !== null && entrepreneur.lng !== null && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs"
+                        asChild
+                        data-testid={`button-route-${entrepreneur.id}`}
+                      >
+                        <a 
+                          href={`https://www.google.com/maps/dir/?api=1&destination=${entrepreneur.lat},${entrepreneur.lng}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Navigation className="h-3 w-3 mr-1" />
+                          Route
+                        </a>
+                      </Button>
+                    )}
+                    
+                    {entrepreneur.website && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full text-xs"
+                        asChild
+                        data-testid={`button-website-${entrepreneur.id}`}
+                      >
+                        <a 
+                          href={entrepreneur.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                        >
+                          <Globe className="h-3 w-3 mr-1" />
+                          Website
+                        </a>
+                      </Button>
+                    )}
+                    
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full text-xs"
+                      data-testid={`button-chat-${entrepreneur.id}`}
+                    >
+                      <MessageSquare className="h-3 w-3 mr-1" />
+                      Chat
+                    </Button>
                   </div>
                 </div>
               </Popup>
