@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema } from "@shared/schema";
+import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -402,6 +402,60 @@ Output formaat:
         return res.status(400).json({ error: error.errors });
       }
       res.status(500).json({ error: "Failed to create post" });
+    }
+  });
+
+  // User Profile routes
+  app.get("/api/user-profile/:id", async (req, res) => {
+    try {
+      const profile = await storage.getUserProfile(req.params.id);
+      if (!profile) {
+        return res.status(404).json({ error: "User profile not found" });
+      }
+      res.json(profile);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch user profile" });
+    }
+  });
+
+  app.get("/api/user-profile/email/:email", async (req, res) => {
+    try {
+      const profile = await storage.getUserProfileByEmail(req.params.email);
+      if (!profile) {
+        return res.status(404).json({ error: "User profile not found" });
+      }
+      res.json(profile);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch user profile" });
+    }
+  });
+
+  app.post("/api/user-profile", async (req, res) => {
+    try {
+      const validatedData = insertUserProfileSchema.parse(req.body);
+      const profile = await storage.createUserProfile(validatedData);
+      res.status(201).json(profile);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create user profile" });
+    }
+  });
+
+  app.patch("/api/user-profile/:id", async (req, res) => {
+    try {
+      const validatedData = insertUserProfileSchema.partial().parse(req.body);
+      const profile = await storage.updateUserProfile(req.params.id, validatedData);
+      if (!profile) {
+        return res.status(404).json({ error: "User profile not found" });
+      }
+      res.json(profile);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update user profile" });
     }
   });
 

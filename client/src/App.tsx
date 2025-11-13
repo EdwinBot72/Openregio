@@ -14,11 +14,13 @@ import CommunityPage from "@/pages/community";
 import RegioBotPage from "@/pages/regiobot";
 import CooperativePage from "@/pages/cooperative";
 import ChatPage from "@/pages/chat";
+import OnboardingPage from "@/pages/onboarding";
 
 function Router() {
   return (
     <Switch>
       <Route path="/" component={HomePage} />
+      <Route path="/onboarding" component={OnboardingPage} />
       <Route path="/dashboard" component={DashboardPage} />
       <Route path="/network" component={NetworkPage} />
       <Route path="/community" component={CommunityPage} />
