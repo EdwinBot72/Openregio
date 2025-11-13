@@ -10,11 +10,14 @@ import {
   type InsertChatRoom,
   type ChatMessage,
   type InsertChatMessage,
+  type Post,
+  type InsertPost,
   entrepreneurs,
   proposals,
   activities,
   chatRooms,
   chatMessages,
+  posts,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
@@ -60,6 +63,10 @@ export interface IStorage {
   getChatMessages(roomId: string, limit?: number): Promise<ChatMessage[]>;
   createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
 
+  // Posts
+  getPosts(region?: string, type?: string): Promise<Post[]>;
+  createPost(post: InsertPost): Promise<Post>;
+
   // Stats
   getStats(): Promise<{
     totalMembers: number;
@@ -75,6 +82,7 @@ export class MemStorage implements IStorage {
   private activities: Map<string, Activity>;
   private chatRooms: Map<string, ChatRoom>;
   private chatMessages: Map<string, ChatMessage>;
+  private posts: Map<string, Post>;
 
   constructor() {
     this.entrepreneurs = new Map();
@@ -82,6 +90,7 @@ export class MemStorage implements IStorage {
     this.activities = new Map();
     this.chatRooms = new Map();
     this.chatMessages = new Map();
+    this.posts = new Map();
     this.seedData();
   }
 
@@ -351,6 +360,57 @@ export class MemStorage implements IStorage {
         });
       });
     }
+
+    const samplePosts: InsertPost[] = [
+      {
+        authorUserId: "user-maria",
+        type: "vraag",
+        title: "Zoek betrouwbare boekhouder in Amsterdam",
+        body: "Hoi allemaal! Mijn bakkerij groeit hard en ik ben op zoek naar een lokale boekhouder die ervaring heeft met horeca. Iemand tips?",
+        region: "Amsterdam",
+      },
+      {
+        authorUserId: "user-jan",
+        type: "aanbieding",
+        title: "Gratis fotoshoot voor lokale ondernemers",
+        body: "Ik bied 3 gratis fotoshoots aan voor bedrijfsprofielen. Ideaal voor je website of social media. Eerste 3 reacties krijgen de shoot!",
+        region: "Rotterdam",
+      },
+      {
+        authorUserId: "user-sophie",
+        type: "event",
+        title: "Netwerk Borrel Utrecht - 15 maart",
+        body: "Kom gezellig netwerken op 15 maart om 18:00 bij Grand Café Lebowski. Drankje en bitterballen op kosten van de organisatie. Aanmelden verplicht!",
+        region: "Utrecht",
+      },
+      {
+        authorUserId: "user-peter",
+        type: "lead",
+        title: "Klant zoekt webdesigner in Den Haag",
+        body: "Een contactpersoon van mij zoekt een goede webdesigner voor een complete website redesign. Budget €5000-8000. DM me voor contact.",
+        region: "Den Haag",
+      },
+      {
+        authorUserId: "user-lisa",
+        type: "update",
+        title: "Nieuwe winkel geopend in Leiden centrum!",
+        body: "Na 6 maanden voorbereiding is het eindelijk zover - mijn concept store opent volgende week! Kom langs voor de opening op zaterdag 🎉",
+        region: "Leiden",
+      },
+    ];
+
+    samplePosts.forEach((p, idx) => {
+      const id = randomUUID();
+      this.posts.set(id, {
+        id,
+        authorUserId: p.authorUserId ?? null,
+        type: p.type,
+        title: p.title,
+        body: p.body,
+        region: p.region,
+        createdAt: new Date(Date.now() - idx * 12 * 60 * 60 * 1000),
+      });
+    });
   }
 
   async getEntrepreneurs(search?: string, category?: string, lat?: number, lng?: number, radius?: number): Promise<Entrepreneur[]> {
@@ -554,6 +614,35 @@ export class MemStorage implements IStorage {
     return newMessage;
   }
 
+  async getPosts(region?: string, type?: string): Promise<Post[]> {
+    let results = Array.from(this.posts.values());
+
+    if (region) {
+      results = results.filter((p) => p.region === region);
+    }
+
+    if (type) {
+      results = results.filter((p) => p.type === type);
+    }
+
+    return results.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  }
+
+  async createPost(post: InsertPost): Promise<Post> {
+    const id = randomUUID();
+    const newPost: Post = {
+      id,
+      authorUserId: post.authorUserId ?? null,
+      type: post.type,
+      title: post.title,
+      body: post.body,
+      region: post.region,
+      createdAt: new Date(),
+    };
+    this.posts.set(id, newPost);
+    return newPost;
+  }
+
   async getStats() {
     return {
       totalMembers: this.entrepreneurs.size + 2800,
@@ -714,6 +803,33 @@ class DbStorage implements IStorage {
     }
     
     const result = await db.insert(chatMessages).values(message).returning();
+    return result[0];
+  }
+
+  async getPosts(region?: string, type?: string): Promise<Post[]> {
+    let conditions = [];
+
+    if (region) {
+      conditions.push(eq(posts.region, region));
+    }
+
+    if (type) {
+      conditions.push(eq(posts.type, type));
+    }
+
+    if (conditions.length > 0) {
+      return await db
+        .select()
+        .from(posts)
+        .where(sql`${sql.join(conditions, sql` AND `)}`)
+        .orderBy(desc(posts.createdAt));
+    }
+
+    return await db.select().from(posts).orderBy(desc(posts.createdAt));
+  }
+
+  async createPost(post: InsertPost): Promise<Post> {
+    const result = await db.insert(posts).values(post).returning();
     return result[0];
   }
 
