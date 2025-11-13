@@ -4,6 +4,7 @@ import { storage } from "./storage";
 import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema } from "@shared/schema";
 import { z } from "zod";
 import { createMollieClient } from "@mollie/api-client";
+import { setupAuth } from "./replitAuth";
 
 // Initialize Mollie client (requires MOLLIE_API_KEY environment variable)
 const mollieClient = process.env.MOLLIE_API_KEY 
@@ -18,6 +19,46 @@ function getBaseUrl(req: any): string {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize Replit Auth (session middleware + passport + OAuth)
+  await setupAuth(app);
+  
+  // Auth endpoint: Get current authenticated user + profile
+  app.get("/api/auth/user", async (req, res) => {
+    if (!req.isAuthenticated || !req.isAuthenticated()) {
+      return res.status(401).json({ error: "Not authenticated" });
+    }
+    
+    try {
+      const user = req.user as any;
+      const replitUserId = user?.id;
+      
+      if (!replitUserId) {
+        return res.status(401).json({ error: "Invalid user session" });
+      }
+      
+      // Fetch linked userProfile
+      const profile = await storage.getUserProfileByReplitUserId(replitUserId);
+      
+      if (!profile) {
+        return res.status(404).json({ error: "User profile not found" });
+      }
+      
+      res.json({
+        user: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          profileImageUrl: user.profileImageUrl,
+        },
+        profile,
+      });
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ error: "Failed to fetch user data" });
+    }
+  });
+  
   // Entrepreneurs routes
   app.get("/api/entrepreneurs", async (req, res) => {
     try {
