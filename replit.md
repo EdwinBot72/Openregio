@@ -29,9 +29,10 @@ Preferred communication style: Simple, everyday language.
 - Component variants using class-variance-authority for type-safe styling
 
 **Component Organization:**
-- Page-level components in `client/src/pages/` (home, dashboard, network, regiobot, cooperative)
+- Page-level components in `client/src/pages/` (home, dashboard, network, regiobot, cooperative, onboarding)
 - Reusable UI components in `client/src/components/` with example implementations
 - Atomic design approach: Base UI components (shadcn), composite components (BusinessProfileCard, NetworkGrid), and page layouts
+- **Onboarding Flow**: Frustration-based welcome with multi-select pain point tiles using react-hook-form and shadcn Form components
 
 **State Management:**
 - Server state via React Query with centralized query client
@@ -54,6 +55,7 @@ Preferred communication style: Simple, everyday language.
   - `/api/activities` - Activity feed and notifications
   - `/api/stats` - Dashboard statistics
   - `/api/regiobot/chat` - AI assistant interactions
+  - `/api/user-profile` - User profile management (GET by ID/email, POST create, PATCH update)
 - JSON request/response format with Zod schema validation
 - Error handling with appropriate HTTP status codes
 
@@ -61,8 +63,8 @@ Preferred communication style: Simple, everyday language.
 - Storage interface pattern (`IStorage`) for data access abstraction
 - In-memory implementation (`MemStorage`) currently active with rich seed data
 - Database implementation available using Drizzle ORM for PostgreSQL (not currently used)
-- UUID-based primary keys for all entities
-- Seed data includes ~12 entrepreneurs, 3 proposals with votes, 3 activities, and statistics
+- UUID-based primary keys for all entities (deterministic IDs for user profiles matching entrepreneur ownerUserId)
+- Seed data includes ~12 entrepreneurs, 6 user profiles with varied pain points, 3 proposals with votes, 3 activities, and statistics
 
 **Middleware Stack:**
 - JSON body parsing with raw body preservation for webhooks
@@ -87,6 +89,7 @@ Preferred communication style: Simple, everyday language.
 - **Entrepreneurs**: Business profiles with contact info, location, category, and metadata
 - **Proposals**: Democratic governance with voting mechanisms (for/against/abstain)
 - **Activities**: Activity feed entries for user engagement tracking
+- **User Profiles**: User accounts with pain points array (8 frustration types: visibility, rules, time, platform_fees, no_community, digital_stress, rights_confusion, low_autonomy) for personalized onboarding
 - Timestamps and audit fields on all entities
 
 **Query Patterns:**
