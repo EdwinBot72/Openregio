@@ -19,6 +19,8 @@ import {
   type Subscription,
   type InsertSubscription,
   type ProposalSummary,
+  type User,
+  type UpsertUser,
   entrepreneurs,
   proposals,
   votes,
@@ -28,6 +30,7 @@ import {
   posts,
   userProfiles,
   subscriptions,
+  users,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
@@ -47,6 +50,11 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 }
 
 export interface IStorage {
+  // Replit Auth: User operations (IMPORTANT: mandatory for Replit Auth)
+  getUser(id: string): Promise<User | undefined>;
+  upsertUser(user: UpsertUser): Promise<User>;
+  getUserProfileByReplitUserId(replitUserId: string): Promise<UserProfile | undefined>;
+  
   // Entrepreneurs
   getEntrepreneurs(search?: string, category?: string, lat?: number, lng?: number, radius?: number): Promise<Entrepreneur[]>;
   getEntrepreneur(id: string): Promise<Entrepreneur | undefined>;
@@ -107,6 +115,7 @@ export interface IStorage {
 }
 
 export class MemStorage implements IStorage {
+  private users: Map<string, User>;
   private entrepreneurs: Map<string, Entrepreneur>;
   private proposals: Map<string, Proposal>;
   private votesByProposal: Map<string, Map<string, Vote>>;
@@ -118,6 +127,7 @@ export class MemStorage implements IStorage {
   private subscriptions: Map<string, Subscription>;
 
   constructor() {
+    this.users = new Map();
     this.entrepreneurs = new Map();
     this.proposals = new Map();
     this.votesByProposal = new Map();
@@ -128,6 +138,32 @@ export class MemStorage implements IStorage {
     this.userProfiles = new Map();
     this.subscriptions = new Map();
     this.seedData();
+  }
+
+  // Replit Auth: User operations (IMPORTANT: mandatory for Replit Auth)
+  async getUser(id: string): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const existing = this.users.get(userData.id!);
+    const user: User = {
+      id: userData.id!,
+      email: userData.email ?? null,
+      firstName: userData.firstName ?? null,
+      lastName: userData.lastName ?? null,
+      profileImageUrl: userData.profileImageUrl ?? null,
+      createdAt: existing?.createdAt ?? new Date(),
+      updatedAt: new Date(),
+    };
+    this.users.set(user.id, user);
+    return user;
+  }
+
+  async getUserProfileByReplitUserId(replitUserId: string): Promise<UserProfile | undefined> {
+    return Array.from(this.userProfiles.values()).find(
+      profile => profile.replitUserId === replitUserId
+    );
   }
 
   private seedData() {
@@ -316,6 +352,7 @@ export class MemStorage implements IStorage {
     sampleUserProfiles.forEach((p) => {
       this.userProfiles.set(p.id, {
         id: p.id,
+        replitUserId: null,
         name: p.name,
         email: p.email,
         painPoints: p.painPoints || [],
@@ -797,6 +834,7 @@ export class MemStorage implements IStorage {
     const id = randomUUID();
     const newProfile: UserProfile = {
       id,
+      replitUserId: profile.replitUserId ?? null,
       name: profile.name,
       email: profile.email,
       painPoints: profile.painPoints || [],
@@ -892,6 +930,35 @@ export class MemStorage implements IStorage {
 }
 
 class DbStorage implements IStorage {
+  // Replit Auth: User operations (IMPORTANT: mandatory for Replit Auth)
+  async getUser(id: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values(userData)
+      .onConflictDoUpdate({
+        target: users.id,
+        set: {
+          ...userData,
+          updatedAt: new Date(),
+        },
+      })
+      .returning();
+    return user;
+  }
+
+  async getUserProfileByReplitUserId(replitUserId: string): Promise<UserProfile | undefined> {
+    const [profile] = await db
+      .select()
+      .from(userProfiles)
+      .where(eq(userProfiles.replitUserId, replitUserId));
+    return profile;
+  }
+
   async getEntrepreneurs(search?: string, category?: string, lat?: number, lng?: number, radius?: number): Promise<Entrepreneur[]> {
     let conditions = [];
 
