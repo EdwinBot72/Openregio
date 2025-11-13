@@ -11,8 +11,11 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Home, Users, Bot, Building2, User, LogOut, MessageCircle, Newspaper, CreditCard } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useAuth } from "@/hooks/useAuth";
+import { getLoginUrl, getLogoutUrl } from "@/lib/authUtils";
 
 const menuItems = [
   {
@@ -48,6 +51,25 @@ const menuItems = [
 ];
 
 export function AppSidebar() {
+  const { user, profile, isLoading } = useAuth();
+
+  // Helper to get user initials
+  const getInitials = () => {
+    if (user?.firstName || user?.lastName) {
+      return `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase();
+    }
+    if (profile?.name) {
+      const parts = profile.name.split(" ");
+      return parts.length > 1
+        ? `${parts[0][0]}${parts[parts.length - 1][0]}`.toUpperCase()
+        : profile.name.substring(0, 2).toUpperCase();
+    }
+    return "OR";
+  };
+
+  const displayName = profile?.name || [user?.firstName, user?.lastName].filter(Boolean).join(" ") || "Gebruiker";
+  const displayEmail = profile?.email || user?.email || "";
+
   return (
     <Sidebar>
       <SidebarHeader className="p-4 border-b border-sidebar-border">
@@ -107,19 +129,58 @@ export function AppSidebar() {
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-sidebar-border">
-        <div className="flex items-center gap-3 mb-3">
-          <Avatar className="h-9 w-9">
-            <AvatarFallback className="bg-primary text-primary-foreground">JD</AvatarFallback>
-          </Avatar>
-          <div className="flex-1 min-w-0">
-            <p className="font-medium text-sm truncate">Jan de Vries</p>
-            <p className="text-xs text-muted-foreground truncate">jan@bakkerij.nl</p>
+        {isLoading ? (
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-9 w-9 rounded-full" />
+              <div className="flex-1 space-y-2">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-3 w-32" />
+              </div>
+            </div>
+            <Skeleton className="h-8 w-full" />
           </div>
-        </div>
-        <Button variant="outline" size="sm" className="w-full gap-2" data-testid="button-logout">
-          <LogOut className="h-4 w-4" />
-          Uitloggen
-        </Button>
+        ) : user ? (
+          <>
+            <div className="flex items-center gap-3 mb-3">
+              <Avatar className="h-9 w-9">
+                {user.profileImageUrl && <AvatarImage src={user.profileImageUrl} alt={displayName} />}
+                <AvatarFallback className="bg-primary text-primary-foreground">
+                  {getInitials()}
+                </AvatarFallback>
+              </Avatar>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm truncate" data-testid="text-user-name">{displayName}</p>
+                <p className="text-xs text-muted-foreground truncate" data-testid="text-user-email">{displayEmail}</p>
+              </div>
+            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full gap-2"
+              data-testid="button-logout"
+              onClick={() => {
+                window.location.href = getLogoutUrl();
+              }}
+            >
+              <LogOut className="h-4 w-4" />
+              Uitloggen
+            </Button>
+          </>
+        ) : (
+          <Button
+            variant="default"
+            size="sm"
+            className="w-full gap-2"
+            data-testid="button-login"
+            onClick={() => {
+              window.location.href = getLoginUrl();
+            }}
+          >
+            <User className="h-4 w-4" />
+            Inloggen
+          </Button>
+        )}
       </SidebarFooter>
     </Sidebar>
   );
