@@ -15,6 +15,7 @@ import RegioBotPage from "@/pages/regiobot";
 import CooperativePage from "@/pages/cooperative";
 import ChatPage from "@/pages/chat";
 import OnboardingPage from "@/pages/onboarding";
+import LidmaatschapPage from "@/pages/lidmaatschap";
 
 function Router() {
   return (
@@ -27,6 +28,7 @@ function Router() {
       <Route path="/chat" component={ChatPage} />
       <Route path="/regiobot" component={RegioBotPage} />
       <Route path="/cooperative" component={CooperativePage} />
+      <Route path="/lidmaatschap" component={LidmaatschapPage} />
       <Route component={NotFound} />
     </Switch>
   );

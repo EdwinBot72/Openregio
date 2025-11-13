@@ -1,4 +1,5 @@
 import { CooperativeStats } from "@/components/CooperativeStats";
+import { PaywallBanner } from "@/components/PaywallBanner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -112,7 +113,7 @@ export default function DashboardPage() {
     queryKey: ["/api/activities"],
   });
 
-  const activeProposals = proposals?.filter((p) => p.status === "active").slice(0, 2) || [];
+  const activeProposals = proposals?.filter((p) => p.status === "open").slice(0, 2) || [];
 
   const recentActivity = (activities || []).map((activity) => ({
     type: activity.type,
@@ -137,6 +138,12 @@ export default function DashboardPage() {
       </div>
 
       <div className="space-y-8">
+        <PaywallBanner
+          userId="user-jan"
+          message="Ontgrendel alle functies en word lid van de OpenRegio coöperatie"
+          ctaText="Bekijk lidmaatschappen"
+        />
+
         <div className={highlights.stats.isPriority ? "rounded-lg border-2 border-primary/50 p-1" : ""}>
           {highlights.stats.isPriority && (
             <div className="mb-2 flex items-center gap-2 px-2">
@@ -247,20 +254,21 @@ export default function DashboardPage() {
                     Geen actieve stemmingen
                   </p>
                 ) : (
-                  activeProposals.map((vote) => {
-                    const totalVotes = Number(vote.votesFor) + Number(vote.votesAgainst) + Number(vote.votesAbstain);
-                    const daysUntilDeadline = formatDistance(new Date(vote.deadline), new Date(), { addSuffix: false, locale: nl });
+                  activeProposals.map((proposal) => {
+                    const daysUntilClose = formatDistance(new Date(proposal.closesAt), new Date(), { addSuffix: false, locale: nl });
 
                     return (
-                      <div key={vote.id} className="space-y-2" data-testid={`vote-${vote.id}`}>
-                        <p className="font-medium text-sm">{vote.title}</p>
+                      <div key={proposal.id} className="space-y-2" data-testid={`vote-${proposal.id}`}>
+                        <p className="font-medium text-sm">{proposal.title}</p>
                         <div className="flex items-center justify-between text-xs">
-                          <span className="text-muted-foreground">{totalVotes} stemmen</span>
-                          <Badge variant="outline">{daysUntilDeadline}</Badge>
+                          <span className="text-muted-foreground">Sluit over {daysUntilClose}</span>
+                          <Badge variant="outline">{proposal.status === "open" ? "Actief" : "Gesloten"}</Badge>
                         </div>
-                        <Button size="sm" variant="outline" className="w-full">
-                          Stem nu
-                        </Button>
+                        <a href="/cooperative">
+                          <Button size="sm" variant="outline" className="w-full">
+                            Stem nu
+                          </Button>
+                        </a>
                       </div>
                     );
                   })

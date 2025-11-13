@@ -10,7 +10,7 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Home, Users, Bot, Building2, User, LogOut, MessageCircle, Newspaper } from "lucide-react";
+import { Home, Users, Bot, Building2, User, LogOut, MessageCircle, Newspaper, CreditCard } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 
@@ -90,6 +90,14 @@ export function AppSidebar() {
                   <a href="/profile">
                     <User className="h-4 w-4" />
                     <span>Mijn Profiel</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild data-testid="link-lidmaatschap">
+                  <a href="/lidmaatschap">
+                    <CreditCard className="h-4 w-4" />
+                    <span>Lidmaatschap</span>
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
