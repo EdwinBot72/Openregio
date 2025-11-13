@@ -16,6 +16,8 @@ import {
   type InsertPost,
   type UserProfile,
   type InsertUserProfile,
+  type Subscription,
+  type InsertSubscription,
   type ProposalSummary,
   entrepreneurs,
   proposals,
@@ -25,6 +27,7 @@ import {
   chatMessages,
   posts,
   userProfiles,
+  subscriptions,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
@@ -89,6 +92,13 @@ export interface IStorage {
   createUserProfile(profile: InsertUserProfile): Promise<UserProfile>;
   updateUserProfile(id: string, profile: Partial<InsertUserProfile>): Promise<UserProfile | undefined>;
 
+  // Subscriptions
+  getSubscription(userId: string): Promise<Subscription | undefined>;
+  getSubscriptionById(id: string): Promise<Subscription | undefined>;
+  createSubscription(subscription: InsertSubscription): Promise<Subscription>;
+  updateSubscription(id: string, subscription: Partial<InsertSubscription>): Promise<Subscription | undefined>;
+  cancelSubscription(id: string): Promise<Subscription | undefined>;
+
   // Stats
   getStats(): Promise<{
     totalMembers: number;
@@ -107,6 +117,7 @@ export class MemStorage implements IStorage {
   private chatMessages: Map<string, ChatMessage>;
   private posts: Map<string, Post>;
   private userProfiles: Map<string, UserProfile>;
+  private subscriptions: Map<string, Subscription>;
 
   constructor() {
     this.entrepreneurs = new Map();
@@ -117,6 +128,7 @@ export class MemStorage implements IStorage {
     this.chatMessages = new Map();
     this.posts = new Map();
     this.userProfiles = new Map();
+    this.subscriptions = new Map();
     this.seedData();
   }
 
@@ -813,6 +825,64 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
+  async getSubscription(userId: string): Promise<Subscription | undefined> {
+    return Array.from(this.subscriptions.values()).find(s => s.userId === userId);
+  }
+
+  async getSubscriptionById(id: string): Promise<Subscription | undefined> {
+    return this.subscriptions.get(id);
+  }
+
+  async createSubscription(subscription: InsertSubscription): Promise<Subscription> {
+    const id = randomUUID();
+    const now = new Date();
+    const newSubscription: Subscription = {
+      id,
+      userId: subscription.userId,
+      mollieCustomerId: subscription.mollieCustomerId ?? null,
+      mollieSubscriptionId: subscription.mollieSubscriptionId ?? null,
+      status: subscription.status ?? "trialing",
+      plan: subscription.plan,
+      currentPeriodEnd: subscription.currentPeriodEnd ?? null,
+      canceledAt: null,
+      createdAt: now,
+      updatedAt: now,
+    };
+    this.subscriptions.set(id, newSubscription);
+    return newSubscription;
+  }
+
+  async updateSubscription(id: string, subscription: Partial<InsertSubscription>): Promise<Subscription | undefined> {
+    const existing = this.subscriptions.get(id);
+    if (!existing) return undefined;
+
+    const updated: Subscription = {
+      ...existing,
+      ...(subscription.mollieCustomerId !== undefined && { mollieCustomerId: subscription.mollieCustomerId }),
+      ...(subscription.mollieSubscriptionId !== undefined && { mollieSubscriptionId: subscription.mollieSubscriptionId }),
+      ...(subscription.status !== undefined && { status: subscription.status }),
+      ...(subscription.plan !== undefined && { plan: subscription.plan }),
+      ...(subscription.currentPeriodEnd !== undefined && { currentPeriodEnd: subscription.currentPeriodEnd }),
+      updatedAt: new Date(),
+    };
+    this.subscriptions.set(id, updated);
+    return updated;
+  }
+
+  async cancelSubscription(id: string): Promise<Subscription | undefined> {
+    const existing = this.subscriptions.get(id);
+    if (!existing) return undefined;
+
+    const updated: Subscription = {
+      ...existing,
+      status: "cancelled",
+      canceledAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.subscriptions.set(id, updated);
+    return updated;
+  }
+
   async getStats() {
     return {
       totalMembers: this.entrepreneurs.size + 2800,
@@ -1117,6 +1187,54 @@ class DbStorage implements IStorage {
     const results = await db.update(userProfiles)
       .set(updates)
       .where(eq(userProfiles.id, id))
+      .returning();
+    return results[0];
+  }
+
+  async getSubscription(userId: string): Promise<Subscription | undefined> {
+    const results = await db.select().from(subscriptions).where(eq(subscriptions.userId, userId));
+    return results[0];
+  }
+
+  async getSubscriptionById(id: string): Promise<Subscription | undefined> {
+    const results = await db.select().from(subscriptions).where(eq(subscriptions.id, id));
+    return results[0];
+  }
+
+  async createSubscription(subscription: InsertSubscription): Promise<Subscription> {
+    const results = await db.insert(subscriptions).values(subscription).returning();
+    return results[0];
+  }
+
+  async updateSubscription(id: string, subscription: Partial<InsertSubscription>): Promise<Subscription | undefined> {
+    const updates: any = {};
+    if (subscription.mollieCustomerId !== undefined) updates.mollieCustomerId = subscription.mollieCustomerId;
+    if (subscription.mollieSubscriptionId !== undefined) updates.mollieSubscriptionId = subscription.mollieSubscriptionId;
+    if (subscription.status !== undefined) updates.status = subscription.status;
+    if (subscription.plan !== undefined) updates.plan = subscription.plan;
+    if (subscription.currentPeriodEnd !== undefined) updates.currentPeriodEnd = subscription.currentPeriodEnd;
+    updates.updatedAt = new Date();
+
+    if (Object.keys(updates).length === 1) {
+      const results = await db.select().from(subscriptions).where(eq(subscriptions.id, id));
+      return results[0];
+    }
+
+    const results = await db.update(subscriptions)
+      .set(updates)
+      .where(eq(subscriptions.id, id))
+      .returning();
+    return results[0];
+  }
+
+  async cancelSubscription(id: string): Promise<Subscription | undefined> {
+    const results = await db.update(subscriptions)
+      .set({ 
+        status: "cancelled",
+        canceledAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(eq(subscriptions.id, id))
       .returning();
     return results[0];
   }

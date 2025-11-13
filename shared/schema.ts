@@ -93,6 +93,10 @@ export const REGIONS = ["Amsterdam", "Rotterdam", "Utrecht", "Den Haag", "Leiden
 export const PROPOSAL_STATUS = ["open", "closed"] as const;
 export const VOTE_CHOICES = ["yes", "no", "abstain"] as const;
 
+// Shared constants for subscriptions
+export const SUBSCRIPTION_STATUS = ["active", "trialing", "cancelled", "past_due"] as const;
+export const SUBSCRIPTION_PLANS = ["basic", "pro"] as const;
+
 export const userProfiles = pgTable("user_profiles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
@@ -110,6 +114,19 @@ export const posts = pgTable("posts", {
   body: text("body").notNull(),
   region: text("region").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const subscriptions = pgTable("subscriptions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => userProfiles.id),
+  mollieCustomerId: text("mollie_customer_id"),
+  mollieSubscriptionId: text("mollie_subscription_id"),
+  status: text("status").notNull().default("trialing"),
+  plan: text("plan").notNull().default("basic"),
+  currentPeriodEnd: timestamp("current_period_end"),
+  canceledAt: timestamp("canceled_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
 export const insertEntrepreneurSchema = createInsertSchema(entrepreneurs).omit({
@@ -151,6 +168,15 @@ export const insertPostSchema = createInsertSchema(posts).omit({
 }).extend({
   type: z.enum(POST_TYPES, { required_error: "Type is verplicht" }),
   region: z.enum(REGIONS, { required_error: "Regio is verplicht" }),
+});
+
+export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  status: z.enum(SUBSCRIPTION_STATUS).optional(),
+  plan: z.enum(SUBSCRIPTION_PLANS, { required_error: "Plan is verplicht" }),
 });
 
 export type InsertEntrepreneur = z.infer<typeof insertEntrepreneurSchema>;
@@ -202,3 +228,6 @@ export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({
 
 export type InsertUserProfile = z.infer<typeof insertUserProfileSchema>;
 export type UserProfile = typeof userProfiles.$inferSelect;
+
+export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
+export type Subscription = typeof subscriptions.$inferSelect;
