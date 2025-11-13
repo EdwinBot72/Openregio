@@ -5,9 +5,15 @@ import {
   type InsertProposal,
   type Activity,
   type InsertActivity,
+  type ChatRoom,
+  type InsertChatRoom,
+  type ChatMessage,
+  type InsertChatMessage,
   entrepreneurs,
   proposals,
   activities,
+  chatRooms,
+  chatMessages,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
@@ -31,6 +37,15 @@ export interface IStorage {
   getRecentActivities(limit?: number): Promise<Activity[]>;
   createActivity(activity: InsertActivity): Promise<Activity>;
 
+  // Chat Rooms
+  getChatRooms(): Promise<ChatRoom[]>;
+  getChatRoom(id: string): Promise<ChatRoom | undefined>;
+  createChatRoom(room: InsertChatRoom): Promise<ChatRoom>;
+
+  // Chat Messages
+  getChatMessages(roomId: string, limit?: number): Promise<ChatMessage[]>;
+  createChatMessage(message: InsertChatMessage): Promise<ChatMessage>;
+
   // Stats
   getStats(): Promise<{
     totalMembers: number;
@@ -44,11 +59,15 @@ export class MemStorage implements IStorage {
   private entrepreneurs: Map<string, Entrepreneur>;
   private proposals: Map<string, Proposal>;
   private activities: Map<string, Activity>;
+  private chatRooms: Map<string, ChatRoom>;
+  private chatMessages: Map<string, ChatMessage>;
 
   constructor() {
     this.entrepreneurs = new Map();
     this.proposals = new Map();
     this.activities = new Map();
+    this.chatRooms = new Map();
+    this.chatMessages = new Map();
     this.seedData();
   }
 
@@ -196,6 +215,81 @@ export class MemStorage implements IStorage {
         createdAt 
       });
     });
+
+    const sampleChatRooms: InsertChatRoom[] = [
+      {
+        name: "Algemeen",
+        description: "Algemene discussies en kennismaking",
+        category: "general",
+        createdBy: "system",
+      },
+      {
+        name: "Horeca & Retail",
+        description: "Voor ondernemers in horeca en retail sector",
+        category: "Horeca",
+        createdBy: "system",
+      },
+      {
+        name: "Tech & IT",
+        description: "Technologie, software en IT ondernemers",
+        category: "IT",
+        createdBy: "system",
+      },
+      {
+        name: "Samenwerkingen",
+        description: "Zoek partners en samenwerkingsmogelijkheden",
+        category: "collaboration",
+        createdBy: "system",
+      },
+    ];
+
+    sampleChatRooms.forEach((r, idx) => {
+      const id = randomUUID();
+      this.chatRooms.set(id, {
+        id,
+        name: r.name,
+        description: r.description ?? null,
+        category: r.category ?? null,
+        createdBy: r.createdBy,
+        createdAt: new Date(Date.now() - idx * 24 * 60 * 60 * 1000),
+      });
+    });
+
+    const roomIds = Array.from(this.chatRooms.keys());
+    if (roomIds.length > 0) {
+      const sampleMessages: InsertChatMessage[] = [
+        {
+          roomId: roomIds[0],
+          userId: "user1",
+          userName: "Maria van den Berg",
+          message: "Welkom iedereen! Fijn dat jullie hier zijn.",
+        },
+        {
+          roomId: roomIds[0],
+          userId: "user2",
+          userName: "Jan Pieters",
+          message: "Dank je! Wat een mooie community wordt dit.",
+        },
+        {
+          roomId: roomIds[0],
+          userId: "user3",
+          userName: "Sophie de Vries",
+          message: "Hoi allemaal! Ik kijk ernaar uit om samen te werken.",
+        },
+      ];
+
+      sampleMessages.forEach((m, idx) => {
+        const id = randomUUID();
+        this.chatMessages.set(id, {
+          id,
+          roomId: m.roomId,
+          userId: m.userId,
+          userName: m.userName,
+          message: m.message,
+          createdAt: new Date(Date.now() - (2 - idx) * 5 * 60 * 1000),
+        });
+      });
+    }
   }
 
   async getEntrepreneurs(search?: string, category?: string): Promise<Entrepreneur[]> {
@@ -225,9 +319,16 @@ export class MemStorage implements IStorage {
   async createEntrepreneur(entrepreneur: InsertEntrepreneur): Promise<Entrepreneur> {
     const id = randomUUID();
     const newEntrepreneur: Entrepreneur = {
-      ...entrepreneur,
       id,
+      name: entrepreneur.name,
+      owner: entrepreneur.owner,
+      email: entrepreneur.email,
       phone: entrepreneur.phone ?? null,
+      website: entrepreneur.website ?? null,
+      category: entrepreneur.category,
+      description: entrepreneur.description,
+      location: entrepreneur.location,
+      city: entrepreneur.city,
       lat: entrepreneur.lat ?? null,
       lng: entrepreneur.lng ?? null,
       image: entrepreneur.image ?? null,
@@ -317,6 +418,64 @@ export class MemStorage implements IStorage {
     };
     this.activities.set(id, newActivity);
     return newActivity;
+  }
+
+  async getChatRooms(): Promise<ChatRoom[]> {
+    return Array.from(this.chatRooms.values()).sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime()
+    );
+  }
+
+  async getChatRoom(id: string): Promise<ChatRoom | undefined> {
+    return this.chatRooms.get(id);
+  }
+
+  async createChatRoom(room: InsertChatRoom): Promise<ChatRoom> {
+    const id = randomUUID();
+    const newRoom: ChatRoom = {
+      id,
+      name: room.name,
+      description: room.description ?? null,
+      category: room.category ?? null,
+      createdBy: room.createdBy,
+      createdAt: new Date(),
+    };
+    this.chatRooms.set(id, newRoom);
+    return newRoom;
+  }
+
+  async getChatMessages(roomId: string, limit: number = 100): Promise<ChatMessage[]> {
+    const messages = Array.from(this.chatMessages.values()).filter(
+      (m) => m.roomId === roomId
+    );
+    return messages
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+      .slice(-limit);
+  }
+
+  async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
+    // Validate required fields
+    if (!message.roomId?.trim() || !message.userId?.trim() || !message.userName?.trim() || !message.message?.trim()) {
+      throw new Error("Missing required chat message fields");
+    }
+    
+    // Verify room exists
+    const room = await this.getChatRoom(message.roomId);
+    if (!room) {
+      throw new Error("Chat room not found");
+    }
+    
+    const id = randomUUID();
+    const newMessage: ChatMessage = {
+      id,
+      roomId: message.roomId,
+      userId: message.userId,
+      userName: message.userName,
+      message: message.message,
+      createdAt: new Date(),
+    };
+    this.chatMessages.set(id, newMessage);
+    return newMessage;
   }
 
   async getStats() {
@@ -422,6 +581,45 @@ class DbStorage implements IStorage {
 
   async createActivity(activity: InsertActivity): Promise<Activity> {
     const result = await db.insert(activities).values(activity).returning();
+    return result[0];
+  }
+
+  async getChatRooms(): Promise<ChatRoom[]> {
+    return await db.select().from(chatRooms).orderBy(desc(chatRooms.createdAt));
+  }
+
+  async getChatRoom(id: string): Promise<ChatRoom | undefined> {
+    const result = await db.select().from(chatRooms).where(eq(chatRooms.id, id)).limit(1);
+    return result[0];
+  }
+
+  async createChatRoom(room: InsertChatRoom): Promise<ChatRoom> {
+    const result = await db.insert(chatRooms).values(room).returning();
+    return result[0];
+  }
+
+  async getChatMessages(roomId: string, limit: number = 100): Promise<ChatMessage[]> {
+    return await db
+      .select()
+      .from(chatMessages)
+      .where(eq(chatMessages.roomId, roomId))
+      .orderBy(chatMessages.createdAt)
+      .limit(limit);
+  }
+
+  async createChatMessage(message: InsertChatMessage): Promise<ChatMessage> {
+    // Validate required fields
+    if (!message.roomId?.trim() || !message.userId?.trim() || !message.userName?.trim() || !message.message?.trim()) {
+      throw new Error("Missing required chat message fields");
+    }
+    
+    // Verify room exists
+    const room = await this.getChatRoom(message.roomId);
+    if (!room) {
+      throw new Error("Chat room not found");
+    }
+    
+    const result = await db.insert(chatMessages).values(message).returning();
     return result[0];
   }
 

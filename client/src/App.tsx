@@ -12,6 +12,7 @@ import DashboardPage from "@/pages/dashboard";
 import NetworkPage from "@/pages/network";
 import RegioBotPage from "@/pages/regiobot";
 import CooperativePage from "@/pages/cooperative";
+import ChatPage from "@/pages/chat";
 
 function Router() {
   return (
@@ -19,6 +20,7 @@ function Router() {
       <Route path="/" component={HomePage} />
       <Route path="/dashboard" component={DashboardPage} />
       <Route path="/network" component={NetworkPage} />
+      <Route path="/chat" component={ChatPage} />
       <Route path="/regiobot" component={RegioBotPage} />
       <Route path="/cooperative" component={CooperativePage} />
       <Route component={NotFound} />

@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEntrepreneurSchema, insertProposalSchema } from "@shared/schema";
+import { insertEntrepreneurSchema, insertProposalSchema, insertChatRoomSchema, insertChatMessageSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -182,6 +182,77 @@ Wees altijd behulpzaam, professioneel en positief. Schrijf in het Nederlands en 
     } catch (error) {
       console.error("RegioBot error:", error);
       res.status(500).json({ error: "Failed to get response from RegioBot" });
+    }
+  });
+
+  // Chat routes
+  app.get("/api/chat/rooms", async (_req, res) => {
+    try {
+      const rooms = await storage.getChatRooms();
+      res.json(rooms);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch chat rooms" });
+    }
+  });
+
+  app.get("/api/chat/rooms/:id", async (req, res) => {
+    try {
+      const room = await storage.getChatRoom(req.params.id);
+      if (!room) {
+        return res.status(404).json({ error: "Chat room not found" });
+      }
+      res.json(room);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch chat room" });
+    }
+  });
+
+  app.post("/api/chat/rooms", async (req, res) => {
+    try {
+      const validatedData = insertChatRoomSchema.parse(req.body);
+      const room = await storage.createChatRoom(validatedData);
+      res.status(201).json(room);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create chat room" });
+    }
+  });
+
+  app.get("/api/chat/rooms/:roomId/messages", async (req, res) => {
+    try {
+      const room = await storage.getChatRoom(req.params.roomId);
+      if (!room) {
+        return res.status(404).json({ error: "Chat room not found" });
+      }
+      
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 100;
+      const messages = await storage.getChatMessages(req.params.roomId, limit);
+      res.json(messages);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch messages" });
+    }
+  });
+
+  app.post("/api/chat/rooms/:roomId/messages", async (req, res) => {
+    try {
+      const room = await storage.getChatRoom(req.params.roomId);
+      if (!room) {
+        return res.status(404).json({ error: "Chat room not found" });
+      }
+      
+      const validatedData = insertChatMessageSchema.parse({
+        ...req.body,
+        roomId: req.params.roomId,
+      });
+      const message = await storage.createChatMessage(validatedData);
+      res.status(201).json(message);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create message" });
     }
   });
 
