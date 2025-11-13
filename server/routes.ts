@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema } from "@shared/schema";
+import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -141,18 +141,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get("/api/proposals/:id/votes", async (req, res) => {
+    try {
+      const voteCounts = await storage.getVoteCounts(req.params.id);
+      res.json(voteCounts);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch vote counts" });
+    }
+  });
+
   app.post("/api/proposals/:id/vote", async (req, res) => {
     try {
-      const { voteType } = req.body;
-      if (!["for", "against", "abstain"].includes(voteType)) {
-        return res.status(400).json({ error: "Invalid vote type" });
-      }
-      const proposal = await storage.voteOnProposal(req.params.id, voteType);
-      if (!proposal) {
-        return res.status(404).json({ error: "Proposal not found" });
-      }
-      res.json(proposal);
+      const { choice } = req.body;
+      
+      const validatedVote = insertVoteSchema.parse({
+        proposalId: req.params.id,
+        userId: "user-jan",
+        choice,
+      });
+      
+      const vote = await storage.createVote(validatedVote);
+      const voteCounts = await storage.getVoteCounts(req.params.id);
+      
+      res.status(201).json({ vote, voteCounts });
     } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      
+      if (error instanceof Error) {
+        if (error.message === "Proposal not found") {
+          return res.status(404).json({ error: error.message });
+        }
+        if (error.message === "Cannot vote on closed proposal") {
+          return res.status(403).json({ error: error.message });
+        }
+        if (error.message === "User has already voted on this proposal") {
+          return res.status(409).json({ error: error.message });
+        }
+      }
+      
       res.status(500).json({ error: "Failed to vote on proposal" });
     }
   });
