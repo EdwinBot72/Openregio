@@ -29,12 +29,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     
     try {
-      const user = req.user as any;
-      const replitUserId = user?.id;
+      const sessionUser = req.user as any;
+      const claims = sessionUser?.claims;
       
-      if (!replitUserId) {
+      if (!claims?.sub) {
         return res.status(401).json({ error: "Invalid user session" });
       }
+      
+      const replitUserId = claims.sub;
       
       // Fetch linked userProfile
       const profile = await storage.getUserProfileByReplitUserId(replitUserId);
@@ -45,11 +47,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({
         user: {
-          id: user.id,
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          profileImageUrl: user.profileImageUrl,
+          id: replitUserId,
+          email: claims.email || null,
+          firstName: claims.first_name || null,
+          lastName: claims.last_name || null,
+          profileImageUrl: claims.profile_image_url || null,
         },
         profile,
       });
