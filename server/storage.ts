@@ -1,6 +1,7 @@
 import {
   type Entrepreneur,
   type InsertEntrepreneur,
+  type StrictInsertEntrepreneur,
   type Proposal,
   type InsertProposal,
   type Activity,
@@ -36,7 +37,7 @@ export interface IStorage {
   // Entrepreneurs
   getEntrepreneurs(search?: string, category?: string, lat?: number, lng?: number, radius?: number): Promise<Entrepreneur[]>;
   getEntrepreneur(id: string): Promise<Entrepreneur | undefined>;
-  createEntrepreneur(entrepreneur: InsertEntrepreneur): Promise<Entrepreneur>;
+  createEntrepreneur(entrepreneur: StrictInsertEntrepreneur): Promise<Entrepreneur>;
   updateEntrepreneur(id: string, entrepreneur: Partial<InsertEntrepreneur>): Promise<Entrepreneur | undefined>;
   deleteEntrepreneur(id: string): Promise<boolean>;
 
@@ -211,8 +212,8 @@ export class MemStorage implements IStorage {
         location: e.location,
         address: e.address ?? null,
         city: e.city,
-        lat: e.lat ?? null,
-        lng: e.lng ?? null,
+        lat: e.lat!,
+        lng: e.lng!,
         openingHours: e.openingHours ?? null,
         logoUrl: e.logoUrl ?? null,
         image: e.image ?? null,
@@ -373,7 +374,7 @@ export class MemStorage implements IStorage {
     if (lat !== undefined && lng !== undefined && radius !== undefined) {
       const maxRadius = Math.min(Math.max(radius, 0), 100); // Clamp radius between 0-100 km
       results = results.filter((e) => {
-        if (e.lat === null || e.lng === null) return false;
+        if (e.lat == null || e.lng == null || !Number.isFinite(e.lat) || !Number.isFinite(e.lng)) return false;
         const distance = calculateDistance(lat, lng, e.lat, e.lng);
         return distance <= maxRadius;
       });
@@ -386,7 +387,7 @@ export class MemStorage implements IStorage {
     return this.entrepreneurs.get(id);
   }
 
-  async createEntrepreneur(entrepreneur: InsertEntrepreneur): Promise<Entrepreneur> {
+  async createEntrepreneur(entrepreneur: StrictInsertEntrepreneur): Promise<Entrepreneur> {
     const id = randomUUID();
     const newEntrepreneur: Entrepreneur = {
       id,
@@ -401,8 +402,8 @@ export class MemStorage implements IStorage {
       location: entrepreneur.location,
       address: entrepreneur.address ?? null,
       city: entrepreneur.city,
-      lat: entrepreneur.lat ?? null,
-      lng: entrepreneur.lng ?? null,
+      lat: entrepreneur.lat,
+      lng: entrepreneur.lng,
       openingHours: entrepreneur.openingHours ?? null,
       logoUrl: entrepreneur.logoUrl ?? null,
       image: entrepreneur.image ?? null,
@@ -600,7 +601,7 @@ class DbStorage implements IStorage {
     if (lat !== undefined && lng !== undefined && radius !== undefined) {
       const maxRadius = Math.min(Math.max(radius, 0), 100); // Clamp radius between 0-100 km
       results = results.filter((e) => {
-        if (e.lat === null || e.lng === null) return false;
+        if (e.lat == null || e.lng == null || !Number.isFinite(e.lat) || !Number.isFinite(e.lng)) return false;
         const distance = calculateDistance(lat, lng, e.lat, e.lng);
         return distance <= maxRadius;
       });
@@ -614,7 +615,7 @@ class DbStorage implements IStorage {
     return result[0];
   }
 
-  async createEntrepreneur(entrepreneur: InsertEntrepreneur): Promise<Entrepreneur> {
+  async createEntrepreneur(entrepreneur: StrictInsertEntrepreneur): Promise<Entrepreneur> {
     const result = await db.insert(entrepreneurs).values(entrepreneur).returning();
     return result[0];
   }

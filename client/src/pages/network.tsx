@@ -39,20 +39,26 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = insertEntrepreneurSchema.omit({ lat: true, lng: true }).extend({
-  lat: z.string({ required_error: "Latitude is verplicht" })
-    .trim()
-    .min(1, "Latitude is verplicht")
-    .refine((val) => {
-      const num = Number(val);
-      return !isNaN(num) && num >= -90 && num <= 90;
-    }, "Latitude moet tussen -90 en 90 zijn"),
-  lng: z.string({ required_error: "Longitude is verplicht" })
-    .trim()
-    .min(1, "Longitude is verplicht")
-    .refine((val) => {
-      const num = Number(val);
-      return !isNaN(num) && num >= -180 && num <= 180;
-    }, "Longitude moet tussen -180 en 180 zijn"),
+  lat: z.preprocess(
+    (val) => {
+      if (val === "" || val === null || val === undefined) return undefined;
+      return Number(val);
+    },
+    z.number({ required_error: "Latitude is verplicht" })
+      .min(-90, "Latitude moet tussen -90 en 90 zijn")
+      .max(90, "Latitude moet tussen -90 en 90 zijn")
+      .refine(Number.isFinite, "Voer een geldig nummer in")
+  ),
+  lng: z.preprocess(
+    (val) => {
+      if (val === "" || val === null || val === undefined) return undefined;
+      return Number(val);
+    },
+    z.number({ required_error: "Longitude is verplicht" })
+      .min(-180, "Longitude moet tussen -180 en 180 zijn")
+      .max(180, "Longitude moet tussen -180 en 180 zijn")
+      .refine(Number.isFinite, "Voer een geldig nummer in")
+  ),
   phone: z.string().optional(),
   website: z.string().url().optional().or(z.literal("")),
   image: z.string().url().optional().or(z.literal("")),
@@ -76,12 +82,13 @@ function AddEntrepreneurDialog() {
       category: "retail",
       description: "",
       location: "",
+      city: "",
       email: "",
       phone: "",
       website: "",
       image: "",
-      lat: "",
-      lng: "",
+      lat: undefined,
+      lng: undefined,
       address: "",
       openingHours: "",
       logoUrl: "",
@@ -98,9 +105,9 @@ function AddEntrepreneurDialog() {
         category: data.category,
         description: data.description,
         location: data.location,
-        city: data.city,
-        lat: Number(data.lat),
-        lng: Number(data.lng),
+        city: data.city || data.location,
+        lat: data.lat,
+        lng: data.lng,
         phone: data.phone || null,
         website: data.website || null,
         address: data.address || null,
@@ -262,7 +269,7 @@ function AddEntrepreneurDialog() {
                   <FormItem>
                     <FormLabel>Latitude</FormLabel>
                     <FormControl>
-                      <Input type="number" step="0.0001" placeholder="52.3676" {...field} data-testid="input-lat" />
+                      <Input type="number" step="0.000001" placeholder="52.3676" {...field} data-testid="input-lat" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -276,7 +283,7 @@ function AddEntrepreneurDialog() {
                   <FormItem>
                     <FormLabel>Longitude</FormLabel>
                     <FormControl>
-                      <Input type="number" step="0.0001" placeholder="4.9041" {...field} data-testid="input-lng" />
+                      <Input type="number" step="0.000001" placeholder="4.9041" {...field} data-testid="input-lng" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

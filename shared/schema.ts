@@ -16,8 +16,8 @@ export const entrepreneurs = pgTable("entrepreneurs", {
   location: text("location").notNull(),
   address: text("address"),
   city: text("city").notNull(),
-  lat: doublePrecision("lat"),
-  lng: doublePrecision("lng"),
+  lat: doublePrecision("lat").notNull(),
+  lng: doublePrecision("lng").notNull(),
   openingHours: text("opening_hours"),
   logoUrl: text("logo_url"),
   image: text("image"),
@@ -99,8 +99,14 @@ export type InsertEntrepreneur = z.infer<typeof insertEntrepreneurSchema>;
 export type Entrepreneur = typeof entrepreneurs.$inferSelect;
 
 export const strictEntrepreneurSchema = insertEntrepreneurSchema.extend({
-  lat: z.number({ required_error: "Latitude is verplicht" }).min(-90, "Latitude moet tussen -90 en 90 zijn").max(90, "Latitude moet tussen -90 en 90 zijn"),
-  lng: z.number({ required_error: "Longitude is verplicht" }).min(-180, "Longitude moet tussen -180 en 180 zijn").max(180, "Longitude moet tussen -180 en 180 zijn"),
+  lat: z.number({ required_error: "Latitude is verplicht" })
+    .min(-90, "Latitude moet tussen -90 en 90 zijn")
+    .max(90, "Latitude moet tussen -90 en 90 zijn")
+    .refine(Number.isFinite, "Latitude must be a valid number"),
+  lng: z.number({ required_error: "Longitude is verplicht" })
+    .min(-180, "Longitude moet tussen -180 en 180 zijn")
+    .max(180, "Longitude moet tussen -180 en 180 zijn")
+    .refine(Number.isFinite, "Longitude must be a valid number"),
 });
 
 export type StrictInsertEntrepreneur = z.infer<typeof strictEntrepreneurSchema>;
