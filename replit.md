@@ -4,7 +4,7 @@
 
 OpenRegio is a Dutch cooperative platform designed to empower local entrepreneurs by providing an alternative to Big Tech platforms. It combines business networking, AI-powered marketing assistance, and democratic governance in a single application. The platform enables entrepreneurs to create visible profiles, discover and collaborate with other local businesses, leverage AI tools for content creation and SEO, and participate in cooperative decision-making through proposal voting.
 
-The application follows a full-stack architecture with React frontend, Express backend, and PostgreSQL database, emphasizing trustworthy professionalism with a collaborative, community-first design aesthetic.
+The application follows a full-stack architecture with React frontend, Express backend, and in-memory storage (MemStorage), emphasizing trustworthy professionalism with a collaborative, community-first design aesthetic. All features are fully functional and tested end-to-end.
 
 ## User Preferences
 
@@ -59,9 +59,10 @@ Preferred communication style: Simple, everyday language.
 
 **Storage Layer:**
 - Storage interface pattern (`IStorage`) for data access abstraction
-- In-memory implementation (`MemStorage`) for development
-- Database implementation using Drizzle ORM for PostgreSQL
+- In-memory implementation (`MemStorage`) currently active with rich seed data
+- Database implementation available using Drizzle ORM for PostgreSQL (not currently used)
 - UUID-based primary keys for all entities
+- Seed data includes ~12 entrepreneurs, 3 proposals with votes, 3 activities, and statistics
 
 **Middleware Stack:**
 - JSON body parsing with raw body preservation for webhooks
@@ -131,7 +132,8 @@ Preferred communication style: Simple, everyday language.
 - **embla-carousel**: Carousel/slider component
 - **vaul**: Drawer component for mobile experiences
 
-**AI Integration (Planned):**
-- RegioBot chat interface prepared for AI service integration
-- POST endpoint `/api/regiobot/chat` ready for external AI API connection
-- Message history management in component state
+**AI Integration:**
+- RegioBot chat interface fully integrated with OpenAI via Replit AI Integrations
+- POST endpoint `/api/regiobot/chat` connected to OpenAI with Dutch language system prompt
+- Message history management in component state with streaming support
+- Context-aware business advice for local Dutch entrepreneurs
