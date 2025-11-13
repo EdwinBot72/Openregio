@@ -9,6 +9,7 @@ export const entrepreneurs = pgTable("entrepreneurs", {
   owner: text("owner").notNull(),
   email: text("email").notNull(),
   phone: text("phone"),
+  website: text("website"),
   category: text("category").notNull(),
   description: text("description").notNull(),
   location: text("location").notNull(),
