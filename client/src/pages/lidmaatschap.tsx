@@ -251,9 +251,19 @@ export default function LidmaatschapPage() {
         </div>
       </div>
 
-      <div className="text-center text-sm text-muted-foreground">
+      <div className="text-center text-sm text-muted-foreground space-y-2">
         <p>
           Betalingen worden veilig verwerkt door Mollie. Je kunt op elk moment opzeggen.
+        </p>
+        <p>
+          Vragen over lidmaatschap? Neem contact op via{" "}
+          <a 
+            href="mailto:info@openregio.nl" 
+            className="text-primary hover:underline font-medium"
+            data-testid="link-contact-email"
+          >
+            info@openregio.nl
+          </a>
         </p>
       </div>
     </div>
