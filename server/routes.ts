@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertChatRoomSchema, insertChatMessageSchema } from "@shared/schema";
+import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema } from "@shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -286,6 +286,33 @@ Wees altijd behulpzaam, professioneel en positief. Schrijf in het Nederlands en 
         return res.status(400).json({ error: error.errors });
       }
       res.status(500).json({ error: "Failed to create message" });
+    }
+  });
+
+  // Posts routes
+  app.get("/api/posts", async (req, res) => {
+    try {
+      const { region, type } = req.query;
+      const posts = await storage.getPosts(
+        region as string | undefined,
+        type as string | undefined
+      );
+      res.json(posts);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch posts" });
+    }
+  });
+
+  app.post("/api/posts", async (req, res) => {
+    try {
+      const validatedData = insertPostSchema.parse(req.body);
+      const post = await storage.createPost(validatedData);
+      res.status(201).json(post);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create post" });
     }
   });
 
