@@ -178,10 +178,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // RegioBot chat route
+  // RegioBot chat route with intent support
   app.post("/api/regiobot/chat", async (req, res) => {
     try {
-      const { message } = req.body;
+      const { message, intent } = req.body;
       if (!message) {
         return res.status(400).json({ error: "Message is required" });
       }
@@ -189,12 +189,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const OpenAI = (await import("openai")).default;
       const openai = new OpenAI();
 
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-          {
-            role: "system",
-            content: `Je bent RegioBot, een vriendelijke AI-assistent voor lokale ondernemers in Nederland. Je helpt met:
+      // Intent-based system prompts
+      const intentPrompts: Record<string, string> = {
+        general: `Je bent RegioBot, een vriendelijke AI-assistent voor lokale ondernemers in Nederland. Je helpt met:
 - Het schrijven van social media posts en marketing teksten
 - Het creëren van aantrekkelijke aanbiedingen
 - Lokale SEO tips en strategieën
@@ -202,6 +199,98 @@ export async function registerRoutes(app: Express): Promise<Server> {
 - Slimme automatiseringen
 
 Wees altijd behulpzaam, professioneel en positief. Schrijf in het Nederlands en houd rekening met de lokale context van Nederlandse ondernemers.`,
+
+        social_post: `Je bent RegioBot, een expert social media content creator voor lokale ondernemers in Nederland.
+        
+Je taak: Schrijf een overtuigende, authentieke social media post die past bij lokale Nederlandse ondernemers.
+
+Richtlijnen:
+- Schrijf in een vriendelijke, toegankelijke toon
+- Gebruik waar gepast emoji's (max 2-3)
+- Houd het kort en krachtig (max 150 woorden)
+- Voeg een duidelijke call-to-action toe
+- Focus op lokale verbinding en gemeenschap
+- Schrijf in het Nederlands
+
+Output formaat: Geef alleen de kant-en-klare post terug, zonder extra uitleg of aanhalingstekens.`,
+
+        offer: `Je bent RegioBot, een marketing specialist voor lokale aanbiedingen in Nederland.
+
+Je taak: Creëer een aantrekkelijke aanbieding of promotie voor een lokale ondernemer.
+
+Richtlijnen:
+- Maak de aanbieding concreet en waardevol
+- Gebruik urgentie (beperkte tijd/aantal)
+- Vermeld duidelijk de voordelen
+- Schrijf een pakkende titel
+- Voeg voorwaarden toe indien relevant
+- Houd het lokaal en persoonlijk
+- Schrijf in het Nederlands
+
+Output formaat:
+**[Titel van aanbieding]**
+
+[Beschrijving van de aanbieding met details]
+
+**Geldig:** [periode]
+**Voorwaarden:** [indien van toepassing]`,
+
+        seo: `Je bent RegioBot, een lokale SEO expert voor Nederlandse ondernemers.
+
+Je taak: Geef concrete, praktische SEO tips specifiek voor lokale vindbaarheid.
+
+Richtlijnen:
+- Focus op lokale zoekwoorden en Google My Business
+- Geef actionable tips (geen algemene theorie)
+- Leg uit waarom het belangrijk is
+- Vermeld quick wins
+- Houd het toegankelijk voor niet-technische ondernemers
+- Schrijf in het Nederlands
+
+Output formaat: Duidelijke, genummerde stappen of tips.`,
+
+        legal_explain: `Je bent RegioBot, een toegankelijke juridische uitlegger voor Nederlandse ondernemers.
+
+Je taak: Leg juridische documenten, brieven of regelgeving uit in begrijpelijke taal.
+
+Richtlijnen:
+- Vertaal jargon naar dagelijkse taal
+- Vat de belangrijkste punten samen
+- Leg consequenties en acties uit
+- Wees helder over wat ondernemer moet doen
+- Geef disclaimer: dit is geen juridisch advies
+- Schrijf in het Nederlands
+
+Output formaat: Heldere samenvatting met bullet points voor belangrijkste punten.`,
+
+        check_text: `Je bent RegioBot, een professionele copy editor voor Nederlandse zakelijke communicatie.
+
+Je taak: Controleer en verbeter de aangeleverde tekst.
+
+Richtlijnen:
+- Check spelling, grammatica en zinsbouw
+- Verbeter leesbaarheid en toon
+- Behoud de bedoeling en persoonlijkheid
+- Geef feedback over wat je veranderd hebt
+- Schrijf in het Nederlands
+
+Output formaat:
+**Verbeterde versie:**
+[Verbeterde tekst]
+
+**Aanpassingen:**
+- [Wat je veranderd hebt en waarom]`,
+      };
+
+      // Get system prompt based on intent, defaults to general
+      const systemPrompt = intentPrompts[intent || "general"] || intentPrompts.general;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: systemPrompt,
           },
           {
             role: "user",
@@ -211,7 +300,7 @@ Wees altijd behulpzaam, professioneel en positief. Schrijf in het Nederlands en 
       });
 
       const response = completion.choices[0]?.message?.content || "Sorry, ik kon geen antwoord genereren.";
-      res.json({ response });
+      res.json({ response, intent: intent || "general" });
     } catch (error) {
       console.error("RegioBot error:", error);
       res.status(500).json({ error: "Failed to get response from RegioBot" });
