@@ -4,6 +4,8 @@ import {
   type StrictInsertEntrepreneur,
   type Proposal,
   type InsertProposal,
+  type Vote,
+  type InsertVote,
   type Activity,
   type InsertActivity,
   type ChatRoom,
@@ -16,6 +18,7 @@ import {
   type InsertUserProfile,
   entrepreneurs,
   proposals,
+  votes,
   activities,
   chatRooms,
   chatMessages,
@@ -24,7 +27,7 @@ import {
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
-import { eq, ilike, or, desc, sql } from "drizzle-orm";
+import { eq, ilike, or, desc, sql, and } from "drizzle-orm";
 
 // Haversine formula to calculate distance between two lat/lng points in km
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -51,7 +54,13 @@ export interface IStorage {
   getProposals(status?: string): Promise<Proposal[]>;
   getProposal(id: string): Promise<Proposal | undefined>;
   createProposal(proposal: InsertProposal): Promise<Proposal>;
-  voteOnProposal(id: string, voteType: "for" | "against" | "abstain"): Promise<Proposal | undefined>;
+  updateProposalStatus(id: string, status: "open" | "closed"): Promise<Proposal | undefined>;
+
+  // Votes
+  getVotes(proposalId: string): Promise<Vote[]>;
+  getUserVote(proposalId: string, userId: string): Promise<Vote | undefined>;
+  createVote(vote: InsertVote): Promise<Vote>;
+  getVoteCounts(proposalId: string): Promise<{ yes: number; no: number; abstain: number }>;
 
   // Activities
   getRecentActivities(limit?: number): Promise<Activity[]>;
@@ -88,6 +97,7 @@ export interface IStorage {
 export class MemStorage implements IStorage {
   private entrepreneurs: Map<string, Entrepreneur>;
   private proposals: Map<string, Proposal>;
+  private votesByProposal: Map<string, Map<string, Vote>>;
   private activities: Map<string, Activity>;
   private chatRooms: Map<string, ChatRoom>;
   private chatMessages: Map<string, ChatMessage>;
@@ -97,6 +107,7 @@ export class MemStorage implements IStorage {
   constructor() {
     this.entrepreneurs = new Map();
     this.proposals = new Map();
+    this.votesByProposal = new Map();
     this.activities = new Map();
     this.chatRooms = new Map();
     this.chatMessages = new Map();
@@ -305,7 +316,7 @@ export class MemStorage implements IStorage {
         description: "Voorstel om gezamenlijke inkoop mogelijk te maken voor betere prijzen bij leveranciers.",
         proposerId: "1",
         proposerName: "Maria van den Berg",
-        deadline: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
+        closesAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000),
       },
     ];
 
@@ -314,10 +325,7 @@ export class MemStorage implements IStorage {
       this.proposals.set(id, {
         ...p,
         id,
-        votesFor: "342",
-        votesAgainst: "45",
-        votesAbstain: "23",
-        status: "active",
+        status: "open",
         createdAt: new Date(),
       });
     });
@@ -574,35 +582,70 @@ export class MemStorage implements IStorage {
     const newProposal: Proposal = {
       ...proposal,
       id,
-      votesFor: "0",
-      votesAgainst: "0",
-      votesAbstain: "0",
-      status: "active",
+      status: "open",
       createdAt: new Date(),
     };
     this.proposals.set(id, newProposal);
     return newProposal;
   }
 
-  async voteOnProposal(id: string, voteType: "for" | "against" | "abstain"): Promise<Proposal | undefined> {
+  async updateProposalStatus(id: string, status: "open" | "closed"): Promise<Proposal | undefined> {
     const proposal = this.proposals.get(id);
     if (!proposal) return undefined;
-
-    const updated = { ...proposal };
-    const forVotes = parseInt(updated.votesFor) || 0;
-    const againstVotes = parseInt(updated.votesAgainst) || 0;
-    const abstainVotes = parseInt(updated.votesAbstain) || 0;
-
-    if (voteType === "for") {
-      updated.votesFor = String(forVotes + 1);
-    } else if (voteType === "against") {
-      updated.votesAgainst = String(againstVotes + 1);
-    } else {
-      updated.votesAbstain = String(abstainVotes + 1);
-    }
-
+    const updated = { ...proposal, status };
     this.proposals.set(id, updated);
     return updated;
+  }
+
+  async getVotes(proposalId: string): Promise<Vote[]> {
+    const proposalVotes = this.votesByProposal.get(proposalId);
+    return proposalVotes ? Array.from(proposalVotes.values()) : [];
+  }
+
+  async getUserVote(proposalId: string, userId: string): Promise<Vote | undefined> {
+    const proposalVotes = this.votesByProposal.get(proposalId);
+    return proposalVotes?.get(userId);
+  }
+
+  async createVote(vote: InsertVote): Promise<Vote> {
+    // Check proposal status
+    const proposal = await this.getProposal(vote.proposalId);
+    if (!proposal) {
+      throw new Error("Proposal not found");
+    }
+    if (proposal.status !== "open") {
+      throw new Error("Cannot vote on closed proposal");
+    }
+    
+    // Check for duplicate (O(1) now!)
+    if (!this.votesByProposal.has(vote.proposalId)) {
+      this.votesByProposal.set(vote.proposalId, new Map());
+    }
+    const proposalVotes = this.votesByProposal.get(vote.proposalId)!;
+    
+    if (proposalVotes.has(vote.userId)) {
+      throw new Error("User has already voted on this proposal");
+    }
+    
+    const newVote: Vote = {
+      id: randomUUID(),
+      ...vote,
+      createdAt: new Date(),
+    };
+    
+    // Store in nested map (single source of truth)
+    proposalVotes.set(vote.userId, newVote);
+    
+    return newVote;
+  }
+
+  async getVoteCounts(proposalId: string): Promise<{ yes: number; no: number; abstain: number }> {
+    const proposalVotes = await this.getVotes(proposalId);
+    return {
+      yes: proposalVotes.filter(v => v.choice === "yes").length,
+      no: proposalVotes.filter(v => v.choice === "no").length,
+      abstain: proposalVotes.filter(v => v.choice === "abstain").length,
+    };
   }
 
   async getRecentActivities(limit: number = 10): Promise<Activity[]> {
@@ -847,21 +890,63 @@ class DbStorage implements IStorage {
     return result[0];
   }
 
-  async voteOnProposal(id: string, voteType: "for" | "against" | "abstain"): Promise<Proposal | undefined> {
-    const proposal = await this.getProposal(id);
-    if (!proposal) return undefined;
+  async updateProposalStatus(id: string, status: "open" | "closed"): Promise<Proposal | undefined> {
+    const updated = await db.update(proposals)
+      .set({ status })
+      .where(eq(proposals.id, id))
+      .returning();
+    return updated[0];
+  }
 
-    const updates: Partial<Proposal> = {};
-    if (voteType === "for") {
-      updates.votesFor = String(Number(proposal.votesFor) + 1);
-    } else if (voteType === "against") {
-      updates.votesAgainst = String(Number(proposal.votesAgainst) + 1);
-    } else {
-      updates.votesAbstain = String(Number(proposal.votesAbstain) + 1);
-    }
+  async getVotes(proposalId: string): Promise<Vote[]> {
+    return await db.select().from(votes).where(eq(votes.proposalId, proposalId));
+  }
 
-    const result = await db.update(proposals).set(updates).where(eq(proposals.id, id)).returning();
+  async getUserVote(proposalId: string, userId: string): Promise<Vote | undefined> {
+    const result = await db.select().from(votes)
+      .where(and(
+        eq(votes.proposalId, proposalId),
+        eq(votes.userId, userId)
+      ))
+      .limit(1);
     return result[0];
+  }
+
+  async createVote(vote: InsertVote): Promise<Vote> {
+    try {
+      // Check proposal status first
+      const proposal = await this.getProposal(vote.proposalId);
+      if (!proposal) {
+        throw new Error("Proposal not found");
+      }
+      if (proposal.status !== "open") {
+        throw new Error("Cannot vote on closed proposal");
+      }
+      
+      // Check for existing vote BEFORE insert to handle gracefully
+      const existingVote = await this.getUserVote(vote.proposalId, vote.userId);
+      if (existingVote) {
+        throw new Error("User has already voted on this proposal");
+      }
+      
+      const newVote = await db.insert(votes).values(vote).returning();
+      return newVote[0];
+    } catch (error: any) {
+      // Still catch unique constraint violations as fallback
+      if (error.code === '23505' || error.message?.includes('unique')) {
+        throw new Error("User has already voted on this proposal");
+      }
+      throw error;
+    }
+  }
+
+  async getVoteCounts(proposalId: string): Promise<{ yes: number; no: number; abstain: number }> {
+    const proposalVotes = await this.getVotes(proposalId);
+    return {
+      yes: proposalVotes.filter(v => v.choice === "yes").length,
+      no: proposalVotes.filter(v => v.choice === "no").length,
+      abstain: proposalVotes.filter(v => v.choice === "abstain").length,
+    };
   }
 
   async getRecentActivities(limit: number = 10): Promise<Activity[]> {

@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, boolean, doublePrecision } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, boolean, doublePrecision, unique } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -31,13 +31,20 @@ export const proposals = pgTable("proposals", {
   description: text("description").notNull(),
   proposerId: varchar("proposer_id").notNull(),
   proposerName: text("proposer_name").notNull(),
-  votesFor: text("votes_for").notNull().default("0"),
-  votesAgainst: text("votes_against").notNull().default("0"),
-  votesAbstain: text("votes_abstain").notNull().default("0"),
-  deadline: timestamp("deadline").notNull(),
-  status: text("status").notNull().default("active"),
+  closesAt: timestamp("closes_at").notNull(),
+  status: text("status").notNull().default("open"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+export const votes = pgTable("votes", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  proposalId: varchar("proposal_id").notNull().references(() => proposals.id),
+  userId: varchar("user_id").notNull().references(() => userProfiles.id),
+  choice: text("choice").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => ({
+  uniqueVote: unique().on(table.proposalId, table.userId),
+}));
 
 export const activities = pgTable("activities", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -82,6 +89,10 @@ export const PAIN_POINTS = [
 export const POST_TYPES = ["vraag", "aanbieding", "lead", "event", "update"] as const;
 export const REGIONS = ["Amsterdam", "Rotterdam", "Utrecht", "Den Haag", "Leiden", "Haarlem"] as const;
 
+// Shared constants for proposal status and vote choices
+export const PROPOSAL_STATUS = ["open", "closed"] as const;
+export const VOTE_CHOICES = ["yes", "no", "abstain"] as const;
+
 export const userProfiles = pgTable("user_profiles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
@@ -109,10 +120,14 @@ export const insertEntrepreneurSchema = createInsertSchema(entrepreneurs).omit({
 export const insertProposalSchema = createInsertSchema(proposals).omit({
   id: true,
   createdAt: true,
-  votesFor: true,
-  votesAgainst: true,
-  votesAbstain: true,
   status: true,
+});
+
+export const insertVoteSchema = createInsertSchema(votes).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  choice: z.enum(["yes", "no", "abstain"], { required_error: "Keuze is verplicht" }),
 });
 
 export const insertActivitySchema = createInsertSchema(activities).omit({
@@ -156,6 +171,9 @@ export type StrictInsertEntrepreneur = z.infer<typeof strictEntrepreneurSchema>;
 
 export type InsertProposal = z.infer<typeof insertProposalSchema>;
 export type Proposal = typeof proposals.$inferSelect;
+
+export type InsertVote = z.infer<typeof insertVoteSchema>;
+export type Vote = typeof votes.$inferSelect;
 
 export type InsertActivity = z.infer<typeof insertActivitySchema>;
 export type Activity = typeof activities.$inferSelect;
