@@ -2,9 +2,41 @@ import { HeroSection } from "@/components/HeroSection";
 import { FeatureSection } from "@/components/FeatureSection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Quote } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useLocation } from "wouter";
+import { useEffect } from "react";
 
 export default function HomePage() {
+  const { isAuthenticated, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
+
+  useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      setLocation("/dashboard");
+    }
+  }, [isLoading, isAuthenticated, setLocation]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen p-8">
+        <div className="max-w-7xl mx-auto space-y-8">
+          <Skeleton className="h-64 w-full" />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <Skeleton className="h-48" />
+            <Skeleton className="h-48" />
+            <Skeleton className="h-48" />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className="min-h-screen">
       <HeroSection />
@@ -64,6 +96,9 @@ export default function HomePage() {
             variant="outline"
             className="text-primary bg-primary-foreground hover:bg-primary-foreground/90 border-primary-foreground text-lg"
             data-testid="button-join-now"
+            onClick={() => {
+              window.location.href = "/api/auth/login";
+            }}
           >
             Word lid van OpenRegio
           </Button>
