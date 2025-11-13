@@ -2,14 +2,17 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Bot, Send, Sparkles } from "lucide-react";
+import { Bot, Send, Sparkles, FileText, Tag, CheckCircle, Scale, Copy, Share2 } from "lucide-react";
 import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 
 interface Message {
   id: string;
   role: "user" | "assistant";
   content: string;
+  intent?: string;
 }
 
 export function RegioBotChat() {
@@ -22,32 +25,64 @@ export function RegioBotChat() {
   ]);
   const [input, setInput] = useState("");
 
-  const suggestedPrompts = [
-    "Schrijf een social media post",
-    "Maak een aanbieding",
-    "SEO tips voor mijn regio",
+  const [isLoading, setIsLoading] = useState(false);
+  const [activeIntent, setActiveIntent] = useState<string | undefined>();
+  const { toast } = useToast();
+  const [, setLocation] = useLocation();
+
+  const quickActions = [
+    {
+      intent: "social_post",
+      label: "Maak social post",
+      icon: <FileText className="h-4 w-4" />,
+      prompt: "Schrijf een pakkende social media post voor mijn lokale business",
+    },
+    {
+      intent: "offer",
+      label: "Maak aanbieding",
+      icon: <Tag className="h-4 w-4" />,
+      prompt: "Creëer een aantrekkelijke aanbieding voor nieuwe klanten",
+    },
+    {
+      intent: "check_text",
+      label: "Check tekst",
+      icon: <CheckCircle className="h-4 w-4" />,
+      prompt: "Check en verbeter deze tekst: ",
+    },
+    {
+      intent: "legal_explain",
+      label: "Leg brief uit",
+      icon: <Scale className="h-4 w-4" />,
+      prompt: "Leg deze brief of document uit in begrijpelijke taal: ",
+    },
   ];
 
-  const [isLoading, setIsLoading] = useState(false);
+  const handleSend = async (customMessage?: string, customIntent?: string) => {
+    const messageToSend = customMessage || input;
+    const intentToUse = customIntent || activeIntent;
 
-  const handleSend = async () => {
-    if (!input.trim() || isLoading) return;
+    if (!messageToSend.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
       role: "user",
-      content: input,
+      content: messageToSend,
+      intent: intentToUse,
     };
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    setActiveIntent(undefined);
     setIsLoading(true);
 
     try {
       const response = await fetch("/api/regiobot/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: input }),
+        body: JSON.stringify({ 
+          message: messageToSend,
+          intent: intentToUse,
+        }),
       });
 
       const data = await response.json();
@@ -56,6 +91,7 @@ export function RegioBotChat() {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: data.response || "Sorry, ik kon geen antwoord genereren.",
+        intent: data.intent,
       };
 
       setMessages((prev) => [...prev, botMessage]);
@@ -71,13 +107,31 @@ export function RegioBotChat() {
     }
   };
 
-  const handlePromptClick = (prompt: string) => {
-    setInput(prompt);
+  const handleQuickAction = (action: typeof quickActions[0]) => {
+    setActiveIntent(action.intent);
+    setInput(action.prompt);
+  };
+
+  const handleCopy = (content: string) => {
+    navigator.clipboard.writeText(content);
+    toast({
+      title: "Gekopieerd!",
+      description: "De tekst is naar je klembord gekopieerd.",
+    });
+  };
+
+  const handlePublish = (content: string) => {
+    // Navigate to community page with pre-filled content
+    setLocation("/community?content=" + encodeURIComponent(content));
+    toast({
+      title: "Naar Community",
+      description: "Je kunt de tekst nu publiceren in de community.",
+    });
   };
 
   return (
     <Card className="flex flex-col h-[600px]" data-testid="card-regiobot">
-      <CardHeader className="border-b">
+      <CardHeader className="border-b space-y-3">
         <div className="flex items-center gap-3">
           <div className="p-2 rounded-lg bg-primary/10">
             <Bot className="h-6 w-6 text-primary" />
@@ -92,6 +146,23 @@ export function RegioBotChat() {
             </CardTitle>
             <p className="text-sm text-muted-foreground">Jouw slimme business assistent</p>
           </div>
+        </div>
+        
+        {/* Quick Actions */}
+        <div className="flex flex-wrap gap-2">
+          {quickActions.map((action) => (
+            <Button
+              key={action.intent}
+              variant={activeIntent === action.intent ? "default" : "outline"}
+              size="sm"
+              onClick={() => handleQuickAction(action)}
+              data-testid={`button-quick-${action.intent}`}
+              className="gap-2"
+            >
+              {action.icon}
+              {action.label}
+            </Button>
+          ))}
         </div>
       </CardHeader>
 
@@ -110,13 +181,43 @@ export function RegioBotChat() {
               </Avatar>
             )}
             <div
-              className={`rounded-lg p-3 max-w-[80%] ${
+              className={`rounded-lg max-w-[80%] ${
                 message.role === "user"
-                  ? "bg-primary text-primary-foreground"
-                  : "bg-muted"
+                  ? "bg-primary text-primary-foreground p-3"
+                  : "bg-card border overflow-hidden"
               }`}
             >
-              <p className="text-sm">{message.content}</p>
+              <p className="text-sm p-3 whitespace-pre-wrap">
+                {message.content}
+              </p>
+              
+              {/* Action buttons for assistant responses */}
+              {message.role === "assistant" && (
+                <div className="flex gap-2 p-2 border-t bg-muted/50">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleCopy(message.content)}
+                    data-testid={`button-copy-${message.id}`}
+                    className="gap-1 flex-1"
+                  >
+                    <Copy className="h-3 w-3" />
+                    Kopieer
+                  </Button>
+                  {(message.intent === "social_post" || message.intent === "offer") && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => handlePublish(message.content)}
+                      data-testid={`button-publish-${message.id}`}
+                      className="gap-1 flex-1"
+                    >
+                      <Share2 className="h-3 w-3" />
+                      Publiceer
+                    </Button>
+                  )}
+                </div>
+              )}
             </div>
             {message.role === "user" && (
               <Avatar className="h-8 w-8 shrink-0">
@@ -128,19 +229,25 @@ export function RegioBotChat() {
       </CardContent>
 
       <CardFooter className="flex-col gap-3 p-4 border-t">
-        <div className="flex flex-wrap gap-2 w-full">
-          {suggestedPrompts.map((prompt, idx) => (
-            <Badge
-              key={idx}
-              variant="outline"
-              className="cursor-pointer hover-elevate"
-              onClick={() => handlePromptClick(prompt)}
-              data-testid={`badge-prompt-${idx}`}
-            >
-              {prompt}
+        {activeIntent && (
+          <div className="flex items-center gap-2 w-full">
+            <Badge variant="secondary" className="gap-1">
+              <Sparkles className="h-3 w-3" />
+              {quickActions.find((a) => a.intent === activeIntent)?.label}
             </Badge>
-          ))}
-        </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => {
+                setActiveIntent(undefined);
+                setInput("");
+              }}
+              data-testid="button-clear-intent"
+            >
+              Wissen
+            </Button>
+          </div>
+        )}
         <div className="flex gap-2 w-full">
           <Input
             placeholder="Stel een vraag aan RegioBot..."
@@ -151,7 +258,7 @@ export function RegioBotChat() {
           />
           <Button
             size="icon"
-            onClick={handleSend}
+            onClick={() => handleSend()}
             disabled={!input.trim() || isLoading}
             data-testid="button-send-message"
           >
