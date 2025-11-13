@@ -66,9 +66,30 @@ export const chatMessages = pgTable("chat_messages", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Shared constants for pain points
+export const PAIN_POINTS = [
+  "visibility",
+  "rules",
+  "time",
+  "platform_fees",
+  "no_community",
+  "digital_stress",
+  "rights_confusion",
+  "low_autonomy"
+] as const;
+
 // Shared constants for post types and regions
 export const POST_TYPES = ["vraag", "aanbieding", "lead", "event", "update"] as const;
 export const REGIONS = ["Amsterdam", "Rotterdam", "Utrecht", "Den Haag", "Leiden", "Haarlem"] as const;
+
+export const userProfiles = pgTable("user_profiles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  painPoints: text("pain_points").array().notNull().default(sql`'{}'::text[]`),
+  onboardingCompleted: boolean("onboarding_completed").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
 
 export const posts = pgTable("posts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -147,3 +168,13 @@ export type ChatMessage = typeof chatMessages.$inferSelect;
 
 export type InsertPost = z.infer<typeof insertPostSchema>;
 export type Post = typeof posts.$inferSelect;
+
+export const insertUserProfileSchema = createInsertSchema(userProfiles).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  painPoints: z.array(z.enum(PAIN_POINTS)).optional(),
+});
+
+export type InsertUserProfile = z.infer<typeof insertUserProfileSchema>;
+export type UserProfile = typeof userProfiles.$inferSelect;

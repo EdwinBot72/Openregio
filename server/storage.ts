@@ -12,12 +12,15 @@ import {
   type InsertChatMessage,
   type Post,
   type InsertPost,
+  type UserProfile,
+  type InsertUserProfile,
   entrepreneurs,
   proposals,
   activities,
   chatRooms,
   chatMessages,
   posts,
+  userProfiles,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
@@ -67,6 +70,12 @@ export interface IStorage {
   getPosts(region?: string, type?: string): Promise<Post[]>;
   createPost(post: InsertPost): Promise<Post>;
 
+  // User Profiles
+  getUserProfile(id: string): Promise<UserProfile | undefined>;
+  getUserProfileByEmail(email: string): Promise<UserProfile | undefined>;
+  createUserProfile(profile: InsertUserProfile): Promise<UserProfile>;
+  updateUserProfile(id: string, profile: Partial<InsertUserProfile>): Promise<UserProfile | undefined>;
+
   // Stats
   getStats(): Promise<{
     totalMembers: number;
@@ -83,6 +92,7 @@ export class MemStorage implements IStorage {
   private chatRooms: Map<string, ChatRoom>;
   private chatMessages: Map<string, ChatMessage>;
   private posts: Map<string, Post>;
+  private userProfiles: Map<string, UserProfile>;
 
   constructor() {
     this.entrepreneurs = new Map();
@@ -91,6 +101,7 @@ export class MemStorage implements IStorage {
     this.chatRooms = new Map();
     this.chatMessages = new Map();
     this.posts = new Map();
+    this.userProfiles = new Map();
     this.seedData();
   }
 
@@ -228,6 +239,63 @@ export class MemStorage implements IStorage {
         image: e.image ?? null,
         isVerified: e.isVerified ?? false,
         createdAt: new Date() 
+      });
+    });
+
+    // Seed user profiles matching ownerUserId references
+    const sampleUserProfiles: Array<InsertUserProfile & { id: string }> = [
+      {
+        id: "user-maria",
+        name: "Maria van den Berg",
+        email: "maria@goudenkorre.nl",
+        painPoints: ["visibility", "time"],
+        onboardingCompleted: true,
+      },
+      {
+        id: "user-jan",
+        name: "Jan de Vries",
+        email: "jan@bakkerij.nl",
+        painPoints: ["no_community", "digital_stress"],
+        onboardingCompleted: true,
+      },
+      {
+        id: "user-sophie",
+        name: "Sophie Bakker",
+        email: "sophie@bloemen.nl",
+        painPoints: ["platform_fees", "rules"],
+        onboardingCompleted: true,
+      },
+      {
+        id: "user-pieter",
+        name: "Pieter Visser",
+        email: "pieter@slager.nl",
+        painPoints: ["low_autonomy"],
+        onboardingCompleted: false,
+      },
+      {
+        id: "user-lisa",
+        name: "Lisa Mulder",
+        email: "lisa@yogastudio.nl",
+        painPoints: ["visibility", "no_community", "time"],
+        onboardingCompleted: true,
+      },
+      {
+        id: "user-mark",
+        name: "Mark de Jong",
+        email: "mark@fitnessfirst.nl",
+        painPoints: [],
+        onboardingCompleted: false,
+      },
+    ];
+
+    sampleUserProfiles.forEach((p) => {
+      this.userProfiles.set(p.id, {
+        id: p.id,
+        name: p.name,
+        email: p.email,
+        painPoints: p.painPoints || [],
+        onboardingCompleted: p.onboardingCompleted ?? false,
+        createdAt: new Date(),
       });
     });
 
@@ -643,6 +711,44 @@ export class MemStorage implements IStorage {
     return newPost;
   }
 
+  async getUserProfile(id: string): Promise<UserProfile | undefined> {
+    return this.userProfiles.get(id);
+  }
+
+  async getUserProfileByEmail(email: string): Promise<UserProfile | undefined> {
+    return Array.from(this.userProfiles.values()).find(p => p.email === email);
+  }
+
+  async createUserProfile(profile: InsertUserProfile): Promise<UserProfile> {
+    const id = randomUUID();
+    const newProfile: UserProfile = {
+      id,
+      name: profile.name,
+      email: profile.email,
+      painPoints: profile.painPoints || [],
+      onboardingCompleted: profile.onboardingCompleted ?? false,
+      createdAt: new Date(),
+    };
+    this.userProfiles.set(id, newProfile);
+    return newProfile;
+  }
+
+  async updateUserProfile(id: string, profile: Partial<InsertUserProfile>): Promise<UserProfile | undefined> {
+    const existing = this.userProfiles.get(id);
+    if (!existing) return undefined;
+    
+    // Filter out undefined values to prevent field nulling
+    const updates: Partial<UserProfile> = {};
+    if (profile.name !== undefined) updates.name = profile.name;
+    if (profile.email !== undefined) updates.email = profile.email;
+    if (profile.painPoints !== undefined) updates.painPoints = profile.painPoints;
+    if (profile.onboardingCompleted !== undefined) updates.onboardingCompleted = profile.onboardingCompleted;
+    
+    const updated = { ...existing, ...updates };
+    this.userProfiles.set(id, updated);
+    return updated;
+  }
+
   async getStats() {
     return {
       totalMembers: this.entrepreneurs.size + 2800,
@@ -831,6 +937,42 @@ class DbStorage implements IStorage {
   async createPost(post: InsertPost): Promise<Post> {
     const result = await db.insert(posts).values(post).returning();
     return result[0];
+  }
+
+  async getUserProfile(id: string): Promise<UserProfile | undefined> {
+    const results = await db.select().from(userProfiles).where(eq(userProfiles.id, id));
+    return results[0];
+  }
+
+  async getUserProfileByEmail(email: string): Promise<UserProfile | undefined> {
+    const results = await db.select().from(userProfiles).where(eq(userProfiles.email, email));
+    return results[0];
+  }
+
+  async createUserProfile(profile: InsertUserProfile): Promise<UserProfile> {
+    const results = await db.insert(userProfiles).values(profile).returning();
+    return results[0];
+  }
+
+  async updateUserProfile(id: string, profile: Partial<InsertUserProfile>): Promise<UserProfile | undefined> {
+    // Filter out undefined values to avoid nulling fields
+    const updates: any = {};
+    if (profile.name !== undefined) updates.name = profile.name;
+    if (profile.email !== undefined) updates.email = profile.email;
+    if (profile.painPoints !== undefined) updates.painPoints = profile.painPoints;
+    if (profile.onboardingCompleted !== undefined) updates.onboardingCompleted = profile.onboardingCompleted;
+
+    // Early return if no fields to update
+    if (Object.keys(updates).length === 0) {
+      const results = await db.select().from(userProfiles).where(eq(userProfiles.id, id));
+      return results[0];
+    }
+
+    const results = await db.update(userProfiles)
+      .set(updates)
+      .where(eq(userProfiles.id, id))
+      .returning();
+    return results[0];
   }
 
   async getStats() {
