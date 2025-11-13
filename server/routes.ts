@@ -1,8 +1,21 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema } from "@shared/schema";
+import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema } from "@shared/schema";
 import { z } from "zod";
+import { createMollieClient } from "@mollie/api-client";
+
+// Initialize Mollie client (requires MOLLIE_API_KEY environment variable)
+const mollieClient = process.env.MOLLIE_API_KEY 
+  ? createMollieClient({ apiKey: process.env.MOLLIE_API_KEY }) 
+  : null;
+
+// Helper to get base URL for redirects/webhooks
+function getBaseUrl(req: any): string {
+  const host = req.get('host') || 'localhost:5000';
+  const protocol = host.includes('localhost') ? 'http' : 'https';
+  return `${protocol}://${host}`;
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Entrepreneurs routes
@@ -495,6 +508,182 @@ Output formaat:
         return res.status(400).json({ error: error.errors });
       }
       res.status(500).json({ error: "Failed to update user profile" });
+    }
+  });
+
+  // Billing & Subscription routes
+  app.post("/api/billing/create-checkout", async (req, res) => {
+    try {
+      if (!mollieClient) {
+        return res.status(503).json({ error: "Payment provider not configured. Please contact administrator." });
+      }
+
+      // Validate request with Zod
+      const checkoutSchema = z.object({
+        userId: z.string().min(1, "userId is required"),
+        plan: z.enum(["basic", "pro"], { required_error: "plan must be 'basic' or 'pro'" }),
+        returnUrl: z.string().url().optional()
+      });
+
+      const validatedData = checkoutSchema.parse(req.body);
+      const { userId, plan, returnUrl } = validatedData;
+
+      // Get or create user profile
+      const userProfile = await storage.getUserProfile(userId);
+      if (!userProfile) {
+        return res.status(404).json({ error: "User profile not found" });
+      }
+
+      // Check if user already has active subscription
+      const existingSub = await storage.getSubscription(userId);
+      if (existingSub && existingSub.status === "active") {
+        return res.status(400).json({ error: "User already has active subscription" });
+      }
+
+      // Create Mollie customer
+      const customer = await mollieClient.customers.create({
+        name: userProfile.name,
+        email: userProfile.email,
+      });
+
+      // Get base URL for redirects and webhooks
+      const baseUrl = getBaseUrl(req);
+
+      // Create first payment to establish mandate
+      const firstPayment = await mollieClient.payments.create({
+        amount: {
+          currency: "EUR",
+          value: plan === "pro" ? "19.99" : "9.99"
+        },
+        customerId: customer.id,
+        sequenceType: "first" as any,
+        description: `OpenRegio ${plan === "pro" ? "Pro" : "Basic"} lidmaatschap`,
+        redirectUrl: returnUrl || `${baseUrl}/lidmaatschap`,
+        webhookUrl: `${baseUrl}/api/webhooks/mollie`,
+        metadata: {
+          userId,
+          plan
+        } as any
+      });
+
+      // Create subscription record in database (status: trialing until first payment)
+      const subscription = await storage.createSubscription({
+        userId,
+        mollieCustomerId: customer.id,
+        mollieSubscriptionId: null,
+        status: "trialing",
+        plan,
+        currentPeriodEnd: null
+      });
+
+      res.json({
+        checkoutUrl: (firstPayment as any)._links?.checkout?.href || "",
+        paymentId: firstPayment.id,
+        subscriptionId: subscription.id
+      });
+    } catch (error: any) {
+      console.error("Create checkout error:", error);
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: error.message || "Failed to create checkout session" });
+    }
+  });
+
+  app.get("/api/billing/subscription", async (req, res) => {
+    try {
+      const { userId } = req.query;
+      
+      if (!userId) {
+        return res.status(400).json({ error: "userId is required" });
+      }
+
+      const subscription = await storage.getSubscription(userId as string);
+      
+      if (!subscription) {
+        return res.status(404).json({ error: "No subscription found" });
+      }
+
+      res.json(subscription);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch subscription" });
+    }
+  });
+
+  app.post("/api/webhooks/mollie", async (req, res) => {
+    try {
+      if (!mollieClient) {
+        return res.sendStatus(503);
+      }
+
+      const paymentId = req.body.id;
+      
+      if (!paymentId) {
+        return res.status(400).json({ error: "Payment ID required" });
+      }
+
+      // Fetch payment details from Mollie
+      const payment: any = await mollieClient.payments.get(paymentId);
+      
+      const userId = payment.metadata?.userId;
+      const plan = payment.metadata?.plan;
+
+      if (!userId) {
+        console.error("Webhook: No userId in payment metadata");
+        return res.sendStatus(200);
+      }
+
+      if (payment.status === "paid") {
+        console.log(`Payment ${paymentId} paid for user ${userId}`);
+        
+        // Get subscription
+        const subscription = await storage.getSubscription(userId);
+        if (!subscription) {
+          console.error("Webhook: Subscription not found for user", userId);
+          return res.sendStatus(200);
+        }
+
+        // If this is first payment with mandate, create Mollie subscription
+        if (payment.sequenceType === "first" && subscription.mollieCustomerId) {
+          try {
+            // Use PUBLIC_BASE_URL env var or construct from request
+            const baseUrl = process.env.PUBLIC_BASE_URL || getBaseUrl(req);
+            
+            const mollieSubscription = await mollieClient.customerSubscriptions.create({
+              customerId: subscription.mollieCustomerId,
+              amount: {
+                currency: "EUR",
+                value: plan === "pro" ? "19.99" : "9.99"
+              },
+              interval: "1 month",
+              description: `OpenRegio ${plan === "pro" ? "Pro" : "Basic"} lidmaatschap`,
+              webhookUrl: `${baseUrl}/api/webhooks/mollie`
+            });
+
+            // Update subscription to active
+            const nextMonth = new Date();
+            nextMonth.setMonth(nextMonth.getMonth() + 1);
+            
+            await storage.updateSubscription(subscription.id, {
+              mollieSubscriptionId: mollieSubscription.id,
+              status: "active",
+              currentPeriodEnd: nextMonth
+            });
+
+            console.log(`Subscription activated for user ${userId}`);
+          } catch (subError: any) {
+            console.error("Failed to create Mollie subscription:", subError);
+          }
+        }
+      } else if (payment.status === "failed") {
+        console.log(`Payment ${paymentId} failed for user ${userId}`);
+        // Handle failed payment (could update subscription status)
+      }
+
+      res.sendStatus(200);
+    } catch (error: any) {
+      console.error("Webhook error:", error);
+      res.sendStatus(500);
     }
   });
 

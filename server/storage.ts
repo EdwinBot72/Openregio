@@ -46,8 +46,6 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
   return R * c;
 }
 
-import type { ProposalSummary } from "@shared/schema";
-
 export interface IStorage {
   // Entrepreneurs
   getEntrepreneurs(search?: string, category?: string, lat?: number, lng?: number, radius?: number): Promise<Entrepreneur[]>;
