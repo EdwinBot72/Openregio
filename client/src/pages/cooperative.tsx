@@ -4,28 +4,40 @@ import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { CooperativeStats } from "@/components/CooperativeStats";
 import { Vote, Users, Euro, FileText, CheckCircle2, Clock } from "lucide-react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { queryClient, apiRequest } from "@/lib/queryClient";
+import type { Proposal } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
+import { formatDistance } from "date-fns";
+import { nl } from "date-fns/locale";
 
 export default function CooperativePage() {
-  const activeProposals = [
-    {
-      id: "1",
-      title: "Introductie van groepsaankopen voor leden",
-      description: "Voorstel om gezamenlijke inkoop mogelijk te maken voor betere prijzen bij leveranciers.",
-      proposer: "Maria van den Berg",
-      votes: { for: 342, against: 45, abstain: 23 },
-      deadline: "3 dagen",
-      status: "active" as const,
+  const { toast } = useToast();
+  const { data: proposals, isLoading } = useQuery<Proposal[]>({
+    queryKey: ["/api/proposals"],
+  });
+
+  const voteMutation = useMutation({
+    mutationFn: async ({ id, voteType }: { id: string; voteType: "for" | "against" | "abstain" }) => {
+      return apiRequest("POST", `/api/proposals/${id}/vote`, { voteType });
     },
-    {
-      id: "2",
-      title: "Budget voor regionale marketingcampagne",
-      description: "€25.000 budget voor gezamenlijke marketingcampagne in Q2 2025.",
-      proposer: "Ahmed Hassan",
-      votes: { for: 456, against: 78, abstain: 12 },
-      deadline: "5 dagen",
-      status: "active" as const,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/proposals"] });
+      toast({
+        title: "Stem geregistreerd",
+        description: "Je stem is succesvol opgeslagen.",
+      });
     },
-  ];
+    onError: () => {
+      toast({
+        title: "Fout",
+        description: "Er is iets misgegaan bij het registreren van je stem.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const activeProposals = proposals?.filter((p) => p.status === "active") || [];
 
   const contributions = [
     { category: "Platformonderhoud", amount: "45%", color: "bg-chart-1" },
@@ -59,57 +71,80 @@ export default function CooperativePage() {
                 </Button>
               </CardHeader>
               <CardContent className="space-y-6">
-                {activeProposals.map((proposal) => {
-                  const totalVotes = proposal.votes.for + proposal.votes.against + proposal.votes.abstain;
-                  const forPercentage = (proposal.votes.for / totalVotes) * 100;
+                {isLoading ? (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">Laden...</p>
+                  </div>
+                ) : activeProposals.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-muted-foreground">Geen actieve voorstellen op dit moment.</p>
+                  </div>
+                ) : (
+                  activeProposals.map((proposal) => {
+                    const totalVotes = Number(proposal.votesFor) + Number(proposal.votesAgainst) + Number(proposal.votesAbstain);
+                    const forPercentage = totalVotes > 0 ? (Number(proposal.votesFor) / totalVotes) * 100 : 0;
+                    const daysUntilDeadline = formatDistance(new Date(proposal.deadline), new Date(), { addSuffix: false, locale: nl });
 
-                  return (
-                    <div
-                      key={proposal.id}
-                      className="p-4 rounded-lg border space-y-4"
-                      data-testid={`proposal-${proposal.id}`}
-                    >
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <h3 className="font-semibold mb-1">{proposal.title}</h3>
-                          <p className="text-sm text-muted-foreground mb-2">{proposal.description}</p>
-                          <p className="text-xs text-muted-foreground">
-                            Voorgesteld door {proposal.proposer}
-                          </p>
+                    return (
+                      <div
+                        key={proposal.id}
+                        className="p-4 rounded-lg border space-y-4"
+                        data-testid={`proposal-${proposal.id}`}
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <h3 className="font-semibold mb-1">{proposal.title}</h3>
+                            <p className="text-sm text-muted-foreground mb-2">{proposal.description}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Voorgesteld door {proposal.proposerName}
+                            </p>
+                          </div>
+                          <Badge variant="outline" className="shrink-0">
+                            <Clock className="h-3 w-3 mr-1" />
+                            {daysUntilDeadline}
+                          </Badge>
                         </div>
-                        <Badge variant="outline" className="shrink-0">
-                          <Clock className="h-3 w-3 mr-1" />
-                          {proposal.deadline}
-                        </Badge>
-                      </div>
 
-                      <div className="space-y-2">
-                        <div className="flex justify-between text-sm">
-                          <span className="text-muted-foreground">Stemmen</span>
-                          <span className="font-medium">{totalVotes} totaal</span>
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Stemmen</span>
+                            <span className="font-medium">{totalVotes} totaal</span>
+                          </div>
+                          <Progress value={forPercentage} className="h-2" />
+                          <div className="flex justify-between text-xs text-muted-foreground">
+                            <span className="text-green-600">Voor: {proposal.votesFor}</span>
+                            <span className="text-red-600">Tegen: {proposal.votesAgainst}</span>
+                            <span>Blanco: {proposal.votesAbstain}</span>
+                          </div>
                         </div>
-                        <Progress value={forPercentage} className="h-2" />
-                        <div className="flex justify-between text-xs text-muted-foreground">
-                          <span className="text-green-600">Voor: {proposal.votes.for}</span>
-                          <span className="text-red-600">Tegen: {proposal.votes.against}</span>
-                          <span>Blanco: {proposal.votes.abstain}</span>
-                        </div>
-                      </div>
 
-                      <div className="flex gap-2">
-                        <Button variant="default" size="sm" className="flex-1">
-                          Stem voor
-                        </Button>
-                        <Button variant="outline" size="sm" className="flex-1">
-                          Stem tegen
-                        </Button>
-                        <Button variant="ghost" size="sm">
-                          Details
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="default"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => voteMutation.mutate({ id: proposal.id, voteType: "for" })}
+                            disabled={voteMutation.isPending}
+                          >
+                            Stem voor
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="flex-1"
+                            onClick={() => voteMutation.mutate({ id: proposal.id, voteType: "against" })}
+                            disabled={voteMutation.isPending}
+                          >
+                            Stem tegen
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            Details
+                          </Button>
+                        </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                )}
               </CardContent>
             </Card>
           </div>

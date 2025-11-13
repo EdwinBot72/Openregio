@@ -28,8 +28,10 @@ export function RegioBotChat() {
     "SEO tips voor mijn regio",
   ];
 
-  const handleSend = () => {
-    if (!input.trim()) return;
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleSend = async () => {
+    if (!input.trim() || isLoading) return;
 
     const userMessage: Message = {
       id: Date.now().toString(),
@@ -37,14 +39,36 @@ export function RegioBotChat() {
       content: input,
     };
 
-    const botMessage: Message = {
-      id: (Date.now() + 1).toString(),
-      role: "assistant",
-      content: "Ik ben een demo-versie. In de volledige app kan ik je helpen met slimme teksten en strategieën voor je business!",
-    };
-
-    setMessages([...messages, userMessage, botMessage]);
+    setMessages((prev) => [...prev, userMessage]);
     setInput("");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/regiobot/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: input }),
+      });
+
+      const data = await response.json();
+
+      const botMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: data.response || "Sorry, ik kon geen antwoord genereren.",
+      };
+
+      setMessages((prev) => [...prev, botMessage]);
+    } catch (error) {
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: "assistant",
+        content: "Sorry, er is iets misgegaan. Probeer het later opnieuw.",
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handlePromptClick = (prompt: string) => {
@@ -128,7 +152,7 @@ export function RegioBotChat() {
           <Button
             size="icon"
             onClick={handleSend}
-            disabled={!input.trim()}
+            disabled={!input.trim() || isLoading}
             data-testid="button-send-message"
           >
             <Send className="h-4 w-4" />

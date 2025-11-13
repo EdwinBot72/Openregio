@@ -3,44 +3,31 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Bell, Calendar, ThumbsUp, MessageSquare, TrendingUp } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import type { Proposal, Activity } from "@shared/schema";
+import { formatDistance } from "date-fns";
+import { nl } from "date-fns/locale";
 
 export default function DashboardPage() {
-  const recentActivity = [
-    {
-      type: "lead",
-      title: "Nieuwe samenwerking aanvraag",
-      from: "Tech Solutions NL",
-      time: "2 uur geleden",
-      icon: <ThumbsUp className="h-4 w-4" />,
-    },
-    {
-      type: "message",
-      title: "Bericht ontvangen",
-      from: "Sophie de Vries",
-      time: "5 uur geleden",
-      icon: <MessageSquare className="h-4 w-4" />,
-    },
-    {
-      type: "event",
-      title: "Netwerkborrel volgende week",
-      from: "OpenRegio Amsterdam",
-      time: "1 dag geleden",
-      icon: <Calendar className="h-4 w-4" />,
-    },
-  ];
+  const { data: proposals } = useQuery<Proposal[]>({
+    queryKey: ["/api/proposals"],
+  });
 
-  const upcomingVotes = [
-    {
-      title: "Nieuwe feature: Groepsaankopen",
-      deadline: "Over 3 dagen",
-      votes: "234 / 500",
-    },
-    {
-      title: "Budget voor regionale marketing",
-      deadline: "Over 5 dagen",
-      votes: "456 / 500",
-    },
-  ];
+  const { data: activities } = useQuery<Activity[]>({
+    queryKey: ["/api/activities"],
+  });
+
+  const activeProposals = proposals?.filter((p) => p.status === "active").slice(0, 2) || [];
+
+  const recentActivity = (activities || []).map((activity) => ({
+    type: activity.type,
+    title: activity.title,
+    from: activity.from,
+    time: formatDistance(new Date(activity.createdAt), new Date(), { addSuffix: true, locale: nl }),
+    icon: activity.type === "lead" ? <ThumbsUp className="h-4 w-4" /> :
+          activity.type === "message" ? <MessageSquare className="h-4 w-4" /> :
+          <Calendar className="h-4 w-4" />,
+  }));
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -96,18 +83,29 @@ export default function DashboardPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {upcomingVotes.map((vote, idx) => (
-                  <div key={idx} className="space-y-2" data-testid={`vote-${idx}`}>
-                    <p className="font-medium text-sm">{vote.title}</p>
-                    <div className="flex items-center justify-between text-xs">
-                      <span className="text-muted-foreground">{vote.votes} stemmen</span>
-                      <Badge variant="outline">{vote.deadline}</Badge>
-                    </div>
-                    <Button size="sm" variant="outline" className="w-full">
-                      Stem nu
-                    </Button>
-                  </div>
-                ))}
+                {activeProposals.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-4">
+                    Geen actieve stemmingen
+                  </p>
+                ) : (
+                  activeProposals.map((vote) => {
+                    const totalVotes = Number(vote.votesFor) + Number(vote.votesAgainst) + Number(vote.votesAbstain);
+                    const daysUntilDeadline = formatDistance(new Date(vote.deadline), new Date(), { addSuffix: false, locale: nl });
+
+                    return (
+                      <div key={vote.id} className="space-y-2" data-testid={`vote-${vote.id}`}>
+                        <p className="font-medium text-sm">{vote.title}</p>
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="text-muted-foreground">{totalVotes} stemmen</span>
+                          <Badge variant="outline">{daysUntilDeadline}</Badge>
+                        </div>
+                        <Button size="sm" variant="outline" className="w-full">
+                          Stem nu
+                        </Button>
+                      </div>
+                    );
+                  })
+                )}
               </CardContent>
             </Card>
 

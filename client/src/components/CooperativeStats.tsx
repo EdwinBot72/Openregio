@@ -1,5 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, TrendingUp, MapPin, Handshake } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
 
 interface StatCardProps {
   icon: React.ReactNode;
@@ -26,36 +27,45 @@ function StatCard({ icon, title, value, description }: StatCardProps) {
 }
 
 export function CooperativeStats() {
-  const stats = [
+  const { data: stats } = useQuery<{
+    totalMembers: number;
+    totalCollaborations: number;
+    totalRegions: number;
+    monthlyGrowth: number;
+  }>({
+    queryKey: ["/api/stats"],
+  });
+
+  const statsData = [
     {
       icon: <Users className="h-4 w-4" />,
       title: "Leden",
-      value: "2,847",
+      value: stats?.totalMembers.toLocaleString("nl-NL") || "...",
       description: "Actieve ondernemers in de regio",
     },
     {
       icon: <Handshake className="h-4 w-4" />,
       title: "Samenwerkingen",
-      value: "1,234",
+      value: stats?.totalCollaborations.toLocaleString("nl-NL") || "...",
       description: "Leads gedeeld deze maand",
     },
     {
       icon: <MapPin className="h-4 w-4" />,
       title: "Regio's",
-      value: "23",
+      value: stats?.totalRegions.toString() || "...",
       description: "Actieve lokale netwerken",
     },
     {
       icon: <TrendingUp className="h-4 w-4" />,
       title: "Groei",
-      value: "+18%",
+      value: stats ? `+${stats.monthlyGrowth}%` : "...",
       description: "Nieuwe leden deze maand",
     },
   ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {stats.map((stat) => (
+      {statsData.map((stat) => (
         <StatCard key={stat.title} {...stat} />
       ))}
     </div>

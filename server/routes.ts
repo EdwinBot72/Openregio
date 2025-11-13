@@ -1,15 +1,190 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
+import { insertEntrepreneurSchema, insertProposalSchema } from "@shared/schema";
+import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // put application routes here
-  // prefix all routes with /api
+  // Entrepreneurs routes
+  app.get("/api/entrepreneurs", async (req, res) => {
+    try {
+      const { search, category } = req.query;
+      const entrepreneurs = await storage.getEntrepreneurs(
+        search as string | undefined,
+        category as string | undefined
+      );
+      res.json(entrepreneurs);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch entrepreneurs" });
+    }
+  });
 
-  // use storage to perform CRUD operations on the storage interface
-  // e.g. storage.insertUser(user) or storage.getUserByUsername(username)
+  app.get("/api/entrepreneurs/:id", async (req, res) => {
+    try {
+      const entrepreneur = await storage.getEntrepreneur(req.params.id);
+      if (!entrepreneur) {
+        return res.status(404).json({ error: "Entrepreneur not found" });
+      }
+      res.json(entrepreneur);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch entrepreneur" });
+    }
+  });
+
+  app.post("/api/entrepreneurs", async (req, res) => {
+    try {
+      const validatedData = insertEntrepreneurSchema.parse(req.body);
+      const entrepreneur = await storage.createEntrepreneur(validatedData);
+      res.status(201).json(entrepreneur);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create entrepreneur" });
+    }
+  });
+
+  app.put("/api/entrepreneurs/:id", async (req, res) => {
+    try {
+      const validatedData = insertEntrepreneurSchema.partial().parse(req.body);
+      const entrepreneur = await storage.updateEntrepreneur(req.params.id, validatedData);
+      if (!entrepreneur) {
+        return res.status(404).json({ error: "Entrepreneur not found" });
+      }
+      res.json(entrepreneur);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to update entrepreneur" });
+    }
+  });
+
+  app.delete("/api/entrepreneurs/:id", async (req, res) => {
+    try {
+      const success = await storage.deleteEntrepreneur(req.params.id);
+      if (!success) {
+        return res.status(404).json({ error: "Entrepreneur not found" });
+      }
+      res.status(204).send();
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete entrepreneur" });
+    }
+  });
+
+  // Proposals routes
+  app.get("/api/proposals", async (req, res) => {
+    try {
+      const { status } = req.query;
+      const proposals = await storage.getProposals(status as string | undefined);
+      res.json(proposals);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch proposals" });
+    }
+  });
+
+  app.get("/api/proposals/:id", async (req, res) => {
+    try {
+      const proposal = await storage.getProposal(req.params.id);
+      if (!proposal) {
+        return res.status(404).json({ error: "Proposal not found" });
+      }
+      res.json(proposal);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch proposal" });
+    }
+  });
+
+  app.post("/api/proposals", async (req, res) => {
+    try {
+      const validatedData = insertProposalSchema.parse(req.body);
+      const proposal = await storage.createProposal(validatedData);
+      res.status(201).json(proposal);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      res.status(500).json({ error: "Failed to create proposal" });
+    }
+  });
+
+  app.post("/api/proposals/:id/vote", async (req, res) => {
+    try {
+      const { voteType } = req.body;
+      if (!["for", "against", "abstain"].includes(voteType)) {
+        return res.status(400).json({ error: "Invalid vote type" });
+      }
+      const proposal = await storage.voteOnProposal(req.params.id, voteType);
+      if (!proposal) {
+        return res.status(404).json({ error: "Proposal not found" });
+      }
+      res.json(proposal);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to vote on proposal" });
+    }
+  });
+
+  // Activities routes
+  app.get("/api/activities", async (req, res) => {
+    try {
+      const limit = req.query.limit ? parseInt(req.query.limit as string) : 10;
+      const activities = await storage.getRecentActivities(limit);
+      res.json(activities);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch activities" });
+    }
+  });
+
+  // Stats routes
+  app.get("/api/stats", async (req, res) => {
+    try {
+      const stats = await storage.getStats();
+      res.json(stats);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch stats" });
+    }
+  });
+
+  // RegioBot chat route
+  app.post("/api/regiobot/chat", async (req, res) => {
+    try {
+      const { message } = req.body;
+      if (!message) {
+        return res.status(400).json({ error: "Message is required" });
+      }
+
+      const OpenAI = (await import("openai")).default;
+      const openai = new OpenAI();
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "system",
+            content: `Je bent RegioBot, een vriendelijke AI-assistent voor lokale ondernemers in Nederland. Je helpt met:
+- Het schrijven van social media posts en marketing teksten
+- Het creëren van aantrekkelijke aanbiedingen
+- Lokale SEO tips en strategieën
+- Klantbereik vergroten
+- Slimme automatiseringen
+
+Wees altijd behulpzaam, professioneel en positief. Schrijf in het Nederlands en houd rekening met de lokale context van Nederlandse ondernemers.`,
+          },
+          {
+            role: "user",
+            content: message,
+          },
+        ],
+      });
+
+      const response = completion.choices[0]?.message?.content || "Sorry, ik kon geen antwoord genereren.";
+      res.json({ response });
+    } catch (error) {
+      console.error("RegioBot error:", error);
+      res.status(500).json({ error: "Failed to get response from RegioBot" });
+    }
+  });
 
   const httpServer = createServer(app);
-
   return httpServer;
 }
