@@ -66,6 +66,10 @@ export const chatMessages = pgTable("chat_messages", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Shared constants for post types and regions
+export const POST_TYPES = ["vraag", "aanbieding", "lead", "event", "update"] as const;
+export const REGIONS = ["Amsterdam", "Rotterdam", "Utrecht", "Den Haag", "Leiden", "Haarlem"] as const;
+
 export const posts = pgTable("posts", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   authorUserId: varchar("author_user_id"),
@@ -108,6 +112,9 @@ export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
 export const insertPostSchema = createInsertSchema(posts).omit({
   id: true,
   createdAt: true,
+}).extend({
+  type: z.enum(POST_TYPES, { required_error: "Type is verplicht" }),
+  region: z.enum(REGIONS, { required_error: "Regio is verplicht" }),
 });
 
 export type InsertEntrepreneur = z.infer<typeof insertEntrepreneurSchema>;

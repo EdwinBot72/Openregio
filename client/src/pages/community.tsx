@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type { Post } from "@shared/schema";
+import { POST_TYPES, REGIONS, insertPostSchema } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { Plus, Filter } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,7 +33,6 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertPostSchema } from "@shared/schema";
 import { z } from "zod";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
@@ -47,20 +47,14 @@ const postTypes = [
   { value: "update", label: "Update", variant: "outline" as const },
 ];
 
-const formSchema = insertPostSchema.extend({
-  type: z.enum(["vraag", "aanbieding", "lead", "event", "update"], {
-    required_error: "Type is verplicht",
-  }),
-});
-
-type FormValues = z.infer<typeof formSchema>;
+type FormValues = z.infer<typeof insertPostSchema>;
 
 function NewPostDialog() {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
 
   const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(insertPostSchema),
     defaultValues: {
       type: "vraag",
       title: "",
@@ -123,11 +117,14 @@ function NewPostDialog() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="vraag">Vraag</SelectItem>
-                      <SelectItem value="aanbieding">Aanbieding</SelectItem>
-                      <SelectItem value="lead">Lead</SelectItem>
-                      <SelectItem value="event">Event</SelectItem>
-                      <SelectItem value="update">Update</SelectItem>
+                      {POST_TYPES.map((type) => {
+                        const typeInfo = postTypes.find((t) => t.value === type);
+                        return (
+                          <SelectItem key={type} value={type}>
+                            {typeInfo?.label || type}
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -148,12 +145,11 @@ function NewPostDialog() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="Amsterdam">Amsterdam</SelectItem>
-                      <SelectItem value="Rotterdam">Rotterdam</SelectItem>
-                      <SelectItem value="Utrecht">Utrecht</SelectItem>
-                      <SelectItem value="Den Haag">Den Haag</SelectItem>
-                      <SelectItem value="Leiden">Leiden</SelectItem>
-                      <SelectItem value="Haarlem">Haarlem</SelectItem>
+                      {REGIONS.map((region) => (
+                        <SelectItem key={region} value={region}>
+                          {region}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
