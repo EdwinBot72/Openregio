@@ -1,10 +1,11 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, boolean, doublePrecision } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const entrepreneurs = pgTable("entrepreneurs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ownerUserId: varchar("owner_user_id"),
   name: text("name").notNull(),
   owner: text("owner").notNull(),
   email: text("email").notNull(),
@@ -13,10 +14,14 @@ export const entrepreneurs = pgTable("entrepreneurs", {
   category: text("category").notNull(),
   description: text("description").notNull(),
   location: text("location").notNull(),
+  address: text("address"),
   city: text("city").notNull(),
-  lat: text("lat"),
-  lng: text("lng"),
+  lat: doublePrecision("lat"),
+  lng: doublePrecision("lng"),
+  openingHours: text("opening_hours"),
+  logoUrl: text("logo_url"),
   image: text("image"),
+  isVerified: boolean("is_verified").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

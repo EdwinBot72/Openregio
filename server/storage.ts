@@ -19,9 +19,22 @@ import { randomUUID } from "crypto";
 import { db } from "db";
 import { eq, ilike, or, desc, sql } from "drizzle-orm";
 
+// Haversine formula to calculate distance between two lat/lng points in km
+function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
+  const R = 6371; // Earth's radius in kilometers
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+}
+
 export interface IStorage {
   // Entrepreneurs
-  getEntrepreneurs(search?: string, category?: string): Promise<Entrepreneur[]>;
+  getEntrepreneurs(search?: string, category?: string, lat?: number, lng?: number, radius?: number): Promise<Entrepreneur[]>;
   getEntrepreneur(id: string): Promise<Entrepreneur | undefined>;
   createEntrepreneur(entrepreneur: InsertEntrepreneur): Promise<Entrepreneur>;
   updateEntrepreneur(id: string, entrepreneur: Partial<InsertEntrepreneur>): Promise<Entrepreneur | undefined>;
@@ -74,6 +87,7 @@ export class MemStorage implements IStorage {
   private seedData() {
     const sampleEntrepreneurs: InsertEntrepreneur[] = [
       {
+        ownerUserId: "user-maria",
         name: "Bakkerij De Gouden Korrel",
         owner: "Maria van den Berg",
         email: "maria@goudenkorre.nl",
@@ -81,10 +95,17 @@ export class MemStorage implements IStorage {
         website: "https://goudenkorre.nl",
         category: "Bakkerij",
         description: "Ambachtelijke bakkerij met verse broodjes en gebak, elke dag vers gebakken met lokale ingrediënten.",
-        location: "Amsterdam",
+        location: "Amsterdam Noord",
+        address: "Buikslotermeerplein 101, 1025 ET Amsterdam",
         city: "Amsterdam",
+        lat: 52.3980,
+        lng: 4.9426,
+        openingHours: "Ma–Vr 07:00–18:00; Za 08:00–16:00",
+        logoUrl: null,
+        isVerified: true,
       },
       {
+        ownerUserId: "user-jan",
         name: "Koffie & Co",
         owner: "Jan Pieters",
         email: "jan@koffieco.nl",
@@ -92,10 +113,17 @@ export class MemStorage implements IStorage {
         website: "https://koffieco.nl",
         category: "Horeca",
         description: "Gezellig koffiehuis met specialty coffee en verse lunch.",
-        location: "Amsterdam",
+        location: "Amsterdam Centrum",
+        address: "Haarlemmerstraat 45, 1013 EJ Amsterdam",
         city: "Amsterdam",
+        lat: 52.3794,
+        lng: 4.8858,
+        openingHours: "Ma–Zo 08:00–22:00",
+        logoUrl: null,
+        isVerified: true,
       },
       {
+        ownerUserId: "user-sophie",
         name: "Groen Advies",
         owner: "Sophie de Vries",
         email: "sophie@groenadvies.nl",
@@ -104,9 +132,16 @@ export class MemStorage implements IStorage {
         category: "Consulting",
         description: "Duurzaamheidsadvies voor lokale bedrijven en MKB.",
         location: "Rotterdam",
+        address: "Wijnhaven 23, 3011 WG Rotterdam",
         city: "Rotterdam",
+        lat: 51.9184,
+        lng: 4.4881,
+        openingHours: "Ma–Vr 09:00–17:00",
+        logoUrl: null,
+        isVerified: false,
       },
       {
+        ownerUserId: "user-pieter",
         name: "Tech Solutions NL",
         owner: "Pieter Jansen",
         email: "pieter@techsolutions.nl",
@@ -115,9 +150,16 @@ export class MemStorage implements IStorage {
         category: "IT",
         description: "IT support en software development voor lokale bedrijven.",
         location: "Utrecht",
+        address: "Vredenburg 12, 3511 BB Utrecht",
         city: "Utrecht",
+        lat: 52.0930,
+        lng: 5.1150,
+        openingHours: "Ma–Vr 09:00–18:00",
+        logoUrl: null,
+        isVerified: true,
       },
       {
+        ownerUserId: "user-lisa",
         name: "Bloemen & Planten",
         owner: "Lisa Bakker",
         email: "lisa@bloemenplanten.nl",
@@ -126,9 +168,16 @@ export class MemStorage implements IStorage {
         category: "Retail",
         description: "Verse bloemen en planten voor elke gelegenheid.",
         location: "Den Haag",
+        address: "Grote Marktstraat 89, 2511 BH Den Haag",
         city: "Den Haag",
+        lat: 52.0774,
+        lng: 4.3150,
+        openingHours: "Ma–Za 09:00–18:00",
+        logoUrl: null,
+        isVerified: false,
       },
       {
+        ownerUserId: "user-mark",
         name: "Fitness First",
         owner: "Mark de Jong",
         email: "mark@fitnessfirst.nl",
@@ -137,7 +186,13 @@ export class MemStorage implements IStorage {
         category: "Sport",
         description: "Modern fitness centrum met personal training.",
         location: "Eindhoven",
+        address: "Vestdijk 56, 5611 CG Eindhoven",
         city: "Eindhoven",
+        lat: 51.4382,
+        lng: 5.4796,
+        openingHours: "Ma–Vr 06:00–23:00; Za–Zo 08:00–20:00",
+        logoUrl: null,
+        isVerified: false,
       },
     ];
 
@@ -145,6 +200,7 @@ export class MemStorage implements IStorage {
       const id = randomUUID();
       this.entrepreneurs.set(id, { 
         id,
+        ownerUserId: e.ownerUserId ?? null,
         name: e.name,
         owner: e.owner,
         email: e.email,
@@ -153,10 +209,14 @@ export class MemStorage implements IStorage {
         category: e.category,
         description: e.description,
         location: e.location,
+        address: e.address ?? null,
         city: e.city,
-        lat: null,
-        lng: null,
-        image: null,
+        lat: e.lat ?? null,
+        lng: e.lng ?? null,
+        openingHours: e.openingHours ?? null,
+        logoUrl: e.logoUrl ?? null,
+        image: e.image ?? null,
+        isVerified: e.isVerified ?? false,
         createdAt: new Date() 
       });
     });
@@ -292,7 +352,7 @@ export class MemStorage implements IStorage {
     }
   }
 
-  async getEntrepreneurs(search?: string, category?: string): Promise<Entrepreneur[]> {
+  async getEntrepreneurs(search?: string, category?: string, lat?: number, lng?: number, radius?: number): Promise<Entrepreneur[]> {
     let results = Array.from(this.entrepreneurs.values());
 
     if (search) {
@@ -309,6 +369,16 @@ export class MemStorage implements IStorage {
       results = results.filter((e) => e.category === category);
     }
 
+    // Geo search filter
+    if (lat !== undefined && lng !== undefined && radius !== undefined) {
+      const maxRadius = Math.min(Math.max(radius, 0), 100); // Clamp radius between 0-100 km
+      results = results.filter((e) => {
+        if (e.lat === null || e.lng === null) return false;
+        const distance = calculateDistance(lat, lng, e.lat, e.lng);
+        return distance <= maxRadius;
+      });
+    }
+
     return results.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
@@ -320,6 +390,7 @@ export class MemStorage implements IStorage {
     const id = randomUUID();
     const newEntrepreneur: Entrepreneur = {
       id,
+      ownerUserId: entrepreneur.ownerUserId ?? null,
       name: entrepreneur.name,
       owner: entrepreneur.owner,
       email: entrepreneur.email,
@@ -328,10 +399,14 @@ export class MemStorage implements IStorage {
       category: entrepreneur.category,
       description: entrepreneur.description,
       location: entrepreneur.location,
+      address: entrepreneur.address ?? null,
       city: entrepreneur.city,
       lat: entrepreneur.lat ?? null,
       lng: entrepreneur.lng ?? null,
+      openingHours: entrepreneur.openingHours ?? null,
+      logoUrl: entrepreneur.logoUrl ?? null,
       image: entrepreneur.image ?? null,
+      isVerified: entrepreneur.isVerified ?? false,
       createdAt: new Date(),
     };
     this.entrepreneurs.set(id, newEntrepreneur);
@@ -489,7 +564,7 @@ export class MemStorage implements IStorage {
 }
 
 class DbStorage implements IStorage {
-  async getEntrepreneurs(search?: string, category?: string): Promise<Entrepreneur[]> {
+  async getEntrepreneurs(search?: string, category?: string, lat?: number, lng?: number, radius?: number): Promise<Entrepreneur[]> {
     let conditions = [];
 
     if (search) {
@@ -505,15 +580,33 @@ class DbStorage implements IStorage {
       conditions.push(eq(entrepreneurs.category, category));
     }
 
+    // Filter out rows with null coordinates first
+    if (lat !== undefined && lng !== undefined && radius !== undefined) {
+      conditions.push(sql`${entrepreneurs.lat} IS NOT NULL AND ${entrepreneurs.lng} IS NOT NULL`);
+    }
+
+    let results: Entrepreneur[];
     if (conditions.length > 0) {
-      return await db
+      results = await db
         .select()
         .from(entrepreneurs)
         .where(sql`${sql.join(conditions, sql` AND `)}`)
         .orderBy(desc(entrepreneurs.createdAt));
+    } else {
+      results = await db.select().from(entrepreneurs).orderBy(desc(entrepreneurs.createdAt));
     }
 
-    return await db.select().from(entrepreneurs).orderBy(desc(entrepreneurs.createdAt));
+    // Apply geo filtering with Haversine in code (simpler than complex SQL for MVP)
+    if (lat !== undefined && lng !== undefined && radius !== undefined) {
+      const maxRadius = Math.min(Math.max(radius, 0), 100); // Clamp radius between 0-100 km
+      results = results.filter((e) => {
+        if (e.lat === null || e.lng === null) return false;
+        const distance = calculateDistance(lat, lng, e.lat, e.lng);
+        return distance <= maxRadius;
+      });
+    }
+
+    return results;
   }
 
   async getEntrepreneur(id: string): Promise<Entrepreneur | undefined> {

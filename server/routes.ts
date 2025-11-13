@@ -8,10 +8,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Entrepreneurs routes
   app.get("/api/entrepreneurs", async (req, res) => {
     try {
-      const { search, category } = req.query;
+      const { search, category, lat, lng, radius } = req.query;
+      
+      // Parse and validate geo parameters
+      const parsedLat = lat ? parseFloat(lat as string) : undefined;
+      const parsedLng = lng ? parseFloat(lng as string) : undefined;
+      const parsedRadius = radius ? parseFloat(radius as string) : undefined;
+      
+      // Validate that if one geo param is provided, all must be provided
+      if ((parsedLat !== undefined || parsedLng !== undefined || parsedRadius !== undefined) &&
+          (parsedLat === undefined || parsedLng === undefined || parsedRadius === undefined)) {
+        return res.status(400).json({ 
+          error: "Geo search requires all three parameters: lat, lng, and radius" 
+        });
+      }
+      
+      // Validate geo parameter values
+      if (parsedLat !== undefined && parsedLng !== undefined && parsedRadius !== undefined) {
+        if (!Number.isFinite(parsedLat) || !Number.isFinite(parsedLng) || !Number.isFinite(parsedRadius)) {
+          return res.status(400).json({ error: "Geo parameters must be valid numbers" });
+        }
+        if (parsedLat < -90 || parsedLat > 90) {
+          return res.status(400).json({ error: "Latitude must be between -90 and 90" });
+        }
+        if (parsedLng < -180 || parsedLng > 180) {
+          return res.status(400).json({ error: "Longitude must be between -180 and 180" });
+        }
+        if (parsedRadius <= 0 || parsedRadius > 100) {
+          return res.status(400).json({ error: "Radius must be between 0 and 100 km" });
+        }
+      }
+      
       const entrepreneurs = await storage.getEntrepreneurs(
         search as string | undefined,
-        category as string | undefined
+        category as string | undefined,
+        parsedLat,
+        parsedLng,
+        parsedRadius
       );
       res.json(entrepreneurs);
     } catch (error) {
