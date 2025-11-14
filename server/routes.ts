@@ -122,6 +122,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Categories endpoint
+  app.get("/api/categories", async (req, res) => {
+    try {
+      const categories = [
+        { value: "retail", label: "Retail" },
+        { value: "food", label: "Horeca" },
+        { value: "services", label: "Diensten" },
+        { value: "tech", label: "Technologie" },
+        { value: "health", label: "Gezondheid" },
+        { value: "education", label: "Onderwijs" },
+      ];
+      res.json(categories);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch categories" });
+    }
+  });
+
   // Proposals routes
   app.get("/api/proposals/summary", async (req, res) => {
     try {
