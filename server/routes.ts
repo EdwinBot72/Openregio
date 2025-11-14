@@ -5,6 +5,7 @@ import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchem
 import { z } from "zod";
 import { createMollieClient } from "@mollie/api-client";
 import { setupAuth } from "./replitAuth";
+import { setupSimpleAuth } from "./simpleAuth";
 
 // Initialize Mollie client (requires MOLLIE_API_KEY environment variable)
 const mollieClient = process.env.MOLLIE_API_KEY 
@@ -19,10 +20,23 @@ function getBaseUrl(req: any): string {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Initialize Replit Auth (session middleware + passport + OAuth)
-  await setupAuth(app);
+  // Initialize auth systems
+  await setupAuth(app);       // Replit Auth (passport + OAuth)
   
-  // Auth endpoint: Get current authenticated user + profile
+  // Session bridge middleware: normalize user ID into req.session.userId (must run before routes)
+  app.use((req, res, next) => {
+    if (req.user && !req.session.userId) {
+      const replitUser = req.user as any;
+      if (replitUser?.claims?.sub) {
+        req.session.userId = replitUser.claims.sub;
+      }
+    }
+    next();
+  });
+  
+  setupSimpleAuth(app);        // Email/password auth (GET /api/auth/user calls next() if no session)
+  
+  // Auth endpoint: Get current authenticated user + profile (Replit Auth legacy, fallback)
   app.get("/api/auth/user", async (req, res) => {
     if (!req.isAuthenticated || !req.isAuthenticated()) {
       return res.status(401).json({ error: "Not authenticated" });

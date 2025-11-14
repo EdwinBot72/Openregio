@@ -15,11 +15,16 @@ export const sessions = pgTable(
   (table) => [index("IDX_session_expire").on(table.expire)],
 );
 
-// Replit Auth: User identity table
-// (IMPORTANT) This table is mandatory for Replit Auth, don't drop it.
+// Shared constants for subscriptions (must be defined before users table)
+export const SUBSCRIPTION_STATUS = ["active", "trialing", "cancelled", "past_due"] as const;
+export const SUBSCRIPTION_PLANS = ["basic", "pro"] as const;
+
+// Users table - supports both Replit Auth and email/password auth
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  email: varchar("email").unique(),
+  email: varchar("email").unique().notNull(),
+  passwordHash: varchar("password_hash"),
+  plan: varchar("plan", { enum: SUBSCRIPTION_PLANS }).default("basic"),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
@@ -116,10 +121,6 @@ export const REGIONS = ["Amsterdam", "Rotterdam", "Utrecht", "Den Haag", "Leiden
 // Shared constants for proposal status and vote choices
 export const PROPOSAL_STATUS = ["open", "closed"] as const;
 export const VOTE_CHOICES = ["yes", "no", "abstain"] as const;
-
-// Shared constants for subscriptions
-export const SUBSCRIPTION_STATUS = ["active", "trialing", "cancelled", "past_due"] as const;
-export const SUBSCRIPTION_PLANS = ["basic", "pro"] as const;
 
 export const userProfiles = pgTable("user_profiles", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -257,11 +258,29 @@ export type UserProfile = typeof userProfiles.$inferSelect;
 export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
 export type Subscription = typeof subscriptions.$inferSelect;
 
-// Replit Auth: User types
+// User types
 export const insertUserSchema = createInsertSchema(users).omit({
   createdAt: true,
   updatedAt: true,
+}).extend({
+  id: z.string().optional(),
+  plan: z.enum(SUBSCRIPTION_PLANS).optional(),
+});
+
+export const registerUserSchema = z.object({
+  email: z.string().email("Ongeldig emailadres"),
+  password: z.string().min(6, "Wachtwoord moet minimaal 6 tekens zijn"),
+  plan: z.enum(SUBSCRIPTION_PLANS).default("basic"),
+  firstName: z.string().optional(),
+  lastName: z.string().optional(),
+});
+
+export const loginUserSchema = z.object({
+  email: z.string().email("Ongeldig emailadres"),
+  password: z.string().min(1, "Wachtwoord is verplicht"),
 });
 
 export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
+export type RegisterUser = z.infer<typeof registerUserSchema>;
+export type LoginUser = z.infer<typeof loginUserSchema>;

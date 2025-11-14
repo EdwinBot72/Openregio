@@ -50,9 +50,12 @@ function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: numbe
 }
 
 export interface IStorage {
-  // Replit Auth: User operations (IMPORTANT: mandatory for Replit Auth)
+  // User operations (supports both Replit Auth and email/password)
   getUser(id: string): Promise<User | undefined>;
+  getUserById(id: string): Promise<User | undefined>;
+  getUserByEmail(email: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  createUser(user: { email: string; passwordHash: string; plan?: "basic" | "pro"; firstName?: string | null; lastName?: string | null }): Promise<User>;
   getUserProfileByReplitUserId(replitUserId: string): Promise<UserProfile | undefined>;
   
   // Entrepreneurs
@@ -145,15 +148,43 @@ export class MemStorage implements IStorage {
     return this.users.get(id);
   }
 
-  async upsertUser(userData: UpsertUser): Promise<User> {
-    const existing = this.users.get(userData.id!);
+  async getUserById(id: string): Promise<User | undefined> {
+    return this.users.get(id);
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(u => u.email === email);
+  }
+
+  async createUser(userData: { email: string; passwordHash: string; plan?: "basic" | "pro"; firstName?: string | null; lastName?: string | null }): Promise<User> {
+    const id = randomUUID();
     const user: User = {
-      id: userData.id!,
-      email: userData.email ?? null,
-      firstName: userData.firstName ?? null,
-      lastName: userData.lastName ?? null,
-      profileImageUrl: userData.profileImageUrl ?? null,
-      createdAt: existing?.createdAt ?? new Date(),
+      id,
+      email: userData.email,
+      passwordHash: userData.passwordHash,
+      plan: userData.plan || "basic",
+      firstName: userData.firstName || null,
+      lastName: userData.lastName || null,
+      profileImageUrl: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.users.set(id, user);
+    return user;
+  }
+
+  async upsertUser(userData: UpsertUser): Promise<User> {
+    const id = userData.id || randomUUID();
+    const existing = this.users.get(id);
+    const user: User = {
+      id,
+      email: userData.email!,
+      passwordHash: userData.passwordHash || null,
+      plan: (userData.plan as "basic" | "pro") || "basic",
+      firstName: userData.firstName || null,
+      lastName: userData.lastName || null,
+      profileImageUrl: userData.profileImageUrl || null,
+      createdAt: existing?.createdAt || new Date(),
       updatedAt: new Date(),
     };
     this.users.set(user.id, user);
@@ -930,20 +961,56 @@ export class MemStorage implements IStorage {
 }
 
 class DbStorage implements IStorage {
-  // Replit Auth: User operations (IMPORTANT: mandatory for Replit Auth)
+  // User operations (supports both Replit Auth and email/password)
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserById(id: string): Promise<User | undefined> {
+    return this.getUser(id);
+  }
+
+  async getUserByEmail(email: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.email, email));
+    return user;
+  }
+
+  async createUser(userData: { email: string; passwordHash: string; plan?: "basic" | "pro"; firstName?: string | null; lastName?: string | null }): Promise<User> {
+    const [user] = await db
+      .insert(users)
+      .values({
+        email: userData.email,
+        passwordHash: userData.passwordHash,
+        plan: userData.plan || "basic",
+        firstName: userData.firstName || null,
+        lastName: userData.lastName || null,
+      })
+      .returning();
     return user;
   }
 
   async upsertUser(userData: UpsertUser): Promise<User> {
     const [user] = await db
       .insert(users)
-      .values(userData)
+      .values({
+        id: userData.id,
+        email: userData.email!,
+        passwordHash: userData.passwordHash || null,
+        plan: userData.plan || "basic",
+        firstName: userData.firstName || null,
+        lastName: userData.lastName || null,
+        profileImageUrl: userData.profileImageUrl || null,
+      })
       .onConflictDoUpdate({
         target: users.id,
         set: {
-          ...userData,
+          email: userData.email!,
+          passwordHash: userData.passwordHash || null,
+          plan: userData.plan || "basic",
+          firstName: userData.firstName || null,
+          lastName: userData.lastName || null,
+          profileImageUrl: userData.profileImageUrl || null,
           updatedAt: new Date(),
         },
       })
