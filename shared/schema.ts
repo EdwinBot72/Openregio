@@ -54,6 +54,22 @@ export const entrepreneurs = pgTable("entrepreneurs", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Business profiles table with Dutch field names
+export const bedrijfsprofielen = pgTable("bedrijfsprofielen", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  gebruikerId: varchar("gebruiker_id").notNull().references(() => users.id),
+  naam: text("naam").notNull(),
+  eigenaarnaam: text("eigenaarnaam").notNull(),
+  categorieId: varchar("categorie_id").notNull(),
+  regio: text("regio").notNull(),
+  beschrijving: text("beschrijving").notNull(),
+  websiteUrl: text("website_url"),
+  stemtoon: text("stemtoon"),
+  status: text("status").notNull().default("actief"),
+  aangemaakt: timestamp("aangemaakt").defaultNow().notNull(),
+  bijgewerkt: timestamp("bijgewerkt").defaultNow().notNull(),
+});
+
 export const proposals = pgTable("proposals", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
@@ -160,6 +176,15 @@ export const insertEntrepreneurSchema = createInsertSchema(entrepreneurs).omit({
   createdAt: true,
 });
 
+// Bedrijfsprofiel insert schema (Dutch field names)
+export const insertBedrijfsprofielSchema = createInsertSchema(bedrijfsprofielen).omit({
+  id: true,
+  aangemaakt: true,
+  bijgewerkt: true,
+}).extend({
+  status: z.enum(["actief", "inactief", "concept"] as const).optional(),
+});
+
 export const insertProposalSchema = createInsertSchema(proposals).omit({
   id: true,
   createdAt: true,
@@ -220,6 +245,10 @@ export const strictEntrepreneurSchema = insertEntrepreneurSchema.extend({
 });
 
 export type StrictInsertEntrepreneur = z.infer<typeof strictEntrepreneurSchema>;
+
+// Bedrijfsprofiel types (Dutch field names)
+export type InsertBedrijfsprofiel = z.infer<typeof insertBedrijfsprofielSchema>;
+export type Bedrijfsprofiel = typeof bedrijfsprofielen.$inferSelect;
 
 export type InsertProposal = z.infer<typeof insertProposalSchema>;
 export type Proposal = typeof proposals.$inferSelect;
