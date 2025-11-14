@@ -9,6 +9,7 @@ import { ThemeToggle } from "@/components/ThemeToggle";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home";
 import LoginPage from "@/pages/login";
+import RegisterPage from "@/pages/register";
 import DashboardPage from "@/pages/dashboard";
 import NetworkPage from "@/pages/network";
 import CommunityPage from "@/pages/community";
@@ -19,13 +20,14 @@ import OnboardingPage from "@/pages/onboarding";
 import LidmaatschapPage from "@/pages/lidmaatschap";
 
 // Routes that should NOT have the sidebar/header layout
-const PUBLIC_ROUTES = ["/", "/login", "/lidmaatschap"];
+const PUBLIC_ROUTES = ["/", "/login", "/register", "/lidmaatschap"];
 
 function PublicRouter() {
   return (
     <Switch>
       <Route path="/" component={HomePage} />
       <Route path="/login" component={LoginPage} />
+      <Route path="/register" component={RegisterPage} />
       <Route path="/lidmaatschap" component={LidmaatschapPage} />
       <Route component={NotFound} />
     </Switch>
@@ -50,9 +52,10 @@ function AuthenticatedRouter() {
 function AppContent() {
   const [isHomePage] = useRoute("/");
   const [isLoginPage] = useRoute("/login");
+  const [isRegisterPage] = useRoute("/register");
   const [isLidmaatschapPage] = useRoute("/lidmaatschap");
   
-  const isPublicRoute = isHomePage || isLoginPage || isLidmaatschapPage;
+  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isLidmaatschapPage;
 
   if (isPublicRoute) {
     return <PublicRouter />;
