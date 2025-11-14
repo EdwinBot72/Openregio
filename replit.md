@@ -39,6 +39,7 @@ Preferred communication style: Simple, everyday language.
   - DialogContent: z-[1000] (dialog modal layer)
   - SelectContent: z-[1001] (dropdown menus inside dialogs)
   - DialogHeader (sticky): z-10 (relative positioning within dialog)
+- **Categories Integration**: Business profile form fetches categories from API with loading state, error handling with fallback, and one-time toast notification on failure
 
 **State Management:**
 - Server state via React Query with centralized query client
@@ -57,6 +58,7 @@ Preferred communication style: Simple, everyday language.
 **API Design:**
 - Resource-based endpoints following REST conventions:
   - `/api/entrepreneurs` - CRUD operations for business profiles
+  - `/api/categories` - Returns available business categories (retail, food, services, tech, health, education) with value/label pairs
   - `/api/proposals` - Cooperative governance system:
     - `GET /api/proposals/summary` - Returns aggregated ProposalSummary[] with vote counts and user vote status
     - `POST /api/proposals/:id/vote` - Cast vote (yes/no/abstain) with validation and duplicate detection
