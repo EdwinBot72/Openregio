@@ -1,0 +1,189 @@
+import express from "express";
+
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// Static files (optioneel, voor later CSS/JS)
+app.use(express.static("public"));
+
+app.get("/", (req, res) => {
+  res.send(`
+    <!doctype html>
+    <html lang="nl">
+      <head>
+        <meta charset="utf-8" />
+        <title>OpenRegio – Slimmer. Vrijer. Samen.</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <style>
+          body {
+            margin: 0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #0f172a;
+            color: #e5e7eb;
+            display: flex;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+          }
+          .page {
+            max-width: 960px;
+            width: 100%;
+            padding: 2rem;
+          }
+          header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+          }
+          .logo {
+            font-weight: 700;
+            font-size: 1.4rem;
+          }
+          .login-link {
+            color: #e5e7eb;
+            text-decoration: none;
+            font-size: 0.95rem;
+            opacity: 0.9;
+          }
+          .login-link:hover {
+            opacity: 1;
+            text-decoration: underline;
+          }
+          h1 {
+            font-size: 2.2rem;
+            margin: 0 0 0.5rem;
+          }
+          p.lead {
+            margin: 0 0 1.5rem;
+            max-width: 38rem;
+            color: #9ca3af;
+          }
+          .cta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+          }
+          .btn {
+            border-radius: 999px;
+            padding: 0.9rem 1.6rem;
+            font-size: 0.98rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+          }
+          .btn-primary {
+            background: #facc15;
+            color: #111827;
+          }
+          .btn-primary:hover {
+            filter: brightness(0.95);
+          }
+          .btn-secondary {
+            background: transparent;
+            border: 1px solid #4b5563;
+            color: #e5e7eb;
+          }
+          .btn-secondary:hover {
+            background: #111827;
+          }
+          .icon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+          }
+          .icon-card {
+            border-radius: 0.75rem;
+            border: 1px solid #1f2937;
+            padding: 1rem;
+            background: rgba(15, 23, 42, 0.9);
+          }
+          .icon-card h3 {
+            margin: 0 0 0.4rem;
+            font-size: 1rem;
+          }
+          .icon {
+            font-size: 1.4rem;
+            margin-bottom: 0.2rem;
+          }
+          .icon-card p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #9ca3af;
+          }
+          .tagline {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #9ca3af;
+            margin-bottom: 0.5rem;
+          }
+          @media (max-width: 640px) {
+            h1 {
+              font-size: 1.7rem;
+            }
+          }
+        </style>
+      </head>
+      <body>
+        <div class="page">
+          <header>
+            <div class="logo">OpenRegio</div>
+            <a href="/login" class="login-link">Inloggen</a>
+          </header>
+
+          <main>
+            <div class="tagline">Coöperatief · Lokaal · Met AI</div>
+            <h1>De ondernemershub voor je regio.</h1>
+            <p class="lead">
+              Word lid van een coöperatief netwerk waar lokale ondernemers elkaar
+              zichtbaar maken, leads delen en AI inzetten om slimmer te werken – zonder
+              afhankelijk te zijn van Big Tech.
+            </p>
+
+            <div class="cta-row">
+              <a href="/start?plan=basic" class="btn btn-primary">
+                <span>Word lid – € 9,95 p/m</span>
+              </a>
+              <a href="/start?plan=pro" class="btn btn-secondary">
+                <span>Word Pro – € 19,95 p/m (incl. RegioBot)</span>
+              </a>
+            </div>
+
+            <div class="icon-grid">
+              <div class="icon-card">
+                <div class="icon">📍</div>
+                <h3>Lokale zichtbaarheid</h3>
+                <p>Sta op de regiokaart en word gevonden zonder Google of advertenties.</p>
+              </div>
+              <div class="icon-card">
+                <div class="icon">🤝</div>
+                <h3>Netwerk & community</h3>
+                <p>Vind ondernemers om mee samen te werken, acties te draaien en leads te delen.</p>
+              </div>
+              <div class="icon-card">
+                <div class="icon">💬</div>
+                <h3>Community & chat</h3>
+                <p>Houd korte lijntjes met ondernemers uit jouw regio in één overzichtelijk platform.</p>
+              </div>
+              <div class="icon-card">
+                <div class="icon">🤖</div>
+                <h3>RegioBot (Pro)</h3>
+                <p>AI-assistent voor teksten, acties en slimme antwoorden op overheidsbrieven.</p>
+              </div>
+            </div>
+          </main>
+        </div>
+      </body>
+    </html>
+  `);
+});
+
+app.listen(PORT, () => {
+  console.log(`OpenRegio draait op poort ${PORT}`);
+});
