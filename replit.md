@@ -33,6 +33,12 @@ Preferred communication style: Simple, everyday language.
 - Reusable UI components in `client/src/components/` with example implementations
 - Atomic design approach: Base UI components (shadcn), composite components (BusinessProfileCard, NetworkGrid), and page layouts
 - **Onboarding Flow**: Frustration-based welcome with multi-select pain point tiles using react-hook-form and shadcn Form components
+- **Z-index Hierarchy**: Ensures proper layering when dialogs contain form dropdowns above maps
+  - Leaflet Maps: Default (~400)
+  - DialogOverlay: z-[999] (dark backdrop layer)
+  - DialogContent: z-[1000] (dialog modal layer)
+  - SelectContent: z-[1001] (dropdown menus inside dialogs)
+  - DialogHeader (sticky): z-10 (relative positioning within dialog)
 
 **State Management:**
 - Server state via React Query with centralized query client
