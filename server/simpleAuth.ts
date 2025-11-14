@@ -1,5 +1,7 @@
 import type { Express, Request, Response } from "express";
 import bcrypt from "bcrypt";
+import session from "express-session";
+import connectPg from "connect-pg-simple";
 import { storage } from "./storage";
 import { registerUserSchema, loginUserSchema, type RegisterUser, type LoginUser } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
@@ -12,7 +14,36 @@ declare module "express-session" {
 
 const SALT_ROUNDS = 10;
 
+function getSession() {
+  const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
+  const pgStore = connectPg(session);
+  const sessionStore = new pgStore({
+    conString: process.env.DATABASE_URL,
+    createTableIfMissing: false,
+    ttl: sessionTtl,
+    tableName: "sessions",
+  });
+  
+  // Only require secure cookies in production (HTTPS)
+  const isProduction = process.env.NODE_ENV === "production";
+  
+  return session({
+    secret: process.env.SESSION_SECRET!,
+    store: sessionStore,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: isProduction,
+      maxAge: sessionTtl,
+    },
+  });
+}
+
 export function setupSimpleAuth(app: Express) {
+  // Setup session middleware
+  app.set("trust proxy", 1);
+  app.use(getSession());
   // Register endpoint
   app.post("/api/auth/register", async (req: Request, res: Response) => {
     try {
@@ -114,19 +145,16 @@ export function setupSimpleAuth(app: Express) {
     });
   });
   
-  // Get current user endpoint (simple auth)
-  // Note: This runs before Replit Auth handler, so call next() if not a simple auth user
-  app.get("/api/auth/user", async (req: Request, res: Response, next: Function) => {
-    // Only handle if this is a simple auth session
+  // Get current user endpoint
+  app.get("/api/auth/user", async (req: Request, res: Response) => {
     if (!req.session.userId) {
-      return next(); // Pass to Replit Auth handler
+      return res.status(401).json({ error: "Niet ingelogd" });
     }
     
     try {
       const user = await storage.getUserById(req.session.userId);
       if (!user) {
-        // User not found in simple auth storage - pass to Replit Auth handler
-        return next();
+        return res.status(404).json({ error: "Gebruiker niet gevonden" });
       }
       
       res.json({
@@ -140,8 +168,7 @@ export function setupSimpleAuth(app: Express) {
       });
     } catch (error) {
       console.error("Get user error:", error);
-      // Pass to Replit Auth handler on error as well
-      next();
+      res.status(500).json({ error: "Fout bij ophalen gebruiker" });
     }
   });
 }

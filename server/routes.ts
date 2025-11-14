@@ -4,7 +4,6 @@ import { storage } from "./storage";
 import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema } from "@shared/schema";
 import { z } from "zod";
 import { createMollieClient } from "@mollie/api-client";
-import { setupAuth } from "./replitAuth";
 import { setupSimpleAuth } from "./simpleAuth";
 
 // Initialize Mollie client (requires MOLLIE_API_KEY environment variable)
@@ -20,60 +19,8 @@ function getBaseUrl(req: any): string {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Initialize auth systems
-  await setupAuth(app);       // Replit Auth (passport + OAuth)
-  
-  // Session bridge middleware: normalize user ID into req.session.userId (must run before routes)
-  app.use((req, res, next) => {
-    if (req.user && !req.session.userId) {
-      const replitUser = req.user as any;
-      if (replitUser?.claims?.sub) {
-        req.session.userId = replitUser.claims.sub;
-      }
-    }
-    next();
-  });
-  
-  setupSimpleAuth(app);        // Email/password auth (GET /api/auth/user calls next() if no session)
-  
-  // Auth endpoint: Get current authenticated user + profile (Replit Auth legacy, fallback)
-  app.get("/api/auth/user", async (req, res) => {
-    if (!req.isAuthenticated || !req.isAuthenticated()) {
-      return res.status(401).json({ error: "Not authenticated" });
-    }
-    
-    try {
-      const sessionUser = req.user as any;
-      const claims = sessionUser?.claims;
-      
-      if (!claims?.sub) {
-        return res.status(401).json({ error: "Invalid user session" });
-      }
-      
-      const replitUserId = claims.sub;
-      
-      // Fetch linked userProfile
-      const profile = await storage.getUserProfileByReplitUserId(replitUserId);
-      
-      if (!profile) {
-        return res.status(404).json({ error: "User profile not found" });
-      }
-      
-      res.json({
-        user: {
-          id: replitUserId,
-          email: claims.email || null,
-          firstName: claims.first_name || null,
-          lastName: claims.last_name || null,
-          profileImageUrl: claims.profile_image_url || null,
-        },
-        profile,
-      });
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      res.status(500).json({ error: "Failed to fetch user data" });
-    }
-  });
+  // Initialize email/password auth only
+  setupSimpleAuth(app);
   
   // Entrepreneurs routes
   app.get("/api/entrepreneurs", async (req, res) => {
