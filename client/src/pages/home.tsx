@@ -1,47 +1,120 @@
-import { HeroSection } from "@/components/HeroSection";
-import { FeatureSection } from "@/components/FeatureSection";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Quote } from "lucide-react";
-import { useAuth } from "@/hooks/useAuth";
-import { useLocation } from "wouter";
-import { useEffect } from "react";
+import { Quote, Users, Sparkles, Vote, ArrowRight } from "lucide-react";
+import { Link } from "wouter";
 
 export default function HomePage() {
-  const { isAuthenticated, isLoading } = useAuth();
-  const [, setLocation] = useLocation();
-
-  useEffect(() => {
-    if (!isLoading && isAuthenticated) {
-      setLocation("/dashboard");
-    }
-  }, [isLoading, isAuthenticated, setLocation]);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen p-8">
-        <div className="max-w-7xl mx-auto space-y-8">
-          <Skeleton className="h-64 w-full" />
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Skeleton className="h-48" />
-            <Skeleton className="h-48" />
-            <Skeleton className="h-48" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (isAuthenticated) {
-    return null;
-  }
-
   return (
     <div className="min-h-screen">
-      <HeroSection />
-      <FeatureSection />
+      {/* Navigation */}
+      <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+          <Link href="/" data-testid="link-home-logo">
+            <a className="font-accent text-2xl font-bold text-primary">
+              OpenRegio
+            </a>
+          </Link>
+          <div className="flex items-center gap-4">
+            <Link href="/lidmaatschap">
+              <a className="text-sm font-medium hover:text-primary transition-colors" data-testid="link-membership">
+                Lidmaatschap
+              </a>
+            </Link>
+            <Link href="/login">
+              <Button variant="ghost" size="sm" data-testid="button-nav-login">
+                Inloggen
+              </Button>
+            </Link>
+            <Link href="/lidmaatschap">
+              <Button size="sm" data-testid="button-nav-start">
+                Start nu
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </nav>
 
+      {/* Hero Section */}
+      <section className="relative py-20 md:py-32 px-4 bg-gradient-to-br from-primary/5 via-background to-background overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="max-w-3xl">
+            <h1 className="font-accent text-4xl md:text-6xl font-bold mb-6 leading-tight">
+              Jouw digitale onafhankelijkheid begint hier
+            </h1>
+            <p className="text-xl md:text-2xl text-muted-foreground mb-8">
+              Sluit je aan bij de coöperatieve beweging van lokale ondernemers. 
+              Geen Big Tech, geen algoritmes, wel échte samenwerking.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Link href="/lidmaatschap">
+                <Button size="lg" className="text-lg" data-testid="button-hero-start">
+                  Word lid
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </Button>
+              </Link>
+              <Link href="/login">
+                <Button size="lg" variant="outline" className="text-lg" data-testid="button-hero-login">
+                  Inloggen
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section */}
+      <section className="py-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="font-accent text-3xl md:text-4xl font-bold mb-4">
+              Waarom OpenRegio?
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Een platform gemaakt door en voor lokale ondernemers
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card data-testid="card-feature-network">
+              <CardContent className="p-6">
+                <Users className="h-12 w-12 text-primary mb-4" />
+                <h3 className="font-accent text-xl font-semibold mb-2">
+                  Lokaal Netwerk
+                </h3>
+                <p className="text-muted-foreground">
+                  Ontdek en verbind met ondernemers in jouw regio. Vind samenwerkingspartners en bouw samen aan een sterker lokaal bedrijfsleven.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card data-testid="card-feature-regiobot">
+              <CardContent className="p-6">
+                <Sparkles className="h-12 w-12 text-primary mb-4" />
+                <h3 className="font-accent text-xl font-semibold mb-2">
+                  RegioBot AI Assistent
+                </h3>
+                <p className="text-muted-foreground">
+                  Krijg gratis hulp bij marketing, SEO en bedrijfsstrategie van onze slimme AI-assistent, speciaal voor lokale ondernemers.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card data-testid="card-feature-coop">
+              <CardContent className="p-6">
+                <Vote className="h-12 w-12 text-primary mb-4" />
+                <h3 className="font-accent text-xl font-semibold mb-2">
+                  Democratisch Platform
+                </h3>
+                <p className="text-muted-foreground">
+                  Stem mee over de toekomst van het platform. Als lid van onze coöperatie heb jij direct invloed op alle beslissingen.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
       <section className="py-20 px-4 bg-muted/30">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
@@ -83,27 +156,73 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* CTA Section */}
       <section className="py-20 px-4 bg-primary text-primary-foreground">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="font-accent text-3xl md:text-4xl font-bold mb-6">
             Klaar om te starten?
           </h2>
           <p className="text-xl mb-8 text-primary-foreground/90">
-            Sluit je vandaag nog aan bij duizenden ondernemers die hun digitale onafhankelijkheid terug hebben gepakt.
+            Sluit je vandaag nog aan bij ondernemers die hun digitale onafhankelijkheid terug hebben gepakt.
           </p>
-          <Button
-            size="lg"
-            variant="outline"
-            className="text-primary bg-primary-foreground hover:bg-primary-foreground/90 border-primary-foreground text-lg"
-            data-testid="button-join-now"
-            onClick={() => {
-              window.location.href = "/api/auth/login";
-            }}
-          >
-            Word lid van OpenRegio
-          </Button>
+          <div className="flex flex-wrap gap-4 justify-center">
+            <Link href="/lidmaatschap">
+              <Button
+                size="lg"
+                variant="outline"
+                className="text-primary bg-primary-foreground hover:bg-primary-foreground/90 border-primary-foreground text-lg"
+                data-testid="button-cta-join"
+              >
+                Word lid van OpenRegio
+              </Button>
+            </Link>
+          </div>
         </div>
       </section>
+
+      {/* Footer */}
+      <footer className="py-12 px-4 border-t">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            <div>
+              <h3 className="font-accent font-bold text-lg mb-4">OpenRegio</h3>
+              <p className="text-sm text-muted-foreground">
+                Het coöperatieve platform voor lokale ondernemers in Nederland.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-4">Platform</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <Link href="/lidmaatschap">
+                    <a className="hover:text-primary transition-colors" data-testid="link-footer-membership">
+                      Lidmaatschap
+                    </a>
+                  </Link>
+                </li>
+                <li>
+                  <Link href="/login">
+                    <a className="hover:text-primary transition-colors" data-testid="link-footer-login">
+                      Inloggen
+                    </a>
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-4">Contact</h3>
+              <p className="text-sm text-muted-foreground">
+                <a href="mailto:info@openregio.nl" className="hover:text-primary transition-colors" data-testid="link-footer-email">
+                  info@openregio.nl
+                </a>
+              </p>
+            </div>
+          </div>
+          <div className="pt-8 border-t text-center text-sm text-muted-foreground">
+            <p>© 2024 OpenRegio Coöperatie U.A. Alle rechten voorbehouden.</p>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

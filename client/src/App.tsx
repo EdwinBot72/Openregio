@@ -1,4 +1,4 @@
-import { Switch, Route } from "wouter";
+import { Switch, Route, useRoute } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -8,6 +8,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home";
+import LoginPage from "@/pages/login";
 import DashboardPage from "@/pages/dashboard";
 import NetworkPage from "@/pages/network";
 import CommunityPage from "@/pages/community";
@@ -17,10 +18,23 @@ import ChatPage from "@/pages/chat";
 import OnboardingPage from "@/pages/onboarding";
 import LidmaatschapPage from "@/pages/lidmaatschap";
 
-function Router() {
+// Routes that should NOT have the sidebar/header layout
+const PUBLIC_ROUTES = ["/", "/login", "/lidmaatschap"];
+
+function PublicRouter() {
   return (
     <Switch>
       <Route path="/" component={HomePage} />
+      <Route path="/login" component={LoginPage} />
+      <Route path="/lidmaatschap" component={LidmaatschapPage} />
+      <Route component={NotFound} />
+    </Switch>
+  );
+}
+
+function AuthenticatedRouter() {
+  return (
+    <Switch>
       <Route path="/onboarding" component={OnboardingPage} />
       <Route path="/dashboard" component={DashboardPage} />
       <Route path="/network" component={NetworkPage} />
@@ -28,34 +42,49 @@ function Router() {
       <Route path="/chat" component={ChatPage} />
       <Route path="/regiobot" component={RegioBotPage} />
       <Route path="/cooperative" component={CooperativePage} />
-      <Route path="/lidmaatschap" component={LidmaatschapPage} />
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-function App() {
+function AppContent() {
+  const [isHomePage] = useRoute("/");
+  const [isLoginPage] = useRoute("/login");
+  const [isLidmaatschapPage] = useRoute("/lidmaatschap");
+  
+  const isPublicRoute = isHomePage || isLoginPage || isLidmaatschapPage;
+
+  if (isPublicRoute) {
+    return <PublicRouter />;
+  }
+
   const style = {
     "--sidebar-width": "16rem",
   };
 
   return (
+    <SidebarProvider style={style as React.CSSProperties}>
+      <div className="flex h-screen w-full">
+        <AppSidebar />
+        <div className="flex flex-col flex-1 overflow-hidden">
+          <header className="flex items-center justify-between p-4 border-b shrink-0">
+            <SidebarTrigger data-testid="button-sidebar-toggle" />
+            <ThemeToggle />
+          </header>
+          <main className="flex-1 overflow-y-auto p-8">
+            <AuthenticatedRouter />
+          </main>
+        </div>
+      </div>
+    </SidebarProvider>
+  );
+}
+
+function App() {
+  return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <SidebarProvider style={style as React.CSSProperties}>
-          <div className="flex h-screen w-full">
-            <AppSidebar />
-            <div className="flex flex-col flex-1 overflow-hidden">
-              <header className="flex items-center justify-between p-4 border-b shrink-0">
-                <SidebarTrigger data-testid="button-sidebar-toggle" />
-                <ThemeToggle />
-              </header>
-              <main className="flex-1 overflow-y-auto p-8">
-                <Router />
-              </main>
-            </div>
-          </div>
-        </SidebarProvider>
+        <AppContent />
         <Toaster />
       </TooltipProvider>
     </QueryClientProvider>
