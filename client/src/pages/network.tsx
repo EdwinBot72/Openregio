@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { NetworkGrid } from "@/components/NetworkGrid";
 import { MapView } from "@/components/MapView";
 import type { BusinessProfile } from "@/components/BusinessProfileCard";
@@ -70,9 +70,56 @@ const formSchema = insertEntrepreneurSchema.omit({ lat: true, lng: true }).exten
 
 type FormValues = z.infer<typeof formSchema>;
 
+type Category = {
+  value: string;
+  label: string;
+};
+
+// Fallback categories in case API fails
+const FALLBACK_CATEGORIES: Category[] = [
+  { value: "retail", label: "Retail" },
+  { value: "food", label: "Horeca" },
+  { value: "services", label: "Diensten" },
+  { value: "tech", label: "Technologie" },
+  { value: "health", label: "Gezondheid" },
+  { value: "education", label: "Onderwijs" },
+];
+
 function AddEntrepreneurDialog() {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
+  const errorShownRef = useRef(false);
+
+  // Fetch categories from API
+  const { data: categories, isLoading: categoriesLoading, isError } = useQuery<Category[]>({
+    queryKey: ["/api/categories"],
+    enabled: open, // Only fetch when dialog is open
+  });
+
+  // Use fetched categories or fallback if error (but not while loading)
+  const availableCategories = categoriesLoading 
+    ? [] 
+    : (isError ? FALLBACK_CATEGORIES : (categories || FALLBACK_CATEGORIES));
+
+  // Show toast once when fallback is used due to API error
+  useEffect(() => {
+    if (isError && open && !errorShownRef.current && !categoriesLoading) {
+      toast({
+        title: "Categorieën laden mislukt",
+        description: "Standaard categorieën worden gebruikt.",
+        variant: "destructive",
+      });
+      console.warn("Categories API failed, using fallback list");
+      errorShownRef.current = true;
+    }
+  }, [isError, open, categoriesLoading, toast]);
+
+  // Reset error flag when dialog closes
+  useEffect(() => {
+    if (!open) {
+      errorShownRef.current = false;
+    }
+  }, [open]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -192,19 +239,18 @@ function AddEntrepreneurDialog() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Categorie</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={categoriesLoading}>
                     <FormControl>
                       <SelectTrigger data-testid="select-category">
-                        <SelectValue placeholder="Selecteer categorie" />
+                        <SelectValue placeholder={categoriesLoading ? "Laden..." : "Selecteer categorie"} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="retail">Retail</SelectItem>
-                      <SelectItem value="food">Horeca</SelectItem>
-                      <SelectItem value="services">Diensten</SelectItem>
-                      <SelectItem value="tech">Technologie</SelectItem>
-                      <SelectItem value="health">Gezondheid</SelectItem>
-                      <SelectItem value="education">Onderwijs</SelectItem>
+                      {availableCategories.map((category) => (
+                        <SelectItem key={category.value} value={category.value}>
+                          {category.label}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
