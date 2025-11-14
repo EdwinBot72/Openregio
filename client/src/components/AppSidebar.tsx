@@ -108,10 +108,10 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild data-testid="link-profile">
-                  <a href="/profile">
-                    <User className="h-4 w-4" />
-                    <span>Mijn Profiel</span>
+                <SidebarMenuButton asChild data-testid="link-bedrijfsprofiel">
+                  <a href="/bedrijfsprofiel">
+                    <Building2 className="h-4 w-4" />
+                    <span>Bedrijfsprofiel</span>
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>

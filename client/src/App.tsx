@@ -18,6 +18,7 @@ import CooperativePage from "@/pages/cooperative";
 import ChatPage from "@/pages/chat";
 import OnboardingPage from "@/pages/onboarding";
 import LidmaatschapPage from "@/pages/lidmaatschap";
+import BedrijfsprofielPage from "@/pages/bedrijfsprofiel";
 
 // Routes that should NOT have the sidebar/header layout
 const PUBLIC_ROUTES = ["/", "/login", "/register", "/lidmaatschap"];
@@ -39,6 +40,7 @@ function AuthenticatedRouter() {
     <Switch>
       <Route path="/onboarding" component={OnboardingPage} />
       <Route path="/dashboard" component={DashboardPage} />
+      <Route path="/bedrijfsprofiel" component={BedrijfsprofielPage} />
       <Route path="/network" component={NetworkPage} />
       <Route path="/community" component={CommunityPage} />
       <Route path="/chat" component={ChatPage} />
