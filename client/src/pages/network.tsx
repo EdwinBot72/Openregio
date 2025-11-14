@@ -147,7 +147,7 @@ function AddEntrepreneurDialog() {
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+        <DialogHeader className="sticky top-0 z-10 bg-background pb-4">
           <DialogTitle>Bedrijfsprofiel Toevoegen</DialogTitle>
           <DialogDescription>
             Vul de gegevens van je bedrijf in om zichtbaar te worden in het netwerk.
