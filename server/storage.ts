@@ -21,6 +21,8 @@ import {
   type ProposalSummary,
   type User,
   type UpsertUser,
+  type Bedrijfsprofiel,
+  type InsertBedrijfsprofiel,
   entrepreneurs,
   proposals,
   votes,
@@ -31,6 +33,7 @@ import {
   userProfiles,
   subscriptions,
   users,
+  bedrijfsprofielen,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
@@ -108,6 +111,11 @@ export interface IStorage {
   updateSubscription(id: string, subscription: Partial<InsertSubscription>): Promise<Subscription | undefined>;
   cancelSubscription(id: string): Promise<Subscription | undefined>;
 
+  // Bedrijfsprofielen (Business Profiles)
+  getBedrijfsprofielByUserId(userId: string): Promise<Bedrijfsprofiel | undefined>;
+  createBedrijfsprofiel(profiel: InsertBedrijfsprofiel): Promise<Bedrijfsprofiel>;
+  updateBedrijfsprofiel(id: string, profiel: Partial<InsertBedrijfsprofiel>): Promise<Bedrijfsprofiel | undefined>;
+
   // Stats
   getStats(): Promise<{
     totalMembers: number;
@@ -128,6 +136,7 @@ export class MemStorage implements IStorage {
   private posts: Map<string, Post>;
   private userProfiles: Map<string, UserProfile>;
   private subscriptions: Map<string, Subscription>;
+  private bedrijfsprofielen: Map<string, Bedrijfsprofiel>;
 
   constructor() {
     this.users = new Map();
@@ -140,6 +149,7 @@ export class MemStorage implements IStorage {
     this.posts = new Map();
     this.userProfiles = new Map();
     this.subscriptions = new Map();
+    this.bedrijfsprofielen = new Map();
     this.seedData();
   }
 
@@ -950,6 +960,44 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
+  async getBedrijfsprofielByUserId(userId: string): Promise<Bedrijfsprofiel | undefined> {
+    return Array.from(this.bedrijfsprofielen.values()).find(p => p.gebruikerId === userId);
+  }
+
+  async createBedrijfsprofiel(profiel: InsertBedrijfsprofiel): Promise<Bedrijfsprofiel> {
+    const id = randomUUID();
+    const now = new Date();
+    const newProfiel: Bedrijfsprofiel = {
+      id,
+      gebruikerId: profiel.gebruikerId,
+      naam: profiel.naam,
+      eigenaarnaam: profiel.eigenaarnaam,
+      categorieId: profiel.categorieId,
+      regio: profiel.regio,
+      beschrijving: profiel.beschrijving,
+      websiteUrl: profiel.websiteUrl || null,
+      stemtoon: profiel.stemtoon || null,
+      status: profiel.status || "actief",
+      aangemaakt: now,
+      bijgewerkt: now,
+    };
+    this.bedrijfsprofielen.set(id, newProfiel);
+    return newProfiel;
+  }
+
+  async updateBedrijfsprofiel(id: string, profiel: Partial<InsertBedrijfsprofiel>): Promise<Bedrijfsprofiel | undefined> {
+    const existing = this.bedrijfsprofielen.get(id);
+    if (!existing) return undefined;
+
+    const updated: Bedrijfsprofiel = {
+      ...existing,
+      ...profiel,
+      bijgewerkt: new Date(),
+    };
+    this.bedrijfsprofielen.set(id, updated);
+    return updated;
+  }
+
   async getStats() {
     return {
       totalMembers: this.entrepreneurs.size + 2800,
@@ -1367,6 +1415,29 @@ class DbStorage implements IStorage {
         updatedAt: new Date()
       })
       .where(eq(subscriptions.id, id))
+      .returning();
+    return results[0];
+  }
+
+  async getBedrijfsprofielByUserId(userId: string): Promise<Bedrijfsprofiel | undefined> {
+    const results = await db.select()
+      .from(bedrijfsprofielen)
+      .where(eq(bedrijfsprofielen.gebruikerId, userId))
+      .limit(1);
+    return results[0];
+  }
+
+  async createBedrijfsprofiel(profiel: InsertBedrijfsprofiel): Promise<Bedrijfsprofiel> {
+    const results = await db.insert(bedrijfsprofielen)
+      .values(profiel)
+      .returning();
+    return results[0];
+  }
+
+  async updateBedrijfsprofiel(id: string, profiel: Partial<InsertBedrijfsprofiel>): Promise<Bedrijfsprofiel | undefined> {
+    const results = await db.update(bedrijfsprofielen)
+      .set({ ...profiel, bijgewerkt: new Date() })
+      .where(eq(bedrijfsprofielen.id, id))
       .returning();
     return results[0];
   }

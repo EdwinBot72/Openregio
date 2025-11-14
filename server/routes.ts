@@ -1,8 +1,9 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema } from "@shared/schema";
+import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema, insertBedrijfsprofielSchema } from "@shared/schema";
 import { z } from "zod";
+import { fromZodError } from "zod-validation-error";
 import { createMollieClient } from "@mollie/api-client";
 import { setupSimpleAuth } from "./simpleAuth";
 
@@ -136,6 +137,57 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json(categories);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch categories" });
+    }
+  });
+
+  // Business Profile routes
+  app.get("/api/business-profile/me", async (req, res) => {
+    try {
+      if (!req.session.userId) {
+        return res.status(401).json({ error: "Niet ingelogd" });
+      }
+
+      const profiel = await storage.getBedrijfsprofielByUserId(req.session.userId);
+      if (!profiel) {
+        return res.status(404).json({ error: "Bedrijfsprofiel niet gevonden" });
+      }
+
+      res.json(profiel);
+    } catch (error) {
+      console.error("Error fetching business profile:", error);
+      res.status(500).json({ error: "Fout bij ophalen bedrijfsprofiel" });
+    }
+  });
+
+  app.post("/api/business-profile", async (req, res) => {
+    try {
+      if (!req.session.userId) {
+        return res.status(401).json({ error: "Niet ingelogd" });
+      }
+
+      const validationResult = insertBedrijfsprofielSchema.safeParse({
+        ...req.body,
+        gebruikerId: req.session.userId,
+      });
+
+      if (!validationResult.success) {
+        const errorMessage = fromZodError(validationResult.error).toString();
+        return res.status(400).json({ error: errorMessage });
+      }
+
+      const existingProfiel = await storage.getBedrijfsprofielByUserId(req.session.userId);
+
+      let profiel;
+      if (existingProfiel) {
+        profiel = await storage.updateBedrijfsprofiel(existingProfiel.id, validationResult.data);
+      } else {
+        profiel = await storage.createBedrijfsprofiel(validationResult.data);
+      }
+
+      res.json(profiel);
+    } catch (error) {
+      console.error("Error saving business profile:", error);
+      res.status(500).json({ error: "Fout bij opslaan bedrijfsprofiel" });
     }
   });
 
