@@ -57,8 +57,13 @@ Preferred communication style: Simple, everyday language.
 
 **API Design:**
 - Resource-based endpoints following REST conventions:
-  - `/api/entrepreneurs` - CRUD operations for business profiles
+  - `/api/entrepreneurs` - CRUD operations for business profiles (legacy)
   - `/api/categories` - Returns available business categories (retail, food, services, tech, health, education) with value/label pairs
+  - `/api/business-profile` - Business profile management (new Dutch-first model):
+    - `GET /api/business-profile/me` - Returns authenticated user's business profile, 404 if not found
+    - `POST /api/business-profile` - Creates new or updates existing profile for authenticated user (upsert pattern)
+    - Authentication: Both endpoints require valid session (req.session.userId), return 401 if unauthenticated
+    - Validation: POST uses insertBedrijfsprofielSchema with Zod validation
   - `/api/proposals` - Cooperative governance system:
     - `GET /api/proposals/summary` - Returns aggregated ProposalSummary[] with vote counts and user vote status
     - `POST /api/proposals/:id/vote` - Cast vote (yes/no/abstain) with validation and duplicate detection
