@@ -99,7 +99,14 @@ Preferred communication style: Simple, everyday language.
 - Zod integration for runtime validation of database inserts
 
 **Data Models:**
-- **Entrepreneurs**: Business profiles with contact info, location, category, and metadata
+- **Entrepreneurs**: Business profiles with contact info, location, category, and metadata (legacy table, coexists with bedrijfsprofielen)
+- **Bedrijfsprofielen**: New business profile table with Dutch field names
+  - Fields: id, gebruikerId (FK to users), naam, eigenaarnaam, categorieId, regio, beschrijving, websiteUrl (optional), stemtoon (optional), status (actief/inactief/concept), aangemaakt, bijgewerkt
+  - Purpose: Represents business profiles owned by registered users with Dutch field naming convention
+  - categorieId: References category from /api/categories endpoint (varchar, not FK for flexibility)
+  - stemtoon: Tone of voice for AI-generated content (free text for personalization)
+  - Status workflow: concept → actief (published) or inactief (unpublished)
+  - Relationship: One user can have one business profile via gebruikerId FK
 - **Proposals**: Democratic governance with normalized schema
   - Fields: id, title, description, proposerId, proposerName, status ("open"|"closed"), closesAt, createdAt
   - Voting: Separate votes table with unique constraint (proposalId, userId) prevents duplicates
@@ -109,6 +116,7 @@ Preferred communication style: Simple, everyday language.
 - **Activities**: Activity feed entries for user engagement tracking
 - **User Profiles**: User accounts with pain points array (8 frustration types: visibility, rules, time, platform_fees, no_community, digital_stress, rights_confusion, low_autonomy) for personalized onboarding
 - **Timestamps and audit**: createdAt on all entities for chronological tracking
+- **Table Coexistence**: bedrijfsprofielen and entrepreneurs tables exist alongside each other - bedrijfsprofielen is the newer Dutch-first model
 
 **Query Patterns:**
 - SQL-like API through Drizzle ORM (eq, ilike, or, desc, inArray operators)
