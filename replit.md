@@ -40,6 +40,11 @@ Preferred communication style: Simple, everyday language.
   - SelectContent: z-[1001] (dropdown menus inside dialogs)
   - DialogHeader (sticky): z-10 (relative positioning within dialog)
 - **Categories Integration**: Business profile form fetches categories from API with loading state, error handling with fallback, and one-time toast notification on failure
+- **Form Pre-population Pattern**: When pre-populating forms with fetched data:
+  1. Use useEffect with dependencies on the data and form object
+  2. Add !form.formState.isDirty guard before calling form.reset()
+  3. This prevents data loss when React Query refetches in background (e.g., on window focus)
+  4. Select components must use value={field.value} (not defaultValue) to stay synchronized with form state
 
 **State Management:**
 - Server state via React Query with centralized query client
