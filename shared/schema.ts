@@ -70,6 +70,19 @@ export const bedrijfsprofielen = pgTable("bedrijfsprofielen", {
   bijgewerkt: timestamp("bijgewerkt").defaultNow().notNull(),
 });
 
+// Uploads table for business profile files
+export const uploads = pgTable("uploads", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  profileId: varchar("profile_id").notNull().references(() => bedrijfsprofielen.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  type: text("type").notNull(), // "image" | "document"
+  originalName: text("original_name").notNull(),
+  mimeType: text("mime_type").notNull(),
+  url: text("url").notNull(),
+  size: text("size").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const proposals = pgTable("proposals", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
@@ -185,6 +198,14 @@ export const insertBedrijfsprofielSchema = createInsertSchema(bedrijfsprofielen)
   status: z.enum(["actief", "inactief", "concept"] as const).optional(),
 });
 
+// Upload insert schema
+export const insertUploadSchema = createInsertSchema(uploads).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  type: z.enum(["image", "document"] as const, { required_error: "Type is verplicht" }),
+});
+
 export const insertProposalSchema = createInsertSchema(proposals).omit({
   id: true,
   createdAt: true,
@@ -249,6 +270,10 @@ export type StrictInsertEntrepreneur = z.infer<typeof strictEntrepreneurSchema>;
 // Bedrijfsprofiel types (Dutch field names)
 export type InsertBedrijfsprofiel = z.infer<typeof insertBedrijfsprofielSchema>;
 export type Bedrijfsprofiel = typeof bedrijfsprofielen.$inferSelect;
+
+// Upload types
+export type InsertUpload = z.infer<typeof insertUploadSchema>;
+export type Upload = typeof uploads.$inferSelect;
 
 export type InsertProposal = z.infer<typeof insertProposalSchema>;
 export type Proposal = typeof proposals.$inferSelect;
