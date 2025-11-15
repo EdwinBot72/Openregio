@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Quote, Users, Sparkles, Vote, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
+import heroImage from "@assets/stock_images/happy_diverse_local__1fc55774.jpg";
 
 export default function HomePage() {
   return (
@@ -37,26 +38,36 @@ export default function HomePage() {
       {/* Hero Section */}
       <section className="relative py-20 md:py-32 px-4 bg-gradient-to-br from-primary/5 via-background to-background overflow-hidden">
         <div className="max-w-7xl mx-auto">
-          <div className="max-w-3xl">
-            <h1 className="font-accent text-4xl md:text-6xl font-bold mb-6 leading-tight">
-              Jouw digitale onafhankelijkheid begint hier
-            </h1>
-            <p className="text-xl md:text-2xl text-muted-foreground mb-8">
-              Sluit je aan bij de coöperatieve beweging van lokale ondernemers. 
-              Geen Big Tech, geen algoritmes, wel échte samenwerking.
-            </p>
-            <div className="flex flex-wrap gap-4">
-              <Link href="/lidmaatschap">
-                <Button size="lg" className="text-lg" data-testid="button-hero-start">
-                  Word lid
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-              <Link href="/login">
-                <Button size="lg" variant="outline" className="text-lg" data-testid="button-hero-login">
-                  Inloggen
-                </Button>
-              </Link>
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h1 className="font-accent text-4xl md:text-6xl font-bold mb-6 leading-tight">
+                Jouw digitale onafhankelijkheid begint hier
+              </h1>
+              <p className="text-xl md:text-2xl text-muted-foreground mb-8">
+                Sluit je aan bij de coöperatieve beweging van lokale ondernemers. 
+                Geen Big Tech, geen algoritmes, wel échte samenwerking.
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <Link href="/lidmaatschap">
+                  <Button size="lg" className="text-lg" data-testid="button-hero-start">
+                    Word lid
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+                <Link href="/login">
+                  <Button size="lg" variant="outline" className="text-lg" data-testid="button-hero-login">
+                    Inloggen
+                  </Button>
+                </Link>
+              </div>
+            </div>
+            <div className="relative">
+              <img 
+                src={heroImage} 
+                alt="Lokale ondernemers die samenwerken" 
+                className="rounded-md shadow-lg w-full h-auto"
+                data-testid="img-hero"
+              />
             </div>
           </div>
         </div>
