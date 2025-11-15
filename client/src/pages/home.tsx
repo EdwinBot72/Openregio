@@ -10,8 +10,8 @@ export default function HomePage() {
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-          <Link href="/" data-testid="link-home-logo">
-            <a className="font-accent text-2xl font-bold text-primary">
+          <Link href="/">
+            <a className="font-accent text-2xl font-bold text-primary" data-testid="link-home-logo">
               OpenRegio
             </a>
           </Link>
@@ -22,14 +22,14 @@ export default function HomePage() {
               </a>
             </Link>
             <Link href="/login">
-              <Button variant="ghost" size="sm" data-testid="button-nav-login">
+              <a className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors hover-elevate active-elevate-2 h-8 px-3 py-2" data-testid="button-nav-login">
                 Inloggen
-              </Button>
+              </a>
             </Link>
             <Link href="/lidmaatschap">
-              <Button size="sm" data-testid="button-nav-start">
+              <a className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors hover-elevate active-elevate-2 h-8 px-3 py-2 bg-primary text-primary-foreground border border-primary-border" data-testid="button-nav-start">
                 Start nu
-              </Button>
+              </a>
             </Link>
           </div>
         </div>
@@ -49,15 +49,15 @@ export default function HomePage() {
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link href="/lidmaatschap">
-                  <Button size="lg" className="text-lg" data-testid="button-hero-start">
+                  <a className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors hover-elevate active-elevate-2 min-h-10 px-6 py-2 text-lg bg-primary text-primary-foreground border border-primary-border" data-testid="button-hero-start">
                     Word lid
                     <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
+                  </a>
                 </Link>
                 <Link href="/login">
-                  <Button size="lg" variant="outline" className="text-lg" data-testid="button-hero-login">
+                  <a className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors hover-elevate active-elevate-2 min-h-10 px-6 py-2 text-lg border border-input bg-background" data-testid="button-hero-login">
                     Inloggen
-                  </Button>
+                  </a>
                 </Link>
               </div>
             </div>
@@ -178,14 +178,9 @@ export default function HomePage() {
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
             <Link href="/lidmaatschap">
-              <Button
-                size="lg"
-                variant="outline"
-                className="text-primary bg-primary-foreground hover:bg-primary-foreground/90 border-primary-foreground text-lg"
-                data-testid="button-cta-join"
-              >
+              <a className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors hover-elevate active-elevate-2 min-h-10 px-6 py-2 text-lg text-primary bg-primary-foreground border border-primary-foreground" data-testid="button-cta-join">
                 Word lid van OpenRegio
-              </Button>
+              </a>
             </Link>
           </div>
         </div>

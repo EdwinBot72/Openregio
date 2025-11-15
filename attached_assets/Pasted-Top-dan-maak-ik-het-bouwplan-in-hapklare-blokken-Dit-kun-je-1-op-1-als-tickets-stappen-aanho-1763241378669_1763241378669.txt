@@ -1,0 +1,193 @@
+Top, dan maak ik het **bouwplan in hapklare blokken**. Dit kun je 1-op-1 als tickets / stappen aanhouden.
+
+---
+
+## 🧩 Fase 1 – Basis op orde (MVP dashboard)
+
+**Doel:**
+Dashboard werkt, profiel kan worden opgeslagen, categorie-dropdown doet het.
+
+**1. Categories fixen (dropdown eerst!)**
+Ticket 1 – *Categories endpoint + seed*
+
+* [ ] Maak `categories` tabel/collectie.
+* [ ] Voeg een seed-script of hardcoded insert toe (10–20 categorieën).
+* [ ] Endpoint: `GET /api/categories` → array met `{ _id, name, slug }`.
+
+Ticket 2 – *Frontend dropdown koppelen*
+
+* [ ] Op `/dashboard` bij “Bedrijfsprofiel toevoegen”:
+
+  * [ ] Fetch `GET /api/categories`.
+  * [ ] Vul de select met opties.
+* [ ] Als er geen profiel is: toon “Geen profiel gevonden” + knop.
+
+---
+
+**2. Business-profiel CRUD**
+
+Ticket 3 – *DB-model business_profiles*
+
+* [ ] Maak `business_profiles` tabel/collectie met o.a.:
+
+  ```ts
+  {
+    _id,
+    userId,
+    name,
+    ownerName,
+    categoryId,
+    region,
+    description,
+    websiteUrl,
+    toneOfVoice,
+    status,
+    createdAt,
+    updatedAt
+  }
+  ```
+
+Ticket 4 – *API business profile*
+
+* [ ] `GET /api/business-profile/me`
+  → haalt profiel op voor ingelogde user, 404 als niet bestaat.
+* [ ] `POST /api/business-profile`
+  → maakt nieuw of update bestaand profiel van ingelogde user.
+
+Ticket 5 – *Frontend profiel-form*
+
+* [ ] Laad bij openen: `GET /api/business-profile/me`.
+* [ ] Als profiel bestaat → velden vullen.
+* [ ] Als geen profiel → lege form.
+* [ ] Submit knop → `POST /api/business-profile`.
+
+👉 **Na Fase 1:**
+Je hebt een werkende profiel-flow en een gevulde categorie-dropdown.
+
+---
+
+## 🧩 Fase 2 – Uploads (foto’s + documenten)
+
+**Doel:**
+Aan elk bedrijfsprofiel kunnen bestanden gehangen worden.
+
+Ticket 6 – *Uploads data-model*
+
+* [ ] Maak `uploads` tabel/collectie:
+
+  ```ts
+  {
+    _id,
+    profileId,
+    userId,
+    type,          // "image" | "document"
+    originalName,
+    mimeType,
+    url,
+    size,
+    createdAt
+  }
+  ```
+
+Ticket 7 – *Upload API*
+
+* [ ] Endpoint: `POST /api/uploads`
+
+  * Content-Type: `multipart/form-data`
+  * Fields: `file`, `type`
+  * Koppeling:
+
+    * [ ] Zoek profiel van `userId`.
+    * [ ] Sla file op (local of storage).
+    * [ ] Sla record op met `profileId`.
+* [ ] Endpoint: `GET /api/uploads/me`
+
+  * Haalt alle uploads voor profiel van ingelogde user.
+
+Ticket 8 – *Frontend upload-sectie*
+
+* [ ] Op dashboard: blok “Bestanden & foto’s”.
+* [ ] File input → `POST /api/uploads`.
+* [ ] Lijst tonen via `GET /api/uploads/me`.
+* [ ] Kleine tag: `type` weergeven (`image` / `document`).
+
+👉 **Na Fase 2:**
+Profiel + categorieën + uploads werken. RegioBot heeft straks iets om mee te werken.
+
+---
+
+## 🧩 Fase 3 – RegioBot chat (zonder AI eerst, dan met AI)
+
+**Doel:**
+Eerst een werkende chat-flow, daarna AI erachter.
+
+Ticket 9 – *Frontend chat UI*
+
+* [ ] Chatbox op dashboard:
+
+  * [ ] Tekstveld + verzendknop.
+  * [ ] Checklist: “Gebruik bedrijfsprofiel”, “Gebruik uploads”.
+  * [ ] Simple chatlog (user + bot-messages).
+* [ ] Voor nu: dummy response tonen (`"RegioBot antwoord (dummy)"`).
+
+Ticket 10 – *RegioBot API skeleton*
+
+* [ ] Endpoint: `POST /api/regiobot/chat`
+
+* Body:
+
+  ```json
+  {
+    "message": "string",
+    "useProfile": true,
+    "useUploads": true,
+    "uploadIds": ["id1", "id2"]
+  }
+  ```
+
+* [ ] Logica:
+
+  * [ ] Haal user.
+  * [ ] Haal `business_profile`.
+  * [ ] Haal uploads indien gevraagd.
+  * [ ] Stel een context-object samen.
+  * [ ] Voor nu: return dummy tekst + context (voor debug).
+
+Ticket 11 – *AI integratie*
+
+* [ ] Voeg call toe naar OpenAI / andere LLM:
+
+  * Bouw prompt zoals:
+
+    ```text
+    System: You are RegioBot, AI assistant for local businesses in the OpenRegio network...
+    Context: <business profile + summary uploads>
+    User: <message>
+    ```
+
+* [ ] Stuur `reply` terug als `reply`-veld naar frontend.
+
+👉 **Na Fase 3:**
+Je hebt een echte AI-assistent in je dashboard.
+
+---
+
+## 🧩 Fase 4 – Nice-to-haves / uitbreiden
+
+Als basis staat, kun je later tickets maken voor:
+
+* Templates (posts, aanbiedingen, mailings).
+* Automatische “wekelijkse post” generator.
+* Local SEO score / scan.
+* Filters & zoekfunctie op alle profielen (OpenRegio directory).
+
+---
+
+## 📌 Samenvatting in 1 regel per blok (voor jouw dev)
+
+1. **Fase 1:** Categories + business_profile CRUD.
+2. **Fase 2:** Uploads koppelen aan business_profile.
+3. **Fase 3:** RegioBot chat + AI-koppeling.
+4. **Fase 4:** Templates, automations, SEO-scan.
+
+Wil je, dan schrijf ik hierna **de exacte tekst voor 6–8 losse Replit issues**, die je letterlijk kan copy-pasten als tasks.
