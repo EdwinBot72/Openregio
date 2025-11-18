@@ -1,0 +1,470 @@
+/**
+ * OpenRegio Plugin Styles
+ * 
+ * Je kunt deze styles naar eigen wens aanpassen
+ */
+
+/* General */
+.openregio-home,
+.openregio-start,
+.openregio-onboarding,
+.openregio-dashboard,
+.openregio-network,
+.openregio-community,
+.openregio-chat,
+.openregio-regiobot,
+.openregio-upgrade {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+}
+
+/* Hero Section */
+.openregio-hero {
+    text-align: center;
+    margin-bottom: 60px;
+}
+
+.openregio-hero h1 {
+    font-size: 3em;
+    margin-bottom: 20px;
+    color: #2c3e50;
+}
+
+.openregio-tagline {
+    font-size: 1.3em;
+    color: #7f8c8d;
+}
+
+/* Intro */
+.openregio-intro {
+    margin-bottom: 60px;
+}
+
+.openregio-features {
+    list-style: none;
+    padding: 0;
+}
+
+.openregio-features li {
+    padding: 10px 0 10px 30px;
+    position: relative;
+}
+
+.openregio-features li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #27ae60;
+    font-weight: bold;
+}
+
+/* Pricing */
+.openregio-pricing {
+    margin-bottom: 60px;
+}
+
+.openregio-plans {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.openregio-plan {
+    background: #fff;
+    border: 2px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 30px;
+    text-align: center;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.openregio-plan:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.openregio-plan-featured {
+    border-color: #3498db;
+    position: relative;
+}
+
+.openregio-badge {
+    position: absolute;
+    top: -15px;
+    right: 20px;
+    background: #3498db;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.9em;
+    font-weight: bold;
+}
+
+.openregio-price {
+    font-size: 2.5em;
+    font-weight: bold;
+    color: #2c3e50;
+    margin: 20px 0;
+}
+
+.openregio-period {
+    font-size: 0.4em;
+    color: #7f8c8d;
+    display: block;
+}
+
+.openregio-plan-features {
+    list-style: none;
+    padding: 0;
+    margin: 30px 0;
+    text-align: left;
+}
+
+.openregio-plan-features li {
+    padding: 10px 0;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+/* Buttons */
+.openregio-button {
+    display: inline-block;
+    padding: 12px 30px;
+    background: #3498db;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.openregio-button:hover {
+    background: #2980b9;
+    color: white;
+}
+
+.openregio-button-primary {
+    background: #3498db;
+}
+
+.openregio-button-pro {
+    background: #9b59b6;
+}
+
+.openregio-button-pro:hover {
+    background: #8e44ad;
+}
+
+.openregio-button-large {
+    padding: 15px 40px;
+    font-size: 1.1em;
+}
+
+.openregio-button-small {
+    padding: 8px 16px;
+    font-size: 0.9em;
+}
+
+/* Forms */
+.openregio-form-group {
+    margin-bottom: 20px;
+}
+
+.openregio-form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #2c3e50;
+}
+
+.openregio-form-group input[type="text"],
+.openregio-form-group input[type="email"],
+.openregio-form-group input[type="password"],
+.openregio-form-group select,
+.openregio-form-group textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1em;
+}
+
+.openregio-form-help {
+    font-size: 0.9em;
+    color: #7f8c8d;
+    margin-top: 5px;
+}
+
+.openregio-form-section {
+    margin-bottom: 40px;
+    padding-bottom: 40px;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+/* Cards */
+.openregio-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 25px;
+    margin-bottom: 20px;
+}
+
+/* Dashboard */
+.openregio-dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.openregio-plan-badge {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: bold;
+    font-size: 0.9em;
+}
+
+.openregio-plan-basic {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.openregio-plan-pro {
+    background: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.openregio-dashboard-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.openregio-stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 25px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.openregio-stat-number {
+    font-size: 2.5em;
+    font-weight: bold;
+    margin: 10px 0;
+}
+
+.openregio-dashboard-content {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+}
+
+.openregio-quick-links {
+    list-style: none;
+    padding: 0;
+}
+
+.openregio-quick-links li {
+    margin-bottom: 10px;
+}
+
+.openregio-quick-links a {
+    color: #3498db;
+    text-decoration: none;
+}
+
+.openregio-quick-links a:hover {
+    text-decoration: underline;
+}
+
+/* Network */
+.openregio-network-filters {
+    display: flex;
+    gap: 15px;
+    margin: 30px 0;
+}
+
+.openregio-search-input,
+.openregio-filter-select {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+.openregio-network-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.openregio-member-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    transition: box-shadow 0.3s;
+}
+
+.openregio-member-card:hover {
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.openregio-member-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: start;
+    margin-bottom: 10px;
+}
+
+.openregio-pro-badge {
+    background: #9b59b6;
+    color: white;
+    padding: 3px 8px;
+    border-radius: 3px;
+    font-size: 0.8em;
+    font-weight: bold;
+}
+
+.openregio-member-category {
+    color: #7f8c8d;
+    font-size: 0.9em;
+    margin-bottom: 10px;
+}
+
+.openregio-member-bio {
+    color: #2c3e50;
+    margin-bottom: 15px;
+}
+
+/* RegioBot */
+.openregio-regiobot-chat {
+    margin: 20px 0;
+}
+
+.openregio-chat-messages {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    min-height: 300px;
+    max-height: 500px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+}
+
+.openregio-chat-message {
+    margin-bottom: 15px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    max-width: 80%;
+}
+
+.openregio-chat-user {
+    background: #3498db;
+    color: white;
+    margin-left: auto;
+}
+
+.openregio-chat-bot {
+    background: white;
+    border: 1px solid #dee2e6;
+}
+
+.openregio-chat-form textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    resize: vertical;
+}
+
+.openregio-regiobot-suggestions {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-top: 20px;
+}
+
+.openregio-regiobot-suggestions ul {
+    list-style: none;
+    padding: 0;
+}
+
+.openregio-regiobot-suggestions li {
+    padding: 8px 0;
+    color: #7f8c8d;
+    font-style: italic;
+}
+
+/* Upgrade */
+.openregio-upgrade-card {
+    background: white;
+    border: 2px solid #9b59b6;
+    border-radius: 10px;
+    padding: 40px;
+    text-align: center;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.openregio-upgrade-benefits ul {
+    list-style: none;
+    padding: 0;
+    text-align: left;
+    max-width: 400px;
+    margin: 20px auto;
+}
+
+.openregio-upgrade-benefits li {
+    padding: 10px 0 10px 30px;
+    position: relative;
+}
+
+.openregio-upgrade-benefits li:before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #9b59b6;
+    font-weight: bold;
+    font-size: 1.2em;
+}
+
+/* Error messages */
+.openregio-error {
+    background: #fee;
+    border: 1px solid #fcc;
+    color: #c33;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .openregio-dashboard-content {
+        grid-template-columns: 1fr;
+    }
+    
+    .openregio-plans {
+        grid-template-columns: 1fr;
+    }
+    
+    .openregio-network-filters {
+        flex-direction: column;
+    }
+    
+    .openregio-dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+}
