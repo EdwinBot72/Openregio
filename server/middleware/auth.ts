@@ -107,3 +107,32 @@ export function requireOnboardingDone(req: Request, res: Response, next: NextFun
 
   next();
 }
+
+/**
+ * Middleware to require Pro plan
+ * Returns 403 for API routes, redirects to /regiobot for page routes
+ * Should be used after requireAuth
+ */
+export function requirePro(req: Request, res: Response, next: NextFunction) {
+  if (!req.user) {
+    // User not authenticated
+    if (req.path.startsWith('/api/')) {
+      return res.status(401).json({ error: "Niet geautoriseerd" });
+    }
+    return res.redirect('/login');
+  }
+
+  if (req.user.plan !== 'pro') {
+    // User doesn't have Pro plan
+    if (req.path.startsWith('/api/')) {
+      return res.status(403).json({ 
+        error: "Deze functie is alleen beschikbaar voor Pro-leden",
+        upgrade: true 
+      });
+    }
+    // For page routes, let the page handle the upgrade UI
+    return next();
+  }
+
+  next();
+}
