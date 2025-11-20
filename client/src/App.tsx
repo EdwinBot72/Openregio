@@ -20,9 +20,10 @@ import OnboardingPage from "@/pages/onboarding";
 import LidmaatschapPage from "@/pages/lidmaatschap";
 import BedrijfsprofielPage from "@/pages/bedrijfsprofiel";
 import PaymentSuccessPage from "@/pages/payment-success";
+import FirstLoginPage from "@/pages/first-login";
 
 // Routes that should NOT have the sidebar/header layout
-const PUBLIC_ROUTES = ["/", "/login", "/register", "/lidmaatschap", "/betaling-geslaagd"];
+const PUBLIC_ROUTES = ["/", "/login", "/register", "/lidmaatschap", "/betaling-geslaagd", "/first-login"];
 
 function PublicRouter() {
   return (
@@ -32,6 +33,7 @@ function PublicRouter() {
       <Route path="/register" component={RegisterPage} />
       <Route path="/lidmaatschap" component={LidmaatschapPage} />
       <Route path="/betaling-geslaagd" component={PaymentSuccessPage} />
+      <Route path="/first-login" component={FirstLoginPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -59,8 +61,9 @@ function AppContent() {
   const [isRegisterPage] = useRoute("/register");
   const [isLidmaatschapPage] = useRoute("/lidmaatschap");
   const [isPaymentSuccessPage] = useRoute("/betaling-geslaagd");
+  const [isFirstLoginPage] = useRoute("/first-login");
   
-  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isLidmaatschapPage || isPaymentSuccessPage;
+  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isLidmaatschapPage || isPaymentSuccessPage || isFirstLoginPage;
 
   if (isPublicRoute) {
     return <PublicRouter />;
