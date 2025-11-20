@@ -28,6 +28,10 @@ export const users = pgTable("users", {
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
+  businessName: varchar("business_name"),
+  bio: text("bio"),
+  category: varchar("category"),
+  mustCompleteOnboarding: boolean("must_complete_onboarding").default(true).notNull(),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

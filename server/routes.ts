@@ -6,6 +6,8 @@ import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { createMollieClient } from "@mollie/api-client";
 import { setupSimpleAuth } from "./simpleAuth";
+import authRouter from "./auth";
+import { attachUser } from "./middleware/auth";
 
 // Initialize Mollie client (requires MOLLIE_API_KEY environment variable)
 const mollieClient = process.env.MOLLIE_API_KEY 
@@ -20,8 +22,14 @@ function getBaseUrl(req: any): string {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Initialize email/password auth only
+  // Initialize email/password auth (API endpoints)
   setupSimpleAuth(app);
+  
+  // Attach user to all requests (makes req.user available)
+  app.use(attachUser);
+  
+  // Server-side rendered auth routes (web pages)
+  app.use(authRouter);
   
   // Entrepreneurs routes
   app.get("/api/entrepreneurs", async (req, res) => {
