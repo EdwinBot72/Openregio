@@ -83,3 +83,27 @@ export function redirectIfAuth(req: Request, res: Response, next: NextFunction) 
   }
   next();
 }
+
+/**
+ * Middleware to ensure user has completed onboarding
+ * Redirects to /first-login if mustCompleteOnboarding is true
+ * Should be used after requireAuth
+ */
+export function requireOnboardingDone(req: Request, res: Response, next: NextFunction) {
+  // Skip check if already on first-login page or first-login API
+  if (req.path.startsWith('/first-login')) {
+    return next();
+  }
+
+  if (!req.user) {
+    // User not authenticated
+    return res.redirect('/login');
+  }
+
+  if (req.user.mustCompleteOnboarding) {
+    // User needs to complete onboarding
+    return res.redirect('/first-login');
+  }
+
+  next();
+}
