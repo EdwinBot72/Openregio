@@ -7,6 +7,7 @@ import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -14,6 +15,7 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+  const { refetch } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,7 +32,10 @@ export default function LoginPage() {
     setIsLoading(true);
     
     try {
-      const response = await apiRequest("POST", "/api/auth/login", { email, password });
+      await apiRequest("POST", "/api/auth/login", { email, password });
+
+      // Refetch user data to update authentication state
+      await refetch();
 
       toast({
         title: "Ingelogd!",
