@@ -18,6 +18,8 @@ import {
   type InsertUserProfile,
   type Subscription,
   type InsertSubscription,
+  type OnboardingToken,
+  type InsertOnboardingToken,
   type ProposalSummary,
   type User,
   type UpsertUser,
@@ -32,6 +34,7 @@ import {
   posts,
   userProfiles,
   subscriptions,
+  onboardingTokens,
   users,
   bedrijfsprofielen,
 } from "@shared/schema";
@@ -112,6 +115,11 @@ export interface IStorage {
   updateSubscription(id: string, subscription: Partial<InsertSubscription>): Promise<Subscription | undefined>;
   cancelSubscription(id: string): Promise<Subscription | undefined>;
 
+  // Onboarding Tokens
+  createOnboardingToken(token: InsertOnboardingToken): Promise<OnboardingToken>;
+  getOnboardingTokenByToken(token: string): Promise<OnboardingToken | undefined>;
+  deleteOnboardingToken(token: string): Promise<boolean>;
+
   // Bedrijfsprofielen (Business Profiles)
   getBedrijfsprofielByUserId(userId: string): Promise<Bedrijfsprofiel | undefined>;
   createBedrijfsprofiel(profiel: InsertBedrijfsprofiel): Promise<Bedrijfsprofiel>;
@@ -137,6 +145,7 @@ export class MemStorage implements IStorage {
   private posts: Map<string, Post>;
   private userProfiles: Map<string, UserProfile>;
   private subscriptions: Map<string, Subscription>;
+  private onboardingTokens: Map<string, OnboardingToken>;
   private bedrijfsprofielen: Map<string, Bedrijfsprofiel>;
 
   constructor() {
@@ -150,6 +159,7 @@ export class MemStorage implements IStorage {
     this.posts = new Map();
     this.userProfiles = new Map();
     this.subscriptions = new Map();
+    this.onboardingTokens = new Map();
     this.bedrijfsprofielen = new Map();
     this.seedData();
   }
@@ -990,6 +1000,28 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
+  async createOnboardingToken(token: InsertOnboardingToken): Promise<OnboardingToken> {
+    const id = randomUUID();
+    const now = new Date();
+    const newToken: OnboardingToken = {
+      id,
+      userId: token.userId,
+      token: token.token,
+      expiresAt: token.expiresAt,
+      createdAt: now,
+    };
+    this.onboardingTokens.set(token.token, newToken);
+    return newToken;
+  }
+
+  async getOnboardingTokenByToken(token: string): Promise<OnboardingToken | undefined> {
+    return this.onboardingTokens.get(token);
+  }
+
+  async deleteOnboardingToken(token: string): Promise<boolean> {
+    return this.onboardingTokens.delete(token);
+  }
+
   async getBedrijfsprofielByUserId(userId: string): Promise<Bedrijfsprofiel | undefined> {
     return Array.from(this.bedrijfsprofielen.values()).find(p => p.gebruikerId === userId);
   }
@@ -1474,6 +1506,21 @@ class DbStorage implements IStorage {
       .where(eq(subscriptions.id, id))
       .returning();
     return results[0];
+  }
+
+  async createOnboardingToken(token: InsertOnboardingToken): Promise<OnboardingToken> {
+    const results = await db.insert(onboardingTokens).values(token).returning();
+    return results[0];
+  }
+
+  async getOnboardingTokenByToken(token: string): Promise<OnboardingToken | undefined> {
+    const results = await db.select().from(onboardingTokens).where(eq(onboardingTokens.token, token));
+    return results[0];
+  }
+
+  async deleteOnboardingToken(token: string): Promise<boolean> {
+    const results = await db.delete(onboardingTokens).where(eq(onboardingTokens.token, token)).returning();
+    return results.length > 0;
   }
 
   async getBedrijfsprofielByUserId(userId: string): Promise<Bedrijfsprofiel | undefined> {

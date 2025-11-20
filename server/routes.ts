@@ -145,12 +145,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
             onboardingToken,
           });
           
+          // Create onboarding token record (expires in 7 days)
+          const expiresAt = new Date();
+          expiresAt.setDate(expiresAt.getDate() + 7);
+          
+          await storage.createOnboardingToken({
+            userId: user.id,
+            token: onboardingToken,
+            expiresAt,
+          });
+          
           console.log(`✓ User created: ${user.id} (${email})`);
           console.log(`  Temporary password: ${tempPassword}`);
           console.log(`  Onboarding token: ${onboardingToken}`);
+          console.log(`  Onboarding link: ${baseUrl}/first-login?token=${onboardingToken}`);
           
           // TODO: Send welcome email with temporary password and onboarding link
-          // const onboardingLink = `${baseUrl}/onboarding?token=${onboardingToken}`;
+          // const onboardingLink = `${baseUrl}/first-login?token=${onboardingToken}`;
           // await sendWelcomeEmail(email, tempPassword, onboardingLink);
           
         } else {
