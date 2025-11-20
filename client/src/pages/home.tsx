@@ -189,10 +189,12 @@ export default function HomePage() {
             Sluit je vandaag nog aan bij ondernemers die hun digitale onafhankelijkheid terug hebben gepakt.
           </p>
           <div className="flex flex-wrap gap-4 justify-center">
-            <Link href="/lidmaatschap">
-              <a className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors hover-elevate active-elevate-2 min-h-10 px-6 py-2 text-lg text-primary bg-primary-foreground border border-primary-foreground" data-testid="button-cta-join">
-                Word lid van OpenRegio
-              </a>
+            <Link 
+              href="/lidmaatschap"
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors hover-elevate active-elevate-2 min-h-10 px-6 py-2 text-lg text-primary bg-primary-foreground border border-primary-foreground" 
+              data-testid="button-cta-join"
+            >
+              Word lid van OpenRegio
             </Link>
           </div>
         </div>
@@ -212,17 +214,21 @@ export default function HomePage() {
               <h3 className="font-semibold mb-4">Platform</h3>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <Link href="/lidmaatschap">
-                    <a className="hover:text-primary transition-colors" data-testid="link-footer-membership">
-                      Lidmaatschap
-                    </a>
+                  <Link 
+                    href="/lidmaatschap"
+                    className="hover:text-primary transition-colors" 
+                    data-testid="link-footer-membership"
+                  >
+                    Lidmaatschap
                   </Link>
                 </li>
                 <li>
-                  <Link href="/login">
-                    <a className="hover:text-primary transition-colors" data-testid="link-footer-login">
-                      Inloggen
-                    </a>
+                  <Link 
+                    href="/login"
+                    className="hover:text-primary transition-colors" 
+                    data-testid="link-footer-login"
+                  >
+                    Inloggen
                   </Link>
                 </li>
               </ul>

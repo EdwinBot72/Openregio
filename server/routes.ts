@@ -71,7 +71,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           currency: "EUR"
         },
         description,
-        redirectUrl: `${baseUrl}/payment-success?email=${encodeURIComponent(email)}&plan=${plan}`,
+        redirectUrl: `${baseUrl}/betaling-geslaagd?email=${encodeURIComponent(email)}`,
         webhookUrl: `${baseUrl}/api/mollie/webhook`,
         metadata: {
           email,

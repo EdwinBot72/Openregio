@@ -58,12 +58,12 @@ export function PaywallBanner({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Link href="/lidmaatschap">
-              <Button size="sm" className="gap-2" data-testid="button-view-membership">
+            <Button size="sm" className="gap-2" data-testid="button-view-membership" asChild>
+              <Link href="/lidmaatschap">
                 <CreditCard className="h-4 w-4" />
                 {ctaText}
-              </Button>
-            </Link>
+              </Link>
+            </Button>
             <Button
               variant="ghost"
               size="sm"
