@@ -6,7 +6,7 @@ import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { createMollieClient } from "@mollie/api-client";
 import { setupSimpleAuth } from "./simpleAuth";
-import { attachUser } from "./middleware/auth";
+import { attachUser, requirePro } from "./middleware/auth";
 import { seedMasterAccount } from "./seed";
 import { generateRandomPassword, generateOnboardingToken, getPlanPrice, getPlanDisplayName } from "./utils/auth";
 import bcrypt from "bcrypt";
@@ -589,8 +589,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // RegioBot chat route with intent support
-  app.post("/api/regiobot/chat", async (req, res) => {
+  // RegioBot chat route with intent support (Pro-only)
+  app.post("/api/regiobot/chat", requirePro, async (req, res) => {
     try {
       const { message, intent } = req.body;
       if (!message) {
