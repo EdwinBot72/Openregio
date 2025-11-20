@@ -179,23 +179,109 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 px-4 bg-primary text-primary-foreground">
-        <div className="max-w-4xl mx-auto text-center">
-          <h2 className="font-accent text-3xl md:text-4xl font-bold mb-6">
-            Klaar om te starten?
-          </h2>
-          <p className="text-xl mb-8 text-primary-foreground/90">
-            Sluit je vandaag nog aan bij ondernemers die hun digitale onafhankelijkheid terug hebben gepakt.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Link 
-              href="/lidmaatschap"
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors hover-elevate active-elevate-2 min-h-10 px-6 py-2 text-lg text-primary bg-primary-foreground border border-primary-foreground" 
-              data-testid="button-cta-join"
-            >
-              Word lid van OpenRegio
-            </Link>
+      {/* CTA Section - Membership Plans */}
+      <section className="py-20 px-4 bg-gradient-to-br from-primary/5 via-background to-background">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="font-accent text-3xl md:text-4xl font-bold mb-4">
+              Kies jouw lidmaatschap
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Start met een Basic plan of ontgrendel alle functies met Pro
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6 max-w-4xl mx-auto">
+            {/* Basic Plan */}
+            <Card data-testid="card-plan-basic" className="relative">
+              <CardContent className="p-8">
+                <div className="mb-6">
+                  <h3 className="font-accent text-2xl font-bold mb-2">Basis</h3>
+                  <div className="flex items-baseline gap-1 mb-4">
+                    <span className="text-4xl font-bold">€9,95</span>
+                    <span className="text-muted-foreground">/maand</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Perfect om te starten met lokaal netwerken
+                  </p>
+                </div>
+                
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-start gap-2 text-sm">
+                    <Users className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <span>Toegang tot lokaal netwerk</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-sm">
+                    <Vote className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <span>Stemrecht in coöperatie</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-sm">
+                    <Users className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <span>Zichtbaar bedrijfsprofiel</span>
+                  </li>
+                </ul>
+
+                <Link href="/lidmaatschap?plan=basic" className="w-full">
+                  <Button 
+                    variant="outline" 
+                    className="w-full" 
+                    size="lg"
+                    data-testid="button-plan-basic"
+                  >
+                    Word Basis lid – €9,95
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            {/* Pro Plan */}
+            <Card data-testid="card-plan-pro" className="relative border-primary/50 shadow-lg">
+              <div className="absolute top-0 right-0 bg-primary text-primary-foreground px-3 py-1 rounded-bl-lg rounded-tr-md text-xs font-semibold">
+                POPULAIR
+              </div>
+              <CardContent className="p-8">
+                <div className="mb-6">
+                  <h3 className="font-accent text-2xl font-bold mb-2">Pro</h3>
+                  <div className="flex items-baseline gap-1 mb-4">
+                    <span className="text-4xl font-bold">€19,95</span>
+                    <span className="text-muted-foreground">/maand</span>
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    Volledige toegang inclusief AI-assistent
+                  </p>
+                </div>
+                
+                <ul className="space-y-3 mb-8">
+                  <li className="flex items-start gap-2 text-sm">
+                    <Sparkles className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <span className="font-semibold">RegioBot AI Assistent</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-sm">
+                    <Users className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <span>Alle Basis functies</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-sm">
+                    <Sparkles className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <span>AI marketing & juridische hulp</span>
+                  </li>
+                  <li className="flex items-start gap-2 text-sm">
+                    <Sparkles className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+                    <span>Document upload & analyse</span>
+                  </li>
+                </ul>
+
+                <Link href="/lidmaatschap?plan=pro" className="w-full">
+                  <Button 
+                    className="w-full" 
+                    size="lg"
+                    data-testid="button-plan-pro"
+                  >
+                    Word Pro – €19,95 (incl. RegioBot)
+                    <Sparkles className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
           </div>
         </div>
       </section>
@@ -203,7 +289,7 @@ export default function HomePage() {
       {/* Footer */}
       <footer className="py-12 px-4 border-t">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
               <h3 className="font-accent font-bold text-lg mb-4">OpenRegio</h3>
               <p className="text-sm text-muted-foreground">
@@ -229,6 +315,29 @@ export default function HomePage() {
                     data-testid="link-footer-login"
                   >
                     Inloggen
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-4">Juridisch</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <Link 
+                    href="/privacy"
+                    className="hover:text-primary transition-colors" 
+                    data-testid="link-footer-privacy"
+                  >
+                    Privacy
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    href="/voorwaarden"
+                    className="hover:text-primary transition-colors" 
+                    data-testid="link-footer-terms"
+                  >
+                    Voorwaarden
                   </Link>
                 </li>
               </ul>

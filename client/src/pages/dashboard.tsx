@@ -102,7 +102,7 @@ function getCardHighlights(painPoints: string[]): {
 }
 
 export default function DashboardPage() {
-  const { profile, isLoading: authLoading } = useAuth();
+  const { user, profile, isLoading: authLoading } = useAuth();
 
   if (authLoading) {
     return (
@@ -117,23 +117,26 @@ export default function DashboardPage() {
     );
   }
 
-  if (!profile) {
+  if (!user) {
     return (
       <div className="max-w-7xl mx-auto">
         <Card className="p-8 text-center">
-          <CardTitle className="mb-4">Geen profiel gevonden</CardTitle>
+          <CardTitle className="mb-4">Geen gebruiker gevonden</CardTitle>
           <p className="text-muted-foreground">Log opnieuw in om door te gaan.</p>
         </Card>
       </div>
     );
   }
 
-  return <DashboardContent profile={profile} />;
+  return <DashboardContent user={user} profile={profile} />;
 }
 
-function DashboardContent({ profile }: { profile: NonNullable<ReturnType<typeof useAuth>["profile"]> }) {
+function DashboardContent({ user, profile }: { 
+  user: NonNullable<ReturnType<typeof useAuth>["user"]>; 
+  profile: ReturnType<typeof useAuth>["profile"];
+}) {
   const { data: userProfile } = useQuery<UserProfile>({
-    queryKey: ["/api/user-profile", profile.id],
+    queryKey: ["/api/user-profile", user.id],
   });
 
   const { data: proposals } = useQuery<Proposal[]>({
@@ -156,21 +159,34 @@ function DashboardContent({ profile }: { profile: NonNullable<ReturnType<typeof 
           <Calendar className="h-4 w-4" />,
   }));
 
-  const painPoints = userProfile?.painPoints || profile.painPoints || [];
+  const painPoints = userProfile?.painPoints || profile?.painPoints || [];
   const highlights = getCardHighlights(painPoints);
+
+  const { data: bedrijfsprofiel } = useQuery<{ naam: string } | null>({
+    queryKey: ["/api/bedrijfsprofiel"],
+  });
+
+  const planBadge = user.plan === "pro" ? (
+    <Badge variant="default" className="ml-2" data-testid="badge-plan">PRO</Badge>
+  ) : (
+    <Badge variant="outline" className="ml-2" data-testid="badge-plan">BASIC</Badge>
+  );
 
   return (
     <div className="max-w-7xl mx-auto">
       <div className="mb-8">
-        <h1 className="font-accent text-3xl font-bold mb-2">Dashboard</h1>
-        <p className="text-muted-foreground">
-          Welkom terug, {userProfile?.name || "Jan"}! Hier is een overzicht van je activiteit.
+        <h1 className="font-accent text-3xl font-bold mb-2 flex items-center flex-wrap gap-2">
+          Welkom {bedrijfsprofiel?.naam || userProfile?.name || user.firstName || "ondernemer"}
+          {planBadge}
+        </h1>
+        <p className="text-muted-foreground" data-testid="text-plan-info">
+          Plan: {user.plan === "pro" ? "Pro" : "Basic"} – Hier is een overzicht van je activiteit.
         </p>
       </div>
 
       <div className="space-y-8">
         <PaywallBanner
-          userId={profile.id}
+          userId={user.id}
           message="Ontgrendel alle functies en word lid van de OpenRegio coöperatie"
           ctaText="Bekijk lidmaatschappen"
         />
