@@ -122,6 +122,37 @@ Preferred communication style: Simple, everyday language.
 - Mode switching resets conversation with new welcome message
 - All features remain Pro-only via `requirePro` middleware
 
+**Beta-Ready UI & Legal (BLOK 7 - Completed):**
+- **Homepage (/):**
+  - Professional hero section with value proposition
+  - Two clear CTA buttons: "Word Basis lid – €9,95" and "Word Pro – €19,95 (incl. RegioBot)"
+  - Inloggen button in top-right navigation
+  - Feature cards showcasing Lokaal Netwerk, RegioBot AI, and Democratisch Platform
+  - Testimonials section with social proof
+  - Membership plan comparison section with detailed features
+  - Footer with platform links, juridisch section (privacy/voorwaarden), and contact info
+- **Dashboard (/dashboard):**
+  - Personalized welcome with business name from bedrijfsprofiel
+  - Plan badge showing BASIC or PRO status
+  - Plan info display below welcome message
+  - Navigation via sidebar to all features
+  - Contextual recommendations based on user pain points
+- **Legal Pages:**
+  - /privacy: AVG-compliant privacy statement covering data collection, usage, security, and user rights
+  - /voorwaarden: General terms covering membership, payment, platform use, liability (including RegioBot disclaimer), and applicable law
+  - Both pages have professional layout with back-to-home navigation
+  - Footer links to legal pages on all public pages
+- **Security Hardening:**
+  - Session-based CSRF protection via express-session
+  - Zod schema validation on all API endpoints
+  - Upload routes protected with requirePro middleware (authenticated Pro users only)
+  - Input sanitization and type validation throughout
+- **Beta-Ready Status:**
+  - Professional, trustworthy design throughout
+  - Consistent Dutch language and terminology
+  - All pages have proper data-testid attributes for testing
+  - No LSP errors, fully type-safe codebase
+
 ## External Dependencies
 
 **Third-Party Services:**
