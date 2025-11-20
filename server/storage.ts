@@ -176,6 +176,10 @@ export class MemStorage implements IStorage {
       firstName: userData.firstName || null,
       lastName: userData.lastName || null,
       profileImageUrl: null,
+      businessName: null,
+      bio: null,
+      category: null,
+      mustCompleteOnboarding: true,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -194,6 +198,10 @@ export class MemStorage implements IStorage {
       firstName: userData.firstName || null,
       lastName: userData.lastName || null,
       profileImageUrl: userData.profileImageUrl || null,
+      businessName: userData.businessName || null,
+      bio: userData.bio || null,
+      category: userData.category || null,
+      mustCompleteOnboarding: userData.mustCompleteOnboarding ?? true,
       createdAt: existing?.createdAt || new Date(),
       updatedAt: new Date(),
     };
@@ -1033,6 +1041,10 @@ class DbStorage implements IStorage {
         plan: userData.plan || "basic",
         firstName: userData.firstName || null,
         lastName: userData.lastName || null,
+        businessName: null,
+        bio: null,
+        category: null,
+        mustCompleteOnboarding: true,
       })
       .returning();
     return user;
@@ -1049,6 +1061,10 @@ class DbStorage implements IStorage {
         firstName: userData.firstName || null,
         lastName: userData.lastName || null,
         profileImageUrl: userData.profileImageUrl || null,
+        businessName: userData.businessName || null,
+        bio: userData.bio || null,
+        category: userData.category || null,
+        mustCompleteOnboarding: userData.mustCompleteOnboarding ?? true,
       })
       .onConflictDoUpdate({
         target: users.id,
@@ -1059,6 +1075,10 @@ class DbStorage implements IStorage {
           firstName: userData.firstName || null,
           lastName: userData.lastName || null,
           profileImageUrl: userData.profileImageUrl || null,
+          businessName: userData.businessName || null,
+          bio: userData.bio || null,
+          category: userData.category || null,
+          mustCompleteOnboarding: userData.mustCompleteOnboarding ?? true,
           updatedAt: new Date(),
         },
       })
