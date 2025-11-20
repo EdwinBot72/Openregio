@@ -7,6 +7,7 @@ import { fromZodError } from "zod-validation-error";
 import { createMollieClient } from "@mollie/api-client";
 import { setupSimpleAuth } from "./simpleAuth";
 import { attachUser } from "./middleware/auth";
+import { seedMasterAccount } from "./seed";
 
 // Initialize Mollie client (requires MOLLIE_API_KEY environment variable)
 const mollieClient = process.env.MOLLIE_API_KEY 
@@ -23,6 +24,9 @@ function getBaseUrl(req: any): string {
 export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize email/password auth (API endpoints)
   setupSimpleAuth(app);
+  
+  // Seed master account (idempotent - only creates if doesn't exist)
+  await seedMasterAccount();
   
   // Attach user to all requests (makes req.user available)
   app.use(attachUser);
