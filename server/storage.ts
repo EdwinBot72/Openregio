@@ -58,7 +58,8 @@ export interface IStorage {
   getUserById(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
-  createUser(user: { email: string; passwordHash: string; plan?: "basic" | "pro"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null }): Promise<User>;
+  createUser(user: { email: string; passwordHash: string; plan?: "basic" | "pro"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null; mustCompleteOnboarding?: boolean; onboardingToken?: string | null }): Promise<User>;
+  updateUserPlan(userId: string, plan: "basic" | "pro"): Promise<User | undefined>;
   getUserProfileByReplitUserId(replitUserId: string): Promise<UserProfile | undefined>;
   
   // Entrepreneurs
@@ -166,7 +167,7 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values()).find(u => u.email === email);
   }
 
-  async createUser(userData: { email: string; passwordHash: string; plan?: "basic" | "pro"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null }): Promise<User> {
+  async createUser(userData: { email: string; passwordHash: string; plan?: "basic" | "pro"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null; mustCompleteOnboarding?: boolean; onboardingToken?: string | null }): Promise<User> {
     const id = randomUUID();
     const user: User = {
       id,
@@ -180,7 +181,8 @@ export class MemStorage implements IStorage {
       businessName: null,
       bio: null,
       category: null,
-      mustCompleteOnboarding: true,
+      mustCompleteOnboarding: userData.mustCompleteOnboarding ?? true,
+      onboardingToken: userData.onboardingToken || null,
       createdAt: new Date(),
       updatedAt: new Date(),
     };
@@ -204,11 +206,28 @@ export class MemStorage implements IStorage {
       bio: userData.bio || null,
       category: userData.category || null,
       mustCompleteOnboarding: userData.mustCompleteOnboarding ?? true,
+      onboardingToken: userData.onboardingToken || null,
       createdAt: existing?.createdAt || new Date(),
       updatedAt: new Date(),
     };
     this.users.set(user.id, user);
     return user;
+  }
+
+  async updateUserPlan(userId: string, plan: "basic" | "pro"): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (!user) {
+      return undefined;
+    }
+    
+    const updatedUser: User = {
+      ...user,
+      plan,
+      updatedAt: new Date(),
+    };
+    
+    this.users.set(userId, updatedUser);
+    return updatedUser;
   }
 
   async getUserProfileByReplitUserId(replitUserId: string): Promise<UserProfile | undefined> {
@@ -926,9 +945,10 @@ export class MemStorage implements IStorage {
     const newSubscription: Subscription = {
       id,
       userId: subscription.userId,
+      molliePaymentId: subscription.molliePaymentId ?? null,
       mollieCustomerId: subscription.mollieCustomerId ?? null,
       mollieSubscriptionId: subscription.mollieSubscriptionId ?? null,
-      status: subscription.status ?? "trialing",
+      status: subscription.status ?? "active",
       plan: subscription.plan,
       currentPeriodEnd: subscription.currentPeriodEnd ?? null,
       canceledAt: null,
@@ -1034,7 +1054,7 @@ class DbStorage implements IStorage {
     return user;
   }
 
-  async createUser(userData: { email: string; passwordHash: string; plan?: "basic" | "pro"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null }): Promise<User> {
+  async createUser(userData: { email: string; passwordHash: string; plan?: "basic" | "pro"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null; mustCompleteOnboarding?: boolean; onboardingToken?: string | null }): Promise<User> {
     const [user] = await db
       .insert(users)
       .values({
@@ -1047,7 +1067,8 @@ class DbStorage implements IStorage {
         businessName: null,
         bio: null,
         category: null,
-        mustCompleteOnboarding: true,
+        mustCompleteOnboarding: userData.mustCompleteOnboarding ?? true,
+        onboardingToken: userData.onboardingToken || null,
       })
       .returning();
     return user;
@@ -1069,6 +1090,7 @@ class DbStorage implements IStorage {
         bio: userData.bio || null,
         category: userData.category || null,
         mustCompleteOnboarding: userData.mustCompleteOnboarding ?? true,
+        onboardingToken: userData.onboardingToken || null,
       })
       .onConflictDoUpdate({
         target: users.id,
@@ -1084,9 +1106,19 @@ class DbStorage implements IStorage {
           bio: userData.bio || null,
           category: userData.category || null,
           mustCompleteOnboarding: userData.mustCompleteOnboarding ?? true,
+          onboardingToken: userData.onboardingToken || null,
           updatedAt: new Date(),
         },
       })
+      .returning();
+    return user;
+  }
+
+  async updateUserPlan(userId: string, plan: "basic" | "pro"): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ plan, updatedAt: new Date() })
+      .where(eq(users.id, userId))
       .returning();
     return user;
   }

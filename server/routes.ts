@@ -8,6 +8,8 @@ import { createMollieClient } from "@mollie/api-client";
 import { setupSimpleAuth } from "./simpleAuth";
 import { attachUser } from "./middleware/auth";
 import { seedMasterAccount } from "./seed";
+import { generateRandomPassword, generateOnboardingToken, getPlanPrice, getPlanDisplayName } from "./utils/auth";
+import bcrypt from "bcrypt";
 
 // Initialize Mollie client (requires MOLLIE_API_KEY environment variable)
 const mollieClient = process.env.MOLLIE_API_KEY 
@@ -30,6 +32,156 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Attach user to all requests (makes req.user available)
   app.use(attachUser);
+  
+  // BLOK 2: Mollie Payment Flow (Basic €9,95 / Pro €19,95)
+  
+  // POST /start - Create Mollie payment for plan subscription
+  app.post("/start", async (req, res) => {
+    try {
+      const { email, plan } = req.body;
+      
+      // Validate input
+      if (!email || !plan) {
+        return res.status(400).json({ error: "Email en plan zijn verplicht" });
+      }
+      
+      if (!["basic", "pro"].includes(plan)) {
+        return res.status(400).json({ error: "Plan moet 'basic' of 'pro' zijn" });
+      }
+      
+      // Validate email format
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({ error: "Ongeldig e-mailadres" });
+      }
+      
+      if (!mollieClient) {
+        console.error("Mollie API key niet geconfigureerd");
+        return res.status(500).json({ error: "Betalingssysteem niet beschikbaar" });
+      }
+      
+      const baseUrl = getBaseUrl(req);
+      const amount = getPlanPrice(plan);
+      const description = `${getPlanDisplayName(plan)} - Maandelijks abonnement`;
+      
+      // Create Mollie payment
+      const payment = await mollieClient.payments.create({
+        amount: {
+          value: amount,
+          currency: "EUR"
+        },
+        description,
+        redirectUrl: `${baseUrl}/payment-success?email=${encodeURIComponent(email)}&plan=${plan}`,
+        webhookUrl: `${baseUrl}/api/mollie/webhook`,
+        metadata: {
+          email,
+          plan,
+          source: "openregio-signup"
+        }
+      });
+      
+      console.log(`✓ Mollie payment created: ${payment.id} for ${email} (${plan})`);
+      
+      // Redirect to Mollie checkout
+      const checkoutUrl = payment.getCheckoutUrl();
+      if (!checkoutUrl) {
+        return res.status(500).json({ error: "Kon checkout URL niet genereren" });
+      }
+      
+      res.json({ checkoutUrl });
+    } catch (error: any) {
+      console.error("Fout bij aanmaken Mollie payment:", error);
+      res.status(500).json({ error: "Kon betaling niet aanmaken" });
+    }
+  });
+  
+  // POST /api/mollie/webhook - Handle Mollie payment status updates
+  app.post("/api/mollie/webhook", async (req, res) => {
+    try {
+      const paymentId = req.body.id;
+      
+      if (!paymentId) {
+        console.error("Webhook ontvangen zonder payment ID");
+        return res.status(400).send("Missing payment ID");
+      }
+      
+      if (!mollieClient) {
+        console.error("Mollie API key niet geconfigureerd");
+        return res.status(500).send("Mollie client not configured");
+      }
+      
+      // Fetch payment details from Mollie
+      const payment = await mollieClient.payments.get(paymentId);
+      
+      console.log(`Webhook ontvangen voor payment ${paymentId}: status=${payment.status}`);
+      
+      // Only process paid payments
+      if (payment.status === "paid") {
+        const { email, plan } = payment.metadata as { email: string; plan: string };
+        
+        if (!email || !plan) {
+          console.error("Payment metadata incomplete:", payment.metadata);
+          return res.status(200).send("OK"); // Still return 200 to acknowledge webhook
+        }
+        
+        console.log(`✓ Payment PAID for ${email} (${plan})`);
+        
+        // Check if user already exists
+        let user = await storage.getUserByEmail(email);
+        
+        if (!user) {
+          // Generate random password and onboarding token
+          const tempPassword = generateRandomPassword();
+          const onboardingToken = generateOnboardingToken();
+          const passwordHash = await bcrypt.hash(tempPassword, 10);
+          
+          // Create new user
+          user = await storage.createUser({
+            email,
+            passwordHash,
+            plan: plan as "basic" | "pro",
+            role: "member",
+            mustCompleteOnboarding: true,
+            onboardingToken,
+          });
+          
+          console.log(`✓ User created: ${user.id} (${email})`);
+          console.log(`  Temporary password: ${tempPassword}`);
+          console.log(`  Onboarding token: ${onboardingToken}`);
+          
+          // TODO: Send welcome email with temporary password and onboarding link
+          // const onboardingLink = `${baseUrl}/onboarding?token=${onboardingToken}`;
+          // await sendWelcomeEmail(email, tempPassword, onboardingLink);
+          
+        } else {
+          console.log(`✓ User already exists: ${user.id} (${email})`);
+          
+          // Update user plan if different
+          if (user.plan !== plan) {
+            await storage.updateUserPlan(user.id, plan as "basic" | "pro");
+            console.log(`  Updated plan: ${user.plan} → ${plan}`);
+          }
+        }
+        
+        // Create subscription record
+        const subscription = await storage.createSubscription({
+          userId: user.id,
+          molliePaymentId: payment.id,
+          plan: plan as "basic" | "pro",
+          status: "active",
+        });
+        
+        console.log(`✓ Subscription created: ${subscription.id}`);
+      }
+      
+      // Always return 200 OK to acknowledge webhook
+      res.status(200).send("OK");
+    } catch (error: any) {
+      console.error("Fout in Mollie webhook:", error);
+      // Still return 200 to prevent Mollie from retrying
+      res.status(200).send("OK");
+    }
+  });
   
   // Entrepreneurs routes
   app.get("/api/entrepreneurs", async (req, res) => {

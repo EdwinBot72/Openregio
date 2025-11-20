@@ -34,6 +34,7 @@ export const users = pgTable("users", {
   bio: text("bio"),
   category: varchar("category"),
   mustCompleteOnboarding: boolean("must_complete_onboarding").default(true).notNull(),
+  onboardingToken: varchar("onboarding_token"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -179,10 +180,11 @@ export const posts = pgTable("posts", {
 
 export const subscriptions = pgTable("subscriptions", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  userId: varchar("user_id").notNull().references(() => userProfiles.id),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  molliePaymentId: text("mollie_payment_id").unique(),
   mollieCustomerId: text("mollie_customer_id"),
   mollieSubscriptionId: text("mollie_subscription_id"),
-  status: text("status").notNull().default("trialing"),
+  status: text("status").notNull().default("active"),
   plan: text("plan").notNull().default("basic"),
   currentPeriodEnd: timestamp("current_period_end"),
   canceledAt: timestamp("canceled_at"),
