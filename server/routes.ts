@@ -98,6 +98,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // POST /api/mollie/webhook - Handle Mollie payment status updates
   app.post("/api/mollie/webhook", async (req, res) => {
     try {
+      const baseUrl = process.env.PUBLIC_BASE_URL || getBaseUrl(req);
       const paymentId = req.body.id;
       
       if (!paymentId) {
@@ -191,6 +192,120 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Fout in Mollie webhook:", error);
       // Still return 200 to prevent Mollie from retrying
       res.status(200).send("OK");
+    }
+  });
+
+  // GET /first-login - Onboarding flow: validate token and show form
+  app.get("/api/first-login/validate", async (req, res) => {
+    try {
+      const { token } = req.query;
+
+      if (!token || typeof token !== "string") {
+        return res.status(400).json({ error: "Token is verplicht" });
+      }
+
+      // Get onboarding token from database
+      const onboardingToken = await storage.getOnboardingTokenByToken(token);
+      
+      if (!onboardingToken) {
+        return res.status(404).json({ error: "Onboarding link is ongeldig" });
+      }
+
+      // Check if token is expired
+      if (new Date() > new Date(onboardingToken.expiresAt)) {
+        return res.status(410).json({ error: "Onboarding link is verlopen" });
+      }
+
+      // Get user
+      const user = await storage.getUserById(onboardingToken.userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: "Gebruiker niet gevonden" });
+      }
+
+      // Return user info (excluding sensitive data)
+      res.json({
+        email: user.email,
+        plan: user.plan,
+      });
+    } catch (error) {
+      console.error("Error validating onboarding token:", error);
+      res.status(500).json({ error: "Fout bij valideren onboarding link" });
+    }
+  });
+
+  // POST /first-login - Complete onboarding
+  app.post("/api/first-login", async (req, res) => {
+    try {
+      const { token, password, businessName, bio, category } = req.body;
+
+      if (!token) {
+        return res.status(400).json({ error: "Token is verplicht" });
+      }
+
+      if (!password || password.length < 6) {
+        return res.status(400).json({ error: "Wachtwoord moet minimaal 6 tekens zijn" });
+      }
+
+      if (!businessName) {
+        return res.status(400).json({ error: "Bedrijfsnaam is verplicht" });
+      }
+
+      // Get onboarding token
+      const onboardingToken = await storage.getOnboardingTokenByToken(token);
+      
+      if (!onboardingToken) {
+        return res.status(404).json({ error: "Onboarding link is ongeldig" });
+      }
+
+      // Check if token is expired
+      if (new Date() > new Date(onboardingToken.expiresAt)) {
+        return res.status(410).json({ error: "Onboarding link is verlopen" });
+      }
+
+      // Get user
+      const user = await storage.getUserById(onboardingToken.userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: "Gebruiker niet gevonden" });
+      }
+
+      // Hash new password
+      const passwordHash = await bcrypt.hash(password, 10);
+
+      // Update user with new password and profile info
+      const updatedUser = await storage.upsertUser({
+        id: user.id,
+        email: user.email,
+        passwordHash,
+        businessName,
+        bio: bio || undefined,
+        category: category || undefined,
+        mustCompleteOnboarding: false,
+        plan: user.plan as "basic" | "pro",
+        role: user.role as "member" | "master" | "admin",
+      });
+
+      // Delete onboarding token
+      await storage.deleteOnboardingToken(token);
+
+      // Create session
+      req.session.userId = user.id;
+
+      console.log(`✓ Onboarding completed for user: ${user.id} (${user.email})`);
+
+      res.json({ 
+        message: "Onboarding succesvol afgerond",
+        user: {
+          id: updatedUser!.id,
+          email: updatedUser!.email,
+          businessName: updatedUser!.businessName,
+          plan: updatedUser!.plan,
+        }
+      });
+    } catch (error) {
+      console.error("Error completing onboarding:", error);
+      res.status(500).json({ error: "Fout bij afronden onboarding" });
     }
   });
   
