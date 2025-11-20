@@ -20,6 +20,8 @@ import {
   type InsertSubscription,
   type OnboardingToken,
   type InsertOnboardingToken,
+  type Document,
+  type InsertDocument,
   type ProposalSummary,
   type User,
   type UpsertUser,
@@ -35,6 +37,7 @@ import {
   userProfiles,
   subscriptions,
   onboardingTokens,
+  documents,
   users,
   bedrijfsprofielen,
 } from "@shared/schema";
@@ -125,6 +128,10 @@ export interface IStorage {
   createBedrijfsprofiel(profiel: InsertBedrijfsprofiel): Promise<Bedrijfsprofiel>;
   updateBedrijfsprofiel(id: string, profiel: Partial<InsertBedrijfsprofiel>): Promise<Bedrijfsprofiel | undefined>;
 
+  // Documents
+  getUserDocuments(userId: string): Promise<Document[]>;
+  createDocument(document: InsertDocument): Promise<Document>;
+
   // Stats
   getStats(): Promise<{
     totalMembers: number;
@@ -147,6 +154,7 @@ export class MemStorage implements IStorage {
   private subscriptions: Map<string, Subscription>;
   private onboardingTokens: Map<string, OnboardingToken>;
   private bedrijfsprofielen: Map<string, Bedrijfsprofiel>;
+  private documentsList: Map<string, Document>;
 
   constructor() {
     this.users = new Map();
@@ -161,6 +169,7 @@ export class MemStorage implements IStorage {
     this.subscriptions = new Map();
     this.onboardingTokens = new Map();
     this.bedrijfsprofielen = new Map();
+    this.documentsList = new Map();
     this.seedData();
   }
 
@@ -1060,6 +1069,21 @@ export class MemStorage implements IStorage {
     return updated;
   }
 
+  async getUserDocuments(userId: string): Promise<Document[]> {
+    return Array.from(this.documentsList.values()).filter(doc => doc.userId === userId);
+  }
+
+  async createDocument(document: InsertDocument): Promise<Document> {
+    const id = randomUUID();
+    const newDoc: Document = {
+      id,
+      ...document,
+      createdAt: new Date(),
+    };
+    this.documentsList.set(id, newDoc);
+    return newDoc;
+  }
+
   async getStats() {
     return {
       totalMembers: this.entrepreneurs.size + 2800,
@@ -1542,6 +1566,20 @@ class DbStorage implements IStorage {
     const results = await db.update(bedrijfsprofielen)
       .set({ ...profiel, bijgewerkt: new Date() })
       .where(eq(bedrijfsprofielen.id, id))
+      .returning();
+    return results[0];
+  }
+
+  async getUserDocuments(userId: string): Promise<Document[]> {
+    return await db.select()
+      .from(documents)
+      .where(eq(documents.userId, userId))
+      .orderBy(desc(documents.createdAt));
+  }
+
+  async createDocument(document: InsertDocument): Promise<Document> {
+    const results = await db.insert(documents)
+      .values(document)
       .returning();
     return results[0];
   }

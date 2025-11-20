@@ -10,6 +10,7 @@ import { attachUser, requirePro } from "./middleware/auth";
 import { seedMasterAccount } from "./seed";
 import { generateRandomPassword, generateOnboardingToken, getPlanPrice, getPlanDisplayName } from "./utils/auth";
 import bcrypt from "bcrypt";
+import { upload, getDocumentType } from "./middleware/upload";
 
 // Initialize Mollie client (requires MOLLIE_API_KEY environment variable)
 const mollieClient = process.env.MOLLIE_API_KEY 
@@ -715,6 +716,59 @@ Output formaat:
     } catch (error) {
       console.error("RegioBot error:", error);
       res.status(500).json({ error: "Failed to get response from RegioBot" });
+    }
+  });
+
+  // BLOK 5: RegioBot document upload endpoint (Pro-only)
+  app.post("/api/regiobot/upload", requirePro, upload.single('file'), async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ error: "Niet geauthenticeerd" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ error: "Geen bestand geüpload" });
+      }
+
+      // Determine document type from mime type
+      const docType = getDocumentType(req.file.mimetype);
+
+      // Store document metadata in database
+      const document = await storage.createDocument({
+        userId: req.user.id,
+        filePath: req.file.path,
+        originalName: req.file.originalname,
+        mimeType: req.file.mimetype,
+        type: docType,
+      });
+
+      res.status(201).json({
+        success: true,
+        document: {
+          id: document.id,
+          originalName: document.originalName,
+          type: document.type,
+          createdAt: document.createdAt,
+        }
+      });
+    } catch (error) {
+      console.error("Upload error:", error);
+      res.status(500).json({ error: "Bestand uploaden mislukt" });
+    }
+  });
+
+  // Get user's uploaded documents
+  app.get("/api/regiobot/documents", requirePro, async (req, res) => {
+    try {
+      if (!req.user) {
+        return res.status(401).json({ error: "Niet geauthenticeerd" });
+      }
+
+      const documents = await storage.getUserDocuments(req.user.id);
+      res.json(documents);
+    } catch (error) {
+      console.error("Get documents error:", error);
+      res.status(500).json({ error: "Documenten ophalen mislukt" });
     }
   });
 
