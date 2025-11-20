@@ -192,6 +192,14 @@ export const subscriptions = pgTable("subscriptions", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+export const onboardingTokens = pgTable("onboarding_tokens", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  token: varchar("token").notNull().unique(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertEntrepreneurSchema = createInsertSchema(entrepreneurs).omit({
   id: true,
   createdAt: true,
@@ -319,6 +327,14 @@ export type UserProfile = typeof userProfiles.$inferSelect;
 
 export type InsertSubscription = z.infer<typeof insertSubscriptionSchema>;
 export type Subscription = typeof subscriptions.$inferSelect;
+
+export const insertOnboardingTokenSchema = createInsertSchema(onboardingTokens).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertOnboardingToken = z.infer<typeof insertOnboardingTokenSchema>;
+export type OnboardingToken = typeof onboardingTokens.$inferSelect;
 
 // User types
 export const insertUserSchema = createInsertSchema(users).omit({
