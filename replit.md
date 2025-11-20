@@ -137,11 +137,39 @@ Preferred communication style: Simple, everyday language.
 
 ### Authentication and Authorization
 
-**Prepared Infrastructure:**
-- Session store configured with connect-pg-simple for PostgreSQL-backed sessions
-- Cookie-based session management ready for implementation
-- Credential-included fetch requests from frontend
-- Currently operating without authentication (to be implemented)
+**Custom Authentication System (BLOK 1 - Completed):**
+- Session-based authentication using express-session with PostgreSQL session store (connect-pg-simple)
+- bcrypt password hashing with salt rounds for secure credential storage
+- Cookie-based session management with httpOnly and secure flags (production)
+- 7-day session TTL (maxAge: 7 days, rolling sessions enabled)
+- SESSION_SECRET environment variable for session signing
+
+**API Endpoints:**
+- `POST /api/auth/register` - User registration with email validation, password requirements, duplicate check
+- `POST /api/auth/login` - User login with credential validation, session creation
+- `POST /api/auth/logout` - Session destruction
+- `GET /api/auth/user` - Get current authenticated user (returns complete user object)
+
+**User Data Model:**
+- Core fields: id, email, passwordHash, plan (basic/pro), firstName, lastName
+- Profile fields: businessName, bio, category (for business profile association)
+- Onboarding: mustCompleteOnboarding (boolean, defaults to true for new users)
+- All auth endpoints return complete user object including profile and onboarding fields
+
+**Middleware:**
+- `attachUser` - Loads user from session into req.user (supports both MemStorage and DbStorage)
+- `requireAuth` - Protects routes requiring authentication, returns 401 if not authenticated
+
+**Security:**
+- Password validation: Minimum 6 characters, bcrypt hashing with salt
+- Email validation: Basic format checking, uniqueness constraint in database
+- Session security: httpOnly cookies prevent XSS, secure flag in production prevents MITM
+- Storage abstraction: Auth middleware supports both in-memory and database backends
+
+**Frontend Integration:**
+- Credential-included fetch requests (credentials: "include")
+- Client-side login/register forms with Zod validation
+- Session persistence across page refreshes
 
 ### External Dependencies
 
