@@ -110,6 +110,18 @@ Preferred communication style: Simple, everyday language.
 - User-specific folder structure (`/uploads/{userId}/`).
 - API endpoints for uploading and retrieving user documents (Pro-only).
 
+**RegioBot Modes (BLOK 6 - Completed):**
+- Three specialized modes for different business needs:
+  - **General**: Algemene bedrijfsassistent voor SEO, strategieën en zakelijke processen
+  - **Legal**: Juridische uitleg-assistent (GEEN formeel advies) voor documenten en brieven in begrijpelijke taal
+  - **Marketing**: AI-marketeer voor social posts, blogs en aanbiedingen
+- Mode-based system prompts with detailed instructions per mode
+- Frontend UI with Tabs component for mode selection (Algemeen, Juridisch, Marketing)
+- Each mode has unique welcome message and quick action buttons
+- Conversation history support for better context in longer chats
+- Mode switching resets conversation with new welcome message
+- All features remain Pro-only via `requirePro` middleware
+
 ## External Dependencies
 
 **Third-Party Services:**
