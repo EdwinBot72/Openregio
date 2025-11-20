@@ -212,6 +212,10 @@ export const documents = pgTable("documents", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// RegioBot modes for specialized assistance
+export const REGIOBOT_MODES = ["general", "legal", "marketing"] as const;
+export type RegioBotMode = typeof REGIOBOT_MODES[number];
+
 export const insertEntrepreneurSchema = createInsertSchema(entrepreneurs).omit({
   id: true,
   createdAt: true,
@@ -382,3 +386,15 @@ export type UpsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
 export type RegisterUser = z.infer<typeof registerUserSchema>;
 export type LoginUser = z.infer<typeof loginUserSchema>;
+
+// RegioBot chat request schema
+export const regioBotChatSchema = z.object({
+  message: z.string().min(1, "Bericht is verplicht"),
+  mode: z.enum(REGIOBOT_MODES, { required_error: "Modus is verplicht" }).default("general"),
+  history: z.array(z.object({
+    role: z.enum(["user", "assistant"]),
+    content: z.string(),
+  })).optional(),
+});
+
+export type RegioBotChatRequest = z.infer<typeof regioBotChatSchema>;
