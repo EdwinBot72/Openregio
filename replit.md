@@ -4,7 +4,13 @@
 
 OpenRegio is a Dutch cooperative platform empowering local entrepreneurs by offering an alternative to large tech platforms. It integrates business networking, AI-powered marketing, and democratic governance. The platform enables entrepreneurs to create visible profiles, collaborate, utilize AI tools for content and SEO, and participate in cooperative decision-making through proposal voting.
 
-The application features a full-stack architecture with a React frontend, Express backend, and in-memory storage (MemStorage) for development, emphasizing professionalism and a community-first design.
+The application features a full-stack architecture with a React frontend, Express backend, and PostgreSQL database (via Neon), emphasizing professionalism and a community-first design.
+
+## Deployment Status
+
+**Beta-Ready**: ✅ All features implemented and tested
+**Database**: ✅ PostgreSQL provisioned and schema synchronized (development)
+**Production Deployment**: ⚠️ Requires manual database migration step (see DEPLOYMENT.md)
 
 ## User Preferences
 
