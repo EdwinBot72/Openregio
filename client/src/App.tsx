@@ -19,7 +19,7 @@ import ChatPage from "@/pages/chat";
 import OnboardingPage from "@/pages/onboarding";
 import LidmaatschapPage from "@/pages/lidmaatschap";
 import BedrijfsprofielPage from "@/pages/bedrijfsprofiel";
-import PaymentSuccessPage from "@/pages/payment-success";
+import BetalingGeslaagdPage from "@/pages/betaling-geslaagd";
 import FirstLoginPage from "@/pages/first-login";
 import PrivacyPage from "@/pages/privacy";
 import VoorwaardenPage from "@/pages/voorwaarden";
@@ -34,7 +34,7 @@ function PublicRouter() {
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />
       <Route path="/lidmaatschap" component={LidmaatschapPage} />
-      <Route path="/betaling-geslaagd" component={PaymentSuccessPage} />
+      <Route path="/betaling-geslaagd" component={BetalingGeslaagdPage} />
       <Route path="/first-login" component={FirstLoginPage} />
       <Route path="/privacy" component={PrivacyPage} />
       <Route path="/voorwaarden" component={VoorwaardenPage} />
