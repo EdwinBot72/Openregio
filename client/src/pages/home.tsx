@@ -10,26 +10,34 @@ export default function HomePage() {
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-          <Link href="/">
-            <a className="font-accent text-2xl font-bold text-primary" data-testid="link-home-logo">
-              OpenRegio
-            </a>
+          <Link 
+            href="/" 
+            className="font-accent text-2xl font-bold text-primary" 
+            data-testid="link-home-logo"
+          >
+            OpenRegio
           </Link>
           <div className="flex items-center gap-4">
-            <Link href="/lidmaatschap">
-              <a className="text-sm font-medium hover:text-primary transition-colors" data-testid="link-membership">
-                Lidmaatschap
-              </a>
+            <Link 
+              href="/lidmaatschap" 
+              className="text-sm font-medium hover:text-primary transition-colors" 
+              data-testid="link-membership"
+            >
+              Lidmaatschap
             </Link>
-            <Link href="/login">
-              <a className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors hover-elevate active-elevate-2 h-8 px-3 py-2" data-testid="button-nav-login">
-                Inloggen
-              </a>
+            <Link 
+              href="/login" 
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors hover-elevate active-elevate-2 h-8 px-3 py-2" 
+              data-testid="button-nav-login"
+            >
+              Inloggen
             </Link>
-            <Link href="/lidmaatschap">
-              <a className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors hover-elevate active-elevate-2 h-8 px-3 py-2 bg-primary text-primary-foreground border border-primary-border" data-testid="button-nav-start">
-                Start nu
-              </a>
+            <Link 
+              href="/lidmaatschap" 
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors hover-elevate active-elevate-2 h-8 px-3 py-2 bg-primary text-primary-foreground border border-primary-border" 
+              data-testid="button-nav-start"
+            >
+              Start nu
             </Link>
           </div>
         </div>
@@ -48,16 +56,20 @@ export default function HomePage() {
                 Geen Big Tech, geen algoritmes, wel échte samenwerking.
               </p>
               <div className="flex flex-wrap gap-4">
-                <Link href="/lidmaatschap">
-                  <a className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors hover-elevate active-elevate-2 min-h-10 px-6 py-2 text-lg bg-primary text-primary-foreground border border-primary-border" data-testid="button-hero-start">
-                    Word lid
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </a>
+                <Link 
+                  href="/lidmaatschap" 
+                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors hover-elevate active-elevate-2 min-h-10 px-6 py-2 text-lg bg-primary text-primary-foreground border border-primary-border" 
+                  data-testid="button-hero-start"
+                >
+                  Word lid
+                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
-                <Link href="/login">
-                  <a className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors hover-elevate active-elevate-2 min-h-10 px-6 py-2 text-lg border border-input bg-background" data-testid="button-hero-login">
-                    Inloggen
-                  </a>
+                <Link 
+                  href="/login" 
+                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors hover-elevate active-elevate-2 min-h-10 px-6 py-2 text-lg border border-input bg-background" 
+                  data-testid="button-hero-login"
+                >
+                  Inloggen
                 </Link>
               </div>
             </div>
