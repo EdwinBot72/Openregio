@@ -200,6 +200,18 @@ export const onboardingTokens = pgTable("onboarding_tokens", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Documents table for RegioBot uploads (PDF, DOC, TXT, images)
+export const DOCUMENT_TYPES = ["doc", "image"] as const;
+export const documents = pgTable("documents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  filePath: text("file_path").notNull(),
+  originalName: text("original_name").notNull(),
+  mimeType: text("mime_type").notNull(),
+  type: varchar("type", { enum: DOCUMENT_TYPES }).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const insertEntrepreneurSchema = createInsertSchema(entrepreneurs).omit({
   id: true,
   createdAt: true,
@@ -334,6 +346,14 @@ export const insertOnboardingTokenSchema = createInsertSchema(onboardingTokens).
 });
 
 export type InsertOnboardingToken = z.infer<typeof insertOnboardingTokenSchema>;
+
+export const insertDocumentSchema = createInsertSchema(documents).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertDocument = z.infer<typeof insertDocumentSchema>;
+export type Document = typeof documents.$inferSelect;
 export type OnboardingToken = typeof onboardingTokens.$inferSelect;
 
 // User types
