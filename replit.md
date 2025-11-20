@@ -125,6 +125,10 @@ Preferred communication style: Simple, everyday language.
 - **Votes**: Vote records with foreign key to proposals, choice validation, duplicate prevention
 - **Activities**: Activity feed entries for user engagement tracking
 - **User Profiles**: User accounts with pain points array (8 frustration types: visibility, rules, time, platform_fees, no_community, digital_stress, rights_confusion, low_autonomy) for personalized onboarding
+- **Onboarding Tokens**: Secure token-based first login for payment integration
+  - Fields: user_id (FK to users), token (64-char hex), expires_at (timestamp)
+  - Purpose: Enable secure onboarding flow after Mollie payment with 7-day token expiration
+  - Lifecycle: Created by webhook → Used once at /first-login → Automatically deleted after use
 - **Timestamps and audit**: createdAt on all entities for chronological tracking
 - **Table Coexistence**: bedrijfsprofielen and entrepreneurs tables exist alongside each other - bedrijfsprofielen is the newer Dutch-first model
 
@@ -170,6 +174,18 @@ Preferred communication style: Simple, everyday language.
 - Credential-included fetch requests (credentials: "include")
 - Client-side login/register forms with Zod validation
 - Session persistence across page refreshes
+
+**Token-Based Onboarding System (BLOK 3 - Completed):**
+- Onboarding flow for Mollie payment integration with secure token-based first login
+- `onboarding_tokens` table: user_id (FK to users), token (64-char hex), expires_at (7 days)
+- **Webhook Integration**: Mollie webhook creates user with must_complete_onboarding=true and generates onboarding token
+- **API Endpoints**:
+  - `GET /api/first-login/validate?token=xxx` - Validates token and returns user info (400/404/410 error codes)
+  - `POST /api/first-login` - Completes onboarding with password, businessName, bio, category; creates session and deletes token
+- **Frontend**: /first-login page with token validation, form with password/confirm, business info, category dropdown from API
+- **Middleware**: `requireOnboardingDone` redirects users with must_complete_onboarding=true to /first-login (skips /first-login route)
+- **Security**: 7-day token expiration, bcrypt password hashing, automatic token cleanup after use
+- **User Flow**: Payment → Email with token link → /first-login → Complete profile → Redirect to /dashboard
 
 ### External Dependencies
 
