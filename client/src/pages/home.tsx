@@ -57,19 +57,19 @@ export default function HomePage() {
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link 
-                  href="/lidmaatschap" 
-                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors hover-elevate active-elevate-2 min-h-10 px-6 py-2 text-lg bg-primary text-primary-foreground border border-primary-border" 
-                  data-testid="button-hero-start"
+                  href="/lidmaatschap?plan=basic" 
+                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors hover-elevate active-elevate-2 min-h-10 px-6 py-2 text-lg border border-input bg-background" 
+                  data-testid="button-hero-basic"
                 >
-                  Word lid
-                  <ArrowRight className="ml-2 h-5 w-5" />
+                  Word Basis lid – €9,95
                 </Link>
                 <Link 
-                  href="/login" 
-                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors hover-elevate active-elevate-2 min-h-10 px-6 py-2 text-lg border border-input bg-background" 
-                  data-testid="button-hero-login"
+                  href="/lidmaatschap?plan=pro" 
+                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors hover-elevate active-elevate-2 min-h-10 px-6 py-2 text-lg bg-primary text-primary-foreground border border-primary-border" 
+                  data-testid="button-hero-pro"
                 >
-                  Inloggen
+                  Word Pro – €19,95 (incl. RegioBot)
+                  <ArrowRight className="ml-2 h-5 w-5" />
                 </Link>
               </div>
             </div>
