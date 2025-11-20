@@ -84,6 +84,10 @@ export function setupSimpleAuth(app: Express) {
           plan: user.plan,
           firstName: user.firstName,
           lastName: user.lastName,
+          businessName: user.businessName,
+          bio: user.bio,
+          category: user.category,
+          mustCompleteOnboarding: user.mustCompleteOnboarding,
         },
       });
     } catch (error) {
@@ -126,6 +130,10 @@ export function setupSimpleAuth(app: Express) {
           plan: user.plan,
           firstName: user.firstName,
           lastName: user.lastName,
+          businessName: user.businessName,
+          bio: user.bio,
+          category: user.category,
+          mustCompleteOnboarding: user.mustCompleteOnboarding,
         },
       });
     } catch (error) {
@@ -164,6 +172,10 @@ export function setupSimpleAuth(app: Express) {
           plan: user.plan,
           firstName: user.firstName,
           lastName: user.lastName,
+          businessName: user.businessName,
+          bio: user.bio,
+          category: user.category,
+          mustCompleteOnboarding: user.mustCompleteOnboarding,
         },
       });
     } catch (error) {

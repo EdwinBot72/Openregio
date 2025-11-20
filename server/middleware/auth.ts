@@ -1,7 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { db } from 'db';
-import { users } from '@shared/schema';
-import { eq } from 'drizzle-orm';
+import { storage } from '../storage';
 
 // Extend Express Request type to include user
 declare global {
@@ -25,15 +23,12 @@ declare global {
 /**
  * Middleware to attach user to request if logged in
  * Does NOT require auth - just attaches user if session exists
+ * Uses storage abstraction to support both MemStorage and DbStorage
  */
 export async function attachUser(req: Request, res: Response, next: NextFunction) {
   if (req.session.userId) {
     try {
-      const [user] = await db
-        .select()
-        .from(users)
-        .where(eq(users.id, req.session.userId))
-        .limit(1);
+      const user = await storage.getUserById(req.session.userId);
 
       if (user) {
         req.user = {
