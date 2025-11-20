@@ -3,12 +3,18 @@ import type { User, UserProfile } from "@shared/schema";
 export interface AuthUser {
   user: {
     id: string;
-    email: string | null;
+    email: string;
+    plan: string;
+    role: string;
     firstName: string | null;
     lastName: string | null;
     profileImageUrl: string | null;
+    businessName: string | null;
+    bio: string | null;
+    category: string | null;
+    mustCompleteOnboarding: boolean;
   };
-  profile: UserProfile;
+  profile?: UserProfile;
 }
 
 export async function fetchCurrentUser(): Promise<AuthUser | null> {

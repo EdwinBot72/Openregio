@@ -58,7 +58,7 @@ export interface IStorage {
   getUserById(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
-  createUser(user: { email: string; passwordHash: string; plan?: "basic" | "pro"; firstName?: string | null; lastName?: string | null }): Promise<User>;
+  createUser(user: { email: string; passwordHash: string; plan?: "basic" | "pro"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null }): Promise<User>;
   getUserProfileByReplitUserId(replitUserId: string): Promise<UserProfile | undefined>;
   
   // Entrepreneurs
@@ -166,13 +166,14 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values()).find(u => u.email === email);
   }
 
-  async createUser(userData: { email: string; passwordHash: string; plan?: "basic" | "pro"; firstName?: string | null; lastName?: string | null }): Promise<User> {
+  async createUser(userData: { email: string; passwordHash: string; plan?: "basic" | "pro"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null }): Promise<User> {
     const id = randomUUID();
     const user: User = {
       id,
       email: userData.email,
       passwordHash: userData.passwordHash,
       plan: userData.plan || "basic",
+      role: userData.role || "member",
       firstName: userData.firstName || null,
       lastName: userData.lastName || null,
       profileImageUrl: null,
@@ -195,6 +196,7 @@ export class MemStorage implements IStorage {
       email: userData.email!,
       passwordHash: userData.passwordHash || null,
       plan: (userData.plan as "basic" | "pro") || "basic",
+      role: (userData.role as "member" | "master" | "admin") || existing?.role || "member",
       firstName: userData.firstName || null,
       lastName: userData.lastName || null,
       profileImageUrl: userData.profileImageUrl || null,
@@ -1032,13 +1034,14 @@ class DbStorage implements IStorage {
     return user;
   }
 
-  async createUser(userData: { email: string; passwordHash: string; plan?: "basic" | "pro"; firstName?: string | null; lastName?: string | null }): Promise<User> {
+  async createUser(userData: { email: string; passwordHash: string; plan?: "basic" | "pro"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null }): Promise<User> {
     const [user] = await db
       .insert(users)
       .values({
         email: userData.email,
         passwordHash: userData.passwordHash,
         plan: userData.plan || "basic",
+        role: userData.role || "member",
         firstName: userData.firstName || null,
         lastName: userData.lastName || null,
         businessName: null,
@@ -1058,6 +1061,7 @@ class DbStorage implements IStorage {
         email: userData.email!,
         passwordHash: userData.passwordHash || null,
         plan: userData.plan || "basic",
+        role: userData.role || "member",
         firstName: userData.firstName || null,
         lastName: userData.lastName || null,
         profileImageUrl: userData.profileImageUrl || null,
@@ -1072,6 +1076,7 @@ class DbStorage implements IStorage {
           email: userData.email!,
           passwordHash: userData.passwordHash || null,
           plan: userData.plan || "basic",
+          role: userData.role || "member",
           firstName: userData.firstName || null,
           lastName: userData.lastName || null,
           profileImageUrl: userData.profileImageUrl || null,

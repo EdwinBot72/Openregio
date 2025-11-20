@@ -18,6 +18,7 @@ export const sessions = pgTable(
 // Shared constants for subscriptions (must be defined before users table)
 export const SUBSCRIPTION_STATUS = ["active", "trialing", "cancelled", "past_due"] as const;
 export const SUBSCRIPTION_PLANS = ["basic", "pro"] as const;
+export const USER_ROLES = ["member", "master", "admin"] as const;
 
 // Users table - supports both Replit Auth and email/password auth
 export const users = pgTable("users", {
@@ -25,6 +26,7 @@ export const users = pgTable("users", {
   email: varchar("email").unique().notNull(),
   passwordHash: varchar("password_hash"),
   plan: varchar("plan", { enum: SUBSCRIPTION_PLANS }).default("basic"),
+  role: varchar("role", { enum: USER_ROLES }).default("member").notNull(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
   profileImageUrl: varchar("profile_image_url"),
