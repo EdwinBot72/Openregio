@@ -9,8 +9,8 @@ import { Loader2 } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState(import.meta.env.DEV ? "edwin@stroombox.nl" : "");
+  const [password, setPassword] = useState(import.meta.env.DEV ? "Konijn01!?!" : "");
   const [isLoading, setIsLoading] = useState(false);
   const [, setLocation] = useLocation();
   const { toast } = useToast();
