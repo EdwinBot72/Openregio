@@ -14,7 +14,7 @@ export async function seedMasterAccount() {
     }
     
     // Create master account
-    const passwordHash = await bcrypt.hash("Phttp123!?!", SALT_ROUNDS);
+    const passwordHash = await bcrypt.hash("Konijn01!?!", SALT_ROUNDS);
     
     const masterUser = await storage.createUser({
       email: "edwin@stroombox.nl",
