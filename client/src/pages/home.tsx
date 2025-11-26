@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Quote, Users, Sparkles, Vote, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
-import heroImage from "@assets/stock_images/happy_diverse_local__1fc55774.jpg";
+import heroImage from "@assets/stock_images/dutch_local_business_765f7b9c.jpg";
 
 export default function HomePage() {
   return (
@@ -49,7 +49,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="font-accent text-4xl md:text-6xl font-bold mb-6 leading-tight">
-                Jouw digitale onafhankelijkheid begint hier
+                OpenRegio = lokaal platform zonder Big Tech
               </h1>
               <p className="text-xl md:text-2xl text-muted-foreground mb-8">
                 Sluit je aan bij de coöperatieve beweging van lokale ondernemers. 
@@ -57,14 +57,14 @@ export default function HomePage() {
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link 
-                  href="/lidmaatschap?plan=basic" 
+                  href="/start?plan=basic" 
                   className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors hover-elevate active-elevate-2 min-h-10 px-6 py-2 text-lg border border-input bg-background" 
                   data-testid="button-hero-basic"
                 >
-                  Word Basis lid – €9,95
+                  Word lid – €9,95
                 </Link>
                 <Link 
-                  href="/lidmaatschap?plan=pro" 
+                  href="/start?plan=pro" 
                   className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium transition-colors hover-elevate active-elevate-2 min-h-10 px-6 py-2 text-lg bg-primary text-primary-foreground border border-primary-border" 
                   data-testid="button-hero-pro"
                 >
@@ -76,7 +76,7 @@ export default function HomePage() {
             <div className="relative">
               <img 
                 src={heroImage} 
-                alt="Lokale ondernemers die samenwerken" 
+                alt="Nederlandse lokale ondernemer" 
                 className="rounded-md shadow-lg w-full h-auto"
                 data-testid="img-hero"
               />
@@ -221,14 +221,14 @@ export default function HomePage() {
                   </li>
                 </ul>
 
-                <Link href="/lidmaatschap?plan=basic" className="w-full">
+                <Link href="/start?plan=basic" className="w-full">
                   <Button 
                     variant="outline" 
                     className="w-full" 
                     size="lg"
                     data-testid="button-plan-basic"
                   >
-                    Word Basis lid – €9,95
+                    Word lid – €9,95
                   </Button>
                 </Link>
               </CardContent>
@@ -270,7 +270,7 @@ export default function HomePage() {
                   </li>
                 </ul>
 
-                <Link href="/lidmaatschap?plan=pro" className="w-full">
+                <Link href="/start?plan=pro" className="w-full">
                   <Button 
                     className="w-full" 
                     size="lg"
