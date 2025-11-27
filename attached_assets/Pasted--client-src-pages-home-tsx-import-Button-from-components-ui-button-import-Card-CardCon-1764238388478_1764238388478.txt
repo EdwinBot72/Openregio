@@ -1,3 +1,4 @@
+// client/src/pages/home.tsx
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowRight, Users, PhoneCall, Receipt } from "lucide-react";
@@ -10,26 +11,12 @@ export default function HomePage() {
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur border-b">
         <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-          <Link 
-            href="/" 
-            className="font-accent text-2xl font-bold text-primary"
-            data-testid="link-home-logo"
-          >
+          <Link href="/" className="font-accent text-2xl font-bold text-primary">
             OpenRegio
           </Link>
           <div className="flex items-center gap-4 text-sm">
-            <Link 
-              href="/login"
-              className="hover:text-primary transition-colors"
-              data-testid="button-nav-login"
-            >
-              Inloggen
-            </Link>
-            <Link 
-              href="/lidmaatschap" 
-              className="font-semibold hover:text-primary transition-colors"
-              data-testid="button-nav-membership"
-            >
+            <Link href="/login">Inloggen</Link>
+            <Link href="/lidmaatschap" className="font-semibold">
               Lid worden
             </Link>
           </div>
@@ -40,10 +27,10 @@ export default function HomePage() {
       <section className="py-16 md:py-24 px-4 flex-1">
         <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12 items-center">
           <div>
-            <h1 className="text-4xl md:text-5xl font-bold mb-4" data-testid="text-hero-title">
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
               Ondernemen terug naar de basis
             </h1>
-            <p className="text-lg text-muted-foreground mb-6" data-testid="text-hero-subtitle">
+            <p className="text-lg text-muted-foreground mb-6">
               OpenRegio is een lokaal ondernemersplatform waar je weer gewoon zaken doet:
               vaste klanten, korte lijntjes, simpel kunnen betalen – en afspraken die blijven
               staan, ook als systemen een keer niet meewerken.
@@ -51,19 +38,19 @@ export default function HomePage() {
 
             <div className="flex flex-wrap gap-3 mb-4">
               <Link href="/start?plan=basic">
-                <Button size="lg" data-testid="button-hero-basic">
+                <Button size="lg">
                   Word lid – €9,95 p/m
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </Link>
               <Link href="/basischeck">
-                <Button variant="outline" size="lg" data-testid="button-hero-basischeck">
+                <Button variant="outline" size="lg">
                   Doe de Basischeck
                 </Button>
               </Link>
             </div>
 
-            <p className="text-sm text-muted-foreground" data-testid="text-hero-tagline">
+            <p className="text-sm text-muted-foreground">
               Minder afhankelijk van platformen en knoppen, meer grip op je eigen netwerk en omzet.
             </p>
           </div>
@@ -73,10 +60,9 @@ export default function HomePage() {
               src={heroImage}
               alt="Lokale ondernemer in Nederland"
               className="rounded-2xl shadow-lg w-full object-cover"
-              data-testid="img-hero"
             />
             <div className="grid grid-cols-3 gap-3 text-xs md:text-sm">
-              <Card data-testid="card-feature-network">
+              <Card>
                 <CardContent className="p-3 flex flex-col items-start gap-1">
                   <Users className="w-4 h-4 text-primary" />
                   <div className="font-semibold">Lokaal netwerk</div>
@@ -85,7 +71,7 @@ export default function HomePage() {
                   </div>
                 </CardContent>
               </Card>
-              <Card data-testid="card-feature-payment">
+              <Card>
                 <CardContent className="p-3 flex flex-col items-start gap-1">
                   <Receipt className="w-4 h-4 text-primary" />
                   <div className="font-semibold">Simpel betalen</div>
@@ -94,7 +80,7 @@ export default function HomePage() {
                   </div>
                 </CardContent>
               </Card>
-              <Card data-testid="card-feature-contact">
+              <Card>
                 <CardContent className="p-3 flex flex-col items-start gap-1">
                   <PhoneCall className="w-4 h-4 text-primary" />
                   <div className="font-semibold">Blijft bereikbaar</div>
@@ -108,7 +94,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      <footer className="border-t py-6 text-center text-xs text-muted-foreground" data-testid="footer">
+      <footer className="border-t py-6 text-center text-xs text-muted-foreground">
         OpenRegio – lokaal netwerk, ondernemen terug naar de basis.
       </footer>
     </div>

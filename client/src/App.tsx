@@ -24,9 +24,10 @@ import FirstLoginPage from "@/pages/first-login";
 import PrivacyPage from "@/pages/privacy";
 import VoorwaardenPage from "@/pages/voorwaarden";
 import StartPage from "@/pages/start";
+import BasischeckPage from "@/pages/basischeck";
 
 // Routes that should NOT have the sidebar/header layout
-const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden"];
+const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck"];
 
 function PublicRouter() {
   return (
@@ -40,6 +41,7 @@ function PublicRouter() {
       <Route path="/first-login" component={FirstLoginPage} />
       <Route path="/privacy" component={PrivacyPage} />
       <Route path="/voorwaarden" component={VoorwaardenPage} />
+      <Route path="/basischeck" component={BasischeckPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -71,8 +73,9 @@ function AppContent() {
   const [isFirstLoginPage] = useRoute("/first-login");
   const [isPrivacyPage] = useRoute("/privacy");
   const [isVoorwaardenPage] = useRoute("/voorwaarden");
+  const [isBasischeckPage] = useRoute("/basischeck");
   
-  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isLidmaatschapPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage;
+  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isLidmaatschapPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage;
 
   if (isPublicRoute) {
     return <PublicRouter />;
