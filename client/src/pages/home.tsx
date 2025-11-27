@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Quote, Users, Banknote, Phone, Battery, FileText, Printer, ArrowRight } from "lucide-react";
+import { Quote, Users, Banknote, Phone, Battery, FileText, Printer, ArrowRight, Check, Sparkles, Bot } from "lucide-react";
 import { Link } from "wouter";
 import heroImage from "@assets/ChatGPT Image 27 nov 2025, 11_33_40_1764239636207.png";
 
@@ -59,7 +59,7 @@ export default function HomePage() {
               <div className="flex flex-wrap gap-4">
                 <Link href="/start?plan=basic">
                   <Button size="lg" data-testid="button-hero-basic">
-                    Word lid – €9,95 p/m
+                    Word lid v.a. €9,95 p/m
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
@@ -70,7 +70,7 @@ export default function HomePage() {
                 </Link>
               </div>
               <p className="text-sm text-muted-foreground mt-4" data-testid="text-hero-tagline">
-                Minder afhankelijk van platformen en knoppen, meer grip op je eigen netwerk en omzet.
+                Maandelijks opzegbaar, geen contracten. Minder afhankelijk, meer grip op je eigen netwerk.
               </p>
             </div>
             <div className="relative">
@@ -214,32 +214,104 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* CTA Section */}
+      {/* Pricing Section */}
       <section className="py-20 px-4 bg-gradient-to-br from-primary/5 via-background to-background">
-        <div className="max-w-3xl mx-auto text-center">
-          <h2 className="font-accent text-3xl md:text-4xl font-bold mb-4">
-            €9,95 per maand, maandelijks opzegbaar
-          </h2>
-          <p className="text-xl text-muted-foreground mb-8">
-            Geen contracten, geen gedoe. Toegang tot het lokale netwerk, de Basischeck, 
-            printbare templates en alle weerbaarheidsbadges.
-          </p>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Link href="/start?plan=basic">
-              <Button size="lg" data-testid="button-cta-join">
-                Word lid – €9,95 p/m
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="font-accent text-3xl md:text-4xl font-bold mb-4">
+              Word lid v.a. €9,95 per maand
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Maandelijks opzegbaar, geen contracten
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* Basis Plan */}
+            <Card data-testid="card-plan-basic" className="relative">
+              <CardContent className="p-8">
+                <h3 className="font-accent text-2xl font-bold mb-2">Basis</h3>
+                <div className="flex items-baseline gap-1 mb-6">
+                  <span className="text-4xl font-bold">€9,95</span>
+                  <span className="text-muted-foreground">/ maand</span>
+                </div>
+                <ul className="space-y-3 mb-8">
+                  {[
+                    "Profiel in het lokale netwerk",
+                    "Ledenlijst met contactgegevens",
+                    "Vraag & aanbod-bord",
+                    "Basischeck + weerbaarheidsbadges",
+                    "Printbare ledenlijst",
+                    "Factuur- en kasboek-templates",
+                  ].map((feature, idx) => (
+                    <li key={idx} className="flex items-start gap-3">
+                      <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/start?plan=basic">
+                  <Button className="w-full" size="lg" data-testid="button-plan-basic">
+                    Word Basis lid
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            {/* Pro Plan */}
+            <Card data-testid="card-plan-pro" className="relative border-primary">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <span className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
+                  <Sparkles className="h-3 w-3" />
+                  Populair
+                </span>
+              </div>
+              <CardContent className="p-8">
+                <h3 className="font-accent text-2xl font-bold mb-2">Pro</h3>
+                <div className="flex items-baseline gap-1 mb-6">
+                  <span className="text-4xl font-bold">€19,95</span>
+                  <span className="text-muted-foreground">/ maand</span>
+                </div>
+                <ul className="space-y-3 mb-8">
+                  {[
+                    "Alles van Basis, plus:",
+                    "RegioBot AI-assistent",
+                    "Juridische documenten uitleg",
+                    "Marketing content generator",
+                    "Documenten uploaden",
+                    "Prioriteit support",
+                  ].map((feature, idx) => (
+                    <li key={idx} className="flex items-start gap-3">
+                      {idx === 0 ? (
+                        <span className="h-5 w-5" />
+                      ) : (
+                        <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                      )}
+                      <span className={idx === 0 ? "font-semibold text-primary" : ""}>
+                        {feature}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/start?plan=pro">
+                  <Button className="w-full" size="lg" data-testid="button-plan-pro">
+                    Word Pro lid
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="text-center mt-8">
+            <Link href="/basischeck">
+              <Button variant="ghost" size="lg" data-testid="button-cta-basischeck">
+                Eerst de gratis Basischeck doen
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
-            <Link href="/basischeck">
-              <Button variant="outline" size="lg" data-testid="button-cta-basischeck">
-                Eerst de Basischeck doen
-              </Button>
-            </Link>
           </div>
-          <p className="text-sm text-muted-foreground mt-6">
-            Later: RegioPunten als interne strippenkaart voor doorverwijzingen en hulp.
-          </p>
         </div>
       </section>
 
