@@ -4,7 +4,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, XCircle, ArrowRight, ArrowLeft, Banknote, FileText, Phone, Battery, Users, Shield, AlertTriangle } from "lucide-react";
 import { Link } from "wouter";
-import introVideo from "@assets/Veerkrachtige_Lokale_Economieën_1764250581612.mp4";
 
 interface Question {
   id: string;
@@ -151,15 +150,16 @@ export default function BasischeckPage() {
 
           <Card className="mb-8 overflow-hidden">
             <CardContent className="p-0">
-              <video
-                src={introVideo}
-                controls
-                className="w-full aspect-video"
-                poster=""
-                data-testid="video-intro"
-              >
-                Je browser ondersteunt geen video.
-              </video>
+              <div className="relative w-full aspect-video">
+                <iframe
+                  src="https://www.youtube.com/embed/pwqUR9bG6kE"
+                  title="Veerkrachtige Lokale Economieën"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full"
+                  data-testid="video-intro"
+                />
+              </div>
             </CardContent>
           </Card>
 
