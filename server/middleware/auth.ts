@@ -136,3 +136,28 @@ export function requirePro(req: Request, res: Response, next: NextFunction) {
 
   next();
 }
+
+// Admin email - only this account has admin access
+const ADMIN_EMAIL = "edwin@stroombox.nl";
+
+/**
+ * Middleware to require Admin access
+ * Only the master admin account has access
+ */
+export function requireAdmin(req: Request, res: Response, next: NextFunction) {
+  if (!req.user) {
+    if (req.path.startsWith('/api/')) {
+      return res.status(401).json({ error: "Niet geautoriseerd" });
+    }
+    return res.redirect('/login');
+  }
+
+  if (req.user.email !== ADMIN_EMAIL) {
+    if (req.path.startsWith('/api/')) {
+      return res.status(403).json({ error: "Alleen admin heeft toegang" });
+    }
+    return res.redirect('/dashboard');
+  }
+
+  next();
+}

@@ -6,7 +6,7 @@ import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { createMollieClient } from "@mollie/api-client";
 import { setupSimpleAuth } from "./simpleAuth";
-import { attachUser, requirePro } from "./middleware/auth";
+import { attachUser, requirePro, requireAdmin } from "./middleware/auth";
 import { seedMasterAccount } from "./seed";
 import { generateRandomPassword, generateOnboardingToken, getPlanPrice, getPlanDisplayName } from "./utils/auth";
 import bcrypt from "bcrypt";
@@ -1085,6 +1085,63 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
     } catch (error: any) {
       console.error("Webhook error:", error);
       res.sendStatus(500);
+    }
+  });
+
+  // ===============================
+  // ADMIN EXPORT ROUTES
+  // ===============================
+
+  // GET /api/export/nieuwe-leden - Export new members (last 30 days)
+  app.get("/api/export/nieuwe-leden", requireAdmin, async (req, res) => {
+    try {
+      // Get all users created in the last 30 days
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const allUsers = await storage.getAllUsers();
+      
+      // Filter users by creation date and get their business profiles
+      const nieuweLeden = [];
+      
+      for (const user of allUsers) {
+        // Skip if no createdAt or if older than 30 days
+        if (!user.createdAt || new Date(user.createdAt) < thirtyDaysAgo) {
+          continue;
+        }
+        
+        // Get business profile if exists
+        const profiel = await storage.getBedrijfsprofielByUserId(user.id);
+        
+        nieuweLeden.push({
+          id: user.id,
+          email: user.email,
+          naam: profiel?.naam || `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Onbekend',
+          eigenaarnaam: profiel?.eigenaarnaam || `${user.firstName || ''} ${user.lastName || ''}`.trim(),
+          regio: profiel?.regio || '-',
+          plan: user.plan,
+          aangemeld: user.createdAt,
+          profielStatus: profiel?.status || 'geen profiel',
+        });
+      }
+
+      // Sort by newest first
+      nieuweLeden.sort((a, b) => 
+        new Date(b.aangemeld).getTime() - new Date(a.aangemeld).getTime()
+      );
+
+      res.json({
+        success: true,
+        periode: {
+          van: thirtyDaysAgo.toISOString().split('T')[0],
+          tot: new Date().toISOString().split('T')[0],
+        },
+        aantal: nieuweLeden.length,
+        leden: nieuweLeden,
+      });
+    } catch (error: any) {
+      console.error("Export nieuwe leden error:", error);
+      res.status(500).json({ error: "Kon nieuwe leden niet ophalen" });
     }
   });
 
