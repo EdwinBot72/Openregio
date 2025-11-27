@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Quote, Users, Banknote, Phone, Battery, FileText, Printer, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
-import heroImage from "@assets/stock_images/dutch_local_business_765f7b9c.jpg";
+import heroImage from "@assets/ChatGPT Image 27 nov 2025, 11_33_40_1764239636207.png";
 
 export default function HomePage() {
   return (
