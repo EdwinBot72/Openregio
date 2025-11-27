@@ -7,6 +7,7 @@ import {
   BarChart3,
   Megaphone,
   UploadCloud,
+  MapPin,
   Crown,
   Zap,
   Tag,
@@ -15,7 +16,7 @@ import {
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
 
-type Mode = "juridisch" | "documenten" | "cijfers" | "marketing";
+type Mode = "juridisch" | "documenten" | "cijfers" | "marketing" | "zichtbaarheid";
 
 export default function RegioBotPage() {
   const { user, isLoading } = useAuth();
@@ -34,6 +35,8 @@ export default function RegioBotPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!message.trim() && files.length === 0) return;
+
     setLoading(true);
     setAnswer(null);
 
@@ -47,11 +50,18 @@ export default function RegioBotPage() {
         method: "POST",
         body: formData,
       });
+
+      if (!res.ok) {
+        throw new Error("RegioBot API gaf een fout");
+      }
+
       const data = await res.json();
-      setAnswer(data.answer ?? "Geen antwoord ontvangen van de AI.");
+      setAnswer(data.answer ?? "Geen antwoord ontvangen van RegioBot.");
     } catch (err) {
       console.error(err);
-      setAnswer("Er ging iets mis met RegioBot. Probeer het later opnieuw.");
+      setAnswer(
+        "Er ging iets mis met RegioBot. Check je verbinding of probeer het later opnieuw."
+      );
     } finally {
       setLoading(false);
     }
@@ -161,7 +171,13 @@ export default function RegioBotPage() {
         <p className="text-sm md:text-base text-muted-foreground">
           Stel juridische, zakelijke en praktische vragen over jouw bedrijf.
           Upload documenten, cijfers en afbeeldingen, en laat RegioBot meedenken
-          – in normale taal.
+          – van bezwaarschriften en contracten tot lokale zichtbaarheid, offline
+          én online, zonder afhankelijk te zijn van grote platformen.
+        </p>
+        <p className="text-[11px] text-muted-foreground">
+          Alles wat je hier invoert (incl. uploads) is alleen zichtbaar voor
+          jou. Niets wordt automatisch gedeeld met andere leden, tenzij jij daar
+          zelf iets van publiceert.
         </p>
       </header>
 
@@ -193,6 +209,13 @@ export default function RegioBotPage() {
           active={mode === "marketing"}
           onClick={() => setMode("marketing")}
           testId="button-mode-marketing"
+        />
+        <ModeButton
+          icon={<MapPin className="w-4 h-4" />}
+          label="Zichtbaarheid & klantenstroom"
+          active={mode === "zichtbaarheid"}
+          onClick={() => setMode("zichtbaarheid")}
+          testId="button-mode-zichtbaarheid"
         />
       </section>
 
@@ -232,7 +255,7 @@ export default function RegioBotPage() {
                   Jouw vraag aan RegioBot
                 </label>
                 <textarea
-                  className="w-full border rounded-md p-2 text-sm min-h-[120px] bg-background"
+                  className="w-full border rounded-md p-2 text-sm min-h-[140px] bg-background"
                   placeholder={placeholderForMode(mode)}
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
@@ -243,7 +266,7 @@ export default function RegioBotPage() {
               <div className="flex items-center justify-between gap-2">
                 <Button
                   type="submit"
-                  disabled={loading || !message.trim()}
+                  disabled={loading || (!message.trim() && files.length === 0)}
                   data-testid="button-submit-regiobot"
                 >
                   {loading
@@ -277,6 +300,7 @@ export default function RegioBotPage() {
         <Card className="h-full">
           <CardContent className="p-5 space-y-3 text-sm">
             <h2 className="font-semibold mb-1">Voorbeelden voor deze modus</h2>
+
             {mode === "juridisch" && (
               <ul className="list-disc list-inside text-muted-foreground space-y-1">
                 <li>
@@ -288,11 +312,12 @@ export default function RegioBotPage() {
                   PDF-besluit."
                 </li>
                 <li>
-                  "Leg in normale taal uit wat dit vonnis of besluit voor mij
-                  betekent."
+                  "Leg in normale taal uit wat dit besluit van de gemeente voor
+                  mij betekent."
                 </li>
               </ul>
             )}
+
             {mode === "documenten" && (
               <ul className="list-disc list-inside text-muted-foreground space-y-1">
                 <li>
@@ -304,6 +329,7 @@ export default function RegioBotPage() {
                 <li>"Vat dit Word-document samen in 10 regels."</li>
               </ul>
             )}
+
             {mode === "cijfers" && (
               <ul className="list-disc list-inside text-muted-foreground space-y-1">
                 <li>
@@ -319,6 +345,7 @@ export default function RegioBotPage() {
                 </li>
               </ul>
             )}
+
             {mode === "marketing" && (
               <ul className="list-disc list-inside text-muted-foreground space-y-1">
                 <li>
@@ -331,6 +358,23 @@ export default function RegioBotPage() {
                 <li>
                   "Geef 5 ideeën om mijn bestaande klanten in de buurt weer te
                   activeren."
+                </li>
+              </ul>
+            )}
+
+            {mode === "zichtbaarheid" && (
+              <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                <li>
+                  "Geef een plan in 5 stappen om mijn bedrijf in [regio]
+                  zichtbaar te maken zonder social media-circus."
+                </li>
+                <li>
+                  "Schrijf een tekst voor een A4-deurposter + korte flyer om
+                  buren en passanten naar binnen te krijgen."
+                </li>
+                <li>
+                  "Maak een simpele combinatie-strategie: etalage, mond-tot-mond,
+                  Google Bedrijfsprofiel en een rustige website."
                 </li>
               </ul>
             )}
@@ -371,12 +415,14 @@ function ModeButton({ icon, label, active, onClick, testId }: ModeButtonProps) {
 function placeholderForMode(mode: Mode): string {
   switch (mode) {
     case "juridisch":
-      return "Beschrijf je juridische vraag of plak hier de tekst uit het document. Voorbeeld: 'Schrijf een bezwaarbrief op basis van de bijgevoegde PDF en deze situatie…'";
+      return "Beschrijf je juridische vraag of plak hier de tekst uit het document. Bijvoorbeeld: 'Schrijf een bezwaarbrief op basis van de bijgevoegde PDF en deze situatie…'";
     case "documenten":
-      return "Leg uit wat je met je brief of document wilt bereiken. Voorbeeld: 'Maak deze brief duidelijker en zakelijker voor een gemeente-ambtenaar…'";
+      return "Leg uit wat je met je brief of document wilt bereiken. Bijvoorbeeld: 'Maak deze brief duidelijker en zakelijker voor een gemeente-ambtenaar…'";
     case "cijfers":
-      return "Vertel kort wat er in je Excel/CSV zit en wat je wilt weten. Voorbeeld: 'Dit is mijn omzet/kosten per maand, geef 3 inzichten…'";
+      return "Vertel kort wat er in je Excel/CSV zit en wat je wilt weten. Bijvoorbeeld: 'Dit is mijn omzet/kosten per maand, geef 3 inzichten…'";
     case "marketing":
-      return "Beschrijf kort je bedrijf, doelgroep en wat je wilt promoten. Voorbeeld: 'Ik wil een actie doen voor nieuwe klanten in [regio]…'";
+      return "Beschrijf kort je bedrijf, doelgroep en wat je wilt promoten. Bijvoorbeeld: 'Ik wil een actie doen voor nieuwe klanten in [regio]…'";
+    case "zichtbaarheid":
+      return "Vertel hoe je nu zichtbaar bent in jouw buurt (offline en online) en wat je wilt verbeteren. Bijvoorbeeld: 'Ik heb een kleine winkel in [plaats], bijna geen online aanwezigheid. Geef een plan met 5 stappen: deurposter, flyer, Google Bedrijfsprofiel, simpele website en iets met bestaande klanten.'";
   }
 }
