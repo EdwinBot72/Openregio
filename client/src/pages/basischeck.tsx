@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { CheckCircle2, XCircle, ArrowRight, ArrowLeft, Banknote, FileText, Phone, Battery, Users, Shield, AlertTriangle } from "lucide-react";
 import { Link } from "wouter";
+import introVideo from "@assets/Veerkrachtige_Lokale_Economieën_1764250581612.mp4";
 
 interface Question {
   id: string;
@@ -147,6 +148,20 @@ export default function BasischeckPage() {
               hoe weerbaar je bent – en wat je kunt doen om sterker te staan.
             </p>
           </div>
+
+          <Card className="mb-8 overflow-hidden">
+            <CardContent className="p-0">
+              <video
+                src={introVideo}
+                controls
+                className="w-full aspect-video"
+                poster=""
+                data-testid="video-intro"
+              >
+                Je browser ondersteunt geen video.
+              </video>
+            </CardContent>
+          </Card>
 
           <Card className="mb-8">
             <CardContent className="p-8">
