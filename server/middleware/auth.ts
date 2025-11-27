@@ -1,6 +1,9 @@
 import { Request, Response, NextFunction } from 'express';
 import { storage } from '../storage';
 
+// Admin email - only this account has admin access
+const ADMIN_EMAIL = "edwin@stroombox.nl";
+
 // Extend Express Request type to include user
 declare global {
   namespace Express {
@@ -15,6 +18,7 @@ declare global {
         bio: string | null;
         category: string | null;
         mustCompleteOnboarding: boolean;
+        isAdmin: boolean;
       };
     }
   }
@@ -41,6 +45,7 @@ export async function attachUser(req: Request, res: Response, next: NextFunction
           bio: user.bio,
           category: user.category,
           mustCompleteOnboarding: user.mustCompleteOnboarding,
+          isAdmin: user.email === ADMIN_EMAIL,
         };
       } else {
         // User not found, clear session
@@ -136,9 +141,6 @@ export function requirePro(req: Request, res: Response, next: NextFunction) {
 
   next();
 }
-
-// Admin email - only this account has admin access
-const ADMIN_EMAIL = "edwin@stroombox.nl";
 
 /**
  * Middleware to require Admin access

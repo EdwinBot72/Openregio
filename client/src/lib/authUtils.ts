@@ -13,6 +13,7 @@ export interface AuthUser {
     bio: string | null;
     category: string | null;
     mustCompleteOnboarding: boolean;
+    isAdmin: boolean;
   };
   profile?: UserProfile;
 }

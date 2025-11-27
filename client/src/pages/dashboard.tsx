@@ -54,7 +54,7 @@ export default function DashboardPage() {
   const basischeckDone = basischeckScore > 0;
 
   const isPro = user.plan === "pro";
-  const isAdmin = user.email === "edwin@stroombox.nl";
+  const isAdmin = user.isAdmin || false;
   const displayName = bedrijfsprofiel?.naam || user.firstName || "ondernemer";
 
   return (

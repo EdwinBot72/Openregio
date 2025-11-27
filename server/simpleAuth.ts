@@ -136,6 +136,7 @@ export function setupSimpleAuth(app: Express) {
           bio: user.bio,
           category: user.category,
           mustCompleteOnboarding: user.mustCompleteOnboarding,
+          isAdmin: user.email === "edwin@stroombox.nl",
         },
       });
     } catch (error) {
@@ -179,6 +180,7 @@ export function setupSimpleAuth(app: Express) {
           bio: user.bio,
           category: user.category,
           mustCompleteOnboarding: user.mustCompleteOnboarding,
+          isAdmin: user.email === "edwin@stroombox.nl",
         },
       });
     } catch (error) {
