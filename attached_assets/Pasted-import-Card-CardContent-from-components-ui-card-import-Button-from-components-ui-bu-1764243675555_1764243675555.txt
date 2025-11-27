@@ -1,7 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Building2,
   Users,
@@ -9,75 +7,34 @@ import {
   ShieldCheck,
   Printer,
   Coins,
-  Bot,
 } from "lucide-react";
 import { Link } from "wouter";
-import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
 
 export default function DashboardPage() {
-  const { user, isLoading: authLoading } = useAuth();
-
-  const { data: bedrijfsprofiel } = useQuery<{ naam: string; status: string } | null>({
-    queryKey: ["/api/bedrijfsprofiel"],
-    enabled: !!user,
-  });
-
-  if (authLoading) {
-    return (
-      <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-        <Skeleton className="h-16 w-full" />
-        <div className="grid md:grid-cols-2 gap-4">
-          <Skeleton className="h-48" />
-          <Skeleton className="h-48" />
-          <Skeleton className="h-48" />
-          <Skeleton className="h-48" />
-        </div>
-      </div>
-    );
-  }
-
-  if (!user) {
-    return (
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <Card className="p-8 text-center">
-          <p className="text-muted-foreground">Log opnieuw in om door te gaan.</p>
-        </Card>
-      </div>
-    );
-  }
-
   // TODO: haal dit later uit de API
   const basischeckScore = 3; // 0–5
   const basischeckDone = basischeckScore > 0;
-
-  const isPro = user.plan === "pro";
-  const displayName = bedrijfsprofiel?.naam || user.firstName || "ondernemer";
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
       {/* Header */}
       <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-2">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold" data-testid="text-welcome">
-            Welkom, {displayName}
-          </h1>
+          <h1 className="text-2xl md:text-3xl font-bold">Welkom, Edwin</h1>
           <p className="text-sm text-muted-foreground">
             Dit is je cockpit: profiel, netwerk, vraag & aanbod en je basisprofiel.
           </p>
         </div>
         <div className="inline-flex items-center gap-2 text-xs px-3 py-1 rounded-full bg-muted">
           <span className="font-semibold">Lidmaatschap:</span>
-          <Badge variant={isPro ? "default" : "outline"} data-testid="badge-plan">
-            {isPro ? "Pro" : "Basis"}
-          </Badge>
+          <span>Pro</span>
         </div>
       </header>
 
       {/* Hoofdtegels */}
       <section className="grid md:grid-cols-2 gap-4">
         {/* Mijn bedrijf */}
-        <Card data-testid="card-mijn-bedrijf">
+        <Card>
           <CardContent className="p-5 flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-full bg-primary/10">
@@ -91,26 +48,19 @@ export default function DashboardPage() {
               </div>
             </div>
             <ul className="text-xs text-muted-foreground list-disc list-inside">
-              <li>
-                Profielstatus:{" "}
-                <span className="font-medium text-foreground">
-                  {bedrijfsprofiel?.status === "actief" ? "actief" : "bijna compleet"}
-                </span>
-              </li>
-              <li>Laatst bijgewerkt: recent</li>
+              <li>Profielstatus: <span className="font-medium text-foreground">bijna compleet</span></li>
+              <li>Laatst bijgewerkt: 2 dagen geleden</li>
             </ul>
             <div className="mt-2">
               <Link href="/bedrijfsprofiel">
-                <Button size="sm" data-testid="button-edit-profile">
-                  Bewerk bedrijfsprofiel
-                </Button>
+                <Button size="sm">Bewerk bedrijfsprofiel</Button>
               </Link>
             </div>
           </CardContent>
         </Card>
 
         {/* Leden in jouw regio */}
-        <Card data-testid="card-leden">
+        <Card>
           <CardContent className="p-5 flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-full bg-primary/10">
@@ -129,16 +79,14 @@ export default function DashboardPage() {
             </ul>
             <div className="mt-2">
               <Link href="/network">
-                <Button size="sm" data-testid="button-view-network">
-                  Bekijk ledenlijst
-                </Button>
+                <Button size="sm">Bekijk ledenlijst</Button>
               </Link>
             </div>
           </CardContent>
         </Card>
 
         {/* Vraag & aanbod */}
-        <Card data-testid="card-vraag-aanbod">
+        <Card>
           <CardContent className="p-5 flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-full bg-primary/10">
@@ -155,14 +103,12 @@ export default function DashboardPage() {
               <li>Open vragen in het netwerk: 5</li>
               <li>Jouw eigen vragen/aanbod: 1</li>
             </ul>
-            <div className="mt-2 flex flex-wrap gap-2">
+            <div className="mt-2 flex gap-2">
               <Link href="/network?tab=bord">
-                <Button size="sm" data-testid="button-view-board">
-                  Naar bord
-                </Button>
+                <Button size="sm">Naar bord</Button>
               </Link>
               <Link href="/network?tab=nieuw">
-                <Button variant="outline" size="sm" data-testid="button-new-post">
+                <Button variant="outline" size="sm">
                   Plaats nieuw bericht
                 </Button>
               </Link>
@@ -171,7 +117,7 @@ export default function DashboardPage() {
         </Card>
 
         {/* Basischeck / offline modus */}
-        <Card data-testid="card-basischeck">
+        <Card>
           <CardContent className="p-5 flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-full bg-primary/10">
@@ -197,9 +143,7 @@ export default function DashboardPage() {
                 </ul>
                 <div className="mt-2">
                   <Link href="/basischeck">
-                    <Button size="sm" data-testid="button-view-basischeck">
-                      Bekijk en verbeter
-                    </Button>
+                    <Button size="sm">Bekijk en verbeter</Button>
                   </Link>
                 </div>
               </>
@@ -211,9 +155,7 @@ export default function DashboardPage() {
                 </p>
                 <div className="mt-2">
                   <Link href="/basischeck">
-                    <Button size="sm" data-testid="button-do-basischeck">
-                      Doe de Basischeck
-                    </Button>
+                    <Button size="sm">Doe de Basischeck</Button>
                   </Link>
                 </div>
               </>
@@ -222,9 +164,9 @@ export default function DashboardPage() {
         </Card>
       </section>
 
-      {/* Onderste rij: print, RegioPunten & RegioBot */}
-      <section className="grid md:grid-cols-3 gap-4">
-        <Card data-testid="card-print">
+      {/* Onderste rij: print & RegioPunten */}
+      <section className="grid md:grid-cols-2 gap-4">
+        <Card>
           <CardContent className="p-5 flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-full bg-primary/10">
@@ -238,17 +180,21 @@ export default function DashboardPage() {
               </div>
             </div>
             <div className="flex flex-wrap gap-2 mt-1">
-              <Button size="sm" variant="outline" data-testid="button-print-members">
-                Ledenlijst printen
-              </Button>
-              <Button size="sm" variant="outline" data-testid="button-print-basischeck">
-                Basischeck printen
-              </Button>
+              <Link href="/leden/print">
+                <Button size="sm" variant="outline">
+                  Ledenlijst printen
+                </Button>
+              </Link>
+              <Link href="/basischeck/rapport">
+                <Button size="sm" variant="outline">
+                  Basischeck printen
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>
 
-        <Card data-testid="card-regiopunten">
+        <Card>
           <CardContent className="p-5 flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-full bg-primary/10">
@@ -257,55 +203,16 @@ export default function DashboardPage() {
               <div>
                 <h2 className="font-semibold">RegioPunten (pilot)</h2>
                 <p className="text-sm text-muted-foreground">
-                  Interne strippenkaart voor doorverwijzingen en hulp.
+                  Interne strippenkaart voor doorverwijzingen en hulp binnen het netwerk.
                 </p>
               </div>
             </div>
             <p className="text-sm">
-              Jouw saldo: <span className="font-semibold">0 RegioPunten</span>
+              Jouw huidige saldo: <span className="font-semibold">0 RegioPunten</span>
             </p>
             <p className="text-xs text-muted-foreground">
-              Later voor beloningen en korting binnen OpenRegio.
+              Dit wordt later gebruikt voor beloningen en korting binnen OpenRegio.
             </p>
-          </CardContent>
-        </Card>
-
-        {/* RegioBot - alleen voor Pro */}
-        <Card data-testid="card-regiobot" className={!isPro ? "opacity-60" : ""}>
-          <CardContent className="p-5 flex flex-col gap-3">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-primary/10">
-                <Bot className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h2 className="font-semibold">RegioBot AI</h2>
-                <p className="text-sm text-muted-foreground">
-                  Je persoonlijke AI-assistent voor marketing en juridisch.
-                </p>
-              </div>
-            </div>
-            {isPro ? (
-              <div className="mt-2">
-                <Link href="/regiobot">
-                  <Button size="sm" data-testid="button-open-regiobot">
-                    Open RegioBot
-                  </Button>
-                </Link>
-              </div>
-            ) : (
-              <>
-                <p className="text-xs text-muted-foreground">
-                  Upgrade naar Pro om RegioBot te gebruiken.
-                </p>
-                <div className="mt-2">
-                  <Link href="/lidmaatschap">
-                    <Button size="sm" variant="outline" data-testid="button-upgrade-pro">
-                      Upgrade naar Pro
-                    </Button>
-                  </Link>
-                </div>
-              </>
-            )}
           </CardContent>
         </Card>
       </section>
