@@ -1092,12 +1092,15 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
   // ADMIN EXPORT ROUTES
   // ===============================
 
-  // GET /api/export/nieuwe-leden - Export new members (last 30 days)
+  // GET /api/export/nieuwe-leden - Export new members (configurable days, supports CSV)
   app.get("/api/export/nieuwe-leden", requireAdmin, async (req, res) => {
     try {
-      // Get all users created in the last 30 days
-      const thirtyDaysAgo = new Date();
-      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+      // Get days parameter (default 30)
+      const days = parseInt(req.query.days as string) || 30;
+      const format = req.query.format as string || 'json';
+      
+      const sinceDate = new Date();
+      sinceDate.setDate(sinceDate.getDate() - days);
 
       const allUsers = await storage.getAllUsers();
       
@@ -1105,8 +1108,8 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
       const nieuweLeden = [];
       
       for (const user of allUsers) {
-        // Skip if no createdAt or if older than 30 days
-        if (!user.createdAt || new Date(user.createdAt) < thirtyDaysAgo) {
+        // Skip if no createdAt or if older than specified days
+        if (!user.createdAt || new Date(user.createdAt) < sinceDate) {
           continue;
         }
         
@@ -1130,11 +1133,27 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
         new Date(b.aangemeld).getTime() - new Date(a.aangemeld).getTime()
       );
 
+      // CSV format
+      if (format === 'csv') {
+        const csvHeader = 'Naam,Eigenaarnaam,Email,Regio,Plan,Aangemeld,Status\n';
+        const csvRows = nieuweLeden.map(lid => 
+          `"${lid.naam}","${lid.eigenaarnaam}","${lid.email}","${lid.regio}","${lid.plan}","${new Date(lid.aangemeld).toLocaleDateString('nl-NL')}","${lid.profielStatus}"`
+        ).join('\n');
+        
+        const csv = csvHeader + csvRows;
+        
+        res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+        res.setHeader('Content-Disposition', `attachment; filename="nieuwe-leden-${days}-dagen.csv"`);
+        return res.send(csv);
+      }
+
+      // JSON format (default)
       res.json({
         success: true,
         periode: {
-          van: thirtyDaysAgo.toISOString().split('T')[0],
+          van: sinceDate.toISOString().split('T')[0],
           tot: new Date().toISOString().split('T')[0],
+          dagen: days,
         },
         aantal: nieuweLeden.length,
         leden: nieuweLeden,

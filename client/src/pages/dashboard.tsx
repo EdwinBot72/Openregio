@@ -10,6 +10,8 @@ import {
   Printer,
   Coins,
   Bot,
+  Download,
+  Shield,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -52,6 +54,7 @@ export default function DashboardPage() {
   const basischeckDone = basischeckScore > 0;
 
   const isPro = user.plan === "pro";
+  const isAdmin = user.email === "edwin@stroombox.nl";
   const displayName = bedrijfsprofiel?.naam || user.firstName || "ondernemer";
 
   return (
@@ -309,6 +312,67 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </section>
+
+      {/* Admin sectie - alleen voor admin */}
+      {isAdmin && (
+        <section className="space-y-4">
+          <div className="flex items-center gap-2">
+            <Shield className="w-5 h-5 text-primary" />
+            <h2 className="font-semibold text-lg">Admin Tools</h2>
+          </div>
+          <div className="grid md:grid-cols-2 gap-4">
+            <Card data-testid="card-admin-export">
+              <CardContent className="p-5 flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-full bg-primary/10">
+                    <Download className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="font-semibold">Nieuwe leden deze week</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Download een lijst van ondernemers die deze week zijn aangesloten.
+                    </p>
+                  </div>
+                </div>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  <a href="/api/export/nieuwe-leden?days=7&format=csv">
+                    <Button size="sm" variant="outline" data-testid="button-export-csv-7">
+                      <Download className="w-4 h-4 mr-2" />
+                      CSV (7 dagen)
+                    </Button>
+                  </a>
+                  <a href="/api/export/nieuwe-leden?days=30&format=csv">
+                    <Button size="sm" variant="outline" data-testid="button-export-csv-30">
+                      <Download className="w-4 h-4 mr-2" />
+                      CSV (30 dagen)
+                    </Button>
+                  </a>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card data-testid="card-admin-stats">
+              <CardContent className="p-5 flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 rounded-full bg-primary/10">
+                    <Users className="w-5 h-5 text-primary" />
+                  </div>
+                  <div>
+                    <h2 className="font-semibold">Platform statistieken</h2>
+                    <p className="text-sm text-muted-foreground">
+                      Overzicht van leden en activiteit op het platform.
+                    </p>
+                  </div>
+                </div>
+                <ul className="text-xs text-muted-foreground list-disc list-inside">
+                  <li>Totaal leden: wordt geladen...</li>
+                  <li>Actieve profielen: wordt geladen...</li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+      )}
     </div>
   );
 }
