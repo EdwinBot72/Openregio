@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Quote, Users, Banknote, Phone, Battery, FileText, Printer, ArrowRight, Check, Sparkles, Bot } from "lucide-react";
+import { Quote, Users, Banknote, Phone, Battery, FileText, Printer, ArrowRight, Check, Sparkles, Bot, ShieldCheck, Lock, Cookie } from "lucide-react";
 import { Link } from "wouter";
 import heroImage from "@assets/ChatGPT Image 27 nov 2025, 11_33_40_1764239636207.png";
 
@@ -310,6 +310,86 @@ export default function HomePage() {
                 Eerst de gratis Basischeck doen
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Privacy & Veiligheid Section */}
+      <section className="py-16 px-4 bg-muted/20" data-testid="section-privacy">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="font-accent text-2xl md:text-3xl font-bold mb-4 flex items-center justify-center gap-3">
+              <ShieldCheck className="h-8 w-8 text-primary" />
+              Privacy & Veiligheid voorop
+            </h2>
+            <p className="text-muted-foreground">
+              OpenRegio is gebouwd met privacy als uitgangspunt
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="bg-background" data-testid="card-privacy-tracking">
+              <CardContent className="p-5 flex items-start gap-4">
+                <div className="bg-primary/10 p-2 rounded-lg shrink-0">
+                  <ShieldCheck className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Geen trackers of Big Tech</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Geen Google Analytics, Meta pixel of andere tracking. Je wordt niet gevolgd.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-background" data-testid="card-privacy-cookies">
+              <CardContent className="p-5 flex items-start gap-4">
+                <div className="bg-primary/10 p-2 rounded-lg shrink-0">
+                  <Cookie className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Alleen functionele cookies</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Uitsluitend voor inloggen, geen marketing of advertenties.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-background" data-testid="card-privacy-docs">
+              <CardContent className="p-5 flex items-start gap-4">
+                <div className="bg-primary/10 p-2 rounded-lg shrink-0">
+                  <Lock className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Jouw documenten zijn privé</h3>
+                  <p className="text-sm text-muted-foreground">
+                    RegioBot gesprekken en uploads zijn alleen voor jou zichtbaar.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-background" data-testid="card-privacy-data">
+              <CardContent className="p-5 flex items-start gap-4">
+                <div className="bg-primary/10 p-2 rounded-lg shrink-0">
+                  <ShieldCheck className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Geen dataverkoop</h3>
+                  <p className="text-sm text-muted-foreground">
+                    We verkopen of verhandelen jouw gegevens nooit. Punt.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="text-center mt-6">
+            <Link href="/privacy" className="text-sm text-primary hover:underline" data-testid="link-privacy-more">
+              Lees onze volledige privacyverklaring
+              <ArrowRight className="inline ml-1 h-3 w-3" />
             </Link>
           </div>
         </div>

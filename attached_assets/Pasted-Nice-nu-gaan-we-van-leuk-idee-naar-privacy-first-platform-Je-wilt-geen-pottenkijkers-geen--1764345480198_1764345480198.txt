@@ -1,0 +1,178 @@
+Nice, nu gaan we van “leuk idee” naar **privacy-first platform**.
+Je wilt: geen pottenkijkers, geen Big Tech tracking, duidelijke regels.
+Ik schrijf het als **opdrachtenset voor jouw Replit-project** die je zo kunt gebruiken.
+
+---
+
+## 🎯 Doel
+
+> OpenRegio moet een veilig, AVG-proof en privacy-vriendelijk platform zijn.
+> Geen trackers, geen onnodige cookies, minimale data, en alleen jij (en de ondernemer) heeft toegang.
+
+---
+
+## 🔐 Opdracht A – Technische beveiliging (Replit / backend)
+
+**A1. Secrets & config**
+
+* Alle API keys, DB-wachtwoorden, Mollie keys → in **Replit Secrets**, niet in de code.
+* Nooit secrets in `client` importeren (anders komen ze in de browser).
+
+**A2. HTTPS & headers**
+
+* Platform alleen via **https** gebruiken (Replit URL is al https).
+* In backend security-middleware toevoegen:
+
+  * `Strict-Transport-Security`
+  * `Content-Security-Policy` (CSP):
+
+    * alleen eigen domein + Mollie/lettertype CDN die je écht nodig hebt
+  * `X-Frame-Options: DENY`
+  * `X-Content-Type-Options: nosniff`
+  * `Referrer-Policy: no-referrer` of `strict-origin-when-cross-origin`
+
+**A3. Sessies & auth**
+
+* Login via **secure cookies**:
+
+  * `httpOnly: true`
+  * `sameSite: "lax"` of `"strict"`
+  * `secure: true` (alleen via https)
+* Geen JWT in `localStorage` steken.
+* Timeouts instellen: sessie verloopt na X uur inactiviteit.
+
+**A4. Database-toegang**
+
+* Alleen backend praat met Postgres, geen directe DB-call vanuit de browser.
+* Per request check:
+
+  * `userId` in sessie
+  * queries altijd filteren op `userId` of `bedrijfId` → geen “select all users” endpoints.
+
+---
+
+## 📦 Opdracht B – Data & opslag
+
+**B1. Data minimaliseren**
+
+* Alleen opslaan wat je nodig hebt:
+
+  * naam, e-mail, bedrijfsprofiel, regio
+  * facturatie/abonnement (voor administratie)
+* Geen gevoelige onzin vragen (BSN, privé-adres, geboortedatum etc. niet nodig? → niet vragen).
+
+**B2. Bestanden (RegioBot uploads)**
+
+* Uploads (PDF, DOCX, XLSX, JPG) **niet in de front-end loggen**.
+* Opslag:
+
+  * in aparte map/bucket met **random bestandsnamen** (geen namen met klantnaam in de URL).
+  * koppel ze in DB aan `userId`.
+* Endpoint om eigen bestanden/gesprekken te verwijderen (recht op verwijdering light versie).
+
+**B3. Retentietermijnen**
+
+* Definieer in code + policy:
+
+  * RegioBot-logs: bijv. na 12 maanden automatisch weg.
+  * Bestanden: bijv. na 6 of 12 maanden automatisch weg.
+* Cronjob/cleanup-script maken dat oude data weggooit.
+
+---
+
+## 🌐 Opdracht C – Frontend: geen Big Tech / geen tracking
+
+**C1. Geen trackers**
+
+* Niet gebruiken:
+
+  * Google Analytics / Tag Manager / Meta pixel / Hotjar.
+* Als je analytics wilt:
+
+  * alleen **privacy-vriendelijke, self-hosted oplossing** of helemaal geen analytics.
+
+**C2. Geen onnodige externe scripts**
+
+* Fonts: bij voorkeur lokaal hosten (bijv. download van Google Fonts en in je project zetten).
+* Geen random CDN’s behalve wat je écht nodig hebt (Mollie script etc.).
+
+**C3. Cookie-gebruik minimaliseren**
+
+* Alleen:
+
+  * sessiecookie (voor login)
+  * eventueel 1 “cookie preference” cookie
+* Geen marketing- of trackingcookies → dan heb je ook geen irritante cookie-pop-up nodig, alleen een simpele uitleg in je beleid.
+
+---
+
+## 📜 Opdracht D – Cookie- & privacybeleid
+
+Laat juridisch in tekst landen wat je technisch doet.
+Je hebt 2 pagina’s nodig:
+
+1. **Privacyverklaring**
+
+   * Welke data je verzamelt (account, bedrijfsprofiel, betaalgegevens via Mollie).
+   * Waarvoor:
+
+     * toegang tot platform
+     * facturatie
+     * support / verbetering RegioBot.
+   * Hoe lang je bewaart (retentietermijnen).
+   * Met wie je deelt:
+
+     * Mollie (betalingen)
+     * hosting (Replit / DB provider)
+   * Rechten van gebruikers (inzage, verwijdering, export).
+
+2. **Cookiebeleid (kort)**
+
+   * Wat voor cookies:
+
+     * functionele sessiecookie (nodig voor login)
+   * Geen trackers / geen marketingcookies.
+   * Vermelden dat je **geen data verkoopt / verhandelt / naar Big Tech doorschiet**, buiten noodzakelijke partijen (betalingen/hosting).
+
+---
+
+## 🧾 Opdracht E – “Geen pottenkijkers” boodschap naar ondernemers
+
+Op je site:
+
+* Klein blok op de homepage of /veiligheid:
+
+> **Privacy & veiligheid voorop**
+>
+> * Geen trackers, geen verkoop van data
+> * Alleen functionele cookies voor inloggen
+> * Je documenten in RegioBot zijn alleen voor jou zichtbaar
+> * Je kunt je data laten verwijderen op verzoek
+
+---
+
+## 🧨 Samenvatting als Replit-opdracht (copy/paste naar je takenlijst)
+
+> **Opdracht: OpenRegio veilig & privacy-first maken**
+>
+> 1. Beveiliging backend
+>
+>    * Secrets in Replit Secrets zetten
+>    * Security headers toevoegen (HSTS, CSP, X-Frame-Options, etc.)
+>    * Sessies via httpOnly, secure cookies + timeouts
+> 2. Data & opslag
+>
+>    * DB-queries altijd per user/bedrijf beperken
+>    * Uploads koppelen aan userId, random bestandsnamen
+>    * Cleanup-job voor oude logs/bestanden (retentie instellen)
+> 3. Frontend
+>
+>    * Alle tracking/marketing scripts verwijderen
+>    * Fonts en scripts zoveel mogelijk lokaal hosten
+>    * Alleen functionele cookies gebruiken
+> 4. Juridisch & communicatie
+>
+>    * Privacyverklaring + cookiebeleid schrijven op basis van bovenstaande
+>    * /veiligheid of /privacy blok op site met: geen trackers, geen data-verkoop, alleen functionele cookies.
+
+Als je wilt, kan ik daarna een **eerste versie van je privacyverklaring** in NL schrijven, in jouw toon: nuchter, geen juridische poeha, maar wel AVG-proof.

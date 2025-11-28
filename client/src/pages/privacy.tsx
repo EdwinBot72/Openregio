@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
-import { ArrowLeft, Shield, Lock, Database, Eye, Mail } from "lucide-react";
+import { ArrowLeft, Shield, Lock, Database, Eye, Mail, Cookie, Server, Trash2, ShieldCheck } from "lucide-react";
 
 export default function PrivacyPage() {
   return (
@@ -37,6 +37,28 @@ export default function PrivacyPage() {
         </div>
 
         <div className="space-y-6">
+          {/* Privacy-first boodschap */}
+          <Card className="border-primary/20 bg-primary/5">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+                Privacy-first platform
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="prose prose-sm max-w-none dark:prose-invert">
+              <p className="font-medium">
+                OpenRegio is gebouwd met privacy als uitgangspunt:
+              </p>
+              <ul className="list-disc list-inside space-y-1 text-sm">
+                <li><strong>Geen trackers</strong> - We gebruiken geen Google Analytics, Meta pixel of andere tracking</li>
+                <li><strong>Geen data-verkoop</strong> - We verkopen of verhandelen jouw gegevens nooit</li>
+                <li><strong>Alleen functionele cookies</strong> - Uitsluitend voor inloggen, geen marketing</li>
+                <li><strong>Lokale hosting</strong> - Fonts en scripts worden lokaal gehost, niet via Big Tech CDN's</li>
+                <li><strong>Jouw documenten zijn privé</strong> - RegioBot gesprekken en uploads zijn alleen voor jou zichtbaar</li>
+              </ul>
+            </CardContent>
+          </Card>
+
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
@@ -60,6 +82,9 @@ export default function PrivacyPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                We verzamelen alleen wat strikt noodzakelijk is:
+              </p>
               <div>
                 <h3 className="font-semibold mb-2">Accountgegevens:</h3>
                 <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
@@ -70,19 +95,27 @@ export default function PrivacyPage() {
                 </ul>
               </div>
               <div>
-                <h3 className="font-semibold mb-2">Bedrijfsprofielgegevens:</h3>
+                <h3 className="font-semibold mb-2">Bedrijfsprofielgegevens (openbaar):</h3>
                 <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
                   <li>Bedrijfsbeschrijving</li>
                   <li>Categorie en diensten</li>
-                  <li>Publieke contactinformatie</li>
+                  <li>Publieke contactinformatie (optioneel)</li>
                 </ul>
               </div>
               <div>
-                <h3 className="font-semibold mb-2">Gebruiksgegevens:</h3>
+                <h3 className="font-semibold mb-2">RegioBot data (alleen Pro, privé):</h3>
                 <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                  <li>IP-adres en browserinformatie</li>
-                  <li>Activiteit op het platform</li>
-                  <li>RegioBot gesprekken (alleen Pro-leden)</li>
+                  <li>Gesprekken en vragen</li>
+                  <li>Geüploade documenten</li>
+                </ul>
+              </div>
+              <div className="bg-muted/30 p-4 rounded-lg">
+                <p className="text-sm font-medium">Wat we NIET verzamelen:</p>
+                <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground mt-2">
+                  <li>BSN of identiteitsbewijs</li>
+                  <li>Privéadres (tenzij zakelijk)</li>
+                  <li>Geboortedatum</li>
+                  <li>Browsegedrag op externe websites</li>
                 </ul>
               </div>
             </CardContent>
@@ -97,16 +130,92 @@ export default function PrivacyPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <p className="text-sm">
-                We gebruiken jouw gegevens voor de volgende doeleinden:
+                We gebruiken jouw gegevens uitsluitend voor:
               </p>
               <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
-                <li>Het leveren van onze platformdiensten</li>
-                <li>Beheer van jouw account en lidmaatschap</li>
-                <li>Verwerking van betalingen via Mollie</li>
-                <li>Communicatie over belangrijke updates</li>
-                <li>Verbetering van onze diensten</li>
-                <li>Naleving van wettelijke verplichtingen</li>
+                <li><strong>Toegang tot platform</strong> - Inloggen en je account beheren</li>
+                <li><strong>Facturatie</strong> - Verwerken van betalingen via Mollie</li>
+                <li><strong>Dienstverlening</strong> - RegioBot, netwerk, stemrecht</li>
+                <li><strong>Support</strong> - Je helpen bij vragen</li>
               </ul>
+              <div className="bg-muted/30 p-4 rounded-lg mt-4">
+                <p className="text-sm font-medium">Wat we NIET doen met je data:</p>
+                <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground mt-2">
+                  <li>Verkopen aan derden</li>
+                  <li>Gebruiken voor advertenties</li>
+                  <li>Delen met Big Tech bedrijven</li>
+                  <li>Profileren voor marketing</li>
+                </ul>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Server className="h-5 w-5 text-primary" />
+                Met wie delen we gegevens?
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                We delen alleen gegevens met partijen die strikt noodzakelijk zijn:
+              </p>
+              <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
+                <li><strong>Mollie</strong> - Betalingsverwerking (alleen factuurgegevens)</li>
+                <li><strong>Neon (hosting)</strong> - Database opslag (versleuteld)</li>
+                <li><strong>Replit (hosting)</strong> - Applicatie hosting</li>
+                <li><strong>OpenAI</strong> - AI-gesprekken RegioBot (Pro-leden)</li>
+              </ul>
+              <p className="text-sm text-muted-foreground mt-4">
+                Al deze partijen zijn gebonden aan verwerkersovereenkomsten en mogen jouw gegevens niet voor eigen doeleinden gebruiken.
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Trash2 className="h-5 w-5 text-primary" />
+                Bewaartermijnen
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
+                <li><strong>Accountgegevens</strong> - Tot opzegging + wettelijke bewaartermijn (max 7 jaar voor facturen)</li>
+                <li><strong>RegioBot gesprekken</strong> - Automatisch verwijderd na 12 maanden</li>
+                <li><strong>Geüploade documenten</strong> - Automatisch verwijderd na 12 maanden, of eerder op verzoek</li>
+                <li><strong>Sessiedata</strong> - 24 uur na laatste activiteit</li>
+              </ul>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Cookie className="h-5 w-5 text-primary" />
+                Cookies
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                We gebruiken <strong>uitsluitend functionele cookies</strong>:
+              </p>
+              <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
+                <li><strong>Sessiecookie</strong> - Houdt je inlogstatus bij (httpOnly, secure)</li>
+              </ul>
+              <div className="bg-muted/30 p-4 rounded-lg mt-4">
+                <p className="text-sm font-medium">Wat we NIET gebruiken:</p>
+                <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground mt-2">
+                  <li>Tracking cookies</li>
+                  <li>Marketing cookies</li>
+                  <li>Cookies van derden (geen Google, Facebook, etc.)</li>
+                  <li>Analytics cookies</li>
+                </ul>
+                <p className="text-sm text-muted-foreground mt-2">
+                  Daarom heb je geen cookie-pop-up nodig - we gebruiken simpelweg geen onnodige cookies.
+                </p>
+              </div>
             </CardContent>
           </Card>
 
@@ -122,11 +231,12 @@ export default function PrivacyPage() {
                 We nemen de beveiliging van jouw gegevens serieus:
               </p>
               <ul className="list-disc list-inside space-y-2 text-sm text-muted-foreground">
-                <li>Versleutelde verbindingen (HTTPS/SSL)</li>
-                <li>Veilige opslag in geautoriseerde datacenters</li>
-                <li>Wachtwoorden worden versleuteld opgeslagen (bcrypt)</li>
-                <li>Beperkte toegang tot persoonsgegevens</li>
-                <li>Regelmatige beveiligingsupdates</li>
+                <li>Versleutelde verbindingen (HTTPS/TLS)</li>
+                <li>Security headers (HSTS, CSP, X-Frame-Options)</li>
+                <li>Wachtwoorden versleuteld opgeslagen (bcrypt)</li>
+                <li>Secure cookies (httpOnly, sameSite strict)</li>
+                <li>Geüploade bestanden met willekeurige bestandsnamen</li>
+                <li>Beperkte toegang - alleen wat nodig is</li>
               </ul>
             </CardContent>
           </Card>
@@ -135,7 +245,7 @@ export default function PrivacyPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5 text-primary" />
-                Jouw rechten
+                Jouw rechten (AVG)
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -149,6 +259,9 @@ export default function PrivacyPage() {
                 <li><strong>Recht op dataportabiliteit:</strong> Je kunt een kopie van je gegevens opvragen</li>
                 <li><strong>Recht van bezwaar:</strong> Je kunt bezwaar maken tegen bepaalde verwerkingen</li>
               </ul>
+              <p className="text-sm text-muted-foreground mt-4">
+                Je kunt deze rechten uitoefenen door contact met ons op te nemen via onderstaande contactgegevens.
+              </p>
             </CardContent>
           </Card>
 

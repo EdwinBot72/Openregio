@@ -15,7 +15,9 @@ declare module "express-session" {
 const SALT_ROUNDS = 10;
 
 function getSession() {
-  const sessionTtl = 7 * 24 * 60 * 60 * 1000; // 1 week
+  // Sessie timeout: 24 uur (privacy-first, kortere sessies)
+  const sessionTtl = 24 * 60 * 60 * 1000; // 24 uur
+  
   const pgStore = connectPg(session);
   const sessionStore = new pgStore({
     conString: process.env.DATABASE_URL,
@@ -24,18 +26,26 @@ function getSession() {
     tableName: "sessions",
   });
   
-  // Only require secure cookies in production (HTTPS)
-  const isProduction = process.env.NODE_ENV === "production";
+  // Productie detectie: check NODE_ENV of Replit deployment
+  const isProduction = process.env.NODE_ENV === "production" || 
+                       process.env.REPL_SLUG !== undefined;
+  
+  // Log waarschuwing als secure cookies niet kunnen worden ingesteld
+  if (isProduction && !process.env.SESSION_SECRET) {
+    console.warn("⚠️ SESSION_SECRET niet ingesteld in productie omgeving");
+  }
   
   return session({
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
     resave: false,
     saveUninitialized: false,
+    rolling: true, // Ververs sessie bij activiteit (idle timeout effectief)
     cookie: {
       httpOnly: true,
-      secure: isProduction,
-      maxAge: sessionTtl,
+      secure: isProduction, // Secure cookie in productie (Replit is altijd HTTPS)
+      sameSite: isProduction ? 'strict' : 'lax', // Strict in productie voor betere beveiliging
+      maxAge: sessionTtl, // 24 uur - automatisch uitloggen na inactiviteit
     },
   });
 }
