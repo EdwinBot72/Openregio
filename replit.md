@@ -148,7 +148,22 @@ Preferred communication style: Simple, everyday language.
   - /voorwaarden: General terms covering membership, payment, platform use, liability (including RegioBot disclaimer), and applicable law
   - Both pages have professional layout with back-to-home navigation
   - Footer links to legal pages on all public pages
-- **Security Hardening:**
+- **Security Hardening (Privacy-First):**
+  - Security headers middleware (`server/middleware/security.ts`):
+    - HSTS (Strict-Transport-Security)
+    - Content-Security-Policy (strict in production, geen unsafe-inline/eval voor scripts)
+    - X-Frame-Options: DENY
+    - X-Content-Type-Options: nosniff
+    - Referrer-Policy: strict-origin-when-cross-origin
+  - Session management:
+    - 24-hour timeout (privacy-first)
+    - Secure cookies (httpOnly, SameSite=strict in production)
+    - Rolling sessions for idle timeout
+  - Upload security:
+    - Random filenames (UUID-based, geen client info)
+    - MIME type validation tegen extensie
+    - Gevaarlijke dubbele extensies geblokkeerd
+  - Local fonts (Inter, Space Grotesk - geen Google Fonts CDN)
   - Session-based CSRF protection via express-session
   - Zod schema validation on all API endpoints
   - Upload routes protected with requirePro middleware (authenticated Pro users only)
@@ -163,7 +178,7 @@ Preferred communication style: Simple, everyday language.
 
 **Third-Party Services:**
 - Neon Database (PostgreSQL).
-- Google Fonts (Inter, Space Grotesk).
+- Local fonts (Inter, Space Grotesk - self-hosted, geen Google CDN).
 - Replit AI Integrations (for RegioBot).
 
 **UI Component Libraries:**
