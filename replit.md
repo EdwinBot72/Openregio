@@ -174,6 +174,29 @@ Preferred communication style: Simple, everyday language.
   - All pages have proper data-testid attributes for testing
   - No LSP errors, fully type-safe codebase
 
+**Privacy & Consent Dashboard (AVG Compliance - Completed):**
+- **Database Tables:**
+  - `field_visibility`: Per-field visibility settings (public/members/region_only/private)
+  - `consent_log`: Audit trail of all visibility changes with timestamps
+  - `deletedAt` field on users table for soft delete functionality
+- **API Endpoints:**
+  - GET /api/privacy/dashboard: Full privacy data in one call
+  - GET/POST /api/privacy/visibility: View/update field visibility
+  - GET /api/privacy/consent-log: View last 10 visibility changes
+  - GET /api/privacy/export: Download all user data as JSON
+  - POST /api/privacy/delete-account: Soft delete account (requires "VERWIJDER" confirmation)
+- **Frontend (/privacy-dashboard):**
+  - Profile overview with current stored data
+  - Per-field visibility controls (email, telefoon, adres, website, beschrijving)
+  - Consent change history display
+  - Data export button (JSON download)
+  - Account deletion with double confirmation (type "VERWIJDER")
+- **AVG Rights Implemented:**
+  - Right to access (data export)
+  - Right to erasure (soft delete with 30-day data retention)
+  - Consent management with audit trail
+- **Sidebar Navigation:** Privacy & Gegevens link in Account section
+
 ## External Dependencies
 
 **Third-Party Services:**
