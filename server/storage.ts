@@ -27,6 +27,11 @@ import {
   type UpsertUser,
   type Bedrijfsprofiel,
   type InsertBedrijfsprofiel,
+  type FieldVisibility,
+  type InsertFieldVisibility,
+  type ConsentLog,
+  type InsertConsentLog,
+  type VisibilityLevel,
   entrepreneurs,
   proposals,
   votes,
@@ -40,6 +45,8 @@ import {
   documents,
   users,
   bedrijfsprofielen,
+  fieldVisibility,
+  consentLog,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
@@ -140,6 +147,20 @@ export interface IStorage {
     totalRegions: number;
     monthlyGrowth: number;
   }>;
+
+  // Privacy & Consent (AVG compliance)
+  getFieldVisibilities(userId: string): Promise<FieldVisibility[]>;
+  getFieldVisibility(userId: string, fieldName: string): Promise<FieldVisibility | undefined>;
+  setFieldVisibility(userId: string, fieldName: string, visibility: VisibilityLevel): Promise<FieldVisibility>;
+  getConsentLogs(userId: string, limit?: number): Promise<ConsentLog[]>;
+  createConsentLog(log: InsertConsentLog): Promise<ConsentLog>;
+  softDeleteUser(userId: string): Promise<boolean>;
+  exportUserData(userId: string): Promise<{
+    profile: User;
+    bedrijfsprofiel: Bedrijfsprofiel | null;
+    visibility: FieldVisibility[];
+    consentLog: ConsentLog[];
+  }>;
 }
 
 export class MemStorage implements IStorage {
@@ -209,6 +230,7 @@ export class MemStorage implements IStorage {
       onboardingToken: userData.onboardingToken || null,
       createdAt: new Date(),
       updatedAt: new Date(),
+      deletedAt: null,
     };
     this.users.set(id, user);
     return user;
@@ -233,6 +255,7 @@ export class MemStorage implements IStorage {
       onboardingToken: userData.onboardingToken || null,
       createdAt: existing?.createdAt || new Date(),
       updatedAt: new Date(),
+      deletedAt: existing?.deletedAt || null,
     };
     this.users.set(user.id, user);
     return user;
@@ -1097,6 +1120,74 @@ export class MemStorage implements IStorage {
       monthlyGrowth: 18,
     };
   }
+
+  // Privacy & Consent (AVG compliance) - MemStorage stubs
+  private fieldVisibilities: Map<string, FieldVisibility> = new Map();
+  private consentLogs: ConsentLog[] = [];
+
+  async getFieldVisibilities(userId: string): Promise<FieldVisibility[]> {
+    return Array.from(this.fieldVisibilities.values()).filter(v => v.userId === userId);
+  }
+
+  async getFieldVisibility(userId: string, fieldName: string): Promise<FieldVisibility | undefined> {
+    return this.fieldVisibilities.get(`${userId}-${fieldName}`);
+  }
+
+  async setFieldVisibility(userId: string, fieldName: string, visibility: VisibilityLevel): Promise<FieldVisibility> {
+    const key = `${userId}-${fieldName}`;
+    const existing = this.fieldVisibilities.get(key);
+    const fv: FieldVisibility = {
+      id: existing?.id || randomUUID(),
+      userId,
+      fieldName,
+      visibility
+    };
+    this.fieldVisibilities.set(key, fv);
+    return fv;
+  }
+
+  async getConsentLogs(userId: string, limit: number = 10): Promise<ConsentLog[]> {
+    return this.consentLogs.filter(l => l.userId === userId).slice(0, limit);
+  }
+
+  async createConsentLog(log: InsertConsentLog): Promise<ConsentLog> {
+    const cl: ConsentLog = { 
+      id: randomUUID(), 
+      userId: log.userId,
+      fieldName: log.fieldName,
+      oldVisibility: log.oldVisibility ?? null,
+      newVisibility: log.newVisibility,
+      changedAt: new Date() 
+    };
+    this.consentLogs.push(cl);
+    return cl;
+  }
+
+  async softDeleteUser(userId: string): Promise<boolean> {
+    const user = this.users.get(userId);
+    if (user) {
+      user.deletedAt = new Date();
+      return true;
+    }
+    return false;
+  }
+
+  async exportUserData(userId: string): Promise<{
+    profile: User;
+    bedrijfsprofiel: Bedrijfsprofiel | null;
+    visibility: FieldVisibility[];
+    consentLog: ConsentLog[];
+  }> {
+    const user = await this.getUser(userId);
+    if (!user) throw new Error("Gebruiker niet gevonden");
+    const profiel = await this.getBedrijfsprofielByUserId(userId);
+    return {
+      profile: user,
+      bedrijfsprofiel: profiel || null,
+      visibility: await this.getFieldVisibilities(userId),
+      consentLog: await this.getConsentLogs(userId, 100)
+    };
+  }
 }
 
 class DbStorage implements IStorage {
@@ -1601,6 +1692,98 @@ class DbStorage implements IStorage {
       totalCollaborations: 1234,
       totalRegions: 23,
       monthlyGrowth: 18,
+    };
+  }
+
+  // Privacy & Consent (AVG compliance)
+  async getFieldVisibilities(userId: string): Promise<FieldVisibility[]> {
+    return await db.select()
+      .from(fieldVisibility)
+      .where(eq(fieldVisibility.userId, userId));
+  }
+
+  async getFieldVisibility(userId: string, fieldName: string): Promise<FieldVisibility | undefined> {
+    const results = await db.select()
+      .from(fieldVisibility)
+      .where(and(
+        eq(fieldVisibility.userId, userId),
+        eq(fieldVisibility.fieldName, fieldName)
+      ));
+    return results[0];
+  }
+
+  async setFieldVisibility(userId: string, fieldName: string, visibility: VisibilityLevel): Promise<FieldVisibility> {
+    // Get current visibility for logging
+    const current = await this.getFieldVisibility(userId, fieldName);
+    const oldVisibility = current?.visibility as VisibilityLevel | undefined;
+
+    // Upsert the visibility setting
+    const results = await db.insert(fieldVisibility)
+      .values({ userId, fieldName, visibility })
+      .onConflictDoUpdate({
+        target: [fieldVisibility.userId, fieldVisibility.fieldName],
+        set: { visibility }
+      })
+      .returning();
+
+    // Log the consent change if visibility changed
+    if (oldVisibility !== visibility) {
+      await this.createConsentLog({
+        userId,
+        fieldName,
+        oldVisibility: oldVisibility || null,
+        newVisibility: visibility
+      });
+    }
+
+    return results[0];
+  }
+
+  async getConsentLogs(userId: string, limit: number = 10): Promise<ConsentLog[]> {
+    return await db.select()
+      .from(consentLog)
+      .where(eq(consentLog.userId, userId))
+      .orderBy(desc(consentLog.changedAt))
+      .limit(limit);
+  }
+
+  async createConsentLog(log: InsertConsentLog): Promise<ConsentLog> {
+    const results = await db.insert(consentLog)
+      .values(log)
+      .returning();
+    return results[0];
+  }
+
+  async softDeleteUser(userId: string): Promise<boolean> {
+    const results = await db.update(users)
+      .set({ deletedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return results.length > 0;
+  }
+
+  async exportUserData(userId: string): Promise<{
+    profile: User;
+    bedrijfsprofiel: Bedrijfsprofiel | null;
+    visibility: FieldVisibility[];
+    consentLog: ConsentLog[];
+  }> {
+    const [user, profiel, visibilities, logs] = await Promise.all([
+      this.getUser(userId),
+      this.getBedrijfsprofielByUserId(userId),
+      this.getFieldVisibilities(userId),
+      this.getConsentLogs(userId, 100)
+    ]);
+
+    if (!user) {
+      throw new Error("Gebruiker niet gevonden");
+    }
+
+    return {
+      profile: user,
+      bedrijfsprofiel: profiel || null,
+      visibility: visibilities,
+      consentLog: logs
     };
   }
 }

@@ -37,6 +37,7 @@ export const users = pgTable("users", {
   onboardingToken: varchar("onboarding_token"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+  deletedAt: timestamp("deleted_at"), // Soft delete for AVG compliance
 });
 
 export const entrepreneurs = pgTable("entrepreneurs", {
@@ -198,6 +199,30 @@ export const onboardingTokens = pgTable("onboarding_tokens", {
   token: varchar("token").notNull().unique(),
   expiresAt: timestamp("expires_at").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Visibility levels for field privacy settings
+export const VISIBILITY_LEVELS = ["public", "members", "region_only", "private"] as const;
+export type VisibilityLevel = typeof VISIBILITY_LEVELS[number];
+
+// Field visibility settings for privacy control
+export const fieldVisibility = pgTable("field_visibility", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  fieldName: varchar("field_name").notNull(),
+  visibility: varchar("visibility", { enum: VISIBILITY_LEVELS }).notNull().default("private"),
+}, (table) => ({
+  uniqueUserField: unique().on(table.userId, table.fieldName),
+}));
+
+// Consent log for tracking visibility changes (AVG compliance)
+export const consentLog = pgTable("consent_log", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  fieldName: varchar("field_name").notNull(),
+  oldVisibility: varchar("old_visibility", { enum: VISIBILITY_LEVELS }),
+  newVisibility: varchar("new_visibility", { enum: VISIBILITY_LEVELS }).notNull(),
+  changedAt: timestamp("changed_at").defaultNow().notNull(),
 });
 
 // Documents table for RegioBot uploads (PDF, DOC, TXT, images)
@@ -398,3 +423,40 @@ export const regioBotChatSchema = z.object({
 });
 
 export type RegioBotChatRequest = z.infer<typeof regioBotChatSchema>;
+
+// Field visibility schemas and types
+export const insertFieldVisibilitySchema = createInsertSchema(fieldVisibility).omit({
+  id: true,
+}).extend({
+  visibility: z.enum(VISIBILITY_LEVELS, { required_error: "Zichtbaarheid is verplicht" }),
+});
+
+export const updateFieldVisibilitySchema = z.object({
+  fieldName: z.string().min(1, "Veldnaam is verplicht"),
+  visibility: z.enum(VISIBILITY_LEVELS, { required_error: "Zichtbaarheid is verplicht" }),
+});
+
+export type InsertFieldVisibility = z.infer<typeof insertFieldVisibilitySchema>;
+export type FieldVisibility = typeof fieldVisibility.$inferSelect;
+export type UpdateFieldVisibility = z.infer<typeof updateFieldVisibilitySchema>;
+
+// Consent log schemas and types
+export const insertConsentLogSchema = createInsertSchema(consentLog).omit({
+  id: true,
+  changedAt: true,
+});
+
+export type InsertConsentLog = z.infer<typeof insertConsentLogSchema>;
+export type ConsentLog = typeof consentLog.$inferSelect;
+
+// Privacy profile fields that can have visibility settings
+export const PRIVACY_FIELDS = [
+  "businessName",
+  "firstName", 
+  "lastName",
+  "email",
+  "bio",
+  "category",
+  "profileImageUrl",
+] as const;
+export type PrivacyField = typeof PRIVACY_FIELDS[number];

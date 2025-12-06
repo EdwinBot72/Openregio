@@ -1164,6 +1164,159 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
     }
   });
 
+  // ===================================
+  // PRIVACY & CONSENT DASHBOARD (AVG)
+  // ===================================
+
+  // Get all field visibilities for current user
+  app.get("/api/privacy/visibility", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const visibilities = await storage.getFieldVisibilities(userId);
+      res.json(visibilities);
+    } catch (error: any) {
+      console.error("Error fetching visibilities:", error);
+      res.status(500).json({ error: "Kon zichtbaarheidsinstellingen niet ophalen" });
+    }
+  });
+
+  // Update visibility for a specific field
+  app.post("/api/privacy/visibility", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const { fieldName, visibility } = req.body;
+
+      if (!fieldName || !visibility) {
+        return res.status(400).json({ error: "Veldnaam en zichtbaarheid zijn verplicht" });
+      }
+
+      const validVisibilities = ["public", "members", "region_only", "private"];
+      if (!validVisibilities.includes(visibility)) {
+        return res.status(400).json({ error: "Ongeldige zichtbaarheidsinstelling" });
+      }
+
+      const result = await storage.setFieldVisibility(userId, fieldName, visibility);
+      res.json(result);
+    } catch (error: any) {
+      console.error("Error updating visibility:", error);
+      res.status(500).json({ error: "Kon zichtbaarheid niet bijwerken" });
+    }
+  });
+
+  // Get consent history (last 10 changes)
+  app.get("/api/privacy/consent-log", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const logs = await storage.getConsentLogs(userId, 10);
+      res.json(logs);
+    } catch (error: any) {
+      console.error("Error fetching consent logs:", error);
+      res.status(500).json({ error: "Kon toestemmingshistorie niet ophalen" });
+    }
+  });
+
+  // Export all user data (AVG right)
+  app.get("/api/privacy/export", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const data = await storage.exportUserData(userId);
+
+      // Remove sensitive fields from export
+      const exportData = {
+        profile: {
+          ...data.profile,
+          passwordHash: undefined, // Never export password hash
+        },
+        bedrijfsprofiel: data.bedrijfsprofiel,
+        visibility: data.visibility,
+        consentLog: data.consentLog,
+        exportedAt: new Date().toISOString(),
+      };
+
+      res.setHeader('Content-Type', 'application/json');
+      res.setHeader('Content-Disposition', 'attachment; filename="mijn-openregio-data.json"');
+      res.json(exportData);
+    } catch (error: any) {
+      console.error("Error exporting user data:", error);
+      res.status(500).json({ error: "Kon data niet exporteren" });
+    }
+  });
+
+  // Delete account (soft delete - AVG right to be forgotten)
+  app.post("/api/privacy/delete-account", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const { confirm } = req.body;
+
+      if (confirm !== "VERWIJDER") {
+        return res.status(400).json({ 
+          error: "Bevestig verwijdering door 'VERWIJDER' in te typen" 
+        });
+      }
+
+      // Soft delete user
+      const deleted = await storage.softDeleteUser(userId);
+
+      if (!deleted) {
+        return res.status(404).json({ error: "Gebruiker niet gevonden" });
+      }
+
+      // Log the user out
+      req.session.destroy((err) => {
+        if (err) {
+          console.error("Error destroying session:", err);
+        }
+      });
+
+      res.json({ 
+        success: true, 
+        message: "Je account is verwijderd. We zullen je data binnen 30 dagen volledig verwijderen." 
+      });
+    } catch (error: any) {
+      console.error("Error deleting account:", error);
+      res.status(500).json({ error: "Kon account niet verwijderen" });
+    }
+  });
+
+  // Get full privacy dashboard data in one call
+  app.get("/api/privacy/dashboard", requireAuth, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      
+      const [user, profiel, visibilities, logs] = await Promise.all([
+        storage.getUser(userId),
+        storage.getBedrijfsprofielByUserId(userId),
+        storage.getFieldVisibilities(userId),
+        storage.getConsentLogs(userId, 10)
+      ]);
+
+      if (!user) {
+        return res.status(404).json({ error: "Gebruiker niet gevonden" });
+      }
+
+      res.json({
+        profile: {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          businessName: user.businessName,
+          bio: user.bio,
+          category: user.category,
+          profileImageUrl: user.profileImageUrl,
+          plan: user.plan,
+          createdAt: user.createdAt,
+        },
+        bedrijfsprofiel: profiel,
+        visibility: visibilities,
+        consentLog: logs,
+      });
+    } catch (error: any) {
+      console.error("Error fetching privacy dashboard:", error);
+      res.status(500).json({ error: "Kon privacy dashboard niet laden" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
