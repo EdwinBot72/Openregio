@@ -6,7 +6,7 @@ import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { createMollieClient } from "@mollie/api-client";
 import { setupSimpleAuth } from "./simpleAuth";
-import { attachUser, requirePro, requireAdmin } from "./middleware/auth";
+import { attachUser, requireAuth, requirePro, requireAdmin } from "./middleware/auth";
 import { seedMasterAccount } from "./seed";
 import { generateRandomPassword, generateOnboardingToken, getPlanPrice, getPlanDisplayName } from "./utils/auth";
 import bcrypt from "bcrypt";
