@@ -195,6 +195,30 @@ Preferred communication style: Simple, everyday language.
   - Right to access (data export)
   - Right to erasure (soft delete with 30-day data retention)
   - Consent management with audit trail
+
+**PRO-Exclusive Data & Consent Control (Completed):**
+- **Business Logic:**
+  - Basic members: All fields default to "private" (privacy-first)
+  - PRO members: Can customize per-field visibility (public/members/region_only/private)
+  - Visibility rules apply equally to all viewers (no plan-check in canViewField)
+  - PRO-exclusive = configuration rights, not read access
+- **Database:**
+  - `users.visibility_settings`: JSON column storing per-field visibility
+  - Uses UUID-based foreign keys for field_visibility and consent_log tables
+  - Automatic migrations in db-migrate.ts ensure schema consistency
+- **API Endpoints (PRO-only via requirePro middleware):**
+  - GET /api/pro/visibility-settings: Fetch current visibility settings
+  - POST /api/pro/visibility-settings: Update visibility (Zod validated)
+- **Frontend (/pro/visibility-settings):**
+  - Table-based UI showing each field with current value and visibility selector
+  - Explanation of visibility levels (Openbaar, Alleen leden, Alleen mijn regio, Privé)
+  - Save button with loading state and toast notifications
+- **Sidebar Integration:**
+  - "Zichtbaarheidsbeheer" link only visible for PRO members
+- **Helper Functions (server/utils/visibility.ts):**
+  - parseVisibilitySettings: Parse JSON with fallback to defaults
+  - canViewField: Check visibility based on viewer status and region
+  - getVisibleFields: Get visibility map for all fields
 - **Sidebar Navigation:** Privacy & Gegevens link in Account section
 
 ## External Dependencies
