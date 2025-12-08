@@ -33,6 +33,8 @@ export const users = pgTable("users", {
   businessName: varchar("business_name"),
   bio: text("bio"),
   category: varchar("category"),
+  region: varchar("region"), // User's region for REGION_ONLY visibility
+  visibilitySettings: text("visibility_settings"), // JSON string with visibility per field
   mustCompleteOnboarding: boolean("must_complete_onboarding").default(true).notNull(),
   onboardingToken: varchar("onboarding_token"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -204,6 +206,15 @@ export const onboardingTokens = pgTable("onboarding_tokens", {
 // Visibility levels for field privacy settings
 export const VISIBILITY_LEVELS = ["public", "members", "region_only", "private"] as const;
 export type VisibilityLevel = typeof VISIBILITY_LEVELS[number];
+
+// Default visibility settings for PRO Data & Consent Control
+export const DEFAULT_VISIBILITY_SETTINGS: Record<string, VisibilityLevel> = {
+  company_name: "public",
+  phone: "members",
+  address: "region_only",
+  website: "public",
+  description: "members",
+};
 
 // Field visibility settings for privacy control
 export const fieldVisibility = pgTable("field_visibility", {

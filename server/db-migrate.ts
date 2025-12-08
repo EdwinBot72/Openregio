@@ -11,6 +11,18 @@ export async function runMigrations(): Promise<void> {
     `);
     console.log("[Migration] ✓ users.deleted_at column ensured");
 
+    // Add visibility_settings column to users table if not exists
+    await db.execute(sql`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS visibility_settings TEXT;
+    `);
+    console.log("[Migration] ✓ users.visibility_settings column ensured");
+
+    // Add region column to users table if not exists
+    await db.execute(sql`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS region VARCHAR(255);
+    `);
+    console.log("[Migration] ✓ users.region column ensured");
+
     // Create field_visibility table if not exists
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS field_visibility (

@@ -1165,6 +1165,141 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
   });
 
   // ===================================
+  // PRO DATA & CONSENT CONTROL
+  // ===================================
+
+  // Get visibility settings (PRO only)
+  app.get("/api/pro/visibility-settings", requirePro, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ error: "Gebruiker niet gevonden" });
+      }
+
+      // Parse visibility settings or use defaults
+      const { parseVisibilitySettings, VISIBILITY_OPTIONS, VISIBILITY_LABELS, FIELD_LABELS } = await import("./utils/visibility");
+      const settings = parseVisibilitySettings(user.visibilitySettings);
+      
+      res.json({
+        user: {
+          id: user.id,
+          email: user.email,
+          businessName: user.businessName,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          bio: user.bio,
+          region: user.region,
+        },
+        settings,
+        options: VISIBILITY_OPTIONS,
+        labels: VISIBILITY_LABELS,
+        fieldLabels: FIELD_LABELS,
+      });
+    } catch (error: any) {
+      console.error("Error fetching visibility settings:", error);
+      res.status(500).json({ error: "Kon zichtbaarheidsinstellingen niet ophalen" });
+    }
+  });
+
+  // Update visibility settings (PRO only)
+  app.post("/api/pro/visibility-settings", requirePro, async (req, res) => {
+    try {
+      const userId = req.session.userId!;
+      const { company_name, phone, address, website, description } = req.body;
+
+      const validValues = ["public", "members", "region_only", "private"];
+      const settings: Record<string, string> = {};
+
+      // Validate and set each field
+      if (company_name && validValues.includes(company_name)) settings.company_name = company_name;
+      if (phone && validValues.includes(phone)) settings.phone = phone;
+      if (address && validValues.includes(address)) settings.address = address;
+      if (website && validValues.includes(website)) settings.website = website;
+      if (description && validValues.includes(description)) settings.description = description;
+
+      // Update user's visibility settings
+      await storage.updateUserVisibilitySettings(userId, JSON.stringify(settings));
+
+      res.json({ 
+        success: true, 
+        message: "Zichtbaarheidsinstellingen opgeslagen",
+        settings 
+      });
+    } catch (error: any) {
+      console.error("Error updating visibility settings:", error);
+      res.status(500).json({ error: "Kon zichtbaarheidsinstellingen niet opslaan" });
+    }
+  });
+
+  // Get user profile with visibility filtering
+  app.get("/api/profile/:id", async (req, res) => {
+    try {
+      const ownerId = req.params.id;
+      const viewerId = req.session.userId;
+      
+      const owner = await storage.getUser(ownerId);
+      if (!owner) {
+        return res.status(404).json({ error: "Profiel niet gevonden" });
+      }
+
+      const viewer = viewerId ? await storage.getUser(viewerId) : null;
+      
+      // Import visibility helpers
+      const { parseVisibilitySettings, canViewField } = await import("./utils/visibility");
+      const settings = parseVisibilitySettings(owner.visibilitySettings);
+
+      // Build profile with visibility filtering
+      const profile: Record<string, any> = {
+        id: owner.id,
+        firstName: owner.firstName,
+        lastName: owner.lastName,
+        profileImageUrl: owner.profileImageUrl,
+        plan: owner.plan,
+      };
+
+      // Apply visibility rules to each field
+      if (canViewField(viewer, owner, settings.company_name)) {
+        profile.businessName = owner.businessName;
+      } else {
+        profile.businessName = null;
+        profile.businessNameHidden = true;
+      }
+
+      if (canViewField(viewer, owner, settings.phone)) {
+        profile.phone = owner.email; // Using email as phone placeholder
+      } else {
+        profile.phone = null;
+        profile.phoneHidden = true;
+      }
+
+      if (canViewField(viewer, owner, settings.address)) {
+        profile.address = owner.region;
+      } else {
+        profile.address = null;
+        profile.addressHidden = true;
+      }
+
+      if (canViewField(viewer, owner, settings.website)) {
+        profile.website = null; // No website field in user table
+      }
+
+      if (canViewField(viewer, owner, settings.description)) {
+        profile.bio = owner.bio;
+      } else {
+        profile.bio = null;
+        profile.bioHidden = true;
+      }
+
+      res.json(profile);
+    } catch (error: any) {
+      console.error("Error fetching profile:", error);
+      res.status(500).json({ error: "Kon profiel niet ophalen" });
+    }
+  });
+
+  // ===================================
   // PRIVACY & CONSENT DASHBOARD (AVG)
   // ===================================
 

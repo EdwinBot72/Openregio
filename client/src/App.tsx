@@ -26,6 +26,7 @@ import VoorwaardenPage from "@/pages/voorwaarden";
 import StartPage from "@/pages/start";
 import BasischeckPage from "@/pages/basischeck";
 import PrivacyDashboardPage from "@/pages/privacy-dashboard";
+import ProVisibilitySettingsPage from "@/pages/pro-visibility-settings";
 
 // Routes that should NOT have the sidebar/header layout
 const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck"];
@@ -60,6 +61,7 @@ function AuthenticatedRouter() {
       <Route path="/regiobot" component={RegioBotPage} />
       <Route path="/cooperative" component={CooperativePage} />
       <Route path="/privacy-dashboard" component={PrivacyDashboardPage} />
+      <Route path="/pro/visibility-settings" component={ProVisibilitySettingsPage} />
       <Route component={NotFound} />
     </Switch>
   );

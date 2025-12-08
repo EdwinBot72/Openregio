@@ -161,6 +161,9 @@ export interface IStorage {
     visibility: FieldVisibility[];
     consentLog: ConsentLog[];
   }>;
+
+  // PRO Data & Consent Control
+  updateUserVisibilitySettings(userId: string, visibilitySettings: string): Promise<User | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -226,6 +229,8 @@ export class MemStorage implements IStorage {
       businessName: null,
       bio: null,
       category: null,
+      region: null,
+      visibilitySettings: null,
       mustCompleteOnboarding: userData.mustCompleteOnboarding ?? true,
       onboardingToken: userData.onboardingToken || null,
       createdAt: new Date(),
@@ -251,6 +256,8 @@ export class MemStorage implements IStorage {
       businessName: userData.businessName || null,
       bio: userData.bio || null,
       category: userData.category || null,
+      region: existing?.region || null,
+      visibilitySettings: existing?.visibilitySettings || null,
       mustCompleteOnboarding: userData.mustCompleteOnboarding ?? true,
       onboardingToken: userData.onboardingToken || null,
       createdAt: existing?.createdAt || new Date(),
@@ -1188,6 +1195,15 @@ export class MemStorage implements IStorage {
       consentLog: await this.getConsentLogs(userId, 100)
     };
   }
+
+  async updateUserVisibilitySettings(userId: string, visibilitySettings: string): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (user) {
+      user.visibilitySettings = visibilitySettings;
+      return user;
+    }
+    return undefined;
+  }
 }
 
 class DbStorage implements IStorage {
@@ -1785,6 +1801,14 @@ class DbStorage implements IStorage {
       visibility: visibilities,
       consentLog: logs
     };
+  }
+
+  async updateUserVisibilitySettings(userId: string, visibilitySettings: string): Promise<User | undefined> {
+    const results = await db.update(users)
+      .set({ visibilitySettings })
+      .where(eq(users.id, userId))
+      .returning();
+    return results[0];
   }
 }
 
