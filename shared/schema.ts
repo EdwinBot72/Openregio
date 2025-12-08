@@ -207,13 +207,25 @@ export const onboardingTokens = pgTable("onboarding_tokens", {
 export const VISIBILITY_LEVELS = ["public", "members", "region_only", "private"] as const;
 export type VisibilityLevel = typeof VISIBILITY_LEVELS[number];
 
-// Default visibility settings for PRO Data & Consent Control
+// Zod schema for visibility settings validation
+export const visibilitySettingsSchema = z.object({
+  company_name: z.enum(VISIBILITY_LEVELS).optional(),
+  phone: z.enum(VISIBILITY_LEVELS).optional(),
+  address: z.enum(VISIBILITY_LEVELS).optional(),
+  website: z.enum(VISIBILITY_LEVELS).optional(),
+  description: z.enum(VISIBILITY_LEVELS).optional(),
+});
+
+export type VisibilitySettings = z.infer<typeof visibilitySettingsSchema>;
+
+// Default visibility is PRIVATE for all fields (privacy-first for Basic members)
+// PRO members can customize these settings in /pro/visibility-settings
 export const DEFAULT_VISIBILITY_SETTINGS: Record<string, VisibilityLevel> = {
-  company_name: "public",
-  phone: "members",
-  address: "region_only",
-  website: "public",
-  description: "members",
+  company_name: "private",
+  phone: "private",
+  address: "private",
+  website: "private",
+  description: "private",
 };
 
 // Field visibility settings for privacy control

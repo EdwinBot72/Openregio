@@ -23,24 +23,25 @@ export async function runMigrations(): Promise<void> {
     `);
     console.log("[Migration] ✓ users.region column ensured");
 
-    // Create field_visibility table if not exists
+    // Create field_visibility table if not exists (legacy table for basic privacy)
+    // Note: Using VARCHAR for user_id to match users.id UUID type
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS field_visibility (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL REFERENCES users(id),
+        id VARCHAR(255) PRIMARY KEY DEFAULT gen_random_uuid()::text,
+        user_id VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         field_name VARCHAR(100) NOT NULL,
-        visibility VARCHAR(20) NOT NULL DEFAULT 'public',
+        visibility VARCHAR(20) NOT NULL DEFAULT 'private',
         updated_at TIMESTAMP DEFAULT NOW(),
         UNIQUE(user_id, field_name)
       );
     `);
     console.log("[Migration] ✓ field_visibility table ensured");
 
-    // Create consent_log table if not exists
+    // Create consent_log table if not exists (audit trail for visibility changes)
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS consent_log (
-        id SERIAL PRIMARY KEY,
-        user_id INTEGER NOT NULL REFERENCES users(id),
+        id VARCHAR(255) PRIMARY KEY DEFAULT gen_random_uuid()::text,
+        user_id VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
         field_name VARCHAR(100) NOT NULL,
         old_value VARCHAR(20),
         new_value VARCHAR(20) NOT NULL,

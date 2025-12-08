@@ -21,6 +21,17 @@ export function parseVisibilitySettings(settingsJson: string | null | undefined)
   }
 }
 
+/**
+ * Check if a viewer can see a specific field based on visibility settings.
+ * 
+ * Business Logic:
+ * - PRO-exclusive: Only PRO members can ADJUST visibility settings (via requirePro middleware)
+ * - Visibility rules apply equally to ALL viewers (Basic + PRO)
+ * - Basic members get all fields private by DEFAULT
+ * - When a PRO owner sets "members", ALL logged-in users can see (not just PRO)
+ * 
+ * No plan-check needed: The PRO feature is configuration rights, not read access.
+ */
 export function canViewField(
   viewer: { id: string; region?: string | null } | null | undefined,
   owner: { id: string; region?: string | null },
@@ -31,15 +42,20 @@ export function canViewField(
 
   switch (fieldVisibility) {
     case "public":
+      // Anyone (logged in or not) can see
       return true;
     case "members":
+      // Any logged-in member (Basic or PRO) can see
       return !!viewer;
     case "region_only":
-      return !!viewer && viewer.region === owner.region;
+      // Only logged-in members from the same region can see
+      return !!viewer && !!viewer.region && viewer.region === owner.region;
     case "private":
+      // Only the owner can see (already checked above)
       return false;
     default:
-      return true; // fallback to public
+      // Fallback to private for safety
+      return false;
   }
 }
 

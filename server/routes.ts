@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema, insertBedrijfsprofielSchema, regioBotChatSchema } from "@shared/schema";
+import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema, insertBedrijfsprofielSchema, regioBotChatSchema, visibilitySettingsSchema, DEFAULT_VISIBILITY_SETTINGS } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { createMollieClient } from "@mollie/api-client";
@@ -1207,17 +1207,21 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
   app.post("/api/pro/visibility-settings", requirePro, async (req, res) => {
     try {
       const userId = req.session.userId!;
-      const { company_name, phone, address, website, description } = req.body;
+      
+      // Validate request body with Zod schema
+      const validationResult = visibilitySettingsSchema.safeParse(req.body);
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          error: "Ongeldige invoer", 
+          details: fromZodError(validationResult.error).message 
+        });
+      }
 
-      const validValues = ["public", "members", "region_only", "private"];
-      const settings: Record<string, string> = {};
-
-      // Validate and set each field
-      if (company_name && validValues.includes(company_name)) settings.company_name = company_name;
-      if (phone && validValues.includes(phone)) settings.phone = phone;
-      if (address && validValues.includes(address)) settings.address = address;
-      if (website && validValues.includes(website)) settings.website = website;
-      if (description && validValues.includes(description)) settings.description = description;
+      // Merge with defaults to ensure all fields are present
+      const settings = {
+        ...DEFAULT_VISIBILITY_SETTINGS,
+        ...validationResult.data,
+      };
 
       // Update user's visibility settings
       await storage.updateUserVisibilitySettings(userId, JSON.stringify(settings));
