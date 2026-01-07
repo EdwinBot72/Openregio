@@ -954,7 +954,7 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
       const firstPayment = await mollieClient.payments.create({
         amount: {
           currency: "EUR",
-          value: plan === "pro" ? "19.99" : "9.99"
+          value: getPlanPrice(plan)
         },
         customerId: customer.id,
         sequenceType: "first" as any,
@@ -1054,7 +1054,7 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
               customerId: subscription.mollieCustomerId,
               amount: {
                 currency: "EUR",
-                value: plan === "pro" ? "19.99" : "9.99"
+                value: getPlanPrice(plan)
               },
               interval: "1 month",
               description: `OpenRegio ${plan === "pro" ? "Pro" : "Basic"} lidmaatschap`,
