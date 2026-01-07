@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, timestamp, boolean, doublePrecision, unique, index, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, timestamp, boolean, doublePrecision, unique, index, jsonb, serial, integer } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -483,3 +483,91 @@ export const PRIVACY_FIELDS = [
   "profileImageUrl",
 ] as const;
 export type PrivacyField = typeof PRIVACY_FIELDS[number];
+
+// ===============================
+// WOO (Wet open overheid) TABLES
+// ===============================
+
+// Regions table
+export const regions = pgTable("regions", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+});
+
+// Authorities (overheden/instanties) table
+export const authorities = pgTable("authorities", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+});
+
+// WOO status options
+export const WOO_REQUEST_STATUS = ["sent", "received", "in_progress", "completed", "rejected"] as const;
+
+// WOO Requests table
+export const wooRequests = pgTable("woo_requests", {
+  id: serial("id").primaryKey(),
+  regionId: integer("region_id").references(() => regions.id),
+  authorityId: integer("authority_id").references(() => authorities.id),
+  title: text("title").notNull(),
+  body: text("body"),
+  referenceCode: text("reference_code"),
+  sentAt: timestamp("sent_at", { withTimezone: true }),
+  status: text("status").default("sent"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  index("idx_woo_requests_region").on(table.regionId),
+  index("idx_woo_requests_authority").on(table.authorityId),
+]);
+
+// Document kinds
+export const WOO_DOCUMENT_KIND = ["response", "decision", "attachment"] as const;
+
+// WOO Documents table
+export const wooDocuments = pgTable("woo_documents", {
+  id: serial("id").primaryKey(),
+  requestId: integer("request_id").notNull().references(() => wooRequests.id, { onDelete: "cascade" }),
+  kind: text("kind").notNull().default("attachment"), // response/decision/attachment
+  filename: text("filename").notNull(),
+  fileUrl: text("file_url"),
+  receivedAt: timestamp("received_at", { withTimezone: true }),
+  summary: text("summary"),
+  textContent: text("text_content"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  index("idx_woo_documents_request").on(table.requestId),
+]);
+
+// Tags table
+export const tags = pgTable("tags", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  slug: text("slug").notNull().unique(),
+});
+
+// Request-Tag junction table
+export const requestTags = pgTable("request_tags", {
+  requestId: integer("request_id").notNull().references(() => wooRequests.id, { onDelete: "cascade" }),
+  tagId: integer("tag_id").notNull().references(() => tags.id, { onDelete: "cascade" }),
+}, (table) => ({
+  pk: unique().on(table.requestId, table.tagId),
+}));
+
+// WOO Schemas and Types
+export const insertRegionSchema = createInsertSchema(regions).omit({ id: true });
+export const insertAuthoritySchema = createInsertSchema(authorities).omit({ id: true });
+export const insertWooRequestSchema = createInsertSchema(wooRequests).omit({ id: true, createdAt: true });
+export const insertWooDocumentSchema = createInsertSchema(wooDocuments).omit({ id: true, createdAt: true });
+export const insertTagSchema = createInsertSchema(tags).omit({ id: true });
+
+export type InsertRegion = z.infer<typeof insertRegionSchema>;
+export type Region = typeof regions.$inferSelect;
+export type InsertAuthority = z.infer<typeof insertAuthoritySchema>;
+export type Authority = typeof authorities.$inferSelect;
+export type InsertWooRequest = z.infer<typeof insertWooRequestSchema>;
+export type WooRequest = typeof wooRequests.$inferSelect;
+export type InsertWooDocument = z.infer<typeof insertWooDocumentSchema>;
+export type WooDocument = typeof wooDocuments.$inferSelect;
+export type InsertTag = z.infer<typeof insertTagSchema>;
+export type Tag = typeof tags.$inferSelect;
