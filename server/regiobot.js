@@ -5,8 +5,26 @@ import pg from "pg";
 
 const { Pool } = pg;
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+// Lazy initialization - only create clients when needed
+let openai = null;
+let pool = null;
+
+function getOpenAI() {
+  if (!openai) {
+    if (!process.env.OPENAI_API_KEY) {
+      throw new Error("OPENAI_API_KEY is niet geconfigureerd");
+    }
+    openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  }
+  return openai;
+}
+
+function getPool() {
+  if (!pool) {
+    pool = new Pool({ connectionString: process.env.DATABASE_URL });
+  }
+  return pool;
+}
 
 // ---- Input schema ----
 const RegioBotInput = z.object({
@@ -78,7 +96,7 @@ function formatSources(rows) {
 
 // ---- Database retrieval (simple relevance: title/summary/text ILIKE) ----
 async function fetchContext({ question, regionSlug, authoritySlug, tags, limit }) {
-  const client = await pool.connect();
+  const client = await getPool().connect();
   try {
     let regionId = null;
     let authorityId = null;
@@ -215,7 +233,7 @@ export async function runRegioBot(rawInput) {
 
   const model = process.env.OPENAI_MODEL || "gpt-4o";
 
-  const completion = await openai.chat.completions.create({
+  const completion = await getOpenAI().chat.completions.create({
     model,
     messages,
     temperature: 0.2

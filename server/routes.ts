@@ -11,6 +11,7 @@ import { seedMasterAccount } from "./seed";
 import { generateRandomPassword, generateOnboardingToken, getPlanPrice, getPlanDisplayName } from "./utils/auth";
 import bcrypt from "bcrypt";
 import { upload, getDocumentType } from "./middleware/upload";
+import { runRegioBot } from "./regiobot.js";
 
 // Initialize Mollie client (requires MOLLIE_API_KEY environment variable)
 const mollieClient = process.env.MOLLIE_API_KEY 
@@ -757,6 +758,21 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
     } catch (error) {
       console.error("Get documents error:", error);
       res.status(500).json({ error: "Documenten ophalen mislukt" });
+    }
+  });
+
+  // WOO RegioBot - searches WOO requests/documents and provides AI answers
+  app.post("/api/regiobot", async (req, res) => {
+    try {
+      const payload = req.body ?? {};
+      const result = await runRegioBot(payload);
+      res.json(result);
+    } catch (err: any) {
+      console.error("RegioBot WOO error:", err);
+      res.status(400).json({
+        error: "RegioBot error",
+        message: err?.message ?? String(err)
+      });
     }
   });
 
