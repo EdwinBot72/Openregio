@@ -513,11 +513,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Proposals routes
   app.get("/api/proposals/summary", requireAuth, async (req, res) => {
     try {
-      const userId = await getOrCreateUserProfileId(req);
-      const summaries = await storage.getProposalSummaries(userId);
+      const userProfileId = await getOrCreateUserProfileId(req);
+      const summaries = await storage.getProposalSummaries(userProfileId);
       res.json(summaries);
     } catch (error) {
-      console.error("Error fetching proposal summaries:", error);
+      console.error(error);
       res.status(500).json({ error: "Failed to fetch proposal summaries" });
     }
   });
@@ -569,11 +569,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/proposals/:id/vote", requireAuth, async (req, res) => {
     try {
       const { choice } = req.body;
-      const userId = await getOrCreateUserProfileId(req);
+      const userProfileId = await getOrCreateUserProfileId(req);
       
       const validatedVote = insertVoteSchema.parse({
         proposalId: req.params.id,
-        userId,
+        userId: userProfileId,
         choice,
       });
       
