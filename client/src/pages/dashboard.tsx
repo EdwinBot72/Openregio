@@ -21,7 +21,7 @@ export default function DashboardPage() {
   const { user, isLoading: authLoading } = useAuth();
 
   const { data: bedrijfsprofiel } = useQuery<{ naam: string; status: string } | null>({
-    queryKey: ["/api/bedrijfsprofiel"],
+    queryKey: ["/api/business-profile/me"],
     enabled: !!user,
   });
 
