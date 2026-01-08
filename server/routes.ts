@@ -919,6 +919,65 @@ Maak een complete, direct bruikbare WOO-brief.`;
     }
   });
 
+  // WOO Dossiers - save and retrieve generated WOO letters
+  app.post("/api/woo/dossiers", requireAuth, async (req, res) => {
+    try {
+      const { authority, subject, context, requestedDocuments, generatedLetter, checklist, status } = req.body;
+
+      if (!authority || !subject || !generatedLetter) {
+        return res.status(400).json({
+          error: "Onvolledige aanvraag",
+          details: "Bestuursorgaan, onderwerp en gegenereerde brief zijn verplicht."
+        });
+      }
+
+      const dossier = await storage.createWooDossier({
+        userId: req.user!.id,
+        authority,
+        subject,
+        context: context || null,
+        requestedDocuments: requestedDocuments || null,
+        generatedLetter,
+        checklist: checklist || null,
+        status: status || "draft",
+      });
+
+      res.status(201).json(dossier);
+    } catch (err: any) {
+      console.error("Create dossier error:", err);
+      res.status(500).json({ error: "Dossier opslaan mislukt" });
+    }
+  });
+
+  app.get("/api/woo/dossiers", requireAuth, async (req, res) => {
+    try {
+      const dossiers = await storage.getWooDossiers(req.user!.id);
+      res.json(dossiers);
+    } catch (err: any) {
+      console.error("Get dossiers error:", err);
+      res.status(500).json({ error: "Dossiers ophalen mislukt" });
+    }
+  });
+
+  app.get("/api/woo/dossiers/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Ongeldig dossier ID" });
+      }
+
+      const dossier = await storage.getWooDossier(id, req.user!.id);
+      if (!dossier) {
+        return res.status(404).json({ error: "Dossier niet gevonden" });
+      }
+
+      res.json(dossier);
+    } catch (err: any) {
+      console.error("Get dossier error:", err);
+      res.status(500).json({ error: "Dossier ophalen mislukt" });
+    }
+  });
+
   // Chat routes
   app.get("/api/chat/rooms", async (_req, res) => {
     try {

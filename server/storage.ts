@@ -32,6 +32,8 @@ import {
   type ConsentLog,
   type InsertConsentLog,
   type VisibilityLevel,
+  type WooDossier,
+  type InsertWooDossier,
   entrepreneurs,
   proposals,
   votes,
@@ -49,6 +51,7 @@ import {
   consentLog,
   regions,
   authorities,
+  wooDossiers,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
@@ -170,6 +173,11 @@ export interface IStorage {
   // WOO data
   getWooRegions(): Promise<{ id: number; name: string; slug: string }[]>;
   getWooAuthorities(): Promise<{ id: number; name: string; slug: string }[]>;
+
+  // WOO Dossiers
+  createWooDossier(dossier: InsertWooDossier): Promise<WooDossier>;
+  getWooDossiers(userId: string): Promise<WooDossier[]>;
+  getWooDossier(id: number, userId: string): Promise<WooDossier | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -1218,6 +1226,24 @@ export class MemStorage implements IStorage {
   async getWooAuthorities(): Promise<{ id: number; name: string; slug: string }[]> {
     return [];
   }
+
+  async createWooDossier(dossier: InsertWooDossier): Promise<WooDossier> {
+    const id = Date.now();
+    return {
+      id,
+      ...dossier,
+      status: dossier.status || "draft",
+      createdAt: new Date(),
+    } as WooDossier;
+  }
+
+  async getWooDossiers(userId: string): Promise<WooDossier[]> {
+    return [];
+  }
+
+  async getWooDossier(id: number, userId: string): Promise<WooDossier | undefined> {
+    return undefined;
+  }
 }
 
 class DbStorage implements IStorage {
@@ -1841,6 +1867,23 @@ class DbStorage implements IStorage {
       slug: authorities.slug
     }).from(authorities).orderBy(authorities.name);
     return results;
+  }
+
+  async createWooDossier(dossier: InsertWooDossier): Promise<WooDossier> {
+    const [result] = await db.insert(wooDossiers).values(dossier).returning();
+    return result;
+  }
+
+  async getWooDossiers(userId: string): Promise<WooDossier[]> {
+    return await db.select().from(wooDossiers)
+      .where(eq(wooDossiers.userId, userId))
+      .orderBy(desc(wooDossiers.createdAt));
+  }
+
+  async getWooDossier(id: number, userId: string): Promise<WooDossier | undefined> {
+    const [result] = await db.select().from(wooDossiers)
+      .where(and(eq(wooDossiers.id, id), eq(wooDossiers.userId, userId)));
+    return result;
   }
 }
 

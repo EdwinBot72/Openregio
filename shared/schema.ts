@@ -554,12 +554,29 @@ export const requestTags = pgTable("request_tags", {
   pk: unique().on(table.requestId, table.tagId),
 }));
 
+// WOO Dossiers - saved generated WOO letters
+export const wooDossiers = pgTable("woo_dossiers", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  authority: text("authority").notNull(),
+  subject: text("subject").notNull(),
+  context: text("context"),
+  requestedDocuments: text("requested_documents"),
+  generatedLetter: text("generated_letter").notNull(),
+  checklist: text("checklist"),
+  status: text("status").default("draft"), // draft, sent, response_received, closed
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  index("idx_woo_dossiers_user").on(table.userId),
+]);
+
 // WOO Schemas and Types
 export const insertRegionSchema = createInsertSchema(regions).omit({ id: true });
 export const insertAuthoritySchema = createInsertSchema(authorities).omit({ id: true });
 export const insertWooRequestSchema = createInsertSchema(wooRequests).omit({ id: true, createdAt: true });
 export const insertWooDocumentSchema = createInsertSchema(wooDocuments).omit({ id: true, createdAt: true });
 export const insertTagSchema = createInsertSchema(tags).omit({ id: true });
+export const insertWooDossierSchema = createInsertSchema(wooDossiers).omit({ id: true, createdAt: true });
 
 export type InsertRegion = z.infer<typeof insertRegionSchema>;
 export type Region = typeof regions.$inferSelect;
@@ -571,3 +588,5 @@ export type InsertWooDocument = z.infer<typeof insertWooDocumentSchema>;
 export type WooDocument = typeof wooDocuments.$inferSelect;
 export type InsertTag = z.infer<typeof insertTagSchema>;
 export type Tag = typeof tags.$inferSelect;
+export type InsertWooDossier = z.infer<typeof insertWooDossierSchema>;
+export type WooDossier = typeof wooDossiers.$inferSelect;
