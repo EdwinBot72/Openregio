@@ -47,6 +47,8 @@ import {
   bedrijfsprofielen,
   fieldVisibility,
   consentLog,
+  regions,
+  authorities,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
@@ -164,6 +166,10 @@ export interface IStorage {
 
   // PRO Data & Consent Control
   updateUserVisibilitySettings(userId: string, visibilitySettings: string): Promise<User | undefined>;
+
+  // WOO data
+  getWooRegions(): Promise<{ id: number; name: string; slug: string }[]>;
+  getWooAuthorities(): Promise<{ id: number; name: string; slug: string }[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -1204,6 +1210,14 @@ export class MemStorage implements IStorage {
     }
     return undefined;
   }
+
+  async getWooRegions(): Promise<{ id: number; name: string; slug: string }[]> {
+    return [];
+  }
+
+  async getWooAuthorities(): Promise<{ id: number; name: string; slug: string }[]> {
+    return [];
+  }
 }
 
 class DbStorage implements IStorage {
@@ -1809,6 +1823,24 @@ class DbStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return results[0];
+  }
+
+  async getWooRegions(): Promise<{ id: number; name: string; slug: string }[]> {
+    const results = await db.select({
+      id: regions.id,
+      name: regions.name,
+      slug: regions.slug
+    }).from(regions).orderBy(regions.name);
+    return results;
+  }
+
+  async getWooAuthorities(): Promise<{ id: number; name: string; slug: string }[]> {
+    const results = await db.select({
+      id: authorities.id,
+      name: authorities.name,
+      slug: authorities.slug
+    }).from(authorities).orderBy(authorities.name);
+    return results;
   }
 }
 

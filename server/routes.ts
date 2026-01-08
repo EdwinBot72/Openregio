@@ -776,6 +776,27 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
     }
   });
 
+  // WOO API routes for dropdown selectors
+  app.get("/api/woo/regions", async (_req, res) => {
+    try {
+      const regions = await storage.getWooRegions();
+      res.json(regions);
+    } catch (err: any) {
+      console.error("Error fetching WOO regions:", err);
+      res.status(500).json({ error: "Kon regio's niet ophalen" });
+    }
+  });
+
+  app.get("/api/woo/authorities", async (_req, res) => {
+    try {
+      const authorities = await storage.getWooAuthorities();
+      res.json(authorities);
+    } catch (err: any) {
+      console.error("Error fetching WOO authorities:", err);
+      res.status(500).json({ error: "Kon bestuursorganen niet ophalen" });
+    }
+  });
+
   // Chat routes
   app.get("/api/chat/rooms", async (_req, res) => {
     try {
