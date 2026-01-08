@@ -50,6 +50,21 @@ export async function runMigrations(): Promise<void> {
     `);
     console.log("[Migration] ✓ consent_log table ensured");
 
+    // Create refresh_tokens table for JWT auth (production-ready stateless auth)
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS refresh_tokens (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        token_hash VARCHAR(255) NOT NULL,
+        token_id VARCHAR(255) NOT NULL UNIQUE,
+        expires_at TIMESTAMPTZ NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_refresh_tokens_user ON refresh_tokens(user_id);`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_refresh_tokens_token_id ON refresh_tokens(token_id);`);
+    console.log("[Migration] ✓ refresh_tokens table ensured");
+
     console.log("[Migration] Database schema is up to date");
   } catch (error) {
     console.error("[Migration] Error running migrations:", error);

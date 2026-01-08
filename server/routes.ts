@@ -5,8 +5,8 @@ import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchem
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { createMollieClient } from "@mollie/api-client";
-import { setupSimpleAuth } from "./simpleAuth";
-import { attachUser, requireAuth, requirePro, requireAdmin } from "./middleware/auth";
+import { setupJwtAuth, attachUser, requireAuth, requirePro } from "./jwtAuth";
+import { requireAdmin } from "./middleware/auth";
 import { seedMasterAccount } from "./seed";
 import { generateRandomPassword, generateOnboardingToken, getPlanPrice, getPlanDisplayName } from "./utils/auth";
 import bcrypt from "bcrypt";
@@ -26,8 +26,8 @@ function getBaseUrl(req: any): string {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Initialize email/password auth (API endpoints)
-  setupSimpleAuth(app);
+  // Initialize JWT auth with rate limiting (production-ready, stateless)
+  setupJwtAuth(app);
   
   // Seed master account (idempotent - only creates if doesn't exist)
   await seedMasterAccount();

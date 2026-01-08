@@ -570,6 +570,23 @@ export const wooDossiers = pgTable("woo_dossiers", {
   index("idx_woo_dossiers_user").on(table.userId),
 ]);
 
+// Refresh tokens for JWT auth (stateless, scalable)
+export const refreshTokens = pgTable("refresh_tokens", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  tokenHash: varchar("token_hash").notNull(), // SHA256 hash of the token
+  tokenId: varchar("token_id").notNull().unique(), // For targeted revocation
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  index("idx_refresh_tokens_user").on(table.userId),
+  index("idx_refresh_tokens_token_id").on(table.tokenId),
+]);
+
+export const insertRefreshTokenSchema = createInsertSchema(refreshTokens).omit({ id: true, createdAt: true });
+export type InsertRefreshToken = z.infer<typeof insertRefreshTokenSchema>;
+export type RefreshToken = typeof refreshTokens.$inferSelect;
+
 // WOO Schemas and Types
 export const insertRegionSchema = createInsertSchema(regions).omit({ id: true });
 export const insertAuthoritySchema = createInsertSchema(authorities).omit({ id: true });
