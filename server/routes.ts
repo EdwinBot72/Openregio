@@ -570,35 +570,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { choice } = req.body;
       const userProfileId = await getOrCreateUserProfileId(req);
-      
+
       const validatedVote = insertVoteSchema.parse({
         proposalId: req.params.id,
         userId: userProfileId,
         choice,
       });
-      
+
       const vote = await storage.createVote(validatedVote);
-      const voteCounts = await storage.getVoteCounts(req.params.id);
-      
-      res.status(201).json({ vote, voteCounts });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.errors });
-      }
-      
-      if (error instanceof Error) {
-        if (error.message === "Proposal not found") {
-          return res.status(404).json({ error: error.message });
-        }
-        if (error.message === "Cannot vote on closed proposal") {
-          return res.status(403).json({ error: error.message });
-        }
-        if (error.message === "User has already voted on this proposal") {
-          return res.status(409).json({ error: error.message });
-        }
-      }
-      
-      res.status(500).json({ error: "Failed to vote on proposal" });
+      res.status(201).json(vote);
+    } catch (error: any) {
+      console.error(error);
+      res.status(500).json({ error: "Failed to vote" });
     }
   });
 
