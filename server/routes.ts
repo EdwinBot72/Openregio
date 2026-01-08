@@ -823,6 +823,102 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
     }
   });
 
+  // WOO Template Generator - generates ready-to-use WOO request letters
+  app.post("/api/woo/generate", async (req, res) => {
+    try {
+      // Early check for OpenAI API key
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({ 
+          error: "WOO Generator is tijdelijk niet beschikbaar",
+          details: "De AI-configuratie is nog niet voltooid.",
+          action: "Vraag de beheerder om OPENAI_API_KEY te configureren."
+        });
+      }
+
+      // Validate input
+      const { authority, subject, context, requestedDocuments } = req.body;
+      
+      if (!authority || !subject) {
+        return res.status(400).json({
+          error: "Onvolledige aanvraag",
+          details: "Bestuursorgaan en onderwerp zijn verplicht.",
+          action: "Vul alle verplichte velden in."
+        });
+      }
+
+      const OpenAI = (await import("openai")).default;
+      const openai = new OpenAI();
+
+      const today = new Date().toLocaleDateString('nl-NL', { 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+      });
+
+      const systemPrompt = `Je bent een expert in het opstellen van WOO-verzoeken (Wet open overheid) voor Nederlandse burgers en ondernemers.
+
+Je taak is om een professionele, juridisch correcte WOO-brief te genereren die direct gebruikt kan worden.
+
+Regels:
+- Gebruik formeel maar toegankelijk Nederlands
+- Verwijs naar de juiste wetsartikelen (Woo artikel 4.1)
+- Wees specifiek over welke documenten worden opgevraagd
+- Geef een redelijke termijn (4 weken conform Woo)
+- Vermeld het recht op bezwaar en beroep
+- Voeg een checklist toe voor de indiener
+
+Output formaat:
+1. De volledige brief (klaar om te kopiëren)
+2. Een checklist met actiepunten voor de indiener
+3. Tips voor opvolging`;
+
+      const userPrompt = `Genereer een WOO-verzoek met de volgende gegevens:
+
+Bestuursorgaan: ${authority}
+Onderwerp: ${subject}
+${context ? `Achtergrond/context: ${context}` : ''}
+${requestedDocuments ? `Specifiek gevraagde stukken: ${requestedDocuments}` : ''}
+
+Datum: ${today}
+
+Maak een complete, direct bruikbare WOO-brief.`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        temperature: 0.7,
+      });
+
+      const generatedContent = completion.choices[0]?.message?.content || "";
+
+      // Parse the response to extract letter and checklist
+      const letterMatch = generatedContent.match(/^([\s\S]*?)(?=\n\s*(?:Checklist|CHECKLIST|✓|□|\d+\.\s*\[))/i);
+      const checklistMatch = generatedContent.match(/(?:Checklist|CHECKLIST|Actiepunten)[\s\S]*$/i);
+
+      res.json({
+        success: true,
+        letter: letterMatch ? letterMatch[1].trim() : generatedContent,
+        checklist: checklistMatch ? checklistMatch[0].trim() : "- Controleer of alle gegevens kloppen\n- Bewaar een kopie van je verzoek\n- Noteer de verzenddatum\n- Zet een herinnering voor 4 weken",
+        fullContent: generatedContent,
+        metadata: {
+          authority,
+          subject,
+          generatedAt: new Date().toISOString(),
+        }
+      });
+    } catch (err: any) {
+      console.error("WOO Generator error:", err);
+      res.status(500).json({
+        error: "WOO-brief genereren mislukt",
+        message: err?.message ?? String(err),
+        action: "Probeer het opnieuw of neem contact op met support."
+      });
+    }
+  });
+
   // Chat routes
   app.get("/api/chat/rooms", async (_req, res) => {
     try {
