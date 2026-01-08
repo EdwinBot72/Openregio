@@ -3,7 +3,8 @@ import { useQuery } from "@tanstack/react-query";
 import type { Post } from "@shared/schema";
 import { POST_TYPES, REGIONS, insertPostSchema } from "@shared/schema";
 import { Button } from "@/components/ui/button";
-import { Plus, Filter } from "lucide-react";
+import { QueryState } from "@/components/query-state";
+import { Plus, Filter, MessageSquare } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -240,7 +241,7 @@ function PostCard({ post }: { post: Post }) {
 export default function CommunityPage() {
   const [typeFilter, setTypeFilter] = useState<string>("all");
 
-  const { data: posts, isLoading } = useQuery<Post[]>({
+  const { data: posts, isLoading, isError, error, refetch } = useQuery<Post[]>({
     queryKey: ["/api/posts", typeFilter !== "all" ? typeFilter : undefined],
     queryFn: async () => {
       const params = new URLSearchParams();
@@ -288,25 +289,21 @@ export default function CommunityPage() {
           </Select>
         </div>
 
-        {isLoading ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground" data-testid="text-loading">Laden...</p>
-          </div>
-        ) : posts && posts.length > 0 ? (
+        <QueryState
+          isLoading={isLoading}
+          isError={isError}
+          error={error}
+          isEmpty={!posts || posts.length === 0}
+          emptyMessage="Nog geen posts. Wees de eerste om iets te delen!"
+          emptyIcon={<MessageSquare className="w-8 h-8 text-muted-foreground" />}
+          onRetry={() => refetch()}
+        >
           <div className="grid gap-4" data-testid="feed">
-            {posts.map((post) => (
+            {posts?.map((post) => (
               <PostCard key={post.id} post={post} />
             ))}
           </div>
-        ) : (
-          <Card>
-            <CardContent className="py-12 text-center">
-              <p className="text-muted-foreground" data-testid="text-empty">
-                Nog geen posts. Wees de eerste om iets te delen!
-              </p>
-            </CardContent>
-          </Card>
-        )}
+        </QueryState>
       </div>
     </div>
   );

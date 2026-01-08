@@ -3,6 +3,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { CooperativeStats } from "@/components/CooperativeStats";
+import { QueryState } from "@/components/query-state";
 import { Vote, Users, Euro, FileText, CheckCircle2, Clock } from "lucide-react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -13,7 +14,7 @@ import { nl } from "date-fns/locale";
 
 export default function CooperativePage() {
   const { toast } = useToast();
-  const { data: summaries, isLoading } = useQuery<ProposalSummary[]>({
+  const { data: summaries, isLoading, isError, error, refetch } = useQuery<ProposalSummary[]>({
     queryKey: ["/api/proposals/summary"],
   });
 
@@ -113,15 +114,16 @@ export default function CooperativePage() {
                 </Button>
               </CardHeader>
               <CardContent className="space-y-6">
-                {isLoading ? (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">Laden...</p>
-                  </div>
-                ) : openSummaries.length === 0 ? (
-                  <div className="text-center py-8">
-                    <p className="text-muted-foreground">Geen actieve voorstellen op dit moment.</p>
-                  </div>
-                ) : (
+                <QueryState
+                  isLoading={isLoading}
+                  isError={isError}
+                  error={error}
+                  isEmpty={openSummaries.length === 0}
+                  emptyMessage="Geen actieve voorstellen op dit moment."
+                  emptyIcon={<Vote className="w-8 h-8 text-muted-foreground" />}
+                  onRetry={() => refetch()}
+                >
+                  {
                   openSummaries.map((summary) => {
                     const { proposal, voteCounts, userVoteChoice } = summary;
                     const totalVotes = voteCounts.yes + voteCounts.no + voteCounts.abstain;
@@ -202,8 +204,8 @@ export default function CooperativePage() {
                         </div>
                       </div>
                     );
-                  })
-                )}
+                  })}
+                </QueryState>
               </CardContent>
             </Card>
           </div>

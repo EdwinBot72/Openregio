@@ -61,12 +61,35 @@ app.use((req, res, next) => {
   
   const server = await registerRoutes(app);
 
-  app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
+  // Global error handler with structured logging
+  app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
+    const isServerError = status >= 500;
 
-    res.status(status).json({ message });
-    throw err;
+    // Structured JSON log for all errors
+    const errorLog = {
+      level: isServerError ? 'error' : 'warn',
+      timestamp: new Date().toISOString(),
+      method: req.method,
+      path: req.path,
+      status,
+      message,
+      stack: isServerError ? err.stack : undefined,
+      userId: (req as any).userId || 'anonymous',
+    };
+
+    if (isServerError) {
+      console.error('[ERROR]', JSON.stringify(errorLog));
+    } else {
+      console.warn('[WARN]', JSON.stringify(errorLog));
+    }
+
+    // Send user-friendly response
+    res.status(status).json({ 
+      error: isServerError ? "Er is een fout opgetreden" : message,
+      code: status,
+    });
   });
 
   // importantly only setup vite in development and after
