@@ -5,7 +5,7 @@ import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchem
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { createMollieClient } from "@mollie/api-client";
-import { setupJwtAuth, attachUser, requireAuth, requirePro } from "./jwtAuth";
+import { setupJwtAuth, attachUser, requireAuth, requirePro, issueTokensForUser, clearTokenCookies, revokeAllUserTokens } from "./jwtAuth";
 import { requireAdmin } from "./middleware/auth";
 import { seedMasterAccount } from "./seed";
 import { generateRandomPassword, generateOnboardingToken, getPlanPrice, getPlanDisplayName } from "./utils/auth";
@@ -291,8 +291,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Delete onboarding token
       await storage.deleteOnboardingToken(token);
 
-      // Create session
-      req.session.userId = user.id;
+      // Issue JWT tokens
+      await issueTokensForUser(res, updatedUser as any);
 
       console.log(`✓ Onboarding completed for user: ${user.id} (${user.email})`);
 
@@ -431,11 +431,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Business Profile routes
   app.get("/api/business-profile/me", async (req, res) => {
     try {
-      if (!req.session.userId) {
+      if (!req.user?.id) {
         return res.status(401).json({ error: "Niet ingelogd" });
       }
 
-      const profiel = await storage.getBedrijfsprofielByUserId(req.session.userId);
+      const profiel = await storage.getBedrijfsprofielByUserId(req.user.id);
       if (!profiel) {
         return res.status(404).json({ error: "Bedrijfsprofiel niet gevonden" });
       }
@@ -449,13 +449,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/business-profile", async (req, res) => {
     try {
-      if (!req.session.userId) {
+      if (!req.user?.id) {
         return res.status(401).json({ error: "Niet ingelogd" });
       }
 
       const validationResult = insertBedrijfsprofielSchema.safeParse({
         ...req.body,
-        gebruikerId: req.session.userId,
+        gebruikerId: req.user.id,
       });
 
       if (!validationResult.success) {
@@ -463,7 +463,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: errorMessage });
       }
 
-      const existingProfiel = await storage.getBedrijfsprofielByUserId(req.session.userId);
+      const existingProfiel = await storage.getBedrijfsprofielByUserId(req.user.id);
 
       let profiel;
       if (existingProfiel) {
@@ -1389,7 +1389,7 @@ Maak een complete, direct bruikbare WOO-brief.`;
   // Get visibility settings (PRO only)
   app.get("/api/pro/visibility-settings", requirePro, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = req.user!.id;
       const user = await storage.getUser(userId);
       
       if (!user) {
@@ -1424,7 +1424,7 @@ Maak een complete, direct bruikbare WOO-brief.`;
   // Update visibility settings (PRO only)
   app.post("/api/pro/visibility-settings", requirePro, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = req.user!.id;
       
       // Validate request body with Zod schema
       const validationResult = visibilitySettingsSchema.safeParse(req.body);
@@ -1459,7 +1459,7 @@ Maak een complete, direct bruikbare WOO-brief.`;
   app.get("/api/profile/:id", async (req, res) => {
     try {
       const ownerId = req.params.id;
-      const viewerId = req.session.userId;
+      const viewerId = req.user?.id;
       
       const owner = await storage.getUser(ownerId);
       if (!owner) {
@@ -1528,7 +1528,7 @@ Maak een complete, direct bruikbare WOO-brief.`;
   // Get all field visibilities for current user
   app.get("/api/privacy/visibility", requireAuth, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = req.user!.id;
       const visibilities = await storage.getFieldVisibilities(userId);
       res.json(visibilities);
     } catch (error: any) {
@@ -1540,7 +1540,7 @@ Maak een complete, direct bruikbare WOO-brief.`;
   // Update visibility for a specific field
   app.post("/api/privacy/visibility", requireAuth, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = req.user!.id;
       const { fieldName, visibility } = req.body;
 
       if (!fieldName || !visibility) {
@@ -1563,7 +1563,7 @@ Maak een complete, direct bruikbare WOO-brief.`;
   // Get consent history (last 10 changes)
   app.get("/api/privacy/consent-log", requireAuth, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = req.user!.id;
       const logs = await storage.getConsentLogs(userId, 10);
       res.json(logs);
     } catch (error: any) {
@@ -1575,7 +1575,7 @@ Maak een complete, direct bruikbare WOO-brief.`;
   // Export all user data (AVG right)
   app.get("/api/privacy/export", requireAuth, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = req.user!.id;
       const data = await storage.exportUserData(userId);
 
       // Remove sensitive fields from export
@@ -1602,7 +1602,7 @@ Maak een complete, direct bruikbare WOO-brief.`;
   // Delete account (soft delete - AVG right to be forgotten)
   app.post("/api/privacy/delete-account", requireAuth, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = req.user!.id;
       const { confirm } = req.body;
 
       if (confirm !== "VERWIJDER") {
@@ -1618,12 +1618,11 @@ Maak een complete, direct bruikbare WOO-brief.`;
         return res.status(404).json({ error: "Gebruiker niet gevonden" });
       }
 
-      // Log the user out
-      req.session.destroy((err) => {
-        if (err) {
-          console.error("Error destroying session:", err);
-        }
-      });
+      // Revoke all refresh tokens for this user
+      await revokeAllUserTokens(userId);
+
+      // Clear all auth cookies
+      clearTokenCookies(res);
 
       res.json({ 
         success: true, 
@@ -1638,7 +1637,7 @@ Maak een complete, direct bruikbare WOO-brief.`;
   // Get full privacy dashboard data in one call
   app.get("/api/privacy/dashboard", requireAuth, async (req, res) => {
     try {
-      const userId = req.session.userId!;
+      const userId = req.user!.id;
       
       const [user, profiel, visibilities, logs] = await Promise.all([
         storage.getUser(userId),

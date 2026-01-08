@@ -434,4 +434,13 @@ export async function requirePro(req: Request, res: Response, next: NextFunction
   }
 }
 
-export { cleanupExpiredTokens };
+export async function issueTokensForUser(res: Response, user: User): Promise<void> {
+  const accessToken = generateAccessToken(user.id, user.email);
+  const refreshToken = generateRefreshToken();
+  const tokenId = generateTokenId();
+  
+  await storeRefreshToken(user.id, refreshToken, tokenId);
+  setTokenCookies(res, accessToken, refreshToken, tokenId);
+}
+
+export { cleanupExpiredTokens, clearTokenCookies, revokeAllUserTokens };

@@ -45,13 +45,13 @@ Preferred communication style: Simple, everyday language.
 **Technology Stack:**
 - Express.js with TypeScript
 - RESTful API design
-- Session-based architecture
+- Stateless JWT-based architecture (fully migrated from sessions)
 - Modular route registration.
 
 **API Design:**
 - Resource-based endpoints for entrepreneurs, categories, business profiles, proposals, activities, stats, RegioBot interactions, and user profiles.
 - Supports CRUD operations and specific actions like voting on proposals.
-- Authentication with session-based `userId`.
+- Authentication via `req.user` set by JWT middleware (access tokens in httpOnly cookies).
 - Zod schema validation for all requests and responses.
 - Consistent error handling with appropriate HTTP status codes.
 
