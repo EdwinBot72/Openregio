@@ -471,7 +471,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="pt-8 border-t text-center text-sm text-muted-foreground">
-            <p>© 2024 OpenRegio – lokaal netwerk, ondernemen terug naar de basis.</p>
+            <p>© 2026 OpenRegio – lokaal netwerk, ondernemen terug naar de basis.</p>
           </div>
         </div>
       </footer>
