@@ -91,13 +91,27 @@ Preferred communication style: Simple, everyday language.
 
 ### Authentication and Authorization
 
-**Custom Authentication:**
-- Session-based using `express-session` and `connect-pg-simple`.
-- `bcrypt` for password hashing.
-- Cookie-based session management with `httpOnly` and `secure` flags.
-- API endpoints for registration, login, logout, and fetching the current user.
-- User data model includes `email`, `passwordHash`, `plan`, `firstName`, `lastName`, and `mustCompleteOnboarding`.
-- `attachUser` and `requireAuth` middleware for session and authentication management.
+**JWT Authentication (Production-Ready for 10k+ Concurrent Users):**
+- Stateless JWT architecture replacing session-based auth for horizontal scaling
+- Access tokens (15 min expiry) stored in httpOnly cookies
+- Refresh tokens (7 days) stored in PostgreSQL with SHA256 hash + rotation
+- API endpoints: `/api/auth/register`, `/api/auth/login`, `/api/auth/refresh`, `/api/auth/logout`, `/api/auth/logout-all`, `/api/auth/user`
+- `bcrypt` for password hashing (10 rounds)
+- Cookie settings: httpOnly, secure (production), sameSite=strict (prod)/lax (dev)
+- Token refresh rotates refresh token on every use (security best practice)
+- CRITICAL: SESSION_SECRET env var required - app hard-fails on startup if missing
+- `attachUser` and `requireAuth` middleware for JWT validation
+
+**Rate Limiting (Brute-Force Protection):**
+- Login: 10 attempts per IP per 15 min, 5 attempts per email per 15 min
+- Register: 5 attempts per IP per hour
+- Uses rate-limiter-flexible with in-memory store
+- Dutch error messages for blocked requests
+
+**Database Connection Pooling:**
+- Neon serverless Pool with configurable settings (env vars)
+- PGPOOL_MAX=5 connections, PGPOOL_IDLE_TIMEOUT=10000ms, PGPOOL_CONNECT_TIMEOUT=2000ms
+- Error handling on pool initialization
 
 **Token-Based Onboarding:**
 - `onboarding_tokens` table for secure first login after Mollie payment.
