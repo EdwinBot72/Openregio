@@ -594,6 +594,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // RegioBot chat route with mode support: general, legal, marketing (Pro-only)
   app.post("/api/regiobot/chat", requirePro, async (req, res) => {
     try {
+      // Early check for OpenAI API key
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({ 
+          error: "RegioBot is tijdelijk niet beschikbaar",
+          details: "De AI-configuratie is nog niet voltooid. Neem contact op met de beheerder.",
+          action: "Vraag de beheerder om OPENAI_API_KEY te configureren in de omgevingsvariabelen."
+        });
+      }
+
       // Validate request using schema
       const validationResult = regioBotChatSchema.safeParse(req.body);
       if (!validationResult.success) {
@@ -764,14 +773,31 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
   // WOO RegioBot - searches WOO requests/documents and provides AI answers
   app.post("/api/regiobot", async (req, res) => {
     try {
+      // Early check for OpenAI API key
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({ 
+          error: "WOO RegioBot is tijdelijk niet beschikbaar",
+          details: "De AI-configuratie is nog niet voltooid. Neem contact op met de beheerder.",
+          action: "Vraag de beheerder om OPENAI_API_KEY te configureren in de omgevingsvariabelen."
+        });
+      }
+
       const payload = req.body ?? {};
       const result = await runRegioBot(payload);
       res.json(result);
     } catch (err: any) {
       console.error("RegioBot WOO error:", err);
-      res.status(400).json({
-        error: "RegioBot error",
-        message: err?.message ?? String(err)
+      
+      // Provide actionable error message
+      const errorMessage = err?.message ?? String(err);
+      const isConfigError = errorMessage.includes("OPENAI") || errorMessage.includes("API");
+      
+      res.status(isConfigError ? 503 : 400).json({
+        error: isConfigError ? "RegioBot configuratiefout" : "RegioBot fout",
+        message: errorMessage,
+        action: isConfigError 
+          ? "Controleer of OPENAI_API_KEY correct is geconfigureerd." 
+          : "Controleer je invoer en probeer opnieuw."
       });
     }
   });
