@@ -11,7 +11,7 @@ import { seedMasterAccount } from "./seed";
 import { generateRandomPassword, generateOnboardingToken, getPlanPrice, getPlanDisplayName } from "./utils/auth";
 import bcrypt from "bcrypt";
 import { upload, getDocumentType } from "./middleware/upload";
-import { runRegioBot } from "./regiobot.js";
+import { runRegioBot } from "./regiobot";
 
 // Initialize Mollie client (requires MOLLIE_API_KEY environment variable)
 const mollieClient = process.env.MOLLIE_API_KEY 
@@ -26,6 +26,11 @@ function getBaseUrl(req: any): string {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoint (before auth middleware)
+  app.get("/health", (_req, res) => {
+    res.json({ ok: true, ts: Date.now() });
+  });
+
   // Initialize JWT auth with rate limiting (production-ready, stateless)
   setupJwtAuth(app);
   
