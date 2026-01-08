@@ -446,12 +446,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/categories", async (req, res) => {
     try {
       const categories = [
-        { value: "retail", label: "Retail" },
-        { value: "food", label: "Horeca" },
-        { value: "services", label: "Diensten" },
-        { value: "tech", label: "Technologie" },
-        { value: "health", label: "Gezondheid" },
-        { value: "education", label: "Onderwijs" },
+        { value: "retail", label: "Retail & Winkels" },
+        { value: "food", label: "Horeca & Catering" },
+        { value: "services", label: "Zakelijke Diensten" },
+        { value: "tech", label: "Technologie & ICT" },
+        { value: "health", label: "Gezondheid & Welzijn" },
+        { value: "education", label: "Onderwijs & Training" },
+        { value: "creative", label: "Creatief & Media" },
+        { value: "construction", label: "Bouw & Renovatie" },
+        { value: "agriculture", label: "Landbouw & Tuinbouw" },
+        { value: "transport", label: "Transport & Logistiek" },
       ];
       res.json(categories);
     } catch (error) {
