@@ -25,6 +25,32 @@ function getBaseUrl(req: any): string {
   return `${protocol}://${host}`;
 }
 
+// Helper to get or create user profile ID from JWT user
+async function getOrCreateUserProfileId(req: any): Promise<string> {
+  const user = req.user;
+  if (!user?.id || !user?.email) throw new Error("No auth user in request");
+
+  // Probeer bestaande profile via email
+  let profile = await storage.getUserProfileByEmail(user.email);
+
+  // Zo niet: maak 'm aan (minimaal)
+  if (!profile) {
+    const name =
+      [user.firstName, user.lastName].filter(Boolean).join(" ").trim() ||
+      user.email.split("@")[0];
+
+    profile = await storage.createUserProfile({
+      replitUserId: user.id,
+      email: user.email,
+      name,
+      painPoints: [],
+      onboardingCompleted: false,
+    });
+  }
+
+  return profile.id;
+}
+
 export async function registerRoutes(app: Express): Promise<Server> {
   // Health check endpoint (before auth middleware)
   app.get("/health", (_req, res) => {
@@ -485,12 +511,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Proposals routes
-  app.get("/api/proposals/summary", async (req, res) => {
+  app.get("/api/proposals/summary", requireAuth, async (req, res) => {
     try {
-      const userId = "user-jan";
+      const userId = await getOrCreateUserProfileId(req);
       const summaries = await storage.getProposalSummaries(userId);
       res.json(summaries);
     } catch (error) {
+      console.error("Error fetching proposal summaries:", error);
       res.status(500).json({ error: "Failed to fetch proposal summaries" });
     }
   });
@@ -539,10 +566,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/proposals/:id/vote", async (req, res) => {
+  app.post("/api/proposals/:id/vote", requireAuth, async (req, res) => {
     try {
       const { choice } = req.body;
-      const userId = "user-jan";
+      const userId = await getOrCreateUserProfileId(req);
       
       const validatedVote = insertVoteSchema.parse({
         proposalId: req.params.id,
