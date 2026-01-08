@@ -188,6 +188,25 @@ Preferred communication style: Simple, everyday language.
   - All pages have proper data-testid attributes for testing
   - No LSP errors, fully type-safe codebase
 
+**Observability & Error Handling (P2 - Completed):**
+- **Server Error Handler (server/index.ts):**
+  - Structured JSON logging for all errors (4xx and 5xx)
+  - Log fields: level, timestamp, method, path, status, message, userId
+  - Stack traces only for 500+ errors
+  - User-friendly Dutch error responses
+- **Client Error Boundary (client/src/components/error-boundary.tsx):**
+  - React class component catching render errors
+  - Dutch error display with retry button
+  - Console logging for debugging
+- **QueryState Component (client/src/components/query-state.tsx):**
+  - Reusable component for loading/empty/error states
+  - Auto-detects error types: auth, env, notfound, network, server, unknown
+  - Shows appropriate actions: login redirect, retry button, config notice
+  - All states have data-testid attributes
+- **Page Updates:**
+  - Community page: QueryState with empty/error states
+  - Cooperative page: QueryState for proposals with refetch
+
 **Privacy & Consent Dashboard (AVG Compliance - Completed):**
 - **Database Tables:**
   - `field_visibility`: Per-field visibility settings (public/members/region_only/private)
