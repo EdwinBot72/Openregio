@@ -1,16 +1,20 @@
 import { Router } from "express";
-import { z } from "zod";
 import {
-  EXTRACT_PROMPT,
-  QUESTIONS_PROMPT,
-  GENERATE_LETTER_PROMPT,
-  SIMPLE_GENERATE_PROMPT,
+  EXTRACT_MODE_SYSTEM,
+  EXTRACT_MODE_USER,
+  GENERATE_MODE_SYSTEM,
+  GENERATE_MODE_USER,
+  QUESTIONS_GENERATOR_SYSTEM,
   intakeSchema,
   extractSchema,
   questionsSchema,
   generateSchema,
   simpleGenerateSchema,
   saveDossierSchema,
+  extractOutputSchema,
+  generateOutputSchema,
+  questionsOutputSchema,
+  zodToJsonSchema,
   calculateDeadline,
   DEFAULT_CHECKLIST,
   WOO_MODEL,
@@ -75,40 +79,31 @@ export function createWooRouter(
         year: "numeric",
       });
 
-      const userPrompt = `Genereer een WOO-verzoek met de volgende gegevens:
+      const simplePrompt = `Je bent een expert in het opstellen van WOO-verzoeken (Wet open overheid).
+Genereer een professionele, juridisch correcte WOO-brief die direct gebruikt kan worden.
 
 Bestuursorgaan: ${authority}
 Onderwerp: ${subject}
-${context ? `Achtergrond/context: ${context}` : ""}
-${requestedDocuments ? `Specifiek gevraagde stukken: ${requestedDocuments}` : ""}
-
+${context ? `Context: ${context}` : ""}
+${requestedDocuments ? `Gevraagde stukken: ${requestedDocuments}` : ""}
 Datum: ${today}
 
-Maak een complete, direct bruikbare WOO-brief.`;
+Maak een complete brief met checklist.`;
 
       const completion = await openai.chat.completions.create({
         model: WOO_MODEL,
         messages: [
-          { role: "system", content: SIMPLE_GENERATE_PROMPT },
-          { role: "user", content: userPrompt },
+          { role: "user", content: simplePrompt },
         ],
         temperature: 0.7,
       });
 
       const generatedContent = completion.choices[0]?.message?.content || "";
-      const letterMatch = generatedContent.match(
-        /^([\s\S]*?)(?=\n\s*(?:Checklist|CHECKLIST|✓|□|\d+\.\s*\[))/i
-      );
-      const checklistMatch = generatedContent.match(
-        /(?:Checklist|CHECKLIST|Actiepunten)[\s\S]*$/i
-      );
 
       res.json({
         success: true,
-        letter: letterMatch ? letterMatch[1].trim() : generatedContent,
-        checklist: checklistMatch
-          ? checklistMatch[0].trim()
-          : DEFAULT_CHECKLIST.map((item) => `- ${item}`).join("\n"),
+        letter: generatedContent,
+        checklist: DEFAULT_CHECKLIST.map((item) => `- ${item}`).join("\n"),
         fullContent: generatedContent,
         metadata: {
           authority,
@@ -230,13 +225,22 @@ Maak een complete, direct bruikbare WOO-brief.`;
       const OpenAI = (await import("openai")).default;
       const openai = new OpenAI();
 
+      const jsonSchema = zodToJsonSchema(extractOutputSchema);
+
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
-          { role: "system", content: EXTRACT_PROMPT },
-          { role: "user", content: documentText },
+          { role: "system", content: EXTRACT_MODE_SYSTEM },
+          { role: "user", content: EXTRACT_MODE_USER(documentText) },
         ],
-        response_format: { type: "json_object" },
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "extract_output",
+            strict: true,
+            schema: jsonSchema,
+          },
+        },
       });
 
       const extractedData = JSON.parse(
@@ -274,21 +278,42 @@ Maak een complete, direct bruikbare WOO-brief.`;
       const OpenAI = (await import("openai")).default;
       const openai = new OpenAI();
 
+      const jsonSchema = zodToJsonSchema(questionsOutputSchema);
+
+      const userPrompt = `Genereer een vragenlijst voor een WOO-verzoek.
+
+Doel: ${purpose || "onderzoek"}
+Gebruikersvraag: ${userQuestion || "Alle relevante documenten"}
+
+Geëxtraheerde data:
+${JSON.stringify(extractedData, null, 2)}`;
+
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
-          {
-            role: "system",
-            content: QUESTIONS_PROMPT(purpose || undefined, userQuestion || undefined),
-          },
-          { role: "user", content: JSON.stringify(extractedData) },
+          { role: "system", content: QUESTIONS_GENERATOR_SYSTEM },
+          { role: "user", content: userPrompt },
         ],
-        response_format: { type: "json_object" },
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "questions_output",
+            strict: true,
+            schema: jsonSchema,
+          },
+        },
       });
 
-      const { documentList } = JSON.parse(
-        response.choices[0].message.content || '{"documentList":[]}'
+      const result = JSON.parse(
+        response.choices[0].message.content || '{"suggestedQuestions":[]}'
       );
+
+      const documentList = result.suggestedQuestions.map((q: any) => ({
+        category: q.category,
+        documents: q.documents,
+        priority: q.priority,
+        rationale: q.rationale,
+      }));
 
       const authReq = req as AuthenticatedRequest;
       await storage.updateWooDossier(dossierId, authReq.user!.id, {
@@ -296,7 +321,11 @@ Maak een complete, direct bruikbare WOO-brief.`;
         status: "questions",
       });
 
-      res.json({ success: true, documentList });
+      res.json({
+        success: true,
+        documentList,
+        aanvullendeVragen: result.aanvullendeVragen || [],
+      });
     } catch (err: any) {
       console.error("WOO questions error:", err);
       res.status(500).json({
@@ -320,46 +349,85 @@ Maak een complete, direct bruikbare WOO-brief.`;
         return res.status(503).json({ error: "OpenAI API niet geconfigureerd" });
       }
 
-      const { dossierId, authority, subject, extractedData, documentList, location } =
-        parsed.data;
+      const {
+        dossierId,
+        authority,
+        subject,
+        extractedData,
+        selectedQuestions,
+        location,
+        senderName,
+        senderAddress,
+        senderEmail,
+      } = parsed.data;
 
       const OpenAI = (await import("openai")).default;
       const openai = new OpenAI();
 
+      const jsonSchema = zodToJsonSchema(generateOutputSchema);
+
       const response = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
-          {
-            role: "system",
-            content: GENERATE_LETTER_PROMPT(authority, subject, location || undefined),
-          },
+          { role: "system", content: GENERATE_MODE_SYSTEM },
           {
             role: "user",
-            content: `Geëxtraheerde data: ${JSON.stringify(extractedData)}\n\nGevraagde documenten: ${JSON.stringify(documentList)}`,
+            content: GENERATE_MODE_USER({
+              authority,
+              subject,
+              extractedData,
+              selectedQuestions: selectedQuestions || [],
+              location,
+              senderName: senderName || undefined,
+              senderAddress: senderAddress || undefined,
+              senderEmail: senderEmail || undefined,
+            }),
           },
         ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "generate_output",
+            strict: true,
+            schema: jsonSchema,
+          },
+        },
       });
 
-      const generatedLetter = response.choices[0].message.content || "";
+      const result = JSON.parse(response.choices[0].message.content || "{}");
+
+      const fullLetter = [
+        result.wooVerzoek?.briefhoofd || "",
+        "",
+        `Betreft: ${result.wooVerzoek?.onderwerpregel || subject}`,
+        "",
+        result.wooVerzoek?.inhoud || "",
+        "",
+        result.wooVerzoek?.afsluiting || "",
+      ].join("\n");
 
       const authReq = req as AuthenticatedRequest;
       await storage.updateWooDossier(dossierId, authReq.user!.id, {
-        generatedLetter,
-        checklist: JSON.stringify(DEFAULT_CHECKLIST),
-        requestedDocuments: JSON.stringify(documentList),
+        generatedLetter: fullLetter,
+        checklist: JSON.stringify(result.checklist || DEFAULT_CHECKLIST),
+        requestedDocuments: JSON.stringify(result.inventarislijst || []),
         status: "generated",
         deadline: calculateDeadline(),
       });
 
       res.json({
         success: true,
-        letter: generatedLetter,
-        checklist: DEFAULT_CHECKLIST,
-        metadata: {
-          authority,
-          subject,
-          generatedAt: new Date().toISOString(),
+        wooVerzoek: result.wooVerzoek,
+        inventarislijst: result.inventarislijst,
+        ingebrekestelling: result.ingebrekestelling,
+        bezwaarschrift: result.bezwaarschrift,
+        checklist: result.checklist || DEFAULT_CHECKLIST,
+        metadata: result.metadata || {
+          gegenereerd: new Date().toISOString(),
+          termijn: "4 weken",
+          deadlineDatum: calculateDeadline().toLocaleDateString("nl-NL"),
         },
+        letter: fullLetter,
       });
     } catch (err: any) {
       console.error("WOO generate error:", err);
