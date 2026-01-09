@@ -178,6 +178,7 @@ export interface IStorage {
   createWooDossier(dossier: InsertWooDossier): Promise<WooDossier>;
   getWooDossiers(userId: string): Promise<WooDossier[]>;
   getWooDossier(id: number, userId: string): Promise<WooDossier | undefined>;
+  updateWooDossier(id: number, userId: string, updates: Partial<InsertWooDossier>): Promise<WooDossier | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -1244,6 +1245,10 @@ export class MemStorage implements IStorage {
   async getWooDossier(id: number, userId: string): Promise<WooDossier | undefined> {
     return undefined;
   }
+
+  async updateWooDossier(id: number, userId: string, updates: Partial<InsertWooDossier>): Promise<WooDossier | undefined> {
+    return undefined;
+  }
 }
 
 class DbStorage implements IStorage {
@@ -1883,6 +1888,14 @@ class DbStorage implements IStorage {
   async getWooDossier(id: number, userId: string): Promise<WooDossier | undefined> {
     const [result] = await db.select().from(wooDossiers)
       .where(and(eq(wooDossiers.id, id), eq(wooDossiers.userId, userId)));
+    return result;
+  }
+
+  async updateWooDossier(id: number, userId: string, updates: Partial<InsertWooDossier>): Promise<WooDossier | undefined> {
+    const [result] = await db.update(wooDossiers)
+      .set(updates)
+      .where(and(eq(wooDossiers.id, id), eq(wooDossiers.userId, userId)))
+      .returning();
     return result;
   }
 }

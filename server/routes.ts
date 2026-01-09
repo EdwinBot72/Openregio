@@ -997,6 +997,243 @@ Maak een complete, direct bruikbare WOO-brief.`;
     }
   });
 
+  // WOO Wizard Step 1: Create intake dossier
+  app.post("/api/woo/wizard/intake", requireAuth, async (req, res) => {
+    try {
+      const { authority, subject, uploadedDocument, location, purpose, userQuestion } = req.body;
+
+      if (!authority || !subject) {
+        return res.status(400).json({ error: "Bestuursorgaan en onderwerp zijn verplicht" });
+      }
+
+      const dossier = await storage.createWooDossier({
+        userId: req.user!.id,
+        authority,
+        subject,
+        uploadedDocument: uploadedDocument || null,
+        location: location || null,
+        purpose: purpose || null,
+        userQuestion: userQuestion || null,
+        status: "intake",
+      });
+
+      res.status(201).json(dossier);
+    } catch (err: any) {
+      console.error("WOO intake error:", err);
+      res.status(500).json({ error: "Intake opslaan mislukt" });
+    }
+  });
+
+  // WOO Wizard Step 2: Extract data from document
+  app.post("/api/woo/wizard/extract", requireAuth, async (req, res) => {
+    try {
+      const { dossierId, documentText } = req.body;
+
+      if (!dossierId || !documentText) {
+        return res.status(400).json({ error: "Dossier ID en documenttekst zijn verplicht" });
+      }
+
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({ error: "OpenAI API niet geconfigureerd" });
+      }
+
+      const OpenAI = (await import("openai")).default;
+      const openai = new OpenAI();
+
+      const systemPrompt = `Je bent een juridisch expert in Nederlandse bestuursrechtelijke documenten.
+Analyseer de beschikking of besluit en extraheer de volgende informatie in JSON formaat:
+{
+  "datum": "datum van het besluit",
+  "zaaknummer": "zaaknummer of kenmerk",
+  "onderwerp": "korte omschrijving van het onderwerp",
+  "afdeling": "betrokken afdeling of bestuursorgaan",
+  "kernfeiten": ["feit 1", "feit 2", "feit 3"],
+  "beleidsbotsing": "beschrijving van mogelijke beleidsconflicten of onduidelijkheden"
+}
+Wees nauwkeurig en beknopt. Als informatie niet gevonden kan worden, geef dan "Niet gevonden" aan.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: documentText }
+        ],
+        response_format: { type: "json_object" },
+      });
+
+      const extractedData = JSON.parse(response.choices[0].message.content || "{}");
+
+      // Update dossier with extracted data
+      await storage.updateWooDossier(dossierId, req.user!.id, {
+        extractedData,
+        status: "extracted",
+      });
+
+      res.json({ success: true, extractedData });
+    } catch (err: any) {
+      console.error("WOO extract error:", err);
+      res.status(500).json({ error: "Analyse mislukt", message: err?.message });
+    }
+  });
+
+  // WOO Wizard Step 3: Generate document list (vraagset)
+  app.post("/api/woo/wizard/questions", requireAuth, async (req, res) => {
+    try {
+      const { dossierId, extractedData, purpose, userQuestion } = req.body;
+
+      if (!dossierId) {
+        return res.status(400).json({ error: "Dossier ID is verplicht" });
+      }
+
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({ error: "OpenAI API niet geconfigureerd" });
+      }
+
+      const OpenAI = (await import("openai")).default;
+      const openai = new OpenAI();
+
+      const systemPrompt = `Je bent een expert in WOO-verzoeken (Wet open overheid).
+Genereer een gerichte documentenlijst voor een WOO-verzoek, gebaseerd op de geëxtraheerde informatie.
+
+Doel van het verzoek: ${purpose || "onderzoek"}
+Vraag van de gebruiker: ${userQuestion || "Alle relevante documenten"}
+
+Genereer een JSON array met categorieën en specifieke documenten:
+{
+  "documentList": [
+    {"category": "Besluitvorming", "documents": ["besluit", "concept-besluiten", "adviezen"]},
+    {"category": "Grondslag", "documents": ["wettelijke grondslag", "beleidsregels"]},
+    {"category": "Beleid", "documents": ["beleidsnotities", "richtlijnen"]},
+    {"category": "Uitvoering", "documents": ["contracten", "facturen", "correspondentie"]},
+    {"category": "Gelijkheidsinformatie", "documents": ["vergelijkbare zaken", "precedenten"]},
+    {"category": "Communicatie", "documents": ["e-mails", "vergaderverslagen", "telefoonnotities"]}
+  ]
+}
+
+Pas de documentenlijst aan op basis van het specifieke onderwerp en doel.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: JSON.stringify(extractedData) }
+        ],
+        response_format: { type: "json_object" },
+      });
+
+      const { documentList } = JSON.parse(response.choices[0].message.content || '{"documentList":[]}');
+
+      // Update dossier with document list
+      await storage.updateWooDossier(dossierId, req.user!.id, {
+        documentList,
+        status: "questions",
+      });
+
+      res.json({ success: true, documentList });
+    } catch (err: any) {
+      console.error("WOO questions error:", err);
+      res.status(500).json({ error: "Vraagset genereren mislukt", message: err?.message });
+    }
+  });
+
+  // WOO Wizard Step 4: Generate complete WOO letter
+  app.post("/api/woo/wizard/generate", requireAuth, async (req, res) => {
+    try {
+      const { dossierId, authority, subject, extractedData, documentList, location } = req.body;
+
+      if (!dossierId || !authority || !subject) {
+        return res.status(400).json({ error: "Vereiste velden ontbreken" });
+      }
+
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({ error: "OpenAI API niet geconfigureerd" });
+      }
+
+      const OpenAI = (await import("openai")).default;
+      const openai = new OpenAI();
+
+      const systemPrompt = `Je bent een expert in Nederlandse WOO-verzoeken (Wet open overheid).
+Schrijf een formeel, volledig WOO-verzoek met de volgende elementen:
+
+1. Briefhoofd met datum en adressering aan: ${authority}
+2. Onderwerpregel: ${subject}
+3. Introductie met verwijzing naar de Wet open overheid
+4. Gedetailleerde opsomming van gevraagde documenten (inventarislijst)
+5. Clausules voor:
+   - Lakken/verwijderen van persoonsgegevens (indien nodig)
+   - Digitale levering via e-mail
+   - Termijn van 4 weken conform artikel 4.4 Woo
+6. Afsluitende formule
+
+Locatie/gemeente: ${location || "Niet gespecificeerd"}
+
+Maak het verzoek professioneel en juridisch correct.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `Geëxtraheerde data: ${JSON.stringify(extractedData)}\n\nGevraagde documenten: ${JSON.stringify(documentList)}` }
+        ],
+      });
+
+      const generatedLetter = response.choices[0].message.content || "";
+
+      // Generate checklist
+      const checklist = [
+        "Controleer alle gegevens op juistheid",
+        "Voeg eventuele bijlagen toe",
+        "Bewaar een kopie van dit verzoek",
+        "Verstuur per e-mail of aangetekende post",
+        "Noteer de verzenddatum",
+        "Zet een herinnering voor 4 weken (reactietermijn)"
+      ];
+
+      // Update dossier with generated letter
+      await storage.updateWooDossier(dossierId, req.user!.id, {
+        generatedLetter,
+        checklist: JSON.stringify(checklist),
+        requestedDocuments: JSON.stringify(documentList),
+        status: "generated",
+        deadline: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000), // 4 weeks from now
+      });
+
+      res.json({
+        success: true,
+        letter: generatedLetter,
+        checklist,
+        metadata: {
+          authority,
+          subject,
+          generatedAt: new Date().toISOString(),
+        }
+      });
+    } catch (err: any) {
+      console.error("WOO generate error:", err);
+      res.status(500).json({ error: "Brief genereren mislukt", message: err?.message });
+    }
+  });
+
+  // Update WOO dossier status
+  app.patch("/api/woo/dossiers/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Ongeldig dossier ID" });
+      }
+
+      const updated = await storage.updateWooDossier(id, req.user!.id, req.body);
+      if (!updated) {
+        return res.status(404).json({ error: "Dossier niet gevonden" });
+      }
+
+      res.json(updated);
+    } catch (err: any) {
+      console.error("Update dossier error:", err);
+      res.status(500).json({ error: "Dossier bijwerken mislukt" });
+    }
+  });
+
   // Chat routes
   app.get("/api/chat/rooms", async (_req, res) => {
     try {

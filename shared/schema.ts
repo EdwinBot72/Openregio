@@ -554,7 +554,7 @@ export const requestTags = pgTable("request_tags", {
   pk: unique().on(table.requestId, table.tagId),
 }));
 
-// WOO Dossiers - saved generated WOO letters
+// WOO Dossiers - saved generated WOO letters with full workflow
 export const wooDossiers = pgTable("woo_dossiers", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
@@ -562,9 +562,21 @@ export const wooDossiers = pgTable("woo_dossiers", {
   subject: text("subject").notNull(),
   context: text("context"),
   requestedDocuments: text("requested_documents"),
-  generatedLetter: text("generated_letter").notNull(),
+  generatedLetter: text("generated_letter"),
   checklist: text("checklist"),
-  status: text("status").default("draft"), // draft, sent, response_received, closed
+  status: text("status").default("intake"), // intake, extracted, questions, generated, sent, response_received, closed
+  // Workflow step 1: Intake
+  uploadedDocument: text("uploaded_document"), // Beschikking text/content
+  location: text("location"), // Gemeente/locatie
+  purpose: text("purpose"), // bezwaar, onderzoek, journalistiek
+  userQuestion: text("user_question"), // "Wat wil je weten?"
+  // Workflow step 2: Extracted data
+  extractedData: jsonb("extracted_data"), // {datum, zaaknr, onderwerp, afdeling, kernfeiten, beleidsbotsing}
+  // Workflow step 3: Document list
+  documentList: jsonb("document_list"), // [{category, documents}]
+  // Workflow step 5: Tracking
+  deadline: timestamp("deadline", { withTimezone: true }),
+  reminderSent: boolean("reminder_sent").default(false),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 }, (table) => [
   index("idx_woo_dossiers_user").on(table.userId),
