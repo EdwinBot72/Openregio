@@ -1521,6 +1521,69 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
     }
   });
 
+  // ============ BLOG ROUTES ============
+  
+  // GET /api/blog - Get all published blog posts (public)
+  app.get("/api/blog", async (_req, res) => {
+    try {
+      const posts = await storage.getBlogPosts();
+      res.json(posts);
+    } catch (error: any) {
+      console.error("Error fetching blog posts:", error);
+      res.status(500).json({ error: "Kon blogposts niet laden" });
+    }
+  });
+
+  // POST /api/blog - Create new blog post (requires auth)
+  app.post("/api/blog", requireAuth, async (req, res) => {
+    try {
+      const { title, content } = req.body;
+      
+      if (!title?.trim() || !content?.trim()) {
+        return res.status(400).json({ error: "Titel en inhoud zijn verplicht" });
+      }
+
+      const user = req.user!;
+      const authorName = [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email.split("@")[0];
+      
+      const post = await storage.createBlogPost({
+        authorId: user.id,
+        authorName,
+        title: title.trim(),
+        content: content.trim(),
+        excerpt: content.slice(0, 200),
+        published: true,
+      });
+
+      res.status(201).json(post);
+    } catch (error: any) {
+      console.error("Error creating blog post:", error);
+      res.status(500).json({ error: "Kon blogpost niet aanmaken" });
+    }
+  });
+
+  // DELETE /api/blog/:id - Delete blog post (author only)
+  app.delete("/api/blog/:id", requireAuth, async (req, res) => {
+    try {
+      const postId = req.params.id;
+      const post = await storage.getBlogPost(postId);
+      
+      if (!post) {
+        return res.status(404).json({ error: "Blogpost niet gevonden" });
+      }
+      
+      if (post.authorId !== req.user!.id) {
+        return res.status(403).json({ error: "Je kunt alleen je eigen posts verwijderen" });
+      }
+      
+      await storage.deleteBlogPost(postId);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error deleting blog post:", error);
+      res.status(500).json({ error: "Kon blogpost niet verwijderen" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

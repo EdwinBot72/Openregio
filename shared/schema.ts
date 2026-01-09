@@ -599,6 +599,26 @@ export const insertRefreshTokenSchema = createInsertSchema(refreshTokens).omit({
 export type InsertRefreshToken = z.infer<typeof insertRefreshTokenSchema>;
 export type RefreshToken = typeof refreshTokens.$inferSelect;
 
+// Blog posts table
+export const blogPosts = pgTable("blog_posts", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  authorId: varchar("author_id").notNull().references(() => users.id),
+  authorName: text("author_name").notNull(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  excerpt: text("excerpt"),
+  published: boolean("published").default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  index("idx_blog_posts_author").on(table.authorId),
+  index("idx_blog_posts_created").on(table.createdAt),
+]);
+
+export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({ id: true, createdAt: true, updatedAt: true });
+export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
+export type BlogPost = typeof blogPosts.$inferSelect;
+
 // WOO Schemas and Types
 export const insertRegionSchema = createInsertSchema(regions).omit({ id: true });
 export const insertAuthoritySchema = createInsertSchema(authorities).omit({ id: true });

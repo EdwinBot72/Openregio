@@ -34,6 +34,8 @@ import {
   type VisibilityLevel,
   type WooDossier,
   type InsertWooDossier,
+  type BlogPost,
+  type InsertBlogPost,
   entrepreneurs,
   proposals,
   votes,
@@ -52,6 +54,7 @@ import {
   regions,
   authorities,
   wooDossiers,
+  blogPosts,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
@@ -179,6 +182,12 @@ export interface IStorage {
   getWooDossiers(userId: string): Promise<WooDossier[]>;
   getWooDossier(id: number, userId: string): Promise<WooDossier | undefined>;
   updateWooDossier(id: number, userId: string, updates: Partial<InsertWooDossier>): Promise<WooDossier | undefined>;
+
+  // Blog Posts
+  getBlogPosts(): Promise<BlogPost[]>;
+  getBlogPost(id: string): Promise<BlogPost | undefined>;
+  createBlogPost(post: InsertBlogPost): Promise<BlogPost>;
+  deleteBlogPost(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -1249,6 +1258,28 @@ export class MemStorage implements IStorage {
   async updateWooDossier(id: number, userId: string, updates: Partial<InsertWooDossier>): Promise<WooDossier | undefined> {
     return undefined;
   }
+
+  async getBlogPosts(): Promise<BlogPost[]> {
+    return [];
+  }
+
+  async getBlogPost(id: string): Promise<BlogPost | undefined> {
+    return undefined;
+  }
+
+  async createBlogPost(post: InsertBlogPost): Promise<BlogPost> {
+    return {
+      id: randomUUID(),
+      ...post,
+      published: post.published ?? true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as BlogPost;
+  }
+
+  async deleteBlogPost(id: string): Promise<boolean> {
+    return false;
+  }
 }
 
 class DbStorage implements IStorage {
@@ -1897,6 +1928,28 @@ class DbStorage implements IStorage {
       .where(and(eq(wooDossiers.id, id), eq(wooDossiers.userId, userId)))
       .returning();
     return result;
+  }
+
+  // Blog Posts
+  async getBlogPosts(): Promise<BlogPost[]> {
+    return await db.select().from(blogPosts)
+      .where(eq(blogPosts.published, true))
+      .orderBy(desc(blogPosts.createdAt));
+  }
+
+  async getBlogPost(id: string): Promise<BlogPost | undefined> {
+    const [result] = await db.select().from(blogPosts).where(eq(blogPosts.id, id));
+    return result;
+  }
+
+  async createBlogPost(post: InsertBlogPost): Promise<BlogPost> {
+    const [result] = await db.insert(blogPosts).values(post).returning();
+    return result;
+  }
+
+  async deleteBlogPost(id: string): Promise<boolean> {
+    const result = await db.delete(blogPosts).where(eq(blogPosts.id, id));
+    return (result.rowCount ?? 0) > 0;
   }
 }
 
