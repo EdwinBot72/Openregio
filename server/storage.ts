@@ -36,6 +36,12 @@ import {
   type InsertWooDossier,
   type BlogPost,
   type InsertBlogPost,
+  type BusinessCategory,
+  type RegionSlot,
+  type MarketLead,
+  type InsertMarketLead,
+  type MarketDeal,
+  type InsertMarketDeal,
   entrepreneurs,
   proposals,
   votes,
@@ -55,6 +61,10 @@ import {
   authorities,
   wooDossiers,
   blogPosts,
+  businessCategories,
+  regionSlots,
+  marketLeads,
+  marketDeals,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
@@ -188,6 +198,31 @@ export interface IStorage {
   getBlogPost(id: string): Promise<BlogPost | undefined>;
   createBlogPost(post: InsertBlogPost): Promise<BlogPost>;
   deleteBlogPost(id: string): Promise<boolean>;
+
+  // RegioMarkt - Business Categories
+  getBusinessCategories(): Promise<BusinessCategory[]>;
+  getBusinessCategory(id: string): Promise<BusinessCategory | undefined>;
+  
+  // RegioMarkt - Region Slots
+  getRegionSlots(regionName: string): Promise<RegionSlot[]>;
+  getRegionSlot(regionName: string, categoryId: string): Promise<RegionSlot | undefined>;
+  getUserSlots(userId: string): Promise<RegionSlot[]>;
+  claimSlot(regionName: string, categoryId: string, userId: string): Promise<RegionSlot | undefined>;
+  releaseSlot(slotId: string, userId: string): Promise<boolean>;
+  
+  // RegioMarkt - Leads
+  getMarketLeads(regionName?: string, status?: string): Promise<MarketLead[]>;
+  getMarketLead(id: string): Promise<MarketLead | undefined>;
+  createMarketLead(lead: InsertMarketLead): Promise<MarketLead>;
+  claimMarketLead(leadId: string, userId: string): Promise<MarketLead | undefined>;
+  updateMarketLeadStatus(leadId: string, status: string): Promise<MarketLead | undefined>;
+  getUserLeads(userId: string): Promise<MarketLead[]>;
+  
+  // RegioMarkt - Deals
+  getMarketDeals(regionName?: string): Promise<MarketDeal[]>;
+  createMarketDeal(deal: InsertMarketDeal): Promise<MarketDeal>;
+  updateMarketDealStatus(dealId: string, status: string, amountEur?: number): Promise<MarketDeal | undefined>;
+  getUserDeals(userId: string): Promise<MarketDeal[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -1280,6 +1315,89 @@ export class MemStorage implements IStorage {
   async deleteBlogPost(id: string): Promise<boolean> {
     return false;
   }
+
+  // RegioMarkt stubs for MemStorage
+  async getBusinessCategories(): Promise<BusinessCategory[]> {
+    return [];
+  }
+
+  async getBusinessCategory(id: string): Promise<BusinessCategory | undefined> {
+    return undefined;
+  }
+
+  async getRegionSlots(regionName: string): Promise<RegionSlot[]> {
+    return [];
+  }
+
+  async getRegionSlot(regionName: string, categoryId: string): Promise<RegionSlot | undefined> {
+    return undefined;
+  }
+
+  async getUserSlots(userId: string): Promise<RegionSlot[]> {
+    return [];
+  }
+
+  async claimSlot(regionName: string, categoryId: string, userId: string): Promise<RegionSlot | undefined> {
+    return undefined;
+  }
+
+  async releaseSlot(slotId: string, userId: string): Promise<boolean> {
+    return false;
+  }
+
+  async getMarketLeads(regionName?: string, status?: string): Promise<MarketLead[]> {
+    return [];
+  }
+
+  async getMarketLead(id: string): Promise<MarketLead | undefined> {
+    return undefined;
+  }
+
+  async createMarketLead(lead: InsertMarketLead): Promise<MarketLead> {
+    return {
+      id: randomUUID(),
+      ...lead,
+      status: lead.status || "new",
+      claimedByUserId: null,
+      claimedAt: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as MarketLead;
+  }
+
+  async claimMarketLead(leadId: string, userId: string): Promise<MarketLead | undefined> {
+    return undefined;
+  }
+
+  async updateMarketLeadStatus(leadId: string, status: string): Promise<MarketLead | undefined> {
+    return undefined;
+  }
+
+  async getUserLeads(userId: string): Promise<MarketLead[]> {
+    return [];
+  }
+
+  async getMarketDeals(regionName?: string): Promise<MarketDeal[]> {
+    return [];
+  }
+
+  async createMarketDeal(deal: InsertMarketDeal): Promise<MarketDeal> {
+    return {
+      id: randomUUID(),
+      ...deal,
+      status: deal.status || "in_progress",
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as MarketDeal;
+  }
+
+  async updateMarketDealStatus(dealId: string, status: string, amountEur?: number): Promise<MarketDeal | undefined> {
+    return undefined;
+  }
+
+  async getUserDeals(userId: string): Promise<MarketDeal[]> {
+    return [];
+  }
 }
 
 class DbStorage implements IStorage {
@@ -1950,6 +2068,174 @@ class DbStorage implements IStorage {
   async deleteBlogPost(id: string): Promise<boolean> {
     const result = await db.delete(blogPosts).where(eq(blogPosts.id, id));
     return (result.rowCount ?? 0) > 0;
+  }
+
+  // RegioMarkt - Business Categories
+  async getBusinessCategories(): Promise<BusinessCategory[]> {
+    return await db.select().from(businessCategories).orderBy(businessCategories.name);
+  }
+
+  async getBusinessCategory(id: string): Promise<BusinessCategory | undefined> {
+    const [result] = await db.select().from(businessCategories).where(eq(businessCategories.id, id));
+    return result;
+  }
+
+  // RegioMarkt - Region Slots
+  async getRegionSlots(regionName: string): Promise<RegionSlot[]> {
+    return await db.select().from(regionSlots)
+      .where(eq(regionSlots.regionName, regionName));
+  }
+
+  async getRegionSlot(regionName: string, categoryId: string): Promise<RegionSlot | undefined> {
+    const [result] = await db.select().from(regionSlots)
+      .where(and(
+        eq(regionSlots.regionName, regionName),
+        eq(regionSlots.categoryId, categoryId)
+      ));
+    return result;
+  }
+
+  async getUserSlots(userId: string): Promise<RegionSlot[]> {
+    return await db.select().from(regionSlots)
+      .where(eq(regionSlots.userId, userId));
+  }
+
+  async claimSlot(regionName: string, categoryId: string, userId: string): Promise<RegionSlot | undefined> {
+    // Check if slot exists
+    let slot = await this.getRegionSlot(regionName, categoryId);
+    
+    if (!slot) {
+      // Create the slot and claim it
+      const [newSlot] = await db.insert(regionSlots)
+        .values({
+          regionName,
+          categoryId,
+          status: "active",
+          userId,
+        })
+        .returning();
+      return newSlot;
+    }
+    
+    // If slot exists and is open, claim it
+    if (slot.status === "open" && !slot.userId) {
+      const [updatedSlot] = await db.update(regionSlots)
+        .set({ status: "active", userId })
+        .where(eq(regionSlots.id, slot.id))
+        .returning();
+      return updatedSlot;
+    }
+    
+    // Slot already claimed
+    return undefined;
+  }
+
+  async releaseSlot(slotId: string, userId: string): Promise<boolean> {
+    const result = await db.update(regionSlots)
+      .set({ status: "open", userId: null })
+      .where(and(
+        eq(regionSlots.id, slotId),
+        eq(regionSlots.userId, userId)
+      ))
+      .returning();
+    return result.length > 0;
+  }
+
+  // RegioMarkt - Leads
+  async getMarketLeads(regionName?: string, status?: string): Promise<MarketLead[]> {
+    let query = db.select().from(marketLeads);
+    
+    if (regionName && status) {
+      query = query.where(and(
+        eq(marketLeads.regionName, regionName),
+        eq(marketLeads.status, status)
+      )) as typeof query;
+    } else if (regionName) {
+      query = query.where(eq(marketLeads.regionName, regionName)) as typeof query;
+    } else if (status) {
+      query = query.where(eq(marketLeads.status, status)) as typeof query;
+    }
+    
+    return await query.orderBy(desc(marketLeads.createdAt));
+  }
+
+  async getMarketLead(id: string): Promise<MarketLead | undefined> {
+    const [result] = await db.select().from(marketLeads).where(eq(marketLeads.id, id));
+    return result;
+  }
+
+  async createMarketLead(lead: InsertMarketLead): Promise<MarketLead> {
+    const [result] = await db.insert(marketLeads).values(lead).returning();
+    return result;
+  }
+
+  async claimMarketLead(leadId: string, userId: string): Promise<MarketLead | undefined> {
+    const [result] = await db.update(marketLeads)
+      .set({ 
+        status: "claimed",
+        claimedByUserId: userId,
+        claimedAt: new Date(),
+        updatedAt: new Date()
+      })
+      .where(and(
+        eq(marketLeads.id, leadId),
+        eq(marketLeads.status, "new")
+      ))
+      .returning();
+    return result;
+  }
+
+  async updateMarketLeadStatus(leadId: string, status: string): Promise<MarketLead | undefined> {
+    const [result] = await db.update(marketLeads)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(marketLeads.id, leadId))
+      .returning();
+    return result;
+  }
+
+  async getUserLeads(userId: string): Promise<MarketLead[]> {
+    return await db.select().from(marketLeads)
+      .where(or(
+        eq(marketLeads.createdByUserId, userId),
+        eq(marketLeads.claimedByUserId, userId)
+      ))
+      .orderBy(desc(marketLeads.createdAt));
+  }
+
+  // RegioMarkt - Deals
+  async getMarketDeals(regionName?: string): Promise<MarketDeal[]> {
+    if (regionName) {
+      return await db.select().from(marketDeals)
+        .where(eq(marketDeals.regionName, regionName))
+        .orderBy(desc(marketDeals.createdAt));
+    }
+    return await db.select().from(marketDeals).orderBy(desc(marketDeals.createdAt));
+  }
+
+  async createMarketDeal(deal: InsertMarketDeal): Promise<MarketDeal> {
+    const [result] = await db.insert(marketDeals).values(deal).returning();
+    return result;
+  }
+
+  async updateMarketDealStatus(dealId: string, status: string, amountEur?: number): Promise<MarketDeal | undefined> {
+    const updateData: Partial<MarketDeal> = { status, updatedAt: new Date() };
+    if (amountEur !== undefined) {
+      updateData.amountEur = amountEur;
+    }
+    const [result] = await db.update(marketDeals)
+      .set(updateData)
+      .where(eq(marketDeals.id, dealId))
+      .returning();
+    return result;
+  }
+
+  async getUserDeals(userId: string): Promise<MarketDeal[]> {
+    return await db.select().from(marketDeals)
+      .where(or(
+        eq(marketDeals.supplierUserId, userId),
+        eq(marketDeals.referrerUserId, userId)
+      ))
+      .orderBy(desc(marketDeals.createdAt));
   }
 }
 
