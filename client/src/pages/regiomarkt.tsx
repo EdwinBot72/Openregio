@@ -111,7 +111,7 @@ const leadFormSchema = z.object({
   description: z.string().min(10, "Beschrijving moet minimaal 10 tekens zijn"),
   categoryId: z.string().min(1, "Selecteer een categorie"),
   regionName: z.string().min(1, "Selecteer een regio"),
-  estimatedValue: z.number().optional(),
+  valueEstimateEur: z.number().optional(),
 });
 
 type LeadFormValues = z.infer<typeof leadFormSchema>;
@@ -193,7 +193,7 @@ export default function RegioMarkt() {
       description: "",
       categoryId: "",
       regionName: selectedRegion,
-      estimatedValue: undefined,
+      valueEstimateEur: undefined,
     },
   });
 
@@ -468,7 +468,7 @@ export default function RegioMarkt() {
                 </div>
                 <FormField
                   control={form.control}
-                  name="estimatedValue"
+                  name="valueEstimateEur"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Geschatte waarde (optioneel)</FormLabel>
