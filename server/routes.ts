@@ -1600,6 +1600,307 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
     }
   });
 
+  // ============ REGIOMARKT ROUTES (Pro-only) ============
+
+  // GET /api/regiomarkt/categories - Get all business categories
+  app.get("/api/regiomarkt/categories", requireAuth, async (_req, res) => {
+    try {
+      const categories = await storage.getBusinessCategories();
+      res.json(categories);
+    } catch (error: any) {
+      console.error("Error fetching categories:", error);
+      res.status(500).json({ error: "Kon categorieën niet laden" });
+    }
+  });
+
+  // GET /api/regiomarkt/slots - Get slots for a region
+  app.get("/api/regiomarkt/slots", requireAuth, requirePro, async (req, res) => {
+    try {
+      const regionName = req.query.region as string;
+      
+      if (!regionName) {
+        return res.status(400).json({ error: "Regio is verplicht" });
+      }
+
+      const slots = await storage.getRegionSlots(regionName);
+      const categories = await storage.getBusinessCategories();
+      
+      // Merge slots with categories for full info
+      const slotsWithCategories = categories.map(category => {
+        const slot = slots.find(s => s.categoryId === category.id);
+        return {
+          categoryId: category.id,
+          categoryName: category.name,
+          regionName,
+          status: slot?.status || "open",
+          userId: slot?.userId || null,
+          slotId: slot?.id || null,
+        };
+      });
+
+      res.json(slotsWithCategories);
+    } catch (error: any) {
+      console.error("Error fetching slots:", error);
+      res.status(500).json({ error: "Kon slots niet laden" });
+    }
+  });
+
+  // GET /api/regiomarkt/my-slots - Get user's claimed slots
+  app.get("/api/regiomarkt/my-slots", requireAuth, requirePro, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const slots = await storage.getUserSlots(userId);
+      res.json(slots);
+    } catch (error: any) {
+      console.error("Error fetching user slots:", error);
+      res.status(500).json({ error: "Kon je slots niet laden" });
+    }
+  });
+
+  // POST /api/regiomarkt/slots/claim - Claim a slot
+  app.post("/api/regiomarkt/slots/claim", requireAuth, requirePro, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const { regionName, categoryId } = req.body;
+
+      if (!regionName || !categoryId) {
+        return res.status(400).json({ error: "Regio en categorie zijn verplicht" });
+      }
+
+      // Check if user already has a slot in this region
+      const userSlots = await storage.getUserSlots(userId);
+      const existingSlotInRegion = userSlots.find(s => s.regionName === regionName);
+      
+      if (existingSlotInRegion) {
+        return res.status(400).json({ 
+          error: "Je hebt al een slot in deze regio. Release je huidige slot eerst." 
+        });
+      }
+
+      const slot = await storage.claimSlot(regionName, categoryId, userId);
+      
+      if (!slot) {
+        return res.status(409).json({ 
+          error: "Deze slot is al bezet door een andere ondernemer" 
+        });
+      }
+
+      res.json(slot);
+    } catch (error: any) {
+      console.error("Error claiming slot:", error);
+      res.status(500).json({ error: "Kon slot niet claimen" });
+    }
+  });
+
+  // POST /api/regiomarkt/slots/release - Release a slot
+  app.post("/api/regiomarkt/slots/release", requireAuth, requirePro, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const { slotId } = req.body;
+
+      if (!slotId) {
+        return res.status(400).json({ error: "Slot ID is verplicht" });
+      }
+
+      const released = await storage.releaseSlot(slotId, userId);
+      
+      if (!released) {
+        return res.status(403).json({ 
+          error: "Je kunt alleen je eigen slots vrijgeven" 
+        });
+      }
+
+      res.json({ success: true, message: "Slot vrijgegeven" });
+    } catch (error: any) {
+      console.error("Error releasing slot:", error);
+      res.status(500).json({ error: "Kon slot niet vrijgeven" });
+    }
+  });
+
+  // GET /api/regiomarkt/leads - Get leads for region
+  app.get("/api/regiomarkt/leads", requireAuth, requirePro, async (req, res) => {
+    try {
+      const regionName = req.query.region as string | undefined;
+      const status = req.query.status as string | undefined;
+      
+      const leads = await storage.getMarketLeads(regionName, status);
+      res.json(leads);
+    } catch (error: any) {
+      console.error("Error fetching leads:", error);
+      res.status(500).json({ error: "Kon leads niet laden" });
+    }
+  });
+
+  // GET /api/regiomarkt/my-leads - Get user's leads
+  app.get("/api/regiomarkt/my-leads", requireAuth, requirePro, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const leads = await storage.getUserLeads(userId);
+      res.json(leads);
+    } catch (error: any) {
+      console.error("Error fetching user leads:", error);
+      res.status(500).json({ error: "Kon je leads niet laden" });
+    }
+  });
+
+  // POST /api/regiomarkt/leads - Create a new lead (share with network)
+  app.post("/api/regiomarkt/leads", requireAuth, requirePro, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const { title, description, categoryId, regionName, estimatedValue } = req.body;
+
+      if (!title || !description || !categoryId || !regionName) {
+        return res.status(400).json({ 
+          error: "Titel, beschrijving, categorie en regio zijn verplicht" 
+        });
+      }
+
+      const lead = await storage.createMarketLead({
+        createdByUserId: userId,
+        title,
+        description,
+        categoryId,
+        regionName,
+        estimatedValueEur: estimatedValue || null,
+        status: "new",
+      });
+
+      res.status(201).json(lead);
+    } catch (error: any) {
+      console.error("Error creating lead:", error);
+      res.status(500).json({ error: "Kon lead niet aanmaken" });
+    }
+  });
+
+  // POST /api/regiomarkt/leads/:id/claim - Claim a lead
+  app.post("/api/regiomarkt/leads/:id/claim", requireAuth, requirePro, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const leadId = req.params.id;
+
+      // Check if user has the right slot for this lead
+      const lead = await storage.getMarketLead(leadId);
+      if (!lead) {
+        return res.status(404).json({ error: "Lead niet gevonden" });
+      }
+
+      // Verify user has a slot in this region for this category
+      const userSlots = await storage.getUserSlots(userId);
+      const hasMatchingSlot = userSlots.some(
+        s => s.regionName === lead.regionName && s.categoryId === lead.categoryId
+      );
+
+      if (!hasMatchingSlot) {
+        return res.status(403).json({ 
+          error: "Je hebt geen slot voor deze categorie in deze regio" 
+        });
+      }
+
+      const claimedLead = await storage.claimMarketLead(leadId, userId);
+      
+      if (!claimedLead) {
+        return res.status(409).json({ 
+          error: "Deze lead is al geclaimed" 
+        });
+      }
+
+      res.json(claimedLead);
+    } catch (error: any) {
+      console.error("Error claiming lead:", error);
+      res.status(500).json({ error: "Kon lead niet claimen" });
+    }
+  });
+
+  // GET /api/regiomarkt/deals - Get deals
+  app.get("/api/regiomarkt/deals", requireAuth, requirePro, async (req, res) => {
+    try {
+      const regionName = req.query.region as string | undefined;
+      const deals = await storage.getMarketDeals(regionName);
+      res.json(deals);
+    } catch (error: any) {
+      console.error("Error fetching deals:", error);
+      res.status(500).json({ error: "Kon deals niet laden" });
+    }
+  });
+
+  // GET /api/regiomarkt/my-deals - Get user's deals
+  app.get("/api/regiomarkt/my-deals", requireAuth, requirePro, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const deals = await storage.getUserDeals(userId);
+      res.json(deals);
+    } catch (error: any) {
+      console.error("Error fetching user deals:", error);
+      res.status(500).json({ error: "Kon je deals niet laden" });
+    }
+  });
+
+  // POST /api/regiomarkt/deals - Create a deal from a claimed lead
+  app.post("/api/regiomarkt/deals", requireAuth, requirePro, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const { leadId, amountEur, notes } = req.body;
+
+      if (!leadId) {
+        return res.status(400).json({ error: "Lead ID is verplicht" });
+      }
+
+      // Verify the lead belongs to this user and is claimed
+      const lead = await storage.getMarketLead(leadId);
+      if (!lead) {
+        return res.status(404).json({ error: "Lead niet gevonden" });
+      }
+
+      if (lead.claimedByUserId !== userId) {
+        return res.status(403).json({ 
+          error: "Je kunt alleen deals maken van leads die je geclaimed hebt" 
+        });
+      }
+
+      const deal = await storage.createMarketDeal({
+        leadId,
+        supplierUserId: userId,
+        referrerUserId: lead.createdByUserId,
+        regionName: lead.regionName,
+        categoryId: lead.categoryId,
+        amountEur: amountEur || null,
+        notes: notes || null,
+        status: "in_progress",
+      });
+
+      // Update lead status
+      await storage.updateMarketLeadStatus(leadId, "converted");
+
+      res.status(201).json(deal);
+    } catch (error: any) {
+      console.error("Error creating deal:", error);
+      res.status(500).json({ error: "Kon deal niet aanmaken" });
+    }
+  });
+
+  // PATCH /api/regiomarkt/deals/:id - Update deal status
+  app.patch("/api/regiomarkt/deals/:id", requireAuth, requirePro, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const dealId = req.params.id;
+      const { status, amountEur } = req.body;
+
+      // Get all user deals to verify ownership
+      const userDeals = await storage.getUserDeals(userId);
+      const deal = userDeals.find(d => d.id === dealId);
+
+      if (!deal) {
+        return res.status(404).json({ error: "Deal niet gevonden of geen toegang" });
+      }
+
+      const updated = await storage.updateMarketDealStatus(dealId, status, amountEur);
+      res.json(updated);
+    } catch (error: any) {
+      console.error("Error updating deal:", error);
+      res.status(500).json({ error: "Kon deal niet bijwerken" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
