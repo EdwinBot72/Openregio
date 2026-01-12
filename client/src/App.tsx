@@ -12,7 +12,6 @@ import HomePage from "@/pages/home";
 import LoginPage from "@/pages/login";
 import RegisterPage from "@/pages/register";
 import DashboardPage from "@/pages/dashboard";
-import NetworkPage from "@/pages/network";
 import CommunityPage from "@/pages/community";
 import RegioBotPage from "@/pages/regiobot";
 import CooperativePage from "@/pages/cooperative";
@@ -60,7 +59,6 @@ function AuthenticatedRouter() {
       <Route path="/onboarding" component={OnboardingPage} />
       <Route path="/dashboard" component={DashboardPage} />
       <Route path="/bedrijfsprofiel" component={BedrijfsprofielPage} />
-      <Route path="/network" component={NetworkPage} />
       <Route path="/community" component={CommunityPage} />
       <Route path="/chat" component={ChatPage} />
       <Route path="/regiobot" component={RegioBotPage} />
