@@ -320,6 +320,7 @@ export const insertPostSchema = createInsertSchema(posts).omit({
 }).extend({
   type: z.enum(POST_TYPES, { required_error: "Type is verplicht" }),
   region: z.enum(REGIONS, { required_error: "Regio is verplicht" }),
+  authorUserId: z.string().optional().nullable(),
 });
 
 export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({

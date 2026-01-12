@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import type { Post } from "@shared/schema";
+import type { Post, User } from "@shared/schema";
 import { POST_TYPES, REGIONS, insertPostSchema } from "@shared/schema";
 import { Button } from "@/components/ui/button";
 import { QueryState } from "@/components/query-state";
-import { Plus, Filter, MessageSquare } from "lucide-react";
+import { Plus, Filter, MessageSquare, LogIn } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -39,6 +39,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { nl } from "date-fns/locale";
+import { Link } from "wouter";
 
 const postTypes = [
   { value: "vraag", label: "Vraag", variant: "default" as const },
@@ -50,26 +51,26 @@ const postTypes = [
 
 type FormValues = z.infer<typeof insertPostSchema>;
 
-function NewPostDialog() {
+function NewPostDialog({ isAuthenticated }: { isAuthenticated: boolean }) {
   const [open, setOpen] = useState(false);
   const { toast } = useToast();
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(insertPostSchema),
+  const form = useForm<Omit<FormValues, "authorUserId">>({
+    resolver: zodResolver(insertPostSchema.omit({ authorUserId: true })),
     defaultValues: {
       type: "vraag",
       title: "",
       body: "",
       region: "Amsterdam",
-      authorUserId: null,
     },
   });
 
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = async (data: Omit<FormValues, "authorUserId">) => {
     try {
       await apiRequest("POST", "/api/posts", data);
       
-      queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+      // Invalidate all /api/posts queries regardless of filter
+      queryClient.invalidateQueries({ queryKey: ["/api/posts"], exact: false });
       
       toast({
         title: "Post aangemaakt!",
@@ -78,14 +79,29 @@ function NewPostDialog() {
       
       setOpen(false);
       form.reset();
-    } catch (error) {
+    } catch (error: any) {
+      const isAuthError = error?.message?.includes("401") || error?.message?.includes("ingelogd");
       toast({
-        title: "Fout bij aanmaken",
-        description: "Er is iets misgegaan. Probeer het opnieuw.",
+        title: isAuthError ? "Niet ingelogd" : "Fout bij aanmaken",
+        description: isAuthError 
+          ? "Je moet ingelogd zijn om een post te plaatsen." 
+          : "Er is iets misgegaan. Probeer het opnieuw.",
         variant: "destructive",
       });
     }
   };
+
+  // Show login button if not authenticated
+  if (!isAuthenticated) {
+    return (
+      <Link href="/login">
+        <Button variant="outline" data-testid="button-login-to-post">
+          <LogIn className="mr-2 h-4 w-4" />
+          Log in om te posten
+        </Button>
+      </Link>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -241,8 +257,19 @@ function PostCard({ post }: { post: Post }) {
 export default function CommunityPage() {
   const [typeFilter, setTypeFilter] = useState<string>("all");
 
+  // Check if user is authenticated
+  const { data: user } = useQuery<User | null>({
+    queryKey: ["/api/auth/user"],
+    queryFn: async () => {
+      const response = await fetch("/api/auth/user", { credentials: "include" });
+      if (!response.ok) return null;
+      return response.json();
+    },
+    retry: false,
+  });
+
   const { data: posts, isLoading, isError, error, refetch } = useQuery<Post[]>({
-    queryKey: ["/api/posts", typeFilter !== "all" ? typeFilter : undefined],
+    queryKey: ["/api/posts", typeFilter],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (typeFilter !== "all") {
@@ -266,7 +293,7 @@ export default function CommunityPage() {
               Deel vragen, aanbiedingen, leads en events met lokale ondernemers
             </p>
           </div>
-          <NewPostDialog />
+          <NewPostDialog isAuthenticated={!!user} />
         </div>
 
         <div className="flex items-center gap-4">
