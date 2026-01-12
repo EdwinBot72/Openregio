@@ -913,7 +913,23 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
 
   app.post("/api/posts", async (req, res) => {
     try {
-      const validatedData = insertPostSchema.parse(req.body);
+      // Require authentication for creating posts
+      if (!req.user?.id) {
+        return res.status(401).json({ error: "Je moet ingelogd zijn om een bericht te plaatsen" });
+      }
+
+      // Frontend stuurt vaak authorUserId: null → Zod faalt (string vs null)
+      // Fix: null weghalen + auteur server-side zetten vanuit authenticated user
+      const payload: any = { ...(req.body ?? {}) };
+
+      if (payload.authorUserId === null) {
+        delete payload.authorUserId;
+      }
+
+      // Always use authenticated user id
+      payload.authorUserId = req.user.id;
+
+      const validatedData = insertPostSchema.parse(payload);
       const post = await storage.createPost(validatedData);
       res.status(201).json(post);
     } catch (error) {
