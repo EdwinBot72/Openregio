@@ -56,28 +56,31 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="font-accent text-4xl md:text-6xl font-bold mb-6 leading-tight" data-testid="text-hero-title">
-                Ondernemen terug naar de basis
+                Lokaal ondernemen zonder Big Tech
               </h1>
-              <p className="text-xl md:text-2xl text-muted-foreground mb-8" data-testid="text-hero-subtitle">
-                OpenRegio is een lokaal ondernemersplatform waar je weer gewoon zaken doet: 
-                vaste klanten, korte lijntjes, simpel kunnen betalen – en afspraken die blijven 
-                staan, ook als systemen een keer niet meewerken.
+              <p className="text-xl md:text-2xl text-muted-foreground mb-4" data-testid="text-hero-subtitle">
+                Moe van platforms die je data verkopen? Van systemen die uitvallen op het verkeerde moment? 
+                Van algoritmes die bepalen wie jouw berichten ziet?
+              </p>
+              <p className="text-lg text-foreground font-medium mb-8">
+                OpenRegio is het lokale netwerk van ondernemers, voor ondernemers. 
+                Geen aandeelhouders, geen tracking, geen gedoe. Gewoon zaken doen met je buren.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link href="/start?plan=basic">
                   <Button size="lg" data-testid="button-hero-basic">
-                    Word lid v.a. €9,95 p/m
+                    Start voor €9,95/maand
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
-                <Link href="/basischeck">
-                  <Button variant="outline" size="lg" data-testid="button-hero-basischeck">
-                    Doe de Basischeck
+                <Link href="/start?plan=pro">
+                  <Button variant="outline" size="lg" data-testid="button-hero-pro">
+                    PRO met AI-assistent €19,95
                   </Button>
                 </Link>
               </div>
               <p className="text-sm text-muted-foreground mt-4" data-testid="text-hero-tagline">
-                Maandelijks opzegbaar, geen contracten. Minder afhankelijk, meer grip op je eigen netwerk.
+                Maandelijks opzegbaar. Coöperatief: jij hebt stemrecht. 100% privacy-first.
               </p>
             </div>
             <div className="relative">
@@ -92,15 +95,15 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Features Section - Wat je krijgt */}
+      {/* Waarom OpenRegio Section */}
       <section className="py-20 px-4">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="font-accent text-3xl md:text-4xl font-bold mb-4">
-              Simpel, offline-proof en menselijk
+              Waarom ondernemers kiezen voor OpenRegio
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              Een platform waar lokale ondernemers weer simpel kunnen ondernemen
+              Geen complexe systemen, geen verborgen kosten, geen data die verkocht wordt
             </p>
           </div>
 
@@ -111,36 +114,51 @@ export default function HomePage() {
                 <h3 className="font-accent text-xl font-semibold mb-2">
                   Lokaal Netwerk
                 </h3>
-                <p className="text-muted-foreground">
-                  Ondernemers in jouw buurt die je echt kunt bellen en doorverwijzen. 
-                  Zie direct wie er cash accepteert, bonnen heeft en offline kan werken.
+                <p className="text-muted-foreground mb-4">
+                  Deel vragen, aanbiedingen, leads en events met ondernemers in jouw regio. 
+                  Geen algoritme dat bepaalt wie wat ziet - iedereen ziet alles.
                 </p>
+                <ul className="text-sm space-y-1 text-muted-foreground">
+                  <li>• Vind collega's voor samenwerkingen</li>
+                  <li>• Deel klanten die je niet zelf kunt helpen</li>
+                  <li>• Organiseer lokale netwerkevents</li>
+                </ul>
               </CardContent>
             </Card>
 
-            <Card data-testid="card-feature-basischeck">
+            <Card data-testid="card-feature-regiobot">
               <CardContent className="p-6">
-                <Battery className="h-12 w-12 text-primary mb-4" />
+                <Bot className="h-12 w-12 text-primary mb-4" />
                 <h3 className="font-accent text-xl font-semibold mb-2">
-                  Basischeck & Badges
+                  RegioBot AI-assistent (PRO)
                 </h3>
-                <p className="text-muted-foreground">
-                  Hoe stevig is jouw bedrijf als systemen haperen? Doe de check en 
-                  toon je weerbaarheid met badges: cash, bonnenblok, noodstroom.
+                <p className="text-muted-foreground mb-4">
+                  Jouw persoonlijke assistent voor marketing, juridische vragen en bedrijfsadvies. 
+                  Spreekt Nederlands, kent jouw context.
                 </p>
+                <ul className="text-sm space-y-1 text-muted-foreground">
+                  <li>• Schrijf social media posts in jouw stijl</li>
+                  <li>• Laat brieven en contracten uitleggen</li>
+                  <li>• Krijg advies over bedrijfskeuzes</li>
+                </ul>
               </CardContent>
             </Card>
 
-            <Card data-testid="card-feature-offline">
+            <Card data-testid="card-feature-coop">
               <CardContent className="p-6">
-                <Printer className="h-12 w-12 text-primary mb-4" />
+                <ShieldCheck className="h-12 w-12 text-primary mb-4" />
                 <h3 className="font-accent text-xl font-semibold mb-2">
-                  Offline Modus
+                  Coöperatief & Democratisch
                 </h3>
-                <p className="text-muted-foreground">
-                  Printbare ledenlijst, factuur-templates en kasboek. 
-                  Niet alleen een app, maar ook papier als onderdeel van het systeem.
+                <p className="text-muted-foreground mb-4">
+                  Geen aandeelhouders die winst willen. Jij bent mede-eigenaar en stemt mee 
+                  over de richting van het platform.
                 </p>
+                <ul className="text-sm space-y-1 text-muted-foreground">
+                  <li>• Stem op voorstellen van leden</li>
+                  <li>• Dien zelf voorstellen in</li>
+                  <li>• Jouw contributie blijft in de coöperatie</li>
+                </ul>
               </CardContent>
             </Card>
           </div>
@@ -192,18 +210,18 @@ export default function HomePage() {
             {[
               {
                 name: "Maria van den Berg",
-                business: "Bakkerij De Gouden Korrel",
-                quote: "Eindelijk weet ik welke collega's ook cash accepteren. Vorige week viel de pin uit – ik kon mijn klanten gewoon doorsturen.",
+                business: "Bakkerij De Gouden Korrel, Haarlem",
+                quote: "Ik zat op Facebook maar mijn berichten bereikten steeds minder mensen. Hier ziet iedereen in mijn regio wat ik plaats. Vorige maand kreeg ik 3 nieuwe vaste klanten via een lead die een collega deelde.",
               },
               {
                 name: "Henk Jansen",
-                business: "Fietsenmaker Henk",
-                quote: "Die Basischeck was een wake-up call. Nu heb ik een bonnenblok en een telefoonlijst op papier. Kost niks, werkt altijd.",
+                business: "Fietsenmaker Henk, Beverwijk",
+                quote: "RegioBot helpt me met offertes en contracten die ik krijg. Ik upload een document en krijg uitleg in gewoon Nederlands. Scheelt me uren bij de advocaat.",
               },
               {
                 name: "Sophie de Vries",
-                business: "Groen Advies",
-                quote: "Geen algoritmes, geen gedoe. Gewoon een lijst met ondernemers in mijn buurt die ik kan bellen. Zoals het hoort.",
+                business: "Adviesbureau Groen, IJmond",
+                quote: "Eindelijk een platform waar ik geen product ben. Mijn gegevens zijn van mij, ik betaal gewoon voor de service. Zo hoort het.",
               },
             ].map((testimonial, idx) => (
               <Card key={idx} data-testid={`card-testimonial-${idx}`}>
@@ -226,10 +244,13 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="font-accent text-3xl md:text-4xl font-bold mb-4">
-              Word lid v.a. €9,95 per maand
+              Investeer in je lokale netwerk
             </h2>
-            <p className="text-xl text-muted-foreground">
-              Maandelijks opzegbaar, geen contracten
+            <p className="text-xl text-muted-foreground mb-2">
+              Maandelijks opzegbaar, geen contracten, geen verborgen kosten
+            </p>
+            <p className="text-muted-foreground">
+              Eén nieuwe klant via het netwerk verdient je lidmaatschap al terug
             </p>
           </div>
 
