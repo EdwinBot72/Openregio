@@ -1,0 +1,392 @@
+Je wil RegioMarkt.
+Dan moet het een verkoopmachine zijn, geen prikbord.
+
+Hier is de werkende versie 👇
+
+RegioMarkt — wat het echt is
+
+RegioMarkt = een gesloten B2B-dealnetwerk per regio.
+
+Geen open community.
+Geen zoekfunctie.
+Alleen gecontroleerde handel.
+
+1) Elke regio heeft vaste rollen
+
+Per postcodegebied:
+
+Rol	1 plek
+Loodgieter	✓
+Elektricien	✓
+Webbouwer	✓
+Drukker	✓
+Schoonmaak	✓
+Accountant	✓
+
+Waarom?
+Omdat:
+
+iedereen elkaar nodig heeft
+
+niemand concurrentie binnen het netwerk heeft
+
+Dat maakt verwijzen logisch en veilig.
+
+2) Iedereen brengt klanten in
+
+Elke ondernemer:
+
+moet minimaal X leads per maand uploaden
+
+ook als ze zelf geen tijd hebben
+
+Voorbeeld:
+
+een kapper krijgt een vraag voor een website → die gaat naar de webbouwer in RegioMarkt.
+
+Geen lead?
+Geen toegang.
+
+Zo wordt elke ondernemer een verkoper voor iedereen.
+
+3) Eén centrale dealflow
+
+Niet DM’s.
+Niet WhatsApp.
+
+Elke lead gaat in:
+
+wie is de klant
+
+wat wil die
+
+wie pakt ’m
+
+status
+
+dealwaarde
+
+Iedereen ziet:
+
+wie levert
+
+wie scoort
+
+wie meeliftt
+
+Transparantie = druk.
+
+4) Geldstroom
+
+Bij elke deal:
+
+5–10% naar OpenRegio
+
+of naar degene die de lead bracht
+
+Dus:
+
+verwijzen = geld
+
+stilzitten = niks
+
+Dat maakt gedrag hard.
+
+5) Regio-bundels
+
+OpenRegio verkoopt pakketten namens het netwerk:
+
+“Startende ondernemer pakket”
+Website + logo + drukwerk + fotograaf + boekhouder
+
+Klant koopt bij OpenRegio.
+Werk gaat naar de leden.
+OpenRegio houdt marge.
+
+Dat is macht.
+
+Waarom dit wél werkt
+
+Omdat:
+
+ondernemers alleen blijven als ze geld verdienen
+
+ze werk mislopen als ze vertrekken
+
+jij de kraan bedient
+
+Je bouwt geen platform.
+Je bouwt een regionale marktplaats met toegangspoort.
+
+Als je wilt, kan ik dit nu omzetten naar:
+
+een database-structuur voor Replit, of
+
+een MVP-flow (van lead → deal → betaling).
+
+Ja doe eens een database-structuur voor Replit, of
+
+Helemaal goed. Hieronder een strakke database-structuur (Postgres) voor RegioMarkt in Replit: rollen/exclusiviteit, leads, deals, referrals/fees, membership, regio’s.
+
+Copy-paste in je DB migration / SQL runner.
+
+-- ================
+-- OpenRegio RegioMarkt v1 (Postgres)
+-- ================
+
+-- EXTENSIONS (optioneel)
+-- create extension if not exists "uuid-ossp";
+-- create extension if not exists pgcrypto;
+
+-- --------
+-- USERS
+-- --------
+create table if not exists users (
+  id                uuid primary key default gen_random_uuid(),
+  email             text unique,
+  display_name      text not null,
+  phone             text,
+  created_at        timestamptz not null default now()
+);
+
+-- --------
+-- REGIONS (postcodegebieden / gemeenten / custom)
+-- --------
+create table if not exists regions (
+  id                uuid primary key default gen_random_uuid(),
+  country           text not null default 'NL',
+  name              text not null,           -- "Haarlem", "Spaarndam", "Regio Kennemerland"
+  code              text,                    -- optioneel interne code
+  -- simpele dekking: of postcode range, of vrije tekst
+  postcode_from     text,                    -- "2000"
+  postcode_to       text,                    -- "2099"
+  created_at        timestamptz not null default now()
+);
+
+create index if not exists idx_regions_name on regions (name);
+
+-- --------
+-- BUSINESS CATEGORIES / ROLES (voor exclusiviteit)
+-- --------
+create table if not exists categories (
+  id                uuid primary key default gen_random_uuid(),
+  slug              text unique not null,    -- "loodgieter", "elektricien"
+  name              text not null,
+  created_at        timestamptz not null default now()
+);
+
+-- --------
+-- BUSINESSES (onderneming/profiel)
+-- --------
+create table if not exists businesses (
+  id                uuid primary key default gen_random_uuid(),
+  owner_user_id     uuid not null references users(id) on delete cascade,
+  name              text not null,
+  kvk               text,
+  website           text,
+  phone             text,
+  email             text,
+  created_at        timestamptz not null default now()
+);
+
+create index if not exists idx_businesses_owner on businesses(owner_user_id);
+
+-- --------
+-- MEMBERSHIPS (business in region + plan + status)
+-- --------
+create type membership_status as enum ('pending', 'active', 'paused', 'cancelled');
+create type membership_plan as enum ('basis', 'pro', 'elite');
+
+create table if not exists memberships (
+  id                uuid primary key default gen_random_uuid(),
+  business_id       uuid not null references businesses(id) on delete cascade,
+  region_id         uuid not null references regions(id) on delete cascade,
+  plan              membership_plan not null default 'basis',
+  status            membership_status not null default 'pending',
+  started_at        timestamptz,
+  ended_at          timestamptz,
+  created_at        timestamptz not null default now(),
+  unique (business_id, region_id)
+);
+
+create index if not exists idx_memberships_region on memberships(region_id);
+create index if not exists idx_memberships_status on memberships(status);
+
+-- --------
+-- REGION SLOTS (exclusiviteit per regio per category)
+-- 1 slot per category per region → toegewezen aan membership
+-- --------
+create type slot_status as enum ('open', 'reserved', 'active');
+
+create table if not exists region_slots (
+  id                uuid primary key default gen_random_uuid(),
+  region_id         uuid not null references regions(id) on delete cascade,
+  category_id       uuid not null references categories(id) on delete cascade,
+  status            slot_status not null default 'open',
+  membership_id     uuid references memberships(id) on delete set null,
+  reserved_until    timestamptz,
+  created_at        timestamptz not null default now(),
+  unique (region_id, category_id)
+);
+
+create index if not exists idx_region_slots_region on region_slots(region_id);
+create index if not exists idx_region_slots_status on region_slots(status);
+
+-- --------
+-- LEADS (ingebracht door leden)
+-- --------
+create type lead_status as enum ('new', 'claimed', 'qualified', 'won', 'lost', 'expired');
+
+create table if not exists leads (
+  id                uuid primary key default gen_random_uuid(),
+  region_id         uuid not null references regions(id) on delete cascade,
+
+  -- wie brengt 'm in
+  created_by_user_id uuid not null references users(id) on delete restrict,
+  created_by_business_id uuid references businesses(id) on delete set null,
+
+  -- klantgegevens (minimaal; later uitbreiden)
+  client_name       text,
+  client_phone      text,
+  client_email      text,
+  client_company    text,
+
+  -- wat wil klant
+  title             text not null,
+  description       text,
+  category_id       uuid references categories(id) on delete set null,
+
+  -- lead lifecycle
+  status            lead_status not null default 'new',
+  value_estimate_eur numeric(12,2),
+  due_by            timestamptz,
+  created_at        timestamptz not null default now(),
+  updated_at        timestamptz not null default now()
+);
+
+create index if not exists idx_leads_region_status on leads(region_id, status);
+create index if not exists idx_leads_category on leads(category_id);
+
+-- --------
+-- LEAD CLAIMS (wie pakt 'm) + exclusiviteit afdwingen
+-- --------
+create table if not exists lead_claims (
+  id                uuid primary key default gen_random_uuid(),
+  lead_id           uuid not null references leads(id) on delete cascade,
+  claimed_by_membership_id uuid not null references memberships(id) on delete cascade,
+  claimed_at        timestamptz not null default now(),
+  unique (lead_id)
+);
+
+create index if not exists idx_lead_claims_membership on lead_claims(claimed_by_membership_id);
+
+-- --------
+-- DEALS (wat er echt uitkomt)
+-- --------
+create type deal_status as enum ('in_progress', 'won', 'lost');
+
+create table if not exists deals (
+  id                uuid primary key default gen_random_uuid(),
+  lead_id           uuid not null references leads(id) on delete cascade,
+  region_id         uuid not null references regions(id) on delete cascade,
+
+  -- uitvoerder
+  supplier_membership_id uuid not null references memberships(id) on delete restrict,
+
+  -- brenger (voor referral fee)
+  referrer_membership_id uuid references memberships(id) on delete set null,
+
+  status            deal_status not null default 'in_progress',
+  amount_eur        numeric(12,2),
+  margin_eur        numeric(12,2), -- optioneel
+  notes             text,
+
+  created_at        timestamptz not null default now(),
+  updated_at        timestamptz not null default now()
+);
+
+create index if not exists idx_deals_region_status on deals(region_id, status);
+create index if not exists idx_deals_supplier on deals(supplier_membership_id);
+
+-- --------
+-- FEES / COMMISSIONS (OpenRegio fee + referrer payout)
+-- --------
+create type fee_type as enum ('platform_fee', 'referral_fee');
+create type fee_status as enum ('pending', 'invoiced', 'paid', 'waived');
+
+create table if not exists deal_fees (
+  id                uuid primary key default gen_random_uuid(),
+  deal_id           uuid not null references deals(id) on delete cascade,
+  fee_type          fee_type not null,
+  status            fee_status not null default 'pending',
+
+  -- wie ontvangt (bij referral_fee) / platform_fee kan null of "platform account"
+  pay_to_membership_id uuid references memberships(id) on delete set null,
+
+  percent           numeric(5,2),      -- bv 5.00 of 10.00
+  amount_eur        numeric(12,2),     -- berekend of handmatig
+  created_at        timestamptz not null default now()
+);
+
+create index if not exists idx_deal_fees_deal on deal_fees(deal_id);
+create index if not exists idx_deal_fees_status on deal_fees(status);
+
+-- --------
+-- ACTIVITY LOG (voor transparantie + anti-freeload)
+-- --------
+create table if not exists activity_log (
+  id                uuid primary key default gen_random_uuid(),
+  region_id         uuid references regions(id) on delete cascade,
+  membership_id     uuid references memberships(id) on delete set null,
+  user_id           uuid references users(id) on delete set null,
+  entity_type       text not null,         -- 'lead','deal','slot','membership'
+  entity_id         uuid,
+  action            text not null,         -- 'created','claimed','won','lost','updated'
+  meta              jsonb not null default '{}'::jsonb,
+  created_at        timestamptz not null default now()
+);
+
+create index if not exists idx_activity_region_time on activity_log(region_id, created_at desc);
+
+-- --------
+-- UPDATED_AT triggers (optioneel)
+-- --------
+create or replace function set_updated_at()
+returns trigger as $$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists trg_leads_updated_at on leads;
+create trigger trg_leads_updated_at
+before update on leads
+for each row execute function set_updated_at();
+
+drop trigger if exists trg_deals_updated_at on deals;
+create trigger trg_deals_updated_at
+before update on deals
+for each row execute function set_updated_at();
+
+Minimal “bulletproof” regels (in je API/service layer)
+
+Zonder deze checks wordt het weer een prikbord:
+
+Claim lead alleen als membership.status='active' én membership in dezelfde region_id.
+
+Als lead een category_id heeft: claim alleen als claimant membership het actieve slot heeft in region_slots (region+category).
+
+Bij deal.status='won': maak automatisch 2 fees aan:
+
+platform_fee (bv 5%)
+
+referral_fee (bv 5% naar referrer) als referrer bestaat
+
+Freeload kill-switch: lid moet X leads per maand inbrengen → anders memberships.status='paused' (regel in cron/job of bij login check).
+
+Als je me 2 dingen geeft (heel kort):
+
+welke DB gebruik je in Replit (Postgres/Supabase/SQLite)?
+
+wil je exclusiviteit hard (1 per category per regio) of soft (max 3)?
