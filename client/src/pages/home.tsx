@@ -112,12 +112,12 @@ export default function HomePage() {
             </a>
           </nav>
           <div className="flex items-center gap-2">
-            <Link href="/login">
+            <Link href="/login" data-testid="link-nav-login">
               <Button variant="ghost" size="sm" data-testid="button-nav-login">
                 Inloggen
               </Button>
             </Link>
-            <Link href="/start?plan=basic">
+            <Link href="/start?plan=basic" data-testid="link-nav-start">
               <Button size="sm" data-testid="button-nav-start">
                 Word lid
               </Button>
@@ -147,12 +147,12 @@ export default function HomePage() {
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
-              <Link href="/start?plan=basic">
+              <Link href="/start?plan=basic" data-testid="link-hero-register">
                 <Button size="lg" data-testid="button-hero-register">
                   Word lid <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
-              <Link href="/regios">
+              <Link href="/regios" data-testid="link-hero-regions">
                 <Button variant="outline" size="lg" data-testid="button-hero-regions">
                   Bekijk jouw regio
                 </Button>
@@ -268,7 +268,7 @@ export default function HomePage() {
               </div>
 
               <div className="mt-6">
-                <Link href="/start?plan=basic">
+                <Link href="/start?plan=basic" data-testid="link-testimonials-register">
                   <Button data-testid="button-testimonials-register">
                     Word lid <ArrowRight className="ml-2 h-4 w-4" />
                   </Button>
@@ -293,13 +293,13 @@ export default function HomePage() {
               </p>
             </div>
             <div className="flex flex-wrap gap-3 md:justify-end">
-              <Link href="/start?plan=basic">
+              <Link href="/start?plan=basic" data-testid="link-cta-register">
                 <Button variant="secondary" data-testid="button-cta-register">
                   Word lid
                 </Button>
               </Link>
-              <Link href="/regios">
-                <Button variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10" data-testid="button-cta-regions">
+              <Link href="/regios" data-testid="link-cta-regions">
+                <Button variant="secondary" data-testid="button-cta-regions">
                   Bekijk beschikbare plekken
                 </Button>
               </Link>
@@ -376,8 +376,8 @@ function BasischeckCard() {
         ))}
       </div>
 
-      <Link href="/basischeck" className="block mt-6">
-        <Button className="w-full bg-green-600 hover:bg-green-700" data-testid="button-basischeck-start">
+      <Link href="/basischeck" className="block mt-6" data-testid="link-basischeck-start">
+        <Button className="w-full" data-testid="button-basischeck-start">
           Verbeter mijn score <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </Link>
