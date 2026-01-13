@@ -78,13 +78,6 @@ export const bedrijfsprofielen = pgTable("bedrijfsprofielen", {
   status: text("status").notNull().default("actief"),
   aangemaakt: timestamp("aangemaakt").defaultNow().notNull(),
   bijgewerkt: timestamp("bijgewerkt").defaultNow().notNull(),
-  // Basischeck velden
-  cashMogelijk: boolean("cash_mogelijk").notNull().default(false),
-  bonnenblok: boolean("bonnenblok").notNull().default(false),
-  papierenTelefoonlijst: boolean("papieren_telefoonlijst").notNull().default(false),
-  offlineWerken: boolean("offline_werken").notNull().default(false),
-  noodstroom: boolean("noodstroom").notNull().default(false),
-  basischeckIngevuld: boolean("basischeck_ingevuld").notNull().default(false),
 });
 
 // Uploads table for business profile files
@@ -327,7 +320,6 @@ export const insertPostSchema = createInsertSchema(posts).omit({
 }).extend({
   type: z.enum(POST_TYPES, { required_error: "Type is verplicht" }),
   region: z.enum(REGIONS, { required_error: "Regio is verplicht" }),
-  authorUserId: z.string().optional().nullable(),
 });
 
 export const insertSubscriptionSchema = createInsertSchema(subscriptions).omit({
@@ -607,26 +599,6 @@ export const insertRefreshTokenSchema = createInsertSchema(refreshTokens).omit({
 export type InsertRefreshToken = z.infer<typeof insertRefreshTokenSchema>;
 export type RefreshToken = typeof refreshTokens.$inferSelect;
 
-// Blog posts table
-export const blogPosts = pgTable("blog_posts", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  authorId: varchar("author_id").notNull().references(() => users.id),
-  authorName: text("author_name").notNull(),
-  title: text("title").notNull(),
-  content: text("content").notNull(),
-  excerpt: text("excerpt"),
-  published: boolean("published").default(true),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-}, (table) => [
-  index("idx_blog_posts_author").on(table.authorId),
-  index("idx_blog_posts_created").on(table.createdAt),
-]);
-
-export const insertBlogPostSchema = createInsertSchema(blogPosts).omit({ id: true, createdAt: true, updatedAt: true });
-export type InsertBlogPost = z.infer<typeof insertBlogPostSchema>;
-export type BlogPost = typeof blogPosts.$inferSelect;
-
 // WOO Schemas and Types
 export const insertRegionSchema = createInsertSchema(regions).omit({ id: true });
 export const insertAuthoritySchema = createInsertSchema(authorities).omit({ id: true });
@@ -647,160 +619,3 @@ export type InsertTag = z.infer<typeof insertTagSchema>;
 export type Tag = typeof tags.$inferSelect;
 export type InsertWooDossier = z.infer<typeof insertWooDossierSchema>;
 export type WooDossier = typeof wooDossiers.$inferSelect;
-
-// ===============================
-// REGIOMARKT TABLES (B2B Deal Network)
-// ===============================
-
-// Business categories for RegioMarkt slots (exclusivity per region)
-export const businessCategories = pgTable("business_categories", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  slug: text("slug").notNull().unique(),
-  name: text("name").notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-});
-
-// Region slots - 1 slot per category per region for exclusivity
-export const SLOT_STATUS = ["open", "reserved", "active"] as const;
-
-export const regionSlots = pgTable("region_slots", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  regionName: text("region_name").notNull(), // Uses REGIONS constant values
-  categoryId: varchar("category_id").notNull().references(() => businessCategories.id),
-  status: text("status").notNull().default("open"),
-  userId: varchar("user_id").references(() => users.id, { onDelete: "set null" }),
-  reservedUntil: timestamp("reserved_until", { withTimezone: true }),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-}, (table) => ({
-  uniqueRegionCategory: unique().on(table.regionName, table.categoryId),
-}));
-
-// Leads - ingebracht door leden
-export const LEAD_STATUS = ["new", "claimed", "qualified", "won", "lost", "expired"] as const;
-
-export const marketLeads = pgTable("market_leads", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  regionName: text("region_name").notNull(),
-  createdByUserId: varchar("created_by_user_id").notNull().references(() => users.id),
-  
-  // Klantgegevens
-  clientName: text("client_name"),
-  clientPhone: text("client_phone"),
-  clientEmail: text("client_email"),
-  clientCompany: text("client_company"),
-  
-  // Lead details
-  title: text("title").notNull(),
-  description: text("description"),
-  categoryId: varchar("category_id").references(() => businessCategories.id),
-  
-  // Lifecycle
-  status: text("status").notNull().default("new"),
-  valueEstimateEur: integer("value_estimate_eur"),
-  dueBy: timestamp("due_by", { withTimezone: true }),
-  
-  // Claim info
-  claimedByUserId: varchar("claimed_by_user_id").references(() => users.id),
-  claimedAt: timestamp("claimed_at", { withTimezone: true }),
-  
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-}, (table) => [
-  index("idx_market_leads_region").on(table.regionName),
-  index("idx_market_leads_status").on(table.status),
-  index("idx_market_leads_category").on(table.categoryId),
-]);
-
-// Deals - afgesloten deals met fees
-export const DEAL_STATUS = ["in_progress", "won", "lost"] as const;
-
-export const marketDeals = pgTable("market_deals", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  leadId: varchar("lead_id").notNull().references(() => marketLeads.id),
-  regionName: text("region_name").notNull(),
-  
-  // Supplier (who does the work)
-  supplierUserId: varchar("supplier_user_id").notNull().references(() => users.id),
-  
-  // Referrer (who brought the lead, gets fee)
-  referrerUserId: varchar("referrer_user_id").references(() => users.id),
-  
-  status: text("status").notNull().default("in_progress"),
-  amountEur: integer("amount_eur"),
-  notes: text("notes"),
-  
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
-}, (table) => [
-  index("idx_market_deals_region").on(table.regionName),
-  index("idx_market_deals_supplier").on(table.supplierUserId),
-]);
-
-// Deal fees - platform fee + referral fee tracking
-export const FEE_TYPE = ["platform_fee", "referral_fee"] as const;
-export const FEE_STATUS = ["pending", "invoiced", "paid", "waived"] as const;
-
-export const dealFees = pgTable("deal_fees", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  dealId: varchar("deal_id").notNull().references(() => marketDeals.id, { onDelete: "cascade" }),
-  feeType: text("fee_type").notNull(),
-  status: text("status").notNull().default("pending"),
-  payToUserId: varchar("pay_to_user_id").references(() => users.id),
-  percent: integer("percent"), // e.g. 5 or 10
-  amountEur: integer("amount_eur"),
-  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
-}, (table) => [
-  index("idx_deal_fees_deal").on(table.dealId),
-]);
-
-// RegioMarkt Schemas and Types
-export const insertBusinessCategorySchema = createInsertSchema(businessCategories).omit({ id: true, createdAt: true });
-export type InsertBusinessCategory = z.infer<typeof insertBusinessCategorySchema>;
-export type BusinessCategory = typeof businessCategories.$inferSelect;
-
-export const insertRegionSlotSchema = createInsertSchema(regionSlots).omit({ id: true, createdAt: true });
-export type InsertRegionSlot = z.infer<typeof insertRegionSlotSchema>;
-export type RegionSlot = typeof regionSlots.$inferSelect;
-
-export const insertMarketLeadSchema = createInsertSchema(marketLeads).omit({ 
-  id: true, 
-  createdAt: true, 
-  updatedAt: true,
-  claimedAt: true,
-  claimedByUserId: true,
-}).extend({
-  status: z.enum(LEAD_STATUS).optional(),
-  regionName: z.enum(REGIONS, { required_error: "Regio is verplicht" }),
-});
-export type InsertMarketLead = z.infer<typeof insertMarketLeadSchema>;
-export type MarketLead = typeof marketLeads.$inferSelect;
-
-export const insertMarketDealSchema = createInsertSchema(marketDeals).omit({ 
-  id: true, 
-  createdAt: true, 
-  updatedAt: true 
-}).extend({
-  status: z.enum(DEAL_STATUS).optional(),
-});
-export type InsertMarketDeal = z.infer<typeof insertMarketDealSchema>;
-export type MarketDeal = typeof marketDeals.$inferSelect;
-
-export const insertDealFeeSchema = createInsertSchema(dealFees).omit({ id: true, createdAt: true });
-export type InsertDealFee = z.infer<typeof insertDealFeeSchema>;
-export type DealFee = typeof dealFees.$inferSelect;
-
-// RegioMarkt business categories (seed data)
-export const BUSINESS_CATEGORIES = [
-  { slug: "loodgieter", name: "Loodgieter" },
-  { slug: "elektricien", name: "Elektricien" },
-  { slug: "webbouwer", name: "Webbouwer" },
-  { slug: "drukker", name: "Drukker" },
-  { slug: "schoonmaak", name: "Schoonmaak" },
-  { slug: "accountant", name: "Accountant" },
-  { slug: "fotograaf", name: "Fotograaf" },
-  { slug: "schilder", name: "Schilder" },
-  { slug: "tuinman", name: "Tuinman" },
-  { slug: "kapper", name: "Kapper" },
-  { slug: "coach", name: "Coach/Trainer" },
-  { slug: "designer", name: "Grafisch Ontwerper" },
-] as const;

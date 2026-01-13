@@ -12,7 +12,6 @@ import { generateRandomPassword, generateOnboardingToken, getPlanPrice, getPlanD
 import bcrypt from "bcrypt";
 import { upload, getDocumentType } from "./middleware/upload";
 import { runRegioBot } from "./regiobot";
-import { createWooRouter } from "./routes/woo";
 
 // Initialize Mollie client (requires MOLLIE_API_KEY environment variable)
 const mollieClient = process.env.MOLLIE_API_KEY 
@@ -515,36 +514,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Basischeck endpoint
-  app.post("/api/basischeck", async (req, res) => {
-    try {
-      if (!req.user?.id) {
-        return res.status(401).json({ error: "Niet ingelogd" });
-      }
-
-      const profiel = await storage.getBedrijfsprofielByUserId(req.user.id);
-      if (!profiel) {
-        return res.status(404).json({ error: "Bedrijfsprofiel niet gevonden" });
-      }
-
-      const { cash, bonnenblok, telefoonlijst, noodstroom, offline } = req.body ?? {};
-
-      const updated = await storage.updateBedrijfsprofiel(profiel.id, {
-        cashMogelijk: !!cash,
-        bonnenblok: !!bonnenblok,
-        papierenTelefoonlijst: !!telefoonlijst,
-        noodstroom: !!noodstroom,
-        offlineWerken: !!offline,
-        basischeckIngevuld: true,
-      });
-
-      res.json(updated);
-    } catch (error) {
-      console.error("Error saving basischeck:", error);
-      res.status(500).json({ error: "Fout bij opslaan basischeck" });
-    }
-  });
-
   // Proposals routes
   app.get("/api/proposals/summary", requireAuth, async (req, res) => {
     try {
@@ -852,9 +821,418 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
     }
   });
 
-  // WOO routes (modular router)
-  const wooRouter = createWooRouter(storage, requireAuth);
-  app.use("/api/woo", wooRouter);
+  // WOO API routes for dropdown selectors
+  app.get("/api/woo/regions", async (_req, res) => {
+    try {
+      const regions = await storage.getWooRegions();
+      res.json(regions);
+    } catch (err: any) {
+      console.error("Error fetching WOO regions:", err);
+      res.status(500).json({ error: "Kon regio's niet ophalen" });
+    }
+  });
+
+  app.get("/api/woo/authorities", async (_req, res) => {
+    try {
+      const authorities = await storage.getWooAuthorities();
+      res.json(authorities);
+    } catch (err: any) {
+      console.error("Error fetching WOO authorities:", err);
+      res.status(500).json({ error: "Kon bestuursorganen niet ophalen" });
+    }
+  });
+
+  // WOO Template Generator - generates ready-to-use WOO request letters
+  app.post("/api/woo/generate", async (req, res) => {
+    try {
+      // Early check for OpenAI API key
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({ 
+          error: "WOO Generator is tijdelijk niet beschikbaar",
+          details: "De AI-configuratie is nog niet voltooid.",
+          action: "Vraag de beheerder om OPENAI_API_KEY te configureren."
+        });
+      }
+
+      // Validate input
+      const { authority, subject, context, requestedDocuments } = req.body;
+      
+      if (!authority || !subject) {
+        return res.status(400).json({
+          error: "Onvolledige aanvraag",
+          details: "Bestuursorgaan en onderwerp zijn verplicht.",
+          action: "Vul alle verplichte velden in."
+        });
+      }
+
+      const OpenAI = (await import("openai")).default;
+      const openai = new OpenAI();
+
+      const today = new Date().toLocaleDateString('nl-NL', { 
+        day: 'numeric', 
+        month: 'long', 
+        year: 'numeric' 
+      });
+
+      const systemPrompt = `Je bent een expert in het opstellen van WOO-verzoeken (Wet open overheid) voor Nederlandse burgers en ondernemers.
+
+Je taak is om een professionele, juridisch correcte WOO-brief te genereren die direct gebruikt kan worden.
+
+Regels:
+- Gebruik formeel maar toegankelijk Nederlands
+- Verwijs naar de juiste wetsartikelen (Woo artikel 4.1)
+- Wees specifiek over welke documenten worden opgevraagd
+- Geef een redelijke termijn (4 weken conform Woo)
+- Vermeld het recht op bezwaar en beroep
+- Voeg een checklist toe voor de indiener
+
+Output formaat:
+1. De volledige brief (klaar om te kopiëren)
+2. Een checklist met actiepunten voor de indiener
+3. Tips voor opvolging`;
+
+      const userPrompt = `Genereer een WOO-verzoek met de volgende gegevens:
+
+Bestuursorgaan: ${authority}
+Onderwerp: ${subject}
+${context ? `Achtergrond/context: ${context}` : ''}
+${requestedDocuments ? `Specifiek gevraagde stukken: ${requestedDocuments}` : ''}
+
+Datum: ${today}
+
+Maak een complete, direct bruikbare WOO-brief.`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt }
+        ],
+        temperature: 0.7,
+      });
+
+      const generatedContent = completion.choices[0]?.message?.content || "";
+
+      // Parse the response to extract letter and checklist
+      const letterMatch = generatedContent.match(/^([\s\S]*?)(?=\n\s*(?:Checklist|CHECKLIST|✓|□|\d+\.\s*\[))/i);
+      const checklistMatch = generatedContent.match(/(?:Checklist|CHECKLIST|Actiepunten)[\s\S]*$/i);
+
+      res.json({
+        success: true,
+        letter: letterMatch ? letterMatch[1].trim() : generatedContent,
+        checklist: checklistMatch ? checklistMatch[0].trim() : "- Controleer of alle gegevens kloppen\n- Bewaar een kopie van je verzoek\n- Noteer de verzenddatum\n- Zet een herinnering voor 4 weken",
+        fullContent: generatedContent,
+        metadata: {
+          authority,
+          subject,
+          generatedAt: new Date().toISOString(),
+        }
+      });
+    } catch (err: any) {
+      console.error("WOO Generator error:", err);
+      res.status(500).json({
+        error: "WOO-brief genereren mislukt",
+        message: err?.message ?? String(err),
+        action: "Probeer het opnieuw of neem contact op met support."
+      });
+    }
+  });
+
+  // WOO Dossiers - save and retrieve generated WOO letters
+  app.post("/api/woo/dossiers", requireAuth, async (req, res) => {
+    try {
+      const { authority, subject, context, requestedDocuments, generatedLetter, checklist, status } = req.body;
+
+      if (!authority || !subject || !generatedLetter) {
+        return res.status(400).json({
+          error: "Onvolledige aanvraag",
+          details: "Bestuursorgaan, onderwerp en gegenereerde brief zijn verplicht."
+        });
+      }
+
+      const dossier = await storage.createWooDossier({
+        userId: req.user!.id,
+        authority,
+        subject,
+        context: context || null,
+        requestedDocuments: requestedDocuments || null,
+        generatedLetter,
+        checklist: checklist || null,
+        status: status || "draft",
+      });
+
+      res.status(201).json(dossier);
+    } catch (err: any) {
+      console.error("Create dossier error:", err);
+      res.status(500).json({ error: "Dossier opslaan mislukt" });
+    }
+  });
+
+  app.get("/api/woo/dossiers", requireAuth, async (req, res) => {
+    try {
+      const dossiers = await storage.getWooDossiers(req.user!.id);
+      res.json(dossiers);
+    } catch (err: any) {
+      console.error("Get dossiers error:", err);
+      res.status(500).json({ error: "Dossiers ophalen mislukt" });
+    }
+  });
+
+  app.get("/api/woo/dossiers/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Ongeldig dossier ID" });
+      }
+
+      const dossier = await storage.getWooDossier(id, req.user!.id);
+      if (!dossier) {
+        return res.status(404).json({ error: "Dossier niet gevonden" });
+      }
+
+      res.json(dossier);
+    } catch (err: any) {
+      console.error("Get dossier error:", err);
+      res.status(500).json({ error: "Dossier ophalen mislukt" });
+    }
+  });
+
+  // WOO Wizard Step 1: Create intake dossier
+  app.post("/api/woo/wizard/intake", requireAuth, async (req, res) => {
+    try {
+      const { authority, subject, uploadedDocument, location, purpose, userQuestion } = req.body;
+
+      if (!authority || !subject) {
+        return res.status(400).json({ error: "Bestuursorgaan en onderwerp zijn verplicht" });
+      }
+
+      const dossier = await storage.createWooDossier({
+        userId: req.user!.id,
+        authority,
+        subject,
+        uploadedDocument: uploadedDocument || null,
+        location: location || null,
+        purpose: purpose || null,
+        userQuestion: userQuestion || null,
+        status: "intake",
+      });
+
+      res.status(201).json(dossier);
+    } catch (err: any) {
+      console.error("WOO intake error:", err);
+      res.status(500).json({ error: "Intake opslaan mislukt" });
+    }
+  });
+
+  // WOO Wizard Step 2: Extract data from document
+  app.post("/api/woo/wizard/extract", requireAuth, async (req, res) => {
+    try {
+      const { dossierId, documentText } = req.body;
+
+      if (!dossierId || !documentText) {
+        return res.status(400).json({ error: "Dossier ID en documenttekst zijn verplicht" });
+      }
+
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({ error: "OpenAI API niet geconfigureerd" });
+      }
+
+      const OpenAI = (await import("openai")).default;
+      const openai = new OpenAI();
+
+      const systemPrompt = `Je bent een juridisch expert in Nederlandse bestuursrechtelijke documenten.
+Analyseer de beschikking of besluit en extraheer de volgende informatie in JSON formaat:
+{
+  "datum": "datum van het besluit",
+  "zaaknummer": "zaaknummer of kenmerk",
+  "onderwerp": "korte omschrijving van het onderwerp",
+  "afdeling": "betrokken afdeling of bestuursorgaan",
+  "kernfeiten": ["feit 1", "feit 2", "feit 3"],
+  "beleidsbotsing": "beschrijving van mogelijke beleidsconflicten of onduidelijkheden"
+}
+Wees nauwkeurig en beknopt. Als informatie niet gevonden kan worden, geef dan "Niet gevonden" aan.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: documentText }
+        ],
+        response_format: { type: "json_object" },
+      });
+
+      const extractedData = JSON.parse(response.choices[0].message.content || "{}");
+
+      // Update dossier with extracted data
+      await storage.updateWooDossier(dossierId, req.user!.id, {
+        extractedData,
+        status: "extracted",
+      });
+
+      res.json({ success: true, extractedData });
+    } catch (err: any) {
+      console.error("WOO extract error:", err);
+      res.status(500).json({ error: "Analyse mislukt", message: err?.message });
+    }
+  });
+
+  // WOO Wizard Step 3: Generate document list (vraagset)
+  app.post("/api/woo/wizard/questions", requireAuth, async (req, res) => {
+    try {
+      const { dossierId, extractedData, purpose, userQuestion } = req.body;
+
+      if (!dossierId) {
+        return res.status(400).json({ error: "Dossier ID is verplicht" });
+      }
+
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({ error: "OpenAI API niet geconfigureerd" });
+      }
+
+      const OpenAI = (await import("openai")).default;
+      const openai = new OpenAI();
+
+      const systemPrompt = `Je bent een expert in WOO-verzoeken (Wet open overheid).
+Genereer een gerichte documentenlijst voor een WOO-verzoek, gebaseerd op de geëxtraheerde informatie.
+
+Doel van het verzoek: ${purpose || "onderzoek"}
+Vraag van de gebruiker: ${userQuestion || "Alle relevante documenten"}
+
+Genereer een JSON array met categorieën en specifieke documenten:
+{
+  "documentList": [
+    {"category": "Besluitvorming", "documents": ["besluit", "concept-besluiten", "adviezen"]},
+    {"category": "Grondslag", "documents": ["wettelijke grondslag", "beleidsregels"]},
+    {"category": "Beleid", "documents": ["beleidsnotities", "richtlijnen"]},
+    {"category": "Uitvoering", "documents": ["contracten", "facturen", "correspondentie"]},
+    {"category": "Gelijkheidsinformatie", "documents": ["vergelijkbare zaken", "precedenten"]},
+    {"category": "Communicatie", "documents": ["e-mails", "vergaderverslagen", "telefoonnotities"]}
+  ]
+}
+
+Pas de documentenlijst aan op basis van het specifieke onderwerp en doel.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: JSON.stringify(extractedData) }
+        ],
+        response_format: { type: "json_object" },
+      });
+
+      const { documentList } = JSON.parse(response.choices[0].message.content || '{"documentList":[]}');
+
+      // Update dossier with document list
+      await storage.updateWooDossier(dossierId, req.user!.id, {
+        documentList,
+        status: "questions",
+      });
+
+      res.json({ success: true, documentList });
+    } catch (err: any) {
+      console.error("WOO questions error:", err);
+      res.status(500).json({ error: "Vraagset genereren mislukt", message: err?.message });
+    }
+  });
+
+  // WOO Wizard Step 4: Generate complete WOO letter
+  app.post("/api/woo/wizard/generate", requireAuth, async (req, res) => {
+    try {
+      const { dossierId, authority, subject, extractedData, documentList, location } = req.body;
+
+      if (!dossierId || !authority || !subject) {
+        return res.status(400).json({ error: "Vereiste velden ontbreken" });
+      }
+
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({ error: "OpenAI API niet geconfigureerd" });
+      }
+
+      const OpenAI = (await import("openai")).default;
+      const openai = new OpenAI();
+
+      const systemPrompt = `Je bent een expert in Nederlandse WOO-verzoeken (Wet open overheid).
+Schrijf een formeel, volledig WOO-verzoek met de volgende elementen:
+
+1. Briefhoofd met datum en adressering aan: ${authority}
+2. Onderwerpregel: ${subject}
+3. Introductie met verwijzing naar de Wet open overheid
+4. Gedetailleerde opsomming van gevraagde documenten (inventarislijst)
+5. Clausules voor:
+   - Lakken/verwijderen van persoonsgegevens (indien nodig)
+   - Digitale levering via e-mail
+   - Termijn van 4 weken conform artikel 4.4 Woo
+6. Afsluitende formule
+
+Locatie/gemeente: ${location || "Niet gespecificeerd"}
+
+Maak het verzoek professioneel en juridisch correct.`;
+
+      const response = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: `Geëxtraheerde data: ${JSON.stringify(extractedData)}\n\nGevraagde documenten: ${JSON.stringify(documentList)}` }
+        ],
+      });
+
+      const generatedLetter = response.choices[0].message.content || "";
+
+      // Generate checklist
+      const checklist = [
+        "Controleer alle gegevens op juistheid",
+        "Voeg eventuele bijlagen toe",
+        "Bewaar een kopie van dit verzoek",
+        "Verstuur per e-mail of aangetekende post",
+        "Noteer de verzenddatum",
+        "Zet een herinnering voor 4 weken (reactietermijn)"
+      ];
+
+      // Update dossier with generated letter
+      await storage.updateWooDossier(dossierId, req.user!.id, {
+        generatedLetter,
+        checklist: JSON.stringify(checklist),
+        requestedDocuments: JSON.stringify(documentList),
+        status: "generated",
+        deadline: new Date(Date.now() + 28 * 24 * 60 * 60 * 1000), // 4 weeks from now
+      });
+
+      res.json({
+        success: true,
+        letter: generatedLetter,
+        checklist,
+        metadata: {
+          authority,
+          subject,
+          generatedAt: new Date().toISOString(),
+        }
+      });
+    } catch (err: any) {
+      console.error("WOO generate error:", err);
+      res.status(500).json({ error: "Brief genereren mislukt", message: err?.message });
+    }
+  });
+
+  // Update WOO dossier status
+  app.patch("/api/woo/dossiers/:id", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Ongeldig dossier ID" });
+      }
+
+      const updated = await storage.updateWooDossier(id, req.user!.id, req.body);
+      if (!updated) {
+        return res.status(404).json({ error: "Dossier niet gevonden" });
+      }
+
+      res.json(updated);
+    } catch (err: any) {
+      console.error("Update dossier error:", err);
+      res.status(500).json({ error: "Dossier bijwerken mislukt" });
+    }
+  });
 
   // Chat routes
   app.get("/api/chat/rooms", async (_req, res) => {
@@ -943,23 +1321,7 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
 
   app.post("/api/posts", async (req, res) => {
     try {
-      // Require authentication for creating posts
-      if (!req.user?.id) {
-        return res.status(401).json({ error: "Je moet ingelogd zijn om een bericht te plaatsen" });
-      }
-
-      // Frontend stuurt vaak authorUserId: null → Zod faalt (string vs null)
-      // Fix: null weghalen + auteur server-side zetten vanuit authenticated user
-      const payload: any = { ...(req.body ?? {}) };
-
-      if (payload.authorUserId === null) {
-        delete payload.authorUserId;
-      }
-
-      // Always use authenticated user id
-      payload.authorUserId = req.user.id;
-
-      const validatedData = insertPostSchema.parse(payload);
+      const validatedData = insertPostSchema.parse(req.body);
       const post = await storage.createPost(validatedData);
       res.status(201).json(post);
     } catch (error) {
@@ -1564,369 +1926,6 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
     } catch (error: any) {
       console.error("Error fetching privacy dashboard:", error);
       res.status(500).json({ error: "Kon privacy dashboard niet laden" });
-    }
-  });
-
-  // ============ BLOG ROUTES ============
-  
-  // GET /api/blog - Get all published blog posts (public)
-  app.get("/api/blog", async (_req, res) => {
-    try {
-      const posts = await storage.getBlogPosts();
-      res.json(posts);
-    } catch (error: any) {
-      console.error("Error fetching blog posts:", error);
-      res.status(500).json({ error: "Kon blogposts niet laden" });
-    }
-  });
-
-  // POST /api/blog - Create new blog post (requires auth)
-  app.post("/api/blog", requireAuth, async (req, res) => {
-    try {
-      const { title, content } = req.body;
-      
-      if (!title?.trim() || !content?.trim()) {
-        return res.status(400).json({ error: "Titel en inhoud zijn verplicht" });
-      }
-
-      const user = req.user!;
-      const authorName = [user.firstName, user.lastName].filter(Boolean).join(" ") || user.email.split("@")[0];
-      
-      const post = await storage.createBlogPost({
-        authorId: user.id,
-        authorName,
-        title: title.trim(),
-        content: content.trim(),
-        excerpt: content.slice(0, 200),
-        published: true,
-      });
-
-      res.status(201).json(post);
-    } catch (error: any) {
-      console.error("Error creating blog post:", error);
-      res.status(500).json({ error: "Kon blogpost niet aanmaken" });
-    }
-  });
-
-  // DELETE /api/blog/:id - Delete blog post (author only)
-  app.delete("/api/blog/:id", requireAuth, async (req, res) => {
-    try {
-      const postId = req.params.id;
-      const post = await storage.getBlogPost(postId);
-      
-      if (!post) {
-        return res.status(404).json({ error: "Blogpost niet gevonden" });
-      }
-      
-      if (post.authorId !== req.user!.id) {
-        return res.status(403).json({ error: "Je kunt alleen je eigen posts verwijderen" });
-      }
-      
-      await storage.deleteBlogPost(postId);
-      res.json({ success: true });
-    } catch (error: any) {
-      console.error("Error deleting blog post:", error);
-      res.status(500).json({ error: "Kon blogpost niet verwijderen" });
-    }
-  });
-
-  // ============ REGIOMARKT ROUTES (Pro-only) ============
-
-  // GET /api/regiomarkt/categories - Get all business categories
-  app.get("/api/regiomarkt/categories", requireAuth, async (_req, res) => {
-    try {
-      const categories = await storage.getBusinessCategories();
-      res.json(categories);
-    } catch (error: any) {
-      console.error("Error fetching categories:", error);
-      res.status(500).json({ error: "Kon categorieën niet laden" });
-    }
-  });
-
-  // GET /api/regiomarkt/slots - Get slots for a region
-  app.get("/api/regiomarkt/slots", requireAuth, requirePro, async (req, res) => {
-    try {
-      const regionName = req.query.region as string;
-      
-      if (!regionName) {
-        return res.status(400).json({ error: "Regio is verplicht" });
-      }
-
-      const slots = await storage.getRegionSlots(regionName);
-      const categories = await storage.getBusinessCategories();
-      
-      // Merge slots with categories for full info
-      const slotsWithCategories = categories.map(category => {
-        const slot = slots.find(s => s.categoryId === category.id);
-        return {
-          categoryId: category.id,
-          categoryName: category.name,
-          regionName,
-          status: slot?.status || "open",
-          userId: slot?.userId || null,
-          slotId: slot?.id || null,
-        };
-      });
-
-      res.json(slotsWithCategories);
-    } catch (error: any) {
-      console.error("Error fetching slots:", error);
-      res.status(500).json({ error: "Kon slots niet laden" });
-    }
-  });
-
-  // GET /api/regiomarkt/my-slots - Get user's claimed slots
-  app.get("/api/regiomarkt/my-slots", requireAuth, requirePro, async (req, res) => {
-    try {
-      const userId = req.user!.id;
-      const slots = await storage.getUserSlots(userId);
-      res.json(slots);
-    } catch (error: any) {
-      console.error("Error fetching user slots:", error);
-      res.status(500).json({ error: "Kon je slots niet laden" });
-    }
-  });
-
-  // POST /api/regiomarkt/slots/claim - Claim a slot
-  app.post("/api/regiomarkt/slots/claim", requireAuth, requirePro, async (req, res) => {
-    try {
-      const userId = req.user!.id;
-      const { regionName, categoryId } = req.body;
-
-      if (!regionName || !categoryId) {
-        return res.status(400).json({ error: "Regio en categorie zijn verplicht" });
-      }
-
-      // Check if user already has a slot in this region
-      const userSlots = await storage.getUserSlots(userId);
-      const existingSlotInRegion = userSlots.find(s => s.regionName === regionName);
-      
-      if (existingSlotInRegion) {
-        return res.status(400).json({ 
-          error: "Je hebt al een slot in deze regio. Release je huidige slot eerst." 
-        });
-      }
-
-      const slot = await storage.claimSlot(regionName, categoryId, userId);
-      
-      if (!slot) {
-        return res.status(409).json({ 
-          error: "Deze slot is al bezet door een andere ondernemer" 
-        });
-      }
-
-      res.json(slot);
-    } catch (error: any) {
-      console.error("Error claiming slot:", error);
-      res.status(500).json({ error: "Kon slot niet claimen" });
-    }
-  });
-
-  // POST /api/regiomarkt/slots/release - Release a slot
-  app.post("/api/regiomarkt/slots/release", requireAuth, requirePro, async (req, res) => {
-    try {
-      const userId = req.user!.id;
-      const { slotId } = req.body;
-
-      if (!slotId) {
-        return res.status(400).json({ error: "Slot ID is verplicht" });
-      }
-
-      const released = await storage.releaseSlot(slotId, userId);
-      
-      if (!released) {
-        return res.status(403).json({ 
-          error: "Je kunt alleen je eigen slots vrijgeven" 
-        });
-      }
-
-      res.json({ success: true, message: "Slot vrijgegeven" });
-    } catch (error: any) {
-      console.error("Error releasing slot:", error);
-      res.status(500).json({ error: "Kon slot niet vrijgeven" });
-    }
-  });
-
-  // GET /api/regiomarkt/leads - Get leads for region
-  app.get("/api/regiomarkt/leads", requireAuth, requirePro, async (req, res) => {
-    try {
-      const regionName = req.query.region as string | undefined;
-      const status = req.query.status as string | undefined;
-      
-      const leads = await storage.getMarketLeads(regionName, status);
-      res.json(leads);
-    } catch (error: any) {
-      console.error("Error fetching leads:", error);
-      res.status(500).json({ error: "Kon leads niet laden" });
-    }
-  });
-
-  // GET /api/regiomarkt/my-leads - Get user's leads
-  app.get("/api/regiomarkt/my-leads", requireAuth, requirePro, async (req, res) => {
-    try {
-      const userId = req.user!.id;
-      const leads = await storage.getUserLeads(userId);
-      res.json(leads);
-    } catch (error: any) {
-      console.error("Error fetching user leads:", error);
-      res.status(500).json({ error: "Kon je leads niet laden" });
-    }
-  });
-
-  // POST /api/regiomarkt/leads - Create a new lead (share with network)
-  app.post("/api/regiomarkt/leads", requireAuth, requirePro, async (req, res) => {
-    try {
-      const userId = req.user!.id;
-      const { title, description, categoryId, regionName, estimatedValue } = req.body;
-
-      if (!title || !description || !categoryId || !regionName) {
-        return res.status(400).json({ 
-          error: "Titel, beschrijving, categorie en regio zijn verplicht" 
-        });
-      }
-
-      const lead = await storage.createMarketLead({
-        createdByUserId: userId,
-        title,
-        description,
-        categoryId,
-        regionName,
-        valueEstimateEur: estimatedValue || null,
-        status: "new",
-      });
-
-      res.status(201).json(lead);
-    } catch (error: any) {
-      console.error("Error creating lead:", error);
-      res.status(500).json({ error: "Kon lead niet aanmaken" });
-    }
-  });
-
-  // POST /api/regiomarkt/leads/:id/claim - Claim a lead
-  app.post("/api/regiomarkt/leads/:id/claim", requireAuth, requirePro, async (req, res) => {
-    try {
-      const userId = req.user!.id;
-      const leadId = req.params.id;
-
-      // Check if user has the right slot for this lead
-      const lead = await storage.getMarketLead(leadId);
-      if (!lead) {
-        return res.status(404).json({ error: "Lead niet gevonden" });
-      }
-
-      // Verify user has a slot in this region for this category
-      const userSlots = await storage.getUserSlots(userId);
-      const hasMatchingSlot = userSlots.some(
-        s => s.regionName === lead.regionName && s.categoryId === lead.categoryId
-      );
-
-      if (!hasMatchingSlot) {
-        return res.status(403).json({ 
-          error: "Je hebt geen slot voor deze categorie in deze regio" 
-        });
-      }
-
-      const claimedLead = await storage.claimMarketLead(leadId, userId);
-      
-      if (!claimedLead) {
-        return res.status(409).json({ 
-          error: "Deze lead is al geclaimed" 
-        });
-      }
-
-      res.json(claimedLead);
-    } catch (error: any) {
-      console.error("Error claiming lead:", error);
-      res.status(500).json({ error: "Kon lead niet claimen" });
-    }
-  });
-
-  // GET /api/regiomarkt/deals - Get deals
-  app.get("/api/regiomarkt/deals", requireAuth, requirePro, async (req, res) => {
-    try {
-      const regionName = req.query.region as string | undefined;
-      const deals = await storage.getMarketDeals(regionName);
-      res.json(deals);
-    } catch (error: any) {
-      console.error("Error fetching deals:", error);
-      res.status(500).json({ error: "Kon deals niet laden" });
-    }
-  });
-
-  // GET /api/regiomarkt/my-deals - Get user's deals
-  app.get("/api/regiomarkt/my-deals", requireAuth, requirePro, async (req, res) => {
-    try {
-      const userId = req.user!.id;
-      const deals = await storage.getUserDeals(userId);
-      res.json(deals);
-    } catch (error: any) {
-      console.error("Error fetching user deals:", error);
-      res.status(500).json({ error: "Kon je deals niet laden" });
-    }
-  });
-
-  // POST /api/regiomarkt/deals - Create a deal from a claimed lead
-  app.post("/api/regiomarkt/deals", requireAuth, requirePro, async (req, res) => {
-    try {
-      const userId = req.user!.id;
-      const { leadId, amountEur, notes } = req.body;
-
-      if (!leadId) {
-        return res.status(400).json({ error: "Lead ID is verplicht" });
-      }
-
-      // Verify the lead belongs to this user and is claimed
-      const lead = await storage.getMarketLead(leadId);
-      if (!lead) {
-        return res.status(404).json({ error: "Lead niet gevonden" });
-      }
-
-      if (lead.claimedByUserId !== userId) {
-        return res.status(403).json({ 
-          error: "Je kunt alleen deals maken van leads die je geclaimed hebt" 
-        });
-      }
-
-      const deal = await storage.createMarketDeal({
-        leadId,
-        supplierUserId: userId,
-        referrerUserId: lead.createdByUserId,
-        regionName: lead.regionName,
-        amountEur: amountEur || null,
-        notes: notes || null,
-        status: "in_progress",
-      });
-
-      // Update lead status
-      await storage.updateMarketLeadStatus(leadId, "converted");
-
-      res.status(201).json(deal);
-    } catch (error: any) {
-      console.error("Error creating deal:", error);
-      res.status(500).json({ error: "Kon deal niet aanmaken" });
-    }
-  });
-
-  // PATCH /api/regiomarkt/deals/:id - Update deal status
-  app.patch("/api/regiomarkt/deals/:id", requireAuth, requirePro, async (req, res) => {
-    try {
-      const userId = req.user!.id;
-      const dealId = req.params.id;
-      const { status, amountEur } = req.body;
-
-      // Get all user deals to verify ownership
-      const userDeals = await storage.getUserDeals(userId);
-      const deal = userDeals.find(d => d.id === dealId);
-
-      if (!deal) {
-        return res.status(404).json({ error: "Deal niet gevonden of geen toegang" });
-      }
-
-      const updated = await storage.updateMarketDealStatus(dealId, status, amountEur);
-      res.json(updated);
-    } catch (error: any) {
-      console.error("Error updating deal:", error);
-      res.status(500).json({ error: "Kon deal niet bijwerken" });
     }
   });
 

@@ -1,377 +1,478 @@
-import { ArrowRight, Users, FileText, MapPin, Wallet, Handshake, Bot, Shield, Check } from "lucide-react";
-import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-
-import heroImage from "@assets/32ce6a59-6745-406f-98f9-83d9c58d115e_1768314351466.png";
-import regioMarktImage from "@assets/ChatGPT_Image_5_jan_2026,_10_22_40_1768314409698.png";
-
-type PainPoint = {
-  title: string;
-  icon: React.ReactNode;
-};
-
-type Step = {
-  number: number;
-  title: string;
-};
-
-type Testimonial = {
-  quote: string;
-  name: string;
-  role: string;
-};
-
-const painPoints: PainPoint[] = [
-  {
-    title: "Te weinig vaste klanten",
-    icon: <Users className="h-6 w-6" />,
-  },
-  {
-    title: "Onzekerheid door brieven en regelgeving",
-    icon: <FileText className="h-6 w-6" />,
-  },
-  {
-    title: "Slecht vindbaar in je regio",
-    icon: <MapPin className="h-6 w-6" />,
-  },
-  {
-    title: "Te late betalingen / onrustige cashflow",
-    icon: <Wallet className="h-6 w-6" />,
-  },
-];
-
-const steps: Step[] = [
-  { number: 1, title: "Maak je profiel aan" },
-  { number: 2, title: "Doe de basischeck" },
-  { number: 3, title: "Kies: RegioMarkt (klanten) of RegioBot (brieven)" },
-  { number: 4, title: "Word sterker in je regio" },
-];
-
-const testimonials: Testimonial[] = [
-  {
-    quote: "Ik krijg nu elke week werk via andere ondernemers.",
-    name: "Sanne",
-    role: "Schoonmaak",
-  },
-  {
-    quote: "RegioBot scheelt tijd en geeft direct overzicht.",
-    name: "Mo",
-    role: "Installateur",
-  },
-  {
-    quote: "Duidelijke afspraken. Korte lijnen. Gewoon samenwerken.",
-    name: "Jeroen",
-    role: "Drukwerk",
-  },
-];
+import { Quote, Users, Banknote, Phone, Battery, FileText, Printer, ArrowRight, Check, Sparkles, Bot, ShieldCheck, Lock, Cookie } from "lucide-react";
+import { Link } from "wouter";
+import heroImage from "@assets/ChatGPT_Image_5_jan_2026,_10_22_40_1767604990134.png";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-          <Link href="/" className="flex items-center gap-2" data-testid="link-home-logo">
-            <div className="h-8 w-8 rounded-xl bg-primary" />
-            <span className="font-semibold tracking-tight">OpenRegio</span>
+    <div className="min-h-screen">
+      {/* Navigation */}
+      <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
+          <Link 
+            href="/" 
+            className="font-accent text-2xl font-bold text-primary" 
+            data-testid="link-home-logo"
+          >
+            OpenRegio
           </Link>
-          <nav className="hidden items-center gap-6 text-sm md:flex">
-            <a className="hover:text-primary transition-colors" href="#herkenbaar" data-testid="link-nav-herkenbaar">
-              Herkenbaar?
-            </a>
-            <a className="hover:text-primary transition-colors" href="#wat-doet" data-testid="link-nav-wat">
-              Wat doet OpenRegio?
-            </a>
-            <a className="hover:text-primary transition-colors" href="#basischeck" data-testid="link-nav-basischeck">
-              Basischeck
-            </a>
-          </nav>
-          <div className="flex items-center gap-2">
-            <Link href="/login" data-testid="link-nav-login">
-              <Button variant="ghost" size="sm" data-testid="button-nav-login">
-                Inloggen
-              </Button>
+          <div className="flex items-center gap-4">
+            <Link 
+              href="/lidmaatschap" 
+              className="text-sm font-medium hover:text-primary transition-colors" 
+              data-testid="link-membership"
+            >
+              Lidmaatschap
             </Link>
-            <Link href="/start?plan=basic" data-testid="link-nav-start">
-              <Button size="sm" data-testid="button-nav-start">
-                Word lid
-              </Button>
+            <Link 
+              href="/login" 
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors hover-elevate active-elevate-2 h-8 px-3 py-2" 
+              data-testid="button-nav-login"
+            >
+              Inloggen
+            </Link>
+            <Link 
+              href="/start?plan=basic" 
+              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors hover-elevate active-elevate-2 h-8 px-3 py-2 bg-primary text-primary-foreground border border-primary-border" 
+              data-testid="button-nav-start"
+            >
+              Word lid
             </Link>
           </div>
         </div>
-      </header>
+      </nav>
 
-      <section className="mx-auto max-w-6xl px-4 py-12 md:py-20">
-        <div className="grid items-center gap-10 md:grid-cols-2">
-          <div>
-            <p className="text-sm font-medium text-primary mb-2">Voor lokale ondernemers</p>
-            <h1 className="text-4xl font-extrabold tracking-tight md:text-5xl leading-tight" data-testid="text-hero-title">
-              Meer lokale klanten.
-              <br />
-              <span className="text-muted-foreground">Duidelijkheid bij brieven en regels.</span>
-            </h1>
-            <p className="mt-6 text-lg text-muted-foreground leading-relaxed" data-testid="text-hero-subtitle">
-              Veel ondernemers lopen vast op wisselende omzet, online zichtbaarheid en onduidelijke communicatie van instanties.
-              OpenRegio helpt je aan meer werk en meer grip — lokaal, praktisch en zonder omwegen.
-            </p>
-
-            <div className="mt-8 flex flex-wrap gap-4">
-              <Link href="/regiomarkt" data-testid="link-hero-klanten">
-                <Button size="lg" data-testid="button-hero-klanten">
-                  Ik wil meer klanten <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-              <Link href="/regiobot" data-testid="link-hero-brieven">
-                <Button variant="outline" size="lg" data-testid="button-hero-brieven">
-                  Ik wil brieven begrijpen
-                </Button>
-              </Link>
-            </div>
-          </div>
-
-          <div className="relative">
-            <div className="absolute -inset-4 -z-10 rounded-3xl bg-primary/5" />
-            <img
-              src={heroImage}
-              alt="Lokale ondernemer"
-              className="w-full rounded-2xl object-cover shadow-lg"
-              data-testid="img-hero"
-            />
-          </div>
-        </div>
-      </section>
-
-      <section id="herkenbaar" className="bg-muted/50 py-16">
-        <div className="mx-auto max-w-6xl px-4">
-          <h2 className="text-center text-3xl font-extrabold tracking-tight mb-4" data-testid="text-herkenbaar-title">
-            Herkenbaar?
-          </h2>
-          <p className="text-center text-muted-foreground mb-10 max-w-2xl mx-auto">
-            OpenRegio maakt dit concreet en oplosbaar.
-          </p>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {painPoints.map((point) => (
-              <Card key={point.title} className="text-center p-6" data-testid={`card-pain-${point.title.toLowerCase().replace(/\s/g, '-').slice(0, 20)}`}>
-                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-                  {point.icon}
-                </div>
-                <p className="font-medium">{point.title}</p>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="wat-doet" className="py-16">
-        <div className="mx-auto max-w-6xl px-4">
-          <h2 className="text-center text-3xl font-extrabold tracking-tight mb-2" data-testid="text-wat-title">
-            Wat doet OpenRegio?
-          </h2>
-          <p className="text-center text-muted-foreground mb-12">
-            Twee dingen die het verschil maken
-          </p>
-
-          <div className="grid gap-8 lg:grid-cols-2">
-            <Card className="overflow-hidden border-2 border-blue-200 dark:border-blue-900" data-testid="card-regiomarkt">
-              <div className="bg-blue-50 dark:bg-blue-950 px-6 py-4 border-b border-blue-200 dark:border-blue-900">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500 text-white">
-                    <Handshake className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-blue-600 dark:text-blue-400">MEER KLANTEN</p>
-                    <h3 className="font-bold text-lg">RegioMarkt (B2B)</h3>
-                  </div>
-                </div>
-              </div>
-              <CardContent className="p-6">
-                <p className="text-muted-foreground mb-4">
-                  Je krijgt geen netwerk om "te praten".<br />
-                  <span className="font-medium text-foreground">Je krijgt doorverwijzingen en samenwerkingen.</span>
-                </p>
-                <p className="text-sm text-muted-foreground mb-6">
-                  Lokale ondernemers verwijzen klanten naar elkaar, maken bundels en werken met vaste partners — zonder advertenties of platforms.
-                </p>
-                <ul className="space-y-2 mb-6">
-                  <li className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-blue-500" />
-                    <span>Doorverwijzingen uit je regio</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-blue-500" />
-                    <span>Gezamenlijke acties & bundels</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-blue-500" />
-                    <span>Meer zekerheid via vaste partners</span>
-                  </li>
-                </ul>
-                <img
-                  src={regioMarktImage}
-                  alt="Ondernemers in je regio"
-                  className="w-full h-48 object-cover rounded-xl mb-4"
-                />
-                <Link href="/regiomarkt" data-testid="link-regiomarkt">
-                  <Button className="w-full" data-testid="button-regiomarkt">
-                    Bekijk RegioMarkt <ArrowRight className="ml-2 h-4 w-4" />
+      {/* Hero Section */}
+      <section className="relative py-20 md:py-32 px-4 bg-gradient-to-br from-primary/5 via-background to-background overflow-hidden">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h1 className="font-accent text-4xl md:text-6xl font-bold mb-6 leading-tight" data-testid="text-hero-title">
+                Ondernemen terug naar de basis
+              </h1>
+              <p className="text-xl md:text-2xl text-muted-foreground mb-8" data-testid="text-hero-subtitle">
+                OpenRegio is een lokaal ondernemersplatform waar je weer gewoon zaken doet: 
+                vaste klanten, korte lijntjes, simpel kunnen betalen – en afspraken die blijven 
+                staan, ook als systemen een keer niet meewerken.
+              </p>
+              <div className="flex flex-wrap gap-4">
+                <Link href="/start?plan=basic">
+                  <Button size="lg" data-testid="button-hero-basic">
+                    Word lid v.a. €9,95 p/m
+                    <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
+                <Link href="/basischeck">
+                  <Button variant="outline" size="lg" data-testid="button-hero-basischeck">
+                    Doe de Basischeck
+                  </Button>
+                </Link>
+              </div>
+              <p className="text-sm text-muted-foreground mt-4" data-testid="text-hero-tagline">
+                Maandelijks opzegbaar, geen contracten. Minder afhankelijk, meer grip op je eigen netwerk.
+              </p>
+            </div>
+            <div className="relative">
+              <img 
+                src={heroImage} 
+                alt="Lokale ondernemer in Nederland" 
+                className="rounded-md shadow-lg w-full h-auto"
+                data-testid="img-hero"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Features Section - Wat je krijgt */}
+      <section className="py-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="font-accent text-3xl md:text-4xl font-bold mb-4">
+              Simpel, offline-proof en menselijk
+            </h2>
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Een platform waar lokale ondernemers weer simpel kunnen ondernemen
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <Card data-testid="card-feature-network">
+              <CardContent className="p-6">
+                <Users className="h-12 w-12 text-primary mb-4" />
+                <h3 className="font-accent text-xl font-semibold mb-2">
+                  Lokaal Netwerk
+                </h3>
+                <p className="text-muted-foreground">
+                  Ondernemers in jouw buurt die je echt kunt bellen en doorverwijzen. 
+                  Zie direct wie er cash accepteert, bonnen heeft en offline kan werken.
+                </p>
               </CardContent>
             </Card>
 
-            <Card className="overflow-hidden border-2 border-purple-200 dark:border-purple-900" data-testid="card-regiobot">
-              <div className="bg-purple-50 dark:bg-purple-950 px-6 py-4 border-b border-purple-200 dark:border-purple-900">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                    <Bot className="h-5 w-5" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-primary">BRIEVEN & REGELS</p>
-                    <h3 className="font-bold text-lg">RegioBot & WOO</h3>
-                  </div>
-                </div>
-              </div>
+            <Card data-testid="card-feature-basischeck">
               <CardContent className="p-6">
-                <p className="text-muted-foreground mb-4">
-                  Upload een brief.<br />
-                  <span className="font-medium text-foreground">Krijg helderheid: wat staat er, wat betekent het, welke stukken horen erbij.</span>
+                <Battery className="h-12 w-12 text-primary mb-4" />
+                <h3 className="font-accent text-xl font-semibold mb-2">
+                  Basischeck & Badges
+                </h3>
+                <p className="text-muted-foreground">
+                  Hoe stevig is jouw bedrijf als systemen haperen? Doe de check en 
+                  toon je weerbaarheid met badges: cash, bonnenblok, noodstroom.
                 </p>
-                <p className="text-sm text-muted-foreground mb-6">
-                  RegioBot helpt je met:
+              </CardContent>
+            </Card>
+
+            <Card data-testid="card-feature-offline">
+              <CardContent className="p-6">
+                <Printer className="h-12 w-12 text-primary mb-4" />
+                <h3 className="font-accent text-xl font-semibold mb-2">
+                  Offline Modus
+                </h3>
+                <p className="text-muted-foreground">
+                  Printbare ledenlijst, factuur-templates en kasboek. 
+                  Niet alleen een app, maar ook papier als onderdeel van het systeem.
                 </p>
-                <ul className="space-y-2 mb-6">
-                  <li className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-primary" />
-                    <span>Brieven begrijpelijk maken</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-primary" />
-                    <span>WOO-verzoeken genereren</span>
-                  </li>
-                  <li className="flex items-center gap-2 text-sm">
-                    <Check className="h-4 w-4 text-primary" />
-                    <span>Reactie- en bezwaar-templates</span>
-                  </li>
-                </ul>
-                <div className="bg-muted rounded-xl p-6 mb-4 flex items-center justify-center h-48">
-                  <div className="text-center">
-                    <Bot className="h-16 w-16 text-primary mx-auto mb-2 opacity-50" />
-                    <p className="text-sm text-muted-foreground">AI-assistent voor juridische documenten</p>
-                  </div>
-                </div>
-                <Link href="/regiobot" data-testid="link-regiobot">
-                  <Button className="w-full" data-testid="button-regiobot">
-                    Start RegioBot <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
               </CardContent>
             </Card>
           </div>
         </div>
       </section>
 
-      <section id="basischeck" className="bg-muted/50 py-16">
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="max-w-3xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-2 text-sm font-medium text-primary mb-4">
-              <Shield className="h-4 w-4" />
-              Continuïteit
-            </div>
-            <h2 className="text-3xl font-extrabold tracking-tight mb-4" data-testid="text-basischeck-title">
-              De Basischeck
+      {/* Weerbaarheid Badges Section */}
+      <section className="py-20 px-4 bg-muted/30">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="font-accent text-3xl md:text-4xl font-bold mb-4">
+              Weerbaarheidsprofiel
             </h2>
-            <p className="text-muted-foreground mb-6 text-lg">
-              Cash. Bonnen. Bereikbaarheid. Offline kunnen werken. Noodstroom.
+            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+              Bij elk lid een duidelijk profiel: hoe goed is dit bedrijf voorbereid?
             </p>
-            <p className="text-muted-foreground mb-8">
-              Een snelle check die laat zien hoe goed je bedrijf blijft functioneren als systemen haperen.
-              <br />
-              <span className="font-medium text-foreground">Je score bepaalt welke functies en kansen je krijgt binnen het netwerk.</span>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 max-w-4xl mx-auto">
+            {[
+              { icon: Banknote, label: "Accepteert cash", desc: "Contant betalen mogelijk" },
+              { icon: FileText, label: "Bonnenblok", desc: "Papieren factuur beschikbaar" },
+              { icon: Phone, label: "Telefoonlijst", desc: "Bereikbaar zonder internet" },
+              { icon: Battery, label: "Noodstroom", desc: "Powerbank of generator" },
+              { icon: Users, label: "Offline werk", desc: "Kan zonder computer" },
+            ].map((badge, idx) => (
+              <Card key={idx} data-testid={`card-badge-${idx}`} className="text-center">
+                <CardContent className="p-4">
+                  <badge.icon className="h-8 w-8 text-primary mx-auto mb-2" />
+                  <h4 className="font-semibold text-sm mb-1">{badge.label}</h4>
+                  <p className="text-xs text-muted-foreground">{badge.desc}</p>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-20 px-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="font-accent text-3xl md:text-4xl font-bold mb-4">
+              Wat ondernemers zeggen
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {[
+              {
+                name: "Maria van den Berg",
+                business: "Bakkerij De Gouden Korrel",
+                quote: "Eindelijk weet ik welke collega's ook cash accepteren. Vorige week viel de pin uit – ik kon mijn klanten gewoon doorsturen.",
+              },
+              {
+                name: "Henk Jansen",
+                business: "Fietsenmaker Henk",
+                quote: "Die Basischeck was een wake-up call. Nu heb ik een bonnenblok en een telefoonlijst op papier. Kost niks, werkt altijd.",
+              },
+              {
+                name: "Sophie de Vries",
+                business: "Groen Advies",
+                quote: "Geen algoritmes, geen gedoe. Gewoon een lijst met ondernemers in mijn buurt die ik kan bellen. Zoals het hoort.",
+              },
+            ].map((testimonial, idx) => (
+              <Card key={idx} data-testid={`card-testimonial-${idx}`}>
+                <CardContent className="p-6">
+                  <Quote className="h-8 w-8 text-primary mb-4" />
+                  <p className="text-foreground mb-4 italic">"{testimonial.quote}"</p>
+                  <div>
+                    <p className="font-semibold">{testimonial.name}</p>
+                    <p className="text-sm text-muted-foreground">{testimonial.business}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section className="py-20 px-4 bg-gradient-to-br from-primary/5 via-background to-background">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="font-accent text-3xl md:text-4xl font-bold mb-4">
+              Word lid v.a. €9,95 per maand
+            </h2>
+            <p className="text-xl text-muted-foreground">
+              Maandelijks opzegbaar, geen contracten
             </p>
-            <Link href="/basischeck" data-testid="link-basischeck">
-              <Button size="lg" data-testid="button-basischeck">
-                Doe de Basischeck <ArrowRight className="ml-2 h-4 w-4" />
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+            {/* Basis Plan */}
+            <Card data-testid="card-plan-basic" className="relative">
+              <CardContent className="p-8">
+                <h3 className="font-accent text-2xl font-bold mb-2">Basis</h3>
+                <div className="flex items-baseline gap-1 mb-6">
+                  <span className="text-4xl font-bold">€9,95</span>
+                  <span className="text-muted-foreground">/ maand</span>
+                </div>
+                <ul className="space-y-3 mb-8">
+                  {[
+                    "Profiel in het lokale netwerk",
+                    "Ledenlijst met contactgegevens",
+                    "Vraag & aanbod-bord",
+                    "Basischeck + weerbaarheidsbadges",
+                    "Printbare ledenlijst",
+                    "Factuur- en kasboek-templates",
+                  ].map((feature, idx) => (
+                    <li key={idx} className="flex items-start gap-3">
+                      <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/start?plan=basic">
+                  <Button className="w-full" size="lg" data-testid="button-plan-basic">
+                    Word Basis lid
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            {/* Pro Plan */}
+            <Card data-testid="card-plan-pro" className="relative border-primary">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                <span className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
+                  <Sparkles className="h-3 w-3" />
+                  Populair
+                </span>
+              </div>
+              <CardContent className="p-8">
+                <h3 className="font-accent text-2xl font-bold mb-2">Pro</h3>
+                <div className="flex items-baseline gap-1 mb-6">
+                  <span className="text-4xl font-bold">€19,95</span>
+                  <span className="text-muted-foreground">/ maand</span>
+                </div>
+                <ul className="space-y-3 mb-8">
+                  {[
+                    "Alles van Basis, plus:",
+                    "RegioBot AI-assistent",
+                    "Juridische documenten uitleg",
+                    "Marketing content generator",
+                    "Documenten uploaden",
+                    "Prioriteit support",
+                  ].map((feature, idx) => (
+                    <li key={idx} className="flex items-start gap-3">
+                      {idx === 0 ? (
+                        <span className="h-5 w-5" />
+                      ) : (
+                        <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                      )}
+                      <span className={idx === 0 ? "font-semibold text-primary" : ""}>
+                        {feature}
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <Link href="/start?plan=pro">
+                  <Button className="w-full" size="lg" data-testid="button-plan-pro">
+                    Word Pro lid
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="text-center mt-8">
+            <Link href="/basischeck">
+              <Button variant="ghost" size="lg" data-testid="button-cta-basischeck">
+                Eerst de gratis Basischeck doen
+                <ArrowRight className="ml-2 h-5 w-5" />
               </Button>
             </Link>
           </div>
         </div>
       </section>
 
-      <section className="py-16">
-        <div className="mx-auto max-w-6xl px-4">
-          <h2 className="text-center text-3xl font-extrabold tracking-tight mb-12" data-testid="text-steps-title">
-            Zo werkt het
-          </h2>
-
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {steps.map((step) => (
-              <Card key={step.number} className="p-6" data-testid={`card-step-${step.number}`}>
-                <div className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold">
-                    {step.number}
-                  </div>
-                  <p className="font-medium pt-2">{step.title}</p>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="bg-muted/50 py-16">
-        <div className="mx-auto max-w-6xl px-4">
-          <h2 className="text-center text-3xl font-extrabold tracking-tight mb-12" data-testid="text-testimonials-title">
-            Ervaringen van leden
-          </h2>
-
-          <div className="grid gap-6 md:grid-cols-3">
-            {testimonials.map((t) => (
-              <Card key={t.name} className="p-6" data-testid={`testimonial-${t.name.toLowerCase()}`}>
-                <p className="text-muted-foreground mb-4 italic">"{t.quote}"</p>
-                <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                    {t.name[0]}
-                  </div>
-                  <div>
-                    <p className="font-semibold">{t.name}</p>
-                    <p className="text-sm text-muted-foreground">{t.role}</p>
-                  </div>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16">
-        <div className="mx-auto max-w-6xl px-4">
-          <div className="rounded-3xl bg-primary p-10 text-primary-foreground text-center" data-testid="section-cta">
-            <h2 className="text-3xl font-extrabold tracking-tight mb-4">
-              Sluit je aan bij ondernemers in jouw regio
+      {/* Privacy & Veiligheid Section */}
+      <section className="py-16 px-4 bg-muted/20" data-testid="section-privacy">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="font-accent text-2xl md:text-3xl font-bold mb-4 flex items-center justify-center gap-3">
+              <ShieldCheck className="h-8 w-8 text-primary" />
+              Privacy & Veiligheid voorop
             </h2>
-            <p className="text-primary-foreground/90 mb-8 text-lg max-w-xl mx-auto">
-              Start simpel. Werk lokaal. Bouw aan continuïteit.
+            <p className="text-muted-foreground">
+              OpenRegio is gebouwd met privacy als uitgangspunt
             </p>
-            <div className="flex flex-wrap justify-center gap-4">
-              <Link href="/start?plan=basic" data-testid="link-cta-register">
-                <Button variant="secondary" size="lg" data-testid="button-cta-register">
-                  Word lid
-                </Button>
-              </Link>
-              <Link href="/regios" data-testid="link-cta-regions">
-                <Button variant="secondary" size="lg" data-testid="button-cta-regions">
-                  Bekijk beschikbare plekken
-                </Button>
-              </Link>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <Card className="bg-background" data-testid="card-privacy-tracking">
+              <CardContent className="p-5 flex items-start gap-4">
+                <div className="bg-primary/10 p-2 rounded-lg shrink-0">
+                  <ShieldCheck className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Geen trackers of Big Tech</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Geen Google Analytics, Meta pixel of andere tracking. Je wordt niet gevolgd.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-background" data-testid="card-privacy-cookies">
+              <CardContent className="p-5 flex items-start gap-4">
+                <div className="bg-primary/10 p-2 rounded-lg shrink-0">
+                  <Cookie className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Alleen functionele cookies</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Uitsluitend voor inloggen, geen marketing of advertenties.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-background" data-testid="card-privacy-docs">
+              <CardContent className="p-5 flex items-start gap-4">
+                <div className="bg-primary/10 p-2 rounded-lg shrink-0">
+                  <Lock className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Jouw documenten zijn privé</h3>
+                  <p className="text-sm text-muted-foreground">
+                    RegioBot gesprekken en uploads zijn alleen voor jou zichtbaar.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="bg-background" data-testid="card-privacy-data">
+              <CardContent className="p-5 flex items-start gap-4">
+                <div className="bg-primary/10 p-2 rounded-lg shrink-0">
+                  <ShieldCheck className="h-5 w-5 text-primary" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Geen dataverkoop</h3>
+                  <p className="text-sm text-muted-foreground">
+                    We verkopen of verhandelen jouw gegevens nooit. Punt.
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="text-center mt-6">
+            <Link href="/privacy" className="text-sm text-primary hover:underline" data-testid="link-privacy-more">
+              Lees onze volledige privacyverklaring
+              <ArrowRight className="inline ml-1 h-3 w-3" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer className="py-12 px-4 border-t">
+        <div className="max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+            <div>
+              <h3 className="font-accent font-bold text-lg mb-4">OpenRegio</h3>
+              <p className="text-sm text-muted-foreground">
+                Een platform waar lokale ondernemers weer simpel kunnen ondernemen, 
+                met cash, papier en korte lijntjes — én een offline modus.
+              </p>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-4">Platform</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <Link 
+                    href="/lidmaatschap"
+                    className="hover:text-primary transition-colors" 
+                    data-testid="link-footer-membership"
+                  >
+                    Lidmaatschap
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    href="/basischeck"
+                    className="hover:text-primary transition-colors" 
+                    data-testid="link-footer-basischeck"
+                  >
+                    Basischeck
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    href="/login"
+                    className="hover:text-primary transition-colors" 
+                    data-testid="link-footer-login"
+                  >
+                    Inloggen
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-4">Juridisch</h3>
+              <ul className="space-y-2 text-sm text-muted-foreground">
+                <li>
+                  <Link 
+                    href="/privacy"
+                    className="hover:text-primary transition-colors" 
+                    data-testid="link-footer-privacy"
+                  >
+                    Privacy
+                  </Link>
+                </li>
+                <li>
+                  <Link 
+                    href="/voorwaarden"
+                    className="hover:text-primary transition-colors" 
+                    data-testid="link-footer-terms"
+                  >
+                    Voorwaarden
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="font-semibold mb-4">Contact</h3>
+              <p className="text-sm text-muted-foreground">
+                <a href="mailto:info@openregio.nl" className="hover:text-primary transition-colors" data-testid="link-footer-email">
+                  info@openregio.nl
+                </a>
+              </p>
             </div>
           </div>
-        </div>
-      </section>
-
-      <footer className="border-t py-8">
-        <div className="mx-auto max-w-6xl px-4 text-sm text-muted-foreground">
-          © {new Date().getFullYear()} OpenRegio • Lokaal. Direct. Weerbaar.
+          <div className="pt-8 border-t text-center text-sm text-muted-foreground">
+            <p>© 2026 OpenRegio – lokaal netwerk, ondernemen terug naar de basis.</p>
+          </div>
         </div>
       </footer>
     </div>

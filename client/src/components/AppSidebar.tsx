@@ -10,7 +10,7 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Home, Users, Bot, Building2, User, LogOut, MessageCircle, CreditCard, Shield, Eye, Store } from "lucide-react";
+import { Home, Users, Bot, Building2, User, LogOut, MessageCircle, Newspaper, CreditCard, Shield, Eye } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,6 +26,11 @@ const menuItems = [
   {
     title: "Netwerk",
     icon: Users,
+    url: "/network",
+  },
+  {
+    title: "Community",
+    icon: Newspaper,
     url: "/community",
   },
   {
@@ -127,24 +132,14 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               {user?.plan === "pro" && (
-                <>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild data-testid="link-regiomarkt">
-                      <a href="/regiomarkt">
-                        <Store className="h-4 w-4" />
-                        <span>RegioMarkt</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                  <SidebarMenuItem>
-                    <SidebarMenuButton asChild data-testid="link-visibility-settings">
-                      <a href="/pro/visibility-settings">
-                        <Eye className="h-4 w-4" />
-                        <span>Zichtbaarheidsbeheer</span>
-                      </a>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                </>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild data-testid="link-visibility-settings">
+                    <a href="/pro/visibility-settings">
+                      <Eye className="h-4 w-4" />
+                      <span>Zichtbaarheidsbeheer</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
               )}
             </SidebarMenu>
           </SidebarGroupContent>

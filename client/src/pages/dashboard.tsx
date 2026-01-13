@@ -20,16 +20,7 @@ import { useQuery } from "@tanstack/react-query";
 export default function DashboardPage() {
   const { user, isLoading: authLoading } = useAuth();
 
-  const { data: bedrijfsprofiel } = useQuery<{
-    naam: string;
-    status: string;
-    cashMogelijk?: boolean;
-    bonnenblok?: boolean;
-    papierenTelefoonlijst?: boolean;
-    offlineWerken?: boolean;
-    noodstroom?: boolean;
-    basischeckIngevuld?: boolean;
-  } | null>({
+  const { data: bedrijfsprofiel } = useQuery<{ naam: string; status: string } | null>({
     queryKey: ["/api/business-profile/me"],
     enabled: !!user,
   });
@@ -58,15 +49,9 @@ export default function DashboardPage() {
     );
   }
 
-  // Bereken score uit bedrijfsprofiel data
-  const basischeckScore = [
-    bedrijfsprofiel?.cashMogelijk,
-    bedrijfsprofiel?.bonnenblok,
-    bedrijfsprofiel?.papierenTelefoonlijst,
-    bedrijfsprofiel?.offlineWerken,
-    bedrijfsprofiel?.noodstroom,
-  ].filter(Boolean).length;
-  const basischeckDone = !!bedrijfsprofiel?.basischeckIngevuld;
+  // TODO: haal dit later uit de API
+  const basischeckScore = 3; // 0–5
+  const basischeckDone = basischeckScore > 0;
 
   const isPro = user.plan === "pro";
   const isAdmin = user.isAdmin || false;
@@ -127,29 +112,61 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Netwerk */}
-        <Card data-testid="card-netwerk">
+        {/* Leden in jouw regio */}
+        <Card data-testid="card-leden">
           <CardContent className="p-5 flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-full bg-primary/10">
                 <Users className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h2 className="font-semibold">Netwerk</h2>
+                <h2 className="font-semibold">Leden in jouw regio</h2>
                 <p className="text-sm text-muted-foreground">
-                  Deel vragen, aanbiedingen, leads en events met ondernemers in jouw regio.
+                  Ondernemers in jouw omgeving die je direct kunt bellen of benaderen.
                 </p>
               </div>
             </div>
             <ul className="text-xs text-muted-foreground list-disc list-inside">
-              <li>Plaats een vraag of aanbod</li>
-              <li>Deel leads met andere ondernemers</li>
-              <li>Organiseer lokale events</li>
+              <li>Actieve leden in jouw regio: 27</li>
+              <li>Nieuw lid deze week: Slagerij De Haven</li>
             </ul>
             <div className="mt-2">
-              <Link href="/community">
+              <Link href="/network">
                 <Button size="sm" data-testid="button-view-network">
-                  Naar Netwerk
+                  Bekijk ledenlijst
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Vraag & aanbod */}
+        <Card data-testid="card-vraag-aanbod">
+          <CardContent className="p-5 flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-full bg-primary/10">
+                <MessageCircle className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="font-semibold">Vraag & aanbod</h2>
+                <p className="text-sm text-muted-foreground">
+                  Waar kun jij nu iets halen of brengen binnen het netwerk?
+                </p>
+              </div>
+            </div>
+            <ul className="text-xs text-muted-foreground list-disc list-inside">
+              <li>Open vragen in het netwerk: 5</li>
+              <li>Jouw eigen vragen/aanbod: 1</li>
+            </ul>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Link href="/network?tab=bord">
+                <Button size="sm" data-testid="button-view-board">
+                  Naar bord
+                </Button>
+              </Link>
+              <Link href="/network?tab=nieuw">
+                <Button variant="outline" size="sm" data-testid="button-new-post">
+                  Plaats nieuw bericht
                 </Button>
               </Link>
             </div>

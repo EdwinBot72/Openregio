@@ -34,30 +34,30 @@ interface Plan {
 const plans: Plan[] = [
   {
     id: "basic",
-    name: "Basis",
+    name: "Basic",
     price: "€9,95",
-    description: "Toegang tot het lokale netwerk",
+    description: "Perfect voor startende ondernemers",
     features: [
-      { text: "Zichtbaar bedrijfsprofiel in jouw regio", included: true },
-      { text: "Netwerk: deel vragen, leads en events", included: true },
-      { text: "Bekijk en reageer op berichten", included: true },
-      { text: "Stem mee over platform beslissingen", included: true },
-      { text: "RegioBot AI-assistent", included: false },
-      { text: "Documenten uploaden en laten uitleggen", included: false },
+      { text: "Bedrijfsprofiel in lokaal netwerk", included: true },
+      { text: "Ontdek andere ondernemers", included: true },
+      { text: "RegioBot AI assistent (basis)", included: true },
+      { text: "Stem mee in de coöperatie", included: true },
+      { text: "Geavanceerde AI features", included: false },
+      { text: "Prioriteit support", included: false },
     ],
   },
   {
     id: "pro",
     name: "Pro",
     price: "€19,95",
-    description: "Alles van Basis + persoonlijke AI-assistent",
+    description: "Voor ondernemers die meer willen",
     features: [
-      { text: "Alles van Basis, plus:", included: true },
-      { text: "RegioBot AI voor marketing content", included: true },
-      { text: "Juridische documenten laten uitleggen", included: true },
-      { text: "Upload en analyseer contracten", included: true },
-      { text: "Persoonlijke bedrijfsadviseur 24/7", included: true },
-      { text: "Prioriteit ondersteuning", included: true },
+      { text: "Bedrijfsprofiel in lokaal netwerk", included: true },
+      { text: "Ontdek andere ondernemers", included: true },
+      { text: "RegioBot AI assistent (uitgebreid)", included: true },
+      { text: "Stem mee in de coöperatie", included: true },
+      { text: "Geavanceerde AI features", included: true },
+      { text: "Prioriteit support", included: true },
     ],
     popular: true,
   },
@@ -136,13 +136,10 @@ export default function StartPage() {
         {/* Header */}
         <div className="text-center mb-12">
           <h1 className="font-accent text-4xl md:text-5xl font-bold mb-4">
-            Sluit je aan bij het lokale netwerk
+            Word lid van OpenRegio
           </h1>
-          <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-4">
-            Kies het plan dat bij jou past. Maandelijks opzegbaar, geen verplichtingen.
-          </p>
-          <p className="text-muted-foreground">
-            Eén lead of samenwerking verdient je lidmaatschap al terug.
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Kies een plan dat bij jouw onderneming past en start vandaag nog met lokale samenwerking
           </p>
         </div>
 
