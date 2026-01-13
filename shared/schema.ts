@@ -78,6 +78,13 @@ export const bedrijfsprofielen = pgTable("bedrijfsprofielen", {
   status: text("status").notNull().default("actief"),
   aangemaakt: timestamp("aangemaakt").defaultNow().notNull(),
   bijgewerkt: timestamp("bijgewerkt").defaultNow().notNull(),
+  // Basischeck velden
+  cashMogelijk: boolean("cash_mogelijk").notNull().default(false),
+  bonnenblok: boolean("bonnenblok").notNull().default(false),
+  papierenTelefoonlijst: boolean("papieren_telefoonlijst").notNull().default(false),
+  offlineWerken: boolean("offline_werken").notNull().default(false),
+  noodstroom: boolean("noodstroom").notNull().default(false),
+  basischeckIngevuld: boolean("basischeck_ingevuld").notNull().default(false),
 });
 
 // Uploads table for business profile files

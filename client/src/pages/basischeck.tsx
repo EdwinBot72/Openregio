@@ -2,8 +2,12 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, XCircle, ArrowRight, ArrowLeft, Banknote, FileText, Phone, Battery, Users, Shield, AlertTriangle } from "lucide-react";
+import { CheckCircle2, XCircle, ArrowRight, ArrowLeft, Banknote, FileText, Phone, Battery, Users, Shield, AlertTriangle, Loader2, Save } from "lucide-react";
 import { Link } from "wouter";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 
 interface Question {
   id: string;
@@ -52,10 +56,42 @@ const questions: Question[] = [
 ];
 
 export default function BasischeckPage() {
+  const { user } = useAuth();
+  const { toast } = useToast();
+  const queryClient = useQueryClient();
   const [started, setStarted] = useState(false);
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [answers, setAnswers] = useState<Record<string, boolean>>({});
   const [finished, setFinished] = useState(false);
+  const [saved, setSaved] = useState(false);
+
+  const saveMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/basischeck", {
+        cash: !!answers.cash,
+        bonnenblok: !!answers.bonnenblok,
+        telefoonlijst: !!answers.telefoonlijst,
+        noodstroom: !!answers.noodstroom,
+        offline: !!answers.offline,
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/business-profile/me"] });
+      setSaved(true);
+      toast({
+        title: "Opgeslagen!",
+        description: "Je basischeck is opgeslagen in je profiel.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Fout bij opslaan",
+        description: error?.message || "Probeer het opnieuw.",
+        variant: "destructive",
+      });
+    },
+  });
 
   const handleAnswer = (answer: boolean) => {
     const question = questions[currentQuestion];
@@ -310,12 +346,35 @@ export default function BasischeckPage() {
                 printbare templates, en je eigen weerbaarheidsprofiel met badges.
               </p>
               <div className="flex flex-wrap gap-4 justify-center">
-                <Link href="/start?plan=basic">
-                  <Button size="lg" data-testid="button-result-join">
-                    Word lid – €9,95 p/m
-                    <ArrowRight className="ml-2 h-5 w-5" />
+                {user && !saved ? (
+                  <Button
+                    size="lg"
+                    onClick={() => saveMutation.mutate()}
+                    disabled={saveMutation.isPending}
+                    data-testid="button-save-basischeck"
+                  >
+                    {saveMutation.isPending ? (
+                      <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                    ) : (
+                      <Save className="mr-2 h-5 w-5" />
+                    )}
+                    Opslaan in mijn profiel
                   </Button>
-                </Link>
+                ) : saved ? (
+                  <Link href="/dashboard">
+                    <Button size="lg" data-testid="button-go-dashboard">
+                      <CheckCircle2 className="mr-2 h-5 w-5" />
+                      Naar Dashboard
+                    </Button>
+                  </Link>
+                ) : (
+                  <Link href="/start?plan=basic">
+                    <Button size="lg" data-testid="button-result-join">
+                      Word lid – €9,95 p/m
+                      <ArrowRight className="ml-2 h-5 w-5" />
+                    </Button>
+                  </Link>
+                )}
                 <Button variant="outline" size="lg" onClick={handleRestart} data-testid="button-restart">
                   Opnieuw doen
                 </Button>

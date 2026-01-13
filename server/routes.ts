@@ -515,6 +515,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Basischeck endpoint
+  app.post("/api/basischeck", async (req, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ error: "Niet ingelogd" });
+      }
+
+      const profiel = await storage.getBedrijfsprofielByUserId(req.user.id);
+      if (!profiel) {
+        return res.status(404).json({ error: "Bedrijfsprofiel niet gevonden" });
+      }
+
+      const { cash, bonnenblok, telefoonlijst, noodstroom, offline } = req.body ?? {};
+
+      const updated = await storage.updateBedrijfsprofiel(profiel.id, {
+        cashMogelijk: !!cash,
+        bonnenblok: !!bonnenblok,
+        papierenTelefoonlijst: !!telefoonlijst,
+        noodstroom: !!noodstroom,
+        offlineWerken: !!offline,
+        basischeckIngevuld: true,
+      });
+
+      res.json(updated);
+    } catch (error) {
+      console.error("Error saving basischeck:", error);
+      res.status(500).json({ error: "Fout bij opslaan basischeck" });
+    }
+  });
+
   // Proposals routes
   app.get("/api/proposals/summary", requireAuth, async (req, res) => {
     try {

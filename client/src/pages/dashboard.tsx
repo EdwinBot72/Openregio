@@ -20,7 +20,16 @@ import { useQuery } from "@tanstack/react-query";
 export default function DashboardPage() {
   const { user, isLoading: authLoading } = useAuth();
 
-  const { data: bedrijfsprofiel } = useQuery<{ naam: string; status: string } | null>({
+  const { data: bedrijfsprofiel } = useQuery<{
+    naam: string;
+    status: string;
+    cashMogelijk?: boolean;
+    bonnenblok?: boolean;
+    papierenTelefoonlijst?: boolean;
+    offlineWerken?: boolean;
+    noodstroom?: boolean;
+    basischeckIngevuld?: boolean;
+  } | null>({
     queryKey: ["/api/business-profile/me"],
     enabled: !!user,
   });
@@ -49,9 +58,15 @@ export default function DashboardPage() {
     );
   }
 
-  // TODO: haal dit later uit de API
-  const basischeckScore = 3; // 0–5
-  const basischeckDone = basischeckScore > 0;
+  // Bereken score uit bedrijfsprofiel data
+  const basischeckScore = [
+    bedrijfsprofiel?.cashMogelijk,
+    bedrijfsprofiel?.bonnenblok,
+    bedrijfsprofiel?.papierenTelefoonlijst,
+    bedrijfsprofiel?.offlineWerken,
+    bedrijfsprofiel?.noodstroom,
+  ].filter(Boolean).length;
+  const basischeckDone = !!bedrijfsprofiel?.basischeckIngevuld;
 
   const isPro = user.plan === "pro";
   const isAdmin = user.isAdmin || false;
