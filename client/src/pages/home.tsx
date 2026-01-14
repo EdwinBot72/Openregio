@@ -323,9 +323,9 @@ export default function HomePage() {
                     "Profiel in het lokale netwerk",
                     "Ledenlijst met contactgegevens",
                     "Vraag & aanbod-bord",
+                    "RegioCrew flexpool toegang",
                     "Basischeck + weerbaarheidsbadges",
                     "Printbare ledenlijst",
-                    "Factuur- en kasboek-templates",
                   ].map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-3">
                       <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
@@ -362,7 +362,7 @@ export default function HomePage() {
                     "RegioBot AI-assistent",
                     "Juridische documenten uitleg",
                     "Marketing content generator",
-                    "Documenten uploaden",
+                    "RegioCrew hulpvragen plaatsen",
                     "Prioriteit support",
                   ].map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-3">

@@ -16,7 +16,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { QueryState } from "@/components/query-state";
-import { UserPlus, Briefcase, Clock, MapPin, Euro, Plus, Send, Users, Search } from "lucide-react";
+import { UserPlus, Briefcase, Clock, MapPin, Euro, Plus, Send, Users, Search, Trash2 } from "lucide-react";
 import { REGIONS, CREW_CATEGORIES, type CrewProfile, type CrewRequest } from "@shared/schema";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
@@ -180,6 +180,20 @@ export default function RegioCrewPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/crew/my-applications"] });
       toast({ title: "Reactie verzonden!" });
+    },
+    onError: (error: any) => {
+      toast({ title: "Fout", description: error.message, variant: "destructive" });
+    },
+  });
+
+  const deleteRequestMutation = useMutation({
+    mutationFn: async (requestId: string) => {
+      return apiRequest("DELETE", `/api/crew/requests/${requestId}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/crew/requests"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/crew/my-requests"] });
+      toast({ title: "Hulpvraag verwijderd" });
     },
     onError: (error: any) => {
       toast({ title: "Fout", description: error.message, variant: "destructive" });
@@ -796,9 +810,24 @@ export default function RegioCrewPage() {
                   <CardHeader className="pb-2">
                     <div className="flex items-start justify-between gap-2">
                       <CardTitle className="text-lg">{req.title}</CardTitle>
-                      <Badge variant={req.status === "open" ? "default" : "secondary"}>
-                        {req.status === "open" ? "Open" : req.status === "filled" ? "Ingevuld" : "Gesloten"}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant={req.status === "open" ? "default" : "secondary"}>
+                          {req.status === "open" ? "Open" : req.status === "filled" ? "Ingevuld" : "Gesloten"}
+                        </Badge>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => {
+                            if (confirm("Weet je zeker dat je deze hulpvraag wilt verwijderen?")) {
+                              deleteRequestMutation.mutate(req.id);
+                            }
+                          }}
+                          disabled={deleteRequestMutation.isPending}
+                          data-testid={`button-delete-request-${req.id}`}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
                     </div>
                   </CardHeader>
                   <CardContent>

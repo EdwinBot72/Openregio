@@ -2147,12 +2147,11 @@ Maak het verzoek professioneel en juridisch correct.`;
         return res.status(404).json({ error: "Hulpvraag niet gevonden" });
       }
 
-      // Check ownership
+      // Check ownership or admin
       const profiel = await storage.getBedrijfsprofielByUserId(req.user!.id);
       const isOwner = profiel && request.businessId === profiel.id;
-      const isAdmin = req.user!.role === "admin" || req.user!.role === "master";
       
-      if (!isOwner && !isAdmin) {
+      if (!isOwner && !req.user!.isAdmin) {
         return res.status(403).json({ error: "Niet geautoriseerd" });
       }
 
