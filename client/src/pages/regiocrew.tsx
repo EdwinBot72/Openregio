@@ -651,24 +651,24 @@ export default function RegioCrewPage() {
         </TabsList>
 
         <div className="flex flex-wrap gap-4 my-4">
-          <Select value={filterRegion} onValueChange={setFilterRegion}>
+          <Select value={filterRegion || "all"} onValueChange={(v) => setFilterRegion(v === "all" ? "" : v)}>
             <SelectTrigger className="w-48" data-testid="filter-region">
               <SelectValue placeholder="Alle regio's" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Alle regio's</SelectItem>
+              <SelectItem value="all">Alle regio's</SelectItem>
               {REGIONS.map((r) => (
                 <SelectItem key={r} value={r}>{r}</SelectItem>
               ))}
             </SelectContent>
           </Select>
 
-          <Select value={filterCategory} onValueChange={setFilterCategory}>
+          <Select value={filterCategory || "all"} onValueChange={(v) => setFilterCategory(v === "all" ? "" : v)}>
             <SelectTrigger className="w-48" data-testid="filter-category">
               <SelectValue placeholder="Alle categorieën" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">Alle categorieën</SelectItem>
+              <SelectItem value="all">Alle categorieën</SelectItem>
               {CREW_CATEGORIES.map((cat) => (
                 <SelectItem key={cat} value={cat}>{categoryLabels[cat]}</SelectItem>
               ))}
