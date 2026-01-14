@@ -34,6 +34,12 @@ import {
   type VisibilityLevel,
   type WooDossier,
   type InsertWooDossier,
+  type CrewProfile,
+  type InsertCrewProfile,
+  type CrewRequest,
+  type InsertCrewRequest,
+  type CrewApplication,
+  type InsertCrewApplication,
   entrepreneurs,
   proposals,
   votes,
@@ -52,6 +58,9 @@ import {
   regions,
   authorities,
   wooDossiers,
+  crewProfiles,
+  crewRequests,
+  crewApplications,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
@@ -182,6 +191,26 @@ export interface IStorage {
   getWooDossiers(userId: string): Promise<WooDossier[]>;
   getWooDossier(id: number, userId: string): Promise<WooDossier | undefined>;
   updateWooDossier(id: number, userId: string, updates: Partial<InsertWooDossier>): Promise<WooDossier | undefined>;
+
+  // RegioCrew - Flex pool for personnel shortages
+  getCrewProfile(userId: string): Promise<CrewProfile | undefined>;
+  getCrewProfileById(id: string): Promise<CrewProfile | undefined>;
+  getCrewProfiles(region?: string, category?: string): Promise<CrewProfile[]>;
+  createCrewProfile(profile: InsertCrewProfile): Promise<CrewProfile>;
+  updateCrewProfile(id: string, profile: Partial<InsertCrewProfile>): Promise<CrewProfile | undefined>;
+  deleteCrewProfile(id: string): Promise<boolean>;
+
+  getCrewRequests(region?: string, category?: string, status?: string): Promise<CrewRequest[]>;
+  getCrewRequestById(id: string): Promise<CrewRequest | undefined>;
+  getCrewRequestsByBusiness(businessId: string): Promise<CrewRequest[]>;
+  createCrewRequest(request: InsertCrewRequest): Promise<CrewRequest>;
+  updateCrewRequest(id: string, request: Partial<InsertCrewRequest>): Promise<CrewRequest | undefined>;
+  deleteCrewRequest(id: string): Promise<boolean>;
+
+  getCrewApplications(requestId: string): Promise<CrewApplication[]>;
+  getCrewApplicationsByProfile(profileId: string): Promise<CrewApplication[]>;
+  createCrewApplication(application: InsertCrewApplication): Promise<CrewApplication>;
+  updateCrewApplication(id: string, status: string): Promise<CrewApplication | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -1264,6 +1293,81 @@ export class MemStorage implements IStorage {
   async updateWooDossier(id: number, userId: string, updates: Partial<InsertWooDossier>): Promise<WooDossier | undefined> {
     return undefined;
   }
+
+  // RegioCrew stubs for MemStorage
+  private crewProfilesList: Map<string, CrewProfile> = new Map();
+  private crewRequestsList: Map<string, CrewRequest> = new Map();
+  private crewApplicationsList: Map<string, CrewApplication> = new Map();
+
+  async getCrewProfile(userId: string): Promise<CrewProfile | undefined> {
+    return Array.from(this.crewProfilesList.values()).find(p => p.userId === userId);
+  }
+  async getCrewProfileById(id: string): Promise<CrewProfile | undefined> {
+    return this.crewProfilesList.get(id);
+  }
+  async getCrewProfiles(region?: string, category?: string): Promise<CrewProfile[]> {
+    return Array.from(this.crewProfilesList.values()).filter(p => p.isActive);
+  }
+  async createCrewProfile(profile: InsertCrewProfile): Promise<CrewProfile> {
+    const id = randomUUID();
+    const cp: CrewProfile = { id, ...profile, createdAt: new Date(), updatedAt: new Date() } as CrewProfile;
+    this.crewProfilesList.set(id, cp);
+    return cp;
+  }
+  async updateCrewProfile(id: string, profile: Partial<InsertCrewProfile>): Promise<CrewProfile | undefined> {
+    const existing = this.crewProfilesList.get(id);
+    if (!existing) return undefined;
+    const updated = { ...existing, ...profile, updatedAt: new Date() };
+    this.crewProfilesList.set(id, updated);
+    return updated;
+  }
+  async deleteCrewProfile(id: string): Promise<boolean> {
+    return this.crewProfilesList.delete(id);
+  }
+  async getCrewRequests(region?: string, category?: string, status?: string): Promise<CrewRequest[]> {
+    return Array.from(this.crewRequestsList.values());
+  }
+  async getCrewRequestById(id: string): Promise<CrewRequest | undefined> {
+    return this.crewRequestsList.get(id);
+  }
+  async getCrewRequestsByBusiness(businessId: string): Promise<CrewRequest[]> {
+    return Array.from(this.crewRequestsList.values()).filter(r => r.businessId === businessId);
+  }
+  async createCrewRequest(request: InsertCrewRequest): Promise<CrewRequest> {
+    const id = randomUUID();
+    const cr: CrewRequest = { id, ...request, createdAt: new Date(), updatedAt: new Date() } as CrewRequest;
+    this.crewRequestsList.set(id, cr);
+    return cr;
+  }
+  async updateCrewRequest(id: string, request: Partial<InsertCrewRequest>): Promise<CrewRequest | undefined> {
+    const existing = this.crewRequestsList.get(id);
+    if (!existing) return undefined;
+    const updated = { ...existing, ...request, updatedAt: new Date() };
+    this.crewRequestsList.set(id, updated);
+    return updated;
+  }
+  async deleteCrewRequest(id: string): Promise<boolean> {
+    return this.crewRequestsList.delete(id);
+  }
+  async getCrewApplications(requestId: string): Promise<CrewApplication[]> {
+    return Array.from(this.crewApplicationsList.values()).filter(a => a.requestId === requestId);
+  }
+  async getCrewApplicationsByProfile(profileId: string): Promise<CrewApplication[]> {
+    return Array.from(this.crewApplicationsList.values()).filter(a => a.crewProfileId === profileId);
+  }
+  async createCrewApplication(application: InsertCrewApplication): Promise<CrewApplication> {
+    const id = randomUUID();
+    const ca: CrewApplication = { id, ...application, createdAt: new Date(), updatedAt: new Date() } as CrewApplication;
+    this.crewApplicationsList.set(id, ca);
+    return ca;
+  }
+  async updateCrewApplication(id: string, status: string): Promise<CrewApplication | undefined> {
+    const existing = this.crewApplicationsList.get(id);
+    if (!existing) return undefined;
+    const updated = { ...existing, status, updatedAt: new Date() };
+    this.crewApplicationsList.set(id, updated);
+    return updated;
+  }
 }
 
 class DbStorage implements IStorage {
@@ -1926,6 +2030,121 @@ class DbStorage implements IStorage {
     const [result] = await db.update(wooDossiers)
       .set(updates)
       .where(and(eq(wooDossiers.id, id), eq(wooDossiers.userId, userId)))
+      .returning();
+    return result;
+  }
+
+  // RegioCrew - Flex pool for personnel shortages
+  async getCrewProfile(userId: string): Promise<CrewProfile | undefined> {
+    const [result] = await db.select().from(crewProfiles)
+      .where(eq(crewProfiles.userId, userId));
+    return result;
+  }
+
+  async getCrewProfileById(id: string): Promise<CrewProfile | undefined> {
+    const [result] = await db.select().from(crewProfiles)
+      .where(eq(crewProfiles.id, id));
+    return result;
+  }
+
+  async getCrewProfiles(region?: string, category?: string): Promise<CrewProfile[]> {
+    let query = db.select().from(crewProfiles)
+      .where(eq(crewProfiles.isActive, true));
+    
+    const results = await query.orderBy(desc(crewProfiles.createdAt));
+    
+    return results.filter(profile => {
+      if (region && profile.region !== region) return false;
+      if (category && !profile.categories.includes(category)) return false;
+      return true;
+    });
+  }
+
+  async createCrewProfile(profile: InsertCrewProfile): Promise<CrewProfile> {
+    const [result] = await db.insert(crewProfiles).values(profile).returning();
+    return result;
+  }
+
+  async updateCrewProfile(id: string, profile: Partial<InsertCrewProfile>): Promise<CrewProfile | undefined> {
+    const [result] = await db.update(crewProfiles)
+      .set({ ...profile, updatedAt: new Date() })
+      .where(eq(crewProfiles.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteCrewProfile(id: string): Promise<boolean> {
+    const result = await db.delete(crewProfiles)
+      .where(eq(crewProfiles.id, id))
+      .returning();
+    return result.length > 0;
+  }
+
+  async getCrewRequests(region?: string, category?: string, status?: string): Promise<CrewRequest[]> {
+    const results = await db.select().from(crewRequests)
+      .orderBy(desc(crewRequests.createdAt));
+    
+    return results.filter(request => {
+      if (region && request.region !== region) return false;
+      if (category && request.category !== category) return false;
+      if (status && request.status !== status) return false;
+      return true;
+    });
+  }
+
+  async getCrewRequestById(id: string): Promise<CrewRequest | undefined> {
+    const [result] = await db.select().from(crewRequests)
+      .where(eq(crewRequests.id, id));
+    return result;
+  }
+
+  async getCrewRequestsByBusiness(businessId: string): Promise<CrewRequest[]> {
+    return await db.select().from(crewRequests)
+      .where(eq(crewRequests.businessId, businessId))
+      .orderBy(desc(crewRequests.createdAt));
+  }
+
+  async createCrewRequest(request: InsertCrewRequest): Promise<CrewRequest> {
+    const [result] = await db.insert(crewRequests).values(request).returning();
+    return result;
+  }
+
+  async updateCrewRequest(id: string, request: Partial<InsertCrewRequest>): Promise<CrewRequest | undefined> {
+    const [result] = await db.update(crewRequests)
+      .set({ ...request, updatedAt: new Date() })
+      .where(eq(crewRequests.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteCrewRequest(id: string): Promise<boolean> {
+    const result = await db.delete(crewRequests)
+      .where(eq(crewRequests.id, id))
+      .returning();
+    return result.length > 0;
+  }
+
+  async getCrewApplications(requestId: string): Promise<CrewApplication[]> {
+    return await db.select().from(crewApplications)
+      .where(eq(crewApplications.requestId, requestId))
+      .orderBy(desc(crewApplications.createdAt));
+  }
+
+  async getCrewApplicationsByProfile(profileId: string): Promise<CrewApplication[]> {
+    return await db.select().from(crewApplications)
+      .where(eq(crewApplications.crewProfileId, profileId))
+      .orderBy(desc(crewApplications.createdAt));
+  }
+
+  async createCrewApplication(application: InsertCrewApplication): Promise<CrewApplication> {
+    const [result] = await db.insert(crewApplications).values(application).returning();
+    return result;
+  }
+
+  async updateCrewApplication(id: string, status: string): Promise<CrewApplication | undefined> {
+    const [result] = await db.update(crewApplications)
+      .set({ status, updatedAt: new Date() })
+      .where(eq(crewApplications.id, id))
       .returning();
     return result;
   }
