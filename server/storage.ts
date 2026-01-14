@@ -140,6 +140,7 @@ export interface IStorage {
 
   // Bedrijfsprofielen (Business Profiles)
   getBedrijfsprofielByUserId(userId: string): Promise<Bedrijfsprofiel | undefined>;
+  getAllBedrijfsprofielen(): Promise<Bedrijfsprofiel[]>;
   createBedrijfsprofiel(profiel: InsertBedrijfsprofiel): Promise<Bedrijfsprofiel>;
   updateBedrijfsprofiel(id: string, profiel: Partial<InsertBedrijfsprofiel>): Promise<Bedrijfsprofiel | undefined>;
 
@@ -1095,6 +1096,10 @@ export class MemStorage implements IStorage {
     return Array.from(this.bedrijfsprofielen.values()).find(p => p.gebruikerId === userId);
   }
 
+  async getAllBedrijfsprofielen(): Promise<Bedrijfsprofiel[]> {
+    return Array.from(this.bedrijfsprofielen.values()).filter(p => p.status === "actief");
+  }
+
   async createBedrijfsprofiel(profiel: InsertBedrijfsprofiel): Promise<Bedrijfsprofiel> {
     const id = randomUUID();
     const now = new Date();
@@ -1734,6 +1739,12 @@ class DbStorage implements IStorage {
       .where(eq(bedrijfsprofielen.gebruikerId, userId))
       .limit(1);
     return results[0];
+  }
+
+  async getAllBedrijfsprofielen(): Promise<Bedrijfsprofiel[]> {
+    return await db.select()
+      .from(bedrijfsprofielen)
+      .where(eq(bedrijfsprofielen.status, "actief"));
   }
 
   async createBedrijfsprofiel(profiel: InsertBedrijfsprofiel): Promise<Bedrijfsprofiel> {

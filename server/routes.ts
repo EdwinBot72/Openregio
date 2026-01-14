@@ -464,6 +464,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Business Profile routes
+  app.get("/api/business-profiles", attachUser, requireAuth, async (req, res) => {
+    try {
+      const profielen = await storage.getAllBedrijfsprofielen();
+      res.json(profielen);
+    } catch (error) {
+      console.error("Error fetching business profiles:", error);
+      res.status(500).json({ error: "Fout bij ophalen bedrijfsprofielen" });
+    }
+  });
+
   app.get("/api/business-profile/me", async (req, res) => {
     try {
       if (!req.user?.id) {

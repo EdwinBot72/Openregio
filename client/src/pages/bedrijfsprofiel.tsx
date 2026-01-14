@@ -1,7 +1,7 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertBedrijfsprofielSchema, type InsertBedrijfsprofiel, type Bedrijfsprofiel } from "@shared/schema";
+import { insertBedrijfsprofielSchema, type InsertBedrijfsprofiel, type Bedrijfsprofiel, REGIONS } from "@shared/schema";
 import { z } from "zod";
 import { useEffect } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -26,7 +26,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, Loader2, Save } from "lucide-react";
+import { Building2, Loader2, Save, MapPin } from "lucide-react";
+import { BusinessMapView } from "@/components/BusinessMapView";
 
 const formSchema = insertBedrijfsprofielSchema.omit({ gebruikerId: true });
 
@@ -42,6 +43,10 @@ export default function BedrijfsprofielPage() {
 
   const { data: categories = [], isLoading: isLoadingCategories } = useQuery<Array<{ value: string; label: string }>>({
     queryKey: ["/api/categories"],
+  });
+
+  const { data: allProfiles = [] } = useQuery<Bedrijfsprofiel[]>({
+    queryKey: ["/api/business-profiles"],
   });
 
   const form = useForm<FormData>({
@@ -201,15 +206,25 @@ export default function BedrijfsprofielPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Regio *</FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Bijv. Amsterdam, Rotterdam, Utrecht"
-                        {...field}
-                        data-testid="input-regio"
-                      />
-                    </FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger data-testid="select-regio">
+                          <SelectValue placeholder="Selecteer je regio" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="max-h-[300px]">
+                        {REGIONS.map((region) => (
+                          <SelectItem key={region} value={region}>
+                            {region}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                     <FormDescription>
-                      De stad of regio waar je bedrijf gevestigd is
+                      De regio waar je bedrijf gevestigd is
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
@@ -328,6 +343,30 @@ export default function BedrijfsprofielPage() {
               </div>
             </form>
           </Form>
+        </CardContent>
+      </Card>
+
+      {/* Map of all businesses */}
+      <Card className="mt-8">
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <MapPin className="h-6 w-6 text-primary" />
+            <div>
+              <CardTitle>Ondernemers op de kaart</CardTitle>
+              <CardDescription>
+                Bekijk waar alle OpenRegio ondernemers gevestigd zijn
+              </CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent>
+          {allProfiles.length > 0 ? (
+            <BusinessMapView businesses={allProfiles} />
+          ) : (
+            <div className="h-[300px] flex items-center justify-center bg-muted rounded-lg">
+              <p className="text-muted-foreground">Nog geen bedrijfsprofielen beschikbaar</p>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>
