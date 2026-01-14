@@ -499,6 +499,72 @@ export const documents = pgTable("documents", {
 export const REGIOBOT_MODES = ["general", "legal", "marketing"] as const;
 export type RegioBotMode = typeof REGIOBOT_MODES[number];
 
+// RegioCrew constants
+export const CREW_RATE_TYPES = ["hour", "day", "fixed", "negotiable"] as const;
+export const CREW_REQUEST_STATUS = ["open", "closed", "filled", "cancelled"] as const;
+export const CREW_APPLICATION_STATUS = ["applied", "shortlisted", "accepted", "rejected", "withdrawn"] as const;
+export const CREW_CATEGORIES = [
+  "retail",
+  "horeca",
+  "logistiek",
+  "administratie",
+  "techniek",
+  "zorg",
+  "onderwijs",
+  "creatief",
+  "it",
+  "overig",
+] as const;
+
+// RegioCrew - Professional profiles for flex work
+export const crewProfiles = pgTable("crew_profiles", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  region: text("region").notNull(),
+  displayName: text("display_name").notNull(),
+  headline: text("headline"),
+  categories: text("categories").array().notNull().default(sql`'{}'::text[]`),
+  skills: text("skills").array().notNull().default(sql`'{}'::text[]`),
+  availability: text("availability"), // JSON string
+  rateType: text("rate_type").notNull().default("hour"),
+  rateMinEur: text("rate_min_eur"),
+  phone: text("phone"),
+  bio: text("bio"),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// RegioCrew - Requests for temporary help
+export const crewRequests = pgTable("crew_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  businessId: varchar("business_id").notNull().references(() => bedrijfsprofielen.id),
+  region: text("region").notNull(),
+  title: text("title").notNull(),
+  description: text("description"),
+  category: text("category").notNull(),
+  skills: text("skills").array().notNull().default(sql`'{}'::text[]`),
+  startAt: timestamp("start_at").notNull(),
+  endAt: timestamp("end_at").notNull(),
+  rateType: text("rate_type").notNull().default("negotiable"),
+  rateEur: text("rate_eur"),
+  locationText: text("location_text"),
+  status: text("status").notNull().default("open"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// RegioCrew - Applications to requests
+export const crewApplications = pgTable("crew_applications", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  requestId: varchar("request_id").notNull().references(() => crewRequests.id),
+  crewProfileId: varchar("crew_profile_id").notNull().references(() => crewProfiles.id),
+  message: text("message"),
+  status: text("status").notNull().default("applied"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const insertEntrepreneurSchema = createInsertSchema(entrepreneurs).omit({
   id: true,
   createdAt: true,
@@ -854,3 +920,40 @@ export type InsertTag = z.infer<typeof insertTagSchema>;
 export type Tag = typeof tags.$inferSelect;
 export type InsertWooDossier = z.infer<typeof insertWooDossierSchema>;
 export type WooDossier = typeof wooDossiers.$inferSelect;
+
+// RegioCrew Schemas and Types
+export const insertCrewProfileSchema = createInsertSchema(crewProfiles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  categories: z.array(z.string()).default([]),
+  skills: z.array(z.string()).default([]),
+  rateType: z.enum(["hour", "day", "fixed"]).default("hour"),
+  isActive: z.boolean().default(true),
+});
+
+export const insertCrewRequestSchema = createInsertSchema(crewRequests).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  skills: z.array(z.string()).default([]),
+  rateType: z.enum(["hour", "day", "fixed", "negotiable"]).default("negotiable"),
+  status: z.enum(["open", "closed", "filled", "cancelled"]).default("open"),
+});
+
+export const insertCrewApplicationSchema = createInsertSchema(crewApplications).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+}).extend({
+  status: z.enum(["applied", "shortlisted", "accepted", "rejected", "withdrawn"]).default("applied"),
+});
+
+export type InsertCrewProfile = z.infer<typeof insertCrewProfileSchema>;
+export type CrewProfile = typeof crewProfiles.$inferSelect;
+export type InsertCrewRequest = z.infer<typeof insertCrewRequestSchema>;
+export type CrewRequest = typeof crewRequests.$inferSelect;
+export type InsertCrewApplication = z.infer<typeof insertCrewApplicationSchema>;
+export type CrewApplication = typeof crewApplications.$inferSelect;
