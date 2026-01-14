@@ -1,6 +1,21 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
+import { formatDistanceToNow } from "date-fns";
+import { nl } from "date-fns/locale";
 import {
   HelpCircle,
   Megaphone,
@@ -8,112 +23,293 @@ import {
   CalendarDays,
   MapPin,
   Plus,
+  Trash2,
+  Loader2,
 } from "lucide-react";
+import { REGIONS, POST_TYPES } from "@shared/schema";
+import type { Post } from "@shared/schema";
 
 type PostType = "vraag" | "aanbod" | "lead" | "event" | "alles";
 
-interface Post {
-  id: string;
-  type: "vraag" | "aanbod" | "lead" | "event";
-  title: string;
-  body: string;
-  region: string;
-  createdAt: string;
-  authorName: string;
+const postFormSchema = z.object({
+  type: z.enum(["vraag", "aanbieding", "lead", "event", "update"]),
+  title: z.string().min(3, "Titel moet minimaal 3 tekens zijn"),
+  body: z.string().min(10, "Beschrijving moet minimaal 10 tekens zijn"),
+  region: z.string().min(1, "Selecteer een regio"),
+});
+
+type PostFormValues = z.infer<typeof postFormSchema>;
+
+function NewPostDialog() {
+  const [open, setOpen] = useState(false);
+  const { toast } = useToast();
+
+  const form = useForm<PostFormValues>({
+    resolver: zodResolver(postFormSchema),
+    defaultValues: {
+      type: "vraag",
+      title: "",
+      body: "",
+      region: "Amsterdam",
+    },
+  });
+
+  const createMutation = useMutation({
+    mutationFn: async (data: PostFormValues) => {
+      return await apiRequest("POST", "/api/posts", data);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+      toast({
+        title: "Post geplaatst!",
+        description: "Je bericht is zichtbaar in het netwerk.",
+      });
+      setOpen(false);
+      form.reset();
+    },
+    onError: () => {
+      toast({
+        title: "Fout",
+        description: "Kon post niet plaatsen. Ben je ingelogd?",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const onSubmit = (data: PostFormValues) => {
+    createMutation.mutate(data);
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogTrigger asChild>
+        <Button data-testid="button-new-post">
+          <Plus className="w-4 h-4 mr-2" />
+          Nieuwe post
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Nieuwe post plaatsen</DialogTitle>
+        </DialogHeader>
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Type</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger data-testid="select-post-type">
+                        <SelectValue placeholder="Selecteer type" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="vraag">Vraag</SelectItem>
+                      <SelectItem value="aanbieding">Aanbod</SelectItem>
+                      <SelectItem value="lead">Lead</SelectItem>
+                      <SelectItem value="event">Event</SelectItem>
+                      <SelectItem value="update">Update</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Titel</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Korte titel" data-testid="input-post-title" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="body"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Beschrijving</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Wat wil je delen?" data-testid="input-post-body" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="region"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Regio</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger data-testid="select-post-region">
+                        <SelectValue placeholder="Selecteer regio" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {REGIONS.map((region) => (
+                        <SelectItem key={region} value={region}>
+                          {region}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button 
+              type="submit" 
+              className="w-full" 
+              disabled={createMutation.isPending}
+              data-testid="button-submit-post"
+            >
+              {createMutation.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Plaatsen...
+                </>
+              ) : (
+                "Plaatsen"
+              )}
+            </Button>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
 }
 
-const mockPosts: Post[] = [
-  {
-    id: "1",
-    type: "vraag",
-    title: "Schilder gezocht voor trap en gang",
-    body: "Woonhuis in Haarlem, werk in de komende 3 weken. Indicatie-offerte gewenst.",
-    region: "Haarlem",
-    createdAt: "2 dagen geleden",
-    authorName: "Lisa van Dijk",
-  },
-  {
-    id: "2",
-    type: "aanbod",
-    title: "Onderhoudsbeurt bedrijfsbus met ondernemerskorting",
-    body: "Garage in Beverwijk, ruimte op dinsdag en donderdag. Speciaal tarief voor leden.",
-    region: "IJmond",
-    createdAt: "5 dagen geleden",
-    authorName: "Garage De Haven",
-  },
-  {
-    id: "3",
-    type: "lead",
-    title: "Lead: kapsalon zoekt vaste boekhouder",
-    body: "Klant van mij in Haarlem, op zoek naar een boekhouder in de buurt. Ik verbind jullie graag.",
-    region: "Haarlem",
-    createdAt: "6 dagen geleden",
-    authorName: "Marco Jansen",
-  },
-  {
-    id: "4",
-    type: "event",
-    title: "Kleine netwerkavond bij de bakkerij",
-    body: "Informele borrel op woensdagavond, maximaal 15 ondernemers, focus op lokale samenwerkingen.",
-    region: "Spaarndam",
-    createdAt: "8 dagen geleden",
-    authorName: "Bakkerij De Brink",
-  },
-];
+function PostCard({ post, currentUserId, isAdmin }: { post: Post; currentUserId?: string; isAdmin?: boolean }) {
+  const { toast } = useToast();
+  
+  const canDelete = isAdmin || post.authorUserId === currentUserId;
+  
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      return await apiRequest("DELETE", `/api/posts/${post.id}`);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/posts"] });
+      toast({
+        title: "Post verwijderd",
+        description: "Je post is verwijderd uit het netwerk.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Fout",
+        description: "Kon post niet verwijderen.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  function labelForType(t: string) {
+    switch (t) {
+      case "vraag": return "Vraag";
+      case "aanbieding": case "aanbod": return "Aanbod";
+      case "lead": return "Lead";
+      case "event": return "Event";
+      case "update": return "Update";
+      default: return t;
+    }
+  }
+
+  function iconForType(t: string) {
+    switch (t) {
+      case "vraag": return <HelpCircle className="w-3 h-3" />;
+      case "aanbieding": case "aanbod": return <Megaphone className="w-3 h-3" />;
+      case "lead": return <Share2 className="w-3 h-3" />;
+      case "event": return <CalendarDays className="w-3 h-3" />;
+      default: return null;
+    }
+  }
+
+  const createdAt = post.createdAt ? formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: nl }) : "";
+
+  return (
+    <Card data-testid={`card-post-${post.id}`}>
+      <CardContent className="p-4 flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary" className="flex items-center gap-1">
+              {iconForType(post.type)}
+              {labelForType(post.type)}
+            </Badge>
+            <Badge variant="outline" className="flex items-center gap-1">
+              <MapPin className="w-3 h-3" />
+              {post.region}
+            </Badge>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-muted-foreground">{createdAt}</span>
+            {canDelete && (
+              <Button
+                size="icon"
+                variant="ghost"
+                onClick={() => deleteMutation.mutate()}
+                disabled={deleteMutation.isPending}
+                data-testid={`button-delete-${post.id}`}
+              >
+                {deleteMutation.isPending ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Trash2 className="w-4 h-4 text-destructive" />
+                )}
+              </Button>
+            )}
+          </div>
+        </div>
+
+        <h2 className="font-semibold text-sm md:text-base" data-testid={`text-post-title-${post.id}`}>
+          {post.title}
+        </h2>
+        <p className="text-sm text-muted-foreground">{post.body}</p>
+      </CardContent>
+    </Card>
+  );
+}
 
 export default function NetworkPage() {
   const [typeFilter, setTypeFilter] = useState<PostType>("alles");
   const [regionFilter, setRegionFilter] = useState<string>("alle");
+  const { user } = useAuth();
 
-  const regions = ["alle", "Haarlem", "IJmond", "Spaarndam"];
+  const { data: posts, isLoading } = useQuery<Post[]>({
+    queryKey: ["/api/posts"],
+  });
 
-  const filteredPosts = useMemo(() => {
-    return mockPosts.filter((post) => {
-      if (typeFilter !== "alles" && post.type !== typeFilter) return false;
-      if (regionFilter !== "alle" && post.region !== regionFilter) return false;
-      return true;
-    });
-  }, [typeFilter, regionFilter]);
+  const regions = ["alle", ...REGIONS];
 
-  function labelForType(t: Post["type"]) {
-    switch (t) {
-      case "vraag":
-        return "Vraag";
-      case "aanbod":
-        return "Aanbod";
-      case "lead":
-        return "Lead";
-      case "event":
-        return "Event";
+  const filteredPosts = posts?.filter((post) => {
+    if (typeFilter !== "alles") {
+      const normalizedType = post.type === "aanbieding" ? "aanbod" : post.type;
+      if (normalizedType !== typeFilter) return false;
     }
-  }
-
-  function iconForType(t: Post["type"]) {
-    switch (t) {
-      case "vraag":
-        return <HelpCircle className="w-3 h-3" />;
-      case "aanbod":
-        return <Megaphone className="w-3 h-3" />;
-      case "lead":
-        return <Share2 className="w-3 h-3" />;
-      case "event":
-        return <CalendarDays className="w-3 h-3" />;
-    }
-  }
+    if (regionFilter !== "alle" && post.region !== regionFilter) return false;
+    return true;
+  }) || [];
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
       <header className="space-y-2">
         <h1 className="text-2xl md:text-3xl font-bold" data-testid="text-network-title">
-          Community & Kansenbord
+          Netwerk & Kansenbord
         </h1>
         <p className="text-sm md:text-base text-muted-foreground">
           Deel concrete vragen, aanbiedingen, leads en events met ondernemers in jouw regio. 
           Hou het kort, zakelijk en praktisch.
-        </p>
-        <p className="text-xs text-muted-foreground">
-          Voorbeelden: "Wie kan volgende week 3 uur fotograferen in Haarlem?" of 
-          "Ik zoek een lokale drukker voor 250 flyers".
         </p>
       </header>
 
@@ -162,67 +358,29 @@ export default function NetworkPage() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-2">
-          <Button size="sm" variant="outline" data-testid="button-new-vraag">
-            <Plus className="w-3 h-3 mr-1" />
-            Nieuwe vraag
-          </Button>
-          <Button size="sm" variant="outline" data-testid="button-new-aanbod">
-            <Plus className="w-3 h-3 mr-1" />
-            Nieuw aanbod
-          </Button>
-          <Button size="sm" variant="outline" data-testid="button-new-lead">
-            <Plus className="w-3 h-3 mr-1" />
-            Lead delen
-          </Button>
-          <Button size="sm" variant="outline" data-testid="button-new-event">
-            <Plus className="w-3 h-3 mr-1" />
-            Event plaatsen
-          </Button>
-        </div>
+        <NewPostDialog />
       </section>
 
       <section className="space-y-3">
-        {filteredPosts.length === 0 && (
-          <p className="text-sm text-muted-foreground" data-testid="text-no-posts">
+        {isLoading && (
+          <div className="flex justify-center py-8">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          </div>
+        )}
+
+        {!isLoading && filteredPosts.length === 0 && (
+          <p className="text-sm text-muted-foreground text-center py-8" data-testid="text-no-posts">
             Nog geen berichten met deze filters. Plaats de eerste vraag of aanbod.
           </p>
         )}
 
         {filteredPosts.map((post) => (
-          <Card key={post.id} data-testid={`card-post-${post.id}`}>
-            <CardContent className="p-4 flex flex-col gap-2">
-              <div className="flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] uppercase tracking-wide border bg-muted text-muted-foreground">
-                    {iconForType(post.type)}
-                    {labelForType(post.type)}
-                  </span>
-                  <span className="text-xs text-muted-foreground flex items-center gap-1">
-                    <MapPin className="w-3 h-3" />
-                    {post.region}
-                  </span>
-                </div>
-                <span className="text-xs text-muted-foreground">
-                  {post.createdAt}
-                </span>
-              </div>
-
-              <h2 className="font-semibold text-sm md:text-base" data-testid={`text-post-title-${post.id}`}>
-                {post.title}
-              </h2>
-              <p className="text-sm text-muted-foreground">{post.body}</p>
-
-              <div className="flex items-center justify-between mt-1">
-                <span className="text-xs text-muted-foreground">
-                  Door <span className="font-medium">{post.authorName}</span>
-                </span>
-                <Button size="sm" variant="outline" data-testid={`button-respond-${post.id}`}>
-                  Reageren
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <PostCard 
+            key={post.id} 
+            post={post} 
+            currentUserId={user?.id}
+            isAdmin={user?.isAdmin}
+          />
         ))}
       </section>
     </div>

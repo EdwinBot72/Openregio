@@ -1319,9 +1319,13 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
-  app.post("/api/posts", async (req, res) => {
+  app.post("/api/posts", attachUser, requireAuth, async (req, res) => {
     try {
-      const validatedData = insertPostSchema.parse(req.body);
+      const user = req.user!;
+      const validatedData = insertPostSchema.parse({
+        ...req.body,
+        authorUserId: user.id,
+      });
       const post = await storage.createPost(validatedData);
       res.status(201).json(post);
     } catch (error) {
@@ -1329,6 +1333,35 @@ Maak het verzoek professioneel en juridisch correct.`;
         return res.status(400).json({ error: error.errors });
       }
       res.status(500).json({ error: "Failed to create post" });
+    }
+  });
+
+  app.delete("/api/posts/:id", attachUser, requireAuth, async (req, res) => {
+    try {
+      const user = req.user!;
+      const postId = req.params.id;
+      
+      const post = await storage.getPostById(postId);
+      if (!post) {
+        return res.status(404).json({ error: "Post niet gevonden" });
+      }
+      
+      // Check if user is owner or master/admin
+      const isMaster = user.isAdmin;
+      const isOwner = post.authorUserId === user.id;
+      
+      if (!isMaster && !isOwner) {
+        return res.status(403).json({ error: "Je kunt alleen je eigen posts verwijderen" });
+      }
+      
+      const deleted = await storage.deletePost(postId);
+      if (deleted) {
+        res.json({ success: true, message: "Post verwijderd" });
+      } else {
+        res.status(500).json({ error: "Kon post niet verwijderen" });
+      }
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete post" });
     }
   });
 

@@ -116,7 +116,9 @@ export interface IStorage {
 
   // Posts
   getPosts(region?: string, type?: string): Promise<Post[]>;
+  getPostById(id: string): Promise<Post | undefined>;
   createPost(post: InsertPost): Promise<Post>;
+  deletePost(id: string): Promise<boolean>;
 
   // User Profiles
   getUserProfile(id: string): Promise<UserProfile | undefined>;
@@ -946,6 +948,10 @@ export class MemStorage implements IStorage {
     return results.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
   }
 
+  async getPostById(id: string): Promise<Post | undefined> {
+    return this.posts.get(id);
+  }
+
   async createPost(post: InsertPost): Promise<Post> {
     const id = randomUUID();
     const newPost: Post = {
@@ -959,6 +965,10 @@ export class MemStorage implements IStorage {
     };
     this.posts.set(id, newPost);
     return newPost;
+  }
+
+  async deletePost(id: string): Promise<boolean> {
+    return this.posts.delete(id);
   }
 
   async getUserProfile(id: string): Promise<UserProfile | undefined> {
@@ -1604,9 +1614,19 @@ class DbStorage implements IStorage {
     return await db.select().from(posts).orderBy(desc(posts.createdAt));
   }
 
+  async getPostById(id: string): Promise<Post | undefined> {
+    const results = await db.select().from(posts).where(eq(posts.id, id));
+    return results[0];
+  }
+
   async createPost(post: InsertPost): Promise<Post> {
     const result = await db.insert(posts).values(post).returning();
     return result[0];
+  }
+
+  async deletePost(id: string): Promise<boolean> {
+    const result = await db.delete(posts).where(eq(posts.id, id)).returning();
+    return result.length > 0;
   }
 
   async getUserProfile(id: string): Promise<UserProfile | undefined> {
