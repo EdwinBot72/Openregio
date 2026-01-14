@@ -10,14 +10,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage, FormDescription } from "@/components/ui/form";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger, DialogFooter, DialogClose } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { QueryState } from "@/components/query-state";
 import { UserPlus, Briefcase, Clock, MapPin, Euro, Plus, Send, Users, Search, Trash2 } from "lucide-react";
-import { REGIONS, CREW_CATEGORIES, type CrewProfile, type CrewRequest } from "@shared/schema";
+import { CREW_CATEGORIES, PROVINCES_REGIONS, PROVINCES, type CrewProfile, type CrewRequest } from "@shared/schema";
+import { RegionSelect } from "@/components/region-select";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 
@@ -280,9 +281,16 @@ export default function RegioCrewPage() {
                                 <SelectValue placeholder="Selecteer regio" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent>
-                              {REGIONS.map((r) => (
-                                <SelectItem key={r} value={r}>{r}</SelectItem>
+                            <SelectContent className="max-h-80">
+                              {PROVINCES.map((province) => (
+                                <SelectGroup key={province}>
+                                  <SelectLabel className="font-semibold text-primary">{province}</SelectLabel>
+                                  {PROVINCES_REGIONS[province].map((region) => (
+                                    <SelectItem key={region} value={region} className="pl-6">
+                                      {region}
+                                    </SelectItem>
+                                  ))}
+                                </SelectGroup>
                               ))}
                             </SelectContent>
                           </Select>
@@ -470,9 +478,16 @@ export default function RegioCrewPage() {
                                 <SelectValue placeholder="Selecteer" />
                               </SelectTrigger>
                             </FormControl>
-                            <SelectContent>
-                              {REGIONS.map((r) => (
-                                <SelectItem key={r} value={r}>{r}</SelectItem>
+                            <SelectContent className="max-h-80">
+                              {PROVINCES.map((province) => (
+                                <SelectGroup key={province}>
+                                  <SelectLabel className="font-semibold text-primary">{province}</SelectLabel>
+                                  {PROVINCES_REGIONS[province].map((region) => (
+                                    <SelectItem key={region} value={region} className="pl-6">
+                                      {region}
+                                    </SelectItem>
+                                  ))}
+                                </SelectGroup>
                               ))}
                             </SelectContent>
                           </Select>
@@ -669,10 +684,17 @@ export default function RegioCrewPage() {
             <SelectTrigger className="w-48" data-testid="filter-region">
               <SelectValue placeholder="Alle regio's" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="max-h-80">
               <SelectItem value="all">Alle regio's</SelectItem>
-              {REGIONS.map((r) => (
-                <SelectItem key={r} value={r}>{r}</SelectItem>
+              {PROVINCES.map((province) => (
+                <SelectGroup key={province}>
+                  <SelectLabel className="font-semibold text-primary">{province}</SelectLabel>
+                  {PROVINCES_REGIONS[province].map((region) => (
+                    <SelectItem key={region} value={region} className="pl-6">
+                      {region}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
               ))}
             </SelectContent>
           </Select>

@@ -392,6 +392,92 @@ export const REGIONS = [
   "Zwijndrechtse Waard",
 ] as const;
 
+// Provinces with their regions for grouped dropdowns
+export const PROVINCES_REGIONS: Record<string, readonly string[]> = {
+  "Drenthe": [
+    "Dieverderdingspel", "Drentse Veenkoloniën", "Drents Plateau", "Ellertsveld",
+    "Hondsrug", "Middenveld", "Noordenveld", "Oostermoer", "Rolderdingspel",
+    "Westerwolde", "Zuidenveld"
+  ],
+  "Flevoland": [
+    "Dronterland", "Flevopolder", "Noordoostpolder", "Oostelijk Flevoland", "Zuidelijk Flevoland"
+  ],
+  "Friesland": [
+    "Ameland", "Het Bildt", "Bouwhoek", "Dokkumer Wouden", "Friese merengebied",
+    "Friese Wouden", "Gaasterland", "Greidhoek", "Lauwersland", "Oostergo",
+    "Schiermonnikoog", "Stellingwerven", "Terschelling", "Vlieland",
+    "Westergo", "Westerlauwers Friesland", "Zevenwouden"
+  ],
+  "Gelderland": [
+    "Achterhoek", "Arkemheen", "Betuwe", "De Duffelt", "Gelderse Vallei",
+    "De Graafschap", "IJsseldal", "Kwartier van Nijmegen", "Kwartier van Veluwe",
+    "Land van Buren en Culemborg", "Land van Maas en Waal", "Land van Winterswijk",
+    "Liemers", "Montferland", "Neder-Betuwe", "Over-Betuwe", "Overveluwe",
+    "Rijk van Nijmegen", "Rivierengebied", "Stedendriehoek", "Teisterbant",
+    "Tielerwaard", "Veluwe", "Veluwezoom"
+  ],
+  "Groningen": [
+    "Centrale Woldgebied", "Dollardpolders", "Duurswold", "Fivelingo",
+    "Gorecht", "Groninger Veenkoloniën", "Halfambt", "Het Hogeland", "Hogeland",
+    "Humsterland", "Hunsingo", "Klei-Oldambt", "Langewold", "Marne", "Marnewaard",
+    "Menterne", "Middag", "Oldambt", "Ommelanden", "Oosterambt", "Reiderland",
+    "Westerkwartier"
+  ],
+  "Limburg": [
+    "Graetheide", "Heuvelland", "Land van Horn", "Land van Kessel",
+    "Land van Montfort", "Land van Thorn", "Land van Weert", "Land van Zwentibold",
+    "Landen van Overmaas", "Lössgebied", "Maasland", "Maasplassen",
+    "Mergelland", "Midden-Limburg", "Noord-Limburg", "Oostelijke Mijnstreek",
+    "Opper-Gelre", "Overkwartier", "Parkstad Limburg", "De Peel",
+    "Plateau van Margraten", "Staats-Overmaas", "Westelijke Mijnstreek", "Zuid-Limburg"
+  ],
+  "Noord-Brabant": [
+    "Acht Zaligheden", "Baronie van Breda", "Brabantse Biesbosch",
+    "Brabantse Stedenrij", "Brabantse Wal", "Generaliteitslanden", "Kempen",
+    "Kwartier van 's-Hertogenbosch", "Kwartier van Oisterwijk", "Land van Bergen op Zoom",
+    "Land van Cuijk", "Land van Heusden en Altena", "Langstraat",
+    "Maaskant", "Markiezaat van Bergen op Zoom", "Meierij van 's-Hertogenbosch",
+    "Peelland", "Staats-Brabant", "Zandgebieden"
+  ],
+  "Noord-Holland": [
+    "Amstelland", "Amsterdam", "De Bangert", "Beemster", "Drechterland",
+    "Eierland", "Haarlem", "Haarlemmermeer", "Het Gooi", "Holland",
+    "Kennemerland", "Kop van Noord-Holland", "Purmer", "Schermer",
+    "Schermereiland", "De Streek", "Texel", "Waterland", "West-Friesland",
+    "Wieringen", "Wieringermeer", "Zaanstreek", "Zeevang"
+  ],
+  "Overijssel": [
+    "De Weerribben", "De Wieden", "Kampereiland", "Kop van Overijssel",
+    "Land van Vollenhove", "Mastenbroek", "Oosterhoek", "Salland", "Twente", "Vechtstreek"
+  ],
+  "Utrecht": [
+    "Eemland", "Eemvallei", "Groene Hart", "Kromme Rijnstreek", "Lopikerwaard",
+    "Nifterlake", "Stichtse Lustwarande", "Utrecht", "Utrechtse Heuvelrug",
+    "Vijfheerenlanden"
+  ],
+  "Zeeland": [
+    "De Biesbosch", "Duiveland", "Hulster Ambacht", "Midden-Zeeland", "Noord-Beveland",
+    "Noord-Zeeland", "Oost-Zeeuws-Vlaanderen", "Saeftinghe", "Schelde- en Maasdelta",
+    "Schouwen", "Schouwen-Duiveland", "Sint Philipsland", "Staats-Vlaanderen",
+    "Tholen", "Vier Ambachten", "Vrije van Sluis", "Walcheren",
+    "West-Zeeuws-Vlaanderen", "Zeeuws-Vlaanderen", "Zuid-Beveland"
+  ],
+  "Zuid-Holland": [
+    "Alblasserwaard", "Beijerland", "Bollenstreek", "Delfland", "Den Haag",
+    "Drechtsteden", "Eiland van Dordrecht", "Goeree-Overflakkee", "Hoeksche Waard",
+    "IJsselmonde", "Krimpenerwaard", "Leiden", "Land van Voorne", "Midden-Delfland",
+    "Overflakkee", "Prins Alexanderpolder", "Putten", "Randstad", "Rijnland",
+    "Rijnmond", "Rotterdam", "Schieland", "Tiengemeten", "Voorne", "Voorne-Putten",
+    "Westhoek", "Westland", "Zuid-Hollandse Eilanden", "Zuidplaspolder", "Zwijndrechtse Waard"
+  ],
+  "Caribisch Nederland": [
+    "Bonaire", "Saba", "Sint Eustatius"
+  ],
+};
+
+// List of provinces for iteration
+export const PROVINCES = Object.keys(PROVINCES_REGIONS) as (keyof typeof PROVINCES_REGIONS)[];
+
 // Shared constants for proposal status and vote choices
 export const PROPOSAL_STATUS = ["open", "closed"] as const;
 export const VOTE_CHOICES = ["yes", "no", "abstain"] as const;

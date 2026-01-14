@@ -1,7 +1,7 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertBedrijfsprofielSchema, type InsertBedrijfsprofiel, type Bedrijfsprofiel, REGIONS } from "@shared/schema";
+import { insertBedrijfsprofielSchema, type InsertBedrijfsprofiel, type Bedrijfsprofiel, PROVINCES_REGIONS, PROVINCES } from "@shared/schema";
 import { z } from "zod";
 import { useEffect } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -21,7 +21,9 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
@@ -215,11 +217,16 @@ export default function BedrijfsprofielPage() {
                           <SelectValue placeholder="Selecteer je regio" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent className="max-h-[300px]">
-                        {REGIONS.map((region) => (
-                          <SelectItem key={region} value={region}>
-                            {region}
-                          </SelectItem>
+                      <SelectContent className="max-h-80">
+                        {PROVINCES.map((province) => (
+                          <SelectGroup key={province}>
+                            <SelectLabel className="font-semibold text-primary">{province}</SelectLabel>
+                            {PROVINCES_REGIONS[province].map((region) => (
+                              <SelectItem key={region} value={region} className="pl-6">
+                                {region}
+                              </SelectItem>
+                            ))}
+                          </SelectGroup>
                         ))}
                       </SelectContent>
                     </Select>

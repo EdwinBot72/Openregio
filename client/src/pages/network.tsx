@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -26,7 +26,7 @@ import {
   Trash2,
   Loader2,
 } from "lucide-react";
-import { REGIONS, POST_TYPES } from "@shared/schema";
+import { PROVINCES_REGIONS, PROVINCES, POST_TYPES } from "@shared/schema";
 import type { Post } from "@shared/schema";
 
 type PostType = "vraag" | "aanbod" | "lead" | "event" | "alles";
@@ -156,11 +156,16 @@ function NewPostDialog() {
                         <SelectValue placeholder="Selecteer regio" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
-                      {REGIONS.map((region) => (
-                        <SelectItem key={region} value={region}>
-                          {region}
-                        </SelectItem>
+                    <SelectContent className="max-h-80">
+                      {PROVINCES.map((province) => (
+                        <SelectGroup key={province}>
+                          <SelectLabel className="font-semibold text-primary">{province}</SelectLabel>
+                          {PROVINCES_REGIONS[province].map((region) => (
+                            <SelectItem key={region} value={region} className="pl-6">
+                              {region}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
                       ))}
                     </SelectContent>
                   </Select>
@@ -290,7 +295,7 @@ export default function NetworkPage() {
     queryKey: ["/api/posts"],
   });
 
-  const regions = ["alle", ...REGIONS];
+  const regions = ["alle", ...Object.values(PROVINCES_REGIONS).flat()];
 
   const filteredPosts = posts?.filter((post) => {
     if (typeFilter !== "alles") {
