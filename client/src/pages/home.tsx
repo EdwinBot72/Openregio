@@ -2,7 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Quote, Users, Banknote, Phone, Battery, FileText, Printer, ArrowRight, Check, Sparkles, Bot, ShieldCheck, Lock, Cookie, Store, Eye, ClipboardCheck, UserPlus } from "lucide-react";
 import { Link } from "wouter";
-import heroImage from "@assets/a6c26f1e-d111-4563-9ebd-09dd423e6ffd_1768342440500.png";
+import heroImage from "@assets/ChatGPT_Image_5_jan_2026,_10_22_40_1768374708257.png";
+import howItWorksImage from "@assets/a6c26f1e-d111-4563-9ebd-09dd423e6ffd_1768342440500.png";
 
 export default function HomePage() {
   return (
@@ -109,6 +110,18 @@ export default function HomePage() {
           <p className="text-center mt-6 font-semibold text-primary">
             OpenRegio maakt dit concreet en beheersbaar.
           </p>
+        </div>
+      </section>
+
+      {/* Hoe OpenRegio Werkt - Infographic */}
+      <section className="py-12 px-4">
+        <div className="max-w-5xl mx-auto">
+          <img 
+            src={howItWorksImage} 
+            alt="Hoe OpenRegio Werkt - RegioMarkt, RegioBot, RegioCrew, Zichtbaarheid, Basischeck" 
+            className="rounded-md shadow-lg w-full h-auto"
+            data-testid="img-how-it-works"
+          />
         </div>
       </section>
 
