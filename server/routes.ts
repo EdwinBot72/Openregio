@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema, insertBedrijfsprofielSchema, regioBotChatSchema, visibilitySettingsSchema, DEFAULT_VISIBILITY_SETTINGS } from "@shared/schema";
+import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema, insertBedrijfsprofielSchema, regioBotChatSchema, visibilitySettingsSchema, DEFAULT_VISIBILITY_SETTINGS, insertCrewProfileSchema, insertCrewRequestSchema, insertCrewApplicationSchema, CREW_CATEGORIES } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { createMollieClient } from "@mollie/api-client";
@@ -1969,6 +1969,290 @@ Maak het verzoek professioneel en juridisch correct.`;
     } catch (error: any) {
       console.error("Error fetching privacy dashboard:", error);
       res.status(500).json({ error: "Kon privacy dashboard niet laden" });
+    }
+  });
+
+  // =====================================
+  // RegioCrew - Flex pool for personnel shortages
+  // Available to ALL members (Basic + Pro)
+  // =====================================
+
+  // Get categories for RegioCrew
+  app.get("/api/crew/categories", (_req, res) => {
+    res.json(CREW_CATEGORIES);
+  });
+
+  // Crew Profiles - My profile
+  app.get("/api/crew/profile", requireAuth, async (req, res) => {
+    try {
+      const profile = await storage.getCrewProfile(req.user!.id);
+      res.json(profile || null);
+    } catch (error: any) {
+      console.error("Error fetching crew profile:", error);
+      res.status(500).json({ error: "Kon profiel niet laden" });
+    }
+  });
+
+  app.post("/api/crew/profile", requireAuth, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      
+      // Check if profile already exists
+      const existing = await storage.getCrewProfile(userId);
+      if (existing) {
+        return res.status(400).json({ error: "Je hebt al een flex-profiel" });
+      }
+
+      const parsed = insertCrewProfileSchema.safeParse({ ...req.body, userId });
+      if (!parsed.success) {
+        return res.status(400).json({ error: fromZodError(parsed.error).message });
+      }
+
+      const profile = await storage.createCrewProfile(parsed.data);
+      res.status(201).json(profile);
+    } catch (error: any) {
+      console.error("Error creating crew profile:", error);
+      res.status(500).json({ error: "Kon profiel niet aanmaken" });
+    }
+  });
+
+  app.put("/api/crew/profile", requireAuth, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const existing = await storage.getCrewProfile(userId);
+      
+      if (!existing) {
+        return res.status(404).json({ error: "Geen profiel gevonden" });
+      }
+
+      const updated = await storage.updateCrewProfile(existing.id, req.body);
+      res.json(updated);
+    } catch (error: any) {
+      console.error("Error updating crew profile:", error);
+      res.status(500).json({ error: "Kon profiel niet bijwerken" });
+    }
+  });
+
+  // Browse all active crew profiles
+  app.get("/api/crew/profiles", requireAuth, async (req, res) => {
+    try {
+      const { region, category } = req.query;
+      const profiles = await storage.getCrewProfiles(
+        region as string | undefined,
+        category as string | undefined
+      );
+      res.json(profiles);
+    } catch (error: any) {
+      console.error("Error fetching crew profiles:", error);
+      res.status(500).json({ error: "Kon profielen niet laden" });
+    }
+  });
+
+  // Crew Requests - Open requests for help
+  app.get("/api/crew/requests", requireAuth, async (req, res) => {
+    try {
+      const { region, category, status } = req.query;
+      const requests = await storage.getCrewRequests(
+        region as string | undefined,
+        category as string | undefined,
+        status as string | undefined || "open"
+      );
+      res.json(requests);
+    } catch (error: any) {
+      console.error("Error fetching crew requests:", error);
+      res.status(500).json({ error: "Kon hulpvragen niet laden" });
+    }
+  });
+
+  app.get("/api/crew/requests/:id", requireAuth, async (req, res) => {
+    try {
+      const request = await storage.getCrewRequestById(req.params.id);
+      if (!request) {
+        return res.status(404).json({ error: "Hulpvraag niet gevonden" });
+      }
+      res.json(request);
+    } catch (error: any) {
+      console.error("Error fetching crew request:", error);
+      res.status(500).json({ error: "Kon hulpvraag niet laden" });
+    }
+  });
+
+  app.get("/api/crew/my-requests", requireAuth, async (req, res) => {
+    try {
+      const profiel = await storage.getBedrijfsprofielByUserId(req.user!.id);
+      if (!profiel) {
+        return res.json([]);
+      }
+      const requests = await storage.getCrewRequestsByBusiness(profiel.id);
+      res.json(requests);
+    } catch (error: any) {
+      console.error("Error fetching my crew requests:", error);
+      res.status(500).json({ error: "Kon mijn hulpvragen niet laden" });
+    }
+  });
+
+  app.post("/api/crew/requests", requireAuth, async (req, res) => {
+    try {
+      // User must have a bedrijfsprofiel to post requests
+      const profiel = await storage.getBedrijfsprofielByUserId(req.user!.id);
+      if (!profiel) {
+        return res.status(400).json({ 
+          error: "Je moet eerst een bedrijfsprofiel aanmaken om hulpvragen te plaatsen" 
+        });
+      }
+
+      const parsed = insertCrewRequestSchema.safeParse({ 
+        ...req.body, 
+        businessId: profiel.id,
+        region: req.body.region || profiel.regio 
+      });
+      
+      if (!parsed.success) {
+        return res.status(400).json({ error: fromZodError(parsed.error).message });
+      }
+
+      const request = await storage.createCrewRequest(parsed.data);
+      res.status(201).json(request);
+    } catch (error: any) {
+      console.error("Error creating crew request:", error);
+      res.status(500).json({ error: "Kon hulpvraag niet aanmaken" });
+    }
+  });
+
+  app.put("/api/crew/requests/:id", requireAuth, async (req, res) => {
+    try {
+      const request = await storage.getCrewRequestById(req.params.id);
+      if (!request) {
+        return res.status(404).json({ error: "Hulpvraag niet gevonden" });
+      }
+
+      // Check ownership
+      const profiel = await storage.getBedrijfsprofielByUserId(req.user!.id);
+      if (!profiel || request.businessId !== profiel.id) {
+        return res.status(403).json({ error: "Niet geautoriseerd" });
+      }
+
+      const updated = await storage.updateCrewRequest(req.params.id, req.body);
+      res.json(updated);
+    } catch (error: any) {
+      console.error("Error updating crew request:", error);
+      res.status(500).json({ error: "Kon hulpvraag niet bijwerken" });
+    }
+  });
+
+  app.delete("/api/crew/requests/:id", requireAuth, async (req, res) => {
+    try {
+      const request = await storage.getCrewRequestById(req.params.id);
+      if (!request) {
+        return res.status(404).json({ error: "Hulpvraag niet gevonden" });
+      }
+
+      // Check ownership
+      const profiel = await storage.getBedrijfsprofielByUserId(req.user!.id);
+      const isOwner = profiel && request.businessId === profiel.id;
+      const isAdmin = req.user!.role === "admin" || req.user!.role === "master";
+      
+      if (!isOwner && !isAdmin) {
+        return res.status(403).json({ error: "Niet geautoriseerd" });
+      }
+
+      await storage.deleteCrewRequest(req.params.id);
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error deleting crew request:", error);
+      res.status(500).json({ error: "Kon hulpvraag niet verwijderen" });
+    }
+  });
+
+  // Crew Applications - Apply for a request
+  app.get("/api/crew/requests/:id/applications", requireAuth, async (req, res) => {
+    try {
+      const request = await storage.getCrewRequestById(req.params.id);
+      if (!request) {
+        return res.status(404).json({ error: "Hulpvraag niet gevonden" });
+      }
+
+      // Only request owner can see all applications
+      const profiel = await storage.getBedrijfsprofielByUserId(req.user!.id);
+      if (!profiel || request.businessId !== profiel.id) {
+        return res.status(403).json({ error: "Niet geautoriseerd" });
+      }
+
+      const applications = await storage.getCrewApplications(req.params.id);
+      res.json(applications);
+    } catch (error: any) {
+      console.error("Error fetching applications:", error);
+      res.status(500).json({ error: "Kon reacties niet laden" });
+    }
+  });
+
+  app.post("/api/crew/requests/:id/apply", requireAuth, async (req, res) => {
+    try {
+      const request = await storage.getCrewRequestById(req.params.id);
+      if (!request) {
+        return res.status(404).json({ error: "Hulpvraag niet gevonden" });
+      }
+
+      if (request.status !== "open") {
+        return res.status(400).json({ error: "Deze hulpvraag is niet meer open" });
+      }
+
+      // User must have a crew profile to apply
+      const crewProfile = await storage.getCrewProfile(req.user!.id);
+      if (!crewProfile) {
+        return res.status(400).json({ 
+          error: "Je moet eerst een flex-profiel aanmaken om te reageren" 
+        });
+      }
+
+      const parsed = insertCrewApplicationSchema.safeParse({
+        requestId: req.params.id,
+        crewProfileId: crewProfile.id,
+        message: req.body.message || null,
+      });
+
+      if (!parsed.success) {
+        return res.status(400).json({ error: fromZodError(parsed.error).message });
+      }
+
+      const application = await storage.createCrewApplication(parsed.data);
+      res.status(201).json(application);
+    } catch (error: any) {
+      console.error("Error creating application:", error);
+      res.status(500).json({ error: "Kon reactie niet plaatsen" });
+    }
+  });
+
+  app.get("/api/crew/my-applications", requireAuth, async (req, res) => {
+    try {
+      const crewProfile = await storage.getCrewProfile(req.user!.id);
+      if (!crewProfile) {
+        return res.json([]);
+      }
+      const applications = await storage.getCrewApplicationsByProfile(crewProfile.id);
+      res.json(applications);
+    } catch (error: any) {
+      console.error("Error fetching my applications:", error);
+      res.status(500).json({ error: "Kon mijn reacties niet laden" });
+    }
+  });
+
+  app.put("/api/crew/applications/:id/status", requireAuth, async (req, res) => {
+    try {
+      const { status } = req.body;
+      if (!["shortlisted", "accepted", "rejected"].includes(status)) {
+        return res.status(400).json({ error: "Ongeldige status" });
+      }
+
+      // TODO: Add authorization check - only request owner can update status
+      const updated = await storage.updateCrewApplication(req.params.id, status);
+      if (!updated) {
+        return res.status(404).json({ error: "Reactie niet gevonden" });
+      }
+      res.json(updated);
+    } catch (error: any) {
+      console.error("Error updating application status:", error);
+      res.status(500).json({ error: "Kon status niet bijwerken" });
     }
   });
 
