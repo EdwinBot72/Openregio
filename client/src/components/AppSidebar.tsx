@@ -10,7 +10,7 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Home, Users, Bot, Building2, User, LogOut, MessageCircle, CreditCard, Shield, Eye } from "lucide-react";
+import { Home, Users, Bot, Building2, User, LogOut, MessageCircle, CreditCard, Shield, Eye, UserPlus } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -27,6 +27,11 @@ const menuItems = [
     title: "Netwerk",
     icon: Users,
     url: "/network",
+  },
+  {
+    title: "RegioCrew",
+    icon: UserPlus,
+    url: "/regiocrew",
   },
   {
     title: "Chat",

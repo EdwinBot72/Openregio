@@ -30,6 +30,7 @@ import PrivacyDashboardPage from "@/pages/privacy-dashboard";
 import ProVisibilitySettingsPage from "@/pages/pro-visibility-settings";
 import WooBotPage from "@/pages/woo-bot";
 import WooWizardPage from "@/pages/woo-wizard";
+import RegioCrewPage from "@/pages/regiocrew";
 
 // Routes that should NOT have the sidebar/header layout
 const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck"];
@@ -67,6 +68,7 @@ function AuthenticatedRouter() {
       <Route path="/pro/visibility-settings" component={ProVisibilitySettingsPage} />
       <Route path="/woo-bot" component={WooBotPage} />
       <Route path="/woo-wizard" component={WooWizardPage} />
+      <Route path="/regiocrew" component={RegioCrewPage} />
       <Route component={NotFound} />
     </Switch>
   );
