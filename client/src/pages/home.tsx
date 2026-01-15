@@ -1,11 +1,23 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Quote, Users, Banknote, Phone, Battery, FileText, Printer, ArrowRight, Check, Sparkles, Bot, ShieldCheck, Lock, Cookie, Store, Eye, ClipboardCheck, UserPlus } from "lucide-react";
+import { Quote, Users, Banknote, Phone, Battery, FileText, Printer, ArrowRight, Check, Sparkles, Bot, ShieldCheck, Lock, Cookie, Store, Eye, ClipboardCheck, UserPlus, BookOpen, Calendar } from "lucide-react";
 import { Link } from "wouter";
+import { useQuery } from "@tanstack/react-query";
+import type { Blog } from "@shared/schema";
 import heroImage from "@assets/ChatGPT_Image_5_jan_2026,_10_22_40_1768374708257.png";
 import howItWorksImage from "@assets/a6c26f1e-d111-4563-9ebd-09dd423e6ffd_1768342440500.png";
 
 export default function HomePage() {
+  const { data: blogs = [] } = useQuery<Blog[]>({
+    queryKey: ["/api/blogs/public"],
+  });
+
+  const formatDate = (date: string | Date | null) => {
+    if (!date) return "";
+    const d = new Date(date);
+    return d.toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" });
+  };
+
   return (
     <div className="min-h-screen">
       {/* Navigation */}
@@ -397,6 +409,59 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Blog Section */}
+      {blogs.length > 0 && (
+        <section className="py-16 px-4 bg-muted/20" data-testid="section-blogs">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-10">
+              <h2 className="font-accent text-3xl md:text-4xl font-bold mb-4 flex items-center justify-center gap-3">
+                <BookOpen className="h-8 w-8 text-primary" />
+                Laatste nieuws
+              </h2>
+              <p className="text-muted-foreground max-w-2xl mx-auto">
+                Tips, updates en inzichten voor regionale ondernemers
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {blogs.slice(0, 6).map((blog) => (
+                <Link key={blog.id} href={`/blog/${blog.slug}`}>
+                  <Card 
+                    className="h-full hover-elevate active-elevate-2 cursor-pointer transition-all" 
+                    data-testid={`card-blog-${blog.id}`}
+                  >
+                    {blog.featuredImage && (
+                      <div className="aspect-video overflow-hidden rounded-t-md">
+                        <img 
+                          src={blog.featuredImage} 
+                          alt={blog.title} 
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    <CardContent className={`p-5 ${!blog.featuredImage ? "pt-6" : ""}`}>
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground mb-2">
+                        <Calendar className="h-3 w-3" />
+                        {formatDate(blog.publishedAt)}
+                      </div>
+                      <h3 className="font-accent font-semibold text-lg mb-2 line-clamp-2">
+                        {blog.title}
+                      </h3>
+                      <p className="text-sm text-muted-foreground line-clamp-3">
+                        {blog.excerpt}
+                      </p>
+                      <div className="mt-4 text-sm text-primary font-medium flex items-center gap-1">
+                        Lees meer <ArrowRight className="h-3 w-3" />
+                      </div>
+                    </CardContent>
+                  </Card>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Final CTA Section */}
       <section className="py-16 px-4 bg-primary/5">

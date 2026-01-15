@@ -31,9 +31,11 @@ import ProVisibilitySettingsPage from "@/pages/pro-visibility-settings";
 import WooBotPage from "@/pages/woo-bot";
 import WooWizardPage from "@/pages/woo-wizard";
 import RegioCrewPage from "@/pages/regiocrew";
+import BlogDetailPage from "@/pages/blog-detail";
+import AdminBlogsPage from "@/pages/admin/blogs";
 
 // Routes that should NOT have the sidebar/header layout
-const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck"];
+const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug"];
 
 function PublicRouter() {
   return (
@@ -48,6 +50,7 @@ function PublicRouter() {
       <Route path="/privacy" component={PrivacyPage} />
       <Route path="/voorwaarden" component={VoorwaardenPage} />
       <Route path="/basischeck" component={BasischeckPage} />
+      <Route path="/blog/:slug" component={BlogDetailPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -69,6 +72,7 @@ function AuthenticatedRouter() {
       <Route path="/woo-bot" component={WooBotPage} />
       <Route path="/woo-wizard" component={WooWizardPage} />
       <Route path="/regiocrew" component={RegioCrewPage} />
+      <Route path="/admin/blogs" component={AdminBlogsPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -85,8 +89,9 @@ function AppContent() {
   const [isPrivacyPage] = useRoute("/privacy");
   const [isVoorwaardenPage] = useRoute("/voorwaarden");
   const [isBasischeckPage] = useRoute("/basischeck");
+  const [isBlogDetailPage] = useRoute("/blog/:slug");
   
-  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isLidmaatschapPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage;
+  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isLidmaatschapPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage;
 
   if (isPublicRoute) {
     return <PublicRouter />;
