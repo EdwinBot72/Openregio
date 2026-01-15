@@ -714,8 +714,12 @@ export const insertBlogSchema = createInsertSchema(blogs).omit({
   createdAt: true,
   updatedAt: true,
   publishedAt: true,
+  authorId: true,
+  authorName: true,
 }).extend({
   status: z.enum(BLOG_STATUS).optional(),
+  authorId: z.string().optional(),
+  authorName: z.string().optional(),
 });
 
 export const insertChatRoomSchema = createInsertSchema(chatRooms).omit({
