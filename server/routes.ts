@@ -2255,6 +2255,110 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
+  // =================================
+  // BLOGS (public homepage content)
+  // =================================
+
+  // Public: Get published blogs for homepage (no auth required)
+  app.get("/api/blogs/public", async (_req, res) => {
+    try {
+      const blogs = await storage.getPublishedBlogs(6);
+      res.json(blogs);
+    } catch (error: any) {
+      console.error("Error fetching public blogs:", error);
+      res.status(500).json({ error: "Kon blogs niet laden" });
+    }
+  });
+
+  // Public: Get single blog by slug (no auth required)
+  app.get("/api/blogs/public/:slug", async (req, res) => {
+    try {
+      const blog = await storage.getBlogBySlug(req.params.slug);
+      if (!blog || blog.status !== "published") {
+        return res.status(404).json({ error: "Blog niet gevonden" });
+      }
+      res.json(blog);
+    } catch (error: any) {
+      console.error("Error fetching blog:", error);
+      res.status(500).json({ error: "Kon blog niet laden" });
+    }
+  });
+
+  // Admin: Get all blogs (requires admin)
+  app.get("/api/blogs", requireAdmin, async (req, res) => {
+    try {
+      const status = req.query.status as string | undefined;
+      const blogs = await storage.getBlogs(status);
+      res.json(blogs);
+    } catch (error: any) {
+      console.error("Error fetching blogs:", error);
+      res.status(500).json({ error: "Kon blogs niet laden" });
+    }
+  });
+
+  // Admin: Get single blog by ID (requires admin)
+  app.get("/api/blogs/:id", requireAdmin, async (req, res) => {
+    try {
+      const blog = await storage.getBlogById(req.params.id);
+      if (!blog) {
+        return res.status(404).json({ error: "Blog niet gevonden" });
+      }
+      res.json(blog);
+    } catch (error: any) {
+      console.error("Error fetching blog:", error);
+      res.status(500).json({ error: "Kon blog niet laden" });
+    }
+  });
+
+  // Admin: Create blog (requires admin)
+  app.post("/api/blogs", requireAdmin, async (req, res) => {
+    try {
+      const { insertBlogSchema } = await import("@shared/schema");
+      const result = insertBlogSchema.safeParse(req.body);
+      if (!result.success) {
+        return res.status(400).json({ error: fromZodError(result.error).message });
+      }
+
+      const blog = await storage.createBlog({
+        ...result.data,
+        authorId: req.user!.id,
+        authorName: [req.user!.firstName, req.user!.lastName].filter(Boolean).join(" ") || req.user!.email,
+      });
+      res.status(201).json(blog);
+    } catch (error: any) {
+      console.error("Error creating blog:", error);
+      res.status(500).json({ error: "Kon blog niet aanmaken" });
+    }
+  });
+
+  // Admin: Update blog (requires admin)
+  app.put("/api/blogs/:id", requireAdmin, async (req, res) => {
+    try {
+      const updated = await storage.updateBlog(req.params.id, req.body);
+      if (!updated) {
+        return res.status(404).json({ error: "Blog niet gevonden" });
+      }
+      res.json(updated);
+    } catch (error: any) {
+      console.error("Error updating blog:", error);
+      res.status(500).json({ error: "Kon blog niet bijwerken" });
+    }
+  });
+
+  // Admin: Delete blog (requires admin)
+  app.delete("/api/blogs/:id", requireAdmin, async (req, res) => {
+    try {
+      const deleted = await storage.deleteBlog(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Blog niet gevonden" });
+      }
+      res.json({ success: true });
+    } catch (error: any) {
+      console.error("Error deleting blog:", error);
+      res.status(500).json({ error: "Kon blog niet verwijderen" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

@@ -40,6 +40,8 @@ import {
   type InsertCrewRequest,
   type CrewApplication,
   type InsertCrewApplication,
+  type Blog,
+  type InsertBlog,
   entrepreneurs,
   proposals,
   votes,
@@ -61,6 +63,7 @@ import {
   crewProfiles,
   crewRequests,
   crewApplications,
+  blogs,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
@@ -211,6 +214,15 @@ export interface IStorage {
   getCrewApplicationsByProfile(profileId: string): Promise<CrewApplication[]>;
   createCrewApplication(application: InsertCrewApplication): Promise<CrewApplication>;
   updateCrewApplication(id: string, status: string): Promise<CrewApplication | undefined>;
+
+  // Blogs
+  getBlogs(status?: string): Promise<Blog[]>;
+  getPublishedBlogs(limit?: number): Promise<Blog[]>;
+  getBlogById(id: string): Promise<Blog | undefined>;
+  getBlogBySlug(slug: string): Promise<Blog | undefined>;
+  createBlog(blog: InsertBlog): Promise<Blog>;
+  updateBlog(id: string, blog: Partial<InsertBlog>): Promise<Blog | undefined>;
+  deleteBlog(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -1368,6 +1380,62 @@ export class MemStorage implements IStorage {
     this.crewApplicationsList.set(id, updated);
     return updated;
   }
+
+  // Blogs (MemStorage stub implementations)
+  private blogsList: Map<string, Blog> = new Map();
+
+  async getBlogs(status?: string): Promise<Blog[]> {
+    const allBlogs = Array.from(this.blogsList.values());
+    if (status) return allBlogs.filter(b => b.status === status);
+    return allBlogs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+  }
+
+  async getPublishedBlogs(limit?: number): Promise<Blog[]> {
+    const published = Array.from(this.blogsList.values())
+      .filter(b => b.status === "published")
+      .sort((a, b) => new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime());
+    return limit ? published.slice(0, limit) : published;
+  }
+
+  async getBlogById(id: string): Promise<Blog | undefined> {
+    return this.blogsList.get(id);
+  }
+
+  async getBlogBySlug(slug: string): Promise<Blog | undefined> {
+    return Array.from(this.blogsList.values()).find(b => b.slug === slug);
+  }
+
+  async createBlog(blog: InsertBlog): Promise<Blog> {
+    const id = randomUUID();
+    const newBlog: Blog = {
+      id,
+      ...blog,
+      status: blog.status || "draft",
+      featuredImage: blog.featuredImage || null,
+      publishedAt: blog.status === "published" ? new Date() : null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.blogsList.set(id, newBlog);
+    return newBlog;
+  }
+
+  async updateBlog(id: string, blog: Partial<InsertBlog>): Promise<Blog | undefined> {
+    const existing = this.blogsList.get(id);
+    if (!existing) return undefined;
+    const updated: Blog = {
+      ...existing,
+      ...blog,
+      publishedAt: blog.status === "published" && !existing.publishedAt ? new Date() : existing.publishedAt,
+      updatedAt: new Date(),
+    };
+    this.blogsList.set(id, updated);
+    return updated;
+  }
+
+  async deleteBlog(id: string): Promise<boolean> {
+    return this.blogsList.delete(id);
+  }
 }
 
 class DbStorage implements IStorage {
@@ -2147,6 +2215,67 @@ class DbStorage implements IStorage {
       .where(eq(crewApplications.id, id))
       .returning();
     return result;
+  }
+
+  // Blogs
+  async getBlogs(status?: string): Promise<Blog[]> {
+    if (status) {
+      return await db.select().from(blogs)
+        .where(sql`${blogs.status} = ${status}`)
+        .orderBy(desc(blogs.createdAt));
+    }
+    return await db.select().from(blogs).orderBy(desc(blogs.createdAt));
+  }
+
+  async getPublishedBlogs(limit?: number): Promise<Blog[]> {
+    const query = db.select().from(blogs)
+      .where(sql`${blogs.status} = 'published'`)
+      .orderBy(desc(blogs.publishedAt));
+    
+    if (limit) {
+      return await query.limit(limit);
+    }
+    return await query;
+  }
+
+  async getBlogById(id: string): Promise<Blog | undefined> {
+    const [blog] = await db.select().from(blogs).where(eq(blogs.id, id));
+    return blog;
+  }
+
+  async getBlogBySlug(slug: string): Promise<Blog | undefined> {
+    const [blog] = await db.select().from(blogs).where(eq(blogs.slug, slug));
+    return blog;
+  }
+
+  async createBlog(blog: InsertBlog): Promise<Blog> {
+    const [result] = await db.insert(blogs).values({
+      ...blog,
+      publishedAt: blog.status === "published" ? new Date() : null,
+    }).returning();
+    return result;
+  }
+
+  async updateBlog(id: string, blog: Partial<InsertBlog>): Promise<Blog | undefined> {
+    const existing = await this.getBlogById(id);
+    if (!existing) return undefined;
+
+    const updateData: Record<string, any> = { ...blog, updatedAt: new Date() };
+    
+    if (blog.status === "published" && !existing.publishedAt) {
+      updateData.publishedAt = new Date();
+    }
+
+    const [result] = await db.update(blogs)
+      .set(updateData)
+      .where(eq(blogs.id, id))
+      .returning();
+    return result;
+  }
+
+  async deleteBlog(id: string): Promise<boolean> {
+    const result = await db.delete(blogs).where(eq(blogs.id, id)).returning();
+    return result.length > 0;
   }
 }
 
