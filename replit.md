@@ -84,6 +84,7 @@ Preferred communication style: Simple, everyday language.
 - **Bedrijfsprofielen**: New Dutch-first business profile model with fields like `naam`, `eigenaarnaam`, `categorieId`, `beschrijving`, `stemtoon`, and `status` (concept, actief, inactief). One-to-one relationship with users.
 - **Proposals**: For democratic governance, including `title`, `description`, `proposerId`, `status`, and `closesAt`. Separate `Votes` table for user votes.
 - **Votes**: Records user votes on proposals, ensuring uniqueness per user per proposal.
+- **Blogs**: Content management for homepage articles. Fields: `title`, `slug` (unique URL identifier), `excerpt`, `content`, `authorId`, `authorName`, `featuredImage` (optional), `status` (draft/published/archived), `publishedAt`, `createdAt`, `updatedAt`.
 - **Activities**: For tracking user engagement.
 - **User Profiles**: Including `pain points` for personalized onboarding.
 - **Onboarding Tokens**: Secure, time-limited tokens for initial login post-payment integration.
