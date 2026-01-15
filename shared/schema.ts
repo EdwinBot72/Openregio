@@ -123,6 +123,24 @@ export const activities = pgTable("activities", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Blogs table for public blog posts on homepage
+export const BLOG_STATUS = ["draft", "published", "archived"] as const;
+
+export const blogs = pgTable("blogs", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: text("title").notNull(),
+  slug: text("slug").notNull().unique(),
+  excerpt: text("excerpt").notNull(),
+  content: text("content").notNull(),
+  authorId: varchar("author_id").notNull().references(() => users.id),
+  authorName: text("author_name").notNull(),
+  featuredImage: text("featured_image"),
+  status: text("status", { enum: BLOG_STATUS }).notNull().default("draft"),
+  publishedAt: timestamp("published_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
 export const chatRooms = pgTable("chat_rooms", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   name: text("name").notNull(),
@@ -691,6 +709,15 @@ export const insertActivitySchema = createInsertSchema(activities).omit({
   createdAt: true,
 });
 
+export const insertBlogSchema = createInsertSchema(blogs).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  publishedAt: true,
+}).extend({
+  status: z.enum(BLOG_STATUS).optional(),
+});
+
 export const insertChatRoomSchema = createInsertSchema(chatRooms).omit({
   id: true,
   createdAt: true,
@@ -756,6 +783,9 @@ export type ProposalSummary = {
 
 export type InsertActivity = z.infer<typeof insertActivitySchema>;
 export type Activity = typeof activities.$inferSelect;
+
+export type InsertBlog = z.infer<typeof insertBlogSchema>;
+export type Blog = typeof blogs.$inferSelect;
 
 export type InsertChatRoom = z.infer<typeof insertChatRoomSchema>;
 export type ChatRoom = typeof chatRooms.$inferSelect;
