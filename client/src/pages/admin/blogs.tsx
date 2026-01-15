@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Eye, Calendar, BookOpen } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, Calendar, BookOpen, Image } from "lucide-react";
 import type { Blog, InsertBlog } from "@shared/schema";
 
 export default function AdminBlogsPage() {
@@ -230,14 +230,35 @@ export default function AdminBlogsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="featuredImage">Afbeelding URL (optioneel)</Label>
+                <Label htmlFor="featuredImage">
+                  <div className="flex items-center gap-2">
+                    <Image className="h-4 w-4" />
+                    Uitgelichte afbeelding (optioneel)
+                  </div>
+                </Label>
                 <Input
                   id="featuredImage"
                   value={formData.featuredImage || ""}
                   onChange={(e) => setFormData({ ...formData, featuredImage: e.target.value })}
-                  placeholder="https://..."
+                  placeholder="Plak hier een afbeelding URL (https://...)"
                   data-testid="input-blog-image"
                 />
+                {formData.featuredImage && (
+                  <div className="mt-2 rounded-md overflow-hidden border">
+                    <img 
+                      src={formData.featuredImage} 
+                      alt="Preview" 
+                      className="w-full h-40 object-cover"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                      }}
+                      data-testid="preview-blog-image"
+                    />
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  Tip: Upload een afbeelding naar een dienst zoals Imgur of Cloudinary en plak de URL hier
+                </p>
               </div>
 
               <div className="space-y-2">
@@ -295,9 +316,25 @@ export default function AdminBlogsPage() {
             <Card key={blog.id} data-testid={`card-blog-admin-${blog.id}`}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
+                  {blog.featuredImage && (
+                    <div className="w-24 h-16 rounded overflow-hidden shrink-0 bg-muted">
+                      <img 
+                        src={blog.featuredImage} 
+                        alt={blog.title}
+                        className="w-full h-full object-cover"
+                        data-testid={`thumbnail-blog-${blog.id}`}
+                      />
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1">
                       {getStatusBadge(blog.status)}
+                      {!blog.featuredImage && (
+                        <Badge variant="outline" className="text-xs">
+                          <Image className="h-3 w-3 mr-1" />
+                          Geen afbeelding
+                        </Badge>
+                      )}
                       <span className="text-sm text-muted-foreground">
                         /blog/{blog.slug}
                       </span>

@@ -39,6 +39,13 @@ export default function HomePage() {
               Lidmaatschap
             </Link>
             <Link 
+              href="/blogs" 
+              className="text-sm font-medium hover:text-primary transition-colors" 
+              data-testid="link-blogs"
+            >
+              Blogs
+            </Link>
+            <Link 
               href="/login" 
               className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors hover-elevate active-elevate-2 h-8 px-3 py-2" 
               data-testid="button-nav-login"

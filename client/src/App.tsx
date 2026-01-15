@@ -32,10 +32,11 @@ import WooBotPage from "@/pages/woo-bot";
 import WooWizardPage from "@/pages/woo-wizard";
 import RegioCrewPage from "@/pages/regiocrew";
 import BlogDetailPage from "@/pages/blog-detail";
+import BlogsPage from "@/pages/blogs";
 import AdminBlogsPage from "@/pages/admin/blogs";
 
 // Routes that should NOT have the sidebar/header layout
-const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug"];
+const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs"];
 
 function PublicRouter() {
   return (
@@ -51,6 +52,7 @@ function PublicRouter() {
       <Route path="/voorwaarden" component={VoorwaardenPage} />
       <Route path="/basischeck" component={BasischeckPage} />
       <Route path="/blog/:slug" component={BlogDetailPage} />
+      <Route path="/blogs" component={BlogsPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -90,8 +92,9 @@ function AppContent() {
   const [isVoorwaardenPage] = useRoute("/voorwaarden");
   const [isBasischeckPage] = useRoute("/basischeck");
   const [isBlogDetailPage] = useRoute("/blog/:slug");
+  const [isBlogsPage] = useRoute("/blogs");
   
-  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isLidmaatschapPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage;
+  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isLidmaatschapPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage || isBlogsPage;
 
   if (isPublicRoute) {
     return <PublicRouter />;
