@@ -83,8 +83,8 @@ export default function DashboardPage() {
         <Card data-testid="card-mijn-bedrijf">
           <CardContent className="p-5 flex flex-col gap-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-primary/10">
-                <Building2 className="w-5 h-5 text-primary" />
+              <div className="p-2 rounded-full bg-regio-blue/10">
+                <Building2 className="w-5 h-5 text-regio-blue" />
               </div>
               <div>
                 <h2 className="font-semibold">Mijn bedrijf</h2>
@@ -116,8 +116,8 @@ export default function DashboardPage() {
         <Card data-testid="card-leden">
           <CardContent className="p-5 flex flex-col gap-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-primary/10">
-                <Users className="w-5 h-5 text-primary" />
+              <div className="p-2 rounded-full bg-regio-blue/10">
+                <Users className="w-5 h-5 text-regio-blue" />
               </div>
               <div>
                 <h2 className="font-semibold">Leden in jouw regio</h2>
@@ -144,8 +144,8 @@ export default function DashboardPage() {
         <Card data-testid="card-vraag-aanbod">
           <CardContent className="p-5 flex flex-col gap-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-primary/10">
-                <MessageCircle className="w-5 h-5 text-primary" />
+              <div className="p-2 rounded-full bg-regio-blue/10">
+                <MessageCircle className="w-5 h-5 text-regio-blue" />
               </div>
               <div>
                 <h2 className="font-semibold">Vraag & aanbod</h2>
@@ -177,8 +177,8 @@ export default function DashboardPage() {
         <Card data-testid="card-basischeck">
           <CardContent className="p-5 flex flex-col gap-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-primary/10">
-                <ShieldCheck className="w-5 h-5 text-primary" />
+              <div className="p-2 rounded-full bg-regio-graph/10">
+                <ShieldCheck className="w-5 h-5 text-regio-graph" />
               </div>
               <div>
                 <h2 className="font-semibold">Ondernemen terug naar de basis</h2>
@@ -230,8 +230,8 @@ export default function DashboardPage() {
         <Card data-testid="card-print">
           <CardContent className="p-5 flex flex-col gap-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-primary/10">
-                <Printer className="w-5 h-5 text-primary" />
+              <div className="p-2 rounded-full bg-regio-graph/10">
+                <Printer className="w-5 h-5 text-regio-graph" />
               </div>
               <div>
                 <h2 className="font-semibold">Printbare overzichten</h2>
@@ -254,8 +254,8 @@ export default function DashboardPage() {
         <Card data-testid="card-regiopunten">
           <CardContent className="p-5 flex flex-col gap-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-primary/10">
-                <Coins className="w-5 h-5 text-primary" />
+              <div className="p-2 rounded-full bg-regio-alert/10">
+                <Coins className="w-5 h-5 text-regio-alert" />
               </div>
               <div>
                 <h2 className="font-semibold">RegioPunten (pilot)</h2>
@@ -277,8 +277,8 @@ export default function DashboardPage() {
         <Card data-testid="card-regiobot" className={!isPro ? "opacity-60" : ""}>
           <CardContent className="p-5 flex flex-col gap-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-primary/10">
-                <Bot className="w-5 h-5 text-primary" />
+              <div className="p-2 rounded-full bg-regio-purple/10">
+                <Bot className="w-5 h-5 text-regio-purple" />
               </div>
               <div>
                 <h2 className="font-semibold">RegioBot AI</h2>
@@ -317,15 +317,15 @@ export default function DashboardPage() {
       {isAdmin && (
         <section className="space-y-4">
           <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-primary" />
+            <Shield className="w-5 h-5 text-regio-purple" />
             <h2 className="font-semibold text-lg">Admin Tools</h2>
           </div>
           <div className="grid md:grid-cols-2 gap-4">
             <Card data-testid="card-admin-export">
               <CardContent className="p-5 flex flex-col gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-full bg-primary/10">
-                    <Download className="w-5 h-5 text-primary" />
+                  <div className="p-2 rounded-full bg-regio-purple/10">
+                    <Download className="w-5 h-5 text-regio-purple" />
                   </div>
                   <div>
                     <h2 className="font-semibold">Nieuwe leden deze week</h2>
@@ -354,8 +354,8 @@ export default function DashboardPage() {
             <Card data-testid="card-admin-stats">
               <CardContent className="p-5 flex flex-col gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-full bg-primary/10">
-                    <Users className="w-5 h-5 text-primary" />
+                  <div className="p-2 rounded-full bg-regio-purple/10">
+                    <Users className="w-5 h-5 text-regio-purple" />
                   </div>
                   <div>
                     <h2 className="font-semibold">Platform statistieken</h2>

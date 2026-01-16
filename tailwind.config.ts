@@ -81,6 +81,13 @@ export default {
           busy: "rgb(239 68 68)",
           offline: "rgb(156 163 175)",
         },
+        regio: {
+          purple: "#6A5CFF",
+          blue: "#2F6FED",
+          graph: "#2B2E34",
+          alert: "#F59E0B",
+          base: "#F5F7FA",
+        },
       },
       fontFamily: {
         sans: ["var(--font-sans)"],

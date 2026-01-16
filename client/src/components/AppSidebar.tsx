@@ -22,31 +22,37 @@ const menuItems = [
     title: "Dashboard",
     icon: Home,
     url: "/dashboard",
+    color: "text-regio-graph",
   },
   {
     title: "Netwerk",
     icon: Users,
     url: "/network",
+    color: "text-regio-blue",
   },
   {
     title: "RegioCrew",
     icon: UserPlus,
     url: "/regiocrew",
+    color: "text-regio-blue",
   },
   {
     title: "Chat",
     icon: MessageCircle,
     url: "/chat",
+    color: "text-regio-blue",
   },
   {
     title: "RegioBot",
     icon: Bot,
     url: "/regiobot",
+    color: "text-regio-purple",
   },
   {
     title: "Coöperatie",
     icon: Building2,
     url: "/cooperative",
+    color: "text-regio-graph",
   },
 ];
 
@@ -93,7 +99,7 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild data-testid={`link-${item.title.toLowerCase()}`}>
                     <a href={item.url}>
-                      <item.icon className="h-4 w-4" />
+                      <item.icon className={`h-4 w-4 ${item.color}`} />
                       <span>{item.title}</span>
                     </a>
                   </SidebarMenuButton>
@@ -110,7 +116,7 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton asChild data-testid="link-bedrijfsprofiel">
                   <a href="/bedrijfsprofiel">
-                    <Building2 className="h-4 w-4" />
+                    <Building2 className="h-4 w-4 text-regio-blue" />
                     <span>Bedrijfsprofiel</span>
                   </a>
                 </SidebarMenuButton>
@@ -118,7 +124,7 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton asChild data-testid="link-lidmaatschap">
                   <a href="/lidmaatschap">
-                    <CreditCard className="h-4 w-4" />
+                    <CreditCard className="h-4 w-4 text-regio-alert" />
                     <span>Lidmaatschap</span>
                   </a>
                 </SidebarMenuButton>
@@ -126,7 +132,7 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton asChild data-testid="link-privacy-dashboard">
                   <a href="/privacy-dashboard">
-                    <Shield className="h-4 w-4" />
+                    <Shield className="h-4 w-4 text-regio-graph" />
                     <span>Privacy & Gegevens</span>
                   </a>
                 </SidebarMenuButton>
@@ -135,7 +141,7 @@ export function AppSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild data-testid="link-visibility-settings">
                     <a href="/pro/visibility-settings">
-                      <Eye className="h-4 w-4" />
+                      <Eye className="h-4 w-4 text-regio-blue" />
                       <span>Zichtbaarheidsbeheer</span>
                     </a>
                   </SidebarMenuButton>
@@ -153,7 +159,7 @@ export function AppSidebar() {
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild data-testid="link-admin-blogs">
                     <a href="/admin/blogs">
-                      <BookOpen className="h-4 w-4" />
+                      <BookOpen className="h-4 w-4 text-regio-purple" />
                       <span>Blogs</span>
                     </a>
                   </SidebarMenuButton>
