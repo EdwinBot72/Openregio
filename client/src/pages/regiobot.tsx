@@ -4,51 +4,51 @@ import { Button } from "@/components/ui/button";
 import {
   Scale,
   FileText,
-  BarChart3,
-  Megaphone,
-  UploadCloud,
-  MapPin,
   Crown,
   Zap,
   Tag,
   TrendingUp,
+  Search,
+  CheckCircle,
+  HelpCircle,
+  FileQuestion,
+  Clock,
+  Library,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
 
-type Mode = "juridisch" | "documenten" | "cijfers" | "marketing" | "zichtbaarheid";
+type ActionType = "analyze" | "mandate" | "missing" | "followup" | "timeline" | null;
 
 export default function RegioBotPage() {
   const { user, isLoading } = useAuth();
   const isPro = user?.plan === "pro";
 
-  const [mode, setMode] = useState<Mode>("juridisch");
   const [message, setMessage] = useState("");
-  const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
   const [answer, setAnswer] = useState<string | null>(null);
+  const [activeAction, setActiveAction] = useState<ActionType>(null);
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    if (!e.target.files) return;
-    setFiles(Array.from(e.target.files));
+  function handleActionClick(action: ActionType, prefix: string) {
+    setActiveAction(action);
+    if (!message.trim()) {
+      setMessage(prefix);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!message.trim() && files.length === 0) return;
+    if (!message.trim()) return;
 
     setLoading(true);
     setAnswer(null);
 
-    const formData = new FormData();
-    formData.append("mode", mode);
-    formData.append("message", message);
-    files.forEach((f) => formData.append("files", f));
-
     try {
       const res = await fetch("/api/regiobot", {
         method: "POST",
-        body: formData,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ question: message }),
+        credentials: "include",
       });
 
       if (!res.ok) {
@@ -84,7 +84,7 @@ export default function RegioBotPage() {
           <CardContent className="space-y-6">
             <p className="text-center text-muted-foreground">
               Upgrade naar OpenRegio Pro om toegang te krijgen tot onze
-              AI-assistent en veel meer functies.
+              WOO & Juridische AI-assistent.
             </p>
 
             <div className="grid gap-4 md:grid-cols-2">
@@ -94,10 +94,10 @@ export default function RegioBotPage() {
                     <Zap className="h-5 w-5 text-primary shrink-0 mt-1" />
                     <div>
                       <h3 className="font-semibold mb-2">
-                        AI-Assistent RegioBot
+                        WOO & Juridische AI
                       </h3>
                       <p className="text-sm text-muted-foreground">
-                        Laat AI je helpen met content, marketing en lokale SEO
+                        Analyseer wet- en regelgeving die ondernemers raakt
                       </p>
                     </div>
                   </div>
@@ -109,10 +109,9 @@ export default function RegioBotPage() {
                   <div className="flex items-start gap-3">
                     <FileText className="h-5 w-5 text-primary shrink-0 mt-1" />
                     <div>
-                      <h3 className="font-semibold mb-2">Onbeperkte content</h3>
+                      <h3 className="font-semibold mb-2">Collectieve bibliotheek</h3>
                       <p className="text-sm text-muted-foreground">
-                        Schrijf zoveel posts, aanbiedingen en teksten als je
-                        wilt
+                        Toegang tot gedeelde WOO-verzoeken en besluiten
                       </p>
                     </div>
                   </div>
@@ -124,9 +123,9 @@ export default function RegioBotPage() {
                   <div className="flex items-start gap-3">
                     <Tag className="h-5 w-5 text-primary shrink-0 mt-1" />
                     <div>
-                      <h3 className="font-semibold mb-2">Slimme templates</h3>
+                      <h3 className="font-semibold mb-2">Mandaat & bevoegdheden</h3>
                       <p className="text-sm text-muted-foreground">
-                        Gebruik professionele templates voor je business
+                        Inzicht in wie wat mag beslissen
                       </p>
                     </div>
                   </div>
@@ -164,99 +163,70 @@ export default function RegioBotPage() {
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-      <header className="space-y-2">
-        <h1 className="text-2xl md:text-3xl font-bold">
-          RegioBot – jouw juridische & business AI
+      <header className="space-y-4">
+        <h1 className="text-2xl md:text-3xl font-bold" data-testid="heading-regiobot">
+          RegioBot – Regionale WOO & Juridische AI
         </h1>
         <p className="text-sm md:text-base text-muted-foreground">
-          Stel juridische, zakelijke en praktische vragen over jouw bedrijf.
-          Upload documenten, cijfers en afbeeldingen, en laat RegioBot meedenken
-          – van bezwaarschriften en contracten tot lokale zichtbaarheid, offline
-          én online, zonder afhankelijk te zijn van grote platformen.
+          RegioBot helpt bij het analyseren van wet- en regelgeving die ondernemers raakt.
+          Samen bouwen we aan een gezamenlijke WOO-bibliotheek voor toezicht op beleid,
+          mandaten en uitvoeringsstructuren.
         </p>
-        <p className="text-[11px] text-muted-foreground">
-          Alles wat je hier invoert (incl. uploads) is alleen zichtbaar voor
-          jou. Niets wordt automatisch gedeeld met andere leden, tenzij jij daar
-          zelf iets van publiceert.
+        <p className="text-sm text-amber-700 dark:text-amber-400 bg-amber-50 dark:bg-amber-950/30 p-3 rounded-md border border-amber-200 dark:border-amber-800">
+          <strong>Niet opgenomen:</strong> verkeersboetes, snelheid, parkeren,
+          persoonlijke dossiers of individuele handhaving.
         </p>
       </header>
 
-      <section className="flex flex-wrap gap-2 text-xs md:text-sm">
-        <ModeButton
-          icon={<Scale className="w-4 h-4" />}
-          label="Juridisch loket"
-          active={mode === "juridisch"}
-          onClick={() => setMode("juridisch")}
-          testId="button-mode-juridisch"
+      <section className="flex flex-wrap gap-2">
+        <ActionButton
+          icon={<Search className="w-4 h-4" />}
+          label="Analyseer besluit"
+          active={activeAction === "analyze"}
+          onClick={() => handleActionClick("analyze", "Analyseer dit besluit: ")}
+          testId="button-action-analyze"
         />
-        <ModeButton
-          icon={<FileText className="w-4 h-4" />}
-          label="Brieven & documenten"
-          active={mode === "documenten"}
-          onClick={() => setMode("documenten")}
-          testId="button-mode-documenten"
+        <ActionButton
+          icon={<CheckCircle className="w-4 h-4" />}
+          label="Controleer mandaat"
+          active={activeAction === "mandate"}
+          onClick={() => handleActionClick("mandate", "Controleer het mandaat voor: ")}
+          testId="button-action-mandate"
         />
-        <ModeButton
-          icon={<BarChart3 className="w-4 h-4" />}
-          label="Cijfers & Excel"
-          active={mode === "cijfers"}
-          onClick={() => setMode("cijfers")}
-          testId="button-mode-cijfers"
+        <ActionButton
+          icon={<HelpCircle className="w-4 h-4" />}
+          label="Wat ontbreekt?"
+          active={activeAction === "missing"}
+          onClick={() => handleActionClick("missing", "Wat ontbreekt in dit dossier: ")}
+          testId="button-action-missing"
         />
-        <ModeButton
-          icon={<Megaphone className="w-4 h-4" />}
-          label="Marketing & content"
-          active={mode === "marketing"}
-          onClick={() => setMode("marketing")}
-          testId="button-mode-marketing"
+        <ActionButton
+          icon={<FileQuestion className="w-4 h-4" />}
+          label="Genereer vervolg-WOO"
+          active={activeAction === "followup"}
+          onClick={() => handleActionClick("followup", "Genereer vervolg-WOO vragen voor: ")}
+          testId="button-action-followup"
         />
-        <ModeButton
-          icon={<MapPin className="w-4 h-4" />}
-          label="Zichtbaarheid & klantenstroom"
-          active={mode === "zichtbaarheid"}
-          onClick={() => setMode("zichtbaarheid")}
-          testId="button-mode-zichtbaarheid"
+        <ActionButton
+          icon={<Clock className="w-4 h-4" />}
+          label="Bouw tijdlijn"
+          active={activeAction === "timeline"}
+          onClick={() => handleActionClick("timeline", "Bouw een tijdlijn op basis van: ")}
+          testId="button-action-timeline"
         />
       </section>
 
-      <div className="grid md:grid-cols-[2fr,1.4fr] gap-6">
+      <div className="grid md:grid-cols-[2fr,1.2fr] gap-6">
         <Card className="h-full">
           <CardContent className="p-5 space-y-4">
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <label className="text-sm font-medium">
-                  Bestanden toevoegen (optioneel)
-                </label>
-                <label className="border border-dashed rounded-lg p-4 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-muted/40 text-center">
-                  <UploadCloud className="w-5 h-5 text-muted-foreground" />
-                  <span className="text-xs text-muted-foreground">
-                    Sleep bestanden hierheen of klik om te kiezen.
-                  </span>
-                  <span className="text-[10px] text-muted-foreground">
-                    Ondersteund: PDF, DOCX, JPG/PNG, XLSX, CSV
-                  </span>
-                  <input
-                    type="file"
-                    multiple
-                    className="hidden"
-                    onChange={handleFileChange}
-                    data-testid="input-file-upload"
-                  />
-                </label>
-                {files.length > 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    Geselecteerd: {files.map((f) => f.name).join(", ")}
-                  </p>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">
                   Jouw vraag aan RegioBot
                 </label>
                 <textarea
-                  className="w-full border rounded-md p-2 text-sm min-h-[140px] bg-background"
-                  placeholder={placeholderForMode(mode)}
+                  className="w-full border rounded-md p-3 text-sm min-h-[160px] bg-background"
+                  placeholder="Stel een vraag over wet- en regelgeving in jouw regio, of plak hier een WOO-verzoek, besluit of antwoord om te analyseren."
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   data-testid="textarea-regiobot-message"
@@ -266,17 +236,16 @@ export default function RegioBotPage() {
               <div className="flex items-center justify-between gap-2">
                 <Button
                   type="submit"
-                  disabled={loading || (!message.trim() && files.length === 0)}
+                  disabled={loading || !message.trim()}
                   data-testid="button-submit-regiobot"
                 >
                   {loading
-                    ? "RegioBot is aan het nadenken..."
-                    : "Stuur naar RegioBot"}
+                    ? "RegioBot analyseert..."
+                    : "Analyseer met RegioBot"}
                 </Button>
                 <p className="text-[10px] text-muted-foreground max-w-xs text-right">
-                  RegioBot is geen advocaat of accountant. Gebruik het als
-                  slimme sparringpartner; bij zware zaken altijd een
-                  professional inschakelen.
+                  RegioBot geeft geen juridisch advies. Gebruik het voor analyse
+                  en onderzoek; bij complexe zaken altijd een specialist raadplegen.
                 </p>
               </div>
             </form>
@@ -284,10 +253,10 @@ export default function RegioBotPage() {
             {answer && (
               <div className="border-t pt-4 mt-4">
                 <h2 className="text-sm font-semibold mb-2">
-                  Antwoord van RegioBot
+                  Analyse van RegioBot
                 </h2>
                 <div
-                  className="text-sm whitespace-pre-wrap"
+                  className="text-sm whitespace-pre-wrap bg-muted/30 p-4 rounded-md"
                   data-testid="text-regiobot-answer"
                 >
                   {answer}
@@ -298,94 +267,74 @@ export default function RegioBotPage() {
         </Card>
 
         <Card className="h-full">
-          <CardContent className="p-5 space-y-3 text-sm">
-            <h2 className="font-semibold mb-1">Voorbeelden voor deze modus</h2>
+          <CardContent className="p-5 space-y-4 text-sm">
+            <h2 className="font-semibold">Voorbeeldvragen</h2>
 
-            {mode === "juridisch" && (
-              <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                <li>
-                  "Check dit contract op onredelijke voorwaarden voor mij als
-                  zzp'er."
-                </li>
-                <li>
-                  "Schrijf een stevige, zakelijke bezwaarbrief op basis van dit
-                  PDF-besluit."
-                </li>
-                <li>
-                  "Leg in normale taal uit wat dit besluit van de gemeente voor
-                  mij betekent."
-                </li>
-              </ul>
-            )}
+            <ul className="list-disc list-inside text-muted-foreground space-y-2">
+              <li>
+                "Welke mandaten heeft de gemeente Haarlem voor handhaving van ondernemers?"
+              </li>
+              <li>
+                "Analyseer dit WOO-besluit en geef aan wat ontbreekt."
+              </li>
+              <li>
+                "Wie heeft bevoegdheid om vergunningen te verlenen in mijn regio?"
+              </li>
+              <li>
+                "Genereer vervolg-WOO vragen op basis van dit antwoord."
+              </li>
+              <li>
+                "Bouw een tijdlijn van alle besluiten in dit dossier."
+              </li>
+            </ul>
 
-            {mode === "documenten" && (
-              <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                <li>
-                  "Herschrijf deze brief aan de gemeente, zakelijk en duidelijk."
-                </li>
-                <li>
-                  "Maak van deze ruwe notities een nette mail voor mijn klant."
-                </li>
-                <li>"Vat dit Word-document samen in 10 regels."</li>
-              </ul>
-            )}
-
-            {mode === "cijfers" && (
-              <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                <li>
-                  "Analyseer deze Excel met omzet en kosten en geef 3 concrete
-                  verbeterpunten."
-                </li>
-                <li>
-                  "Maak een simpele cashflow-inschatting voor de komende 3
-                  maanden."
-                </li>
-                <li>
-                  "Leg in normale taal uit wat je ziet in dit CSV-bestand."
-                </li>
-              </ul>
-            )}
-
-            {mode === "marketing" && (
-              <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                <li>
-                  "Schrijf 3 korte posts voor mijn actie in [regio], gericht op
-                  [doelgroep]."
-                </li>
-                <li>
-                  "Maak een simpele landingspagina-tekst voor mijn dienst [X]."
-                </li>
-                <li>
-                  "Geef 5 ideeën om mijn bestaande klanten in de buurt weer te
-                  activeren."
-                </li>
-              </ul>
-            )}
-
-            {mode === "zichtbaarheid" && (
-              <ul className="list-disc list-inside text-muted-foreground space-y-1">
-                <li>
-                  "Geef een plan in 5 stappen om mijn bedrijf in [regio]
-                  zichtbaar te maken zonder social media-circus."
-                </li>
-                <li>
-                  "Schrijf een tekst voor een A4-deurposter + korte flyer om
-                  buren en passanten naar binnen te krijgen."
-                </li>
-                <li>
-                  "Maak een simpele combinatie-strategie: etalage, mond-tot-mond,
-                  Google Bedrijfsprofiel en een rustige website."
-                </li>
-              </ul>
-            )}
+            <div className="border-t pt-4">
+              <h3 className="font-semibold mb-2">Scope van RegioBot</h3>
+              <div className="space-y-2 text-muted-foreground">
+                <p className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                  <span>WOO-verzoeken en antwoorden</span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                  <span>Beleidsregels en verordeningen</span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                  <span>Mandaat- en delegatiebesluiten</span>
+                </p>
+                <p className="flex items-start gap-2">
+                  <CheckCircle className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                  <span>Vergunningen en subsidies</span>
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>
+
+      <Card className="border-regio-purple/20 bg-regio-purple/5">
+        <CardContent className="p-6">
+          <div className="flex items-start gap-4">
+            <div className="p-3 rounded-full bg-regio-purple/10">
+              <Library className="h-6 w-6 text-regio-purple" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg mb-2">Gezamenlijke WOO-bibliotheek</h3>
+              <p className="text-sm text-muted-foreground">
+                Alle WOO-verzoeken en documenten die hier worden toegevoegd,
+                dragen bij aan een collectief regionaal geheugen.
+                Zo hoeven ondernemers niet individueel hetzelfde uit te zoeken.
+              </p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
 
-interface ModeButtonProps {
+interface ActionButtonProps {
   icon: React.ReactNode;
   label: string;
   active: boolean;
@@ -393,36 +342,21 @@ interface ModeButtonProps {
   testId: string;
 }
 
-function ModeButton({ icon, label, active, onClick, testId }: ModeButtonProps) {
+function ActionButton({ icon, label, active, onClick, testId }: ActionButtonProps) {
   return (
     <button
       type="button"
       onClick={onClick}
       data-testid={testId}
       className={[
-        "inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs md:text-sm",
+        "inline-flex items-center gap-2 px-3 py-2 rounded-md border text-sm font-medium transition-colors",
         active
           ? "bg-primary text-primary-foreground border-primary"
-          : "bg-background text-muted-foreground hover:bg-muted",
+          : "bg-background text-foreground hover:bg-muted border-border",
       ].join(" ")}
     >
       {icon}
       <span>{label}</span>
     </button>
   );
-}
-
-function placeholderForMode(mode: Mode): string {
-  switch (mode) {
-    case "juridisch":
-      return "Beschrijf je juridische vraag of plak hier de tekst uit het document. Bijvoorbeeld: 'Schrijf een bezwaarbrief op basis van de bijgevoegde PDF en deze situatie…'";
-    case "documenten":
-      return "Leg uit wat je met je brief of document wilt bereiken. Bijvoorbeeld: 'Maak deze brief duidelijker en zakelijker voor een gemeente-ambtenaar…'";
-    case "cijfers":
-      return "Vertel kort wat er in je Excel/CSV zit en wat je wilt weten. Bijvoorbeeld: 'Dit is mijn omzet/kosten per maand, geef 3 inzichten…'";
-    case "marketing":
-      return "Beschrijf kort je bedrijf, doelgroep en wat je wilt promoten. Bijvoorbeeld: 'Ik wil een actie doen voor nieuwe klanten in [regio]…'";
-    case "zichtbaarheid":
-      return "Vertel hoe je nu zichtbaar bent in jouw buurt (offline en online) en wat je wilt verbeteren. Bijvoorbeeld: 'Ik heb een kleine winkel in [plaats], bijna geen online aanwezigheid. Geef een plan met 5 stappen: deurposter, flyer, Google Bedrijfsprofiel, simpele website en iets met bestaande klanten.'";
-  }
 }

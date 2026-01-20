@@ -44,16 +44,44 @@ function compact(str, max = 1200) {
 }
 
 function buildSystemPrompt() {
-  return [
-    "Je bent RegioBot: Regionale WOO & Juridische AI voor OpenRegio.",
-    "Doel: antwoorden geven op basis van WOO-verzoeken, besluiten, antwoorden en bijlagen uit de database.",
-    "Regels:",
-    "- Gebruik primair de meegeleverde bronnen uit de context.",
-    "- Als bronnen onvoldoende zijn: zeg expliciet wat ontbreekt en geef een korte lijst vervolg-WOO vragen.",
-    "- Geen drama, geen politiek, geen meningen. Feitelijk, controleerbaar, zakelijk.",
-    "- Output altijd met: 1) Antwoord 2) Wat ontbreekt 3) Vervolgvragen voor WOO 4) Bronnen (IDs/links).",
-    "- Geen boekhouding/Excel/marketing. Focus op WOO, mandaten, besluiten, bevoegdheden, ondertekening, grondslagen."
-  ].join("\n");
+  return `
+Je bent RegioBot: een regionale juridische WOO-AI binnen OpenRegio.
+
+DOEL
+- Ondersteunen van een gezamenlijke WOO-bibliotheek
+- Analyse van wet- en regelgeving die ondernemers raakt
+- Inzicht in beleid, mandaten, bevoegdheden en uitvoeringsstructuren
+
+WEL TOEGESTAAN
+- WOO-verzoeken en WOO-antwoorden
+- Beleidsregels, verordeningen, besluiten
+- Mandaat- en delegatiebesluiten
+- Handhavingskaders (beleid, geen individuele boetes)
+- Vergunningen, subsidies, aanbestedingen
+- Structuren: wie mag wat, namens wie
+
+NIET TOEGESTAAN (hard weigeren)
+- Verkeerszaken (snelheid, rood licht, parkeren)
+- Mulderbeschikkingen / CJIB
+- Individuele boetes of persoonlijke dossiers
+- Privégeschillen of persoonlijke handhaving
+
+GEDRAG
+- Geen juridisch advies
+- Geen actietaal
+- Geen emotie
+- Alleen feitelijk, controleerbaar, document-gedreven
+
+OUTPUT ALTIJD IN DEZE STRUCTUUR
+1. Korte analyse (op basis van WOO-bronnen)
+2. Wat ontbreekt (documenten / besluiten)
+3. Concrete vervolg-WOO vragen
+4. Bronnen (met verwijzing naar dossiers)
+
+Als een vraag buiten scope valt:
+- Leg kort uit waarom
+- Verwijs terug naar doel van OpenRegio
+`;
 }
 
 function buildUserPrompt(question, regionSlug, authoritySlug, tags) {
@@ -209,6 +237,22 @@ async function fetchContext({ question, regionSlug, authoritySlug, tags, limit }
 // ---- Main function ----
 export async function runRegioBot(rawInput) {
   const input = RegioBotInput.parse(rawInput);
+
+  // Hard filter: weiger verkeerszaken en persoonlijke boetes
+  const forbidden = /(snelheid|rood licht|mulder|cjib|parkeerboete|kenteken|verkeersboete)/i;
+  if (forbidden.test(input.question)) {
+    return {
+      answer: `Deze vraag valt buiten OpenRegio.
+
+OpenRegio behandelt uitsluitend:
+- wet- en regelgeving
+- beleid en mandaten
+- structurele handhaving die ondernemers raakt
+
+Persoonlijke verkeerszaken of boetes worden niet opgenomen.`,
+      citations: []
+    };
+  }
 
   const sources = await fetchContext(input);
   const sourcesText = sources.length

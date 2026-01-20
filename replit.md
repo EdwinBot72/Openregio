@@ -30,7 +30,7 @@ The system uses a robust JWT authentication flow with short-lived access tokens 
 
 ### Core Features
 
--   **RegioBot**: An AI assistant offering specialized modes (General, Legal, Marketing) for various business needs, providing context-aware support. This is a PRO-exclusive feature.
+-   **RegioBot**: A regional WOO & Legal AI assistant focused on wet- en regelgeving analysis, WOO-verzoeken, mandaten, and bevoegdheden. Explicitly refuses traffic violations, personal fines, and non-business-related queries. PRO-exclusive feature with collectieve WOO-bibliotheek access.
 -   **Privacy & Consent Dashboard (AVG/GDPR Compliance)**: Enables users to manage per-field data visibility, view consent logs, export their data, and perform soft account deletion. This feature is enhanced for PRO members to allow customization of visibility settings.
 -   **Affiliate System**: Allows users to refer new members and earn recurring commissions. It tracks referrals, calculates commissions, and provides an affiliate dashboard.
 
