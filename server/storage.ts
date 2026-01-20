@@ -64,6 +64,7 @@ import {
   crewRequests,
   crewApplications,
   blogs,
+  wooCategories,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
@@ -188,6 +189,7 @@ export interface IStorage {
   // WOO data
   getWooRegions(): Promise<{ id: number; name: string; slug: string }[]>;
   getWooAuthorities(): Promise<{ id: number; name: string; slug: string }[]>;
+  getWooCategories(): Promise<{ slug: string; label: string }[]>;
 
   // WOO Dossiers
   createWooDossier(dossier: InsertWooDossier): Promise<WooDossier>;
@@ -1296,6 +1298,20 @@ export class MemStorage implements IStorage {
     return [];
   }
 
+  async getWooCategories(): Promise<{ slug: string; label: string }[]> {
+    return [
+      { slug: "mandaat_delegatie", label: "Mandaat & delegatie" },
+      { slug: "beleid_verordening", label: "Beleid & verordeningen" },
+      { slug: "vergunningen", label: "Vergunningen & beleidsregels" },
+      { slug: "heffingen_leges", label: "Heffingen, leges, belastingen" },
+      { slug: "handhaving_kaders", label: "Handhavingskaders (beleid)" },
+      { slug: "aanbesteding", label: "Aanbestedingen & gunning" },
+      { slug: "subsidies", label: "Subsidiekaders & besluiten" },
+      { slug: "uitvoering_partijen", label: "Uitvoeringsorganisaties/derden" },
+      { slug: "openbaarheid_archief", label: "Archief/openbaarheid/werkinstructies" },
+    ];
+  }
+
   async createWooDossier(dossier: InsertWooDossier): Promise<WooDossier> {
     const id = Date.now();
     return {
@@ -2130,6 +2146,16 @@ class DbStorage implements IStorage {
       name: authorities.name,
       slug: authorities.slug
     }).from(authorities).orderBy(authorities.name);
+    return results;
+  }
+
+  async getWooCategories(): Promise<{ slug: string; label: string }[]> {
+    const results = await db.select({
+      slug: wooCategories.slug,
+      label: wooCategories.label
+    }).from(wooCategories)
+      .where(eq(wooCategories.isAllowed, true))
+      .orderBy(wooCategories.label);
     return results;
   }
 

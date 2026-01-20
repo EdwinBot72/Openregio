@@ -880,6 +880,17 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
     }
   });
 
+  // WOO Categories - get allowed categories for dropdown
+  app.get("/api/woo/categories", async (_req, res) => {
+    try {
+      const categories = await storage.getWooCategories();
+      res.json(categories);
+    } catch (err: any) {
+      console.error("Error fetching WOO categories:", err);
+      res.status(500).json({ error: "Kon categorieën niet ophalen" });
+    }
+  });
+
   // WOO Template Generator - generates ready-to-use WOO request letters
   app.post("/api/woo/generate", async (req, res) => {
     try {

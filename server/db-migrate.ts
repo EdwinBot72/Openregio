@@ -81,6 +81,74 @@ export async function runMigrations(): Promise<void> {
     `);
     console.log("[Migration] ✓ users.referred_at column ensured");
 
+    // WOO Categories table - fixed set of allowed categories for WOO requests
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS woo_categories (
+        slug TEXT PRIMARY KEY,
+        label TEXT NOT NULL,
+        is_allowed BOOLEAN NOT NULL DEFAULT true
+      );
+    `);
+    console.log("[Migration] ✓ woo_categories table ensured");
+
+    // Seed WOO categories (idempotent upsert)
+    await db.execute(sql`
+      INSERT INTO woo_categories (slug, label, is_allowed) VALUES
+        ('mandaat_delegatie', 'Mandaat & delegatie', true),
+        ('beleid_verordening', 'Beleid & verordeningen', true),
+        ('vergunningen', 'Vergunningen & beleidsregels', true),
+        ('heffingen_leges', 'Heffingen, leges, belastingen', true),
+        ('handhaving_kaders', 'Handhavingskaders (beleid)', true),
+        ('aanbesteding', 'Aanbestedingen & gunning', true),
+        ('subsidies', 'Subsidiekaders & besluiten', true),
+        ('uitvoering_partijen', 'Uitvoeringsorganisaties/derden', true),
+        ('openbaarheid_archief', 'Archief/openbaarheid/werkinstructies', true),
+        ('persoonlijk_verkeer_boete', 'Persoonlijk/Verkeer/Boete (NIET TOEGESTAAN)', false)
+      ON CONFLICT (slug) DO UPDATE SET
+        label = EXCLUDED.label,
+        is_allowed = EXCLUDED.is_allowed;
+    `);
+    console.log("[Migration] ✓ woo_categories seeded");
+
+    // Add category_slug to woo_requests (optional, defaults to beleid_verordening)
+    await db.execute(sql`
+      ALTER TABLE woo_requests ADD COLUMN IF NOT EXISTS category_slug TEXT;
+    `);
+    console.log("[Migration] ✓ woo_requests.category_slug column ensured");
+
+    // Add category_slug to woo_documents (optional)
+    await db.execute(sql`
+      ALTER TABLE woo_documents ADD COLUMN IF NOT EXISTS category_slug TEXT;
+    `);
+    console.log("[Migration] ✓ woo_documents.category_slug column ensured");
+
+    // Create hard block trigger for non-allowed categories
+    await db.execute(sql`
+      CREATE OR REPLACE FUNCTION enforce_allowed_woo_category()
+      RETURNS trigger AS $$
+      BEGIN
+        IF NEW.category_slug IS NOT NULL AND NOT EXISTS (
+          SELECT 1 FROM woo_categories c
+          WHERE c.slug = NEW.category_slug AND c.is_allowed = true
+        ) THEN
+          RAISE EXCEPTION 'Category % is not allowed in OpenRegio WOO library', NEW.category_slug;
+        END IF;
+        RETURN NEW;
+      END;
+      $$ LANGUAGE plpgsql;
+    `);
+    console.log("[Migration] ✓ enforce_allowed_woo_category function created");
+
+    await db.execute(sql`
+      DROP TRIGGER IF EXISTS trg_enforce_allowed_woo_category ON woo_requests;
+    `);
+    await db.execute(sql`
+      CREATE TRIGGER trg_enforce_allowed_woo_category
+      BEFORE INSERT OR UPDATE ON woo_requests
+      FOR EACH ROW EXECUTE FUNCTION enforce_allowed_woo_category();
+    `);
+    console.log("[Migration] ✓ woo_requests category enforcement trigger ensured");
+
     console.log("[Migration] Database schema is up to date");
   } catch (error) {
     console.error("[Migration] Error running migrations:", error);
