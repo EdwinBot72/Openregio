@@ -149,6 +149,43 @@ export async function runMigrations(): Promise<void> {
     `);
     console.log("[Migration] ✓ woo_requests category enforcement trigger ensured");
 
+    // Full-text search index on woo_documents for smart Top-K selection
+    await db.execute(sql`
+      ALTER TABLE woo_documents ADD COLUMN IF NOT EXISTS fts tsvector;
+    `);
+    console.log("[Migration] ✓ woo_documents.fts column ensured");
+
+    await db.execute(sql`
+      UPDATE woo_documents 
+      SET fts = to_tsvector('simple', coalesce(summary,'') || ' ' || coalesce(text_content,''))
+      WHERE fts IS NULL;
+    `);
+    console.log("[Migration] ✓ woo_documents.fts values populated");
+
+    await db.execute(sql`
+      CREATE INDEX IF NOT EXISTS idx_woo_documents_fts ON woo_documents USING gin(fts);
+    `);
+    console.log("[Migration] ✓ woo_documents FTS index ensured");
+
+    await db.execute(sql`
+      CREATE OR REPLACE FUNCTION woo_documents_fts_trigger()
+      RETURNS trigger AS $$
+      BEGIN
+        NEW.fts := to_tsvector('simple', coalesce(NEW.summary,'') || ' ' || coalesce(NEW.text_content,''));
+        RETURN NEW;
+      END;
+      $$ LANGUAGE plpgsql;
+    `);
+    console.log("[Migration] ✓ woo_documents_fts_trigger function created");
+
+    await db.execute(sql`DROP TRIGGER IF EXISTS trg_woo_documents_fts ON woo_documents;`);
+    await db.execute(sql`
+      CREATE TRIGGER trg_woo_documents_fts
+      BEFORE INSERT OR UPDATE ON woo_documents
+      FOR EACH ROW EXECUTE FUNCTION woo_documents_fts_trigger();
+    `);
+    console.log("[Migration] ✓ woo_documents FTS trigger ensured");
+
     console.log("[Migration] Database schema is up to date");
   } catch (error) {
     console.error("[Migration] Error running migrations:", error);

@@ -891,7 +891,53 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
     }
   });
 
-  // WOO Requests List - for RegioBot dossier selector (collective library)
+  // WOO Dossiers - for RegioBot dossier selector with filters (collective library)
+  app.get("/api/woo/dossiers", async (req, res) => {
+    try {
+      const { region, authority, q } = req.query as { region?: string; authority?: string; q?: string };
+      
+      const results = await db.execute(sql`
+        SELECT 
+          r.id, 
+          r.title, 
+          r.reference_code, 
+          r.sent_at, 
+          r.status,
+          rg.slug as region_slug, 
+          rg.name as region_name,
+          au.slug as authority_slug, 
+          au.name as authority_name
+        FROM woo_requests r
+        LEFT JOIN regions rg ON rg.id = r.region_id
+        LEFT JOIN authorities au ON au.id = r.authority_id
+        ORDER BY COALESCE(r.sent_at, r.created_at) DESC
+        LIMIT 300
+      `);
+      
+      // Filter in memory for dynamic conditions (safer than raw SQL injection)
+      let rows = results.rows as any[];
+      if (region && region !== "all") {
+        rows = rows.filter(r => r.region_slug === region);
+      }
+      if (authority && authority !== "all") {
+        rows = rows.filter(r => r.authority_slug === authority);
+      }
+      if (q && String(q).trim().length >= 2) {
+        const search = String(q).trim().toLowerCase();
+        rows = rows.filter(r => 
+          (r.title && r.title.toLowerCase().includes(search)) ||
+          (r.reference_code && r.reference_code.toLowerCase().includes(search))
+        );
+      }
+      
+      res.json(rows);
+    } catch (err: any) {
+      console.error("Error fetching WOO dossiers:", err);
+      res.status(500).json({ error: "dossiers_list_failed" });
+    }
+  });
+
+  // Legacy endpoint - redirect to dossiers
   app.get("/api/woo/requests/list", async (_req, res) => {
     try {
       const results = await db.execute(sql`

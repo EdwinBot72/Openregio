@@ -1,0 +1,284 @@
+SERVER: Slim context selectie (Top-K docs)
+
+Je hebt al woo_requests en woo_documents met summary/text_content.
+We gaan nu ranken welke docs je meeneemt.
+
+1A) Maak full-text index (Postgres)
+
+Run in DB:
+
+-- Full-text index voor documents
+alter table woo_documents
+add column if not exists fts tsvector;
+
+update woo_documents
+set fts = to_tsvector('simple', coalesce(summary,'') || ' ' || coalesce(text_content,''));
+
+create index if not exists idx_woo_documents_fts
+on woo_documents using gin(fts);
+
+-- trigger om fts up-to-date te houden
+create or replace function woo_documents_fts_trigger()
+returns trigger as $$
+begin
+  new.fts := to_tsvector('simple', coalesce(new.summary,'') || ' ' || coalesce(new.text_content,''));
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists trg_woo_documents_fts on woo_documents;
+
+create trigger trg_woo_documents_fts
+before insert or update on woo_documents
+for each row execute function woo_documents_fts_trigger();
+
+
+Als je nu nog geen text_content hebt: prima. summary alleen werkt ook.
+
+1B) Vervang je “dossierContext builder” door Top-K selectie
+
+In server/regiobot.js (waar je pool hebt), gebruik dit:
+
+async function fetchDossierContextSmart({ requestId, queryText, maxDocs = 4 }) {
+  const client = await pool.connect();
+  try {
+    const reqRes = await client.query(
+      `select r.id, r.title, r.body, r.reference_code, r.sent_at, r.status,
+              rg.slug as region_slug, rg.name as region_name,
+              au.slug as authority_slug, au.name as authority_name,
+              r.category_slug
+       from woo_requests r
+       left join regions rg on rg.id = r.region_id
+       left join authorities au on au.id = r.authority_id
+       where r.id = $1`,
+      [requestId]
+    );
+
+    if (!reqRes.rows[0]) return null;
+    const r = reqRes.rows[0];
+
+    // 1) Pak top docs op relevance (fts), fallback op recente docs
+    const q = (queryText || "").trim();
+    let docsRes;
+
+    if (q.length >= 3) {
+      docsRes = await client.query(
+        `select id, kind, filename, file_url, received_at, summary, text_content, category_slug,
+                ts_rank_cd(fts, plainto_tsquery('simple', $2)) as rank
+         from woo_documents
+         where request_id = $1
+         order by rank desc, coalesce(received_at, created_at) desc
+         limit $3`,
+        [requestId, q, maxDocs]
+      );
+    } else {
+      docsRes = await client.query(
+        `select id, kind, filename, file_url, received_at, summary, text_content, category_slug,
+                0 as rank
+         from woo_documents
+         where request_id = $1
+         order by coalesce(received_at, created_at) desc
+         limit $2`,
+        [requestId, maxDocs]
+      );
+    }
+
+    // 2) Bouw compacte dossier header + request body (kort)
+    const header = [
+      `DOSSIER`,
+      `request_id: ${r.id}`,
+      r.title ? `title: ${r.title}` : null,
+      r.region_slug ? `region: ${r.region_slug}` : null,
+      r.authority_slug ? `authority: ${r.authority_slug}` : null,
+      r.reference_code ? `kenmerk: ${r.reference_code}` : null,
+      r.sent_at ? `sent_at: ${r.sent_at}` : null,
+      r.status ? `status: ${r.status}` : null,
+      r.category_slug ? `category: ${r.category_slug}` : null,
+      `docs_included: ${docsRes.rows.length}/${maxDocs}`,
+    ].filter(Boolean).join("\n");
+
+    const reqBody = r.body ? `REQUEST_BODY (compact):\n${compact(r.body, 1800)}` : "";
+
+    // 3) Gebruik summary first; text_content alleen als summary ontbreekt
+    const docBlocks = docsRes.rows.map((d, i) => {
+      const meta = [
+        `DOC ${i + 1}`,
+        `document_id: ${d.id}`,
+        d.kind ? `kind: ${d.kind}` : null,
+        d.received_at ? `received_at: ${d.received_at}` : null,
+        d.filename ? `filename: ${d.filename}` : null,
+        d.file_url ? `file_url: ${d.file_url}` : null,
+        d.category_slug ? `category: ${d.category_slug}` : null,
+        d.rank ? `rank: ${Number(d.rank).toFixed(3)}` : null,
+      ].filter(Boolean).join("\n");
+
+      const content = d.summary
+        ? `summary:\n${compact(d.summary, 900)}`
+        : (d.text_content ? `text:\n${compact(d.text_content, 1200)}` : "text: (leeg)");
+
+      return `${meta}\n${content}`.trim();
+    }).join("\n\n");
+
+    return `${header}\n\n${reqBody}\n\n${docBlocks}`.trim();
+  } finally {
+    client.release();
+  }
+}
+
+1C) Koppel dit aan /api/regiobot
+
+In runRegioBot():
+
+voeg dossierRequestId toe aan schema (had je al)
+
+vervang je dossierContext call door:
+
+let dossierContext = null;
+if (input.dossierRequestId) {
+  dossierContext = await fetchDossierContextSmart({
+    requestId: input.dossierRequestId,
+    queryText: `${input.task || ""} ${input.question || ""}`,
+    maxDocs: 4
+  });
+}
+
+
+En voeg in messages dit blok toe (na taskInstruction):
+
+if (dossierContext) {
+  messages.push({ role: "user", content: `DOSSIER CONTEXT (smart):\n\n${dossierContext}` });
+}
+
+
+💡 Why dit werkt: je stopt top 4 relevante bijlagen in context i.p.v. 40 pdf’s.
+
+2) SERVER: Dossier list + filters (sneller werken)
+
+Maak/upgrade endpoint:
+
+2A) GET /api/woo/dossiers?region=...&authority=...&q=...
+app.get("/api/woo/dossiers", async (req, res) => {
+  const { region, authority, q } = req.query;
+  const client = await pool.connect();
+  try {
+    const params = [];
+    let where = "where 1=1";
+
+    if (region && region !== "all") {
+      params.push(region);
+      where += ` and rg.slug = $${params.length}`;
+    }
+    if (authority && authority !== "all") {
+      params.push(authority);
+      where += ` and au.slug = $${params.length}`;
+    }
+    if (q && String(q).trim().length >= 2) {
+      params.push(`%${String(q).trim().replace(/%/g, "").slice(0, 80)}%`);
+      where += ` and (r.title ilike $${params.length} or r.reference_code ilike $${params.length})`;
+    }
+
+    const rows = await client.query(
+      `
+      select r.id, r.title, r.reference_code, r.sent_at, r.status,
+             rg.slug as region_slug, rg.name as region_name,
+             au.slug as authority_slug, au.name as authority_name
+      from woo_requests r
+      left join regions rg on rg.id = r.region_id
+      left join authorities au on au.id = r.authority_id
+      ${where}
+      order by coalesce(r.sent_at, r.created_at) desc
+      limit 300
+      `,
+      params
+    );
+    res.json(rows.rows);
+  } catch (e) {
+    res.status(500).json({ error: "dossiers_list_failed" });
+  } finally {
+    client.release();
+  }
+});
+
+3) CLIENT: RegioBot “open dossier” + query param
+
+Je hebt al task buttons en dossier dropdown. Nu maken we het smooth:
+
+3A) RegioBot pakt URL params
+
+In client/src/pages/regiobot.tsx bovenin component:
+
+import { useEffect } from "react";
+
+
+En voeg toe:
+
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const dossier = params.get("dossier");
+  const t = params.get("task") as Task | null;
+
+  if (dossier) setSelectedDossierId(dossier);
+  if (t) applyTaskTemplate(t);
+}, []);
+
+
+Nu kan je vanaf een dossierpagina linken naar:
+/regiobot?dossier=123&task=mandaat_check
+
+3B) Dossiers fetch met filters (region/authority)
+
+Vervang je dossiers query door eentje met querystring:
+
+const dossiersUrl = useMemo(() => {
+  const p = new URLSearchParams();
+  if (selectedRegion && selectedRegion !== "all") p.set("region", selectedRegion);
+  if (selectedAuthority && selectedAuthority !== "all") p.set("authority", selectedAuthority);
+  return `/api/woo/dossiers?${p.toString()}`;
+}, [selectedRegion, selectedAuthority]);
+
+const { data: dossiers = [] } = useQuery<DossierRow[]>({ queryKey: [dossiersUrl] });
+
+
+En update je dropdown om dossiers te gebruiken (done).
+
+4) BONUS: Dossier detailpagina “Run in RegioBot”
+
+Op je dossier detail route (waar je WOO request toont) zet je 1 knop:
+
+<Link href={`/regiobot?dossier=${request.id}&task=analyse_besluit`}>
+  <Button>Open in RegioBot</Button>
+</Link>
+
+
+Zelfde layout, mega effect.
+
+5) Token control: bronnen ook slim (niet 6 random)
+
+Als je al “global sources” meepakt uit DB, hou dat ook strak:
+
+limit: 6 blijft prima
+
+maar als dossier geselecteerd: reduceer limit naar 3 of zelfs 0 (je dossiercontext is leidend)
+
+In runRegioBot():
+
+const effectiveLimit = input.dossierRequestId ? Math.min(input.limit ?? 6, 3) : (input.limit ?? 6);
+
+
+En gebruik effectiveLimit in fetchContext().
+
+6) Afmaken: 2 UX tweaks die het “must-have” maken
+
+Deze twee zijn klein maar killer:
+
+A) “Task output anchors”
+
+Na response, scroll automatisch naar output (1 regel JS).
+
+B) “Run task” op dossier zonder input
+
+Als dossier geselecteerd en input leeg, laat ‘m toch draaien op dossiercontext + task (met template).
+
+In handleSubmit:
+
+als selectedDossierId !== "none" en question leeg → question = "Gebruik dossiercontext. Geef resultaat."

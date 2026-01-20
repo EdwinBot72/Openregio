@@ -118,21 +118,32 @@ export default function RegioBotPage() {
 
   const { data: regions = [] } = useQuery<Region[]>({ queryKey: ["/api/woo/regions"] });
   const { data: authorities = [] } = useQuery<Authority[]>({ queryKey: ["/api/woo/authorities"] });
-  const { data: dossiers = [] } = useQuery<DossierRow[]>({ queryKey: ["/api/woo/requests/list"] });
+
+  const dossiersUrl = useMemo(() => {
+    const p = new URLSearchParams();
+    if (selectedRegion && selectedRegion !== "all") p.set("region", selectedRegion);
+    if (selectedAuthority && selectedAuthority !== "all") p.set("authority", selectedAuthority);
+    return `/api/woo/dossiers?${p.toString()}`;
+  }, [selectedRegion, selectedAuthority]);
+
+  const { data: dossiers = [] } = useQuery<DossierRow[]>({ queryKey: [dossiersUrl] });
 
   useEffect(() => {
     const params = new URLSearchParams(searchString);
     const dossier = params.get("dossier");
-    if (dossier) {
-      setSelectedDossierId(dossier);
+    const t = params.get("task") as Task | null;
+
+    if (dossier) setSelectedDossierId(dossier);
+    if (t && ["analyse_besluit", "mandaat_check", "wat_ontbreekt", "vervolg_woo", "tijdlijn", "publiceer_samenvatting"].includes(t)) {
+      setTask(t);
     }
   }, [searchString]);
 
   const askMutation = useMutation({
-    mutationFn: async () => {
+    mutationFn: async (finalQuestion: string) => {
       const payload = {
         task,
-        question,
+        question: finalQuestion,
         dossierRequestId: selectedDossierId === "none" ? undefined : Number(selectedDossierId),
         regionSlug: selectedRegion === "all" ? undefined : selectedRegion || undefined,
         authoritySlug: selectedAuthority === "all" ? undefined : selectedAuthority || undefined,
@@ -165,9 +176,13 @@ export default function RegioBotPage() {
   };
 
   const handleSubmit = () => {
-    if (question.trim().length < 3) return;
+    const finalQuestion = question.trim();
+    
+    // Allow empty question if dossier is selected (server uses task keywords for FTS)
+    if (finalQuestion.length < 3 && selectedDossierId === "none") return;
+    
     setResponse(null);
-    askMutation.mutate();
+    askMutation.mutate(finalQuestion);
   };
 
   if (!isLoading && !isPro) {
@@ -337,7 +352,7 @@ export default function RegioBotPage() {
             </div>
 
             <div className="flex items-center justify-between gap-2">
-              <Button onClick={handleSubmit} disabled={askMutation.isPending || question.trim().length < 3} data-testid="button-submit-regiobot">
+              <Button onClick={handleSubmit} disabled={askMutation.isPending || (question.trim().length < 3 && selectedDossierId === "none")} data-testid="button-submit-regiobot">
                 {askMutation.isPending ? "RegioBot werkt..." : "Verwerk"}
               </Button>
               <p className="text-[10px] text-muted-foreground max-w-xs text-right">

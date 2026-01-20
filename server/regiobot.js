@@ -27,8 +27,9 @@ function getPool() {
 }
 
 // ---- Input schema ----
+// question can be empty if dossierRequestId is provided (dossier-only context)
 const RegioBotInput = z.object({
-  question: z.string().min(3),
+  question: z.string().optional().default(""),
   task: z.enum([
     "analyse_besluit",
     "mandaat_check",
@@ -43,7 +44,10 @@ const RegioBotInput = z.object({
   tags: z.array(z.string()).optional(),         // bv ["mandaat","heffing"]
   includePrivate: z.boolean().optional().default(true),
   limit: z.number().int().min(1).max(12).optional().default(6),
-});
+}).refine(
+  (data) => data.question.trim().length >= 3 || data.dossierRequestId,
+  { message: "Question required (min 3 chars) unless dossier is selected" }
+);
 
 // ---- Helpers ----
 function compact(str, max = 1200) {
@@ -123,10 +127,10 @@ function taskInstruction(task) {
   }
 }
 
-async function fetchDossierContextByRequestId(requestId) {
+async function fetchDossierContextSmart({ requestId, queryText, maxDocs = 4 }) {
   const client = await getPool().connect();
   try {
-    const req = await client.query(
+    const reqRes = await client.query(
       `select r.id, r.title, r.body, r.reference_code, r.sent_at, r.status,
               rg.slug as region_slug, rg.name as region_name,
               au.slug as authority_slug, au.name as authority_name,
@@ -138,17 +142,33 @@ async function fetchDossierContextByRequestId(requestId) {
       [requestId]
     );
 
-    if (!req.rows[0]) return null;
+    if (!reqRes.rows[0]) return null;
+    const r = reqRes.rows[0];
 
-    const docs = await client.query(
-      `select id, kind, filename, file_url, received_at, summary, text_content, category_slug
-       from woo_documents
-       where request_id = $1
-       order by coalesce(received_at, created_at) asc`,
-      [requestId]
-    );
+    const q = (queryText || "").trim();
+    let docsRes;
 
-    const r = req.rows[0];
+    if (q.length >= 3) {
+      docsRes = await client.query(
+        `select id, kind, filename, file_url, received_at, summary, text_content, category_slug,
+                ts_rank_cd(fts, plainto_tsquery('simple', $2)) as rank
+         from woo_documents
+         where request_id = $1
+         order by rank desc, coalesce(received_at, created_at) desc
+         limit $3`,
+        [requestId, q, maxDocs]
+      );
+    } else {
+      docsRes = await client.query(
+        `select id, kind, filename, file_url, received_at, summary, text_content, category_slug,
+                0 as rank
+         from woo_documents
+         where request_id = $1
+         order by coalesce(received_at, created_at) desc
+         limit $2`,
+        [requestId, maxDocs]
+      );
+    }
 
     const header = [
       `DOSSIER`,
@@ -160,11 +180,12 @@ async function fetchDossierContextByRequestId(requestId) {
       r.sent_at ? `sent_at: ${r.sent_at}` : null,
       r.status ? `status: ${r.status}` : null,
       r.category_slug ? `category: ${r.category_slug}` : null,
+      `docs_included: ${docsRes.rows.length}/${maxDocs}`,
     ].filter(Boolean).join("\n");
 
-    const reqBody = r.body ? `REQUEST_BODY:\n${compact(r.body, 2500)}` : "";
+    const reqBody = r.body ? `REQUEST_BODY (compact):\n${compact(r.body, 1800)}` : "";
 
-    const docBlocks = docs.rows.map((d, i) => {
+    const docBlocks = docsRes.rows.map((d, i) => {
       const meta = [
         `DOC ${i + 1}`,
         `document_id: ${d.id}`,
@@ -173,12 +194,12 @@ async function fetchDossierContextByRequestId(requestId) {
         d.filename ? `filename: ${d.filename}` : null,
         d.file_url ? `file_url: ${d.file_url}` : null,
         d.category_slug ? `category: ${d.category_slug}` : null,
+        d.rank ? `rank: ${Number(d.rank).toFixed(3)}` : null,
       ].filter(Boolean).join("\n");
 
-      const content = [
-        d.summary ? `summary: ${compact(d.summary, 900)}` : null,
-        d.text_content ? `text: ${compact(d.text_content, 1800)}` : null,
-      ].filter(Boolean).join("\n");
+      const content = d.summary
+        ? `summary:\n${compact(d.summary, 900)}`
+        : (d.text_content ? `text:\n${compact(d.text_content, 1200)}` : "text: (leeg)");
 
       return `${meta}\n${content}`.trim();
     }).join("\n\n");
@@ -348,13 +369,34 @@ Persoonlijke verkeerszaken of boetes worden niet opgenomen.`,
     };
   }
 
-  // Fetch dossier context if a specific dossier is selected
+  // Fetch smart dossier context if a specific dossier is selected (Top-K docs)
   let dossierContext = null;
   if (input.dossierRequestId) {
-    dossierContext = await fetchDossierContextByRequestId(input.dossierRequestId);
+    // Build meaningful query text for FTS ranking
+    // Use task keywords + question, or task-derived keywords for dossier-only requests
+    const taskKeywords = {
+      analyse_besluit: "besluit antwoord grondslag bevoegdheid",
+      mandaat_check: "mandaat delegatie aanwijzing volmacht",
+      wat_ontbreekt: "ontbreken document besluit kader",
+      vervolg_woo: "openbaarmaking document informatie",
+      tijdlijn: "datum besluit verzoek antwoord",
+      publiceer_samenvatting: "samenvatting feiten bronnen",
+    };
+    const taskTerms = input.task ? (taskKeywords[input.task] || input.task) : "";
+    const userTerms = (input.question || "").trim();
+    const queryText = userTerms.length >= 3 ? `${taskTerms} ${userTerms}` : taskTerms;
+
+    dossierContext = await fetchDossierContextSmart({
+      requestId: input.dossierRequestId,
+      queryText,
+      maxDocs: 4
+    });
   }
 
-  const sources = await fetchContext(input);
+  // Token control: reduce global sources when dossier is active (dossier context is leading)
+  const effectiveLimit = input.dossierRequestId ? Math.min(input.limit ?? 6, 3) : (input.limit ?? 6);
+
+  const sources = await fetchContext({ ...input, limit: effectiveLimit });
   const sourcesText = sources.length
     ? formatSources(sources)
     : "Geen bronnen gevonden in de database voor deze vraag.";
@@ -363,7 +405,7 @@ Persoonlijke verkeerszaken of boetes worden niet opgenomen.`,
     { role: "system", content: buildSystemPrompt() },
     { role: "user", content: buildUserPrompt(input.question, input.regionSlug, input.authoritySlug, input.tags) },
     ...(input.task ? [{ role: "user", content: taskInstruction(input.task) }] : []),
-    ...(dossierContext ? [{ role: "user", content: `DOSSIER CONTEXT (geselecteerd):\n\n${dossierContext}` }] : []),
+    ...(dossierContext ? [{ role: "user", content: `DOSSIER CONTEXT (smart Top-K):\n\n${dossierContext}` }] : []),
     { role: "user", content: `BRONNEN (WOO Database):\n\n${sourcesText}` },
     {
       role: "user",
