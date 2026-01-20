@@ -37,6 +37,7 @@ const RegioBotInput = z.object({
     "tijdlijn",
     "publiceer_samenvatting",
   ]).optional(),
+  dossierRequestId: z.number().int().positive().optional(),
   regionSlug: z.string().min(1).optional(),     // bv "haarlemmermeer"
   authoritySlug: z.string().min(1).optional(),  // bv "gemeente-haarlem"
   tags: z.array(z.string()).optional(),         // bv ["mandaat","heffing"]
@@ -119,6 +120,72 @@ function taskInstruction(task) {
       return "TAAK: Maak publicatie-ready samenvatting: geen persoonsgegevens, geen emotie, alleen feiten + verwijzingen. Eindig met: 'Bronnen' lijst.";
     default:
       return "";
+  }
+}
+
+async function fetchDossierContextByRequestId(requestId) {
+  const client = await getPool().connect();
+  try {
+    const req = await client.query(
+      `select r.id, r.title, r.body, r.reference_code, r.sent_at, r.status,
+              rg.slug as region_slug, rg.name as region_name,
+              au.slug as authority_slug, au.name as authority_name,
+              r.category_slug
+       from woo_requests r
+       left join regions rg on rg.id = r.region_id
+       left join authorities au on au.id = r.authority_id
+       where r.id = $1`,
+      [requestId]
+    );
+
+    if (!req.rows[0]) return null;
+
+    const docs = await client.query(
+      `select id, kind, filename, file_url, received_at, summary, text_content, category_slug
+       from woo_documents
+       where request_id = $1
+       order by coalesce(received_at, created_at) asc`,
+      [requestId]
+    );
+
+    const r = req.rows[0];
+
+    const header = [
+      `DOSSIER`,
+      `request_id: ${r.id}`,
+      r.title ? `title: ${r.title}` : null,
+      r.region_slug ? `region: ${r.region_slug}` : null,
+      r.authority_slug ? `authority: ${r.authority_slug}` : null,
+      r.reference_code ? `kenmerk: ${r.reference_code}` : null,
+      r.sent_at ? `sent_at: ${r.sent_at}` : null,
+      r.status ? `status: ${r.status}` : null,
+      r.category_slug ? `category: ${r.category_slug}` : null,
+    ].filter(Boolean).join("\n");
+
+    const reqBody = r.body ? `REQUEST_BODY:\n${compact(r.body, 2500)}` : "";
+
+    const docBlocks = docs.rows.map((d, i) => {
+      const meta = [
+        `DOC ${i + 1}`,
+        `document_id: ${d.id}`,
+        d.kind ? `kind: ${d.kind}` : null,
+        d.received_at ? `received_at: ${d.received_at}` : null,
+        d.filename ? `filename: ${d.filename}` : null,
+        d.file_url ? `file_url: ${d.file_url}` : null,
+        d.category_slug ? `category: ${d.category_slug}` : null,
+      ].filter(Boolean).join("\n");
+
+      const content = [
+        d.summary ? `summary: ${compact(d.summary, 900)}` : null,
+        d.text_content ? `text: ${compact(d.text_content, 1800)}` : null,
+      ].filter(Boolean).join("\n");
+
+      return `${meta}\n${content}`.trim();
+    }).join("\n\n");
+
+    return `${header}\n\n${reqBody}\n\n${docBlocks}`.trim();
+  } finally {
+    client.release();
   }
 }
 
@@ -281,6 +348,12 @@ Persoonlijke verkeerszaken of boetes worden niet opgenomen.`,
     };
   }
 
+  // Fetch dossier context if a specific dossier is selected
+  let dossierContext = null;
+  if (input.dossierRequestId) {
+    dossierContext = await fetchDossierContextByRequestId(input.dossierRequestId);
+  }
+
   const sources = await fetchContext(input);
   const sourcesText = sources.length
     ? formatSources(sources)
@@ -290,6 +363,7 @@ Persoonlijke verkeerszaken of boetes worden niet opgenomen.`,
     { role: "system", content: buildSystemPrompt() },
     { role: "user", content: buildUserPrompt(input.question, input.regionSlug, input.authoritySlug, input.tags) },
     ...(input.task ? [{ role: "user", content: taskInstruction(input.task) }] : []),
+    ...(dossierContext ? [{ role: "user", content: `DOSSIER CONTEXT (geselecteerd):\n\n${dossierContext}` }] : []),
     { role: "user", content: `BRONNEN (WOO Database):\n\n${sourcesText}` },
     {
       role: "user",

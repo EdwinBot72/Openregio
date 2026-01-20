@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,8 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
-import { Link } from "wouter";
-import { Crown, Scale, FileText, Zap, Tag, MapPin } from "lucide-react";
+import { Link, useSearch } from "wouter";
+import { Crown, Scale, FileText, Zap, Tag, MapPin, FolderOpen } from "lucide-react";
 
 type Task =
   | "analyse_besluit"
@@ -26,6 +26,18 @@ interface Authority {
   id: number;
   name: string;
   slug: string;
+}
+
+interface DossierRow {
+  id: number;
+  title: string;
+  reference_code: string | null;
+  sent_at: string | null;
+  status: string | null;
+  region_slug: string | null;
+  region_name: string | null;
+  authority_slug: string | null;
+  authority_name: string | null;
 }
 
 interface Citation {
@@ -94,22 +106,34 @@ function taskTemplate(t: Task) {
 export default function RegioBotPage() {
   const { user, isLoading } = useAuth();
   const isPro = user?.plan === "pro";
+  const searchString = useSearch();
 
   const [task, setTask] = useState<Task>("analyse_besluit");
   const [question, setQuestion] = useState("");
   const [selectedRegion, setSelectedRegion] = useState<string>("all");
   const [selectedAuthority, setSelectedAuthority] = useState<string>("all");
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedDossierId, setSelectedDossierId] = useState<string>("none");
   const [response, setResponse] = useState<RegioBotResponse | null>(null);
 
   const { data: regions = [] } = useQuery<Region[]>({ queryKey: ["/api/woo/regions"] });
   const { data: authorities = [] } = useQuery<Authority[]>({ queryKey: ["/api/woo/authorities"] });
+  const { data: dossiers = [] } = useQuery<DossierRow[]>({ queryKey: ["/api/woo/requests/list"] });
+
+  useEffect(() => {
+    const params = new URLSearchParams(searchString);
+    const dossier = params.get("dossier");
+    if (dossier) {
+      setSelectedDossierId(dossier);
+    }
+  }, [searchString]);
 
   const askMutation = useMutation({
     mutationFn: async () => {
       const payload = {
         task,
         question,
+        dossierRequestId: selectedDossierId === "none" ? undefined : Number(selectedDossierId),
         regionSlug: selectedRegion === "all" ? undefined : selectedRegion || undefined,
         authoritySlug: selectedAuthority === "all" ? undefined : selectedAuthority || undefined,
         tags: selectedTags.length ? selectedTags : undefined,
@@ -225,6 +249,29 @@ export default function RegioBotPage() {
         {/* LEFT */}
         <Card className="h-full">
           <CardContent className="p-5 space-y-4">
+            {/* Dossier Selector */}
+            <div className="space-y-1">
+              <div className="text-xs text-muted-foreground flex items-center gap-1">
+                <FolderOpen className="w-3 h-3" /> Dossier (optioneel)
+              </div>
+              <Select value={selectedDossierId} onValueChange={setSelectedDossierId}>
+                <SelectTrigger data-testid="select-dossier">
+                  <SelectValue placeholder="Kies dossier" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Geen dossier (losse vraag)</SelectItem>
+                  {dossiers.map((d) => (
+                    <SelectItem key={d.id} value={String(d.id)}>
+                      {d.title || "(geen titel)"} {d.reference_code ? `• ${d.reference_code}` : ""} {d.region_name ? `• ${d.region_name}` : ""}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-[10px] text-muted-foreground">
+                Met dossier: RegioBot gebruikt automatisch verzoek + bijlagen als context.
+              </p>
+            </div>
+
             <div className="grid md:grid-cols-2 gap-3">
               <div className="space-y-1">
                 <div className="text-xs text-muted-foreground">Regio</div>

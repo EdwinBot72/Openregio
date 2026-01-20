@@ -13,7 +13,7 @@ import bcrypt from "bcrypt";
 import { upload, getDocumentType } from "./middleware/upload";
 import { runRegioBot } from "./regiobot";
 import { db } from "db";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 
 // Initialize Mollie client (requires MOLLIE_API_KEY environment variable)
 const mollieClient = process.env.MOLLIE_API_KEY 
@@ -888,6 +888,33 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
     } catch (err: any) {
       console.error("Error fetching WOO categories:", err);
       res.status(500).json({ error: "Kon categorieën niet ophalen" });
+    }
+  });
+
+  // WOO Requests List - for RegioBot dossier selector (collective library)
+  app.get("/api/woo/requests/list", async (_req, res) => {
+    try {
+      const results = await db.execute(sql`
+        SELECT 
+          r.id, 
+          r.title, 
+          r.reference_code, 
+          r.sent_at, 
+          r.status,
+          rg.slug as region_slug, 
+          rg.name as region_name,
+          au.slug as authority_slug, 
+          au.name as authority_name
+        FROM woo_requests r
+        LEFT JOIN regions rg ON rg.id = r.region_id
+        LEFT JOIN authorities au ON au.id = r.authority_id
+        ORDER BY COALESCE(r.sent_at, r.created_at) DESC
+        LIMIT 200
+      `);
+      res.json(results.rows);
+    } catch (err: any) {
+      console.error("Error fetching WOO requests list:", err);
+      res.status(500).json({ error: "Kon WOO-verzoeken niet ophalen" });
     }
   });
 
