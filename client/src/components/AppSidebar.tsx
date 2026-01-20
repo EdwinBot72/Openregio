@@ -10,7 +10,7 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Home, Users, Bot, Building2, User, LogOut, MessageCircle, CreditCard, Shield, Eye, UserPlus, BookOpen, Settings } from "lucide-react";
+import { Home, Users, Bot, Building2, User, LogOut, MessageCircle, CreditCard, Shield, Eye, UserPlus, BookOpen, Settings, Share2 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -147,6 +147,14 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild data-testid="link-affiliate">
+                  <a href="/affiliate">
+                    <Share2 className="h-4 w-4 text-regio-alert" />
+                    <span>Affiliate</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

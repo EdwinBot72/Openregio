@@ -39,11 +39,26 @@ export function generateOnboardingToken(): string {
 
 /**
  * Calculate the plan price in euros
+ * Updated pricing: Basic €12,95 / Pro €24,00
  * @param plan Plan name (basic or pro)
- * @returns Price as string in format "9.95" or "19.95"
+ * @returns Price as string in format "12.95" or "24.00"
  */
 export function getPlanPrice(plan: string): string {
-  return plan === "pro" ? "19.95" : "9.95";
+  return plan === "pro" ? "24.00" : "12.95";
+}
+
+/**
+ * Generate a unique affiliate referral code
+ * Format: OR-XXXXXX (6 uppercase alphanumeric characters)
+ * @returns Referral code string
+ */
+export function generateReferralCode(): string {
+  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // No I, O, 0, 1 to avoid confusion
+  let code = "";
+  for (let i = 0; i < 6; i++) {
+    code += chars[Math.floor(Math.random() * chars.length)];
+  }
+  return `OR-${code}`;
 }
 
 /**

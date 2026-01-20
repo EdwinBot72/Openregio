@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -7,12 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Check, Sparkles, Users, Vote, ArrowRight, Loader2 } from "lucide-react";
-import { Link, useLocation } from "wouter";
+import { Link, useLocation, useSearch } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   email: z.string().email("Vul een geldig e-mailadres in"),
   plan: z.enum(["basic", "pro"]),
+  ref: z.string().optional(),
 });
 
 type FormData = z.infer<typeof formSchema>;
@@ -35,7 +36,7 @@ const plans: Plan[] = [
   {
     id: "basic",
     name: "Basic",
-    price: "€9,95",
+    price: "€12,95",
     description: "Perfect voor startende ondernemers",
     features: [
       { text: "Bedrijfsprofiel in lokaal netwerk", included: true },
@@ -49,7 +50,7 @@ const plans: Plan[] = [
   {
     id: "pro",
     name: "Pro",
-    price: "€19,95",
+    price: "€24,00",
     description: "Voor ondernemers die meer willen",
     features: [
       { text: "Bedrijfsprofiel in lokaal netwerk", included: true },
@@ -65,17 +66,29 @@ const plans: Plan[] = [
 
 export default function StartPage() {
   const [, setLocation] = useLocation();
+  const searchParams = useSearch();
   const { toast } = useToast();
   const [selectedPlan, setSelectedPlan] = useState<"basic" | "pro">("basic");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Get referral code from URL
+  const ref = new URLSearchParams(searchParams).get("ref") || undefined;
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
       plan: "basic",
+      ref: ref,
     },
   });
+  
+  // Update form if ref changes
+  useEffect(() => {
+    if (ref) {
+      form.setValue("ref", ref);
+    }
+  }, [ref, form]);
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);

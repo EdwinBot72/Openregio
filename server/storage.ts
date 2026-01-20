@@ -89,7 +89,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   getAllUsers(): Promise<User[]>;
   upsertUser(user: UpsertUser): Promise<User>;
-  createUser(user: { email: string; passwordHash: string; plan?: "basic" | "pro"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null; mustCompleteOnboarding?: boolean; onboardingToken?: string | null }): Promise<User>;
+  createUser(user: { email: string; passwordHash: string; plan?: "basic" | "pro"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null; mustCompleteOnboarding?: boolean; onboardingToken?: string | null; referralCode?: string | null; referredByUserId?: string | null; referredAt?: Date | null }): Promise<User>;
   updateUserPlan(userId: string, plan: "basic" | "pro"): Promise<User | undefined>;
   getUserProfileByReplitUserId(replitUserId: string): Promise<UserProfile | undefined>;
   
@@ -223,6 +223,12 @@ export interface IStorage {
   createBlog(blog: InsertBlog): Promise<Blog>;
   updateBlog(id: string, blog: Partial<InsertBlog>): Promise<Blog | undefined>;
   deleteBlog(id: string): Promise<boolean>;
+
+  // Affiliate/Referral system
+  getUserByReferralCode(code: string): Promise<User | undefined>;
+  getActiveReferrals(userId: string): Promise<User[]>;
+  getAffiliateStats(userId: string): Promise<{ activeReferrals: number; totalCommission: number }>;
+  getAllAffiliateStats(): Promise<{ userId: string; email: string; referralCode: string; activeReferrals: number; totalCommission: number }[]>;
 }
 
 export class MemStorage implements IStorage {
@@ -274,7 +280,7 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values());
   }
 
-  async createUser(userData: { email: string; passwordHash: string; plan?: "basic" | "pro"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null; mustCompleteOnboarding?: boolean; onboardingToken?: string | null }): Promise<User> {
+  async createUser(userData: { email: string; passwordHash: string; plan?: "basic" | "pro"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null; mustCompleteOnboarding?: boolean; onboardingToken?: string | null; referralCode?: string | null; referredByUserId?: string | null; referredAt?: Date | null }): Promise<User> {
     const id = randomUUID();
     const user: User = {
       id,
@@ -292,6 +298,9 @@ export class MemStorage implements IStorage {
       visibilitySettings: null,
       mustCompleteOnboarding: userData.mustCompleteOnboarding ?? true,
       onboardingToken: userData.onboardingToken || null,
+      referralCode: userData.referralCode || null,
+      referredByUserId: userData.referredByUserId || null,
+      referredAt: userData.referredAt || null,
       createdAt: new Date(),
       updatedAt: new Date(),
       deletedAt: null,
@@ -319,6 +328,9 @@ export class MemStorage implements IStorage {
       visibilitySettings: existing?.visibilitySettings || null,
       mustCompleteOnboarding: userData.mustCompleteOnboarding ?? true,
       onboardingToken: userData.onboardingToken || null,
+      referralCode: existing?.referralCode || null,
+      referredByUserId: existing?.referredByUserId || null,
+      referredAt: existing?.referredAt || null,
       createdAt: existing?.createdAt || new Date(),
       updatedAt: new Date(),
       deletedAt: existing?.deletedAt || null,
@@ -1436,6 +1448,47 @@ export class MemStorage implements IStorage {
   async deleteBlog(id: string): Promise<boolean> {
     return this.blogsList.delete(id);
   }
+
+  // Affiliate/Referral system
+  async getUserByReferralCode(code: string): Promise<User | undefined> {
+    return Array.from(this.users.values()).find(u => u.referralCode === code);
+  }
+
+  async getActiveReferrals(userId: string): Promise<User[]> {
+    // Get all users referred by this user who have active subscriptions
+    const referredUsers = Array.from(this.users.values()).filter(u => 
+      u.referredByUserId === userId && !u.deletedAt
+    );
+    // Filter to only active subscriptions
+    return referredUsers.filter(u => {
+      const sub = Array.from(this.subscriptions.values()).find(s => s.userId === u.id);
+      return sub?.status === "active";
+    });
+  }
+
+  async getAffiliateStats(userId: string): Promise<{ activeReferrals: number; totalCommission: number }> {
+    const activeReferrals = await this.getActiveReferrals(userId);
+    const COMMISSION_PER_REFERRAL = 2.95; // €2,95 per active referral per month
+    return {
+      activeReferrals: activeReferrals.length,
+      totalCommission: activeReferrals.length * COMMISSION_PER_REFERRAL
+    };
+  }
+
+  async getAllAffiliateStats(): Promise<{ userId: string; email: string; referralCode: string; activeReferrals: number; totalCommission: number }[]> {
+    const usersWithReferrals = Array.from(this.users.values()).filter(u => u.referralCode);
+    const stats = await Promise.all(usersWithReferrals.map(async user => {
+      const { activeReferrals, totalCommission } = await this.getAffiliateStats(user.id);
+      return {
+        userId: user.id,
+        email: user.email,
+        referralCode: user.referralCode!,
+        activeReferrals,
+        totalCommission
+      };
+    }));
+    return stats.filter(s => s.activeReferrals > 0);
+  }
 }
 
 class DbStorage implements IStorage {
@@ -1458,7 +1511,7 @@ class DbStorage implements IStorage {
     return await db.select().from(users).orderBy(desc(users.createdAt));
   }
 
-  async createUser(userData: { email: string; passwordHash: string; plan?: "basic" | "pro"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null; mustCompleteOnboarding?: boolean; onboardingToken?: string | null }): Promise<User> {
+  async createUser(userData: { email: string; passwordHash: string; plan?: "basic" | "pro"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null; mustCompleteOnboarding?: boolean; onboardingToken?: string | null; referralCode?: string | null; referredByUserId?: string | null; referredAt?: Date | null }): Promise<User> {
     const [user] = await db
       .insert(users)
       .values({
@@ -1473,6 +1526,9 @@ class DbStorage implements IStorage {
         category: null,
         mustCompleteOnboarding: userData.mustCompleteOnboarding ?? true,
         onboardingToken: userData.onboardingToken || null,
+        referralCode: userData.referralCode || null,
+        referredByUserId: userData.referredByUserId || null,
+        referredAt: userData.referredAt || null,
       })
       .returning();
     return user;
@@ -2276,6 +2332,65 @@ class DbStorage implements IStorage {
   async deleteBlog(id: string): Promise<boolean> {
     const result = await db.delete(blogs).where(eq(blogs.id, id)).returning();
     return result.length > 0;
+  }
+
+  // Affiliate/Referral system
+  async getUserByReferralCode(code: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.referralCode, code));
+    return user;
+  }
+
+  async getActiveReferrals(userId: string): Promise<User[]> {
+    // Get all users referred by this user who have active subscriptions
+    const referredUsers = await db.select()
+      .from(users)
+      .where(and(
+        eq(users.referredByUserId, userId),
+        sql`${users.deletedAt} IS NULL`
+      ));
+    
+    // Filter to only active subscriptions
+    if (referredUsers.length === 0) return [];
+    
+    const userIds = referredUsers.map(u => u.id);
+    const activeSubscriptions = await db.select()
+      .from(subscriptions)
+      .where(and(
+        inArray(subscriptions.userId, userIds),
+        eq(subscriptions.status, "active")
+      ));
+    
+    const activeUserIds = new Set(activeSubscriptions.map(s => s.userId));
+    return referredUsers.filter(u => activeUserIds.has(u.id));
+  }
+
+  async getAffiliateStats(userId: string): Promise<{ activeReferrals: number; totalCommission: number }> {
+    const activeReferrals = await this.getActiveReferrals(userId);
+    const COMMISSION_PER_REFERRAL = 2.95; // €2,95 per active referral per month
+    return {
+      activeReferrals: activeReferrals.length,
+      totalCommission: activeReferrals.length * COMMISSION_PER_REFERRAL
+    };
+  }
+
+  async getAllAffiliateStats(): Promise<{ userId: string; email: string; referralCode: string; activeReferrals: number; totalCommission: number }[]> {
+    // Get all users with a referral code
+    const usersWithReferrals = await db.select()
+      .from(users)
+      .where(sql`${users.referralCode} IS NOT NULL`);
+    
+    const stats = await Promise.all(usersWithReferrals.map(async user => {
+      const { activeReferrals, totalCommission } = await this.getAffiliateStats(user.id);
+      return {
+        userId: user.id,
+        email: user.email,
+        referralCode: user.referralCode!,
+        activeReferrals,
+        totalCommission
+      };
+    }));
+    
+    return stats.filter(s => s.activeReferrals > 0);
   }
 }
 

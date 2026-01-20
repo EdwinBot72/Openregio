@@ -37,6 +37,10 @@ export const users = pgTable("users", {
   visibilitySettings: text("visibility_settings"), // JSON string with visibility per field
   mustCompleteOnboarding: boolean("must_complete_onboarding").default(true).notNull(),
   onboardingToken: varchar("onboarding_token"),
+  // Affiliate/Referral tracking
+  referralCode: varchar("referral_code").unique(), // Unique code like OR-ABC123
+  referredByUserId: varchar("referred_by_user_id"), // User who referred this user
+  referredAt: timestamp("referred_at"), // When the referral was made
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   deletedAt: timestamp("deleted_at"), // Soft delete for AVG compliance

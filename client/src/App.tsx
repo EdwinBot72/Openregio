@@ -34,6 +34,7 @@ import RegioCrewPage from "@/pages/regiocrew";
 import BlogDetailPage from "@/pages/blog-detail";
 import BlogsPage from "@/pages/blogs";
 import AdminBlogsPage from "@/pages/admin/blogs";
+import AffiliatePage from "@/pages/affiliate";
 
 // Routes that should NOT have the sidebar/header layout
 const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs"];
@@ -74,6 +75,7 @@ function AuthenticatedRouter() {
       <Route path="/woo-bot" component={WooBotPage} />
       <Route path="/woo-wizard" component={WooWizardPage} />
       <Route path="/regiocrew" component={RegioCrewPage} />
+      <Route path="/affiliate" component={AffiliatePage} />
       <Route path="/admin/blogs" component={AdminBlogsPage} />
       <Route component={NotFound} />
     </Switch>

@@ -1,17 +1,19 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema, insertBedrijfsprofielSchema, regioBotChatSchema, visibilitySettingsSchema, DEFAULT_VISIBILITY_SETTINGS, insertCrewProfileSchema, insertCrewRequestSchema, insertCrewApplicationSchema, CREW_CATEGORIES } from "@shared/schema";
+import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema, insertBedrijfsprofielSchema, regioBotChatSchema, visibilitySettingsSchema, DEFAULT_VISIBILITY_SETTINGS, insertCrewProfileSchema, insertCrewRequestSchema, insertCrewApplicationSchema, CREW_CATEGORIES, users } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { createMollieClient } from "@mollie/api-client";
 import { setupJwtAuth, attachUser, requireAuth, requirePro, issueTokensForUser, clearTokenCookies, revokeAllUserTokens } from "./jwtAuth";
 import { requireAdmin } from "./middleware/auth";
 import { seedMasterAccount } from "./seed";
-import { generateRandomPassword, generateOnboardingToken, getPlanPrice, getPlanDisplayName } from "./utils/auth";
+import { generateRandomPassword, generateOnboardingToken, getPlanPrice, getPlanDisplayName, generateReferralCode } from "./utils/auth";
 import bcrypt from "bcrypt";
 import { upload, getDocumentType } from "./middleware/upload";
 import { runRegioBot } from "./regiobot";
+import { db } from "db";
+import { eq } from "drizzle-orm";
 
 // Initialize Mollie client (requires MOLLIE_API_KEY environment variable)
 const mollieClient = process.env.MOLLIE_API_KEY 
@@ -71,7 +73,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // POST /start - Create Mollie payment for plan subscription
   app.post("/start", async (req, res) => {
     try {
-      const { email, plan } = req.body;
+      const { email, plan, ref } = req.body;
       
       // Validate input
       if (!email || !plan) {
@@ -93,11 +95,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(500).json({ error: "Betalingssysteem niet beschikbaar" });
       }
       
+      // If referral code provided, validate it exists
+      let referrerUserId: string | null = null;
+      if (ref) {
+        const referrer = await storage.getUserByReferralCode(ref);
+        if (referrer) {
+          referrerUserId = referrer.id;
+          console.log(`✓ Valid referral code ${ref} from user ${referrer.id}`);
+        } else {
+          console.log(`⚠ Invalid referral code ${ref} - ignoring`);
+        }
+      }
+      
       const baseUrl = getBaseUrl(req);
       const amount = getPlanPrice(plan);
       const description = `${getPlanDisplayName(plan)} - Maandelijks abonnement`;
       
-      // Create Mollie payment
+      // Create Mollie payment with referral in metadata
       const payment = await mollieClient.payments.create({
         amount: {
           value: amount,
@@ -109,7 +123,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         metadata: {
           email,
           plan,
-          source: "openregio-signup"
+          source: "openregio-signup",
+          referrerUserId: referrerUserId || undefined,
+          referralCode: ref || undefined
         }
       });
       
@@ -151,7 +167,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Only process paid payments
       if (payment.status === "paid") {
-        const { email, plan } = payment.metadata as { email: string; plan: string };
+        const { email, plan, referrerUserId } = payment.metadata as { 
+          email: string; 
+          plan: string; 
+          referrerUserId?: string;
+        };
         
         if (!email || !plan) {
           console.error("Payment metadata incomplete:", payment.metadata);
@@ -164,12 +184,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         let user = await storage.getUserByEmail(email);
         
         if (!user) {
-          // Generate random password and onboarding token
+          // Generate random password, onboarding token, and referral code
           const tempPassword = generateRandomPassword();
           const onboardingToken = generateOnboardingToken();
+          const referralCode = generateReferralCode();
           const passwordHash = await bcrypt.hash(tempPassword, 10);
           
-          // Create new user
+          // Create new user with referral info
           user = await storage.createUser({
             email,
             passwordHash,
@@ -177,6 +198,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
             role: "member",
             mustCompleteOnboarding: true,
             onboardingToken,
+            referralCode,
+            referredByUserId: referrerUserId || null,
+            referredAt: referrerUserId ? new Date() : null,
           });
           
           // Create onboarding token record (expires in 7 days)
@@ -190,6 +214,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
           
           console.log(`✓ User created: ${user.id} (${email})`);
+          console.log(`  Referral code: ${referralCode}`);
+          if (referrerUserId) {
+            console.log(`  Referred by: ${referrerUserId}`);
+          }
           console.log(`  Temporary password: ${tempPassword}`);
           console.log(`  Onboarding token: ${onboardingToken}`);
           console.log(`  Onboarding link: ${baseUrl}/first-login?token=${onboardingToken}`);
@@ -2356,6 +2384,103 @@ Maak het verzoek professioneel en juridisch correct.`;
     } catch (error: any) {
       console.error("Error deleting blog:", error);
       res.status(500).json({ error: "Kon blog niet verwijderen" });
+    }
+  });
+
+  // ====== AFFILIATE SYSTEM ======
+  
+  // GET /api/affiliate - Get current user's affiliate info and stats
+  app.get("/api/affiliate", requireAuth, async (req, res) => {
+    try {
+      const jwtUser = req.user!;
+      // Get full user from database to access referralCode
+      const fullUser = await storage.getUserById(jwtUser.id);
+      if (!fullUser) {
+        return res.status(404).json({ error: "Gebruiker niet gevonden" });
+      }
+      
+      const stats = await storage.getAffiliateStats(fullUser.id);
+      
+      res.json({
+        referralCode: fullUser.referralCode,
+        activeReferrals: stats.activeReferrals,
+        totalCommission: stats.totalCommission,
+        commissionPerReferral: 2.95,
+      });
+    } catch (error: any) {
+      console.error("Error fetching affiliate stats:", error);
+      res.status(500).json({ error: "Kon affiliate gegevens niet laden" });
+    }
+  });
+
+  // POST /api/affiliate/generate-code - Generate a referral code for the current user if they don't have one
+  app.post("/api/affiliate/generate-code", requireAuth, async (req, res) => {
+    try {
+      const jwtUser = req.user!;
+      // Get full user from database
+      const fullUser = await storage.getUserById(jwtUser.id);
+      if (!fullUser) {
+        return res.status(404).json({ error: "Gebruiker niet gevonden" });
+      }
+      
+      if (fullUser.referralCode) {
+        return res.json({ referralCode: fullUser.referralCode });
+      }
+      
+      // Generate unique referral code
+      let code = generateReferralCode();
+      let existingUser = await storage.getUserByReferralCode(code);
+      let attempts = 0;
+      while (existingUser && attempts < 10) {
+        code = generateReferralCode();
+        existingUser = await storage.getUserByReferralCode(code);
+        attempts++;
+      }
+      
+      if (existingUser) {
+        return res.status(500).json({ error: "Kon geen unieke referral code genereren" });
+      }
+      
+      // Update user with referral code
+      await db.update(users).set({ referralCode: code }).where(eq(users.id, fullUser.id));
+      
+      res.json({ referralCode: code });
+    } catch (error: any) {
+      console.error("Error generating referral code:", error);
+      res.status(500).json({ error: "Kon referral code niet genereren" });
+    }
+  });
+
+  // Admin: GET /api/admin/affiliates - Get all affiliate stats for CSV export
+  app.get("/api/admin/affiliates", requireAdmin, async (req, res) => {
+    try {
+      const stats = await storage.getAllAffiliateStats();
+      res.json(stats);
+    } catch (error: any) {
+      console.error("Error fetching all affiliate stats:", error);
+      res.status(500).json({ error: "Kon affiliate statistieken niet laden" });
+    }
+  });
+
+  // Admin: GET /api/admin/affiliates/csv - Download CSV export of affiliate stats
+  app.get("/api/admin/affiliates/csv", requireAdmin, async (req, res) => {
+    try {
+      const stats = await storage.getAllAffiliateStats();
+      
+      // Build CSV
+      const header = "Email,Referral Code,Actieve Referrals,Commissie (EUR)\n";
+      const rows = stats.map(s => 
+        `"${s.email}","${s.referralCode}",${s.activeReferrals},${s.totalCommission.toFixed(2)}`
+      ).join("\n");
+      
+      const csv = header + rows;
+      
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader("Content-Disposition", `attachment; filename="affiliates-${new Date().toISOString().slice(0, 10)}.csv"`);
+      res.send(csv);
+    } catch (error: any) {
+      console.error("Error generating affiliate CSV:", error);
+      res.status(500).json({ error: "Kon CSV niet genereren" });
     }
   });
 

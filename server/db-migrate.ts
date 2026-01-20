@@ -65,6 +65,22 @@ export async function runMigrations(): Promise<void> {
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_refresh_tokens_token_id ON refresh_tokens(token_id);`);
     console.log("[Migration] ✓ refresh_tokens table ensured");
 
+    // Add affiliate/referral columns to users table
+    await db.execute(sql`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS referral_code VARCHAR(20) UNIQUE;
+    `);
+    console.log("[Migration] ✓ users.referral_code column ensured");
+    
+    await db.execute(sql`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS referred_by_user_id VARCHAR(255);
+    `);
+    console.log("[Migration] ✓ users.referred_by_user_id column ensured");
+    
+    await db.execute(sql`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS referred_at TIMESTAMP;
+    `);
+    console.log("[Migration] ✓ users.referred_at column ensured");
+
     console.log("[Migration] Database schema is up to date");
   } catch (error) {
     console.error("[Migration] Error running migrations:", error);
