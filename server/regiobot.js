@@ -29,6 +29,14 @@ function getPool() {
 // ---- Input schema ----
 const RegioBotInput = z.object({
   question: z.string().min(3),
+  task: z.enum([
+    "analyse_besluit",
+    "mandaat_check",
+    "wat_ontbreekt",
+    "vervolg_woo",
+    "tijdlijn",
+    "publiceer_samenvatting",
+  ]).optional(),
   regionSlug: z.string().min(1).optional(),     // bv "haarlemmermeer"
   authoritySlug: z.string().min(1).optional(),  // bv "gemeente-haarlem"
   tags: z.array(z.string()).optional(),         // bv ["mandaat","heffing"]
@@ -93,6 +101,25 @@ function buildUserPrompt(question, regionSlug, authoritySlug, tags) {
   ].filter(Boolean);
 
   return bits.join("\n");
+}
+
+function taskInstruction(task) {
+  switch (task) {
+    case "analyse_besluit":
+      return "TAAK: Analyseer dit besluit/antwoord. Geef: kernbeslissing, wettelijke basis (als genoemd), wie tekent/rol, risico's/zwaktes, en wat je nog moet opvragen via WOO.";
+    case "mandaat_check":
+      return "TAAK: Mandaat-check. Zoek in bronnen naar mandaat/delegatie/aanwijzingsbesluiten. Zeg expliciet wat je wel/niet ziet. Geef concrete WOO-vragen om mandaatketen te bewijzen.";
+    case "wat_ontbreekt":
+      return "TAAK: Wat ontbreekt? Geef checklist met ontbrekende stukken (besluiten, mandaatregister, contracten, werkinstructies, beleidskaders) en formuleer vervolg-WOO vragen.";
+    case "vervolg_woo":
+      return "TAAK: Schrijf vervolg-WOO vragen (bulletlist) op basis van gaten/inconsistenties. Kort, precies, documentgericht (geen meningen).";
+    case "tijdlijn":
+      return "TAAK: Bouw een tijdlijn. Zet events op datum (verzoek/antwoord/besluit/bijlage), benoem verantwoordelijke partij per stap, en markeer hiaten.";
+    case "publiceer_samenvatting":
+      return "TAAK: Maak publicatie-ready samenvatting: geen persoonsgegevens, geen emotie, alleen feiten + verwijzingen. Eindig met: 'Bronnen' lijst.";
+    default:
+      return "";
+  }
 }
 
 function formatSources(rows) {
@@ -262,6 +289,7 @@ Persoonlijke verkeerszaken of boetes worden niet opgenomen.`,
   const messages = [
     { role: "system", content: buildSystemPrompt() },
     { role: "user", content: buildUserPrompt(input.question, input.regionSlug, input.authoritySlug, input.tags) },
+    ...(input.task ? [{ role: "user", content: taskInstruction(input.task) }] : []),
     { role: "user", content: `BRONNEN (WOO Database):\n\n${sourcesText}` },
     {
       role: "user",
