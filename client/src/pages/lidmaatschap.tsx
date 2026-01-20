@@ -245,7 +245,7 @@ export default function StartPage() {
                 />
                 <div className="pt-2">
                   <p className="text-sm text-muted-foreground mb-4">
-                    Geselecteerd plan: <span className="font-semibold text-foreground">{selectedPlan === "basic" ? "Basic (€9,95/maand)" : "Pro (€19,95/maand)"}</span>
+                    Geselecteerd plan: <span className="font-semibold text-foreground">{selectedPlan === "basic" ? "Basic (€12,95/maand)" : "Pro (€24,00/maand)"}</span>
                   </p>
                   <Button
                     type="submit"

@@ -68,7 +68,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Attach user to all requests (makes req.user available)
   app.use(attachUser);
   
-  // BLOK 2: Mollie Payment Flow (Basic €9,95 / Pro €19,95)
+  // BLOK 2: Mollie Payment Flow (Basic €12,95 / Pro €24,00)
   
   // POST /start - Create Mollie payment for plan subscription
   app.post("/start", async (req, res) => {
