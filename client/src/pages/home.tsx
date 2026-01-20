@@ -69,27 +69,27 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="font-accent text-4xl md:text-6xl font-bold mb-6 leading-tight" data-testid="text-hero-title">
-                Meer werk uit je eigen regio. Meer grip op brieven en regels.
+                Meer omzet uit je regio. Meer grip op regels en bevoegdheden.
               </h1>
               <p className="text-xl md:text-2xl text-muted-foreground mb-8" data-testid="text-hero-subtitle">
-                OpenRegio is het regionale systeem voor ondernemers die willen groeien zonder 
-                afhankelijk te zijn van advertenties, platforms of onduidelijke instanties.
+                OpenRegio is infrastructuur voor lokale ondernemers: een regionaal netwerk + een gezamenlijke WOO-bibliotheek.
+                RegioBot maakt beleid, mandaten en besluiten doorzichtig — zodat jij niet vaart op aannames.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link href="/start?plan=basic">
                   <Button size="lg" data-testid="button-hero-basic">
-                    Ik wil meer klanten
+                    Word lid en claim je regio
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
                 <Link href="/regiobot">
                   <Button variant="outline" size="lg" data-testid="button-hero-basischeck">
-                    Ik wil een brief checken
+                    Check een besluit met RegioBot
                   </Button>
                 </Link>
               </div>
               <p className="text-sm text-muted-foreground mt-4" data-testid="text-hero-tagline">
-                Regionale omzet. Duidelijke regels. Sterke ondernemers.
+                Regio-omzet. Bewijs op tafel. Ondernemen zonder ruis.
               </p>
             </div>
             <div className="relative">
@@ -111,15 +111,15 @@ export default function HomePage() {
             <h2 className="font-accent text-2xl md:text-3xl font-bold mb-4">
               Waarom ondernemers zich aansluiten
             </h2>
-            <p className="text-muted-foreground">Lokale ondernemers lopen vast op:</p>
+            <p className="text-muted-foreground">Lokale ondernemers verliezen geld door:</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center text-sm">
             {[
-              "Te weinig vaste klanten",
-              "Onduidelijke brieven en aanslagen",
-              "Slecht gevonden worden in hun regio",
-              "Personeelstekort en werkdruk",
-              "Onzekerheid over betalingen en regels",
+              "Onvoorspelbare omzet en losse aanvragen",
+              "Beleid en brieven zonder duidelijke grondslag",
+              "Onzichtbare besluiten die je bedrijf raken",
+              "Onduidelijke mandaten: wie mag eigenlijk wat?",
+              "Tijdverlies door loketten, standaardteksten en omwegen",
             ].map((pijnpunt, idx) => (
               <div key={idx} className="p-3 rounded-md bg-background border">
                 {pijnpunt}
@@ -127,7 +127,7 @@ export default function HomePage() {
             ))}
           </div>
           <p className="text-center mt-6 font-semibold text-primary">
-            OpenRegio maakt dit concreet en beheersbaar.
+            OpenRegio maakt dit simpel: regionaal netwerk + documenten + overzicht.
           </p>
         </div>
       </section>
@@ -158,14 +158,14 @@ export default function HomePage() {
               <CardContent className="p-6">
                 <Store className="h-12 w-12 text-blue-500 mb-4" />
                 <h3 className="font-accent text-xl font-semibold mb-2">
-                  1. RegioMarkt — Omzet uit je regio
+                  1. RegioMarkt — Werk uit je eigen regio
                 </h3>
                 <p className="text-muted-foreground mb-4">
-                  Een gesloten B2B-netwerk waarin ondernemers elkaar klanten en klussen geven. 
-                  Vaste plekken per vakgebied, doorverwijzingen tussen leden, gezamenlijke bundels en acties.
+                  Een gesloten netwerk waar ondernemers elkaar doorverwijzen en werk verdelen.
+                  Geen algoritmes, geen advertenties: gewoon korte lijnen, vaste plekken per vakgebied en afspraken die blijven staan.
                 </p>
                 <p className="text-sm font-medium text-blue-600">
-                  Resultaat: stabielere omzet en minder prijsdruk.
+                  Resultaat: stabiele instroom en minder afhankelijkheid van platforms.
                 </p>
               </CardContent>
             </Card>
@@ -174,15 +174,15 @@ export default function HomePage() {
               <CardContent className="p-6">
                 <Bot className="h-12 w-12 text-primary mb-4" />
                 <h3 className="font-accent text-xl font-semibold mb-2">
-                  2. RegioBot — Grip op brieven en regels
+                  2. RegioBot — WOO & regels, regionaal scherp
                 </h3>
                 <p className="text-muted-foreground mb-4">
-                  Upload een brief van gemeente, Belastingdienst of CJIB en krijg direct overzicht: 
-                  wat er staat, wat het betekent, welke stappen je kunt nemen. 
-                  Inclusief WOO-verzoeken en bezwaar-templates.
+                  RegioBot werkt dossier-gedreven: WOO-verzoeken, antwoorden, besluiten, mandaten en beleidsregels.
+                  Je krijgt geen 'advies', maar een check op wat er staat, wat ontbreekt en welke documenten je moet opvragen om het hard te maken.
+                  Samen bouwen we een WOO-bibliotheek die ondernemers beschermt met feiten.
                 </p>
                 <p className="text-sm font-medium text-primary">
-                  Resultaat: meer duidelijkheid en minder financieel risico.
+                  Resultaat: minder risico, meer controle, sneller schakelen.
                 </p>
               </CardContent>
             </Card>
@@ -191,14 +191,14 @@ export default function HomePage() {
               <CardContent className="p-6">
                 <Eye className="h-12 w-12 text-green-500 mb-4" />
                 <h3 className="font-accent text-xl font-semibold mb-2">
-                  3. Zichtbaarheid — Lokaal gevonden worden
+                  3. Zichtbaarheid — Lokaal vindbaar, zonder marketingcircus
                 </h3>
                 <p className="text-muted-foreground mb-4">
-                  Praktische hulp bij Google Business, reviews, lokale SEO en eenvoudige website-checks. 
-                  Zodat klanten in jouw buurt je weten te vinden.
+                  Praktische basics: Google bedrijfsprofiel, reviews en lokale vindbaarheid.
+                  Niet "content spammen", wel gewoon beter gevonden worden door klanten in jouw buurt.
                 </p>
                 <p className="text-sm font-medium text-green-600">
-                  Resultaat: meer aanvragen uit je eigen buurt.
+                  Resultaat: meer aanvragen uit de regio, minder advertentiedruk.
                 </p>
               </CardContent>
             </Card>
@@ -207,14 +207,15 @@ export default function HomePage() {
               <CardContent className="p-6">
                 <ClipboardCheck className="h-12 w-12 text-orange-500 mb-4" />
                 <h3 className="font-accent text-xl font-semibold mb-2">
-                  4. Basischeck — Bedrijf dat blijft draaien
+                  4. Basischeck — Betrouwbaar bedrijf, ook als systemen haperen
                 </h3>
                 <p className="text-muted-foreground mb-4">
-                  Een score op cash, bonnen, bereikbaarheid, offline werken en noodstroom. 
-                  Je score bepaalt welke functies en kansen je krijgt binnen RegioMarkt.
+                  Een simpele check op cash, bonnen, bereikbaarheid en offline werken.
+                  Zodat je bedrijf niet stilvalt door pin-storingen, apps of afhankelijkheden.
+                  Je score bepaalt ook je positie in het netwerk.
                 </p>
                 <p className="text-sm font-medium text-orange-600">
-                  Resultaat: betrouwbaarheid en continuïteit.
+                  Resultaat: vertrouwen en continuïteit in je regio.
                 </p>
               </CardContent>
             </Card>
@@ -229,12 +230,11 @@ export default function HomePage() {
             <CardContent className="p-8 text-center">
               <UserPlus className="h-12 w-12 text-primary mx-auto mb-4" />
               <h2 className="font-accent text-2xl md:text-3xl font-bold mb-4">
-                RegioCrew — Personeelstekort oplossen
+                RegioCrew — Capaciteit uit de regio
               </h2>
               <p className="text-muted-foreground mb-6 max-w-2xl mx-auto">
-                Te veel werk, te weinig mensen? OpenRegio helpt je capaciteit opvangen via een regionale 
-                flex-pool en vertrouwde partners. Werk doorschuiven naar ondernemers in je regio, 
-                inhuur via zzp'ers en oproepkrachten, simpele lokale werving-templates.
+                Te veel werk, te weinig mensen? Regel het regionaal.
+                Schuif werk door naar betrouwbare ondernemers, huur sneller in en werk met een flex-pool die je niet eerst hoeft te 'leren kennen'.
               </p>
               <p className="font-medium text-primary mb-6">
                 Resultaat: geen omzetverlies door onderbezetting.
@@ -260,8 +260,8 @@ export default function HomePage() {
             {[
               { step: "1", label: "Maak je profiel aan" },
               { step: "2", label: "Doe de Basischeck" },
-              { step: "3", label: "Gebruik RegioMarkt, RegioBot of RegioCrew" },
-              { step: "4", label: "Word sterker in je regio" },
+              { step: "3", label: "Gebruik RegioMarkt + RegioBot (WOO)" },
+              { step: "4", label: "Bouw voordeel op in je regio" },
             ].map((item, idx) => (
               <div key={idx} className="flex flex-col items-center gap-2">
                 <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
@@ -378,10 +378,10 @@ export default function HomePage() {
                 <ul className="space-y-3 mb-8">
                   {[
                     "Alles van Basis, plus:",
-                    "RegioBot AI-assistent",
-                    "Juridische documenten uitleg",
-                    "Marketing content generator",
-                    "RegioCrew hulpvragen plaatsen",
+                    "RegioBot (WOO & mandaat-checks)",
+                    "Dossier-modus (werken op WOO-dossiers)",
+                    "Vervolg-WOO vragen generator",
+                    "Bronnen & verwijzingen per antwoord",
                     "Prioriteit support",
                   ].map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-3">
@@ -474,11 +474,11 @@ export default function HomePage() {
       <section className="py-16 px-4 bg-primary/5">
         <div className="max-w-3xl mx-auto text-center">
           <h2 className="font-accent text-2xl md:text-3xl font-bold mb-4">
-            Geen praatclub. Gewoon resultaat.
+            Geen praatclub. Dit is infrastructuur.
           </h2>
           <p className="text-lg text-muted-foreground mb-6">
-            Sluit je aan bij ondernemers in jouw regio. Bouw aan omzet. Houd grip op regels. 
-            Werk samen met betrouwbare partners.
+            OpenRegio is er voor ondernemers die regionaal willen winnen én grip willen op regels.
+            We bouwen samen een WOO-bibliotheek voor toezicht op beleid, mandaten en uitvoering — zonder ruis van persoonlijke boetes of privézaken.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
             <Link href="/start?plan=basic">
@@ -583,8 +583,8 @@ export default function HomePage() {
             <div>
               <h3 className="font-accent font-bold text-lg mb-4">OpenRegio</h3>
               <p className="text-sm text-muted-foreground">
-                Regionale omzet. Duidelijke regels. Sterke ondernemers. 
-                Het regionale systeem voor ondernemers die willen groeien.
+                Regio-omzet. Regels doorzichtig. Sterke ondernemers. 
+                Infrastructuur voor ondernemers die regionaal willen winnen.
               </p>
             </div>
             <div>
@@ -652,7 +652,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="pt-8 border-t text-center text-sm text-muted-foreground">
-            <p>© 2026 OpenRegio – Regionale omzet. Duidelijke regels. Sterke ondernemers.</p>
+            <p>© 2026 OpenRegio – Regio-omzet. Regels doorzichtig. Sterke ondernemers.</p>
           </div>
         </div>
       </footer>
