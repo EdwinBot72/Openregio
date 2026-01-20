@@ -913,6 +913,29 @@ export type PrivacyField = typeof PRIVACY_FIELDS[number];
 // WOO (Wet open overheid) TABLES
 // ===============================
 
+// WOO Categories - fixed set of allowed categories
+export const WOO_CATEGORIES = [
+  { slug: "mandaat_delegatie", label: "Mandaat & delegatie", isAllowed: true },
+  { slug: "beleid_verordening", label: "Beleid & verordeningen", isAllowed: true },
+  { slug: "vergunningen", label: "Vergunningen & beleidsregels", isAllowed: true },
+  { slug: "heffingen_leges", label: "Heffingen, leges, belastingen", isAllowed: true },
+  { slug: "handhaving_kaders", label: "Handhavingskaders (beleid)", isAllowed: true },
+  { slug: "aanbesteding", label: "Aanbestedingen & gunning", isAllowed: true },
+  { slug: "subsidies", label: "Subsidiekaders & besluiten", isAllowed: true },
+  { slug: "uitvoering_partijen", label: "Uitvoeringsorganisaties/derden", isAllowed: true },
+  { slug: "openbaarheid_archief", label: "Archief/openbaarheid/werkinstructies", isAllowed: true },
+  { slug: "persoonlijk_verkeer_boete", label: "Persoonlijk/Verkeer/Boete (NIET TOEGESTAAN)", isAllowed: false },
+] as const;
+
+export type WooCategorySlug = typeof WOO_CATEGORIES[number]["slug"];
+
+// WOO Categories table
+export const wooCategories = pgTable("woo_categories", {
+  slug: text("slug").primaryKey(),
+  label: text("label").notNull(),
+  isAllowed: boolean("is_allowed").notNull().default(true),
+});
+
 // Regions table
 export const regions = pgTable("regions", {
   id: serial("id").primaryKey(),
@@ -935,6 +958,7 @@ export const wooRequests = pgTable("woo_requests", {
   id: serial("id").primaryKey(),
   regionId: integer("region_id").references(() => regions.id),
   authorityId: integer("authority_id").references(() => authorities.id),
+  categorySlug: text("category_slug").references(() => wooCategories.slug).default("beleid_verordening"),
   title: text("title").notNull(),
   body: text("body"),
   referenceCode: text("reference_code"),
@@ -944,6 +968,7 @@ export const wooRequests = pgTable("woo_requests", {
 }, (table) => [
   index("idx_woo_requests_region").on(table.regionId),
   index("idx_woo_requests_authority").on(table.authorityId),
+  index("idx_woo_requests_category").on(table.categorySlug),
 ]);
 
 // Document kinds
@@ -953,6 +978,7 @@ export const WOO_DOCUMENT_KIND = ["response", "decision", "attachment"] as const
 export const wooDocuments = pgTable("woo_documents", {
   id: serial("id").primaryKey(),
   requestId: integer("request_id").notNull().references(() => wooRequests.id, { onDelete: "cascade" }),
+  categorySlug: text("category_slug").references(() => wooCategories.slug),
   kind: text("kind").notNull().default("attachment"), // response/decision/attachment
   filename: text("filename").notNull(),
   fileUrl: text("file_url"),
@@ -962,6 +988,7 @@ export const wooDocuments = pgTable("woo_documents", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 }, (table) => [
   index("idx_woo_documents_request").on(table.requestId),
+  index("idx_woo_documents_category").on(table.categorySlug),
 ]);
 
 // Tags table
