@@ -1,0 +1,204 @@
+Yes. Hieronder is je **kant-en-klare patch** voor `client/src/pages/home.tsx`.
+**Layout blijft hetzelfde.** Alleen copy wordt hard + scope strak (WOO/regelgeving voor ondernemers, geen boete/traffic/privé).
+
+## Patch 1: Home copy (zoek/vervang)
+
+### 1) Hero title
+
+**Zoek:**
+
+```tsx
+Meer werk uit je eigen regio. Meer grip op brieven en regels.
+```
+
+**Vervang door:**
+
+```tsx
+Meer werk uit je regio. Meer grip op regels, mandaten en besluiten.
+```
+
+### 2) Hero subtitle
+
+**Zoek:**
+
+```tsx
+OpenRegio is het regionale systeem voor ondernemers die willen groeien zonder 
+afhankelijk te zijn van advertenties, platforms of onduidelijke instanties.
+```
+
+**Vervang door:**
+
+```tsx
+OpenRegio is infrastructuur voor lokale ondernemers: een regionaal netwerk + een gezamenlijke WOO-bibliotheek.
+RegioBot maakt beleid, mandaten en uitvoering doorzichtig — zodat jij niet vaart op aannames,
+maar op documenten.
+```
+
+### 3) Hero buttons
+
+**Zoek:**
+
+```tsx
+Ik wil meer klanten
+```
+
+**Vervang door:**
+
+```tsx
+Word lid en claim je regio
+```
+
+**Zoek:**
+
+```tsx
+Ik wil een brief checken
+```
+
+**Vervang door:**
+
+```tsx
+Check beleid of besluit met RegioBot
+```
+
+### 4) Hero scope-regel toevoegen (nieuw)
+
+Zoek dit blok:
+
+```tsx
+<p className="text-sm text-muted-foreground mt-4" data-testid="text-hero-tagline">
+  Regionale omzet. Duidelijke regels. Sterke ondernemers.
+</p>
+```
+
+Plak **direct eronder**:
+
+```tsx
+<p className="text-xs text-muted-foreground mt-2" data-testid="text-hero-scope">
+  Scope: alleen wet- en regelgeving voor ondernemers. Geen verkeerszaken, Mulder/CJIB, snelheid,
+  rood-licht of persoonlijke boetes.
+</p>
+```
+
+---
+
+## Patch 2: RegioBot feature card (CJIB/bezwaar eruit)
+
+Zoek:
+
+```tsx
+2. RegioBot — Grip op brieven en regels
+```
+
+Vervang door:
+
+```tsx
+2. RegioBot — WOO & regelgeving, regionaal scherp
+```
+
+Zoek deze tekst (hele alinea):
+
+```tsx
+Upload een brief van gemeente, Belastingdienst of CJIB en krijg direct overzicht: 
+wat er staat, wat het betekent, welke stappen je kunt nemen. 
+Inclusief WOO-verzoeken en bezwaar-templates.
+```
+
+Vervang door:
+
+```tsx
+RegioBot werkt dossier-gedreven: WOO-verzoeken, antwoorden, besluiten, mandaten en beleidsregels.
+Je krijgt geen ‘mening’ en geen loket-praat, maar: wat er staat, wat ontbreekt
+en welke documenten je moet opvragen om het hard te maken.
+Samen bouwen we een WOO-bibliotheek die ondernemers beschermt met feiten.
+```
+
+Zoek:
+
+```tsx
+Resultaat: meer duidelijkheid en minder financieel risico.
+```
+
+Vervang door:
+
+```tsx
+Resultaat: minder risico, sneller schakelen, meer controle.
+```
+
+---
+
+## Patch 3: “Zo werkt” stap 3 (harder)
+
+Zoek:
+
+```tsx
+{ step: "3", label: "Gebruik RegioMarkt, RegioBot of RegioCrew" },
+```
+
+Vervang door:
+
+```tsx
+{ step: "3", label: "Gebruik RegioMarkt + RegioBot (WOO)" },
+```
+
+---
+
+## Patch 4: Pro pricing (marketing/vaag juridisch eruit)
+
+Zoek de Pro features array:
+
+```tsx
+{[
+  "Alles van Basis, plus:",
+  "RegioBot AI-assistent",
+  "Juridische documenten uitleg",
+  "Marketing content generator",
+  "RegioCrew hulpvragen plaatsen",
+  "Prioriteit support",
+].map((feature, idx) => (
+```
+
+Vervang door:
+
+```tsx
+{[
+  "Alles van Basis, plus:",
+  "RegioBot (WOO & mandaat-checks)",
+  "Dossier-modus (werken op WOO-dossiers)",
+  "Vervolg-WOO vragen generator",
+  "Bronnen & verwijzingen per antwoord",
+  "RegioCrew hulpvragen plaatsen",
+  "Prioriteit support",
+].map((feature, idx) => (
+```
+
+---
+
+## Patch 5: Final CTA (WOO-bibliotheek + scope)
+
+Zoek:
+
+```tsx
+Sluit je aan bij ondernemers in jouw regio. Bouw aan omzet. Houd grip op regels. 
+Werk samen met betrouwbare partners.
+```
+
+Vervang door:
+
+```tsx
+Sluit je aan bij ondernemers in jouw regio. Bouw aan omzet. Houd grip op regels.
+We bouwen samen een WOO-bibliotheek voor toezicht op beleid, mandaten en uitvoering —
+zonder ruis van persoonlijke boetes of privézaken.
+```
+
+---
+
+# Mini check (2 minuten)
+
+Na aanpassen:
+
+1. `npm run dev`
+2. Check homepage: hero + scope + RegioBot card tekst klopt
+3. Check pricing Pro: geen “marketing generator” meer
+4. Check CTA: noemt WOO-bibliotheek + “zonder ruis”
+
+Als je wil, pak ik daarna meteen je **RegioMarkt** en **Basischeck** teksten ook harder (zelfde layout, meer punch).

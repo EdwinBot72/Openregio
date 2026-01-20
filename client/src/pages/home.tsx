@@ -69,11 +69,11 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="font-accent text-4xl md:text-6xl font-bold mb-6 leading-tight" data-testid="text-hero-title">
-                Meer omzet uit je regio. Meer grip op regels en bevoegdheden.
+                Meer werk uit je regio. Meer grip op regels, mandaten en besluiten.
               </h1>
               <p className="text-xl md:text-2xl text-muted-foreground mb-8" data-testid="text-hero-subtitle">
                 OpenRegio is infrastructuur voor lokale ondernemers: een regionaal netwerk + een gezamenlijke WOO-bibliotheek.
-                RegioBot maakt beleid, mandaten en besluiten doorzichtig — zodat jij niet vaart op aannames.
+                RegioBot maakt beleid, mandaten en uitvoering doorzichtig — zodat jij niet vaart op aannames, maar op documenten.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link href="/start?plan=basic">
@@ -84,12 +84,15 @@ export default function HomePage() {
                 </Link>
                 <Link href="/regiobot">
                   <Button variant="outline" size="lg" data-testid="button-hero-basischeck">
-                    Check een besluit met RegioBot
+                    Check beleid of besluit met RegioBot
                   </Button>
                 </Link>
               </div>
               <p className="text-sm text-muted-foreground mt-4" data-testid="text-hero-tagline">
                 Regio-omzet. Bewijs op tafel. Ondernemen zonder ruis.
+              </p>
+              <p className="text-xs text-muted-foreground mt-2" data-testid="text-hero-scope">
+                Scope: alleen wet- en regelgeving voor ondernemers. Geen verkeerszaken, Mulder/CJIB, snelheid, rood-licht of persoonlijke boetes.
               </p>
             </div>
             <div className="relative">
@@ -174,15 +177,15 @@ export default function HomePage() {
               <CardContent className="p-6">
                 <Bot className="h-12 w-12 text-primary mb-4" />
                 <h3 className="font-accent text-xl font-semibold mb-2">
-                  2. RegioBot — WOO & regels, regionaal scherp
+                  2. RegioBot — WOO & regelgeving, regionaal scherp
                 </h3>
                 <p className="text-muted-foreground mb-4">
                   RegioBot werkt dossier-gedreven: WOO-verzoeken, antwoorden, besluiten, mandaten en beleidsregels.
-                  Je krijgt geen 'advies', maar een check op wat er staat, wat ontbreekt en welke documenten je moet opvragen om het hard te maken.
+                  Je krijgt geen 'mening' en geen loket-praat, maar: wat er staat, wat ontbreekt en welke documenten je moet opvragen om het hard te maken.
                   Samen bouwen we een WOO-bibliotheek die ondernemers beschermt met feiten.
                 </p>
                 <p className="text-sm font-medium text-primary">
-                  Resultaat: minder risico, meer controle, sneller schakelen.
+                  Resultaat: minder risico, sneller schakelen, meer controle.
                 </p>
               </CardContent>
             </Card>
@@ -382,6 +385,7 @@ export default function HomePage() {
                     "Dossier-modus (werken op WOO-dossiers)",
                     "Vervolg-WOO vragen generator",
                     "Bronnen & verwijzingen per antwoord",
+                    "RegioCrew hulpvragen plaatsen",
                     "Prioriteit support",
                   ].map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-3">
