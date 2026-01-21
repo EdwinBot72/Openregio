@@ -1,0 +1,702 @@
+import React from "react";
+
+const BRAND = {
+  purple: "#8665C0",
+  purpleDark: "#6F4FB3",
+  ink: "#0B0B0F",
+  bg: "#07070B",
+};
+
+const nav = [
+  { label: "Home", href: "#top" },
+  { label: "Voor wie", href: "#voorwie" },
+  { label: "Pijlers", href: "#pijlers" },
+  { label: "Werkwijze", href: "#werkwijze" },
+  { label: "Bewijs", href: "#bewijs" },
+  { label: "FAQ", href: "#faq" },
+  { label: "Contact", href: "#contact" },
+];
+
+const audience = [
+  {
+    title: "Lokale ondernemers",
+    text: "Je wil klanten, geen platformstress. Je wil bellen, afspreken, leveren.",
+    icon: "📍",
+  },
+  {
+    title: "Vakmensen & diensten",
+    text: "Je moet bereikbaar blijven. Ook als pin, cloud of apps haperen.",
+    icon: "🛠️",
+  },
+  {
+    title: "Regio-netwerken",
+    text: "Je wil dat werk, kennis en geld lokaal blijven rondgaan.",
+    icon: "🔁",
+  },
+  {
+    title: "Collectieven & coöps",
+    text: "Je wil structuur: afspraken, bewijs, en een systeem dat blijft staan.",
+    icon: "🤝",
+  },
+];
+
+const pillars = [
+  {
+    title: "RegioMarkt",
+    kicker: "Werk uit je eigen regio",
+    bullets: [
+      "Gesloten netwerk, korte lijnen.",
+      "Doorverwijzen i.p.v. concurreer-circus.",
+      "Vaste plekken per vakgebied (optioneel).",
+    ],
+    tag: "Stabiele instroom",
+    icon: "🧩",
+  },
+  {
+    title: "RegioBot",
+    kicker: "WOO & regelgeving, regionaal scherp",
+    bullets: [
+      "Dossier-gedreven: besluiten, mandaat, termijnen.",
+      "Wat staat er / wat ontbreekt / wat moet je opvragen.",
+      "Bouwt een herbruikbare WOO-bibliotheek per regio.",
+    ],
+    tag: "Meer controle",
+    icon: "🗂️",
+  },
+  {
+    title: "Zichtbaarheid",
+    kicker: "Lokaal vindbaar, zonder marketingcircus",
+    bullets: [
+      "Google bedrijfsprofiel + reviews + lokale signalen.",
+      "Geen contentplicht. Geen advertentiebudget.",
+      "Gewoon gevonden worden door buurtklanten.",
+    ],
+    tag: "Rust in je funnel",
+    icon: "📈",
+  },
+  {
+    title: "Basischeck",
+    kicker: "Bedrijf dat blijft draaien",
+    bullets: [
+      "Cash, bonnen, telefoonlijst, offline bereikbaarheid.",
+      "Noodstroom / powerbank / fallback werkwijze.",
+      "Badges als bewijs (geen vage claims).",
+    ],
+    tag: "Offline-proof",
+    icon: "🧯",
+  },
+];
+
+const steps = [
+  {
+    n: "01",
+    title: "Meld je aan",
+    text: "Binnen 2 minuten. Geen gedoe, maandelijks opzegbaar.",
+  },
+  {
+    n: "02",
+    title: "Kies je regio & vakgebied",
+    text: "Zodat zoeken en doorverwijzen meteen klopt.",
+  },
+  {
+    n: "03",
+    title: "Doe de Basischeck",
+    text: "Je badges worden zichtbaar: cash, bonnen, offline, noodstroom.",
+  },
+  {
+    n: "04",
+    title: "Word vindbaar & doorverwijsbaar",
+    text: "Korte lijnen. Minder afhankelijk. Meer grip.",
+  },
+];
+
+const proofPoints = [
+  {
+    title: "Badges = bewijs",
+    text: "Niet ‘wij zijn betrouwbaar’. Gewoon: cash mogelijk, bonnenblok, offline bereikbaar, noodstroom.",
+  },
+  {
+    title: "Printbaar & offline",
+    text: "Ledenlijst, telefoonnummers, templates. Ook bruikbaar zonder internet.",
+  },
+  {
+    title: "Dossierkracht",
+    text: "RegioBot maakt gaten zichtbaar: ontbrekende stukken, mandaat, termijnen.",
+  },
+];
+
+const localPhotoGrid = [
+  {
+    title: "Bakker / food",
+    src: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    title: "Installatie / techniek",
+    src: "https://images.unsplash.com/photo-1581091215367-59ab6b6c2f5b?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    title: "Fiets / mobiliteit",
+    src: "https://images.unsplash.com/photo-1520975693411-35a3f6d2f1ea?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    title: "Kapsalon / service",
+    src: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    title: "Zorg / ondersteuning",
+    src: "https://images.unsplash.com/photo-1580281657527-47f249e8f7e3?auto=format&fit=crop&w=1200&q=80",
+  },
+  {
+    title: "Bouw / onderhoud",
+    src: "https://images.unsplash.com/photo-1523413651479-597eb2da0ad6?auto=format&fit=crop&w=1200&q=80",
+  },
+];
+
+const testimonials = [
+  {
+    quote:
+      "Eindelijk een plek waar ‘lokale economie’ niet een slogan is, maar een systeem met regels.",
+    who: "Ondernemer (dienstverlening)",
+  },
+  {
+    quote:
+      "Die badges zijn goud. Klanten snappen direct: jij kunt leveren, ook als pin of apps kappen.",
+    who: "Vakman (installatie)",
+  },
+  {
+    quote:
+      "RegioBot is basically: stop met gokken. Laat mij zien wat ontbreekt, dan ga ik gericht vragen.",
+    who: "MKB (administratie)",
+  },
+];
+
+const faqs = [
+  {
+    q: "Is OpenRegio een marktplaats?",
+    a: "Nee. Dit is infrastructuur: netwerk + vindbaarheid + offline-proof + dossierhulp. Geen algoritme-feed.",
+  },
+  {
+    q: "Moet ik ‘socials’ doen?",
+    a: "Nee. Basis zichtbaarheid is genoeg: profiel, reviews, lokale signalen. Klaar.",
+  },
+  {
+    q: "Wat is ‘Basischeck’ precies?",
+    a: "Een set praktische checks (cash/bonnen/offline/noodstroom) die je als badges toont. Bewijs i.p.v. marketing.",
+  },
+  {
+    q: "Kan ik maandelijks opzeggen?",
+    a: "Ja. Geen jaarcontracten. Geen lock-in.",
+  },
+];
+
+function cx(...classes) {
+  return classes.filter(Boolean).join(" ");
+}
+
+function Badge({ children }) {
+  return (
+    <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-white/80">
+      {children}
+    </span>
+  );
+}
+
+function SectionTitle({ eyebrow, title, desc, align = "left" }) {
+  return (
+    <div className={cx("max-w-3xl", align === "center" && "mx-auto text-center")}>
+      {eyebrow && (
+        <div className="mb-3 text-sm font-semibold tracking-wide text-white/70">
+          {eyebrow}
+        </div>
+      )}
+      <h2 className="text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+        {title}
+      </h2>
+      {desc && <p className="mt-3 text-base text-white/70">{desc}</p>}
+    </div>
+  );
+}
+
+function Card({ children, className = "" }) {
+  return (
+    <div
+      className={cx(
+        "rounded-2xl border border-white/10 bg-white/5 p-6 shadow-[0_0_0_1px_rgba(255,255,255,0.03)] backdrop-blur",
+        className
+      )}
+    >
+      {children}
+    </div>
+  );
+}
+
+function Button({ href, children, variant = "primary" }) {
+  const base =
+    "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black";
+  const primary = `bg-[${BRAND.purple}] text-white hover:opacity-90 focus:ring-[${BRAND.purple}]`;
+  const secondary =
+    "border border-white/15 bg-white/5 text-white hover:bg-white/10 focus:ring-white/40";
+  const cls = cx(base, variant === "primary" ? primary : secondary);
+
+  return (
+    <a href={href} className={cls}>
+      {children}
+    </a>
+  );
+}
+
+export default function App() {
+  return (
+    <div
+      id="top"
+      className="min-h-screen bg-black text-white"
+      style={{
+        background:
+          "radial-gradient(1200px 600px at 20% 10%, rgba(134,101,192,0.28), transparent 55%), radial-gradient(900px 500px at 90% 20%, rgba(134,101,192,0.18), transparent 60%), linear-gradient(180deg, #07070B 0%, #000 100%)",
+      }}
+    >
+      {/* HEADER */}
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-black/60 backdrop-blur">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+          <a href="#top" className="flex items-center gap-2">
+            <div
+              className="h-9 w-9 rounded-xl"
+              style={{
+                background: `linear-gradient(135deg, ${BRAND.purple} 0%, ${BRAND.purpleDark} 100%)`,
+              }}
+            />
+            <div className="leading-tight">
+              <div className="text-sm font-semibold">OpenRegio</div>
+              <div className="text-xs text-white/60">lokaal • offline-proof • menselijk</div>
+            </div>
+          </a>
+
+          <nav className="hidden items-center gap-6 md:flex">
+            {nav.map((i) => (
+              <a
+                key={i.href}
+                href={i.href}
+                className="text-sm text-white/70 hover:text-white"
+              >
+                {i.label}
+              </a>
+            ))}
+          </nav>
+
+          <div className="flex items-center gap-2">
+            <Button href="#wordlid" variant="secondary">
+              Inloggen
+            </Button>
+            <Button href="#wordlid">Word lid</Button>
+          </div>
+        </div>
+      </header>
+
+      {/* HERO */}
+      <section className="mx-auto max-w-6xl px-4 pt-12 pb-10 sm:pt-16">
+        <div className="grid items-center gap-8 lg:grid-cols-2">
+          <div>
+            <div className="mb-4 flex flex-wrap gap-2">
+              <Badge>RegioMarkt</Badge>
+              <Badge>RegioBot</Badge>
+              <Badge>Zichtbaarheid</Badge>
+              <Badge>Basischeck</Badge>
+            </div>
+
+            <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
+              Regionaal ondernemen.
+              <span className="block text-white/80">Zonder platforms. Met grip.</span>
+            </h1>
+
+            <p className="mt-4 max-w-xl text-base text-white/70">
+              OpenRegio is infrastructuur voor lokale ondernemers die willen blijven draaien —
+              ook als systemen haperen. Korte lijnen, zichtbaar bewijs, en dossierkracht waar het
+              nodig is.
+            </p>
+
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button href="#wordlid">Word lid</Button>
+              <Button href="#pijlers" variant="secondary">
+                Bekijk hoe het werkt
+              </Button>
+            </div>
+
+            <div className="mt-6 grid max-w-xl grid-cols-2 gap-3 sm:grid-cols-3">
+              <Card className="p-4">
+                <div className="text-xs text-white/60">Focus</div>
+                <div className="mt-1 font-semibold">Lokaal netwerk</div>
+              </Card>
+              <Card className="p-4">
+                <div className="text-xs text-white/60">Proof</div>
+                <div className="mt-1 font-semibold">Badges</div>
+              </Card>
+              <Card className="p-4">
+                <div className="text-xs text-white/60">Fallback</div>
+                <div className="mt-1 font-semibold">Offline tools</div>
+              </Card>
+            </div>
+          </div>
+
+          <div className="relative">
+            <div className="absolute -inset-4 rounded-[2rem] opacity-40 blur-2xl"
+              style={{
+                background: `radial-gradient(circle at 30% 20%, ${BRAND.purple} 0%, transparent 55%)`,
+              }}
+            />
+            <Card className="relative overflow-hidden p-0">
+              <div className="grid gap-0 lg:grid-cols-1">
+                <div className="relative h-64 w-full sm:h-80">
+                  <img
+                    src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1600&q=80"
+                    alt="Lokale ondernemers aan tafel"
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-black/10" />
+                  <div className="absolute bottom-4 left-4 right-4">
+                    <div className="text-sm font-semibold">Offline-proof ondernemen</div>
+                    <div className="mt-1 text-sm text-white/70">
+                      Cash • Bonnen • Telefoonlijst • Noodstroom
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid gap-3 p-5 sm:grid-cols-2">
+                  <div className="rounded-xl border border-white/10 bg-black/30 p-4">
+                    <div className="text-xs text-white/60">Waarom</div>
+                    <div className="mt-1 font-semibold">Minder afhankelijk</div>
+                    <div className="mt-1 text-sm text-white/70">
+                      Je eigen netwerk blijft werken, ook als platforms falen.
+                    </div>
+                  </div>
+                  <div className="rounded-xl border border-white/10 bg-black/30 p-4">
+                    <div className="text-xs text-white/60">Resultaat</div>
+                    <div className="mt-1 font-semibold">Meer grip</div>
+                    <div className="mt-1 text-sm text-white/70">
+                      Duidelijke afspraken, bewijs en korte lijnen.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* “HOOK” STRIP */}
+      <section className="mx-auto max-w-6xl px-4">
+        <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-5">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <div>
+              <div className="text-sm font-semibold">
+                OpenRegio is geen platform. Het is een onderlaag.
+              </div>
+              <div className="text-sm text-white/70">
+                Voor regio’s die werk lokaal willen houden — met ondernemers die blijven draaien.
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Button href="#bewijs" variant="secondary">
+                Zie het bewijs
+              </Button>
+              <Button href="#wordlid">Start nu</Button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* VOOR WIE */}
+      <section id="voorwie" className="mx-auto max-w-6xl px-4 pt-14 pb-8">
+        <SectionTitle
+          eyebrow="Voor wie is dit?"
+          title="Voor mensen die klaar zijn met ruis"
+          desc="Geen algoritmes. Geen advertentie-spam. Gewoon: lokaal ondernemen dat werkt."
+        />
+
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {audience.map((a) => (
+            <Card key={a.title}>
+              <div className="text-2xl">{a.icon}</div>
+              <div className="mt-3 text-lg font-semibold">{a.title}</div>
+              <div className="mt-2 text-sm text-white/70">{a.text}</div>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* PIJLERS */}
+      <section id="pijlers" className="mx-auto max-w-6xl px-4 pt-10 pb-8">
+        <SectionTitle
+          eyebrow="Wat je krijgt"
+          title="Vier pijlers. Eén systeem."
+          desc="Dit is de kern. Compact, bruikbaar, en meteen toepasbaar."
+        />
+
+        <div className="mt-8 grid gap-4 lg:grid-cols-2">
+          {pillars.map((p) => (
+            <Card key={p.title} className="relative overflow-hidden">
+              <div
+                className="absolute -right-16 -top-16 h-44 w-44 rounded-full opacity-20 blur-2xl"
+                style={{ background: BRAND.purple }}
+              />
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="text-sm font-semibold text-white/80">{p.kicker}</div>
+                  <div className="mt-1 text-2xl font-semibold">{p.title}</div>
+                </div>
+                <div className="text-2xl">{p.icon}</div>
+              </div>
+
+              <ul className="mt-4 space-y-2 text-sm text-white/70">
+                {p.bullets.map((b) => (
+                  <li key={b} className="flex gap-2">
+                    <span className="mt-1 inline-block h-1.5 w-1.5 rounded-full bg-white/50" />
+                    <span>{b}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <div className="mt-5 flex items-center justify-between">
+                <Badge>{p.tag}</Badge>
+                <a href="#wordlid" className="text-sm font-semibold text-white hover:opacity-90">
+                  Start →{" "}
+                </a>
+              </div>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* WAAROM */}
+      <section className="mx-auto max-w-6xl px-4 pt-10 pb-6">
+        <SectionTitle
+          eyebrow="Waarom dit nodig is"
+          title="Omdat ‘online alles’ een single point of failure is"
+          desc="Als pin, apps, cloud of loketten haperen, wil je niet improviseren. Dan wil je een plan."
+        />
+
+        <div className="mt-8 grid gap-4 lg:grid-cols-3">
+          <Card>
+            <div className="text-sm font-semibold">Systemen falen</div>
+            <div className="mt-2 text-sm text-white/70">
+              Platforms, pin, cloud, identity-flows, API’s — één storing en je staat stil.
+            </div>
+          </Card>
+          <Card>
+            <div className="text-sm font-semibold">Ondernemers lopen vast</div>
+            <div className="mt-2 text-sm text-white/70">
+              Geen overzicht, geen bereikbaarheid, geen fallback. Alles “even via de app”.
+            </div>
+          </Card>
+          <Card>
+            <div className="text-sm font-semibold">Regio’s verzwakken</div>
+            <div className="mt-2 text-sm text-white/70">
+              Werk en geld lekken weg. Lokale netwerken verdwijnen. Dat is letterlijk dom risico.
+            </div>
+          </Card>
+        </div>
+      </section>
+
+      {/* WERKWIJZE */}
+      <section id="werkwijze" className="mx-auto max-w-6xl px-4 pt-10 pb-8">
+        <SectionTitle
+          eyebrow="Zo werkt het"
+          title="Simpel. In 4 stappen."
+          desc="Geen onboarding-hel. Gewoon starten."
+        />
+
+        <div className="mt-8 grid gap-4 lg:grid-cols-4">
+          {steps.map((s) => (
+            <Card key={s.n}>
+              <div className="text-xs font-semibold text-white/60">{s.n}</div>
+              <div className="mt-2 text-lg font-semibold">{s.title}</div>
+              <div className="mt-2 text-sm text-white/70">{s.text}</div>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* FOTO’S LOKALE ONDERNEMERS */}
+      <section className="mx-auto max-w-6xl px-4 pt-10 pb-8">
+        <SectionTitle
+          eyebrow="Lokaal, echt, zichtbaar"
+          title="Dit is de vibe: bedrijven uit de buurt"
+          desc="Geen stock-gedoe in je gevoel. Wel herkenbaar: vak, winkel, service, zorg, onderhoud."
+        />
+
+        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {localPhotoGrid.map((p) => (
+            <div
+              key={p.title}
+              className="group relative overflow-hidden rounded-2xl border border-white/10"
+            >
+              <img
+                src={p.src}
+                alt={p.title}
+                className="h-56 w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-black/10" />
+              <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between">
+                <div className="text-sm font-semibold">{p.title}</div>
+                <span className="rounded-full border border-white/15 bg-black/40 px-3 py-1 text-xs text-white/80">
+                  lokaal
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* BEWIJS */}
+      <section id="bewijs" className="mx-auto max-w-6xl px-4 pt-10 pb-8">
+        <SectionTitle
+          eyebrow="Geen praat, bewijs"
+          title="Zichtbaar maken wat er écht staat"
+          desc="Badges, offline tools en dossierkracht. Dit is de ‘underlayer’ waar je op kunt bouwen."
+        />
+
+        <div className="mt-8 grid gap-4 lg:grid-cols-3">
+          {proofPoints.map((p) => (
+            <Card key={p.title}>
+              <div className="text-lg font-semibold">{p.title}</div>
+              <div className="mt-2 text-sm text-white/70">{p.text}</div>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* TESTIMONIALS */}
+      <section className="mx-auto max-w-6xl px-4 pt-10 pb-10">
+        <SectionTitle
+          eyebrow="Wat ondernemers zeggen"
+          title="Direct, praktisch, zonder theater"
+          desc="Exact waar OpenRegio op stuurt."
+        />
+
+        <div className="mt-8 grid gap-4 lg:grid-cols-3">
+          {testimonials.map((t, idx) => (
+            <Card key={idx}>
+              <div className="text-sm text-white/80">“{t.quote}”</div>
+              <div className="mt-4 text-xs font-semibold text-white/60">{t.who}</div>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA WORD LID */}
+      <section id="wordlid" className="mx-auto max-w-6xl px-4 pb-12">
+        <div
+          className="rounded-3xl border border-white/10 p-8"
+          style={{
+            background: `linear-gradient(135deg, rgba(134,101,192,0.35) 0%, rgba(0,0,0,0.55) 55%, rgba(134,101,192,0.18) 100%)`,
+          }}
+        >
+          <div className="grid gap-6 lg:grid-cols-2 lg:items-center">
+            <div>
+              <div className="text-sm font-semibold text-white/80">Ready?</div>
+              <h3 className="mt-2 text-3xl font-semibold tracking-tight">
+                Ondernemen terug naar de basis.
+              </h3>
+              <p className="mt-3 text-sm text-white/70">
+                Doe mee — of blijf afhankelijk van systemen die je niet beheert. Jij kiest.
+              </p>
+
+              <div className="mt-5 flex flex-wrap gap-3">
+                <Button href="#contact">Word lid</Button>
+                <Button href="#faq" variant="secondary">
+                  Eerst vragen
+                </Button>
+              </div>
+
+              <div className="mt-6 flex flex-wrap gap-2">
+                <Badge>Maandelijks opzegbaar</Badge>
+                <Badge>Geen advertenties</Badge>
+                <Badge>Geen feed</Badge>
+                <Badge>Wel resultaat</Badge>
+              </div>
+            </div>
+
+            <Card className="bg-black/40">
+              <div className="text-sm font-semibold">Snelstart checklist</div>
+              <ul className="mt-3 space-y-2 text-sm text-white/70">
+                <li>✔ Profiel + regio + vakgebied</li>
+                <li>✔ Basischeck badges</li>
+                <li>✔ Printbare lijst / offline templates</li>
+                <li>✔ Doorverwijzen & samenwerken</li>
+              </ul>
+
+              <div className="mt-5 rounded-xl border border-white/10 bg-white/5 p-4">
+                <div className="text-xs text-white/60">Pro tip</div>
+                <div className="mt-1 text-sm text-white/80">
+                  Zet je “offline-proof” badges op je gevel, site en factuur. Klanten snappen het meteen.
+                </div>
+              </div>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="mx-auto max-w-6xl px-4 pb-14">
+        <SectionTitle eyebrow="FAQ" title="Even scherp: wat mensen meteen vragen" />
+
+        <div className="mt-8 grid gap-4 lg:grid-cols-2">
+          {faqs.map((f) => (
+            <Card key={f.q}>
+              <div className="text-sm font-semibold">{f.q}</div>
+              <div className="mt-2 text-sm text-white/70">{f.a}</div>
+            </Card>
+          ))}
+        </div>
+      </section>
+
+      {/* CONTACT / FOOTER */}
+      <footer id="contact" className="border-t border-white/10 bg-black/60">
+        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-12 lg:grid-cols-3">
+          <div>
+            <div className="text-lg font-semibold">OpenRegio</div>
+            <div className="mt-2 text-sm text-white/70">
+              Lokaal ondernemersplatform — maar dan zonder platformbullshit.
+            </div>
+            <div className="mt-4 flex gap-2">
+              <Badge>info@openregio.nl</Badge>
+              <Badge>NL</Badge>
+            </div>
+          </div>
+
+          <div>
+            <div className="text-sm font-semibold">Snel naar</div>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              {nav.map((i) => (
+                <a key={i.href} href={i.href} className="text-sm text-white/70 hover:text-white">
+                  {i.label}
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <div className="text-sm font-semibold">Contact</div>
+            <p className="mt-3 text-sm text-white/70">
+              Wil je je regio als node starten, of wil je als “essentieel bedrijf” erin? Mail en je bent
+              binnen.
+            </p>
+
+            <div className="mt-4 flex flex-wrap gap-3">
+              <Button href="mailto:info@openregio.nl">Mail</Button>
+              <Button href="#wordlid" variant="secondary">
+                Word lid
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t border-white/10 py-6">
+          <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 text-xs text-white/50 sm:flex-row sm:items-center sm:justify-between">
+            <div>© {new Date().getFullYear()} OpenRegio</div>
+            <div>Privacy • Voorwaarden • Cookies</div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}

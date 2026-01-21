@@ -24,6 +24,12 @@ interface RegionStats {
   region: string | null;
 }
 
+interface PostStats {
+  openPosts: number;
+  userPosts: number;
+  region: string | null;
+}
+
 export default function DashboardPage() {
   const { user, isLoading: authLoading } = useAuth();
 
@@ -34,6 +40,11 @@ export default function DashboardPage() {
 
   const { data: regionStats } = useQuery<RegionStats>({
     queryKey: ["/api/region-stats/me"],
+    enabled: !!user,
+  });
+
+  const { data: postStats } = useQuery<PostStats>({
+    queryKey: ["/api/post-stats/me"],
     enabled: !!user,
   });
 
@@ -182,10 +193,16 @@ export default function DashboardPage() {
                 </p>
               </div>
             </div>
-            <ul className="text-xs text-muted-foreground list-disc list-inside">
-              <li>Open vragen in het netwerk: 5</li>
-              <li>Jouw eigen vragen/aanbod: 1</li>
-            </ul>
+            {postStats?.region ? (
+              <ul className="text-xs text-muted-foreground list-disc list-inside">
+                <li>Berichten in {postStats.region}: {postStats.openPosts}</li>
+                <li>Jouw eigen berichten: {postStats.userPosts}</li>
+              </ul>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Vul eerst je bedrijfsprofiel in om berichten in jouw regio te zien.
+              </p>
+            )}
             <div className="mt-2 flex flex-wrap gap-2">
               <Link href="/network?tab=bord">
                 <Button size="sm" data-testid="button-view-board">

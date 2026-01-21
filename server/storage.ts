@@ -1176,6 +1176,16 @@ export class MemStorage implements IStorage {
     };
   }
 
+  async getRegionPostStats(region: string, userId: string): Promise<{ openPosts: number; userPosts: number }> {
+    const allPosts = Array.from(this.posts.values());
+    const regionPosts = allPosts.filter(p => p.region === region);
+    const userPosts = allPosts.filter(p => p.authorUserId === userId);
+    return {
+      openPosts: regionPosts.length,
+      userPosts: userPosts.length,
+    };
+  }
+
   async createBedrijfsprofiel(profiel: InsertBedrijfsprofiel): Promise<Bedrijfsprofiel> {
     const id = randomUUID();
     const now = new Date();
@@ -2031,6 +2041,19 @@ class DbStorage implements IStorage {
     return {
       count: members.length,
       latestMember: sorted[0] || null,
+    };
+  }
+
+  async getRegionPostStats(region: string, userId: string): Promise<{ openPosts: number; userPosts: number }> {
+    const regionPosts = await db.select()
+      .from(posts)
+      .where(eq(posts.region, region));
+    const userPosts = await db.select()
+      .from(posts)
+      .where(eq(posts.authorUserId, userId));
+    return {
+      openPosts: regionPosts.length,
+      userPosts: userPosts.length,
     };
   }
 
