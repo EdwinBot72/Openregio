@@ -491,6 +491,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Business Profile routes
+  
+  // Public endpoint for all business profiles (for map display)
+  app.get("/api/business-profiles/public", async (req, res) => {
+    try {
+      const profielen = await storage.getAllBedrijfsprofielen();
+      res.json(profielen);
+    } catch (error) {
+      console.error("Error fetching public business profiles:", error);
+      res.status(500).json({ error: "Fout bij ophalen bedrijfsprofielen" });
+    }
+  });
+  
   app.get("/api/business-profiles", attachUser, requireAuth, async (req, res) => {
     try {
       const profielen = await storage.getAllBedrijfsprofielen();

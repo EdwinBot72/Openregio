@@ -48,7 +48,7 @@ export default function BedrijfsprofielPage() {
   });
 
   const { data: allProfiles = [] } = useQuery<Bedrijfsprofiel[]>({
-    queryKey: ["/api/business-profiles"],
+    queryKey: ["/api/business-profiles/public"],
   });
 
   const form = useForm<FormData>({
