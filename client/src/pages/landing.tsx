@@ -705,18 +705,21 @@ export default function LandingPage() {
         <div className="grid items-center gap-8 lg:grid-cols-2">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              Wie de regels niet kent, verliest werk.
+              Meer werk uit je regio.<br />
+              <span className="text-white/80">Meer grip op regels, mandaten en besluiten.</span>
             </h1>
 
             <p className="mt-4 max-w-xl text-base text-white/70">
-              OpenRegio organiseert lokaal ondernemerschap rond twee fundamentals:
-              regionaal werk en doorzichtige regels.
+              OpenRegio is infrastructuur voor lokale ondernemers: een regionaal netwerk + een gezamenlijke WOO-bibliotheek. 
+              RegioBot maakt beleid, mandaten en uitvoering doorzichtig — zodat jij niet vaart op aannames, maar op documenten.
             </p>
 
-            <p className="mt-3 max-w-xl text-base text-white/70">
-              Met een gesloten netwerk van ondernemers en een gezamenlijke WOO-bibliotheek 
-              die beleid, mandaten en besluiten inzichtelijk maakt.
-              <span className="block mt-2 font-medium text-white/90">Geen aannames. Bewijs op tafel.</span>
+            <p className="mt-3 max-w-xl text-sm font-medium text-white/90">
+              Regio-omzet. Bewijs op tafel. Ondernemen zonder ruis.
+            </p>
+
+            <p className="mt-2 text-xs text-white/50">
+              Scope: alleen wet- en regelgeving voor ondernemers. Geen verkeerszaken, Mulder/CJIB, snelheid, rood-licht of persoonlijke boetes.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
@@ -725,22 +728,6 @@ export default function LandingPage() {
                 Check beleid met RegioBot
               </LandingButton>
             </div>
-
-            <div className="mt-6 grid max-w-xl grid-cols-3 gap-3">
-              <LandingCard className="p-4">
-                <div className="font-semibold text-sm">Regio-omzet</div>
-              </LandingCard>
-              <LandingCard className="p-4">
-                <div className="font-semibold text-sm">Bewijs op tafel</div>
-              </LandingCard>
-              <LandingCard className="p-4">
-                <div className="font-semibold text-sm">Geen ruis</div>
-              </LandingCard>
-            </div>
-
-            <p className="mt-4 text-xs text-white/50">
-              Scope: alleen wet- en regelgeving voor ondernemers. Geen verkeerszaken, Mulder/CJIB, snelheid, rood-licht of persoonlijke boetes.
-            </p>
           </div>
 
           <div className="relative">
@@ -789,24 +776,30 @@ export default function LandingPage() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-4">
-        <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-5">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div>
-              <div className="text-sm font-semibold">
-                OpenRegio is geen platform. Het is een onderlaag.
-              </div>
-              <div className="text-sm text-white/70">
-                Voor regio's die werk lokaal willen houden - met ondernemers die blijven draaien.
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <LandingButton href="#werkwijze" variant="secondary">
-                Hoe het werkt
-              </LandingButton>
-              <LandingButton href="#wordlid">Start nu</LandingButton>
-            </div>
-          </div>
+      <section className="mx-auto max-w-6xl px-4 pt-10">
+        <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-8">
+          <h2 className="text-2xl font-semibold sm:text-3xl">
+            Inzicht maakt ondernemen voorspelbaarder.
+          </h2>
+          
+          <p className="mt-4 max-w-2xl text-base text-white/70">
+            Onduidelijke regels en versnipperd werk kosten ondernemers meer tijd dan hun eigen vak.
+          </p>
+
+          <p className="mt-3 max-w-2xl text-base text-white/70">
+            OpenRegio organiseert lokaal ondernemen rond vier vaste pijlers:
+            werk in de regio, inzicht in regelgeving, lokale zichtbaarheid
+            en operationele betrouwbaarheid.
+          </p>
+
+          <p className="mt-3 max-w-2xl text-base text-white/70">
+            Ondersteund door een gezamenlijke WOO-bibliotheek
+            en RegioBot dat documenten leest zoals ze bedoeld zijn.
+          </p>
+
+          <p className="mt-4 text-sm font-medium text-white/90">
+            Zo ontstaat rust, overzicht en continuïteit.
+          </p>
         </div>
       </section>
 
