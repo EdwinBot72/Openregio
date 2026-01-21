@@ -1,3 +1,7 @@
+import { createRequire } from "module";
+
+const require = createRequire(import.meta.url);
+
 interface ExtractResult {
   text: string;
   needsOcr: boolean;
@@ -6,8 +10,7 @@ interface ExtractResult {
 
 export async function extractTextFromPDF(buffer: Buffer): Promise<ExtractResult> {
   try {
-    const pdfParse = await import("pdf-parse") as any;
-    const pdf = pdfParse.default || pdfParse;
+    const pdf = require("pdf-parse");
     const data = await pdf(buffer);
     const text = (data.text || "").trim();
     const needsOcr = text.length < 200;
