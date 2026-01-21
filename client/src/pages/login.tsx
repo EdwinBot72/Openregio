@@ -30,9 +30,7 @@ export default function LoginPage() {
     setIsLoading(true);
     
     try {
-      console.log("Attempting login with:", { email, password: "***" });
       const response = await apiRequest("POST", "/api/auth/login", { email, password });
-      console.log("Login response:", response);
 
       // Invalidate and refetch user data to update authentication state
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
