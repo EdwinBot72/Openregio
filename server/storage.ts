@@ -156,6 +156,7 @@ export interface IStorage {
   getAllBedrijfsprofielen(): Promise<Bedrijfsprofiel[]>;
   getBedrijfsprofielenByRegion(region: string): Promise<Bedrijfsprofiel[]>;
   getRegionMemberStats(region: string): Promise<{ count: number; latestMember: Bedrijfsprofiel | null }>;
+  getRegionPostStats(region: string, userId: string): Promise<{ openPosts: number; userPosts: number }>;
   createBedrijfsprofiel(profiel: InsertBedrijfsprofiel): Promise<Bedrijfsprofiel>;
   updateBedrijfsprofiel(id: string, profiel: Partial<InsertBedrijfsprofiel>): Promise<Bedrijfsprofiel | undefined>;
 
