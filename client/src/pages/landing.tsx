@@ -705,8 +705,7 @@ export default function LandingPage() {
         <div className="grid items-center gap-8 lg:grid-cols-2">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              Meer werk uit je regio.<br />
-              <span className="text-white/80">Meer grip op regels, mandaten en besluiten.</span>
+              Inzicht maakt ondernemen voorspelbaarder.
             </h1>
 
             <p className="mt-4 max-w-xl text-base text-white/70">
