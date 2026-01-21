@@ -704,45 +704,43 @@ export default function LandingPage() {
       <section className="mx-auto max-w-6xl px-4 pt-12 pb-10 sm:pt-16">
         <div className="grid items-center gap-8 lg:grid-cols-2">
           <div>
-            <div className="mb-4 flex flex-wrap gap-2">
-              <Badge>RegioMarkt</Badge>
-              <Badge>RegioBot</Badge>
-              <Badge>Zichtbaarheid</Badge>
-              <Badge>Basischeck</Badge>
-            </div>
-
-            <h1 className="text-4xl font-semibold tracking-tight sm:text-5xl">
-              Regionaal ondernemen.
-              <span className="block text-white/80">Zonder platforms. Met grip.</span>
+            <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
+              Wie de regels niet kent, verliest werk.
             </h1>
 
             <p className="mt-4 max-w-xl text-base text-white/70">
-              OpenRegio is infrastructuur voor lokale ondernemers die willen blijven draaien -
-              ook als systemen haperen. Korte lijnen, zichtbaar bewijs, en dossierkracht waar het
-              nodig is.
+              OpenRegio organiseert lokaal ondernemerschap rond twee fundamentals:
+              regionaal werk en doorzichtige regels.
+            </p>
+
+            <p className="mt-3 max-w-xl text-base text-white/70">
+              Met een gesloten netwerk van ondernemers en een gezamenlijke WOO-bibliotheek 
+              die beleid, mandaten en besluiten inzichtelijk maakt.
+              <span className="block mt-2 font-medium text-white/90">Geen aannames. Bewijs op tafel.</span>
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
-              <LandingButton href="#wordlid">Word lid</LandingButton>
-              <LandingButton href="#pijlers" variant="secondary">
-                Bekijk hoe het werkt
+              <LandingButton href="#wordlid">Word lid en claim je regio</LandingButton>
+              <LandingButton href="/regiobot" variant="secondary">
+                Check beleid met RegioBot
               </LandingButton>
             </div>
 
-            <div className="mt-6 grid max-w-xl grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="mt-6 grid max-w-xl grid-cols-3 gap-3">
               <LandingCard className="p-4">
-                <div className="text-xs text-white/60">Focus</div>
-                <div className="mt-1 font-semibold">Lokaal netwerk</div>
+                <div className="font-semibold text-sm">Regio-omzet</div>
               </LandingCard>
               <LandingCard className="p-4">
-                <div className="text-xs text-white/60">Proof</div>
-                <div className="mt-1 font-semibold">Badges</div>
+                <div className="font-semibold text-sm">Bewijs op tafel</div>
               </LandingCard>
               <LandingCard className="p-4">
-                <div className="text-xs text-white/60">Fallback</div>
-                <div className="mt-1 font-semibold">Offline tools</div>
+                <div className="font-semibold text-sm">Geen ruis</div>
               </LandingCard>
             </div>
+
+            <p className="mt-4 text-xs text-white/50">
+              Scope: alleen wet- en regelgeving voor ondernemers. Geen verkeerszaken, Mulder/CJIB, snelheid, rood-licht of persoonlijke boetes.
+            </p>
           </div>
 
           <div className="relative">
