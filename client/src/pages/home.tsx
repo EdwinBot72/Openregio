@@ -69,7 +69,7 @@ export default function HomePage() {
           <div className="grid md:grid-cols-2 gap-12 items-center">
             <div>
               <h1 className="font-accent text-4xl md:text-6xl font-bold mb-6 leading-tight" data-testid="text-hero-title">
-                Meer werk uit je regio. Meer grip op regels, mandaten en besluiten.
+                Inzicht maakt ondernemen voorspelbaarder.
               </h1>
               <p className="text-xl md:text-2xl text-muted-foreground mb-8" data-testid="text-hero-subtitle">
                 OpenRegio is infrastructuur voor lokale ondernemers: een regionaal netwerk + een gezamenlijke WOO-bibliotheek.
