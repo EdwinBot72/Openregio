@@ -513,6 +513,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get region member stats for dashboard
+  app.get("/api/region-stats/me", async (req, res) => {
+    try {
+      if (!req.user?.id) {
+        return res.status(401).json({ error: "Niet ingelogd" });
+      }
+
+      const profiel = await storage.getBedrijfsprofielByUserId(req.user.id);
+      if (!profiel) {
+        return res.json({ count: 0, latestMember: null, region: null });
+      }
+
+      const stats = await storage.getRegionMemberStats(profiel.regio);
+      res.json({ ...stats, region: profiel.regio });
+    } catch (error) {
+      console.error("Error fetching region stats:", error);
+      res.status(500).json({ error: "Fout bij ophalen regio statistieken" });
+    }
+  });
+
   app.get("/api/business-profile/me", async (req, res) => {
     try {
       if (!req.user?.id) {

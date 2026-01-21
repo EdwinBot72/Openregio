@@ -16,12 +16,24 @@ import {
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
+import type { Bedrijfsprofiel } from "@shared/schema";
+
+interface RegionStats {
+  count: number;
+  latestMember: Bedrijfsprofiel | null;
+  region: string | null;
+}
 
 export default function DashboardPage() {
   const { user, isLoading: authLoading } = useAuth();
 
-  const { data: bedrijfsprofiel } = useQuery<{ naam: string; status: string } | null>({
+  const { data: bedrijfsprofiel } = useQuery<{ naam: string; status: string; regio: string } | null>({
     queryKey: ["/api/business-profile/me"],
+    enabled: !!user,
+  });
+
+  const { data: regionStats } = useQuery<RegionStats>({
+    queryKey: ["/api/region-stats/me"],
     enabled: !!user,
   });
 
@@ -126,16 +138,32 @@ export default function DashboardPage() {
                 </p>
               </div>
             </div>
-            <ul className="text-xs text-muted-foreground list-disc list-inside">
-              <li>Actieve leden in jouw regio: 27</li>
-              <li>Nieuw lid deze week: Slagerij De Haven</li>
-            </ul>
+            {regionStats?.region ? (
+              <ul className="text-xs text-muted-foreground list-disc list-inside">
+                <li>Actieve leden in {regionStats.region}: {regionStats.count}</li>
+                {regionStats.latestMember && (
+                  <li>Nieuwste lid: {regionStats.latestMember.naam}</li>
+                )}
+              </ul>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Vul eerst je bedrijfsprofiel in om leden in jouw regio te zien.
+              </p>
+            )}
             <div className="mt-2">
-              <Link href="/network">
-                <Button size="sm" data-testid="button-view-network">
-                  Bekijk ledenlijst
-                </Button>
-              </Link>
+              {regionStats?.region ? (
+                <Link href={`/network?regio=${encodeURIComponent(regionStats.region)}`}>
+                  <Button size="sm" data-testid="button-view-network">
+                    Bekijk ledenlijst
+                  </Button>
+                </Link>
+              ) : (
+                <Link href="/bedrijfsprofiel">
+                  <Button size="sm" variant="outline" data-testid="button-create-profile">
+                    Maak bedrijfsprofiel
+                  </Button>
+                </Link>
+              )}
             </div>
           </CardContent>
         </Card>

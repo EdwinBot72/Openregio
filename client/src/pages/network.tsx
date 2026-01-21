@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { formatDistanceToNow } from "date-fns";
 import { nl } from "date-fns/locale";
+import { useLocation, useSearch } from "wouter";
 import {
   HelpCircle,
   Megaphone,
@@ -25,9 +26,12 @@ import {
   Plus,
   Trash2,
   Loader2,
+  Building2,
+  Globe,
+  Users,
 } from "lucide-react";
 import { PROVINCES_REGIONS, PROVINCES, POST_TYPES } from "@shared/schema";
-import type { Post } from "@shared/schema";
+import type { Post, Bedrijfsprofiel } from "@shared/schema";
 
 type PostType = "vraag" | "aanbod" | "lead" | "event" | "alles";
 
@@ -195,6 +199,49 @@ function NewPostDialog() {
   );
 }
 
+function MemberCard({ member }: { member: Bedrijfsprofiel }) {
+  return (
+    <Card data-testid={`card-member-${member.id}`}>
+      <CardContent className="p-4">
+        <div className="flex items-start gap-3">
+          <div className="p-2 rounded-full bg-primary/10">
+            <Building2 className="w-5 h-5 text-primary" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <h3 className="font-semibold" data-testid={`text-member-name-${member.id}`}>
+                {member.naam}
+              </h3>
+              <Badge variant="outline" className="text-xs">
+                <MapPin className="w-3 h-3 mr-1" />
+                {member.regio}
+              </Badge>
+            </div>
+            <p className="text-sm text-muted-foreground">{member.eigenaarnaam}</p>
+            {member.beschrijving && (
+              <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
+                {member.beschrijving}
+              </p>
+            )}
+            {member.websiteUrl && (
+              <a 
+                href={member.websiteUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs text-primary mt-2 hover:underline"
+                data-testid={`link-website-${member.id}`}
+              >
+                <Globe className="w-3 h-3" />
+                Website bezoeken
+              </a>
+            )}
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 function PostCard({ post, currentUserId, isAdmin }: { post: Post; currentUserId?: string; isAdmin?: boolean }) {
   const { toast } = useToast();
   
@@ -286,16 +333,32 @@ function PostCard({ post, currentUserId, isAdmin }: { post: Post; currentUserId?
   );
 }
 
+type ViewTab = "posts" | "leden";
+
 export default function NetworkPage() {
+  const searchString = useSearch();
+  const searchParams = new URLSearchParams(searchString);
+  const initialRegio = searchParams.get("regio");
+  
+  const [activeTab, setActiveTab] = useState<ViewTab>(initialRegio ? "leden" : "posts");
   const [typeFilter, setTypeFilter] = useState<PostType>("alles");
-  const [regionFilter, setRegionFilter] = useState<string>("alle");
+  const [regionFilter, setRegionFilter] = useState<string>(initialRegio || "alle");
   const { user } = useAuth();
 
-  const { data: posts, isLoading } = useQuery<Post[]>({
+  const { data: posts, isLoading: postsLoading } = useQuery<Post[]>({
     queryKey: ["/api/posts"],
   });
 
+  const { data: allMembers, isLoading: membersLoading } = useQuery<Bedrijfsprofiel[]>({
+    queryKey: ["/api/business-profiles/public"],
+  });
+
   const regions = ["alle", ...Object.values(PROVINCES_REGIONS).flat()];
+
+  const filteredMembers = allMembers?.filter((member) => {
+    if (regionFilter !== "alle" && member.regio !== regionFilter) return false;
+    return true;
+  }) || [];
 
   const filteredPosts = posts?.filter((post) => {
     if (typeFilter !== "alles") {
@@ -306,6 +369,8 @@ export default function NetworkPage() {
     return true;
   }) || [];
 
+  const isLoading = activeTab === "posts" ? postsLoading : membersLoading;
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-8 space-y-6">
       <header className="space-y-2">
@@ -313,38 +378,75 @@ export default function NetworkPage() {
           Netwerk & Kansenbord
         </h1>
         <p className="text-sm md:text-base text-muted-foreground">
-          Deel concrete vragen, aanbiedingen, leads en events met ondernemers in jouw regio. 
-          Hou het kort, zakelijk en praktisch.
+          {activeTab === "leden" 
+            ? "Bekijk alle ondernemers in jouw regio en maak direct contact."
+            : "Deel concrete vragen, aanbiedingen, leads en events met ondernemers in jouw regio."}
         </p>
       </header>
 
+      {/* Tabs */}
+      <div className="flex gap-2 border-b">
+        <button
+          type="button"
+          onClick={() => setActiveTab("posts")}
+          data-testid="tab-posts"
+          className={[
+            "px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors",
+            activeTab === "posts"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground",
+          ].join(" ")}
+        >
+          <HelpCircle className="w-4 h-4 inline mr-2" />
+          Kansenbord
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("leden")}
+          data-testid="tab-leden"
+          className={[
+            "px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors",
+            activeTab === "leden"
+              ? "border-primary text-primary"
+              : "border-transparent text-muted-foreground hover:text-foreground",
+          ].join(" ")}
+        >
+          <Users className="w-4 h-4 inline mr-2" />
+          Leden ({filteredMembers.length})
+        </button>
+      </div>
+
       <section className="flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-2 text-xs md:text-sm">
-          <span className="font-semibold">Filter:</span>
-          <div className="inline-flex rounded-full border bg-background p-1">
-            {[
-              { key: "alles", label: "Alles" },
-              { key: "vraag", label: "Vraag" },
-              { key: "aanbod", label: "Aanbod" },
-              { key: "lead", label: "Lead" },
-              { key: "event", label: "Event" },
-            ].map((opt) => (
-              <button
-                key={opt.key}
-                type="button"
-                onClick={() => setTypeFilter(opt.key as PostType)}
-                data-testid={`button-filter-${opt.key}`}
-                className={[
-                  "px-3 py-1 rounded-full text-xs md:text-sm transition-colors",
-                  typeFilter === opt.key
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:bg-muted",
-                ].join(" ")}
-              >
-                {opt.label}
-              </button>
-            ))}
-          </div>
+          {activeTab === "posts" && (
+            <>
+              <span className="font-semibold">Filter:</span>
+              <div className="inline-flex rounded-full border bg-background p-1">
+                {[
+                  { key: "alles", label: "Alles" },
+                  { key: "vraag", label: "Vraag" },
+                  { key: "aanbod", label: "Aanbod" },
+                  { key: "lead", label: "Lead" },
+                  { key: "event", label: "Event" },
+                ].map((opt) => (
+                  <button
+                    key={opt.key}
+                    type="button"
+                    onClick={() => setTypeFilter(opt.key as PostType)}
+                    data-testid={`button-filter-${opt.key}`}
+                    className={[
+                      "px-3 py-1 rounded-full text-xs md:text-sm transition-colors",
+                      typeFilter === opt.key
+                        ? "bg-primary text-primary-foreground"
+                        : "text-muted-foreground hover:bg-muted",
+                    ].join(" ")}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
 
           <div className="flex items-center gap-2">
             <MapPin className="w-4 h-4 text-muted-foreground" />
@@ -363,7 +465,7 @@ export default function NetworkPage() {
           </div>
         </div>
 
-        <NewPostDialog />
+        {activeTab === "posts" && <NewPostDialog />}
       </section>
 
       <section className="space-y-3">
@@ -373,20 +475,42 @@ export default function NetworkPage() {
           </div>
         )}
 
-        {!isLoading && filteredPosts.length === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-8" data-testid="text-no-posts">
-            Nog geen berichten met deze filters. Plaats de eerste vraag of aanbod.
-          </p>
+        {activeTab === "posts" && (
+          <>
+            {!postsLoading && filteredPosts.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-8" data-testid="text-no-posts">
+                Nog geen berichten met deze filters. Plaats de eerste vraag of aanbod.
+              </p>
+            )}
+
+            {filteredPosts.map((post) => (
+              <PostCard 
+                key={post.id} 
+                post={post} 
+                currentUserId={user?.id}
+                isAdmin={user?.isAdmin}
+              />
+            ))}
+          </>
         )}
 
-        {filteredPosts.map((post) => (
-          <PostCard 
-            key={post.id} 
-            post={post} 
-            currentUserId={user?.id}
-            isAdmin={user?.isAdmin}
-          />
-        ))}
+        {activeTab === "leden" && (
+          <>
+            {!membersLoading && filteredMembers.length === 0 && (
+              <p className="text-sm text-muted-foreground text-center py-8" data-testid="text-no-members">
+                {regionFilter !== "alle" 
+                  ? `Nog geen leden gevonden in ${regionFilter}.`
+                  : "Nog geen leden gevonden."}
+              </p>
+            )}
+
+            <div className="grid gap-3 md:grid-cols-2">
+              {filteredMembers.map((member) => (
+                <MemberCard key={member.id} member={member} />
+              ))}
+            </div>
+          </>
+        )}
       </section>
     </div>
   );

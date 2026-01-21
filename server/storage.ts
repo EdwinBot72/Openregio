@@ -154,6 +154,8 @@ export interface IStorage {
   // Bedrijfsprofielen (Business Profiles)
   getBedrijfsprofielByUserId(userId: string): Promise<Bedrijfsprofiel | undefined>;
   getAllBedrijfsprofielen(): Promise<Bedrijfsprofiel[]>;
+  getBedrijfsprofielenByRegion(region: string): Promise<Bedrijfsprofiel[]>;
+  getRegionMemberStats(region: string): Promise<{ count: number; latestMember: Bedrijfsprofiel | null }>;
   createBedrijfsprofiel(profiel: InsertBedrijfsprofiel): Promise<Bedrijfsprofiel>;
   updateBedrijfsprofiel(id: string, profiel: Partial<InsertBedrijfsprofiel>): Promise<Bedrijfsprofiel | undefined>;
 
@@ -1155,6 +1157,24 @@ export class MemStorage implements IStorage {
     return Array.from(this.bedrijfsprofielen.values()).filter(p => p.status === "actief");
   }
 
+  async getBedrijfsprofielenByRegion(region: string): Promise<Bedrijfsprofiel[]> {
+    return Array.from(this.bedrijfsprofielen.values())
+      .filter(p => p.status === "actief" && p.regio === region);
+  }
+
+  async getRegionMemberStats(region: string): Promise<{ count: number; latestMember: Bedrijfsprofiel | null }> {
+    const members = await this.getBedrijfsprofielenByRegion(region);
+    const sorted = members.sort((a, b) => {
+      const dateA = a.aangemaakt ? new Date(a.aangemaakt).getTime() : 0;
+      const dateB = b.aangemaakt ? new Date(b.aangemaakt).getTime() : 0;
+      return dateB - dateA;
+    });
+    return {
+      count: members.length,
+      latestMember: sorted[0] || null,
+    };
+  }
+
   async createBedrijfsprofiel(profiel: InsertBedrijfsprofiel): Promise<Bedrijfsprofiel> {
     const id = randomUUID();
     const now = new Date();
@@ -1989,6 +2009,28 @@ class DbStorage implements IStorage {
     return await db.select()
       .from(bedrijfsprofielen)
       .where(eq(bedrijfsprofielen.status, "actief"));
+  }
+
+  async getBedrijfsprofielenByRegion(region: string): Promise<Bedrijfsprofiel[]> {
+    return await db.select()
+      .from(bedrijfsprofielen)
+      .where(and(
+        eq(bedrijfsprofielen.status, "actief"),
+        eq(bedrijfsprofielen.regio, region)
+      ));
+  }
+
+  async getRegionMemberStats(region: string): Promise<{ count: number; latestMember: Bedrijfsprofiel | null }> {
+    const members = await this.getBedrijfsprofielenByRegion(region);
+    const sorted = members.sort((a, b) => {
+      const dateA = a.aangemaakt ? new Date(a.aangemaakt).getTime() : 0;
+      const dateB = b.aangemaakt ? new Date(b.aangemaakt).getTime() : 0;
+      return dateB - dateA;
+    });
+    return {
+      count: members.length,
+      latestMember: sorted[0] || null,
+    };
   }
 
   async createBedrijfsprofiel(profiel: InsertBedrijfsprofiel): Promise<Bedrijfsprofiel> {
