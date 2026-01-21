@@ -218,7 +218,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (referrerUserId) {
             console.log(`  Referred by: ${referrerUserId}`);
           }
-          console.log(`  Temporary password: ${tempPassword}`);
           console.log(`  Onboarding token: ${onboardingToken}`);
           console.log(`  Onboarding link: ${baseUrl}/first-login?token=${onboardingToken}`);
           
