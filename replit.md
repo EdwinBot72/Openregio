@@ -24,13 +24,19 @@ The backend utilizes Express.js with TypeScript, adhering to a RESTful API desig
 
 PostgreSQL is the primary database, accessed via the Neon serverless driver, with Drizzle ORM managing schema and queries. Key data models include `Bedrijfsprofielen` (business profiles), `Proposals` for democratic governance, `Votes`, `Blogs`, `Activities`, and `User Profiles` with features like `pain points` for personalization and `onboarding_tokens` for secure initial access.
 
+**RAG Vector Storage**: The platform uses pgvector extension for semantic document search. Tables:
+- `rag_documents`: User-uploaded PDF documents with metadata
+- `rag_chunks`: Text chunks split on Dutch government document markers (Geachte, Betreft, Kenmerk, etc.)
+- `rag_embeddings`: 1536-dimensional vectors from OpenAI text-embedding-3-small
+- `leads`: Signup leads tracking with plan, region, and badge preferences
+
 ### Authentication and Authorization
 
 The system uses a robust JWT authentication flow with short-lived access tokens (httpOnly cookies) and rotating refresh tokens (stored in PostgreSQL) for enhanced security and scalability, suitable for high concurrent user loads. `bcrypt` is used for password hashing. Rate limiting is implemented for login and registration endpoints to prevent brute-force attacks. Role-Based Access Control (`requirePro` middleware) restricts certain features, like RegioBot, to Pro plan users.
 
 ### Core Features
 
--   **RegioBot**: A regional WOO & Legal AI assistant focused on wet- en regelgeving analysis, WOO-verzoeken, mandaten, and bevoegdheden. Explicitly refuses traffic violations, personal fines, and non-business-related queries. PRO-exclusive feature with collectieve WOO-bibliotheek access.
+-   **RegioBot with RAG**: A regional WOO & Legal AI assistant using Retrieval-Augmented Generation (RAG) for dossier-driven answers. Users upload PDF documents to their personal WOO-bibliotheek, which are chunked, embedded with OpenAI text-embedding-3-small, and stored using pgvector for semantic similarity search. The system uses gpt-4o-mini for answer generation with source citations. Focus: wet- en regelgeving analysis, WOO-verzoeken, mandaten, bevoegdheden. Explicitly refuses traffic violations, personal fines, and non-business-related queries. PRO-exclusive feature.
 -   **WOO Categories**: Database-enforced categorization for WOO requests with 9 allowed categories (mandaat_delegatie, beleid_verordening, vergunningen, heffingen_leges, handhaving_kaders, aanbesteding, subsidies, uitvoering_partijen, openbaarheid_archief) and 1 blocked category (persoonlijk_verkeer_boete). Hard blocking via database trigger prevents non-business queries from entering the WOO library.
 -   **Privacy & Consent Dashboard (AVG/GDPR Compliance)**: Enables users to manage per-field data visibility, view consent logs, export their data, and perform soft account deletion. This feature is enhanced for PRO members to allow customization of visibility settings.
 -   **Affiliate System**: Allows users to refer new members and earn recurring commissions. It tracks referrals, calculates commissions, and provides an affiliate dashboard.
@@ -42,7 +48,7 @@ Security is a paramount concern, with comprehensive measures including HSTS, Con
 ## External Dependencies
 
 -   **Database**: Neon Database (PostgreSQL)
--   **AI Integration**: Replit AI (for RegioBot)
+-   **AI Integration**: OpenAI (text-embedding-3-small for RAG embeddings, gpt-4o-mini for chat), pgvector for vector similarity search
 -   **UI Components**: Radix UI, shadcn/ui, Lucide React, cmdk, embla-carousel, vaul
 -   **Build Tools**: Vite, esbuild, tsx
 -   **Styling**: Tailwind CSS

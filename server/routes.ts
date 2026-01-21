@@ -910,6 +910,125 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
     }
   });
 
+  // RAG System Routes - Document Upload and Vector Search
+  app.post("/api/rag/documents", requirePro, upload.single('file'), async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user?.id) return res.status(401).json({ error: "Niet ingelogd" });
+
+      const file = req.file;
+      if (!file) return res.status(400).json({ error: "Geen bestand ontvangen" });
+
+      const { extractTextFromPDF } = await import("./rag/extract");
+      const { chunkText } = await import("./rag/chunk");
+      const { embedTexts } = await import("./rag/embeddings");
+
+      const { text, needsOcr, pages } = await extractTextFromPDF(file.buffer);
+
+      const title = req.body.title || file.originalname;
+      const region = req.body.region;
+
+      const docResult = await db.execute(sql`
+        INSERT INTO rag_documents (user_id, region, title, source_type, needs_ocr, metadata_json)
+        VALUES (${user.id}, ${region || null}, ${title}, 'upload', ${needsOcr}, ${JSON.stringify({ pages, originalName: file.originalname })})
+        RETURNING id
+      `);
+      const docId = (docResult.rows as any)[0]?.id;
+
+      if (!docId) throw new Error("Kon document niet opslaan");
+
+      const chunks = chunkText(text);
+      const embeddings = await embedTexts(chunks);
+
+      for (let i = 0; i < chunks.length; i++) {
+        const chunkResult = await db.execute(sql`
+          INSERT INTO rag_chunks (document_id, chunk_index, text)
+          VALUES (${docId}, ${i}, ${chunks[i]})
+          RETURNING id
+        `);
+        const chunkId = (chunkResult.rows as any)[0]?.id;
+
+        const embeddingStr = `[${embeddings[i].join(",")}]`;
+        await db.execute(sql`
+          INSERT INTO rag_embeddings (chunk_id, embedding)
+          VALUES (${chunkId}, ${embeddingStr}::vector)
+        `);
+      }
+
+      res.json({
+        success: true,
+        documentId: docId,
+        chunks: chunks.length,
+        needsOcr,
+        pages,
+      });
+    } catch (err: any) {
+      console.error("RAG document upload error:", err);
+      res.status(500).json({ error: "Document verwerken mislukt", message: err?.message });
+    }
+  });
+
+  app.post("/api/rag/ask", requirePro, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user?.id) return res.status(401).json({ error: "Niet ingelogd" });
+
+      const { query, region } = req.body;
+      if (!query || typeof query !== "string") {
+        return res.status(400).json({ error: "Vraag is verplicht" });
+      }
+
+      const { ask } = await import("./rag/answer");
+      const result = await ask({
+        userId: user.id,
+        region: region || undefined,
+        query,
+      });
+
+      res.json(result);
+    } catch (err: any) {
+      console.error("RAG ask error:", err);
+      res.status(500).json({ error: "Vraag beantwoorden mislukt", message: err?.message });
+    }
+  });
+
+  app.get("/api/rag/documents", requirePro, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user?.id) return res.status(401).json({ error: "Niet ingelogd" });
+
+      const result = await db.execute(sql`
+        SELECT d.*, 
+          (SELECT COUNT(*) FROM rag_chunks WHERE document_id = d.id) as chunk_count
+        FROM rag_documents d
+        WHERE d.user_id = ${user.id}
+        ORDER BY d.created_at DESC
+      `);
+
+      res.json(result.rows);
+    } catch (err: any) {
+      console.error("RAG documents list error:", err);
+      res.status(500).json({ error: "Documenten ophalen mislukt" });
+    }
+  });
+
+  app.delete("/api/rag/documents/:id", requirePro, async (req, res) => {
+    try {
+      const user = req.user;
+      if (!user?.id) return res.status(401).json({ error: "Niet ingelogd" });
+
+      const { id } = req.params;
+      await db.execute(sql`
+        DELETE FROM rag_documents WHERE id = ${id} AND user_id = ${user.id}
+      `);
+
+      res.json({ success: true });
+    } catch (err: any) {
+      console.error("RAG document delete error:", err);
+      res.status(500).json({ error: "Document verwijderen mislukt" });
+    }
+  });
+
   // WOO API routes for dropdown selectors
   app.get("/api/woo/regions", async (_req, res) => {
     try {

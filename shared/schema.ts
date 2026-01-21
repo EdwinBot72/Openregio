@@ -1108,3 +1108,58 @@ export type InsertCrewRequest = z.infer<typeof insertCrewRequestSchema>;
 export type CrewRequest = typeof crewRequests.$inferSelect;
 export type InsertCrewApplication = z.infer<typeof insertCrewApplicationSchema>;
 export type CrewApplication = typeof crewApplications.$inferSelect;
+
+// RAG System Tables for RegioBot WOO-bibliotheek
+export const ragDocuments = pgTable("rag_documents", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull(),
+  region: text("region"),
+  title: text("title"),
+  sourceType: text("source_type").default("upload"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  letterDate: timestamp("letter_date"),
+  metadataJson: jsonb("metadata_json").default({}),
+  needsOcr: boolean("needs_ocr").default(false),
+}, (table) => [
+  index("idx_rag_documents_user").on(table.userId),
+]);
+
+export const ragChunks = pgTable("rag_chunks", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  documentId: varchar("document_id").notNull().references(() => ragDocuments.id, { onDelete: "cascade" }),
+  chunkIndex: integer("chunk_index").notNull(),
+  text: text("text").notNull(),
+  metadataJson: jsonb("metadata_json").default({}),
+}, (table) => [
+  index("idx_rag_chunks_doc").on(table.documentId),
+]);
+
+export const ragEmbeddings = pgTable("rag_embeddings", {
+  chunkId: varchar("chunk_id").primaryKey().references(() => ragChunks.id, { onDelete: "cascade" }),
+});
+
+export const leads = pgTable("leads", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  plan: text("plan").notNull(),
+  name: text("name").notNull(),
+  email: text("email").notNull(),
+  company: text("company").notNull(),
+  phone: text("phone"),
+  region: text("region"),
+  category: text("category"),
+  badges: jsonb("badges").default([]),
+  note: text("note"),
+  source: text("source").default("openregio"),
+});
+
+export const insertRagDocumentSchema = createInsertSchema(ragDocuments).omit({ id: true, createdAt: true });
+export const insertRagChunkSchema = createInsertSchema(ragChunks).omit({ id: true });
+export const insertLeadSchema = createInsertSchema(leads).omit({ id: true, createdAt: true });
+
+export type InsertRagDocument = z.infer<typeof insertRagDocumentSchema>;
+export type RagDocument = typeof ragDocuments.$inferSelect;
+export type InsertRagChunk = z.infer<typeof insertRagChunkSchema>;
+export type RagChunk = typeof ragChunks.$inferSelect;
+export type InsertLead = z.infer<typeof insertLeadSchema>;
+export type Lead = typeof leads.$inferSelect;
