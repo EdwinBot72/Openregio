@@ -71,29 +71,34 @@ export default function HomePage() {
               <h1 className="font-accent text-4xl md:text-6xl font-bold mb-6 leading-tight" data-testid="text-hero-title">
                 Inzicht maakt ondernemen voorspelbaarder.
               </h1>
-              <p className="text-xl md:text-2xl text-muted-foreground mb-8" data-testid="text-hero-subtitle">
-                OpenRegio is infrastructuur voor lokale ondernemers: een regionaal netwerk + een gezamenlijke WOO-bibliotheek.
-                RegioBot maakt beleid, mandaten en uitvoering doorzichtig — zodat jij niet vaart op aannames, maar op documenten.
+              <p className="text-xl md:text-2xl text-muted-foreground mb-4" data-testid="text-hero-subtitle">
+                Onduidelijke regels en versnipperd werk kosten ondernemers meer tijd dan hun eigen vak.
+              </p>
+              <p className="text-lg text-muted-foreground mb-4">
+                OpenRegio organiseert lokaal ondernemen rond vier vaste pijlers: werk in de regio, inzicht in regelgeving, lokale zichtbaarheid en operationele betrouwbaarheid.
+              </p>
+              <p className="text-lg text-muted-foreground mb-4">
+                Ondersteund door een gezamenlijke WOO-bibliotheek en RegioBot die documenten leest zoals ze bedoeld zijn.
+              </p>
+              <p className="text-base font-medium mb-6">
+                Zo ontstaat rust, overzicht en continuïteit.
+              </p>
+              <p className="text-sm text-primary font-semibold mb-8" data-testid="text-hero-urgency">
+                Elke regio die dit niet organiseert, verliest werk en grip zonder het te merken.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link href="/start?plan=basic">
                   <Button size="lg" data-testid="button-hero-basic">
-                    Word lid en claim je regio
+                    Claim je regio
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
                 <Link href="/regiobot">
                   <Button variant="outline" size="lg" data-testid="button-hero-basischeck">
-                    Check beleid of besluit met RegioBot
+                    Organiseer werk en regels
                   </Button>
                 </Link>
               </div>
-              <p className="text-sm text-muted-foreground mt-4" data-testid="text-hero-tagline">
-                Regio-omzet. Bewijs op tafel. Ondernemen zonder ruis.
-              </p>
-              <p className="text-xs text-muted-foreground mt-2" data-testid="text-hero-scope">
-                Scope: alleen wet- en regelgeving voor ondernemers. Geen verkeerszaken, Mulder/CJIB, snelheid, rood-licht of persoonlijke boetes.
-              </p>
             </div>
             <div className="relative">
               <img 
@@ -107,30 +112,58 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Pijnpunten Section */}
+      {/* Waarom OpenRegio nodig is */}
       <section className="py-16 px-4 bg-muted/30">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="font-accent text-2xl md:text-3xl font-bold mb-4">
+              Waarom OpenRegio nodig is
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Ondernemen wordt onvoorspelbaar wanneer werk, regels en besluiten niet als één geheel zijn georganiseerd.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-4 text-center text-sm">
+            {[
+              "Werk niet kan worden doorverwezen binnen de regio",
+              "Regels bestaan, maar niet inzichtelijk zijn",
+              "Besluiten worden toegepast zonder zichtbaar kader",
+              "Bevoegdheden onduidelijk zijn belegd",
+              "Tijd verdwijnt in systemen in plaats van in ondernemen",
+            ].map((punt, idx) => (
+              <div key={idx} className="p-3 rounded-md bg-background border">
+                {punt}
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Waarom ondernemers zich aansluiten */}
+      <section className="py-16 px-4">
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-8">
             <h2 className="font-accent text-2xl md:text-3xl font-bold mb-4">
               Waarom ondernemers zich aansluiten
             </h2>
-            <p className="text-muted-foreground">Lokale ondernemers verliezen geld door:</p>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Ondernemers sluiten zich niet aan voor gezelligheid, maar om grip te houden op hun bedrijf.
+            </p>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-center text-sm">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm max-w-3xl mx-auto">
             {[
-              "Onvoorspelbare omzet en losse aanvragen",
-              "Beleid en brieven zonder duidelijke grondslag",
-              "Onzichtbare besluiten die je bedrijf raken",
-              "Onduidelijke mandaten: wie mag eigenlijk wat?",
-              "Tijdverlies door loketten, standaardteksten en omwegen",
-            ].map((pijnpunt, idx) => (
-              <div key={idx} className="p-3 rounded-md bg-background border">
-                {pijnpunt}
+              "Omdat werk onnodig uit de regio verdwijnt",
+              "Omdat regels en besluiten bestaan, maar niet doorzichtig zijn",
+              "Omdat afhankelijkheid van platforms kwetsbaar maakt",
+              "Omdat rust en continuïteit geen luxe zijn",
+            ].map((reden, idx) => (
+              <div key={idx} className="p-4 rounded-md bg-muted/50 border-l-4 border-l-primary">
+                {reden}
               </div>
             ))}
           </div>
           <p className="text-center mt-6 font-semibold text-primary">
-            OpenRegio maakt dit simpel: regionaal netwerk + documenten + overzicht.
+            OpenRegio organiseert dit vóórdat het misgaat.
           </p>
         </div>
       </section>
@@ -161,14 +194,13 @@ export default function HomePage() {
               <CardContent className="p-6">
                 <Store className="h-12 w-12 text-blue-500 mb-4" />
                 <h3 className="font-accent text-xl font-semibold mb-2">
-                  1. RegioMarkt — Werk uit je eigen regio
+                  RegioMarkt — Werk blijft in de regio
                 </h3>
                 <p className="text-muted-foreground mb-4">
-                  Een gesloten netwerk waar ondernemers elkaar doorverwijzen en werk verdelen.
-                  Geen algoritmes, geen advertenties: gewoon korte lijnen, vaste plekken per vakgebied en afspraken die blijven staan.
+                  Een gesloten netwerk waar ondernemers elkaar gericht doorverwijzen en werk verdelen. Geen algoritmes. Geen advertenties.
                 </p>
                 <p className="text-sm font-medium text-blue-600">
-                  Resultaat: stabiele instroom en minder afhankelijkheid van platforms.
+                  Effect: stabiele instroom en minder afhankelijkheid van platforms.
                 </p>
               </CardContent>
             </Card>
@@ -177,15 +209,13 @@ export default function HomePage() {
               <CardContent className="p-6">
                 <Bot className="h-12 w-12 text-primary mb-4" />
                 <h3 className="font-accent text-xl font-semibold mb-2">
-                  2. RegioBot — WOO & regelgeving, regionaal scherp
+                  RegioBot — WOO & regelgeving, zonder ruis
                 </h3>
                 <p className="text-muted-foreground mb-4">
-                  RegioBot werkt dossier-gedreven: WOO-verzoeken, antwoorden, besluiten, mandaten en beleidsregels.
-                  Je krijgt geen 'mening' en geen loket-praat, maar: wat er staat, wat ontbreekt en welke documenten je moet opvragen om het hard te maken.
-                  Samen bouwen we een WOO-bibliotheek die ondernemers beschermt met feiten.
+                  Document-gedreven inzicht in WOO-verzoeken, besluiten, mandaten en beleidsregels. Geen meningen, alleen feiten.
                 </p>
                 <p className="text-sm font-medium text-primary">
-                  Resultaat: minder risico, sneller schakelen, meer controle.
+                  Effect: minder risico, sneller schakelen, meer controle.
                 </p>
               </CardContent>
             </Card>
@@ -194,14 +224,13 @@ export default function HomePage() {
               <CardContent className="p-6">
                 <Eye className="h-12 w-12 text-green-500 mb-4" />
                 <h3 className="font-accent text-xl font-semibold mb-2">
-                  3. Zichtbaarheid — Lokaal vindbaar, zonder marketingcircus
+                  Zichtbaarheid — Vindbaar waar het telt
                 </h3>
                 <p className="text-muted-foreground mb-4">
-                  Praktische basics: Google bedrijfsprofiel, reviews en lokale vindbaarheid.
-                  Niet "content spammen", wel gewoon beter gevonden worden door klanten in jouw buurt.
+                  Lokale basis op orde: Google-profiel, reviews en regionale vindbaarheid.
                 </p>
                 <p className="text-sm font-medium text-green-600">
-                  Resultaat: meer aanvragen uit de regio, minder advertentiedruk.
+                  Effect: meer aanvragen uit de regio.
                 </p>
               </CardContent>
             </Card>
@@ -210,12 +239,10 @@ export default function HomePage() {
               <CardContent className="p-6">
                 <ClipboardCheck className="h-12 w-12 text-orange-500 mb-4" />
                 <h3 className="font-accent text-xl font-semibold mb-2">
-                  4. Basischeck — Betrouwbaar bedrijf, ook als systemen haperen
+                  Basischeck — Betrouwbaar, ook als systemen falen
                 </h3>
                 <p className="text-muted-foreground mb-4">
-                  Een simpele check op cash, bonnen, bereikbaarheid en offline werken.
-                  Zodat je bedrijf niet stilvalt door pin-storingen, apps of afhankelijkheden.
-                  Je score bepaalt ook je positie in het netwerk.
+                  Check op cash, bereikbaarheid en offline werken. Je positie in het netwerk is gebaseerd op betrouwbaarheid.
                 </p>
                 <p className="text-sm font-medium text-orange-600">
                   Resultaat: vertrouwen en continuïteit in je regio.
@@ -580,15 +607,32 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Slot */}
+      <section className="py-16 px-4 bg-muted/30">
+        <div className="max-w-3xl mx-auto text-center">
+          <h2 className="font-accent text-2xl md:text-3xl font-bold mb-4">
+            OpenRegio is geen platform.
+          </h2>
+          <p className="text-xl text-muted-foreground mb-4">
+            Het is infrastructuur voor lokaal ondernemen.
+          </p>
+          <p className="text-lg text-muted-foreground">
+            Wie werk, regels en continuïteit organiseert, is minder afhankelijk van systemen die hij niet beheerst.
+          </p>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer className="py-12 px-4 border-t">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
             <div>
               <h3 className="font-accent font-bold text-lg mb-4">OpenRegio</h3>
-              <p className="text-sm text-muted-foreground">
-                Regio-omzet. Regels doorzichtig. Sterke ondernemers. 
-                Infrastructuur voor ondernemers die regionaal willen winnen.
+              <p className="text-sm text-muted-foreground mb-4">
+                Infrastructuur voor lokaal ondernemen.
+              </p>
+              <p className="text-xs text-muted-foreground">
+                OpenRegio biedt informatie en documentanalyse. Geen juridisch advies.
               </p>
             </div>
             <div>

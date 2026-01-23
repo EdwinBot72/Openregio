@@ -60,46 +60,42 @@ const audience = [
 const pillars = [
   {
     title: "RegioMarkt",
-    kicker: "Werk uit je eigen regio",
+    kicker: "Werk blijft in de regio",
     bullets: [
-      "Gesloten netwerk, korte lijnen.",
-      "Doorverwijzen i.p.v. concurreer-circus.",
-      "Vaste plekken per vakgebied (optioneel).",
+      "Gesloten netwerk waar ondernemers elkaar gericht doorverwijzen.",
+      "Geen algoritmes. Geen advertenties.",
     ],
     tag: "Stabiele instroom",
     icon: Puzzle,
   },
   {
     title: "RegioBot",
-    kicker: "WOO & regelgeving, regionaal scherp",
+    kicker: "WOO & regelgeving, zonder ruis",
     bullets: [
-      "Dossier-gedreven: besluiten, mandaat, termijnen.",
-      "Wat staat er / wat ontbreekt / wat moet je opvragen.",
-      "Bouwt een herbruikbare WOO-bibliotheek per regio.",
+      "Document-gedreven inzicht in WOO-verzoeken, besluiten, mandaten.",
+      "Geen meningen, alleen feiten.",
     ],
     tag: "Meer controle",
     icon: FolderOpen,
   },
   {
     title: "Zichtbaarheid",
-    kicker: "Lokaal vindbaar, zonder marketingcircus",
+    kicker: "Vindbaar waar het telt",
     bullets: [
-      "Google bedrijfsprofiel + reviews + lokale signalen.",
-      "Geen contentplicht. Geen advertentiebudget.",
-      "Gewoon gevonden worden door buurtklanten.",
+      "Lokale basis op orde: Google-profiel, reviews.",
+      "Regionale vindbaarheid.",
     ],
-    tag: "Rust in je funnel",
+    tag: "Meer aanvragen",
     icon: TrendingUp,
   },
   {
     title: "Basischeck",
-    kicker: "Bedrijf dat blijft draaien",
+    kicker: "Betrouwbaar, ook als systemen falen",
     bullets: [
-      "Cash, bonnen, telefoonlijst, offline bereikbaarheid.",
-      "Noodstroom / powerbank / fallback werkwijze.",
-      "Badges als bewijs (geen vage claims).",
+      "Check op cash, bereikbaarheid en offline werken.",
+      "Je positie is gebaseerd op betrouwbaarheid.",
     ],
-    tag: "Offline-proof",
+    tag: "Continuïteit",
     icon: ShieldCheck,
   },
 ];
@@ -709,22 +705,29 @@ export default function LandingPage() {
             </h1>
 
             <p className="mt-4 max-w-xl text-base text-white/70">
-              OpenRegio is infrastructuur voor lokale ondernemers: een regionaal netwerk + een gezamenlijke WOO-bibliotheek. 
-              RegioBot maakt beleid, mandaten en uitvoering doorzichtig — zodat jij niet vaart op aannames, maar op documenten.
+              Onduidelijke regels en versnipperd werk kosten ondernemers meer tijd dan hun eigen vak.
+            </p>
+
+            <p className="mt-3 max-w-xl text-base text-white/70">
+              OpenRegio organiseert lokaal ondernemen rond vier vaste pijlers: werk in de regio, inzicht in regelgeving, lokale zichtbaarheid en operationele betrouwbaarheid.
+            </p>
+
+            <p className="mt-3 max-w-xl text-base text-white/70">
+              Ondersteund door een gezamenlijke WOO-bibliotheek en RegioBot die documenten leest zoals ze bedoeld zijn.
             </p>
 
             <p className="mt-3 max-w-xl text-sm font-medium text-white/90">
-              Regio-omzet. Bewijs op tafel. Ondernemen zonder ruis.
+              Zo ontstaat rust, overzicht en continuïteit.
             </p>
 
-            <p className="mt-2 text-xs text-white/50">
-              Scope: alleen wet- en regelgeving voor ondernemers. Geen verkeerszaken, Mulder/CJIB, snelheid, rood-licht of persoonlijke boetes.
+            <p className="mt-3 text-sm font-semibold" style={{ color: "#8665C0" }}>
+              Elke regio die dit niet organiseert, verliest werk en grip zonder het te merken.
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
-              <LandingButton href="#wordlid">Word lid en claim je regio</LandingButton>
+              <LandingButton href="#wordlid">Claim je regio</LandingButton>
               <LandingButton href="/regiobot" variant="secondary">
-                Check beleid met RegioBot
+                Organiseer werk en regels
               </LandingButton>
             </div>
           </div>
