@@ -162,9 +162,6 @@ export default function HomePage() {
               </div>
             ))}
           </div>
-          <p className="text-center mt-6 font-semibold text-primary">
-            OpenRegio organiseert dit vóórdat het misgaat.
-          </p>
         </div>
       </section>
 
