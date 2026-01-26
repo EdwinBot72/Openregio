@@ -5,7 +5,6 @@ import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import type { Blog } from "@shared/schema";
 import heroImage from "@assets/ChatGPT_Image_5_jan_2026,_10_22_40_1768374708257.png";
-import howItWorksImage from "@assets/a6c26f1e-d111-4563-9ebd-09dd423e6ffd_1768342440500.png";
 
 export default function HomePage() {
   const { data: blogs = [] } = useQuery<Blog[]>({
@@ -162,18 +161,6 @@ export default function HomePage() {
               </div>
             ))}
           </div>
-        </div>
-      </section>
-
-      {/* Hoe OpenRegio Werkt - Infographic */}
-      <section className="py-12 px-4">
-        <div className="max-w-5xl mx-auto">
-          <img 
-            src={howItWorksImage} 
-            alt="Hoe OpenRegio Werkt - RegioMarkt, RegioBot, RegioCrew, Zichtbaarheid, Basischeck" 
-            className="rounded-md shadow-lg w-full h-auto"
-            data-testid="img-how-it-works"
-          />
         </div>
       </section>
 
