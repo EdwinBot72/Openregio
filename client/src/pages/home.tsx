@@ -178,74 +178,94 @@ export default function HomePage() {
       </section>
 
       {/* De 4 pijlers van OpenRegio */}
-      <section className="py-20 px-4">
-        <div className="max-w-7xl mx-auto">
+      <section className="py-20 px-4" id="pijlers">
+        <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="font-accent text-3xl md:text-4xl font-bold mb-4">
               De 4 pijlers van OpenRegio
             </h2>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <Card data-testid="card-feature-regiomarkt" className="border-l-4 border-l-blue-500">
-              <CardContent className="p-6">
-                <Store className="h-12 w-12 text-blue-500 mb-4" />
-                <h3 className="font-accent text-xl font-semibold mb-2">
-                  RegioMarkt — Werk blijft in de regio
-                </h3>
+          <div className="space-y-16">
+            {/* RegioMarkt */}
+            <div className="grid md:grid-cols-2 gap-8 items-center" data-testid="card-feature-regiomarkt">
+              <img 
+                src="/img/regiomarkt.png" 
+                alt="RegioMarkt" 
+                className="w-full rounded-xl shadow-lg"
+              />
+              <div>
+                <p className="text-primary font-semibold mb-2">RegioMarkt</p>
+                <h3 className="font-accent text-2xl font-bold mb-4">Werk blijft in de regio</h3>
                 <p className="text-muted-foreground mb-4">
-                  Een gesloten netwerk waar ondernemers elkaar gericht doorverwijzen en werk verdelen. Geen algoritmes. Geen advertenties.
+                  RegioMarkt is een gesloten netwerk van ondernemers binnen één regio. Ondernemers kunnen werk doorverwijzen wanneer zij het zelf niet uitvoeren.
                 </p>
-                <p className="text-sm font-medium text-blue-600">
-                  Effect: stabiele instroom en minder afhankelijkheid van platforms.
+                <p className="text-muted-foreground mb-4">
+                  Er zijn geen advertenties en geen algoritmes. De indeling is vast per regio.
                 </p>
-              </CardContent>
-            </Card>
+                <p className="font-semibold">Effect: werk kan binnen de regio worden herverdeeld.</p>
+              </div>
+            </div>
 
-            <Card data-testid="card-feature-regiobot" className="border-l-4 border-l-primary">
-              <CardContent className="p-6">
-                <Bot className="h-12 w-12 text-primary mb-4" />
-                <h3 className="font-accent text-xl font-semibold mb-2">
-                  RegioBot — WOO & regelgeving, zonder ruis
-                </h3>
+            {/* RegioBot */}
+            <div className="grid md:grid-cols-2 gap-8 items-center" data-testid="card-feature-regiobot">
+              <img 
+                src="/img/regiobot.png" 
+                alt="RegioBot" 
+                className="w-full rounded-xl shadow-lg md:order-2"
+              />
+              <div className="md:order-1">
+                <p className="text-primary font-semibold mb-2">RegioBot</p>
+                <h3 className="font-accent text-2xl font-bold mb-4">WOO & regelgeving, zonder ruis</h3>
                 <p className="text-muted-foreground mb-4">
-                  Document-gedreven inzicht in WOO-verzoeken, besluiten, mandaten en beleidsregels. Geen meningen, alleen feiten.
+                  RegioBot ontsluit documenten zoals WOO-verzoeken, besluiten, beleidsregels en mandaten.
                 </p>
-                <p className="text-sm font-medium text-primary">
-                  Effect: minder risico, sneller schakelen, meer controle.
+                <p className="text-muted-foreground mb-4">
+                  RegioBot geeft geen mening en geen interpretatie. Het toont wat er is en wat ontbreekt.
                 </p>
-              </CardContent>
-            </Card>
+                <p className="font-semibold">Effect: regelgeving is inzichtelijk op documentniveau.</p>
+              </div>
+            </div>
 
-            <Card data-testid="card-feature-zichtbaarheid" className="border-l-4 border-l-green-500">
-              <CardContent className="p-6">
-                <Eye className="h-12 w-12 text-green-500 mb-4" />
-                <h3 className="font-accent text-xl font-semibold mb-2">
-                  Zichtbaarheid — Vindbaar waar het telt
-                </h3>
+            {/* Zichtbaarheid */}
+            <div className="grid md:grid-cols-2 gap-8 items-center" data-testid="card-feature-zichtbaarheid">
+              <img 
+                src="/img/zichtbaarheid.png" 
+                alt="Zichtbaarheid" 
+                className="w-full rounded-xl shadow-lg"
+              />
+              <div>
+                <p className="text-primary font-semibold mb-2">Zichtbaarheid</p>
+                <h3 className="font-accent text-2xl font-bold mb-4">Vindbaar waar het telt</h3>
                 <p className="text-muted-foreground mb-4">
-                  Lokale basis op orde: Google-profiel, reviews en regionale vindbaarheid.
+                  Dit onderdeel richt zich op correcte bedrijfsvermeldingen, reviews en regionale zoekresultaten.
                 </p>
-                <p className="text-sm font-medium text-green-600">
-                  Effect: meer aanvragen uit de regio.
+                <p className="text-muted-foreground mb-4">
+                  Er wordt geen contentstrategie en geen advertentiemodel gebruikt.
                 </p>
-              </CardContent>
-            </Card>
+                <p className="font-semibold">Effect: bedrijven zijn vindbaar binnen hun regio.</p>
+              </div>
+            </div>
 
-            <Card data-testid="card-feature-basischeck" className="border-l-4 border-l-orange-500">
-              <CardContent className="p-6">
-                <ClipboardCheck className="h-12 w-12 text-orange-500 mb-4" />
-                <h3 className="font-accent text-xl font-semibold mb-2">
-                  Basischeck — Betrouwbaar, ook als systemen falen
-                </h3>
+            {/* Basischeck */}
+            <div className="grid md:grid-cols-2 gap-8 items-center" data-testid="card-feature-basischeck">
+              <img 
+                src="/img/basischeck.png" 
+                alt="Basischeck" 
+                className="w-full rounded-xl shadow-lg md:order-2"
+              />
+              <div className="md:order-1">
+                <p className="text-primary font-semibold mb-2">Basischeck</p>
+                <h3 className="font-accent text-2xl font-bold mb-4">Betrouwbaar, ook als systemen falen</h3>
                 <p className="text-muted-foreground mb-4">
-                  Check op cash, bereikbaarheid en offline werken. Je positie in het netwerk is gebaseerd op betrouwbaarheid.
+                  De Basischeck registreert of een bedrijf bereikbaar is, offline kan functioneren en basisbetalingen kan verwerken.
                 </p>
-                <p className="text-sm font-medium text-orange-600">
-                  Resultaat: vertrouwen en continuïteit in je regio.
+                <p className="text-muted-foreground mb-4">
+                  Deze gegevens worden gebruikt binnen het netwerk.
                 </p>
-              </CardContent>
-            </Card>
+                <p className="font-semibold">Effect: betrouwbaarheid is zichtbaar binnen de regio.</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
