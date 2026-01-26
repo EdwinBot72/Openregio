@@ -138,32 +138,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Waarom ondernemers zich aansluiten */}
-      <section className="py-16 px-4">
-        <div className="max-w-5xl mx-auto">
-          <div className="text-center mb-8">
-            <h2 className="font-accent text-2xl md:text-3xl font-bold mb-4">
-              Waarom ondernemers zich aansluiten
-            </h2>
-            <p className="text-muted-foreground max-w-2xl mx-auto">
-              Ondernemers sluiten zich niet aan voor gezelligheid, maar om grip te houden op hun bedrijf.
-            </p>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm max-w-3xl mx-auto">
-            {[
-              "Omdat werk onnodig uit de regio verdwijnt",
-              "Omdat regels en besluiten bestaan, maar niet doorzichtig zijn",
-              "Omdat afhankelijkheid van platforms kwetsbaar maakt",
-              "Omdat rust en continuïteit geen luxe zijn",
-            ].map((reden, idx) => (
-              <div key={idx} className="p-4 rounded-md bg-muted/50 border-l-4 border-l-primary">
-                {reden}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* De 4 pijlers van OpenRegio */}
       <section className="py-20 px-4" id="pijlers">
         <div className="max-w-6xl mx-auto">
