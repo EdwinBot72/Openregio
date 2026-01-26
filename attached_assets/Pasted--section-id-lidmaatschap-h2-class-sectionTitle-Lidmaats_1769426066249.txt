@@ -1,0 +1,75 @@
+<section id="lidmaatschap">
+  <h2 class="sectionTitle">Lidmaatschappen</h2>
+  <p class="sectionText">
+    Twee niveaus. Eén structuur. Basis kijkt mee. Pro bouwt mee.
+  </p>
+
+  <div class="split" style="margin-top:18px;">
+    <!-- BASIS -->
+    <div class="box">
+      <div class="pill" style="margin-bottom:12px;">Basis</div>
+      <h3 class="cardH" style="margin-top:0;">Meedoen en meekijken</h3>
+      <p class="cardP">
+        Voor ondernemers die willen aansluiten en inzicht willen krijgen, zonder verplichtingen.
+      </p>
+
+      <strong>Wat je krijgt</strong>
+      <ul>
+        <li>Toegang tot RegioMarkt (ontvangen van werk)</li>
+        <li>Inzage in de openbare WOO-bibliotheek van je regio</li>
+        <li>RegioBot: documenten bekijken (wat is er / wat ontbreekt)</li>
+        <li>Zichtbaarheid: basis bedrijfsvermelding</li>
+        <li>Basischeck: zichtbaar, niet sturend</li>
+      </ul>
+
+      <strong style="display:block; margin-top:12px;">Wat niet</strong>
+      <ul>
+        <li>Geen actieve doorverwijzingen</li>
+        <li>Geen eigen WOO-verzoeken indienen</li>
+        <li>Geen prioriteit of positie in het netwerk</li>
+      </ul>
+
+      <p class="effect" style="margin-top:14px;">Doel: oriëntatie en inzicht, zonder invloed op de structuur.</p>
+
+      <div class="cta" style="margin-top:14px;">
+        <a class="btn" href="/lidmaatschap">Kies Basis</a>
+      </div>
+    </div>
+
+    <!-- PRO -->
+    <div class="box" style="border-color: rgba(134,101,192,.35); box-shadow: 0 10px 28px rgba(134,101,192,.10);">
+      <div class="pill" style="margin-bottom:12px;">Pro</div>
+      <h3 class="cardH" style="margin-top:0;">Meebouwen en sturen</h3>
+      <p class="cardP">
+        Voor ondernemers die actief onderdeel zijn van de regionale infrastructuur.
+      </p>
+
+      <strong>Wat je krijgt</strong>
+      <ul>
+        <li>Actieve deelname aan RegioMarkt (doorverwijzen + ontvangen)</li>
+        <li>RegioBot: WOO-verzoeken indienen</li>
+        <li>RegioBot: documenten structureren en taggen</li>
+        <li>Meebouwen aan de regionale WOO-bibliotheek</li>
+        <li>Zichtbaarheid: versterkte regionale positie</li>
+        <li>Basischeck: meegewogen in netwerkpositie</li>
+        <li>Vaste plek per vakgebied (waar van toepassing)</li>
+      </ul>
+
+      <strong style="display:block; margin-top:12px;">Wat niet</strong>
+      <ul>
+        <li>Geen juridisch advies</li>
+        <li>Geen behandeling van individuele boetes of dossiers</li>
+      </ul>
+
+      <p class="effect" style="margin-top:14px;">Doel: stabiliteit, invloed en voorspelbaarheid binnen je regio.</p>
+
+      <div class="cta" style="margin-top:14px;">
+        <a class="btn primary" href="/register">Kies Pro</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="meta" style="margin-top:18px;">
+    Waarom dit onderscheid bestaat: niet iedereen wil of kan bijdragen. Het netwerk werkt alleen als bijdragen zichtbaar en beperkt zijn.
+  </div>
+</section>
