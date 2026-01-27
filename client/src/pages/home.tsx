@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Quote, Users, Banknote, Phone, Battery, FileText, Printer, ArrowRight, Check, Sparkles, Bot, ShieldCheck, Lock, Cookie, Store, Eye, ClipboardCheck, UserPlus, BookOpen, Calendar } from "lucide-react";
+import { Quote, Users, Banknote, Phone, Battery, FileText, Printer, ArrowRight, Check, Sparkles, Bot, ShieldCheck, Lock, Cookie, Store, Eye, ClipboardCheck, UserPlus, BookOpen, Calendar, User, CheckCircle2, Zap, TrendingUp } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import type { Blog } from "@shared/schema";
@@ -259,25 +259,69 @@ export default function HomePage() {
       </section>
 
       {/* Zo werkt OpenRegio */}
-      <section className="py-16 px-4">
-        <div className="max-w-4xl mx-auto">
-          <h2 className="font-accent text-2xl md:text-3xl font-bold mb-8 text-center">
-            Zo werkt OpenRegio
-          </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+      <section className="py-20 px-4 bg-muted/30">
+        <div className="max-w-5xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="font-accent text-3xl md:text-4xl font-bold mb-4">
+              Zo werkt OpenRegio
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto">
+              Van aanmelding tot voordeel in 4 stappen
+            </p>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {[
-              { step: "1", label: "Maak je profiel aan" },
-              { step: "2", label: "Doe de Basischeck" },
-              { step: "3", label: "Gebruik RegioMarkt + RegioBot (WOO)" },
-              { step: "4", label: "Bouw voordeel op in je regio" },
-            ].map((item, idx) => (
-              <div key={idx} className="flex flex-col items-center gap-2">
-                <div className="w-10 h-10 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold">
-                  {item.step}
-                </div>
-                <p className="text-sm font-medium">{item.label}</p>
-              </div>
-            ))}
+              { 
+                step: "1", 
+                icon: User,
+                title: "Maak je profiel aan",
+                description: "Vul je bedrijfsgegevens in en kies je regio en vakgebied"
+              },
+              { 
+                step: "2", 
+                icon: CheckCircle2,
+                title: "Doe de Basischeck",
+                description: "Beantwoord praktische vragen en verdien je weerbaarheidsbadges"
+              },
+              { 
+                step: "3", 
+                icon: Zap,
+                title: "Gebruik RegioMarkt + RegioBot",
+                description: "Vind collega's, verwijs werk door en krijg grip op WOO-documenten"
+              },
+              { 
+                step: "4", 
+                icon: TrendingUp,
+                title: "Bouw voordeel op",
+                description: "Stem mee, deel kennis en versterk je positie in de regio"
+              },
+            ].map((item, idx) => {
+              const Icon = item.icon;
+              return (
+                <Card key={idx} className="relative overflow-visible" data-testid={`card-step-${idx + 1}`}>
+                  <div className="absolute -top-4 left-4">
+                    <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center font-bold text-sm shadow-md">
+                      {item.step}
+                    </div>
+                  </div>
+                  <CardContent className="pt-8 pb-6 px-4">
+                    <div className="mb-3">
+                      <Icon className="h-8 w-8 text-primary" />
+                    </div>
+                    <h3 className="font-semibold mb-2">{item.title}</h3>
+                    <p className="text-sm text-muted-foreground">{item.description}</p>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+          <div className="text-center mt-10">
+            <Link href="/start?plan=basic">
+              <Button size="lg" data-testid="button-steps-cta">
+                Begin nu
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
           </div>
         </div>
       </section>
