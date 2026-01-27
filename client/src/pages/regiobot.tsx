@@ -132,10 +132,33 @@ export default function RegioBotPage() {
     const params = new URLSearchParams(searchString);
     const dossier = params.get("dossier");
     const t = params.get("task") as Task | null;
+    const preset = params.get("preset");
 
     if (dossier) setSelectedDossierId(dossier);
     if (t && ["analyse_besluit", "mandaat_check", "wat_ontbreekt", "vervolg_woo", "tijdlijn", "publiceer_samenvatting"].includes(t)) {
       setTask(t);
+    }
+    
+    // Handle preset prompts from dashboard buttons
+    if (preset) {
+      switch (preset) {
+        case "woo":
+          setTask("vervolg_woo");
+          setQuestion("Stel een WOO-verzoek op voor openbare documenten over: [onderwerp]. Beperk tot ondernemersregels. Maak het per documenttype.\n\nOnderwerp: ");
+          break;
+        case "besluit":
+          setTask("analyse_besluit");
+          setQuestion("Vat dit document samen in 10 bullets: wat staat er, welke datum, welke bevoegdheid, welke verplichting, welke gevolgen.\n\nPlak document hieronder:\n\n");
+          break;
+        case "mandaat":
+          setTask("mandaat_check");
+          setQuestion("Zoek in dit document: wie tekent, namens wie, welke mandaatketen wordt genoemd, en wat ontbreekt om bevoegdheid te onderbouwen.\n\nPlak document hieronder:\n\n");
+          break;
+        case "ontbrekend":
+          setTask("wat_ontbreekt");
+          setQuestion("Maak een lijst van documenten die logisch ontbreken om dit volledig te onderbouwen (mandaatbesluit, delegatie, beleidsregel, publicatie, bijlagen).\n\nContext/document:\n\n");
+          break;
+      }
     }
   }, [searchString]);
 
