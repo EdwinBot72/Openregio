@@ -312,7 +312,7 @@ export default function BasischeckPage() {
               <div className="flex flex-wrap gap-4 justify-center">
                 <Link href="/start?plan=basic">
                   <Button size="lg" data-testid="button-result-join">
-                    Word lid – €12,95 p/m
+                    Word lid – €12,95 p/m excl. BTW
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>

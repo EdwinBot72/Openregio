@@ -36,7 +36,7 @@ const plans: Plan[] = [
   {
     id: "basic",
     name: "Basic",
-    price: "€12,95",
+    price: "€12,95 excl. BTW",
     description: "Perfect voor startende ondernemers",
     features: [
       { text: "Bedrijfsprofiel in lokaal netwerk", included: true },
@@ -50,7 +50,7 @@ const plans: Plan[] = [
   {
     id: "pro",
     name: "Pro",
-    price: "€24,00",
+    price: "€24 excl. BTW",
     description: "Voor ondernemers die meer willen",
     features: [
       { text: "Bedrijfsprofiel in lokaal netwerk", included: true },
@@ -245,7 +245,7 @@ export default function StartPage() {
                 />
                 <div className="pt-2">
                   <p className="text-sm text-muted-foreground mb-4">
-                    Geselecteerd plan: <span className="font-semibold text-foreground">{selectedPlan === "basic" ? "Basic (€12,95/maand)" : "Pro (€24,00/maand)"}</span>
+                    Geselecteerd plan: <span className="font-semibold text-foreground">{selectedPlan === "basic" ? "Basic (€12,95/maand excl. BTW)" : "Pro (€24/maand excl. BTW)"}</span>
                   </p>
                   <Button
                     type="submit"

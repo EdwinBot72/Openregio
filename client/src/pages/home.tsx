@@ -329,7 +329,7 @@ export default function HomePage() {
         <div className="max-w-5xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="font-accent text-3xl md:text-4xl font-bold mb-4">
-              Word lid v.a. €12,95 per maand
+              Word lid v.a. €12,95 per maand excl. BTW
             </h2>
             <p className="text-xl text-muted-foreground">
               Maandelijks opzegbaar, geen contracten
@@ -343,7 +343,7 @@ export default function HomePage() {
                 <h3 className="font-accent text-2xl font-bold mb-2">Basis</h3>
                 <div className="flex items-baseline gap-1 mb-6">
                   <span className="text-4xl font-bold">€12,95</span>
-                  <span className="text-muted-foreground">/ maand</span>
+                  <span className="text-muted-foreground">/ maand excl. BTW</span>
                 </div>
                 <ul className="space-y-3 mb-8">
                   {[
@@ -380,8 +380,8 @@ export default function HomePage() {
               <CardContent className="p-8">
                 <h3 className="font-accent text-2xl font-bold mb-2">Pro</h3>
                 <div className="flex items-baseline gap-1 mb-6">
-                  <span className="text-4xl font-bold">€24,00</span>
-                  <span className="text-muted-foreground">/ maand</span>
+                  <span className="text-4xl font-bold">€24</span>
+                  <span className="text-muted-foreground">/ maand excl. BTW</span>
                 </div>
                 <ul className="space-y-3 mb-8">
                   {[

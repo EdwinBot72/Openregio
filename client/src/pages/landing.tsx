@@ -147,7 +147,7 @@ const PLANS = [
     id: "basis",
     name: "Basis",
     price: "12,95",
-    period: "/ maand",
+    period: "/ maand excl. BTW",
     desc: "Voor ondernemers die gewoon lokaal zichtbaar + bereikbaar willen zijn.",
     bullets: [
       "Profiel + regio + categorie",
@@ -162,7 +162,7 @@ const PLANS = [
     id: "pro",
     name: "Pro",
     price: "24",
-    period: "/ maand",
+    period: "/ maand excl. BTW",
     highlight: true,
     desc: "Voor ondernemers die meer grip willen: extra zichtbaarheid + tools.",
     bullets: [
@@ -386,8 +386,8 @@ function PricingSignup() {
           </div>
 
           <div className="mt-3 sm:mt-0 flex gap-2">
-            <Badge>€12,95 Basis</Badge>
-            <Badge>€24 Pro</Badge>
+            <Badge>€12,95 Basis excl. BTW</Badge>
+            <Badge>€24 Pro excl. BTW</Badge>
           </div>
         </div>
 
