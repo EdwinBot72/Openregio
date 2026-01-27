@@ -215,8 +215,16 @@ export function AppSidebar() {
               size="sm"
               className="w-full gap-2"
               data-testid="button-logout"
-              onClick={() => {
-                window.location.href = getLogoutUrl();
+              onClick={async () => {
+                try {
+                  await fetch(getLogoutUrl(), { 
+                    method: "POST", 
+                    credentials: "include" 
+                  });
+                  window.location.href = "/";
+                } catch (e) {
+                  window.location.href = "/";
+                }
               }}
             >
               <LogOut className="h-4 w-4" />

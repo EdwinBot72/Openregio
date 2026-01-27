@@ -35,7 +35,7 @@ export async function fetchCurrentUser(): Promise<AuthUser | null> {
 }
 
 export function getLoginUrl(): string {
-  return "/api/auth/login";
+  return "/login";
 }
 
 export function getLogoutUrl(): string {
