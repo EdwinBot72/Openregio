@@ -30,6 +30,7 @@ import PrivacyDashboardPage from "@/pages/privacy-dashboard";
 import ProVisibilitySettingsPage from "@/pages/pro-visibility-settings";
 import WooBotPage from "@/pages/woo-bot";
 import WooWizardPage from "@/pages/woo-wizard";
+import WooBibliotheekPage from "@/pages/woo-bibliotheek";
 import RegioCrewPage from "@/pages/regiocrew";
 import BlogDetailPage from "@/pages/blog-detail";
 import BlogsPage from "@/pages/blogs";
@@ -74,6 +75,7 @@ function AuthenticatedRouter() {
       <Route path="/pro/visibility-settings" component={ProVisibilitySettingsPage} />
       <Route path="/woo-bot" component={WooBotPage} />
       <Route path="/woo-wizard" component={WooWizardPage} />
+      <Route path="/woo-bibliotheek" component={WooBibliotheekPage} />
       <Route path="/regiocrew" component={RegioCrewPage} />
       <Route path="/affiliate" component={AffiliatePage} />
       <Route path="/admin/blogs" component={AdminBlogsPage} />

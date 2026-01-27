@@ -10,7 +10,7 @@ import { requireAdmin } from "./middleware/auth";
 import { seedMasterAccount } from "./seed";
 import { generateRandomPassword, generateOnboardingToken, getPlanPrice, getPlanDisplayName, generateReferralCode } from "./utils/auth";
 import bcrypt from "bcrypt";
-import { upload, getDocumentType } from "./middleware/upload";
+import { upload, uploadMemory, getDocumentType } from "./middleware/upload";
 import { runRegioBot } from "./regiobot";
 import { db } from "db";
 import { eq, sql } from "drizzle-orm";
@@ -911,7 +911,7 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
   });
 
   // RAG System Routes - Document Upload and Vector Search
-  app.post("/api/rag/documents", requirePro, upload.single('file'), async (req, res) => {
+  app.post("/api/rag/documents", requirePro, uploadMemory.single('file'), async (req, res) => {
     try {
       const user = req.user;
       if (!user?.id) return res.status(401).json({ error: "Niet ingelogd" });
@@ -920,17 +920,70 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
       if (!file) return res.status(400).json({ error: "Geen bestand ontvangen" });
 
       const { extractTextFromPDF } = await import("./rag/extract");
+      const { extractTextFromImage } = await import("./rag/ocr");
       const { chunkText } = await import("./rag/chunk");
       const { embedTexts } = await import("./rag/embeddings");
 
-      const { text, needsOcr, pages } = await extractTextFromPDF(file.buffer);
+      const allowedMimeTypes = [
+        "application/pdf",
+        "image/jpeg",
+        "image/png",
+        "image/jpg",
+        "text/plain",
+      ];
+      
+      if (!allowedMimeTypes.includes(file.mimetype)) {
+        return res.status(400).json({ 
+          error: "Bestandstype niet ondersteund", 
+          hint: "Upload een PDF, afbeelding (JPG/PNG), of tekstbestand."
+        });
+      }
+
+      let text = "";
+      let needsOcr = false;
+      let pages: number | null = null;
+      let ocrConfidence: number | null = null;
+
+      const isImage = file.mimetype.startsWith("image/");
+      const isTextFile = file.mimetype === "text/plain";
+      
+      if (isImage) {
+        const ocrResult = await extractTextFromImage(file.buffer);
+        text = ocrResult.text;
+        ocrConfidence = ocrResult.confidence;
+        needsOcr = false;
+      } else if (isTextFile) {
+        text = file.buffer.toString("utf-8");
+        needsOcr = false;
+      } else {
+        const pdfResult = await extractTextFromPDF(file.buffer);
+        text = pdfResult.text;
+        needsOcr = pdfResult.needsOcr;
+        pages = pdfResult.pages;
+      }
+
+      if (!text || text.trim().length < 10) {
+        return res.status(400).json({ 
+          error: "Geen tekst gevonden in document", 
+          hint: "Probeer een document met meer tekst of een duidelijker gescande afbeelding." 
+        });
+      }
 
       const title = req.body.title || file.originalname;
-      const region = req.body.region;
+      const region = req.body.region || null;
+      const wooCategory = req.body.wooCategory || null;
+
+      const metadata = { 
+        pages, 
+        originalName: file.originalname,
+        mimeType: file.mimetype,
+        ocrConfidence,
+        isImage,
+      };
 
       const docResult = await db.execute(sql`
-        INSERT INTO rag_documents (user_id, region, title, source_type, needs_ocr, metadata_json)
-        VALUES (${user.id}, ${region || null}, ${title}, 'upload', ${needsOcr}, ${JSON.stringify({ pages, originalName: file.originalname })})
+        INSERT INTO rag_documents (user_id, region, woo_category, title, source_type, needs_ocr, metadata_json)
+        VALUES (${user.id}, ${region}, ${wooCategory}, ${title}, 'upload', ${needsOcr}, ${JSON.stringify(metadata)})
         RETURNING id
       `);
       const docId = (docResult.rows as any)[0]?.id;
@@ -938,6 +991,11 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
       if (!docId) throw new Error("Kon document niet opslaan");
 
       const chunks = chunkText(text);
+      
+      if (chunks.length === 0) {
+        return res.status(400).json({ error: "Geen tekst chunks gevonden" });
+      }
+
       const embeddings = await embedTexts(chunks);
 
       for (let i = 0; i < chunks.length; i++) {
@@ -961,6 +1019,8 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
         chunks: chunks.length,
         needsOcr,
         pages,
+        ocrConfidence,
+        isImage,
       });
     } catch (err: any) {
       console.error("RAG document upload error:", err);

@@ -1109,11 +1109,27 @@ export type CrewRequest = typeof crewRequests.$inferSelect;
 export type InsertCrewApplication = z.infer<typeof insertCrewApplicationSchema>;
 export type CrewApplication = typeof crewApplications.$inferSelect;
 
+// WOO Category slugs for RAG documents
+export const WOO_CATEGORY_SLUGS = [
+  "mandaat_delegatie",
+  "beleid_verordening",
+  "vergunningen",
+  "heffingen_leges",
+  "handhaving_kaders",
+  "aanbesteding",
+  "subsidies",
+  "uitvoering_partijen",
+  "openbaarheid_archief",
+] as const;
+
+export type WooCategorySlugType = typeof WOO_CATEGORY_SLUGS[number];
+
 // RAG System Tables for RegioBot WOO-bibliotheek
 export const ragDocuments = pgTable("rag_documents", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   userId: varchar("user_id").notNull(),
   region: text("region"),
+  wooCategory: text("woo_category"),
   title: text("title"),
   sourceType: text("source_type").default("upload"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),

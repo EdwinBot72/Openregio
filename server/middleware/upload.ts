@@ -110,9 +110,18 @@ const fileFilter = (req: any, file: Express.Multer.File, cb: multer.FileFilterCa
   cb(null, true);
 };
 
-// Configure multer upload
+// Configure multer upload (disk storage for general uploads)
 export const upload = multer({
   storage: diskStorage,
+  fileFilter,
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB max file size
+  }
+});
+
+// Memory storage for RAG document uploads (need buffer for processing)
+export const uploadMemory = multer({
+  storage: multer.memoryStorage(),
   fileFilter,
   limits: {
     fileSize: 10 * 1024 * 1024, // 10MB max file size
