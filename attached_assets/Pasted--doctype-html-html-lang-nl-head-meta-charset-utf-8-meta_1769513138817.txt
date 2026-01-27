@@ -232,7 +232,8 @@
       </div>
 
       <div class="heroImage" aria-label="OpenRegio headerbeeld">
-        <img src="img/hero.png" alt="OpenRegio" onerror="this.onerror=null;this.src='img/regiomarkt.png';" />
+        <!-- Gebruik /img/hero.png als je die hebt, anders pak je regiomarkt.png -->
+        <img src="/img/hero.png" alt="OpenRegio" onerror="this.onerror=null;this.src='/img/regiomarkt.png';" />
       </div>
     </section>
 
@@ -258,7 +259,7 @@
       <div class="grid4">
         <!-- RegioMarkt -->
         <article class="card">
-          <img src="img/regiomarkt.png" alt="RegioMarkt" />
+          <img src="/img/regiomarkt.png" alt="RegioMarkt" />
           <div class="cardBody">
             <div class="pill">RegioMarkt</div>
             <h3 class="cardH">Regionale werkverdeling</h3>
@@ -275,7 +276,7 @@
 
         <!-- RegioBot -->
         <article class="card">
-          <img src="img/regiobot.png" alt="RegioBot" />
+          <img src="/img/regiobot.png" alt="RegioBot" />
           <div class="cardBody">
             <div class="pill">RegioBot</div>
             <h3 class="cardH">WOO &amp; regelgeving, zonder ruis</h3>
@@ -290,7 +291,7 @@
 
         <!-- Zichtbaarheid -->
         <article class="card">
-          <img src="img/zichtbaarheid.png" alt="Zichtbaarheid" />
+          <img src="/img/zichtbaarheid.png" alt="Zichtbaarheid" />
           <div class="cardBody">
             <div class="pill">Zichtbaarheid</div>
             <h3 class="cardH">Lokale vindbaarheid</h3>
@@ -304,7 +305,7 @@
 
         <!-- Basischeck -->
         <article class="card">
-          <img src="img/basischeck.png" alt="Basischeck" />
+          <img src="/img/basischeck.png" alt="Basischeck" />
           <div class="cardBody">
             <div class="pill">Basischeck</div>
             <h3 class="cardH">Operationele voorwaarden</h3>
@@ -372,34 +373,65 @@
             <li>Geen behandeling van individuele boetes of dossiers</li>
           </ul>
 
-          <p class="effect" style="margin-top:14px;">Doel: stabiliteit, invloed en voorspelbaarheid binnen je regio.</p>
+          <p class="effect" style="margin-top:14px;">Doel: stabiliteit, invloed en voorspelbaarheid binnen de regio.</p>
         </div>
       </div>
 
       <p class="note">
-        Waarom dit onderscheid bestaat: niet iedereen wil of kan bijdragen. Het netwerk werkt alleen als bijdragen zichtbaar en beperkt zijn.
+        Waarom dit onderscheid bestaat: bijdragen binnen de structuur zijn zichtbaar en afgebakend.
       </p>
     </section>
 
     <!-- SCOPE -->
     <section id="scope">
       <h2 class="sectionTitle">Wat OpenRegio niet doet</h2>
+
+      <div class="split">
+        <div class="box">
+          <div class="smallcaps">OpenRegio</div>
+          <ul>
+            <li>geeft geen juridisch advies</li>
+            <li>beoordeelt geen individuele dossiers</li>
+            <li>behandelt geen persoonlijke boetes of verkeerszaken</li>
+          </ul>
+        </div>
+
+        <div class="box">
+          <div class="smallcaps">Focus</div>
+          <ul>
+            <li>wet- en regelgeving voor ondernemers</li>
+            <li>regionale samenwerking</li>
+            <li>openbare informatie (WOO)</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- START -->
+    <section id="start">
+      <h2 class="sectionTitle">Start</h2>
       <p class="sectionText">
-        OpenRegio geeft geen juridisch advies, beoordeelt geen individuele dossiers en behandelt geen persoonlijke boetes of verkeerszaken.
+        Koppel onderstaande knoppen aan je bestaande routes in Replit.
       </p>
-      <p class="sectionText" style="margin-top:10px;">
-        De focus ligt op openbare informatie, regionale samenwerking en wet- en regelgeving voor ondernemers.
-      </p>
+
+      <div class="cta">
+        <a class="btn primary" href="/register">Claim je regio</a>
+        <a class="btn" href="/login">Inloggen</a>
+        <a class="btn" href="/lidmaatschap">Lidmaatschap</a>
+      </div>
     </section>
 
   </main>
 
   <footer>
     <div class="wrap">
-      <strong>OpenRegio</strong> — Infrastructuur voor lokaal ondernemen<br>
-      Geen juridisch advies. Geen behandeling van persoonlijke boetes of verkeerszaken.
+      <strong>OpenRegio</strong> — informatie en documentanalyse. Geen juridisch advies.
+      <div style="margin-top:6px;">© <span id="y"></span> OpenRegio</div>
     </div>
   </footer>
 
+  <script>
+    document.getElementById("y").textContent = new Date().getFullYear();
+  </script>
 </body>
 </html>
