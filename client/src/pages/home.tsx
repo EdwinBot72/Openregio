@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Quote, Users, Banknote, Phone, Battery, FileText, Printer, ArrowRight, Check, Sparkles, Bot, ShieldCheck, Lock, Cookie, Store, Eye, ClipboardCheck, UserPlus, BookOpen, Calendar, User, CheckCircle2, Zap, TrendingUp } from "lucide-react";
+import { Quote, Users, Banknote, Phone, Battery, FileText, Printer, ArrowRight, Check, Sparkles, Bot, ShieldCheck, Lock, Cookie, Store, Eye, ClipboardCheck, UserPlus, BookOpen, Calendar, User, CheckCircle2, Zap, TrendingUp, Wrench, Settings, Shield, Server } from "lucide-react";
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import type { Blog } from "@shared/schema";
@@ -225,6 +225,86 @@ export default function HomePage() {
                   Deze gegevens worden gebruikt binnen het netwerk.
                 </p>
                 <p className="font-semibold">Effect: betrouwbaarheid is zichtbaar binnen de regio.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Stroombox Section - De motor onder de motorkap */}
+      <section className="py-20 px-4 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+        <div className="max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            {/* Left: Icon and intro */}
+            <div className="text-center md:text-left">
+              <img 
+                src="/img/stroombox-icon.png" 
+                alt="Stroombox" 
+                className="w-48 h-48 mx-auto md:mx-0 mb-6 drop-shadow-2xl"
+                data-testid="img-stroombox-icon"
+              />
+              <p className="text-cyan-400 font-semibold mb-2">Stroombox</p>
+              <h2 className="font-accent text-3xl md:text-4xl font-bold mb-4">
+                De motor onder de motorkap
+              </h2>
+              <p className="text-slate-300 mb-4">
+                OpenRegio is het netwerk. Stroombox is de technische motor die alles draaiende houdt.
+              </p>
+              <p className="text-slate-400 text-sm">
+                Digitaal onafhankelijk. Geen grote platforms. Geen vage IT'ers. Gewoon controle, snelheid en continuïteit.
+              </p>
+            </div>
+
+            {/* Right: Services grid */}
+            <div className="grid gap-4">
+              <div className="flex items-start gap-4 bg-slate-800/50 p-4 rounded-lg" data-testid="card-stroombox-bouwen">
+                <div className="bg-cyan-500/20 p-2 rounded-lg">
+                  <Wrench className="h-6 w-6 text-cyan-400" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Bouwt websites, tools & automatisering</h3>
+                  <p className="text-slate-400 text-sm">Geen hobby-IT, maar een werkend systeem dat je online zaak draaiende houdt.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4 bg-slate-800/50 p-4 rounded-lg" data-testid="card-stroombox-fixen">
+                <div className="bg-cyan-500/20 p-2 rounded-lg">
+                  <Settings className="h-6 w-6 text-cyan-400" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Onderhoudt en fixt storingen</h3>
+                  <p className="text-slate-400 text-sm">Ook als alles plat ligt. Website offline? Computer traag of virus? Hulp in de IT.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4 bg-slate-800/50 p-4 rounded-lg" data-testid="card-stroombox-diagnose">
+                <div className="bg-cyan-500/20 p-2 rounded-lg">
+                  <Zap className="h-6 w-6 text-cyan-400" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Diagnosticeert met AI</h3>
+                  <p className="text-slate-400 text-sm">Snel zien wat stuk is en waarom. Geen urenlang zoeken.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4 bg-slate-800/50 p-4 rounded-lg" data-testid="card-stroombox-beveiligen">
+                <div className="bg-cyan-500/20 p-2 rounded-lg">
+                  <Shield className="h-6 w-6 text-cyan-400" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Beveiligt data, hosting & systemen</h3>
+                  <p className="text-slate-400 text-sm">Geen zorgen over hackers of datalekken.</p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-4 bg-slate-800/50 p-4 rounded-lg" data-testid="card-stroombox-infra">
+                <div className="bg-cyan-500/20 p-2 rounded-lg">
+                  <Server className="h-6 w-6 text-cyan-400" />
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-1">Regelt infrastructuur</h3>
+                  <p className="text-slate-400 text-sm">Hosting, backups, koppelingen, performance. Alles geregeld.</p>
+                </div>
               </div>
             </div>
           </div>
