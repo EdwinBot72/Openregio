@@ -232,7 +232,7 @@ export default function HomePage() {
       </section>
 
       {/* Stroombox Section - De motor onder de motorkap */}
-      <section className="py-20 px-4 bg-gradient-to-br from-slate-900 to-slate-800 text-white">
+      <section className="py-20 px-4 bg-primary dark:bg-primary/90" data-testid="section-stroombox">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12 items-center">
             {/* Left: Icon and intro */}
@@ -243,69 +243,79 @@ export default function HomePage() {
                 className="w-48 h-48 mx-auto md:mx-0 mb-6 drop-shadow-2xl"
                 data-testid="img-stroombox-icon"
               />
-              <p className="text-cyan-400 font-semibold mb-2">Stroombox</p>
-              <h2 className="font-accent text-3xl md:text-4xl font-bold mb-4">
+              <p className="text-primary-foreground/80 font-semibold mb-2" data-testid="text-stroombox-label">Stroombox</p>
+              <h2 className="font-accent text-3xl md:text-4xl font-bold mb-4 text-primary-foreground" data-testid="text-stroombox-title">
                 De motor onder de motorkap
               </h2>
-              <p className="text-slate-300 mb-4">
+              <p className="text-primary-foreground/90 mb-4" data-testid="text-stroombox-intro">
                 OpenRegio is het netwerk. Stroombox is de technische motor die alles draaiende houdt.
               </p>
-              <p className="text-slate-400 text-sm">
+              <p className="text-primary-foreground/70 text-sm" data-testid="text-stroombox-tagline">
                 Digitaal onafhankelijk. Geen grote platforms. Geen vage IT'ers. Gewoon controle, snelheid en continuïteit.
               </p>
             </div>
 
             {/* Right: Services grid */}
             <div className="grid gap-4">
-              <div className="flex items-start gap-4 bg-slate-800/50 p-4 rounded-lg" data-testid="card-stroombox-bouwen">
-                <div className="bg-cyan-500/20 p-2 rounded-lg">
-                  <Wrench className="h-6 w-6 text-cyan-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">Bouwt websites, tools & automatisering</h3>
-                  <p className="text-slate-400 text-sm">Geen hobby-IT, maar een werkend systeem dat je online zaak draaiende houdt.</p>
-                </div>
-              </div>
+              <Card className="bg-primary-foreground/10 border-primary-foreground/20" data-testid="card-stroombox-bouwen">
+                <CardContent className="p-4 flex items-start gap-4">
+                  <div className="bg-primary-foreground/20 p-2 rounded-lg">
+                    <Wrench className="h-6 w-6 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-1 text-primary-foreground" data-testid="text-stroombox-bouwen-title">Bouwt websites, tools & automatisering</h3>
+                    <p className="text-primary-foreground/70 text-sm" data-testid="text-stroombox-bouwen-desc">Geen hobby-IT, maar een werkend systeem dat je online zaak draaiende houdt.</p>
+                  </div>
+                </CardContent>
+              </Card>
 
-              <div className="flex items-start gap-4 bg-slate-800/50 p-4 rounded-lg" data-testid="card-stroombox-fixen">
-                <div className="bg-cyan-500/20 p-2 rounded-lg">
-                  <Settings className="h-6 w-6 text-cyan-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">Onderhoudt en fixt storingen</h3>
-                  <p className="text-slate-400 text-sm">Ook als alles plat ligt. Website offline? Computer traag of virus? Hulp in de IT.</p>
-                </div>
-              </div>
+              <Card className="bg-primary-foreground/10 border-primary-foreground/20" data-testid="card-stroombox-fixen">
+                <CardContent className="p-4 flex items-start gap-4">
+                  <div className="bg-primary-foreground/20 p-2 rounded-lg">
+                    <Settings className="h-6 w-6 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-1 text-primary-foreground" data-testid="text-stroombox-fixen-title">Onderhoudt en fixt storingen</h3>
+                    <p className="text-primary-foreground/70 text-sm" data-testid="text-stroombox-fixen-desc">Ook als alles plat ligt. Website offline? Computer traag of virus? Hulp in de IT.</p>
+                  </div>
+                </CardContent>
+              </Card>
 
-              <div className="flex items-start gap-4 bg-slate-800/50 p-4 rounded-lg" data-testid="card-stroombox-diagnose">
-                <div className="bg-cyan-500/20 p-2 rounded-lg">
-                  <Zap className="h-6 w-6 text-cyan-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">Diagnosticeert met AI</h3>
-                  <p className="text-slate-400 text-sm">Snel zien wat stuk is en waarom. Geen urenlang zoeken.</p>
-                </div>
-              </div>
+              <Card className="bg-primary-foreground/10 border-primary-foreground/20" data-testid="card-stroombox-diagnose">
+                <CardContent className="p-4 flex items-start gap-4">
+                  <div className="bg-primary-foreground/20 p-2 rounded-lg">
+                    <Zap className="h-6 w-6 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-1 text-primary-foreground" data-testid="text-stroombox-diagnose-title">Diagnosticeert met AI</h3>
+                    <p className="text-primary-foreground/70 text-sm" data-testid="text-stroombox-diagnose-desc">Snel zien wat stuk is en waarom. Geen urenlang zoeken.</p>
+                  </div>
+                </CardContent>
+              </Card>
 
-              <div className="flex items-start gap-4 bg-slate-800/50 p-4 rounded-lg" data-testid="card-stroombox-beveiligen">
-                <div className="bg-cyan-500/20 p-2 rounded-lg">
-                  <Shield className="h-6 w-6 text-cyan-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">Beveiligt data, hosting & systemen</h3>
-                  <p className="text-slate-400 text-sm">Geen zorgen over hackers of datalekken.</p>
-                </div>
-              </div>
+              <Card className="bg-primary-foreground/10 border-primary-foreground/20" data-testid="card-stroombox-beveiligen">
+                <CardContent className="p-4 flex items-start gap-4">
+                  <div className="bg-primary-foreground/20 p-2 rounded-lg">
+                    <Shield className="h-6 w-6 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-1 text-primary-foreground" data-testid="text-stroombox-beveiligen-title">Beveiligt data, hosting & systemen</h3>
+                    <p className="text-primary-foreground/70 text-sm" data-testid="text-stroombox-beveiligen-desc">Geen zorgen over hackers of datalekken.</p>
+                  </div>
+                </CardContent>
+              </Card>
 
-              <div className="flex items-start gap-4 bg-slate-800/50 p-4 rounded-lg" data-testid="card-stroombox-infra">
-                <div className="bg-cyan-500/20 p-2 rounded-lg">
-                  <Server className="h-6 w-6 text-cyan-400" />
-                </div>
-                <div>
-                  <h3 className="font-semibold mb-1">Regelt infrastructuur</h3>
-                  <p className="text-slate-400 text-sm">Hosting, backups, koppelingen, performance. Alles geregeld.</p>
-                </div>
-              </div>
+              <Card className="bg-primary-foreground/10 border-primary-foreground/20" data-testid="card-stroombox-infra">
+                <CardContent className="p-4 flex items-start gap-4">
+                  <div className="bg-primary-foreground/20 p-2 rounded-lg">
+                    <Server className="h-6 w-6 text-primary-foreground" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold mb-1 text-primary-foreground" data-testid="text-stroombox-infra-title">Regelt infrastructuur</h3>
+                    <p className="text-primary-foreground/70 text-sm" data-testid="text-stroombox-infra-desc">Hosting, backups, koppelingen, performance. Alles geregeld.</p>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           </div>
         </div>
