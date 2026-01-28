@@ -321,6 +321,95 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* Kleine SaaS-oplossingen */}
+      <section className="py-20 px-4" data-testid="section-saas-oplossingen">
+        <div className="max-w-6xl mx-auto">
+          <div className="text-center mb-12">
+            <p className="text-primary font-semibold mb-2" data-testid="text-saas-label">Kleine SaaS-oplossingen</p>
+            <h2 className="font-accent text-3xl md:text-4xl font-bold mb-4" data-testid="text-saas-title">
+              Praktische tools voor dagelijkse problemen
+            </h2>
+            <p className="text-muted-foreground max-w-2xl mx-auto" data-testid="text-saas-intro">
+              Geen dure software. Geen lange contracten. Gewoon werkende oplossingen voor wat je nu nodig hebt.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <Card data-testid="card-saas-website-offline">
+              <CardContent className="p-6">
+                <div className="bg-destructive/10 p-3 rounded-lg w-fit mb-4">
+                  <Battery className="h-6 w-6 text-destructive" />
+                </div>
+                <h3 className="font-semibold mb-2" data-testid="text-saas-offline-title">Website offline?</h3>
+                <p className="text-muted-foreground text-sm" data-testid="text-saas-offline-desc">
+                  Snelle diagnose en herstel. Geen wachten tot maandag of vage uitleg.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card data-testid="card-saas-computer-traag">
+              <CardContent className="p-6">
+                <div className="bg-orange-500/10 p-3 rounded-lg w-fit mb-4">
+                  <Settings className="h-6 w-6 text-orange-500" />
+                </div>
+                <h3 className="font-semibold mb-2" data-testid="text-saas-traag-title">Computer traag of virus?</h3>
+                <p className="text-muted-foreground text-sm" data-testid="text-saas-traag-desc">
+                  Opschonen, beveiligen en optimaliseren. Weer aan het werk.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card data-testid="card-saas-website-onderhoud">
+              <CardContent className="p-6">
+                <div className="bg-primary/10 p-3 rounded-lg w-fit mb-4">
+                  <Wrench className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-semibold mb-2" data-testid="text-saas-onderhoud-title">Website onderhoud</h3>
+                <p className="text-muted-foreground text-sm" data-testid="text-saas-onderhoud-desc">
+                  Updates, backups en beveiliging. Je site blijft actueel en veilig.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card data-testid="card-saas-automatisering">
+              <CardContent className="p-6">
+                <div className="bg-primary/10 p-3 rounded-lg w-fit mb-4">
+                  <Zap className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-semibold mb-2" data-testid="text-saas-automatisering-title">Automatisering</h3>
+                <p className="text-muted-foreground text-sm" data-testid="text-saas-automatisering-desc">
+                  Facturen, afspraken, mails automatisch. Minder handwerk, meer tijd.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card data-testid="card-saas-koppelingen">
+              <CardContent className="p-6">
+                <div className="bg-primary/10 p-3 rounded-lg w-fit mb-4">
+                  <Server className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-semibold mb-2" data-testid="text-saas-koppelingen-title">Koppelingen & integraties</h3>
+                <p className="text-muted-foreground text-sm" data-testid="text-saas-koppelingen-desc">
+                  Systemen aan elkaar knopen. Boekhouding, planning, CRM - alles praat met elkaar.
+                </p>
+              </CardContent>
+            </Card>
+
+            <Card data-testid="card-saas-hulp-it">
+              <CardContent className="p-6">
+                <div className="bg-primary/10 p-3 rounded-lg w-fit mb-4">
+                  <Phone className="h-6 w-6 text-primary" />
+                </div>
+                <h3 className="font-semibold mb-2" data-testid="text-saas-hulp-title">Hulp in de IT</h3>
+                <p className="text-muted-foreground text-sm" data-testid="text-saas-hulp-desc">
+                  Vraag stellen, antwoord krijgen. Geen tickets, geen wachtrijen.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
       {/* RegioCrew Section */}
       <section className="py-16 px-4 bg-muted/30">
         <div className="max-w-4xl mx-auto">
