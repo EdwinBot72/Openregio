@@ -212,14 +212,14 @@ export default function WooBibliotheekPage() {
                 <Crown className="h-10 w-10 text-primary" />
               </div>
             </div>
-            <h1 className="text-2xl font-bold">WOO-bibliotheek is alleen voor Pro</h1>
+            <h1 className="text-2xl font-bold">WOO-bibliotheek voor Pro-bijdragers</h1>
             <p className="text-muted-foreground">
-              Met Pro kun je documenten uploaden naar je persoonlijke WOO-bibliotheek. 
+              Als Pro-bijdrager kun je documenten uploaden naar je persoonlijke WOO-bibliotheek. 
               RegioBot gebruikt deze documenten om je vragen te beantwoorden.
             </p>
             <Link href="/lidmaatschap?plan=pro" asChild>
               <Button size="lg" data-testid="button-upgrade-to-pro">
-                <Crown className="mr-2 h-5 w-5" /> Upgrade naar Pro
+                <Crown className="mr-2 h-5 w-5" /> Word Pro-bijdrager
               </Button>
             </Link>
           </CardContent>

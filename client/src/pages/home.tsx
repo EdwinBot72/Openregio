@@ -381,10 +381,11 @@ export default function HomePage() {
           </div>
 
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {/* Basis Plan */}
+            {/* Basis-lid */}
             <Card data-testid="card-plan-basic" className="relative">
               <CardContent className="p-8">
-                <h3 className="font-accent text-2xl font-bold mb-2">Basis</h3>
+                <h3 className="font-accent text-2xl font-bold mb-2">Basis-lid</h3>
+                <p className="text-sm text-muted-foreground mb-4">Volwaardig lid van de coöperatie</p>
                 <div className="flex items-baseline gap-1 mb-6">
                   <span className="text-4xl font-bold">€12,95</span>
                   <span className="text-muted-foreground">/ maand excl. BTW</span>
@@ -393,10 +394,10 @@ export default function HomePage() {
                   {[
                     "Profiel in het lokale netwerk",
                     "Ledenlijst met contactgegevens",
-                    "Vraag & aanbod-bord",
+                    "Vraag & aanbod-bord (RegioMarkt)",
                     "RegioCrew flexpool toegang",
                     "Basischeck + weerbaarheidsbadges",
-                    "Printbare ledenlijst",
+                    "Volledige stemrecht in coöperatie",
                   ].map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-3">
                       <Check className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
@@ -406,14 +407,14 @@ export default function HomePage() {
                 </ul>
                 <Link href="/start?plan=basic">
                   <Button className="w-full" size="lg" data-testid="button-plan-basic">
-                    Word Basis lid
+                    Word Basis-lid
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>
               </CardContent>
             </Card>
 
-            {/* Pro Plan */}
+            {/* Pro-bijdrager */}
             <Card data-testid="card-plan-pro" className="relative border-primary">
               <div className="absolute -top-3 left-1/2 -translate-x-1/2">
                 <span className="bg-primary text-primary-foreground text-xs font-semibold px-3 py-1 rounded-full flex items-center gap-1">
@@ -422,20 +423,20 @@ export default function HomePage() {
                 </span>
               </div>
               <CardContent className="p-8">
-                <h3 className="font-accent text-2xl font-bold mb-2">Pro</h3>
+                <h3 className="font-accent text-2xl font-bold mb-2">Pro-bijdrager</h3>
+                <p className="text-sm text-muted-foreground mb-4">Draag extra bij, krijg krachtige tools</p>
                 <div className="flex items-baseline gap-1 mb-6">
                   <span className="text-4xl font-bold">€24</span>
                   <span className="text-muted-foreground">/ maand excl. BTW</span>
                 </div>
                 <ul className="space-y-3 mb-8">
                   {[
-                    "Alles van Basis, plus:",
+                    "Alles van Basis-lid, plus:",
                     "RegioBot (WOO & mandaat-checks)",
-                    "Dossier-modus (werken op WOO-dossiers)",
+                    "Persoonlijke WOO-bibliotheek",
                     "Vervolg-WOO vragen generator",
                     "Bronnen & verwijzingen per antwoord",
-                    "RegioCrew hulpvragen plaatsen",
-                    "Prioriteit support",
+                    "Prioriteit ondersteuning",
                   ].map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-3">
                       {idx === 0 ? (
@@ -451,7 +452,7 @@ export default function HomePage() {
                 </ul>
                 <Link href="/start?plan=pro">
                   <Button className="w-full" size="lg" data-testid="button-plan-pro">
-                    Word Pro lid
+                    Word Pro-bijdrager
                     <ArrowRight className="ml-2 h-5 w-5" />
                   </Button>
                 </Link>

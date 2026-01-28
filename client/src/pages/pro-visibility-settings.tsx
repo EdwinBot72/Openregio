@@ -85,18 +85,18 @@ export default function ProVisibilitySettings() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
-                PRO Functie
+                Pro-bijdrager functie
               </CardTitle>
             </CardHeader>
             <CardContent>
               <Alert>
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  Data & Consent Control is alleen beschikbaar voor PRO-leden.{" "}
-                  <Link href="/upgrade" className="underline font-medium">
-                    Upgrade naar PRO
+                  Data & Consent Control is beschikbaar voor Pro-bijdragers.{" "}
+                  <Link href="/lidmaatschap" className="underline font-medium">
+                    Word Pro-bijdrager
                   </Link>{" "}
-                  om toegang te krijgen.
+                  om deze functie te gebruiken.
                 </AlertDescription>
               </Alert>
             </CardContent>

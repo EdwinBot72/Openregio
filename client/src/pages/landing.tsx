@@ -145,34 +145,34 @@ const faqs = [
 const PLANS = [
   {
     id: "basis",
-    name: "Basis",
+    name: "Basis-lid",
     price: "12,95",
     period: "/ maand excl. BTW",
-    desc: "Voor ondernemers die gewoon lokaal zichtbaar + bereikbaar willen zijn.",
+    desc: "Volwaardig lid: netwerk, stem mee, word weerbaar.",
     bullets: [
       "Profiel + regio + categorie",
       "Zichtbaar in RegioMarkt",
-      "Badges: cash/bonnen/offline/noodstroom",
-      "Printbare ledenlijst + templates",
+      "Stemrecht in de coöperatie",
+      "Basischeck + weerbaarheidsbadges",
       "Maandelijks opzegbaar",
     ],
-    cta: "Start Basis",
+    cta: "Word Basis-lid",
   },
   {
     id: "pro",
-    name: "Pro",
+    name: "Pro-bijdrager",
     price: "24",
     period: "/ maand excl. BTW",
     highlight: true,
-    desc: "Voor ondernemers die meer grip willen: extra zichtbaarheid + tools.",
+    desc: "Draag extra bij en krijg krachtige tools erbij.",
     bullets: [
-      "Alles van Basis",
-      "Pro zichtbaarheid (bovenaan in regio)",
-      "Extra categorie-tags (meer vindbaar)",
-      "Prioriteit support / intake",
-      "Early access nieuwe features",
+      "Alles van Basis-lid",
+      "RegioBot: WOO & regelgeving AI",
+      "Persoonlijke WOO-bibliotheek",
+      "Prioriteit ondersteuning",
+      "Bouw mee aan nieuwe features",
     ],
-    cta: "Start Pro",
+    cta: "Word Pro-bijdrager",
   },
 ];
 
@@ -321,7 +321,7 @@ function PricingSignup() {
     if (!payload.company) return "Bedrijfsnaam ontbreekt.";
     if (!payload.region) return "Kies je regio.";
     if (!payload.category) return "Kies je categorie.";
-    if (!payload.plan) return "Kies Basis of Pro.";
+    if (!payload.plan) return "Kies Basis-lid of Pro-bijdrager.";
     return "";
   }
 
@@ -381,13 +381,13 @@ function PricingSignup() {
               Kies je pakket. Klaar.
             </h3>
             <p className="mt-2 text-sm text-white/70">
-              Basis voor zichtbaar + offline-proof. Pro voor extra grip en voorrang.
+              Basis-lid: volwaardig lid. Pro-bijdrager: extra tools erbij.
             </p>
           </div>
 
           <div className="mt-3 sm:mt-0 flex gap-2">
-            <Badge>€12,95 Basis excl. BTW</Badge>
-            <Badge>€24 Pro excl. BTW</Badge>
+            <Badge>€12,95 Basis-lid excl. BTW</Badge>
+            <Badge>€24 Pro-bijdrager excl. BTW</Badge>
           </div>
         </div>
 

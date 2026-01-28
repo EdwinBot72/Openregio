@@ -98,12 +98,12 @@ export default function DashboardPage() {
         <div className="flex flex-col items-end gap-1">
           <div className="inline-flex items-center gap-2 text-xs px-3 py-1 rounded-full bg-muted">
             <span className="font-semibold">Lidmaatschap:</span>
-            <Badge variant={isPro ? "default" : "outline"} data-testid="badge-plan">
-              {isPro ? "Pro" : "Basis"}
+            <Badge variant={isPro ? "default" : "secondary"} data-testid="badge-plan">
+              {isPro ? "Pro-bijdrager" : "Basis-lid"}
             </Badge>
           </div>
           <span className="text-[10px] text-muted-foreground">
-            {isPro ? "Pro bouwt mee." : "Basis kijkt mee."}
+            {isPro ? "Pro-bijdrager: je bouwt mee." : "Basis-lid: je bent er volledig bij."}
           </span>
         </div>
       </header>
@@ -158,7 +158,7 @@ export default function DashboardPage() {
                   </p>
                 </div>
               </div>
-              <Badge variant="outline" className="text-[10px] shrink-0">BASIS</Badge>
+              <Badge className="bg-regio-blue/10 text-regio-blue border-regio-blue/20 text-[10px] shrink-0">ALLE LEDEN</Badge>
             </div>
             {regionStats?.region ? (
               <ul className="text-xs text-muted-foreground list-disc list-inside">
@@ -205,7 +205,7 @@ export default function DashboardPage() {
                   </p>
                 </div>
               </div>
-              <Badge variant="outline" className="text-[10px] shrink-0">BASIS</Badge>
+              <Badge className="bg-regio-blue/10 text-regio-blue border-regio-blue/20 text-[10px] shrink-0">ALLE LEDEN</Badge>
             </div>
             {postStats?.region ? (
               <ul className="text-xs text-muted-foreground list-disc list-inside">
@@ -252,7 +252,7 @@ export default function DashboardPage() {
                   </p>
                 </div>
               </div>
-              <Badge variant="outline" className="text-[10px] shrink-0">BASIS</Badge>
+              <Badge className="bg-regio-blue/10 text-regio-blue border-regio-blue/20 text-[10px] shrink-0">ALLE LEDEN</Badge>
             </div>
 
             {basischeckDone ? (
@@ -308,7 +308,7 @@ export default function DashboardPage() {
                   </p>
                 </div>
               </div>
-              <Badge className="bg-regio-purple text-white text-[10px] shrink-0">PRO</Badge>
+              <Badge className="bg-regio-purple text-white text-[10px] shrink-0">PRO-BIJDRAGER</Badge>
             </div>
             {isPro ? (
               <div className="flex flex-wrap gap-2 mt-1">
@@ -323,7 +323,7 @@ export default function DashboardPage() {
               <div className="mt-2">
                 <Link href="/lidmaatschap">
                   <Button size="sm" variant="outline" data-testid="button-upgrade-pro-print">
-                    Upgrade naar Pro
+                    Word Pro-bijdrager
                   </Button>
                 </Link>
               </div>
@@ -353,7 +353,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* RegioBot: WOO & regelgeving - alleen voor Pro */}
+        {/* RegioBot: WOO & regelgeving - voor Pro-bijdragers */}
         <Card data-testid="card-regiobot" className={!isPro ? "opacity-60" : ""}>
           <CardContent className="p-5 flex flex-col gap-3">
             <div className="flex items-center justify-between">
@@ -368,7 +368,7 @@ export default function DashboardPage() {
                   </p>
                 </div>
               </div>
-              <Badge className="bg-regio-purple text-white text-[10px] shrink-0">PRO</Badge>
+              <Badge className="bg-regio-purple text-white text-[10px] shrink-0">PRO-BIJDRAGER</Badge>
             </div>
             <p className="text-xs text-muted-foreground">
               Toont wat er is en wat ontbreekt. Geen advies, geen mening.
@@ -400,7 +400,7 @@ export default function DashboardPage() {
               <div className="mt-2">
                 <Link href="/lidmaatschap">
                   <Button size="sm" variant="outline" data-testid="button-upgrade-pro">
-                    Upgrade naar Pro
+                    Word Pro-bijdrager
                   </Button>
                 </Link>
               </div>

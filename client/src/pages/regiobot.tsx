@@ -218,13 +218,13 @@ export default function RegioBotPage() {
                 <Crown className="h-10 w-10 text-primary" />
               </div>
             </div>
-            <h1 className="text-2xl font-bold">RegioBot is alleen voor Pro</h1>
+            <h1 className="text-2xl font-bold">RegioBot voor Pro-bijdragers</h1>
             <p className="text-muted-foreground">
-              RegioBot werkt met WOO-bronnen en regionale dossiers. Upgrade naar Pro om het te gebruiken.
+              RegioBot werkt met WOO-bronnen en regionale dossiers. Als Pro-bijdrager krijg je deze krachtige tool erbij.
             </p>
             <Link href="/lidmaatschap?plan=pro" asChild>
               <Button size="lg" data-testid="button-upgrade-to-pro">
-                <Crown className="mr-2 h-5 w-5" /> Upgrade naar Pro
+                <Crown className="mr-2 h-5 w-5" /> Word Pro-bijdrager
               </Button>
             </Link>
           </CardContent>
