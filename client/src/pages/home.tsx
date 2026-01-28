@@ -159,7 +159,7 @@ export default function HomePage() {
                 <p className="text-primary font-semibold mb-2">RegioMarkt</p>
                 <h3 className="font-accent text-2xl font-bold mb-4">Werk blijft in de regio</h3>
                 <p className="text-muted-foreground mb-4">
-                  RegioMarkt is een gesloten netwerk van ondernemers binnen één regio. Ondernemers kunnen werk doorverwijzen wanneer zij het zelf niet uitvoeren.
+                  RegioMarkt is een open netwerk van ondernemers binnen één regio. Ondernemers kunnen werk doorverwijzen wanneer zij het zelf niet uitvoeren.
                 </p>
                 <p className="text-muted-foreground mb-4">
                   Er zijn geen advertenties en geen algoritmes. De indeling is vast per regio.
