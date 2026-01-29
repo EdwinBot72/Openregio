@@ -92,6 +92,7 @@ export interface IStorage {
   upsertUser(user: UpsertUser): Promise<User>;
   createUser(user: { email: string; passwordHash: string; plan?: "basic" | "pro"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null; mustCompleteOnboarding?: boolean; onboardingToken?: string | null; referralCode?: string | null; referredByUserId?: string | null; referredAt?: Date | null }): Promise<User>;
   updateUserPlan(userId: string, plan: "basic" | "pro"): Promise<User | undefined>;
+  updateUserPassword(userId: string, passwordHash: string): Promise<User | undefined>;
   getUserProfileByReplitUserId(replitUserId: string): Promise<UserProfile | undefined>;
   
   // Entrepreneurs
@@ -353,6 +354,22 @@ export class MemStorage implements IStorage {
     const updatedUser: User = {
       ...user,
       plan,
+      updatedAt: new Date(),
+    };
+    
+    this.users.set(userId, updatedUser);
+    return updatedUser;
+  }
+
+  async updateUserPassword(userId: string, passwordHash: string): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (!user) {
+      return undefined;
+    }
+    
+    const updatedUser: User = {
+      ...user,
+      passwordHash,
       updatedAt: new Date(),
     };
     
@@ -1625,6 +1642,15 @@ class DbStorage implements IStorage {
     const [user] = await db
       .update(users)
       .set({ plan, updatedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  async updateUserPassword(userId: string, passwordHash: string): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ passwordHash, updatedAt: new Date() })
       .where(eq(users.id, userId))
       .returning();
     return user;

@@ -1051,6 +1051,20 @@ export const insertRefreshTokenSchema = createInsertSchema(refreshTokens).omit({
 export type InsertRefreshToken = z.infer<typeof insertRefreshTokenSchema>;
 export type RefreshToken = typeof refreshTokens.$inferSelect;
 
+// Password reset tokens
+export const passwordResetTokens = pgTable("password_reset_tokens", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  tokenHash: varchar("token_hash").notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  usedAt: timestamp("used_at", { withTimezone: true }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  index("idx_password_reset_tokens_user").on(table.userId),
+]);
+
+export type PasswordResetToken = typeof passwordResetTokens.$inferSelect;
+
 // WOO Schemas and Types
 export const insertRegionSchema = createInsertSchema(regions).omit({ id: true });
 export const insertAuthoritySchema = createInsertSchema(authorities).omit({ id: true });

@@ -4,10 +4,11 @@ import jwt from "jsonwebtoken";
 import crypto from "crypto";
 import { RateLimiterMemory } from "rate-limiter-flexible";
 import { storage } from "./storage";
-import { registerUserSchema, loginUserSchema, refreshTokens, type User } from "@shared/schema";
+import { registerUserSchema, loginUserSchema, refreshTokens, passwordResetTokens, type User } from "@shared/schema";
 import { fromZodError } from "zod-validation-error";
 import { db } from "db";
-import { eq, and, lt } from "drizzle-orm";
+import { eq, and, lt, isNull } from "drizzle-orm";
+import { sendPasswordResetEmail, sendWelcomeEmail } from "./services/emailService";
 
 const ADMIN_EMAIL = "edwin@stroombox.nl";
 
@@ -196,6 +197,11 @@ export function setupJwtAuth(app: Express) {
       await storeRefreshToken(user.id, refreshToken, tokenId);
       setTokenCookies(res, accessToken, refreshToken, tokenId);
       
+      // Send welcome email (don't await - fire and forget)
+      sendWelcomeEmail(user.email, user.firstName || "").catch(err => {
+        console.error("Failed to send welcome email:", err);
+      });
+      
       res.status(201).json({ user: formatUserResponse(user) });
     } catch (error) {
       console.error("Registration error:", error);
@@ -322,6 +328,105 @@ export function setupJwtAuth(app: Express) {
     } catch {
       clearTokenCookies(res);
       res.status(401).json({ error: "Ongeldige token" });
+    }
+  });
+
+  // Password reset - request reset link
+  app.post("/api/auth/forgot-password", async (req: Request, res: Response) => {
+    try {
+      await emailLimiter.consume(req.ip || "unknown");
+    } catch {
+      return res.status(429).json({ error: "Te veel verzoeken. Probeer later opnieuw." });
+    }
+
+    const { email } = req.body;
+    
+    if (!email) {
+      return res.status(400).json({ error: "Email is verplicht" });
+    }
+
+    try {
+      const user = await storage.getUserByEmail(email.toLowerCase().trim());
+      
+      // Always return success to prevent email enumeration
+      if (!user) {
+        return res.json({ message: "Als dit emailadres bij ons bekend is, ontvang je een herstelmail." });
+      }
+
+      // Generate reset token
+      const resetToken = crypto.randomBytes(32).toString("hex");
+      const tokenHash = hashToken(resetToken);
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+      // Store token in database
+      await db.insert(passwordResetTokens).values({
+        userId: user.id,
+        tokenHash,
+        expiresAt,
+      });
+
+      // Send email
+      await sendPasswordResetEmail(user.email, resetToken, user.firstName || "");
+
+      res.json({ message: "Als dit emailadres bij ons bekend is, ontvang je een herstelmail." });
+    } catch (error) {
+      console.error("Forgot password error:", error);
+      res.status(500).json({ error: "Er is een fout opgetreden" });
+    }
+  });
+
+  // Password reset - verify token and reset password
+  app.post("/api/auth/reset-password", async (req: Request, res: Response) => {
+    const { token, password } = req.body;
+    
+    if (!token || !password) {
+      return res.status(400).json({ error: "Token en nieuw wachtwoord zijn verplicht" });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({ error: "Wachtwoord moet minimaal 6 tekens zijn" });
+    }
+
+    try {
+      const tokenHash = hashToken(token);
+      
+      // Find valid token
+      const [resetToken] = await db
+        .select()
+        .from(passwordResetTokens)
+        .where(
+          and(
+            eq(passwordResetTokens.tokenHash, tokenHash),
+            isNull(passwordResetTokens.usedAt)
+          )
+        )
+        .limit(1);
+
+      if (!resetToken) {
+        return res.status(400).json({ error: "Ongeldige of verlopen herstellink" });
+      }
+
+      if (new Date() > resetToken.expiresAt) {
+        return res.status(400).json({ error: "Herstellink is verlopen" });
+      }
+
+      // Update user password
+      const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+      await storage.updateUserPassword(resetToken.userId, passwordHash);
+
+      // Mark token as used
+      await db
+        .update(passwordResetTokens)
+        .set({ usedAt: new Date() })
+        .where(eq(passwordResetTokens.id, resetToken.id));
+
+      // Revoke all existing sessions for security
+      await revokeAllUserTokens(resetToken.userId);
+
+      res.json({ message: "Wachtwoord is gewijzigd. Je kunt nu inloggen." });
+    } catch (error) {
+      console.error("Reset password error:", error);
+      res.status(500).json({ error: "Er is een fout opgetreden" });
     }
   });
   

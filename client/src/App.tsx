@@ -36,9 +36,11 @@ import BlogDetailPage from "@/pages/blog-detail";
 import BlogsPage from "@/pages/blogs";
 import AdminBlogsPage from "@/pages/admin/blogs";
 import AffiliatePage from "@/pages/affiliate";
+import ForgotPasswordPage from "@/pages/forgot-password";
+import ResetPasswordPage from "@/pages/reset-password";
 
 // Routes that should NOT have the sidebar/header layout
-const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs"];
+const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password"];
 
 function PublicRouter() {
   return (
@@ -55,6 +57,8 @@ function PublicRouter() {
       <Route path="/basischeck" component={BasischeckPage} />
       <Route path="/blog/:slug" component={BlogDetailPage} />
       <Route path="/blogs" component={BlogsPage} />
+      <Route path="/forgot-password" component={ForgotPasswordPage} />
+      <Route path="/reset-password" component={ResetPasswordPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -97,8 +101,10 @@ function AppContent() {
   const [isBasischeckPage] = useRoute("/basischeck");
   const [isBlogDetailPage] = useRoute("/blog/:slug");
   const [isBlogsPage] = useRoute("/blogs");
+  const [isForgotPasswordPage] = useRoute("/forgot-password");
+  const [isResetPasswordPage] = useRoute("/reset-password");
   
-  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isLidmaatschapPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage || isBlogsPage;
+  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isLidmaatschapPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage || isBlogsPage || isForgotPasswordPage || isResetPasswordPage;
 
   if (isPublicRoute) {
     return <PublicRouter />;
