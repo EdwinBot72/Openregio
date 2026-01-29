@@ -1,17 +1,35 @@
 import nodemailer from 'nodemailer';
 
+const SMTP_HOST = process.env.SMTP_HOST || 'smtp.soverin.net';
+const SMTP_PORT = parseInt(process.env.SMTP_PORT || '587');
+const SMTP_USER = process.env.SMTP_USER || 'info@openregio.nl';
+const SMTP_PASS = process.env.SMTP_PASSWORD;
+
+console.log(`[Email] Configuring SMTP: host=${SMTP_HOST}, port=${SMTP_PORT}, user=${SMTP_USER}, password=${SMTP_PASS ? 'SET' : 'NOT SET'}`);
+
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.soverin.net',
-  port: parseInt(process.env.SMTP_PORT || '587'),
+  host: SMTP_HOST,
+  port: SMTP_PORT,
   secure: false,
   auth: {
-    user: process.env.SMTP_USER || 'info@openregio.nl',
-    pass: process.env.SMTP_PASSWORD,
+    user: SMTP_USER,
+    pass: SMTP_PASS,
   },
 });
 
 const FROM_EMAIL = process.env.SMTP_FROM || 'OpenRegio <info@openregio.nl>';
 const BASE_URL = process.env.APP_BASE_URL || 'https://openregio.nl';
+
+console.log(`[Email] FROM_EMAIL=${FROM_EMAIL}, BASE_URL=${BASE_URL}`);
+
+// Verify SMTP connection on startup
+transporter.verify()
+  .then(() => {
+    console.log('[Email] ✓ SMTP connection verified successfully');
+  })
+  .catch((error) => {
+    console.error('[Email] ✗ SMTP connection failed:', error.message);
+  });
 
 export async function sendWelcomeEmail(to: string, firstName: string): Promise<boolean> {
   try {
