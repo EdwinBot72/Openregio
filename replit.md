@@ -51,17 +51,27 @@ The system uses a robust JWT authentication flow with short-lived access tokens 
 
 Security is a paramount concern, with comprehensive measures including HSTS, Content-Security-Policy, secure cookie settings, input sanitization, and type validation. File uploads are secured with MIME type validation and random filenames. Observability includes structured JSON logging for server errors and client-side error boundaries with user-friendly error displays and recovery options.
 
+## Email Integration (IMPLEMENTED)
+
+E-mail functionaliteit is geïmplementeerd via SMTP:
+- **Email adres**: info@openregio.nl
+- **SMTP Host**: mail.mijndomein.nl
+- **SMTP Port**: 587 (STARTTLS)
+- **Geïmplementeerde functies**:
+  - Welkomstberichten bij registratie
+  - Wachtwoord reset emails
+  - Notificatie emails (template gereed)
+  - Nieuwsbrief emails (template gereed)
+- **Environment variables**:
+  - `SMTP_HOST` = mail.mijndomein.nl
+  - `SMTP_PORT` = 587
+  - `SMTP_USER` = info@openregio.nl
+  - `SMTP_PASSWORD` = (secret)
+  - `APP_BASE_URL` = https://openregio.replit.app
+
 ## Pending Tasks
 
-### Email Integration (TODO)
-E-mail functionaliteit moet nog worden geïmplementeerd via Soverin SMTP:
-- **Email adres**: info@openregio.nl
-- **Te implementeren**: Welkomstberichten, wachtwoord reset, notificaties, nieuwsbrieven
-- **Benodigde secrets**:
-  - `SMTP_HOST` (smtp.soverin.net)
-  - `SMTP_PORT` (587)
-  - `SMTP_USER` (info@openregio.nl)
-  - `SMTP_PASSWORD` (nog te ontvangen van gebruiker)
+(Geen openstaande taken)
 
 ## External Dependencies
 
