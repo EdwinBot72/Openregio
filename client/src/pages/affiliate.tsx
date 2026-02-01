@@ -1,16 +1,34 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Loader2, Copy, Check, Users, Euro, Link as LinkIcon, Share2 } from "lucide-react";
+import { Loader2, Copy, Check, Users, Euro, Link as LinkIcon, Share2, Clock, CheckCircle, Ban, TrendingUp } from "lucide-react";
 import { useState } from "react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { Badge } from "@/components/ui/badge";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 interface AffiliateStats {
   referralCode: string | null;
   activeReferrals: number;
   totalCommission: number;
-  commissionPerReferral: number;
+  pendingCommission: number;
+  paidCommission: number;
+  commissionRates: {
+    basic: number;
+    pro: number;
+  };
+}
+
+interface Commission {
+  id: string;
+  referredEmail: string;
+  planDisplayName: string;
+  plan: string;
+  amount: number;
+  status: string;
+  createdAt: string;
+  paidAt: string | null;
 }
 
 export default function AffiliatePage() {
@@ -19,6 +37,11 @@ export default function AffiliatePage() {
 
   const { data: stats, isLoading } = useQuery<AffiliateStats>({
     queryKey: ["/api/affiliate"],
+  });
+
+  const { data: commissionsData, isLoading: commissionsLoading } = useQuery<Commission[]>({
+    queryKey: ["/api/affiliate/commissions"],
+    enabled: !!stats?.referralCode,
   });
 
   const generateCodeMutation = useMutation({
@@ -67,6 +90,21 @@ export default function AffiliatePage() {
     }
   };
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "pending":
+        return <Badge variant="secondary" className="gap-1"><Clock className="h-3 w-3" />Openstaand</Badge>;
+      case "approved":
+        return <Badge variant="default" className="gap-1 bg-blue-500"><TrendingUp className="h-3 w-3" />Goedgekeurd</Badge>;
+      case "paid":
+        return <Badge variant="default" className="gap-1 bg-green-600"><CheckCircle className="h-3 w-3" />Uitbetaald</Badge>;
+      case "cancelled":
+        return <Badge variant="destructive" className="gap-1"><Ban className="h-3 w-3" />Geannuleerd</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
@@ -80,7 +118,7 @@ export default function AffiliatePage() {
       <div>
         <h1 className="text-2xl font-bold" data-testid="heading-affiliate">Affiliate Programma</h1>
         <p className="text-muted-foreground">
-          Verdien €2,95 per maand voor elke actieve klant die je doorverwijst.
+          Verdien commissie voor elke ondernemer die je doorverwijst: €{stats?.commissionRates?.basic?.toFixed(2) || "2,95"} per Basis-lid, €{stats?.commissionRates?.pro?.toFixed(2) || "4,00"} per Pro-bijdrager.
         </p>
       </div>
 
@@ -151,7 +189,7 @@ export default function AffiliatePage() {
             </CardContent>
           </Card>
 
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-3 gap-4">
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
@@ -169,19 +207,84 @@ export default function AffiliatePage() {
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-full bg-regio-alert/10">
-                    <Euro className="h-6 w-6 text-regio-alert" />
+                  <div className="p-3 rounded-full bg-amber-500/10">
+                    <Clock className="h-6 w-6 text-amber-500" />
                   </div>
                   <div>
-                    <p className="text-2xl font-bold" data-testid="text-total-commission">
-                      €{stats.totalCommission.toFixed(2)}
+                    <p className="text-2xl font-bold" data-testid="text-pending-commission">
+                      €{stats.pendingCommission.toFixed(2)}
                     </p>
-                    <p className="text-sm text-muted-foreground">Verwachte commissie per maand</p>
+                    <p className="text-sm text-muted-foreground">Openstaande commissie</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="pt-6">
+                <div className="flex items-center gap-4">
+                  <div className="p-3 rounded-full bg-green-500/10">
+                    <Euro className="h-6 w-6 text-green-500" />
+                  </div>
+                  <div>
+                    <p className="text-2xl font-bold" data-testid="text-paid-commission">
+                      €{stats.paidCommission.toFixed(2)}
+                    </p>
+                    <p className="text-sm text-muted-foreground">Uitbetaald</p>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
+
+          {commissionsData && commissionsData.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Commissie Historie</CardTitle>
+                <CardDescription>
+                  Overzicht van al je verdiende commissies
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Datum</TableHead>
+                      <TableHead>Aangebracht lid</TableHead>
+                      <TableHead>Plan</TableHead>
+                      <TableHead className="text-right">Bedrag</TableHead>
+                      <TableHead>Status</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {commissionsData.map((commission) => (
+                      <TableRow key={commission.id} data-testid={`row-commission-${commission.id}`}>
+                        <TableCell className="text-muted-foreground">
+                          {new Date(commission.createdAt).toLocaleDateString('nl-NL')}
+                        </TableCell>
+                        <TableCell className="font-medium">{commission.referredEmail}</TableCell>
+                        <TableCell>
+                          <Badge variant="outline">{commission.planDisplayName}</Badge>
+                        </TableCell>
+                        <TableCell className="text-right font-semibold">
+                          €{commission.amount.toFixed(2)}
+                        </TableCell>
+                        <TableCell>{getStatusBadge(commission.status)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
+
+          {commissionsLoading && (
+            <Card>
+              <CardContent className="py-8 flex items-center justify-center">
+                <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+              </CardContent>
+            </Card>
+          )}
 
           <Card>
             <CardHeader>
@@ -218,7 +321,7 @@ export default function AffiliatePage() {
                   <div>
                     <p className="font-medium">Ontvang commissie</p>
                     <p className="text-sm text-muted-foreground">
-                      Je ontvangt €2,95 per maand voor elke actieve klant. Uitbetaling gebeurt maandelijks.
+                      Je ontvangt €{stats.commissionRates?.basic?.toFixed(2) || "2,95"} per Basis-lid en €{stats.commissionRates?.pro?.toFixed(2) || "4,00"} per Pro-bijdrager. Uitbetaling gebeurt maandelijks.
                     </p>
                   </div>
                 </div>
@@ -230,7 +333,7 @@ export default function AffiliatePage() {
             <CardContent className="pt-6">
               <p className="text-sm text-amber-800 dark:text-amber-200">
                 <strong>Let op:</strong> Commissie wordt alleen uitbetaald zolang de doorverwezen klant een actief abonnement heeft. 
-                Bij opzegging stopt de commissie automatisch. Uitbetaling gebeurt maandelijks via bankoverschrijving.
+                Bij opzegging stopt de commissie automatisch. Uitbetaling gebeurt maandelijks via bankoverschrijving na goedkeuring.
               </p>
             </CardContent>
           </Card>

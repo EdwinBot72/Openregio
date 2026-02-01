@@ -10,7 +10,7 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Home, Users, Bot, Building2, User, LogOut, MessageCircle, CreditCard, Shield, Eye, UserPlus, BookOpen, Settings, Share2, FolderOpen } from "lucide-react";
+import { Home, Users, Bot, Building2, User, LogOut, MessageCircle, CreditCard, Shield, Eye, UserPlus, BookOpen, Settings, Share2, FolderOpen, Euro } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -175,6 +175,14 @@ export function AppSidebar() {
                     <a href="/admin/blogs">
                       <BookOpen className="h-4 w-4 text-regio-purple" />
                       <span>Blogs</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild data-testid="link-admin-commissions">
+                    <a href="/admin/commissions">
+                      <Euro className="h-4 w-4 text-regio-alert" />
+                      <span>Commissies</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

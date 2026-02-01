@@ -35,6 +35,7 @@ import RegioCrewPage from "@/pages/regiocrew";
 import BlogDetailPage from "@/pages/blog-detail";
 import BlogsPage from "@/pages/blogs";
 import AdminBlogsPage from "@/pages/admin/blogs";
+import AdminCommissionsPage from "@/pages/admin/commissions";
 import AffiliatePage from "@/pages/affiliate";
 import ForgotPasswordPage from "@/pages/forgot-password";
 import ResetPasswordPage from "@/pages/reset-password";
@@ -83,6 +84,7 @@ function AuthenticatedRouter() {
       <Route path="/regiocrew" component={RegioCrewPage} />
       <Route path="/affiliate" component={AffiliatePage} />
       <Route path="/admin/blogs" component={AdminBlogsPage} />
+      <Route path="/admin/commissions" component={AdminCommissionsPage} />
       <Route component={NotFound} />
     </Switch>
   );
