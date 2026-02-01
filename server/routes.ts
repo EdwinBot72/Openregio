@@ -244,6 +244,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
         
         console.log(`✓ Subscription created: ${subscription.id}`);
+        
+        // Create commission for referrer if applicable
+        if (referrerUserId) {
+          // Commission rates: €2.95 for basic (€12.95), €4.00 for pro (€24.00)
+          const commissionAmount = plan === "pro" ? 4.00 : 2.95;
+          
+          try {
+            const commission = await storage.createCommission({
+              affiliateUserId: referrerUserId,
+              referredUserId: user.id,
+              subscriptionId: subscription.id,
+              molliePaymentId: payment.id,
+              plan: plan as "basic" | "pro",
+              amount: commissionAmount,
+              status: "pending",
+            });
+            
+            console.log(`✓ Commission created: ${commission.id} (€${commissionAmount.toFixed(2)} for ${referrerUserId})`);
+          } catch (commissionError: any) {
+            console.error(`⚠ Failed to create commission:`, commissionError);
+            // Don't fail the webhook for commission errors
+          }
+        }
       }
       
       // Always return 200 OK to acknowledge webhook
