@@ -42,6 +42,8 @@ import {
   type InsertCrewApplication,
   type Blog,
   type InsertBlog,
+  type Commission,
+  type InsertCommission,
   entrepreneurs,
   proposals,
   votes,
@@ -65,6 +67,7 @@ import {
   crewApplications,
   blogs,
   wooCategories,
+  commissions,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
@@ -233,8 +236,16 @@ export interface IStorage {
   // Affiliate/Referral system
   getUserByReferralCode(code: string): Promise<User | undefined>;
   getActiveReferrals(userId: string): Promise<User[]>;
-  getAffiliateStats(userId: string): Promise<{ activeReferrals: number; totalCommission: number }>;
-  getAllAffiliateStats(): Promise<{ userId: string; email: string; referralCode: string; activeReferrals: number; totalCommission: number }[]>;
+  getAffiliateStats(userId: string): Promise<{ activeReferrals: number; totalCommission: number; pendingCommission: number; paidCommission: number }>;
+  getAllAffiliateStats(): Promise<{ userId: string; email: string; referralCode: string; activeReferrals: number; totalCommission: number; pendingCommission: number; paidCommission: number }[]>;
+  
+  // Commission tracking
+  createCommission(commission: InsertCommission): Promise<Commission>;
+  getCommissionsByAffiliateId(affiliateUserId: string): Promise<Commission[]>;
+  getCommissionById(id: string): Promise<Commission | undefined>;
+  getAllCommissions(): Promise<Commission[]>;
+  updateCommissionStatus(id: string, status: "pending" | "approved" | "paid" | "cancelled", paidAt?: Date): Promise<Commission | undefined>;
+  getCommissionSummary(affiliateUserId: string): Promise<{ total: number; pending: number; approved: number; paid: number }>;
 }
 
 export class MemStorage implements IStorage {
@@ -1530,28 +1541,85 @@ export class MemStorage implements IStorage {
     });
   }
 
-  async getAffiliateStats(userId: string): Promise<{ activeReferrals: number; totalCommission: number }> {
+  async getAffiliateStats(userId: string): Promise<{ activeReferrals: number; totalCommission: number; pendingCommission: number; paidCommission: number }> {
     const activeReferrals = await this.getActiveReferrals(userId);
-    const COMMISSION_PER_REFERRAL = 2.95; // €2,95 per active referral per month
+    const userCommissions = await this.getCommissionsByAffiliateId(userId);
+    const pendingCommission = userCommissions.filter(c => c.status === "pending" || c.status === "approved").reduce((sum, c) => sum + c.amount, 0);
+    const paidCommission = userCommissions.filter(c => c.status === "paid").reduce((sum, c) => sum + c.amount, 0);
     return {
       activeReferrals: activeReferrals.length,
-      totalCommission: activeReferrals.length * COMMISSION_PER_REFERRAL
+      totalCommission: pendingCommission + paidCommission,
+      pendingCommission,
+      paidCommission
     };
   }
 
-  async getAllAffiliateStats(): Promise<{ userId: string; email: string; referralCode: string; activeReferrals: number; totalCommission: number }[]> {
+  async getAllAffiliateStats(): Promise<{ userId: string; email: string; referralCode: string; activeReferrals: number; totalCommission: number; pendingCommission: number; paidCommission: number }[]> {
     const usersWithReferrals = Array.from(this.users.values()).filter(u => u.referralCode);
     const stats = await Promise.all(usersWithReferrals.map(async user => {
-      const { activeReferrals, totalCommission } = await this.getAffiliateStats(user.id);
+      const { activeReferrals, totalCommission, pendingCommission, paidCommission } = await this.getAffiliateStats(user.id);
       return {
         userId: user.id,
         email: user.email,
         referralCode: user.referralCode!,
         activeReferrals,
-        totalCommission
+        totalCommission,
+        pendingCommission,
+        paidCommission
       };
     }));
-    return stats.filter(s => s.activeReferrals > 0);
+    return stats.filter(s => s.activeReferrals > 0 || s.totalCommission > 0);
+  }
+
+  // Commission tracking (MemStorage implementation)
+  private commissionsMap: Map<string, Commission> = new Map();
+
+  async createCommission(commission: InsertCommission): Promise<Commission> {
+    const id = randomUUID();
+    const newCommission: Commission = {
+      id,
+      ...commission,
+      status: commission.status || "pending",
+      paidAt: commission.paidAt || null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    this.commissionsMap.set(id, newCommission);
+    return newCommission;
+  }
+
+  async getCommissionsByAffiliateId(affiliateUserId: string): Promise<Commission[]> {
+    return Array.from(this.commissionsMap.values()).filter(c => c.affiliateUserId === affiliateUserId);
+  }
+
+  async getCommissionById(id: string): Promise<Commission | undefined> {
+    return this.commissionsMap.get(id);
+  }
+
+  async getAllCommissions(): Promise<Commission[]> {
+    return Array.from(this.commissionsMap.values()).sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+  }
+
+  async updateCommissionStatus(id: string, status: "pending" | "approved" | "paid" | "cancelled", paidAt?: Date): Promise<Commission | undefined> {
+    const commission = this.commissionsMap.get(id);
+    if (!commission) return undefined;
+    commission.status = status;
+    commission.updatedAt = new Date();
+    if (paidAt) commission.paidAt = paidAt;
+    if (status === "paid" && !paidAt) commission.paidAt = new Date();
+    return commission;
+  }
+
+  async getCommissionSummary(affiliateUserId: string): Promise<{ total: number; pending: number; approved: number; paid: number }> {
+    const userCommissions = await this.getCommissionsByAffiliateId(affiliateUserId);
+    return {
+      total: userCommissions.reduce((sum, c) => sum + c.amount, 0),
+      pending: userCommissions.filter(c => c.status === "pending").reduce((sum, c) => sum + c.amount, 0),
+      approved: userCommissions.filter(c => c.status === "approved").reduce((sum, c) => sum + c.amount, 0),
+      paid: userCommissions.filter(c => c.status === "paid").reduce((sum, c) => sum + c.amount, 0),
+    };
   }
 }
 
@@ -2482,33 +2550,88 @@ class DbStorage implements IStorage {
     return referredUsers.filter(u => activeUserIds.has(u.id));
   }
 
-  async getAffiliateStats(userId: string): Promise<{ activeReferrals: number; totalCommission: number }> {
+  async getAffiliateStats(userId: string): Promise<{ activeReferrals: number; totalCommission: number; pendingCommission: number; paidCommission: number }> {
     const activeReferrals = await this.getActiveReferrals(userId);
-    const COMMISSION_PER_REFERRAL = 2.95; // €2,95 per active referral per month
+    const userCommissions = await this.getCommissionsByAffiliateId(userId);
+    const pendingCommission = userCommissions.filter(c => c.status === "pending" || c.status === "approved").reduce((sum, c) => sum + c.amount, 0);
+    const paidCommission = userCommissions.filter(c => c.status === "paid").reduce((sum, c) => sum + c.amount, 0);
     return {
       activeReferrals: activeReferrals.length,
-      totalCommission: activeReferrals.length * COMMISSION_PER_REFERRAL
+      totalCommission: pendingCommission + paidCommission,
+      pendingCommission,
+      paidCommission
     };
   }
 
-  async getAllAffiliateStats(): Promise<{ userId: string; email: string; referralCode: string; activeReferrals: number; totalCommission: number }[]> {
+  async getAllAffiliateStats(): Promise<{ userId: string; email: string; referralCode: string; activeReferrals: number; totalCommission: number; pendingCommission: number; paidCommission: number }[]> {
     // Get all users with a referral code
     const usersWithReferrals = await db.select()
       .from(users)
       .where(sql`${users.referralCode} IS NOT NULL`);
     
     const stats = await Promise.all(usersWithReferrals.map(async user => {
-      const { activeReferrals, totalCommission } = await this.getAffiliateStats(user.id);
+      const { activeReferrals, totalCommission, pendingCommission, paidCommission } = await this.getAffiliateStats(user.id);
       return {
         userId: user.id,
         email: user.email,
         referralCode: user.referralCode!,
         activeReferrals,
-        totalCommission
+        totalCommission,
+        pendingCommission,
+        paidCommission
       };
     }));
     
-    return stats.filter(s => s.activeReferrals > 0);
+    return stats.filter(s => s.activeReferrals > 0 || s.totalCommission > 0);
+  }
+
+  // Commission tracking (DbStorage implementation)
+  async createCommission(commission: InsertCommission): Promise<Commission> {
+    const [result] = await db.insert(commissions).values({
+      ...commission,
+      status: commission.status || "pending",
+    }).returning();
+    return result;
+  }
+
+  async getCommissionsByAffiliateId(affiliateUserId: string): Promise<Commission[]> {
+    return await db.select()
+      .from(commissions)
+      .where(eq(commissions.affiliateUserId, affiliateUserId))
+      .orderBy(desc(commissions.createdAt));
+  }
+
+  async getCommissionById(id: string): Promise<Commission | undefined> {
+    const [result] = await db.select().from(commissions).where(eq(commissions.id, id));
+    return result;
+  }
+
+  async getAllCommissions(): Promise<Commission[]> {
+    return await db.select()
+      .from(commissions)
+      .orderBy(desc(commissions.createdAt));
+  }
+
+  async updateCommissionStatus(id: string, status: "pending" | "approved" | "paid" | "cancelled", paidAt?: Date): Promise<Commission | undefined> {
+    const updateData: Record<string, any> = { status, updatedAt: new Date() };
+    if (paidAt) updateData.paidAt = paidAt;
+    if (status === "paid" && !paidAt) updateData.paidAt = new Date();
+    
+    const [result] = await db.update(commissions)
+      .set(updateData)
+      .where(eq(commissions.id, id))
+      .returning();
+    return result;
+  }
+
+  async getCommissionSummary(affiliateUserId: string): Promise<{ total: number; pending: number; approved: number; paid: number }> {
+    const userCommissions = await this.getCommissionsByAffiliateId(affiliateUserId);
+    return {
+      total: userCommissions.reduce((sum, c) => sum + c.amount, 0),
+      pending: userCommissions.filter(c => c.status === "pending").reduce((sum, c) => sum + c.amount, 0),
+      approved: userCommissions.filter(c => c.status === "approved").reduce((sum, c) => sum + c.amount, 0),
+      paid: userCommissions.filter(c => c.status === "paid").reduce((sum, c) => sum + c.amount, 0),
+    };
   }
 }
 

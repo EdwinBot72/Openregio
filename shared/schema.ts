@@ -546,6 +546,33 @@ export const onboardingTokens = pgTable("onboarding_tokens", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Affiliate commission status options
+export const COMMISSION_STATUS = ["pending", "approved", "paid", "cancelled"] as const;
+
+// Affiliate commissions table - tracks earnings per referral payment
+export const commissions = pgTable("commissions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  affiliateUserId: varchar("affiliate_user_id").notNull().references(() => users.id), // The user who earns commission
+  referredUserId: varchar("referred_user_id").notNull().references(() => users.id), // The user who was referred
+  subscriptionId: varchar("subscription_id").notNull().references(() => subscriptions.id),
+  molliePaymentId: text("mollie_payment_id").notNull(), // Original payment that triggered commission
+  plan: text("plan", { enum: SUBSCRIPTION_PLANS }).notNull(), // basic or pro
+  amount: doublePrecision("amount").notNull(), // Commission amount in EUR (2.95 for basic, 4.00 for pro)
+  status: text("status", { enum: COMMISSION_STATUS }).notNull().default("pending"),
+  paidAt: timestamp("paid_at"), // When commission was paid out
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Insert schemas for commissions
+export const insertCommissionSchema = createInsertSchema(commissions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertCommission = z.infer<typeof insertCommissionSchema>;
+export type Commission = typeof commissions.$inferSelect;
+
 // Visibility levels for field privacy settings
 export const VISIBILITY_LEVELS = ["public", "members", "region_only", "private"] as const;
 export type VisibilityLevel = typeof VISIBILITY_LEVELS[number];
