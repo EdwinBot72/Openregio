@@ -2742,11 +2742,39 @@ Maak het verzoek professioneel en juridisch correct.`;
         referralCode: fullUser.referralCode,
         activeReferrals: stats.activeReferrals,
         totalCommission: stats.totalCommission,
-        commissionPerReferral: 2.95,
+        pendingCommission: stats.pendingCommission,
+        paidCommission: stats.paidCommission,
+        commissionRates: {
+          basic: 2.95,
+          pro: 4.00
+        },
       });
     } catch (error: any) {
       console.error("Error fetching affiliate stats:", error);
       res.status(500).json({ error: "Kon affiliate gegevens niet laden" });
+    }
+  });
+  
+  // GET /api/affiliate/commissions - Get current user's commission history
+  app.get("/api/affiliate/commissions", requireAuth, async (req, res) => {
+    try {
+      const jwtUser = req.user!;
+      const userCommissions = await storage.getCommissionsByAffiliateId(jwtUser.id);
+      
+      // Enrich with referred user info
+      const enrichedCommissions = await Promise.all(userCommissions.map(async (c) => {
+        const referredUser = await storage.getUserById(c.referredUserId);
+        return {
+          ...c,
+          referredEmail: referredUser?.email || "Onbekend",
+          planDisplayName: c.plan === "pro" ? "Pro-bijdrager" : "Basis-lid",
+        };
+      }));
+      
+      res.json(enrichedCommissions);
+    } catch (error: any) {
+      console.error("Error fetching user commissions:", error);
+      res.status(500).json({ error: "Kon commissies niet laden" });
     }
   });
 
@@ -2805,9 +2833,9 @@ Maak het verzoek professioneel en juridisch correct.`;
       const stats = await storage.getAllAffiliateStats();
       
       // Build CSV
-      const header = "Email,Referral Code,Actieve Referrals,Commissie (EUR)\n";
+      const header = "Email,Referral Code,Actieve Referrals,Openstaand (EUR),Uitbetaald (EUR),Totaal (EUR)\n";
       const rows = stats.map(s => 
-        `"${s.email}","${s.referralCode}",${s.activeReferrals},${s.totalCommission.toFixed(2)}`
+        `"${s.email}","${s.referralCode}",${s.activeReferrals},${s.pendingCommission.toFixed(2)},${s.paidCommission.toFixed(2)},${s.totalCommission.toFixed(2)}`
       ).join("\n");
       
       const csv = header + rows;
@@ -2817,6 +2845,124 @@ Maak het verzoek professioneel en juridisch correct.`;
       res.send(csv);
     } catch (error: any) {
       console.error("Error generating affiliate CSV:", error);
+      res.status(500).json({ error: "Kon CSV niet genereren" });
+    }
+  });
+  
+  // Admin: GET /api/admin/commissions - Get all commissions with filtering
+  app.get("/api/admin/commissions", requireAdmin, async (req, res) => {
+    try {
+      const allCommissions = await storage.getAllCommissions();
+      
+      // Enrich with user info
+      const enrichedCommissions = await Promise.all(allCommissions.map(async (c) => {
+        const affiliateUser = await storage.getUserById(c.affiliateUserId);
+        const referredUser = await storage.getUserById(c.referredUserId);
+        return {
+          ...c,
+          affiliateEmail: affiliateUser?.email || "Onbekend",
+          referredEmail: referredUser?.email || "Onbekend",
+          planDisplayName: c.plan === "pro" ? "Pro-bijdrager" : "Basis-lid",
+        };
+      }));
+      
+      res.json(enrichedCommissions);
+    } catch (error: any) {
+      console.error("Error fetching all commissions:", error);
+      res.status(500).json({ error: "Kon commissies niet laden" });
+    }
+  });
+  
+  // Admin: PATCH /api/admin/commissions/:id/status - Update commission status (approve/pay/cancel)
+  app.patch("/api/admin/commissions/:id/status", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      
+      if (!["pending", "approved", "paid", "cancelled"].includes(status)) {
+        return res.status(400).json({ error: "Ongeldige status" });
+      }
+      
+      const commission = await storage.getCommissionById(id);
+      if (!commission) {
+        return res.status(404).json({ error: "Commissie niet gevonden" });
+      }
+      
+      const paidAt = status === "paid" ? new Date() : undefined;
+      const updatedCommission = await storage.updateCommissionStatus(id, status, paidAt);
+      
+      console.log(`✓ Commission ${id} status updated: ${commission.status} → ${status}`);
+      
+      res.json(updatedCommission);
+    } catch (error: any) {
+      console.error("Error updating commission status:", error);
+      res.status(500).json({ error: "Kon commissie status niet bijwerken" });
+    }
+  });
+  
+  // Admin: POST /api/admin/commissions/bulk-pay - Mark multiple commissions as paid
+  app.post("/api/admin/commissions/bulk-pay", requireAdmin, async (req, res) => {
+    try {
+      const { commissionIds } = req.body;
+      
+      if (!Array.isArray(commissionIds) || commissionIds.length === 0) {
+        return res.status(400).json({ error: "Geen commissies geselecteerd" });
+      }
+      
+      const paidAt = new Date();
+      const results = await Promise.all(commissionIds.map(async (id: string) => {
+        try {
+          const updated = await storage.updateCommissionStatus(id, "paid", paidAt);
+          return { id, success: !!updated };
+        } catch (e) {
+          return { id, success: false };
+        }
+      }));
+      
+      const successCount = results.filter(r => r.success).length;
+      console.log(`✓ Bulk commission payout: ${successCount}/${commissionIds.length} marked as paid`);
+      
+      res.json({ 
+        success: true, 
+        processed: results.length,
+        successful: successCount,
+        paidAt 
+      });
+    } catch (error: any) {
+      console.error("Error bulk paying commissions:", error);
+      res.status(500).json({ error: "Kon commissies niet uitbetalen" });
+    }
+  });
+  
+  // Admin: GET /api/admin/commissions/csv - Download CSV export of all commissions
+  app.get("/api/admin/commissions/csv", requireAdmin, async (req, res) => {
+    try {
+      const allCommissions = await storage.getAllCommissions();
+      
+      // Enrich with user info
+      const enrichedCommissions = await Promise.all(allCommissions.map(async (c) => {
+        const affiliateUser = await storage.getUserById(c.affiliateUserId);
+        const referredUser = await storage.getUserById(c.referredUserId);
+        return {
+          ...c,
+          affiliateEmail: affiliateUser?.email || "Onbekend",
+          referredEmail: referredUser?.email || "Onbekend",
+        };
+      }));
+      
+      // Build CSV
+      const header = "Datum,Affiliate Email,Referred Email,Plan,Bedrag (EUR),Status,Uitbetaald Op\n";
+      const rows = enrichedCommissions.map(c => 
+        `"${new Date(c.createdAt).toLocaleDateString('nl-NL')}","${c.affiliateEmail}","${c.referredEmail}","${c.plan}",${c.amount.toFixed(2)},"${c.status}","${c.paidAt ? new Date(c.paidAt).toLocaleDateString('nl-NL') : '-'}"`
+      ).join("\n");
+      
+      const csv = header + rows;
+      
+      res.setHeader("Content-Type", "text/csv");
+      res.setHeader("Content-Disposition", `attachment; filename="commissions-${new Date().toISOString().slice(0, 10)}.csv"`);
+      res.send(csv);
+    } catch (error: any) {
+      console.error("Error generating commissions CSV:", error);
       res.status(500).json({ error: "Kon CSV niet genereren" });
     }
   });
