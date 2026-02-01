@@ -5,8 +5,6 @@ const SMTP_PORT = parseInt(process.env.SMTP_PORT || '587');
 const SMTP_USER = process.env.SMTP_USER || 'info@openregio.nl';
 const SMTP_PASS = process.env.SMTP_PASSWORD;
 
-console.log(`[Email] Configuring SMTP: host=${SMTP_HOST}, port=${SMTP_PORT}, user=${SMTP_USER}, password=${SMTP_PASS ? 'SET' : 'NOT SET'}`);
-
 const transporter = nodemailer.createTransport({
   host: SMTP_HOST,
   port: SMTP_PORT,
