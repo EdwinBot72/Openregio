@@ -9,6 +9,7 @@ import { setupJwtAuth, attachUser, requireAuth, requirePro, issueTokensForUser, 
 import { requireAdmin } from "./middleware/auth";
 import { seedMasterAccount } from "./seed";
 import { generateRandomPassword, generateOnboardingToken, getPlanPrice, getPlanDisplayName, generateReferralCode } from "./utils/auth";
+import { sendOnboardingEmail } from "./services/emailService";
 import bcrypt from "bcrypt";
 import { upload, uploadMemory, getDocumentType } from "./middleware/upload";
 import { runRegioBot } from "./regiobot";
@@ -219,11 +220,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`  Referred by: ${referrerUserId}`);
           }
           console.log(`  Onboarding token: ${onboardingToken}`);
-          console.log(`  Onboarding link: ${baseUrl}/first-login?token=${onboardingToken}`);
+          const onboardingLink = `${baseUrl}/first-login?token=${onboardingToken}`;
+          console.log(`  Onboarding link: ${onboardingLink}`);
           
-          // TODO: Send welcome email with temporary password and onboarding link
-          // const onboardingLink = `${baseUrl}/first-login?token=${onboardingToken}`;
-          // await sendWelcomeEmail(email, tempPassword, onboardingLink);
+          // Send welcome email with credentials and onboarding link
+          const emailSent = await sendOnboardingEmail(email, tempPassword, onboardingLink, plan);
+          if (emailSent) {
+            console.log(`✓ Onboarding email sent to ${email}`);
+          } else {
+            console.error(`✗ Failed to send onboarding email to ${email}`);
+          }
           
         } else {
           console.log(`✓ User already exists: ${user.id} (${email})`);
