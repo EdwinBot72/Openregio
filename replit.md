@@ -51,6 +51,22 @@ The system uses a robust JWT authentication flow with short-lived access tokens 
 
 Security is a paramount concern, with comprehensive measures including HSTS, Content-Security-Policy, secure cookie settings, input sanitization, and type validation. File uploads are secured with MIME type validation and random filenames. Observability includes structured JSON logging for server errors and client-side error boundaries with user-friendly error displays and recovery options.
 
+## Object Storage (IMPLEMENTED)
+
+Personal file storage for entrepreneurs using Replit's built-in Object Storage (Google Cloud Storage):
+- **Bucket ID**: replit-objstore-d1f0cf16-6b2b-44b9-9e66-6c8748d9c8b0
+- **Public Directory**: /public (for publicly accessible files)
+- **Private Directory**: /.private (for user-specific files with ACL)
+- **Database Table**: `user_files` tracks uploaded files per user
+- **Upload Flow**: Two-step presigned URL flow (metadata request → direct GCS upload)
+- **API Endpoints**:
+  - `POST /api/uploads/request-url` - Get presigned upload URL
+  - `POST /api/user-files/register` - Register uploaded file
+  - `GET /api/user-files` - List user's files
+  - `DELETE /api/user-files/:id` - Delete a file
+  - `GET /api/user-files/:id/download` - Download a file
+- **Components**: `ObjectUploader.tsx`, `use-upload.ts` hook
+
 ## Email Integration (IMPLEMENTED)
 
 E-mail functionaliteit is geïmplementeerd via SMTP:

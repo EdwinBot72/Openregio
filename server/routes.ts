@@ -15,6 +15,7 @@ import { upload, uploadMemory, getDocumentType } from "./middleware/upload";
 import { runRegioBot } from "./regiobot";
 import { db } from "db";
 import { eq, sql } from "drizzle-orm";
+import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 
 // Initialize Mollie client (requires MOLLIE_API_KEY environment variable)
 const mollieClient = process.env.MOLLIE_API_KEY 
@@ -68,6 +69,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Attach user to all requests (makes req.user available)
   app.use(attachUser);
+  
+  // Register object storage routes for user file uploads
+  registerObjectStorageRoutes(app, requireAuth);
   
   // BLOK 2: Mollie Payment Flow (Basic €12,95 / Pro €24,00)
   

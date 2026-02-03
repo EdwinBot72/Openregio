@@ -97,6 +97,17 @@ export const uploads = pgTable("uploads", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// User files for personal object storage
+export const userFiles = pgTable("user_files", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  objectPath: text("object_path").notNull(),
+  fileName: text("file_name").notNull(),
+  fileSize: integer("file_size").default(0),
+  contentType: text("content_type").default("application/octet-stream"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const proposals = pgTable("proposals", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   title: text("title").notNull(),
