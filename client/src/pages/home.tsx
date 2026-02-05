@@ -51,13 +51,7 @@ export default function HomePage() {
         {/* Hero Section */}
         <section 
           id="home"
-          className="relative"
-          style={{
-            background: "linear-gradient(90deg, rgba(14,63,134,.88), rgba(14,63,134,.55)), url('/img/hero-landscape.jpg')",
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            color: "#fff"
-          }}
+          className="hero relative"
           data-testid="section-hero"
         >
           <div className="max-w-[1120px] mx-auto px-4">
