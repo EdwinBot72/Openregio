@@ -173,11 +173,12 @@ export default function HomePage() {
             <h2 className="font-bold mb-2" style={{ fontSize: "28px", letterSpacing: "-0.3px" }} data-testid="text-cases-title">Onze Projecten</h2>
             <p style={{ color: "#5b677a", marginBottom: "18px", maxWidth: "78ch" }} data-testid="text-cases-lead">Een kijkje in onze succesvolle cases.</p>
 
-            <div className="grid md:grid-cols-3 gap-3.5">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3.5">
               {[
-                { img: "/img/regiomarkt.png?v=3", title: "RegioMarkt", desc: "Regionale werkverdeling tussen ondernemers.", slug: "regiomarkt" },
-                { img: "/img/regiobot.png?v=3", title: "RegioBot", desc: "WOO-documenten en beleidsregels overzichtelijk.", slug: "regiobot" },
+                { img: "/img/regiomarkt.png?v=3", title: "RegioMarkt", desc: "Vaste regionale werkverdeling.", slug: "regiomarkt" },
+                { img: "/img/regiobot.png?v=3", title: "RegioBot", desc: "WOO-documenten en beleidsregels.", slug: "regiobot" },
                 { img: "/img/zichtbaarheid.png?v=3", title: "Zichtbaarheid", desc: "Lokale vindbaarheid op orde.", slug: "zichtbaarheid" },
+                { img: "/img/basischeck.png?v=3", title: "Back to Basic", desc: "Blijf draaien zonder digitale afhankelijkheid.", slug: "backtobasic" },
               ].map((project, i) => (
                 <article 
                   key={i}
@@ -192,15 +193,15 @@ export default function HomePage() {
                   <img 
                     src={project.img}
                     alt={project.title}
-                    className="h-40 w-full object-cover"
+                    className="h-32 w-full object-cover"
                   />
-                  <div className="p-3.5">
-                    <h4 className="font-bold mb-1.5" data-testid={`text-project-title-${i}`}>{project.title}</h4>
-                    <p style={{ color: "#5b677a", fontSize: "13px", margin: 0 }} data-testid={`text-project-desc-${i}`}>{project.desc}</p>
-                    <div className="mt-3">
+                  <div className="p-3">
+                    <h4 className="font-bold mb-1" data-testid={`text-project-title-${i}`}>{project.title}</h4>
+                    <p style={{ color: "#5b677a", fontSize: "12px", margin: 0 }} data-testid={`text-project-desc-${i}`}>{project.desc}</p>
+                    <div className="mt-2.5">
                       <a 
-                        href="#member"
-                        className="inline-flex items-center justify-center px-3.5 py-2.5 rounded-full font-black text-white text-sm"
+                        href={`#${project.slug}`}
+                        className="inline-flex items-center justify-center px-3 py-2 rounded-full font-black text-white text-xs"
                         style={{ background: "#1f5fae", boxShadow: "0 14px 40px rgba(31,95,174,.25)" }}
                         data-testid={`button-project-readmore-${project.slug}`}
                       >
@@ -211,6 +212,45 @@ export default function HomePage() {
                 </article>
               ))}
             </div>
+          </div>
+        </section>
+
+        {/* Project Details */}
+        <section className="py-8" style={{ background: "#fff" }}>
+          <div className="max-w-[1120px] mx-auto px-4 space-y-8">
+            
+            {/* RegioMarkt */}
+            <div id="regiomarkt" className="scroll-mt-20" data-testid="section-regiomarkt">
+              <h3 className="font-bold text-xl mb-2" style={{ color: "#1f5fae" }}>RegioMarkt</h3>
+              <p style={{ color: "#374151", lineHeight: 1.7 }}>
+                RegioMarkt is een vaste regionale werkverdeling tussen ondernemers. Als jij werk krijgt dat je zelf niet doet, verwijs je het binnen je regio door naar iemand die het wél kan. Geen advertenties, geen algoritmes—gewoon werk blijft lokaal en zichtbaar.
+              </p>
+            </div>
+
+            {/* RegioBot */}
+            <div id="regiobot" className="scroll-mt-20" data-testid="section-regiobot">
+              <h3 className="font-bold text-xl mb-2" style={{ color: "#1f5fae" }}>RegioBot</h3>
+              <p style={{ color: "#374151", lineHeight: 1.7 }}>
+                RegioBot laat zien welke regels, besluiten en mandaten er zijn door de onderliggende documenten te tonen. Hij geeft geen advies en geen mening, alleen wat er ligt en wat ontbreekt. Zo werk je niet op aannames, maar op controleerbare informatie.
+              </p>
+            </div>
+
+            {/* Zichtbaarheid */}
+            <div id="zichtbaarheid" className="scroll-mt-20" data-testid="section-zichtbaarheid">
+              <h3 className="font-bold text-xl mb-2" style={{ color: "#1f5fae" }}>Zichtbaarheid</h3>
+              <p style={{ color: "#374151", lineHeight: 1.7 }}>
+                Zichtbaarheid zorgt dat je bedrijf correct en vindbaar is binnen je eigen regio. Het gaat om juiste gegevens, reviews en regionale zoekresultaten — zonder advertenties of contenttrucs. Zo kunnen klanten en andere ondernemers je vinden zoals je werkelijk bent.
+              </p>
+            </div>
+
+            {/* Back to Basic */}
+            <div id="backtobasic" className="scroll-mt-20" data-testid="section-backtobasic">
+              <h3 className="font-bold text-xl mb-2" style={{ color: "#1f5fae" }}>Back to Basic</h3>
+              <p style={{ color: "#374151", lineHeight: 1.7 }}>
+                Back to Basic betekent dat je bedrijf kan blijven draaien zonder afhankelijk te zijn van digitale systemen. Het gaat om bereikbaarheid, eenvoudige betalingen en werken met papier als dat nodig is. Zo blijft je onderneming betrouwbaar, ook als techniek of systemen tijdelijk uitvallen.
+              </p>
+            </div>
+
           </div>
         </section>
 
