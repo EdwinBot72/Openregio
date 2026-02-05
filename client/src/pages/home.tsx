@@ -98,12 +98,9 @@ export default function HomePage() {
                   border: "1px solid rgba(255,255,255,.18)",
                   backdropFilter: "blur(8px)"
                 }}
-                data-testid="card-hero-kpis"
+                data-testid="card-hero-toolkit"
               >
-                <strong>Focus (2030/2050)</strong>
-                <div style={{ color: "rgba(255,255,255,.82)", fontSize: "13px", marginTop: "6px" }}>
-                  Meetbaar. Praktisch. Geen ruis.
-                </div>
+                <strong style={{ fontSize: "18px" }}>Jouw regionale toolkit</strong>
 
                 <div className="grid grid-cols-2 gap-2.5 mt-2.5">
                   {[
