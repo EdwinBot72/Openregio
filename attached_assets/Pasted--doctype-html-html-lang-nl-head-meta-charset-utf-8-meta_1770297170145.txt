@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>OpenRegio — Samen bouwen aan een sterke regio</title>
+  <meta name="description" content="OpenRegio — regionale samenwerking, projecten, innovatie en lidmaatschap." />
+
+  <style>
+    :root{
+      /* kleuren (blauw/oranje) */
+      --blue:#1f5fae;
+      --blue2:#0e3f86;
+      --orange:#f28a1a;
+      --orange2:#ff9f2d;
+
+      --bg:#f5f7fb;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#5b677a;
+      --line:#e6ebf2;
+
+      --radius:18px;
+      --shadow:0 16px 40px rgba(15,23,42,.10);
+      --shadow2:0 8px 22px rgba(15,23,42,.08);
+
+      --max:1120px;
+    }
+
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+      color:var(--text);
+      background:var(--bg);
+      line-height:1.55;
+    }
+    a{color:inherit;text-decoration:none}
+    .wrap{max-width:var(--max);margin:0 auto;padding:0 18px}
+    .btn{
+      display:inline-flex;align-items:center;justify-content:center;
+      gap:10px;
+      padding:12px 16px;
+      border-radius:999px;
+      border:1px solid transparent;
+      font-weight:900;
+      cursor:pointer;
+      transition:.15s transform ease, .15s opacity ease;
+      user-select:none;
+    }
+    .btn:hover{transform:translateY(-1px)}
+    .btn.blue{background:var(--blue);color:#fff;box-shadow:0 14px 40px rgba(31,95,174,.25)}
+    .btn.orange{background:var(--orange);color:#1b1307;box-shadow:0 14px 40px rgba(242,138,26,.25)}
+    .btn.ghost{
+      background:rgba(255,255,255,.12);
+      color:#fff;
+      border-color:rgba(255,255,255,.25);
+    }
+
+    /* NAV */
+    header{
+      position:sticky;top:0;z-index:60;
+      background:rgba(255,255,255,.92);
+      backdrop-filter: blur(10px);
+      border-bottom:1px solid var(--line);
+    }
+    .nav{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:14px 0;
+      gap:12px;
+    }
+    .brand{display:flex;align-items:center;gap:12px;font-weight:950}
+    .logo{
+      width:36px;height:36px;border-radius:12px;
+      background: conic-gradient(from 200deg, var(--blue), #3aa0ff, var(--orange), #5ccf8a, var(--blue));
+      box-shadow: var(--shadow2);
+      position:relative;
+    }
+    .logo:after{
+      content:"";position:absolute;inset:11px;border-radius:8px;border:1px solid rgba(255,255,255,.6)
+    }
+    .navlinks{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .navlinks a{
+      padding:10px 12px;border-radius:12px;
+      color:var(--text);
+      font-weight:800;
+    }
+    .navlinks a:hover{background:#eef3fb}
+    .navright{display:flex;gap:10px;align-items:center}
+
+    /* HERO */
+    .hero{
+      background:
+        linear-gradient(90deg, rgba(14,63,134,.88), rgba(14,63,134,.55)),
+        url("https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=2400&q=70");
+      background-size:cover;
+      background-position:center;
+      color:#fff;
+    }
+    .hero-inner{
+      padding:60px 0 40px;
+      display:grid;
+      grid-template-columns: 1.2fr .8fr;
+      gap:18px;
+      align-items:stretch;
+    }
+    .hero h1{
+      margin:0 0 10px;
+      font-size: clamp(30px, 4.4vw, 54px);
+      line-height:1.05;
+      letter-spacing:-.6px;
+    }
+    .hero p{
+      margin:0 0 18px;
+      color:rgba(255,255,255,.90);
+      max-width:68ch;
+      font-size: clamp(15px, 1.7vw, 18px);
+    }
+    .hero-cta{display:flex;gap:10px;flex-wrap:wrap}
+    .hero-card{
+      background:rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.18);
+      border-radius: var(--radius);
+      padding:16px;
+      backdrop-filter: blur(8px);
+    }
+    .hero-card .kpis{
+      display:grid;grid-template-columns:repeat(2,1fr);
+      gap:10px;margin-top:10px;
+    }
+    .kpi{
+      border:1px solid rgba(255,255,255,.20);
+      border-radius:14px;
+      padding:12px;
+      background:rgba(255,255,255,.10);
+    }
+    .kpi .label{font-size:12px;color:rgba(255,255,255,.78);font-weight:900}
+    .kpi .val{font-size:18px;font-weight:1000;margin-top:4px}
+    .kpi .hint{font-size:12px;color:rgba(255,255,255,.78);margin-top:6px}
+
+    /* ICON STRIP */
+    .strip{
+      background:#fff;
+      border-bottom:1px solid var(--line);
+    }
+    .strip-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px;
+      padding:18px 0;
+    }
+    .strip-card{
+      background:var(--card);
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      padding:16px;
+      box-shadow: 0 6px 18px rgba(15,23,42,.06);
+      display:flex;gap:12px;align-items:flex-start;
+    }
+    .ic{
+      width:46px;height:46px;border-radius:16px;
+      display:flex;align-items:center;justify-content:center;
+      font-size:22px;font-weight:1000;
+      background:rgba(31,95,174,.10);
+      color:var(--blue);
+      border:1px solid rgba(31,95,174,.18);
+      flex:0 0 auto;
+    }
+    .strip-card h3{margin:0;font-size:16px}
+    .strip-card p{margin:6px 0 0;color:var(--muted);font-size:13px}
+
+    /* SECTIONS */
+    section{padding:34px 0}
+    .title{margin:0 0 8px;font-size:28px;letter-spacing:-.3px}
+    .lead{margin:0 0 18px;color:var(--muted);max-width:78ch}
+    .tiles{
+      display:grid;
+      grid-template-columns:repeat(3,1fr);
+      gap:14px;
+    }
+    .tile{
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background:var(--card);
+      overflow:hidden;
+      box-shadow: var(--shadow2);
+    }
+    .thumb{height:160px;background-size:cover;background-position:center}
+    .tile .body{padding:14px}
+    .tile h4{margin:0 0 6px}
+    .tile p{margin:0;color:var(--muted);font-size:13px}
+    .tile .actions{margin-top:12px}
+    .tile .actions .btn{padding:10px 14px;font-weight:950}
+
+    .why{
+      background:#fff;
+      border-top:1px solid var(--line);
+      border-bottom:1px solid var(--line);
+    }
+    .why-grid{
+      display:grid;grid-template-columns:repeat(3,1fr);
+      gap:14px;
+      margin-top:12px;
+    }
+    .why-card{
+      border:1px solid var(--line);
+      border-radius: var(--radius);
+      background:var(--card);
+      padding:16px;
+      box-shadow: var(--shadow2);
+      display:flex;gap:12px;align-items:flex-start;
+    }
+    .why-card .ic{background:rgba(242,138,26,.12);color:var(--orange);border-color:rgba(242,138,26,.22)}
+    .why-card h3{margin:0;font-size:16px}
+    .why-card p{margin:6px 0 0;color:var(--muted);font-size:13px}
+
+    /* MEMBERSHIP (pricing) */
+    .member{
+      background: radial-gradient(800px 500px at 10% 0%, rgba(31,95,174,.10), transparent 60%),
+                  radial-gradient(800px 500px at 90% 0%, rgba(242,138,26,.10), transparent 60%),
+                  var(--bg);
+    }
+    .member-head{
+      text-align:center;
+      padding-bottom:10px;
+    }
+    .member-head h2{margin:0 0 8px;font-size: clamp(28px, 3.6vw, 44px)}
+    .member-head p{margin:0;color:var(--muted)}
+    .plans{
+      display:grid;grid-template-columns:repeat(2,1fr);
+      gap:14px;
+      margin-top:22px;
+      align-items:stretch;
+    }
+    .plan{
+      background:var(--card);
+      border:2px solid var(--line);
+      border-radius: 22px;
+      padding:18px;
+      box-shadow: var(--shadow);
+      position:relative;
+      overflow:hidden;
+    }
+    .plan.blue{border-color: rgba(31,95,174,.35)}
+    .plan.orange{border-color: rgba(242,138,26,.40)}
+    .plan .badge{
+      position:absolute;top:14px;right:14px;
+      background:var(--blue);
+      color:#fff;font-weight:1000;
+      padding:8px 12px;border-radius:999px;
+      font-size:12px;
+      box-shadow:0 12px 30px rgba(31,95,174,.20);
+    }
+    .plan h3{margin:0 0 6px;font-size:20px}
+    .plan .sub{color:var(--muted);font-size:13px;margin:0 0 10px}
+    .price{
+      font-size:34px;font-weight:1000;letter-spacing:-.4px;
+      margin:0 0 10px;
+    }
+    .per{font-size:14px;color:var(--muted);font-weight:900}
+    .selectbar{
+      width:100%;
+      margin:10px 0 12px;
+      border-radius:14px;
+      padding:12px 14px;
+      text-align:center;
+      font-weight:1000;
+      border:1px solid var(--line);
+      background:#fff;
+    }
+    .selectbar.blue{background: linear-gradient(180deg, rgba(31,95,174,.08), rgba(31,95,174,.02)); border-color:rgba(31,95,174,.25)}
+    .selectbar.orange{background: linear-gradient(180deg, rgba(242,138,26,.10), rgba(242,138,26,.02)); border-color:rgba(242,138,26,.28)}
+    .features{list-style:none;margin:0;padding:0}
+    .features li{
+      display:flex;gap:10px;align-items:flex-start;
+      padding:10px 0;border-top:1px solid var(--line);
+      color:var(--text);
+      font-weight:700;
+    }
+    .features li:first-child{border-top:none}
+    .check{
+      width:22px;height:22px;border-radius:999px;
+      display:flex;align-items:center;justify-content:center;
+      flex:0 0 auto;
+      font-size:14px;
+      margin-top:2px;
+      background:rgba(31,95,174,.12);
+      color:var(--blue);
+      border:1px solid rgba(31,95,174,.18);
+    }
+    .plan.orange .check{
+      background:rgba(242,138,26,.14);
+      color:var(--orange);
+      border-color:rgba(242,138,26,.22);
+    }
+
+    /* CTA STRIP (blauw/oranje) */
+    .cta-strip{
+      margin-top:18px;
+      border-radius:28px;
+      overflow:hidden;
+      box-shadow: var(--shadow);
+      border:1px solid rgba(15,23,42,.06);
+      display:grid;
+      grid-template-columns: 1.4fr .6fr;
+      background:
+        radial-gradient(900px 400px at 20% 20%, rgba(255,255,255,.22), transparent 60%),
+        linear-gradient(135deg, var(--blue2), var(--blue));
+      color:#fff;
+    }
+    .cta-left{
+      padding:26px;
+    }
+    .cta-left h3{margin:0 0 8px;font-size:30px;letter-spacing:-.4px}
+    .cta-left p{margin:0 0 14px;color:rgba(255,255,255,.86);max-width:70ch}
+    .cta-form{
+      display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+      margin-top:10px;
+    }
+    .cta-form input{
+      flex:1 1 260px;
+      padding:14px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.25);
+      outline:none;
+      font-size:14px;
+    }
+    .cta-right{
+      padding:26px;
+      background:
+        radial-gradient(700px 300px at 40% 40%, rgba(255,255,255,.14), transparent 60%),
+        linear-gradient(135deg, rgba(242,138,26,.95), rgba(255,159,45,.92));
+      color:#1b1307;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      gap:10px;
+    }
+    .cta-right h4{margin:0;font-size:22px}
+    .cta-right ul{margin:0;padding-left:18px;font-weight:900}
+    .cta-right li{margin:6px 0}
+
+    /* FOOTER */
+    footer{
+      margin-top:28px;
+      background:#0b1020;
+      color:#e5e7eb;
+      padding:28px 0 34px;
+    }
+    .foot{
+      display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;
+    }
+    .foot a{color:#e5e7eb;opacity:.9}
+    .foot a:hover{opacity:1;text-decoration:underline}
+    .tiny{font-size:12px;color:rgba(229,231,235,.70)}
+
+    @media (max-width: 980px){
+      .hero-inner{grid-template-columns:1fr}
+      .strip-grid{grid-template-columns:1fr}
+      .tiles{grid-template-columns:1fr}
+      .why-grid{grid-template-columns:1fr}
+      .plans{grid-template-columns:1fr}
+      .cta-strip{grid-template-columns:1fr}
+      .navlinks{display:none}
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="nav">
+      <a class="brand" href="#top">
+        <span class="logo" aria-hidden="true"></span>
+        <span>OpenRegio</span>
+      </a>
+
+      <nav class="navlinks" aria-label="Menu">
+        <a href="#home">Home</a>
+        <a href="#diensten">Diensten</a>
+        <a href="#cases">Cases</a>
+        <a href="#over">Over ons</a>
+        <a href="#contact">Contact</a>
+      </nav>
+
+      <div class="navright">
+        <a class="btn blue" href="#member">Meer informatie</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <!-- HOME HERO -->
+  <section class="hero" id="home">
+    <div class="wrap">
+      <div class="hero-inner">
+        <div>
+          <h1>Samen bouwen<br>aan een sterke regio</h1>
+          <p>Oplossingen voor regionale samenwerking en innovatie. Minder praat, meer uitvoering.</p>
+          <div class="hero-cta">
+            <a class="btn orange" href="#member">Word lid</a>
+            <a class="btn ghost" href="#cases">Ontdek meer</a>
+          </div>
+        </div>
+
+        <aside class="hero-card">
+          <strong>Focus (2030/2050)</strong>
+          <div style="color:rgba(255,255,255,.82);font-size:13px;margin-top:6px">
+            Meetbaar. Praktisch. Geen ruis.
+          </div>
+
+          <div class="kpis">
+            <div class="kpi">
+              <div class="label">Woningbouw</div>
+              <div class="val">22.000+/jaar</div>
+              <div class="hint">Talentretentie</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Werkgelegenheid</div>
+              <div class="val">&gt; 80%</div>
+              <div class="hint">Slagkracht</div>
+            </div>
+            <div class="kpi">
+              <div class="label">R&amp;D</div>
+              <div class="val">≥ 4,5%</div>
+              <div class="hint">Voorsprong</div>
+            </div>
+            <div class="kpi">
+              <div class="label">Breedband</div>
+              <div class="val">100%</div>
+              <div class="hint">Continuïteit</div>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <!-- STRIP ICONS -->
+  <div class="strip" id="diensten">
+    <div class="wrap">
+      <div class="strip-grid">
+        <div class="strip-card">
+          <div class="ic">📍</div>
+          <div>
+            <h3>Regio analyse</h3>
+            <p>Korte scan: wat blokkeert groei, waar zit je leverage.</p>
+          </div>
+        </div>
+        <div class="strip-card">
+          <div class="ic">🤝</div>
+          <div>
+            <h3>Samenwerking</h3>
+            <p>Structuur + afspraken die werken (geen netwerkpraat).</p>
+          </div>
+        </div>
+        <div class="strip-card">
+          <div class="ic">💡</div>
+          <div>
+            <h3>Innovatie</h3>
+            <p>Van idee naar pilot naar omzet. In de regio.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROJECTS -->
+  <section id="cases">
+    <div class="wrap">
+      <h2 class="title">Onze Projecten</h2>
+      <p class="lead">Een kijkje in onze succesvolle cases (placeholder — vervang later door echte projecten).</p>
+
+      <div class="tiles">
+        <article class="tile">
+          <div class="thumb" style="background-image:url('https://images.unsplash.com/photo-1544986581-efac024faf62?auto=format&fit=crop&w=1400&q=70')"></div>
+          <div class="body">
+            <h4>Project 1</h4>
+            <p>Korte omschrijving van de dienst.</p>
+            <div class="actions">
+              <a class="btn blue" href="#member">Lees meer</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="tile">
+          <div class="thumb" style="background-image:url('https://images.unsplash.com/photo-1467533003447-e295ff1b0435?auto=format&fit=crop&w=1400&q=70')"></div>
+          <div class="body">
+            <h4>Project 2</h4>
+            <p>Korte omschrijving van de dienst.</p>
+            <div class="actions">
+              <a class="btn blue" href="#member">Lees meer</a>
+            </div>
+          </div>
+        </article>
+
+        <article class="tile">
+          <div class="thumb" style="background-image:url('https://images.unsplash.com/photo-1451976426598-a7593bd6d0b2?auto=format&fit=crop&w=1400&q=70')"></div>
+          <div class="body">
+            <h4>Project 3</h4>
+            <p>Korte omschrijving van de dienst.</p>
+            <div class="actions">
+              <a class="btn blue" href="#member">Lees meer</a>
+            </div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- WHY -->
+  <section class="why" id="over">
+    <div class="wrap">
+      <h2 class="title">Waarom OpenRegio?</h2>
+      <p class="lead">Heldere waarde. Geen gedoe. Gewoon: regio sterker maken en ondernemers laten draaien.</p>
+
+      <div class="why-grid">
+        <div class="why-card">
+          <div class="ic">⚙️</div>
+          <div>
+            <h3>Deskundige aanpak</h3>
+            <p>Structuur, uitvoering, meetbaar resultaat.</p>
+          </div>
+        </div>
+        <div class="why-card">
+          <div class="ic">🎯</div>
+          <div>
+            <h3>Heldere strategie</h3>
+            <p>KPI’s + prioriteiten, geen eindeloze plannen.</p>
+          </div>
+        </div>
+        <div class="why-card">
+          <div class="ic">💬</div>
+          <div>
+            <h3>Persoonlijke service</h3>
+            <p>Snel schakelen, korte lijnen.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MEMBERSHIP (joined) -->
+  <section class="member" id="member">
+    <div class="wrap">
+      <div class="member-head">
+        <h2>Word lid van OpenRegio</h2>
+        <p>Kies een plan dat bij jouw onderneming past en start vandaag nog met lokale samenwerking.</p>
+      </div>
+
+      <div class="plans">
+        <div class="plan blue">
+          <h3>Basis-lid</h3>
+          <p class="sub">Volwaardig lid van de coöperatie</p>
+          <div class="price">€12,95 <span class="per">excl. BTW / maand</span></div>
+
+          <div class="selectbar blue">Geselecteerd</div>
+
+          <ul class="features">
+            <li><span class="check">✓</span> Bedrijfsprofiel in lokaal netwerk</li>
+            <li><span class="check">✓</span> Ontdek en ontmoet ondernemers</li>
+            <li><span class="check">✓</span> Volledige stemrecht in de coöperatie</li>
+            <li><span class="check">✓</span> Basischeck &amp; weerbaarheidsbadges</li>
+            <li><span class="check">✓</span> RegioBot &amp; WOO-bibliotheek</li>
+            <li><span class="check">✓</span> Printbare overzichten</li>
+          </ul>
+        </div>
+
+        <div class="plan orange">
+          <div class="badge">Populair</div>
+          <h3>Pro-bijdrager</h3>
+          <p class="sub">Draag extra bij en krijg krachtige tools</p>
+          <div class="price">€24 <span class="per">excl. BTW / maand</span></div>
+
+          <div class="selectbar orange">Selecteer dit plan</div>
+
+          <ul class="features">
+            <li><span class="check">✓</span> Alles van Basis-lid</li>
+            <li><span class="check">✓</span> RegioBot: WOO &amp; regelgeving AI</li>
+            <li><span class="check">✓</span> Persoonlijke WOO-bibliotheek</li>
+            <li><span class="check">✓</span> Printbare overzichten</li>
+            <li><span class="check">✓</span> Prioriteit ondersteuning</li>
+            <li><span class="check">✓</span> Bouw mee aan nieuwe features</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- CTA BLOCK (blauw + oranje) -->
+      <div class="cta-strip" style="margin-top:22px" id="contact">
+        <div class="cta-left">
+          <h3>Zet de eerste stap!</h3>
+          <p>Start meteen met lokale samenwerking. Vul je e-mailadres in en ga door naar betaling.</p>
+
+          <form class="cta-form" onsubmit="event.preventDefault(); alert('Demo: koppel dit later aan Stripe / checkout.');">
+            <input type="email" required placeholder="E-mailadres" />
+            <button class="btn orange" type="submit">Lidmaatschap starten</button>
+          </form>
+
+          <div style="margin-top:10px;color:rgba(255,255,255,.78);font-size:12px">
+            Tip: koppel deze CTA aan je echte onboarding flow (Stripe checkout / account create).
+          </div>
+        </div>
+
+        <div class="cta-right">
+          <h4>Neem contact op</h4>
+          <ul>
+            <li>Adres</li>
+            <li>Telefoon</li>
+            <li>E-mail</li>
+          </ul>
+          <div style="font-weight:900;opacity:.85;font-size:13px">
+            (vervang later door echte gegevens)
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <div style="display:flex;gap:12px;align-items:center">
+          <span class="logo" aria-hidden="true"></span>
+          <div>
+            <div style="font-weight:1000">OpenRegio</div>
+            <div class="tiny">Samen bouwen aan een sterke regio</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <a href="#home">Home</a> ·
+        <a href="#cases">Cases</a> ·
+        <a href="#member">Word lid</a> ·
+        <a href="#contact">Contact</a>
+      </div>
+    </div>
+    <div style="height:1px;background:rgba(255,255,255,.12);margin:14px 0"></div>
+    <div class="tiny">© <span id="y"></span> OpenRegio — Alle rechten voorbehouden. · Privacybeleid · Disclaimer</div>
+  </div>
+</footer>
+
+<script>
+  document.getElementById("y").textContent = new Date().getFullYear();
+</script>
+
+</body>
+</html>
