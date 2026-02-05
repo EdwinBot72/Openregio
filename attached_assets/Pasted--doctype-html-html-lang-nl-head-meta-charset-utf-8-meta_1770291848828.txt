@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>OpenRegio — Strategische bedrijfs- en groeistrategie</title>
-  <meta name="description" content="OpenRegio is regionale economische infrastructuur: van strategie naar executie. KPI's, pijlers en uitvoering in één harde structuur." />
+  <meta name="description" content="OpenRegio is regionale economische infrastructuur: van strategie naar executie. KPI’s, pijlers en uitvoering in één harde structuur." />
   <style>
     :root{
       --bg:#0b0b10;
@@ -171,12 +171,12 @@
           <div class="logo" aria-hidden="true"></div>
           <div>
             <div>OpenRegio</div>
-            <div class="tiny muted">Van strategie naar executie</div>
+            <div class="tiny muted">Van strategie → naar executie</div>
           </div>
         </div>
 
         <nav class="nav-links" aria-label="Navigatie">
-          <a href="#kpis">KPI's</a>
+          <a href="#kpis">KPI’s</a>
           <a href="#pijlers">Pijlers</a>
           <a href="#randvoorwaarden">Randvoorwaarden</a>
           <a href="#implementatie">Implementatie</a>
@@ -201,10 +201,10 @@
             </p>
 
             <div class="pill">
-              <span class="tag"><b>KPI-gedreven</b> uitvoering</span>
-              <span class="tag"><b>4 pijlers</b> als fundament</span>
-              <span class="tag"><b>Werk → Skills</b> i.p.v. theorie</span>
-              <span class="tag"><b>Schaarste</b> per sector/regio</span>
+              <span class="tag">🎯 <b>KPI-gedreven</b> uitvoering</span>
+              <span class="tag">🧩 <b>4 pijlers</b> als fundament</span>
+              <span class="tag">⚡ <b>Werk → Skills</b> i.p.v. theorie</span>
+              <span class="tag">🔒 <b>Schaarste</b> per sector/regio</span>
             </div>
 
             <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
@@ -251,9 +251,9 @@
     <!-- KPI TABLE -->
     <section class="section" id="kpis">
       <div class="wrap">
-        <h2>Kern-doelstellingen (KPI's)</h2>
+        <h2>Kern-doelstellingen (KPI’s)</h2>
         <p class="lead">
-          Ambities zijn leuk. KPI's zijn hard. Dit is de meetlat voor 2030/2050.
+          Ambities zijn leuk. KPI’s zijn hard. Dit is de meetlat voor 2030/2050.
         </p>
 
         <table class="table" aria-label="KPI tabel">
@@ -421,7 +421,7 @@
               <h3 style="margin:10px 0 6px">Netcapaciteit</h3>
               <p class="muted" style="margin:0 0 10px">
                 Netcongestie is een blok op digitalisering en industriële ambities. Zonder prioritering van vitale economische functies
-                krijg je "stop" op datacenters, maakindustrie en zelfs woningbouw.
+                krijg je “stop” op datacenters, maakindustrie en zelfs woningbouw.
               </p>
               <ul class="list">
                 <li><span class="dot"></span><div><b>Prioriteer vitale functies</b><div class="muted tiny">Energie voor groei, niet voor ruis.</div></div></li>
@@ -448,7 +448,7 @@
               <h3 style="margin:0 0 10px">De ladder</h3>
               <ul class="list">
                 <li><span class="dot"></span><div><b>Niveau 1 — Discussie</b><div class="muted tiny">Gedeelde belangen en noodzaak scherp krijgen.</div></div></li>
-                <li><span class="dot"></span><div><b>Niveau 2 — Consensus</b><div class="muted tiny">Overeenstemming over prioriteiten en KPI's.</div></div></li>
+                <li><span class="dot"></span><div><b>Niveau 2 — Consensus</b><div class="muted tiny">Overeenstemming over prioriteiten en KPI’s.</div></div></li>
                 <li><span class="dot"></span><div><b>Niveau 3 — Coöperatie</b><div class="muted tiny">Allianties vormen; wie draagt welke verantwoordelijkheid.</div></div></li>
                 <li><span class="dot"></span><div><b>Niveau 4 — Gezamenlijke actie</b><div class="muted tiny">Concrete projecten met gedeelde middelen en mandaat.</div></div></li>
               </ul>
@@ -466,11 +466,11 @@
 
               <div style="margin-top:14px" class="cta">
                 <div>
-                  <h3 id="start">Klaar om dit naar "uitvoering" te trekken?</h3>
+                  <h3 id="start">Klaar om dit naar “uitvoering” te trekken?</h3>
                   <p>Maak een A4 uitvoeringsschema + een harde homepage-variant + een onboarding flow voor ondernemers.</p>
                 </div>
                 <div style="display:flex;gap:10px;flex-wrap:wrap">
-                  <a class="btn primary" href="#kpis">Start met KPI's</a>
+                  <a class="btn primary" href="#kpis">Start met KPI’s</a>
                   <a class="btn" href="#pijlers">Pijlers checken</a>
                 </div>
               </div>
