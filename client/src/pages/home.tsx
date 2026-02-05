@@ -151,28 +151,28 @@ export default function HomePage() {
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {[
               {
-                img: "/img/regiomarkt.png",
+                img: "/img/regiomarkt.png?v=2",
                 title: "RegioMarkt",
                 badge: "Werk blijft lokaal",
                 desc: "Regionale werkverdeling: ondernemers kunnen werk doorzetten wanneer zij het niet uitvoeren. Vaste regio-indeling. Geen advertenties. Geen algoritmische selectie.",
                 effect: "Effect: werk kan binnen de regio worden herverdeeld."
               },
               {
-                img: "/img/regiobot.png",
+                img: "/img/regiobot.png?v=2",
                 title: "RegioBot",
                 badge: "WOO & beleid",
                 desc: "Document-gedreven overzicht van WOO-verzoeken, antwoorden, besluiten, mandaten en beleidsregels. Geen interpretaties, alleen wat er is — en wat ontbreekt.",
                 effect: "Effect: regelgeving wordt inzichtelijk op documentniveau."
               },
               {
-                img: "/img/zichtbaarheid.png",
+                img: "/img/zichtbaarheid.png?v=2",
                 title: "Zichtbaarheid",
                 badge: "Vindbaar waar het telt",
                 desc: "Lokale basis op orde: bedrijfsvermelding, reviews en regionale vindbaarheid. Geen contentstrategie en geen advertenties.",
                 effect: "Effect: bedrijven zijn vindbaar binnen hun regio."
               },
               {
-                img: "/img/basischeck.png",
+                img: "/img/basischeck.png?v=2",
                 title: "Basischeck",
                 badge: "Betrouwbaarheid",
                 desc: "Registratie van basiscondities: bereikbaarheid, offline functioneren en basisbetalingen. Dit wordt gebruikt binnen het netwerk.",
