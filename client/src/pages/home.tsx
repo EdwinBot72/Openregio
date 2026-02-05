@@ -53,7 +53,7 @@ export default function HomePage() {
           id="home"
           className="relative"
           style={{
-            background: "linear-gradient(90deg, rgba(14,63,134,.88), rgba(14,63,134,.55)), url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=2400&q=70')",
+            background: "linear-gradient(90deg, rgba(14,63,134,.88), rgba(14,63,134,.55)), url('/img/hero-landscape.jpg')",
             backgroundSize: "cover",
             backgroundPosition: "center",
             color: "#fff"
@@ -185,9 +185,9 @@ export default function HomePage() {
 
             <div className="grid md:grid-cols-3 gap-3.5">
               {[
-                { img: "/img/regiomarkt.png?v=3", title: "RegioMarkt", desc: "Regionale werkverdeling tussen ondernemers." },
-                { img: "/img/regiobot.png?v=3", title: "RegioBot", desc: "WOO-documenten en beleidsregels overzichtelijk." },
-                { img: "/img/zichtbaarheid.png?v=3", title: "Zichtbaarheid", desc: "Lokale vindbaarheid op orde." },
+                { img: "/img/regiomarkt.png?v=3", title: "RegioMarkt", desc: "Regionale werkverdeling tussen ondernemers.", slug: "regiomarkt" },
+                { img: "/img/regiobot.png?v=3", title: "RegioBot", desc: "WOO-documenten en beleidsregels overzichtelijk.", slug: "regiobot" },
+                { img: "/img/zichtbaarheid.png?v=3", title: "Zichtbaarheid", desc: "Lokale vindbaarheid op orde.", slug: "zichtbaarheid" },
               ].map((project, i) => (
                 <article 
                   key={i}
@@ -199,18 +199,20 @@ export default function HomePage() {
                   }}
                   data-testid={`card-project-${i}`}
                 >
-                  <div 
-                    className="h-40 bg-cover bg-center"
-                    style={{ backgroundImage: `url('${project.img}')` }}
+                  <img 
+                    src={project.img}
+                    alt={project.title}
+                    className="h-40 w-full object-cover"
                   />
                   <div className="p-3.5">
-                    <h4 className="font-bold mb-1.5">{project.title}</h4>
-                    <p style={{ color: "#5b677a", fontSize: "13px", margin: 0 }}>{project.desc}</p>
+                    <h4 className="font-bold mb-1.5" data-testid={`text-project-title-${i}`}>{project.title}</h4>
+                    <p style={{ color: "#5b677a", fontSize: "13px", margin: 0 }} data-testid={`text-project-desc-${i}`}>{project.desc}</p>
                     <div className="mt-3">
                       <a 
                         href="#member"
                         className="inline-flex items-center justify-center px-3.5 py-2.5 rounded-full font-black text-white text-sm"
                         style={{ background: "#1f5fae", boxShadow: "0 14px 40px rgba(31,95,174,.25)" }}
+                        data-testid={`button-project-readmore-${project.slug}`}
                       >
                         Lees meer
                       </a>
@@ -481,13 +483,13 @@ export default function HomePage() {
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
-              <a href="#home" className="opacity-90 hover:opacity-100 hover:underline">Home</a>
+              <a href="#home" className="opacity-90 hover:opacity-100 hover:underline" data-testid="link-footer-home">Home</a>
               <span className="opacity-50">·</span>
-              <a href="#cases" className="opacity-90 hover:opacity-100 hover:underline">Cases</a>
+              <a href="#cases" className="opacity-90 hover:opacity-100 hover:underline" data-testid="link-footer-cases">Cases</a>
               <span className="opacity-50">·</span>
-              <a href="#member" className="opacity-90 hover:opacity-100 hover:underline">Word lid</a>
+              <a href="#member" className="opacity-90 hover:opacity-100 hover:underline" data-testid="link-footer-lid">Word lid</a>
               <span className="opacity-50">·</span>
-              <a href="#contact" className="opacity-90 hover:opacity-100 hover:underline">Contact</a>
+              <a href="#contact" className="opacity-90 hover:opacity-100 hover:underline" data-testid="link-footer-contact">Contact</a>
             </div>
           </div>
           <div className="h-px my-3.5" style={{ background: "rgba(255,255,255,.12)" }} />
