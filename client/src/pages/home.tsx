@@ -107,11 +107,11 @@ export default function HomePage() {
 
                 <div className="grid grid-cols-2 gap-2.5 mt-2.5">
                   {[
-                    { label: "Woningbouw", val: "22.000+/jaar", hint: "Talentretentie" },
-                    { label: "Werkgelegenheid", val: "> 80%", hint: "Slagkracht" },
-                    { label: "R&D", val: "≥ 4,5%", hint: "Voorsprong" },
-                    { label: "Breedband", val: "100%", hint: "Continuïteit" },
-                  ].map((kpi, i) => (
+                    { label: "RegioBot", hint: "WOO & Beleid AI" },
+                    { label: "RegioCrew", hint: "Regionale samenwerking" },
+                    { label: "Zichtbaarheid", hint: "Lokale vindbaarheid" },
+                    { label: "Back to Basis", hint: "Betrouwbaarheidscheck" },
+                  ].map((pillar, i) => (
                     <div 
                       key={i}
                       className="rounded-[14px] p-3"
@@ -119,11 +119,10 @@ export default function HomePage() {
                         border: "1px solid rgba(255,255,255,.20)",
                         background: "rgba(255,255,255,.10)"
                       }}
-                      data-testid={`kpi-hero-${i}`}
+                      data-testid={`pillar-hero-${i}`}
                     >
-                      <div style={{ fontSize: "12px", color: "rgba(255,255,255,.78)", fontWeight: 900 }}>{kpi.label}</div>
-                      <div style={{ fontSize: "18px", fontWeight: 1000, marginTop: "4px" }}>{kpi.val}</div>
-                      <div style={{ fontSize: "12px", color: "rgba(255,255,255,.78)", marginTop: "6px" }}>{kpi.hint}</div>
+                      <div style={{ fontSize: "15px", fontWeight: 900, marginBottom: "4px" }}>{pillar.label}</div>
+                      <div style={{ fontSize: "12px", color: "rgba(255,255,255,.78)" }}>{pillar.hint}</div>
                     </div>
                   ))}
                 </div>
