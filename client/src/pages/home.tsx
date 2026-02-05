@@ -1,384 +1,499 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { AlertCircle, Check, Minus, ArrowRight } from "lucide-react";
 import { Link } from "wouter";
-import heroImage from "@assets/ChatGPT_Image_5_jan_2026,_10_22_40_1768374708257.png";
+import { MapPin, Users, Lightbulb, Settings, Target, MessageCircle, Check, Mail, Phone, MapPinned } from "lucide-react";
 
 export default function HomePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-muted/20 to-background dark:from-background dark:via-muted/10 dark:to-background">
-      {/* Decorative gradient orbs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-0 left-[20%] w-[800px] h-[500px] bg-primary/10 dark:bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute top-[10%] right-[10%] w-[900px] h-[600px] bg-primary/5 dark:bg-primary/3 rounded-full blur-3xl" />
-      </div>
-
+    <div className="min-h-screen" style={{ background: "#f5f7fb", color: "#0f172a" }}>
       {/* Navigation */}
-      <nav className="sticky top-0 z-50 backdrop-blur-lg backdrop-saturate-150 bg-background/70 dark:bg-background/80 border-b border-border/50" data-testid="nav-main">
-        <div className="max-w-6xl mx-auto px-4 md:px-6">
-          <div className="flex items-center justify-between h-16 gap-4">
-            <Link href="/" className="flex items-center gap-2.5" data-testid="link-home-logo">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary/70 shadow-lg shadow-primary/25 flex items-center justify-center text-white font-black text-sm">
-                OR
+      <header className="sticky top-0 z-50 backdrop-blur-lg border-b" style={{ background: "rgba(255,255,255,.92)", borderColor: "#e6ebf2" }} data-testid="nav-main">
+        <div className="max-w-[1120px] mx-auto px-4">
+          <div className="flex items-center justify-between py-3.5 gap-3">
+            <Link href="/" className="flex items-center gap-3 font-black" data-testid="link-home-logo">
+              <div 
+                className="w-9 h-9 rounded-xl relative"
+                style={{ 
+                  background: "conic-gradient(from 200deg, #1f5fae, #3aa0ff, #f28a1a, #5ccf8a, #1f5fae)",
+                  boxShadow: "0 8px 22px rgba(15,23,42,.08)"
+                }}
+              >
+                <div className="absolute rounded-lg border" style={{ inset: "11px", borderColor: "rgba(255,255,255,.6)" }} />
               </div>
-              <span className="font-bold tracking-tight">OpenRegio</span>
+              <span>OpenRegio</span>
             </Link>
 
-            <nav className="hidden md:flex items-center gap-1 text-sm font-semibold text-muted-foreground">
-              <a href="#pijlers" className="px-3 py-2 rounded-xl hover-elevate" data-testid="link-nav-pijlers">Pijlers</a>
-              <a href="#hoehetwerkt" className="px-3 py-2 rounded-xl hover-elevate" data-testid="link-nav-hoehetwerkt">Hoe werkt het</a>
-              <a href="#lidmaatschap" className="px-3 py-2 rounded-xl hover-elevate" data-testid="link-nav-lidmaatschap">Lidmaatschap</a>
-              <a href="#scope" className="px-3 py-2 rounded-xl hover-elevate" data-testid="link-nav-scope">Scope</a>
+            <nav className="hidden md:flex items-center gap-2.5 font-extrabold" style={{ color: "#0f172a" }}>
+              <a href="#home" className="px-3 py-2.5 rounded-xl hover:bg-[#eef3fb]" data-testid="link-nav-home">Home</a>
+              <a href="#diensten" className="px-3 py-2.5 rounded-xl hover:bg-[#eef3fb]" data-testid="link-nav-diensten">Diensten</a>
+              <a href="#cases" className="px-3 py-2.5 rounded-xl hover:bg-[#eef3fb]" data-testid="link-nav-cases">Cases</a>
+              <a href="#over" className="px-3 py-2.5 rounded-xl hover:bg-[#eef3fb]" data-testid="link-nav-over">Over ons</a>
+              <a href="#contact" className="px-3 py-2.5 rounded-xl hover:bg-[#eef3fb]" data-testid="link-nav-contact">Contact</a>
             </nav>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2.5">
               <Link href="/login">
-                <Button variant="ghost" size="sm" data-testid="button-nav-login">
-                  Inloggen
-                </Button>
+                <Button variant="ghost" size="sm" data-testid="button-nav-login">Inloggen</Button>
               </Link>
-              <Link href="/start?plan=basic">
-                <Button size="sm" data-testid="button-nav-start">
-                  Word lid
-                </Button>
-              </Link>
+              <a 
+                href="#member"
+                className="inline-flex items-center justify-center px-4 py-2.5 rounded-full font-black text-white text-sm"
+                style={{ background: "#1f5fae", boxShadow: "0 14px 40px rgba(31,95,174,.25)" }}
+                data-testid="button-nav-info"
+              >
+                Meer informatie
+              </a>
             </div>
           </div>
         </div>
-      </nav>
+      </header>
 
-      {/* Hero Section */}
-      <section className="relative py-14 md:py-20 px-4" data-testid="section-hero">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-2 gap-8 items-center">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3 py-2 rounded-full border border-border bg-background/70 dark:bg-background/50 text-muted-foreground text-xs font-bold mb-4" data-testid="badge-hero-kicker">
-                <span className="w-2 h-2 rounded-full bg-primary shadow-lg shadow-primary/30" />
-                Regionale infrastructuur voor ondernemers (in opbouw)
-              </div>
-
-              <h1 className="font-accent text-4xl md:text-5xl lg:text-[54px] font-bold leading-[1.03] tracking-tight mb-4" data-testid="text-hero-title">
-                Meer werk uit je regio.<br/>Meer grip op regels.
-              </h1>
-
-              <p className="text-muted-foreground text-base md:text-lg leading-relaxed mb-4 max-w-xl" data-testid="text-hero-subtitle">
-                OpenRegio organiseert werkverdeling, openbare documenten en betrouwbaarheid <strong className="text-foreground">per regio</strong>.
-                Geen advertenties. Geen algoritmes. Geen ruis.
-              </p>
-
-              <div className="flex flex-wrap gap-3 mb-4">
-                <a href="#hoehetwerkt">
-                  <Button data-testid="button-hero-howworks">
-                    Bekijk hoe het werkt
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </a>
-                <a href="#pijlers">
-                  <Button variant="outline" data-testid="button-hero-pijlers">
-                    Bekijk de 4 pijlers
-                  </Button>
-                </a>
-              </div>
-
-              <div className="flex flex-wrap gap-2 mb-4">
-                {["Werk-signalen & doorverwijzing", "WOO-documenten & beleid", "Zichtbaarheid basics", "Basischeck betrouwbaarheid"].map((tag, i) => (
-                  <span key={i} className="px-3 py-2 rounded-full border border-border bg-background/70 dark:bg-background/50 text-muted-foreground text-xs font-bold" data-testid={`tag-hero-${i}`}>
-                    {tag}
-                  </span>
-                ))}
-              </div>
-
-              <p className="text-muted-foreground text-xs leading-relaxed" data-testid="text-hero-fineprint">
-                Elke regio die dit niet organiseert, verliest werk en grip zonder het te merken.
-              </p>
-            </div>
-
-            <div className="relative">
-              <Card className="overflow-hidden shadow-xl shadow-black/5 dark:shadow-black/20">
-                <img 
-                  src={heroImage} 
-                  alt="OpenRegio — overzicht van werk en documenten in de regio" 
-                  className="w-full h-auto"
-                  data-testid="img-hero"
-                />
-              </Card>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Waarom OpenRegio nodig is */}
-      <section className="relative py-12 px-4" id="hoehetwerkt" data-testid="section-waarom">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="font-accent text-xl md:text-2xl font-bold mb-2" data-testid="text-waarom-title">Waarom OpenRegio nodig is</h2>
-          <p className="text-muted-foreground mb-6 max-w-2xl leading-relaxed" data-testid="text-waarom-intro">
-            Ondernemen wordt onvoorspelbaar wanneer werk versnipperd raakt, regels ondoorzichtig zijn en besluiten niet vindbaar zijn.
-            OpenRegio brengt structuur met regionale afspraken en openbare documenten.
-          </p>
-
-          <div className="grid sm:grid-cols-3 gap-4 mb-6">
-            {[
-              { title: "Werk verdwijnt uit de regio", desc: "Wanneer ondernemers elkaar niet kennen of niet kunnen doorverwijzen, gaat werk onnodig buiten de regio terechtkomen." },
-              { title: "Regels zijn ondoorzichtig", desc: "Brieven, beleidsregels en besluiten zijn vaak verspreid. Dat kost tijd en vergroot risico." },
-              { title: "Betrouwbaarheid is onzichtbaar", desc: "Als systemen haperen (apps, pin, bereikbaarheid), valt werk stil. Zonder basisafspraken is er geen continuïteit." },
-            ].map((item, i) => (
-              <Card key={i} className="bg-card/90 dark:bg-card/80" data-testid={`card-waarom-${i}`}>
-                <CardContent className="p-5">
-                  <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-black mb-3">
-                    <AlertCircle className="w-5 h-5" />
-                  </div>
-                  <h3 className="font-semibold mb-2 tracking-tight" data-testid={`text-waarom-card-title-${i}`}>{item.title}</h3>
-                  <p className="text-muted-foreground text-sm leading-relaxed" data-testid={`text-waarom-card-desc-${i}`}>{item.desc}</p>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          <div className="h-px bg-border my-6" />
-
-          <p className="text-muted-foreground leading-relaxed" data-testid="text-waarom-conclusion">
-            OpenRegio is geen adviesloket. Het organiseert <strong className="text-foreground">wat er al is</strong>: werk, documenten en basiscondities — regionaal.
-          </p>
-        </div>
-      </section>
-
-      {/* De 4 pijlers */}
-      <section className="relative py-12 px-4" id="pijlers" data-testid="section-pijlers">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="font-accent text-xl md:text-2xl font-bold mb-2" data-testid="text-pijlers-title">De 4 pijlers</h2>
-          <p className="text-muted-foreground mb-6" data-testid="text-pijlers-intro">Kort, scanbaar, zonder marketingcircus.</p>
-
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              {
-                img: "/img/regiomarkt.png?v=2",
-                title: "RegioMarkt",
-                badge: "Werk blijft lokaal",
-                desc: "Regionale werkverdeling: ondernemers kunnen werk doorzetten wanneer zij het niet uitvoeren. Vaste regio-indeling. Geen advertenties. Geen algoritmische selectie.",
-                effect: "Effect: werk kan binnen de regio worden herverdeeld."
-              },
-              {
-                img: "/img/regiobot.png?v=2",
-                title: "RegioBot",
-                badge: "WOO & beleid",
-                desc: "Document-gedreven overzicht van WOO-verzoeken, antwoorden, besluiten, mandaten en beleidsregels. Geen interpretaties, alleen wat er is — en wat ontbreekt.",
-                effect: "Effect: regelgeving wordt inzichtelijk op documentniveau."
-              },
-              {
-                img: "/img/zichtbaarheid.png?v=2",
-                title: "Zichtbaarheid",
-                badge: "Vindbaar waar het telt",
-                desc: "Lokale basis op orde: bedrijfsvermelding, reviews en regionale vindbaarheid. Geen contentstrategie en geen advertenties.",
-                effect: "Effect: bedrijven zijn vindbaar binnen hun regio."
-              },
-              {
-                img: "/img/basischeck.png?v=2",
-                title: "Basischeck",
-                badge: "Betrouwbaarheid",
-                desc: "Registratie van basiscondities: bereikbaarheid, offline functioneren en basisbetalingen. Dit wordt gebruikt binnen het netwerk.",
-                effect: "Effect: betrouwbaarheid is inzichtelijk binnen de regio."
-              },
-            ].map((pijler, i) => (
-              <Card key={i} className="bg-card/90 dark:bg-card/80 overflow-hidden flex flex-col" data-testid={`card-pijler-${i}`}>
-                <img src={pijler.img} alt={pijler.title} className="w-full h-auto" data-testid={`img-pijler-${i}`} />
-                <CardContent className="p-4 flex-1 flex flex-col">
-                  <div className="flex items-baseline justify-between gap-2 mb-2 flex-wrap">
-                    <h3 className="font-semibold tracking-tight" data-testid={`text-pijler-title-${i}`}>{pijler.title}</h3>
-                    <span className="text-xs font-bold text-primary bg-primary/10 border border-primary/20 px-2.5 py-1.5 rounded-full whitespace-nowrap" data-testid={`badge-pijler-${i}`}>
-                      {pijler.badge}
-                    </span>
-                  </div>
-                  <p className="text-muted-foreground text-sm leading-relaxed mb-3 flex-1" data-testid={`text-pijler-desc-${i}`}>{pijler.desc}</p>
-                  <div className="text-xs font-bold text-foreground/80 bg-primary/5 dark:bg-primary/10 border border-dashed border-primary/30 rounded-xl px-3 py-2.5" data-testid={`text-pijler-effect-${i}`}>
-                    {pijler.effect}
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Scope - Wat OpenRegio wel en niet doet */}
-      <section className="relative py-12 px-4" id="scope" data-testid="section-scope">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="font-accent text-xl md:text-2xl font-bold mb-6" data-testid="text-scope-title">Wat OpenRegio wel en niet doet</h2>
-
-          <div className="grid md:grid-cols-2 gap-4">
-            <Card className="bg-card/90 dark:bg-card/80" data-testid="card-scope-wel">
-              <CardContent className="p-5">
-                <h3 className="font-semibold mb-4" data-testid="text-scope-wel-title">OpenRegio doet wél</h3>
-                <ul className="space-y-3">
-                  {[
-                    "Regionale werkverdeling faciliteren via werk-signalen en doorverwijzing.",
-                    "Openbare documenten verzamelen en ordenen (WOO, besluiten, mandaten, beleidsregels).",
-                    "Basiscondities zichtbaar maken (bereikbaarheid, offline werken, basisbetalingen).",
-                    "Lokale vindbaarheid structureren (vermelding, reviews, regio-zoekresultaten).",
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-3 text-muted-foreground text-sm font-medium leading-relaxed" data-testid={`item-scope-wel-${i}`}>
-                      <span className="w-5 h-5 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center text-primary flex-shrink-0 mt-0.5">
-                        <Check className="w-3 h-3" />
-                      </span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-            </Card>
-
-            <Card className="bg-card/90 dark:bg-card/80" data-testid="card-scope-niet">
-              <CardContent className="p-5">
-                <h3 className="font-semibold mb-4" data-testid="text-scope-niet-title">OpenRegio doet níet</h3>
-                <ul className="space-y-3">
-                  {[
-                    "Geen juridisch advies en geen beoordeling van individuele dossiers.",
-                    "Geen behandeling van persoonlijke boetes of verkeerszaken.",
-                    "Geen advertenties, geen algoritmische feeds, geen \"growth hacks\".",
-                    "Geen partij bij transacties tussen ondernemers en hun klanten.",
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-start gap-3 text-muted-foreground text-sm font-medium leading-relaxed" data-testid={`item-scope-niet-${i}`}>
-                      <span className="w-5 h-5 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center text-primary flex-shrink-0 mt-0.5">
-                        <Minus className="w-3 h-3" />
-                      </span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <p className="text-muted-foreground text-xs mt-4 leading-relaxed" data-testid="text-scope-fineprint">
-                  RegioBot is document-gedreven: het helpt bij <strong className="text-foreground">vinden, ordenen en zichtbaar maken</strong> van openbare informatie.
+      <main>
+        {/* Hero Section */}
+        <section 
+          id="home"
+          className="relative"
+          style={{
+            background: "linear-gradient(90deg, rgba(14,63,134,.88), rgba(14,63,134,.55)), url('https://images.unsplash.com/photo-1469474968028-56623f02e42e?auto=format&fit=crop&w=2400&q=70')",
+            backgroundSize: "cover",
+            backgroundPosition: "center",
+            color: "#fff"
+          }}
+          data-testid="section-hero"
+        >
+          <div className="max-w-[1120px] mx-auto px-4">
+            <div className="grid md:grid-cols-[1.2fr_.8fr] gap-4 py-14 md:py-16 items-stretch">
+              <div>
+                <h1 
+                  className="font-black leading-[1.05] mb-2.5"
+                  style={{ fontSize: "clamp(30px, 4.4vw, 54px)", letterSpacing: "-0.6px" }}
+                  data-testid="text-hero-title"
+                >
+                  Samen bouwen<br/>aan een sterke regio
+                </h1>
+                <p 
+                  className="mb-4"
+                  style={{ color: "rgba(255,255,255,.90)", fontSize: "clamp(15px, 1.7vw, 18px)", maxWidth: "68ch" }}
+                  data-testid="text-hero-subtitle"
+                >
+                  Oplossingen voor regionale samenwerking en innovatie. Minder praat, meer uitvoering.
                 </p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
-
-      {/* Lidmaatschap */}
-      <section className="relative py-12 px-4" id="lidmaatschap" data-testid="section-lidmaatschap">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="font-accent text-xl md:text-2xl font-bold mb-2" data-testid="text-lidmaatschap-title">Lidmaatschap</h2>
-          <p className="text-muted-foreground mb-6" data-testid="text-lidmaatschap-intro">Hou het simpel: Basis om mee te doen, Pro voor serieuze inzet.</p>
-
-          <div className="grid md:grid-cols-2 gap-4">
-            {/* Basis */}
-            <Card className="bg-card/95 dark:bg-card/90" data-testid="card-pricing-basis">
-              <CardContent className="p-5">
-                <div className="font-black tracking-tight mb-1" data-testid="text-pricing-basis-title">Basis</div>
-                <p className="text-muted-foreground text-sm mb-3 leading-relaxed" data-testid="text-pricing-basis-desc">
-                  Voor ondernemers die willen instappen, zichtbaar worden en meedoen in de regio.
-                </p>
-                <div className="bg-muted/50 border border-border rounded-xl px-3 py-2.5 text-muted-foreground text-xs font-bold mb-4" data-testid="text-pricing-basis-features">
-                  Toegang tot: RegioMarkt + Zichtbaarheid + Basischeck (basis)
-                </div>
-                <ul className="space-y-2 mb-5">
-                  {[
-                    "Profiel + regio-indeling",
-                    "Werk-signalen bekijken / reageren",
-                    "Zichtbaarheid-basis (checklist)",
-                    "Basischeck invullen",
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-center gap-2.5 text-muted-foreground text-sm font-medium" data-testid={`item-pricing-basis-${i}`}>
-                      <span className="w-5 h-5 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center text-primary flex-shrink-0">
-                        <Check className="w-3 h-3" />
-                      </span>
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
-                <div className="flex flex-wrap gap-3 items-center">
-                  <Link href="/start?plan=basic">
-                    <Button data-testid="button-start-basis">Start Basis</Button>
-                  </Link>
-                  <a href="#pijlers">
-                    <Button variant="outline" data-testid="button-pricing-basis-pijlers">Bekijk pijlers</Button>
+                <div className="flex flex-wrap gap-2.5">
+                  <a 
+                    href="#member"
+                    className="inline-flex items-center justify-center px-4 py-3 rounded-full font-black text-sm"
+                    style={{ background: "#f28a1a", color: "#1b1307", boxShadow: "0 14px 40px rgba(242,138,26,.25)" }}
+                    data-testid="button-hero-lid"
+                  >
+                    Word lid
+                  </a>
+                  <a 
+                    href="#cases"
+                    className="inline-flex items-center justify-center px-4 py-3 rounded-full font-black text-sm"
+                    style={{ background: "rgba(255,255,255,.12)", color: "#fff", border: "1px solid rgba(255,255,255,.25)" }}
+                    data-testid="button-hero-discover"
+                  >
+                    Ontdek meer
                   </a>
                 </div>
-                <p className="text-muted-foreground text-xs mt-3" data-testid="text-pricing-basis-fineprint">Prijs: gratis tijdens opbouw. Geen belofte, wel toegang.</p>
-              </CardContent>
-            </Card>
+              </div>
 
-            {/* Pro */}
-            <Card className="bg-card/95 dark:bg-card/90 border-primary/30 shadow-lg shadow-primary/10" data-testid="card-pricing-pro">
-              <CardContent className="p-5">
-                <div className="font-black tracking-tight mb-1" data-testid="text-pricing-pro-title">Pro</div>
-                <p className="text-muted-foreground text-sm mb-3 leading-relaxed" data-testid="text-pricing-pro-desc">
-                  Voor ondernemers die structureel willen doorverwijzen en RegioBot/WOO actief gebruiken.
-                </p>
-                <div className="bg-muted/50 border border-border rounded-xl px-3 py-2.5 text-muted-foreground text-xs font-bold mb-4" data-testid="text-pricing-pro-features">
-                  Extra: RegioBot + WOO-bibliotheek (opbouw) + hogere positie op betrouwbaarheid
+              <aside 
+                className="rounded-[18px] p-4"
+                style={{ 
+                  background: "rgba(255,255,255,.12)",
+                  border: "1px solid rgba(255,255,255,.18)",
+                  backdropFilter: "blur(8px)"
+                }}
+                data-testid="card-hero-kpis"
+              >
+                <strong>Focus (2030/2050)</strong>
+                <div style={{ color: "rgba(255,255,255,.82)", fontSize: "13px", marginTop: "6px" }}>
+                  Meetbaar. Praktisch. Geen ruis.
                 </div>
-                <ul className="space-y-2 mb-5">
+
+                <div className="grid grid-cols-2 gap-2.5 mt-2.5">
                   {[
-                    "RegioBot gebruiken voor document-overzicht",
-                    "WOO-bibliotheek bijdragen / hergebruiken",
-                    "Doorverwijzing-logging (bewijs van verwijzing)",
-                    "Basischeck-score telt zwaarder in netwerkpositie",
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-center gap-2.5 text-muted-foreground text-sm font-medium" data-testid={`item-pricing-pro-${i}`}>
-                      <span className="w-5 h-5 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center text-primary flex-shrink-0">
+                    { label: "Woningbouw", val: "22.000+/jaar", hint: "Talentretentie" },
+                    { label: "Werkgelegenheid", val: "> 80%", hint: "Slagkracht" },
+                    { label: "R&D", val: "≥ 4,5%", hint: "Voorsprong" },
+                    { label: "Breedband", val: "100%", hint: "Continuïteit" },
+                  ].map((kpi, i) => (
+                    <div 
+                      key={i}
+                      className="rounded-[14px] p-3"
+                      style={{ 
+                        border: "1px solid rgba(255,255,255,.20)",
+                        background: "rgba(255,255,255,.10)"
+                      }}
+                      data-testid={`kpi-hero-${i}`}
+                    >
+                      <div style={{ fontSize: "12px", color: "rgba(255,255,255,.78)", fontWeight: 900 }}>{kpi.label}</div>
+                      <div style={{ fontSize: "18px", fontWeight: 1000, marginTop: "4px" }}>{kpi.val}</div>
+                      <div style={{ fontSize: "12px", color: "rgba(255,255,255,.78)", marginTop: "6px" }}>{kpi.hint}</div>
+                    </div>
+                  ))}
+                </div>
+              </aside>
+            </div>
+          </div>
+        </section>
+
+        {/* Strip Icons */}
+        <div id="diensten" className="border-b" style={{ background: "#fff", borderColor: "#e6ebf2" }} data-testid="section-diensten">
+          <div className="max-w-[1120px] mx-auto px-4">
+            <div className="grid md:grid-cols-3 gap-3.5 py-4">
+              {[
+                { icon: MapPin, title: "Regio analyse", desc: "Korte scan: wat blokkeert groei, waar zit je leverage." },
+                { icon: Users, title: "Samenwerking", desc: "Structuur + afspraken die werken (geen netwerkpraat)." },
+                { icon: Lightbulb, title: "Innovatie", desc: "Van idee naar pilot naar omzet. In de regio." },
+              ].map((item, i) => (
+                <div 
+                  key={i}
+                  className="rounded-[18px] p-4 flex gap-3 items-start"
+                  style={{ 
+                    background: "#ffffff",
+                    border: "1px solid #e6ebf2",
+                    boxShadow: "0 6px 18px rgba(15,23,42,.06)"
+                  }}
+                  data-testid={`card-dienst-${i}`}
+                >
+                  <div 
+                    className="w-[46px] h-[46px] rounded-[16px] flex items-center justify-center flex-shrink-0"
+                    style={{ 
+                      background: "rgba(31,95,174,.10)",
+                      color: "#1f5fae",
+                      border: "1px solid rgba(31,95,174,.18)"
+                    }}
+                  >
+                    <item.icon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold" style={{ margin: 0, fontSize: "16px" }}>{item.title}</h3>
+                    <p style={{ margin: "6px 0 0", color: "#5b677a", fontSize: "13px" }}>{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Projects Section */}
+        <section id="cases" className="py-8" data-testid="section-cases">
+          <div className="max-w-[1120px] mx-auto px-4">
+            <h2 className="font-bold mb-2" style={{ fontSize: "28px", letterSpacing: "-0.3px" }} data-testid="text-cases-title">Onze Projecten</h2>
+            <p style={{ color: "#5b677a", marginBottom: "18px", maxWidth: "78ch" }} data-testid="text-cases-lead">Een kijkje in onze succesvolle cases.</p>
+
+            <div className="grid md:grid-cols-3 gap-3.5">
+              {[
+                { img: "/img/regiomarkt.png?v=3", title: "RegioMarkt", desc: "Regionale werkverdeling tussen ondernemers." },
+                { img: "/img/regiobot.png?v=3", title: "RegioBot", desc: "WOO-documenten en beleidsregels overzichtelijk." },
+                { img: "/img/zichtbaarheid.png?v=3", title: "Zichtbaarheid", desc: "Lokale vindbaarheid op orde." },
+              ].map((project, i) => (
+                <article 
+                  key={i}
+                  className="rounded-[18px] overflow-hidden"
+                  style={{ 
+                    border: "1px solid #e6ebf2",
+                    background: "#ffffff",
+                    boxShadow: "0 8px 22px rgba(15,23,42,.08)"
+                  }}
+                  data-testid={`card-project-${i}`}
+                >
+                  <div 
+                    className="h-40 bg-cover bg-center"
+                    style={{ backgroundImage: `url('${project.img}')` }}
+                  />
+                  <div className="p-3.5">
+                    <h4 className="font-bold mb-1.5">{project.title}</h4>
+                    <p style={{ color: "#5b677a", fontSize: "13px", margin: 0 }}>{project.desc}</p>
+                    <div className="mt-3">
+                      <a 
+                        href="#member"
+                        className="inline-flex items-center justify-center px-3.5 py-2.5 rounded-full font-black text-white text-sm"
+                        style={{ background: "#1f5fae", boxShadow: "0 14px 40px rgba(31,95,174,.25)" }}
+                      >
+                        Lees meer
+                      </a>
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Why OpenRegio */}
+        <section id="over" className="py-8 border-t border-b" style={{ background: "#fff", borderColor: "#e6ebf2" }} data-testid="section-why">
+          <div className="max-w-[1120px] mx-auto px-4">
+            <h2 className="font-bold mb-2" style={{ fontSize: "28px", letterSpacing: "-0.3px" }} data-testid="text-why-title">Waarom OpenRegio?</h2>
+            <p style={{ color: "#5b677a", marginBottom: "18px", maxWidth: "78ch" }} data-testid="text-why-lead">Heldere waarde. Geen gedoe. Gewoon: regio sterker maken en ondernemers laten draaien.</p>
+
+            <div className="grid md:grid-cols-3 gap-3.5 mt-3">
+              {[
+                { icon: Settings, title: "Deskundige aanpak", desc: "Structuur, uitvoering, meetbaar resultaat." },
+                { icon: Target, title: "Heldere strategie", desc: "KPI's + prioriteiten, geen eindeloze plannen." },
+                { icon: MessageCircle, title: "Persoonlijke service", desc: "Snel schakelen, korte lijnen." },
+              ].map((item, i) => (
+                <div 
+                  key={i}
+                  className="rounded-[18px] p-4 flex gap-3 items-start"
+                  style={{ 
+                    border: "1px solid #e6ebf2",
+                    background: "#ffffff",
+                    boxShadow: "0 8px 22px rgba(15,23,42,.08)"
+                  }}
+                  data-testid={`card-why-${i}`}
+                >
+                  <div 
+                    className="w-[46px] h-[46px] rounded-[16px] flex items-center justify-center flex-shrink-0"
+                    style={{ 
+                      background: "rgba(242,138,26,.12)",
+                      color: "#f28a1a",
+                      border: "1px solid rgba(242,138,26,.22)"
+                    }}
+                  >
+                    <item.icon className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold" style={{ margin: 0, fontSize: "16px" }}>{item.title}</h3>
+                    <p style={{ margin: "6px 0 0", color: "#5b677a", fontSize: "13px" }}>{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* Membership Section */}
+        <section 
+          id="member" 
+          className="py-8"
+          style={{
+            background: "radial-gradient(800px 500px at 10% 0%, rgba(31,95,174,.10), transparent 60%), radial-gradient(800px 500px at 90% 0%, rgba(242,138,26,.10), transparent 60%), #f5f7fb"
+          }}
+          data-testid="section-member"
+        >
+          <div className="max-w-[1120px] mx-auto px-4">
+            <div className="text-center pb-2.5">
+              <h2 className="font-bold mb-2" style={{ fontSize: "clamp(28px, 3.6vw, 44px)" }} data-testid="text-member-title">Word lid van OpenRegio</h2>
+              <p style={{ color: "#5b677a", margin: 0 }} data-testid="text-member-lead">Kies een plan dat bij jouw onderneming past en start vandaag nog met lokale samenwerking.</p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-3.5 mt-5">
+              {/* Basis Plan */}
+              <div 
+                className="rounded-[22px] p-4 relative overflow-hidden"
+                style={{ 
+                  background: "#ffffff",
+                  border: "2px solid rgba(31,95,174,.35)",
+                  boxShadow: "0 16px 40px rgba(15,23,42,.10)"
+                }}
+                data-testid="card-plan-basis"
+              >
+                <h3 className="font-bold" style={{ fontSize: "20px", marginBottom: "6px" }}>Basis-lid</h3>
+                <p style={{ color: "#5b677a", fontSize: "13px", marginBottom: "10px" }}>Volwaardig lid van de coöperatie</p>
+                <div style={{ fontSize: "34px", fontWeight: 1000, letterSpacing: "-0.4px", marginBottom: "10px" }}>
+                  €12,95 <span style={{ fontSize: "14px", color: "#5b677a", fontWeight: 900 }}>excl. BTW / maand</span>
+                </div>
+
+                <div 
+                  className="w-full rounded-[14px] p-3 text-center font-black mb-3"
+                  style={{ 
+                    background: "linear-gradient(180deg, rgba(31,95,174,.08), rgba(31,95,174,.02))",
+                    border: "1px solid rgba(31,95,174,.25)"
+                  }}
+                >
+                  Geselecteerd
+                </div>
+
+                <ul className="space-y-0">
+                  {[
+                    "Bedrijfsprofiel in lokaal netwerk",
+                    "Ontdek en ontmoet ondernemers",
+                    "Volledige stemrecht in de coöperatie",
+                    "Basischeck & weerbaarheidsbadges",
+                    "RegioBot & WOO-bibliotheek",
+                    "Printbare overzichten",
+                  ].map((feature, i) => (
+                    <li 
+                      key={i}
+                      className="flex gap-2.5 items-start py-2.5 font-bold"
+                      style={{ borderTop: i > 0 ? "1px solid #e6ebf2" : "none" }}
+                    >
+                      <span 
+                        className="w-[22px] h-[22px] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+                        style={{ 
+                          background: "rgba(31,95,174,.12)",
+                          color: "#1f5fae",
+                          border: "1px solid rgba(31,95,174,.18)"
+                        }}
+                      >
                         <Check className="w-3 h-3" />
                       </span>
-                      <span>{item}</span>
+                      <span>{feature}</span>
                     </li>
                   ))}
                 </ul>
-                <div className="flex flex-wrap gap-3 items-center">
-                  <Link href="/start?plan=pro">
-                    <Button data-testid="button-start-pro">Start Pro</Button>
-                  </Link>
-                  <a href="#scope">
-                    <Button variant="outline" data-testid="button-pricing-pro-scope">Bekijk scope</Button>
-                  </a>
-                </div>
-                <p className="text-muted-foreground text-xs mt-3" data-testid="text-pricing-pro-fineprint">OpenRegio is in opbouw: Pro groeit mee met regio's en documentsets.</p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </section>
+              </div>
 
-      {/* Contact CTA */}
-      <section className="relative py-12 px-4" data-testid="section-cta">
-        <div className="max-w-6xl mx-auto">
-          <Card className="bg-card/90 dark:bg-card/80" data-testid="card-cta">
-            <CardContent className="p-5 flex flex-wrap items-start justify-between gap-6">
-              <div className="max-w-xl">
-                <h2 className="font-accent text-xl md:text-2xl font-bold mb-2" data-testid="text-cta-title">Organiseer jouw regio</h2>
-                <p className="text-muted-foreground leading-relaxed" data-testid="text-cta-desc">
-                  OpenRegio is geen hype. Het is structuur. Als je regio meedoet, ontstaat er voorspelbaarheid.
-                </p>
-                <p className="text-muted-foreground text-xs mt-2" data-testid="text-cta-fineprint">
-                  Toegang kan regionaal worden gefaseerd. Meld je aan om op de hoogte te blijven.
-                </p>
+              {/* Pro Plan */}
+              <div 
+                className="rounded-[22px] p-4 relative overflow-hidden"
+                style={{ 
+                  background: "#ffffff",
+                  border: "2px solid rgba(242,138,26,.40)",
+                  boxShadow: "0 16px 40px rgba(15,23,42,.10)"
+                }}
+                data-testid="card-plan-pro"
+              >
+                <div 
+                  className="absolute top-3.5 right-3.5 px-3 py-2 rounded-full text-white font-black text-xs"
+                  style={{ background: "#1f5fae", boxShadow: "0 12px 30px rgba(31,95,174,.20)" }}
+                >
+                  Populair
+                </div>
+
+                <h3 className="font-bold" style={{ fontSize: "20px", marginBottom: "6px" }}>Pro-bijdrager</h3>
+                <p style={{ color: "#5b677a", fontSize: "13px", marginBottom: "10px" }}>Draag extra bij en krijg krachtige tools</p>
+                <div style={{ fontSize: "34px", fontWeight: 1000, letterSpacing: "-0.4px", marginBottom: "10px" }}>
+                  €24 <span style={{ fontSize: "14px", color: "#5b677a", fontWeight: 900 }}>excl. BTW / maand</span>
+                </div>
+
+                <div 
+                  className="w-full rounded-[14px] p-3 text-center font-black mb-3"
+                  style={{ 
+                    background: "linear-gradient(180deg, rgba(242,138,26,.10), rgba(242,138,26,.02))",
+                    border: "1px solid rgba(242,138,26,.28)"
+                  }}
+                >
+                  Selecteer dit plan
+                </div>
+
+                <ul className="space-y-0">
+                  {[
+                    "Alles van Basis-lid",
+                    "RegioBot: WOO & regelgeving AI",
+                    "Persoonlijke WOO-bibliotheek",
+                    "Printbare overzichten",
+                    "Prioriteit ondersteuning",
+                    "Bouw mee aan nieuwe features",
+                  ].map((feature, i) => (
+                    <li 
+                      key={i}
+                      className="flex gap-2.5 items-start py-2.5 font-bold"
+                      style={{ borderTop: i > 0 ? "1px solid #e6ebf2" : "none" }}
+                    >
+                      <span 
+                        className="w-[22px] h-[22px] rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+                        style={{ 
+                          background: "rgba(242,138,26,.14)",
+                          color: "#f28a1a",
+                          border: "1px solid rgba(242,138,26,.22)"
+                        }}
+                      >
+                        <Check className="w-3 h-3" />
+                      </span>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <div className="flex flex-wrap gap-3">
-                <Link href="/start?plan=basic">
-                  <Button data-testid="button-cta-start">Word lid</Button>
-                </Link>
-                <a href="#lidmaatschap">
-                  <Button variant="outline" data-testid="button-cta-lidmaatschap">Bekijk lidmaatschap</Button>
-                </a>
+            </div>
+
+            {/* CTA Strip */}
+            <div 
+              id="contact"
+              className="mt-5 rounded-[28px] overflow-hidden grid md:grid-cols-[1.4fr_.6fr]"
+              style={{ 
+                background: "radial-gradient(900px 400px at 20% 20%, rgba(255,255,255,.22), transparent 60%), linear-gradient(135deg, #0e3f86, #1f5fae)",
+                boxShadow: "0 16px 40px rgba(15,23,42,.10)",
+                border: "1px solid rgba(15,23,42,.06)",
+                color: "#fff"
+              }}
+              data-testid="section-cta"
+            >
+              <div className="p-6">
+                <h3 className="font-bold" style={{ fontSize: "30px", letterSpacing: "-0.4px", marginBottom: "8px" }} data-testid="text-cta-title">Zet de eerste stap!</h3>
+                <p style={{ color: "rgba(255,255,255,.86)", marginBottom: "14px", maxWidth: "70ch" }}>
+                  Start meteen met lokale samenwerking. Vul je e-mailadres in en ga door naar betaling.
+                </p>
+
+                <form className="flex flex-wrap gap-2.5 items-center mt-2.5" onSubmit={(e) => { e.preventDefault(); window.location.href = "/start?plan=basic"; }}>
+                  <input 
+                    type="email" 
+                    required 
+                    placeholder="E-mailadres"
+                    className="flex-1 min-w-[260px] px-3.5 py-3.5 rounded-[14px] text-sm outline-none"
+                    style={{ border: "1px solid rgba(255,255,255,.25)", background: "#fff", color: "#0f172a" }}
+                    data-testid="input-cta-email"
+                  />
+                  <button 
+                    type="submit"
+                    className="inline-flex items-center justify-center px-4 py-3.5 rounded-full font-black text-sm"
+                    style={{ background: "#f28a1a", color: "#1b1307", boxShadow: "0 14px 40px rgba(242,138,26,.25)" }}
+                    data-testid="button-cta-submit"
+                  >
+                    Lidmaatschap starten
+                  </button>
+                </form>
+
+                <div style={{ marginTop: "10px", color: "rgba(255,255,255,.78)", fontSize: "12px" }}>
+                  Direct door naar onboarding en betaling.
+                </div>
               </div>
-            </CardContent>
-          </Card>
-        </div>
-      </section>
+
+              <div 
+                className="p-6 flex flex-col justify-center gap-2.5"
+                style={{ 
+                  background: "radial-gradient(700px 300px at 40% 40%, rgba(255,255,255,.14), transparent 60%), linear-gradient(135deg, rgba(242,138,26,.95), rgba(255,159,45,.92))",
+                  color: "#1b1307"
+                }}
+              >
+                <h4 className="font-bold" style={{ fontSize: "22px", margin: 0 }}>Neem contact op</h4>
+                <ul className="font-black pl-4 space-y-1.5">
+                  <li className="flex items-center gap-2"><MapPinned className="w-4 h-4" /> Nederland</li>
+                  <li className="flex items-center gap-2"><Phone className="w-4 h-4" /> +31 (0) ...</li>
+                  <li className="flex items-center gap-2"><Mail className="w-4 h-4" /> info@openregio.nl</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </section>
+      </main>
 
       {/* Footer */}
-      <footer className="relative border-t border-border py-8 px-4 text-muted-foreground text-sm" data-testid="footer">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex flex-wrap items-center justify-between gap-4">
-            <div data-testid="text-footer-brand"><strong className="text-foreground">OpenRegio</strong> — regionale infrastructuur (in opbouw)</div>
-            <div className="flex flex-wrap gap-1">
-              <a href="#pijlers" className="px-2 py-1 rounded-md hover-elevate" data-testid="link-footer-pijlers">Pijlers</a>
-              <a href="#scope" className="px-2 py-1 rounded-md hover-elevate" data-testid="link-footer-scope">Scope</a>
-              <a href="#lidmaatschap" className="px-2 py-1 rounded-md hover-elevate" data-testid="link-footer-lidmaatschap">Lidmaatschap</a>
-              <Link href="/login" className="px-2 py-1 rounded-md hover-elevate" data-testid="link-footer-login">Inloggen</Link>
+      <footer className="mt-7 py-7" style={{ background: "#0b1020", color: "#e5e7eb" }} data-testid="footer">
+        <div className="max-w-[1120px] mx-auto px-4">
+          <div className="flex flex-wrap items-start justify-between gap-4">
+            <div className="flex gap-3 items-center">
+              <div 
+                className="w-9 h-9 rounded-xl relative"
+                style={{ 
+                  background: "conic-gradient(from 200deg, #1f5fae, #3aa0ff, #f28a1a, #5ccf8a, #1f5fae)",
+                  boxShadow: "0 8px 22px rgba(15,23,42,.08)"
+                }}
+              >
+                <div className="absolute rounded-lg border" style={{ inset: "11px", borderColor: "rgba(255,255,255,.6)" }} />
+              </div>
+              <div>
+                <div className="font-black">OpenRegio</div>
+                <div style={{ fontSize: "12px", color: "rgba(229,231,235,.70)" }}>Samen bouwen aan een sterke regio</div>
+              </div>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <a href="#home" className="opacity-90 hover:opacity-100 hover:underline">Home</a>
+              <span className="opacity-50">·</span>
+              <a href="#cases" className="opacity-90 hover:opacity-100 hover:underline">Cases</a>
+              <span className="opacity-50">·</span>
+              <a href="#member" className="opacity-90 hover:opacity-100 hover:underline">Word lid</a>
+              <span className="opacity-50">·</span>
+              <a href="#contact" className="opacity-90 hover:opacity-100 hover:underline">Contact</a>
             </div>
           </div>
-          <p className="text-xs mt-4 leading-relaxed" data-testid="text-footer-woo">
-            WOO = Wet open overheid (openbare overheidsinformatie). OpenRegio gebruikt openbare bronnen en organiseert die per regio.
-          </p>
+          <div className="h-px my-3.5" style={{ background: "rgba(255,255,255,.12)" }} />
+          <div style={{ fontSize: "12px", color: "rgba(229,231,235,.70)" }}>
+            © {new Date().getFullYear()} OpenRegio — Alle rechten voorbehouden. · Privacybeleid · Disclaimer
+          </div>
         </div>
       </footer>
     </div>
