@@ -523,8 +523,14 @@ export default function HomePage() {
             </div>
           </div>
           <div className="h-px my-3.5" style={{ background: "rgba(255,255,255,.12)" }} />
-          <div style={{ fontSize: "12px", color: "rgba(229,231,235,.70)" }}>
-            © {new Date().getFullYear()} OpenRegio — Alle rechten voorbehouden. · Privacybeleid · Disclaimer
+          <div className="flex flex-wrap gap-1" style={{ fontSize: "12px", color: "rgba(229,231,235,.70)" }}>
+            <span>© {new Date().getFullYear()} OpenRegio — Alle rechten voorbehouden.</span>
+            <span className="opacity-50">·</span>
+            <Link href="/privacy" className="hover:underline hover:opacity-100" data-testid="link-footer-privacy">Privacybeleid</Link>
+            <span className="opacity-50">·</span>
+            <Link href="/disclaimer" className="hover:underline hover:opacity-100" data-testid="link-footer-disclaimer">Disclaimer</Link>
+            <span className="opacity-50">·</span>
+            <Link href="/cookiebeleid" className="hover:underline hover:opacity-100" data-testid="link-footer-cookiebeleid">Cookiebeleid</Link>
           </div>
         </div>
       </footer>
