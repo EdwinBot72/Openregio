@@ -22,8 +22,8 @@ import { REGIONS } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 
 const BRAND = {
-  purple: "#8665C0",
-  purpleDark: "#6F4FB3",
+  purple: "#1f5fae",
+  purpleDark: "#174a8a",
 };
 
 const nav = [
@@ -241,7 +241,7 @@ function LandingCard({ children, className = "" }: { children: React.ReactNode; 
 
 function LandingButton({ href, children, variant = "primary" }: { href: string; children: React.ReactNode; variant?: "primary" | "secondary" }) {
   const base = "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black";
-  const primary = "bg-[#8665C0] text-white hover:opacity-90 focus:ring-[#8665C0]";
+  const primary = "bg-[#1f5fae] text-white hover:opacity-90 focus:ring-[#1f5fae]";
   const secondary = "border border-white/15 bg-white/5 text-white hover:bg-white/10 focus:ring-white/40";
   const cls = cx(base, variant === "primary" ? primary : secondary);
 
@@ -371,7 +371,7 @@ function PricingSignup() {
       <div
         className="rounded-3xl border border-white/10 p-8"
         style={{
-          background: `linear-gradient(135deg, rgba(134,101,192,0.35) 0%, rgba(0,0,0,0.55) 55%, rgba(134,101,192,0.18) 100%)`,
+          background: `linear-gradient(135deg, rgba(31,95,174,0.35) 0%, rgba(0,0,0,0.55) 55%, rgba(31,95,174,0.18) 100%)`,
         }}
       >
         <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
@@ -623,7 +623,7 @@ export default function LandingPage() {
       className="min-h-screen bg-black text-white"
       style={{
         background:
-          "radial-gradient(1200px 600px at 20% 10%, rgba(134,101,192,0.28), transparent 55%), radial-gradient(900px 500px at 90% 20%, rgba(134,101,192,0.18), transparent 60%), linear-gradient(180deg, #07070B 0%, #000 100%)",
+          "radial-gradient(1200px 600px at 20% 10%, rgba(31,95,174,0.28), transparent 55%), radial-gradient(900px 500px at 90% 20%, rgba(31,95,174,0.18), transparent 60%), linear-gradient(180deg, #07070B 0%, #000 100%)",
       }}
     >
       <header className="sticky top-0 z-50 border-b border-white/10 bg-black/60 backdrop-blur">
@@ -720,7 +720,7 @@ export default function LandingPage() {
               Zo ontstaat rust, overzicht en continuïteit.
             </p>
 
-            <p className="mt-3 text-sm font-semibold" style={{ color: "#8665C0" }}>
+            <p className="mt-3 text-sm font-semibold" style={{ color: "#1f5fae" }}>
               Elke regio die dit niet organiseert, verliest werk en grip zonder het te merken.
             </p>
 
@@ -817,7 +817,7 @@ export default function LandingPage() {
             const Icon = a.icon;
             return (
               <LandingCard key={a.title}>
-                <Icon className="w-8 h-8 text-[#8665C0]" />
+                <Icon className="w-8 h-8 text-[#1f5fae]" />
                 <div className="mt-3 text-lg font-semibold">{a.title}</div>
                 <div className="mt-2 text-sm text-white/70">{a.text}</div>
               </LandingCard>
@@ -847,7 +847,7 @@ export default function LandingPage() {
                     <div className="text-sm font-semibold text-white/80">{p.kicker}</div>
                     <div className="mt-1 text-2xl font-semibold">{p.title}</div>
                   </div>
-                  <Icon className="w-8 h-8 text-[#8665C0]" />
+                  <Icon className="w-8 h-8 text-[#1f5fae]" />
                 </div>
 
                 <ul className="mt-4 space-y-2 text-sm text-white/70">

@@ -82,7 +82,7 @@ export default {
           offline: "rgb(156 163 175)",
         },
         regio: {
-          purple: "#6A5CFF",
+          purple: "#1f5fae",
           blue: "#2F6FED",
           graph: "#2B2E34",
           alert: "#F59E0B",
