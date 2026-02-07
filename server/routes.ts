@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema, insertBedrijfsprofielSchema, regioBotChatSchema, visibilitySettingsSchema, DEFAULT_VISIBILITY_SETTINGS, insertCrewProfileSchema, insertCrewRequestSchema, insertCrewApplicationSchema, CREW_CATEGORIES, users } from "@shared/schema";
+import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema, insertBedrijfsprofielSchema, regioBotChatSchema, visibilitySettingsSchema, DEFAULT_VISIBILITY_SETTINGS, insertCrewProfileSchema, insertCrewRequestSchema, insertCrewApplicationSchema, CREW_CATEGORIES, users, ragDocuments, documents } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { createMollieClient } from "@mollie/api-client";
@@ -14,8 +14,50 @@ import bcrypt from "bcrypt";
 import { upload, uploadMemory, getDocumentType } from "./middleware/upload";
 import { runRegioBot } from "./regiobot";
 import { db } from "db";
-import { eq, sql } from "drizzle-orm";
+import { eq, sql, gte, and, count } from "drizzle-orm";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
+import type { Request, Response, NextFunction } from "express";
+
+const DAILY_UPLOAD_LIMIT_BASIC = 1;
+
+async function checkDailyUploadLimit(req: Request, res: Response, next: NextFunction) {
+  const user = (req as any).user;
+  if (!user?.id) return res.status(401).json({ error: "Niet ingelogd" });
+
+  if (user.plan === "pro") return next();
+
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+
+  const [ragCount] = await db
+    .select({ total: count() })
+    .from(ragDocuments)
+    .where(and(
+      eq(ragDocuments.userId, user.id),
+      gte(ragDocuments.createdAt, todayStart)
+    ));
+
+  const [docCount] = await db
+    .select({ total: count() })
+    .from(documents)
+    .where(and(
+      eq(documents.userId, user.id),
+      gte(documents.createdAt, todayStart)
+    ));
+
+  const totalUploads = (ragCount?.total ?? 0) + (docCount?.total ?? 0);
+
+  if (totalUploads >= DAILY_UPLOAD_LIMIT_BASIC) {
+    return res.status(429).json({
+      error: "Daglimiet bereikt",
+      message: `Als basis-lid kun je ${DAILY_UPLOAD_LIMIT_BASIC} document per dag uploaden. Upgrade naar Pro voor onbeperkt uploaden.`,
+      limit: DAILY_UPLOAD_LIMIT_BASIC,
+      used: totalUploads,
+    });
+  }
+
+  next();
+}
 
 // Initialize Mollie client (requires MOLLIE_API_KEY environment variable)
 const mollieClient = process.env.MOLLIE_API_KEY 
@@ -859,7 +901,7 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
   });
 
   // BLOK 5: RegioBot document upload endpoint (Pro-only)
-  app.post("/api/regiobot/upload", requirePro, upload.single('file'), async (req, res) => {
+  app.post("/api/regiobot/upload", requireAuth, checkDailyUploadLimit, upload.single('file'), async (req, res) => {
     try {
       if (!req.user) {
         return res.status(401).json({ error: "Niet geauthenticeerd" });
@@ -897,7 +939,7 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
   });
 
   // Get user's uploaded documents
-  app.get("/api/regiobot/documents", requirePro, async (req, res) => {
+  app.get("/api/regiobot/documents", requireAuth, async (req, res) => {
     try {
       if (!req.user) {
         return res.status(401).json({ error: "Niet geauthenticeerd" });
@@ -944,7 +986,7 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
   });
 
   // RAG System Routes - Document Upload and Vector Search
-  app.post("/api/rag/documents", requirePro, uploadMemory.single('file'), async (req, res) => {
+  app.post("/api/rag/documents", requireAuth, checkDailyUploadLimit, uploadMemory.single('file'), async (req, res) => {
     try {
       const user = req.user;
       if (!user?.id) return res.status(401).json({ error: "Niet ingelogd" });
@@ -1061,7 +1103,7 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
     }
   });
 
-  app.post("/api/rag/ask", requirePro, async (req, res) => {
+  app.post("/api/rag/ask", requireAuth, async (req, res) => {
     try {
       const user = req.user;
       if (!user?.id) return res.status(401).json({ error: "Niet ingelogd" });
@@ -1085,7 +1127,7 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
     }
   });
 
-  app.get("/api/rag/documents", requirePro, async (req, res) => {
+  app.get("/api/rag/documents", requireAuth, async (req, res) => {
     try {
       const user = req.user;
       if (!user?.id) return res.status(401).json({ error: "Niet ingelogd" });
@@ -1105,7 +1147,7 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
     }
   });
 
-  app.delete("/api/rag/documents/:id", requirePro, async (req, res) => {
+  app.delete("/api/rag/documents/:id", requireAuth, async (req, res) => {
     try {
       const user = req.user;
       if (!user?.id) return res.status(401).json({ error: "Niet ingelogd" });

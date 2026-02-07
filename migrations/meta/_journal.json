@@ -8,6 +8,13 @@
       "when": 1763636292080,
       "tag": "0000_thick_warhawk",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1770488648918,
+      "tag": "0001_yielding_tombstone",
+      "breakpoints": true
     }
   ]
 }

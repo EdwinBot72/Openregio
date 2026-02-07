@@ -22,7 +22,7 @@ The backend utilizes Express.js with TypeScript, adhering to a RESTful API desig
 
 ### Data Storage Solutions
 
-PostgreSQL is the primary database, accessed via the Neon serverless driver, with Drizzle ORM managing schema and queries. Key data models include `Bedrijfsprofielen` (business profiles), `Proposals` for democratic governance, `Votes`, `Blogs`, `Activities`, and `User Profiles` with features like `pain points` for personalization and `onboarding_tokens` for secure initial access.
+PostgreSQL is the primary database, accessed via the `pg` driver (node-postgres), with Drizzle ORM managing schema and queries. Database connection is in `db/index.ts`. Key data models include `Bedrijfsprofielen` (business profiles), `Proposals` for democratic governance, `Votes`, `Blogs`, `Activities`, and `User Profiles` with features like `pain points` for personalization and `onboarding_tokens` for secure initial access.
 
 **RAG Vector Storage**: The platform uses pgvector extension for semantic document search. Tables:
 - `rag_documents`: User-uploaded documents (PDF, images, text) with metadata including `woo_category`
@@ -84,6 +84,22 @@ E-mail functionaliteit is geïmplementeerd via SMTP:
   - `SMTP_USER` = info@openregio.nl
   - `SMTP_PASSWORD` = (secret)
   - `APP_BASE_URL` = https://openregio.replit.app
+
+## Upload Policy
+
+Document upload is available to all authenticated users with tiered limits:
+- **Basic/Free**: 1 upload per day (enforced via `checkDailyUploadLimit` middleware in `server/routes.ts`)
+- **Pro**: Unlimited uploads
+- Middleware checks `rag_documents` table for today's uploads by the user
+- RegioBot chat remains Pro-only
+
+## Dashboard
+
+Clean 3-card layout (single column, max-w-3xl):
+1. **Regio-analyse** → links to /regio-analyse (public)
+2. **Brief uploaden** → links to /woo-bibliotheek (auth required)
+3. **WOO-verzoek maken** → links to /woo-wizard (auth required)
+Admin section shown conditionally for admin users.
 
 ## Pending Tasks
 

@@ -3,32 +3,17 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Building2,
-  Users,
-  MessageCircle,
-  ShieldCheck,
-  Printer,
-  Coins,
-  Bot,
+  BarChart3,
+  FileUp,
+  FileText,
   Download,
   Shield,
+  Users,
+  ArrowRight,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
-import type { Bedrijfsprofiel } from "@shared/schema";
-
-interface RegionStats {
-  count: number;
-  latestMember: Bedrijfsprofiel | null;
-  region: string | null;
-}
-
-interface PostStats {
-  openPosts: number;
-  userPosts: number;
-  region: string | null;
-}
 
 export default function DashboardPage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -38,33 +23,20 @@ export default function DashboardPage() {
     enabled: !!user,
   });
 
-  const { data: regionStats } = useQuery<RegionStats>({
-    queryKey: ["/api/region-stats/me"],
-    enabled: !!user,
-  });
-
-  const { data: postStats } = useQuery<PostStats>({
-    queryKey: ["/api/post-stats/me"],
-    enabled: !!user,
-  });
-
   if (authLoading) {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
         <Skeleton className="h-16 w-full" />
-        <div className="grid md:grid-cols-2 gap-4">
-          <Skeleton className="h-48" />
-          <Skeleton className="h-48" />
-          <Skeleton className="h-48" />
-          <Skeleton className="h-48" />
-        </div>
+        <Skeleton className="h-40" />
+        <Skeleton className="h-40" />
+        <Skeleton className="h-40" />
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="max-w-6xl mx-auto px-4 py-8">
+      <div className="max-w-3xl mx-auto px-4 py-8">
         <Card className="p-8 text-center">
           <p className="text-muted-foreground">Log opnieuw in om door te gaan.</p>
         </Card>
@@ -72,374 +44,124 @@ export default function DashboardPage() {
     );
   }
 
-  // TODO: haal dit later uit de API
-  const basischeckScore = 3; // 0–5
-  const basischeckDone = basischeckScore > 0;
-
   const isPro = user.plan === "pro";
   const isAdmin = user.isAdmin || false;
   const displayName = bedrijfsprofiel?.naam || user.firstName || "ondernemer";
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
-      {/* Header */}
-      <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div className="space-y-2">
-          <h1 className="text-2xl md:text-3xl font-bold" data-testid="text-welcome">
+    <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+      <header className="space-y-2">
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <h1 className="text-2xl font-bold" data-testid="text-welcome">
             Welkom, {displayName}
           </h1>
-          <p className="text-sm font-medium text-foreground">
-            Dit dashboard organiseert werk in je regio en maakt ondernemersregels doorzichtig via documenten (WOO).
-          </p>
-          <p className="text-xs text-muted-foreground">
-            Geen boetes. Geen privézaken. Alleen wat ondernemers direct raakt.
-          </p>
+          <Badge variant={isPro ? "default" : "secondary"} data-testid="badge-plan">
+            {isPro ? "Pro-bijdrager" : "Basis-lid"}
+          </Badge>
         </div>
-        <div className="flex flex-col items-end gap-1">
-          <div className="inline-flex items-center gap-2 text-xs px-3 py-1 rounded-full bg-muted">
-            <span className="font-semibold">Lidmaatschap:</span>
-            <Badge variant={isPro ? "default" : "secondary"} data-testid="badge-plan">
-              {isPro ? "Pro-bijdrager" : "Basis-lid"}
-            </Badge>
-          </div>
-          <span className="text-[10px] text-muted-foreground">
-            {isPro ? "Pro-bijdrager: je bouwt mee." : "Basis-lid: je bent er volledig bij."}
-          </span>
-        </div>
+        <p className="text-sm text-muted-foreground">
+          Kies wat je wilt doen. Geen omwegen, direct aan de slag.
+        </p>
       </header>
 
-      {/* Hoofdtegels */}
-      <section className="grid md:grid-cols-2 gap-4">
-        {/* Mijn bedrijf */}
-        <Card data-testid="card-mijn-bedrijf">
+      <section className="space-y-4">
+        <Card data-testid="card-regio-analyse" className="hover-elevate">
           <CardContent className="p-5 flex flex-col gap-3">
             <div className="flex items-center gap-3">
               <div className="p-2 rounded-full bg-regio-blue/10">
-                <Building2 className="w-5 h-5 text-regio-blue" />
+                <BarChart3 className="w-5 h-5 text-regio-blue" />
               </div>
-              <div>
-                <h2 className="font-semibold">Mijn bedrijf</h2>
+              <div className="flex-1">
+                <h2 className="font-semibold">Regio-analyse</h2>
                 <p className="text-sm text-muted-foreground">
-                  Zo zien andere leden jouw profiel in OpenRegio.
+                  Ontdek in 8 vragen waar jouw regio sterk in is en waar kansen liggen.
                 </p>
               </div>
             </div>
-            <ul className="text-xs text-muted-foreground list-disc list-inside">
-              <li>
-                Profielstatus:{" "}
-                <span className="font-medium text-foreground">
-                  {bedrijfsprofiel?.status === "actief" ? "actief" : "bijna compleet"}
-                </span>
-              </li>
-              <li>Laatst bijgewerkt: recent</li>
-            </ul>
-            <div className="mt-2">
-              <Link href="/bedrijfsprofiel">
-                <Button size="sm" data-testid="button-edit-profile">
-                  Bewerk bedrijfsprofiel
+            <div className="mt-1">
+              <Link href="/regio-analyse">
+                <Button size="sm" data-testid="button-start-analyse">
+                  Start analyse
+                  <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
               </Link>
             </div>
           </CardContent>
         </Card>
 
-        {/* RegioMarkt: Beschikbare ondernemers */}
-        <Card data-testid="card-leden">
-          <CardContent className="p-5 flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-regio-blue/10">
-                  <Users className="w-5 h-5 text-regio-blue" />
-                </div>
-                <div>
-                  <h2 className="font-semibold">RegioMarkt: Beschikbare ondernemers</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Ondernemers in jouw omgeving die je direct kunt bellen of benaderen.
-                  </p>
-                </div>
-              </div>
-              <Badge className="bg-regio-blue/10 text-regio-blue border-regio-blue/20 text-[10px] shrink-0">ALLE LEDEN</Badge>
-            </div>
-            {regionStats?.region ? (
-              <ul className="text-xs text-muted-foreground list-disc list-inside">
-                <li>Actieve leden in {regionStats.region}: {regionStats.count}</li>
-                {regionStats.latestMember && (
-                  <li>Nieuwste lid: {regionStats.latestMember.naam}</li>
-                )}
-              </ul>
-            ) : (
-              <p className="text-xs text-muted-foreground">
-                Vul eerst je bedrijfsprofiel in om leden in jouw regio te zien.
-              </p>
-            )}
-            <div className="mt-2">
-              {regionStats?.region ? (
-                <Link href={`/network?regio=${encodeURIComponent(regionStats.region)}`}>
-                  <Button size="sm" data-testid="button-view-network">
-                    Bekijk ledenlijst
-                  </Button>
-                </Link>
-              ) : (
-                <Link href="/bedrijfsprofiel">
-                  <Button size="sm" variant="outline" data-testid="button-create-profile">
-                    Maak bedrijfsprofiel
-                  </Button>
-                </Link>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* RegioMarkt: Werk doorverwijzen */}
-        <Card data-testid="card-vraag-aanbod">
-          <CardContent className="p-5 flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-regio-blue/10">
-                  <MessageCircle className="w-5 h-5 text-regio-blue" />
-                </div>
-                <div>
-                  <h2 className="font-semibold">RegioMarkt: Werk doorverwijzen</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Plaats een vraag of aanbod voor ondernemers in jouw regio.
-                  </p>
-                </div>
-              </div>
-              <Badge className="bg-regio-blue/10 text-regio-blue border-regio-blue/20 text-[10px] shrink-0">ALLE LEDEN</Badge>
-            </div>
-            {postStats?.region ? (
-              <ul className="text-xs text-muted-foreground list-disc list-inside">
-                <li>Berichten in {postStats.region}: {postStats.openPosts}</li>
-                <li>Jouw eigen berichten: {postStats.userPosts}</li>
-              </ul>
-            ) : (
-              <p className="text-xs text-muted-foreground">
-                Vul eerst je bedrijfsprofiel in om berichten in jouw regio te zien.
-              </p>
-            )}
-            <div className="mt-2 flex flex-wrap gap-2">
-              <Link href="/network?tab=bord">
-                <Button size="sm" data-testid="button-view-board">
-                  Naar bord
-                </Button>
-              </Link>
-              <Link href="/network?tab=nieuw&type=vraag">
-                <Button variant="outline" size="sm" data-testid="button-plaats-vraag">
-                  Plaats vraag
-                </Button>
-              </Link>
-              <Link href="/network?tab=nieuw&type=aanbod">
-                <Button variant="outline" size="sm" data-testid="button-plaats-aanbod">
-                  Plaats aanbod
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Basischeck / offline modus */}
-        <Card data-testid="card-basischeck">
-          <CardContent className="p-5 flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-regio-graph/10">
-                  <ShieldCheck className="w-5 h-5 text-regio-graph" />
-                </div>
-                <div>
-                  <h2 className="font-semibold">Basischeck: Offline weerbaarheid</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Cash, papieren bonnen, bereikbaarheid en offline werken.
-                  </p>
-                </div>
-              </div>
-              <Badge className="bg-regio-blue/10 text-regio-blue border-regio-blue/20 text-[10px] shrink-0">ALLE LEDEN</Badge>
-            </div>
-
-            {basischeckDone ? (
-              <>
-                <p className="text-sm">
-                  Jouw basisprofiel: <span className="font-semibold">{basischeckScore}/5 punten</span>.
-                </p>
-                <ul className="text-xs text-muted-foreground list-disc list-inside">
-                  <li>Cash mogelijk: ja</li>
-                  <li>Bonnenblok: ja</li>
-                  <li>Papieren telefoonlijst: nog niet ingesteld</li>
-                </ul>
-                <div className="mt-2">
-                  <Link href="/basischeck">
-                    <Button size="sm" data-testid="button-view-basischeck">
-                      Bekijk en verbeter
-                    </Button>
-                  </Link>
-                </div>
-              </>
-            ) : (
-              <>
-                <p className="text-sm text-muted-foreground">
-                  Je basischeck is nog niet ingevuld. Met 5 simpele vragen zie je hoe stevig
-                  jouw bedrijf blijft draaien als systemen even niet meewerken.
-                </p>
-                <div className="mt-2">
-                  <Link href="/basischeck">
-                    <Button size="sm" data-testid="button-do-basischeck">
-                      Doe de Basischeck
-                    </Button>
-                  </Link>
-                </div>
-              </>
-            )}
-          </CardContent>
-        </Card>
-      </section>
-
-      {/* Onderste rij: print, RegioPunten & RegioBot */}
-      <section className="grid md:grid-cols-3 gap-4">
-        <Card data-testid="card-print" className={!isPro ? "opacity-60" : ""}>
-          <CardContent className="p-5 flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-regio-graph/10">
-                  <Printer className="w-5 h-5 text-regio-graph" />
-                </div>
-                <div>
-                  <h2 className="font-semibold">Printbare overzichten</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Voor als je met pen, papier en telefoon wilt werken.
-                  </p>
-                </div>
-              </div>
-              <Badge className="bg-regio-purple text-white text-[10px] shrink-0">PRO-BIJDRAGER</Badge>
-            </div>
-            {isPro ? (
-              <div className="flex flex-wrap gap-2 mt-1">
-                <Button size="sm" variant="outline" data-testid="button-print-members">
-                  Ledenlijst printen
-                </Button>
-                <Button size="sm" variant="outline" data-testid="button-print-basischeck">
-                  Basischeck printen
-                </Button>
-              </div>
-            ) : (
-              <div className="mt-2">
-                <Link href="/lidmaatschap">
-                  <Button size="sm" variant="outline" data-testid="button-upgrade-pro-print">
-                    Word Pro-bijdrager
-                  </Button>
-                </Link>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card data-testid="card-regiopunten">
+        <Card data-testid="card-upload-brief" className="hover-elevate">
           <CardContent className="p-5 flex flex-col gap-3">
             <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-regio-alert/10">
-                <Coins className="w-5 h-5 text-regio-alert" />
+              <div className="p-2 rounded-full bg-regio-blue/10">
+                <FileUp className="w-5 h-5 text-regio-blue" />
               </div>
-              <div>
-                <h2 className="font-semibold">RegioPunten (pilot)</h2>
+              <div className="flex-1">
+                <h2 className="font-semibold">Brief uploaden</h2>
                 <p className="text-sm text-muted-foreground">
-                  Interne strippenkaart voor doorverwijzingen en hulp.
+                  Upload een brief of document. We checken het en geven verbetersuggesties.
                 </p>
               </div>
+              {!isPro && (
+                <Badge variant="secondary" className="text-[10px] shrink-0">1x per dag</Badge>
+              )}
             </div>
-            <p className="text-sm">
-              Jouw saldo: <span className="font-semibold">0 RegioPunten</span>
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Later voor beloningen en korting binnen OpenRegio.
-            </p>
+            <div className="mt-1">
+              <Link href="/woo-bibliotheek">
+                <Button size="sm" data-testid="button-upload-brief">
+                  Upload document
+                  <ArrowRight className="w-4 h-4 ml-1" />
+                </Button>
+              </Link>
+            </div>
           </CardContent>
         </Card>
 
-        {/* RegioBot: WOO & regelgeving - voor Pro-bijdragers */}
-        <Card data-testid="card-regiobot" className={!isPro ? "opacity-60" : ""}>
+        <Card data-testid="card-woo-verzoek" className="hover-elevate">
           <CardContent className="p-5 flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-regio-purple/10">
-                  <Bot className="w-5 h-5 text-regio-purple" />
-                </div>
-                <div>
-                  <h2 className="font-semibold">RegioBot: WOO & regelgeving</h2>
-                  <p className="text-sm text-muted-foreground">
-                    Leest WOO-verzoeken, besluiten, mandaten en beleidsregels.
-                  </p>
-                </div>
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-full bg-regio-blue/10">
+                <FileText className="w-5 h-5 text-regio-blue" />
               </div>
-              <Badge className="bg-regio-purple text-white text-[10px] shrink-0">PRO-BIJDRAGER</Badge>
+              <div className="flex-1">
+                <h2 className="font-semibold">WOO-verzoek maken</h2>
+                <p className="text-sm text-muted-foreground">
+                  Genereer een professioneel WOO-verzoek. Kies je onderwerp, wij schrijven de brief.
+                </p>
+              </div>
             </div>
-            <p className="text-xs text-muted-foreground">
-              Toont wat er is en wat ontbreekt. Geen advies, geen mening.
-            </p>
-            {isPro ? (
-              <div className="mt-2 flex flex-wrap gap-2">
-                <Link href="/regiobot?preset=woo">
-                  <Button size="sm" data-testid="button-regiobot-woo">
-                    WOO-verzoek opstellen
-                  </Button>
-                </Link>
-                <Link href="/regiobot?preset=besluit">
-                  <Button size="sm" variant="outline" data-testid="button-regiobot-besluit">
-                    Besluit samenvatten
-                  </Button>
-                </Link>
-                <Link href="/regiobot?preset=mandaat">
-                  <Button size="sm" variant="outline" data-testid="button-regiobot-mandaat">
-                    Mandaat check
-                  </Button>
-                </Link>
-                <Link href="/regiobot?preset=ontbrekend">
-                  <Button size="sm" variant="outline" data-testid="button-regiobot-ontbrekend">
-                    Wat ontbreekt?
-                  </Button>
-                </Link>
-              </div>
-            ) : (
-              <div className="mt-2">
-                <Link href="/lidmaatschap">
-                  <Button size="sm" variant="outline" data-testid="button-upgrade-pro">
-                    Word Pro-bijdrager
-                  </Button>
-                </Link>
-              </div>
-            )}
+            <div className="mt-1">
+              <Link href="/woo-wizard">
+                <Button size="sm" data-testid="button-woo-wizard">
+                  Maak WOO-verzoek
+                  <ArrowRight className="w-4 h-4 ml-1" />
+                </Button>
+              </Link>
+            </div>
           </CardContent>
         </Card>
       </section>
 
-      {/* Admin sectie - alleen voor admin */}
       {isAdmin && (
-        <section className="space-y-4">
+        <section className="space-y-4 pt-4 border-t">
           <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-regio-purple" />
-            <h2 className="font-semibold text-lg">Admin Tools</h2>
+            <Shield className="w-5 h-5 text-muted-foreground" />
+            <h2 className="font-semibold">Admin</h2>
           </div>
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-2 gap-4">
             <Card data-testid="card-admin-export">
               <CardContent className="p-5 flex flex-col gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-full bg-regio-purple/10">
-                    <Download className="w-5 h-5 text-regio-purple" />
-                  </div>
-                  <div>
-                    <h2 className="font-semibold">Nieuwe leden deze week</h2>
-                    <p className="text-sm text-muted-foreground">
-                      Download een lijst van ondernemers die deze week zijn aangesloten.
-                    </p>
-                  </div>
+                  <Download className="w-5 h-5 text-muted-foreground" />
+                  <h3 className="font-medium text-sm">Leden export</h3>
                 </div>
-                <div className="mt-2 flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-2">
                   <a href="/api/export/nieuwe-leden?days=7&format=csv">
                     <Button size="sm" variant="outline" data-testid="button-export-csv-7">
-                      <Download className="w-4 h-4 mr-2" />
                       CSV (7 dagen)
                     </Button>
                   </a>
                   <a href="/api/export/nieuwe-leden?days=30&format=csv">
                     <Button size="sm" variant="outline" data-testid="button-export-csv-30">
-                      <Download className="w-4 h-4 mr-2" />
                       CSV (30 dagen)
                     </Button>
                   </a>
@@ -450,20 +172,12 @@ export default function DashboardPage() {
             <Card data-testid="card-admin-stats">
               <CardContent className="p-5 flex flex-col gap-3">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-full bg-regio-purple/10">
-                    <Users className="w-5 h-5 text-regio-purple" />
-                  </div>
-                  <div>
-                    <h2 className="font-semibold">Platform statistieken</h2>
-                    <p className="text-sm text-muted-foreground">
-                      Overzicht van leden en activiteit op het platform.
-                    </p>
-                  </div>
+                  <Users className="w-5 h-5 text-muted-foreground" />
+                  <h3 className="font-medium text-sm">Platform statistieken</h3>
                 </div>
-                <ul className="text-xs text-muted-foreground list-disc list-inside">
-                  <li>Totaal leden: wordt geladen...</li>
-                  <li>Actieve profielen: wordt geladen...</li>
-                </ul>
+                <p className="text-xs text-muted-foreground">
+                  Overzicht van leden en activiteit komt binnenkort.
+                </p>
               </CardContent>
             </Card>
           </div>

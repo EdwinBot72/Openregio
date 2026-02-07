@@ -57,7 +57,11 @@ app.use((req, res, next) => {
 
 (async () => {
   // Run database migrations before starting the server
-  await runMigrations();
+  try {
+    await runMigrations();
+  } catch (err) {
+    console.error("[Startup] Migration warning (non-fatal):", (err as Error).message);
+  }
   
   const server = await registerRoutes(app);
 
