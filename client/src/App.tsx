@@ -44,7 +44,7 @@ import CookiebeleidPage from "@/pages/cookiebeleid";
 import RegioAnalysePage from "@/pages/regio-analyse";
 
 // Routes that should NOT have the sidebar/header layout
-const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse"];
+const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid"];
 
 function PublicRouter() {
   return (
@@ -65,7 +65,6 @@ function PublicRouter() {
       <Route path="/reset-password" component={ResetPasswordPage} />
       <Route path="/disclaimer" component={DisclaimerPage} />
       <Route path="/cookiebeleid" component={CookiebeleidPage} />
-      <Route path="/regio-analyse" component={RegioAnalysePage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -75,6 +74,7 @@ function AuthenticatedRouter() {
   return (
     <Switch>
       <Route path="/onboarding" component={OnboardingPage} />
+      <Route path="/regio-analyse" component={RegioAnalysePage} />
       <Route path="/dashboard" component={DashboardPage} />
       <Route path="/bedrijfsprofiel" component={BedrijfsprofielPage} />
       <Route path="/network" component={NetworkPage} />
@@ -113,9 +113,8 @@ function AppContent() {
   const [isResetPasswordPage] = useRoute("/reset-password");
   const [isDisclaimerPage] = useRoute("/disclaimer");
   const [isCookiebeleidPage] = useRoute("/cookiebeleid");
-  const [isRegioAnalysePage] = useRoute("/regio-analyse");
   
-  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isLidmaatschapPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage || isBlogsPage || isForgotPasswordPage || isResetPasswordPage || isDisclaimerPage || isCookiebeleidPage || isRegioAnalysePage;
+  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isLidmaatschapPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage || isBlogsPage || isForgotPasswordPage || isResetPasswordPage || isDisclaimerPage || isCookiebeleidPage;
 
   if (isPublicRoute) {
     return <PublicRouter />;

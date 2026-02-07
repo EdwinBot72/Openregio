@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "wouter";
 import { ArrowLeft, ArrowRight, BarChart3, AlertTriangle, TrendingUp, RotateCcw, MapPin, Eye, Users, Shield } from "lucide-react";
 
 const QUESTIONS = [
@@ -236,33 +235,7 @@ export default function RegioAnalysePage() {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: "#f5f7fb", color: "#0f172a" }}>
-      {/* Navigation */}
-      <header className="sticky top-0 z-50 backdrop-blur-lg border-b" style={{ background: "rgba(255,255,255,.92)", borderColor: "#e6ebf2" }}>
-        <div className="max-w-[800px] mx-auto px-4">
-          <div className="flex items-center justify-between py-3.5 gap-3">
-            <Link href="/" className="flex items-center gap-3 font-black" data-testid="link-home-logo">
-              <div
-                className="w-9 h-9 rounded-xl relative"
-                style={{
-                  background: "conic-gradient(from 200deg, #1f5fae, #3aa0ff, #f28a1a, #5ccf8a, #1f5fae)",
-                  boxShadow: "0 8px 22px rgba(15,23,42,.08)",
-                }}
-              >
-                <div className="absolute rounded-lg border" style={{ inset: "11px", borderColor: "rgba(255,255,255,.6)" }} />
-              </div>
-              <span>OpenRegio</span>
-            </Link>
-            <Link href="/">
-              <span className="text-sm font-bold flex items-center gap-1.5" style={{ color: "#1f5fae" }} data-testid="link-back-home">
-                <ArrowLeft className="w-4 h-4" /> Terug
-              </span>
-            </Link>
-          </div>
-        </div>
-      </header>
-
-      <main className="max-w-[800px] mx-auto px-4 py-8">
+    <div className="max-w-[800px] mx-auto" style={{ color: "#0f172a" }}>
 
         {/* INTRO */}
         {step === "intro" && (
@@ -607,16 +580,6 @@ export default function RegioAnalysePage() {
             </div>
           </div>
         )}
-      </main>
-
-      {/* Footer */}
-      <footer className="py-6 mt-8 border-t" style={{ borderColor: "#e6ebf2" }}>
-        <div className="max-w-[800px] mx-auto px-4 text-center">
-          <p style={{ color: "#8896a8", fontSize: "13px" }}>
-            &copy; {new Date().getFullYear()} OpenRegio &mdash; Samen bouwen aan een sterke regio
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }
