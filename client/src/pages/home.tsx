@@ -133,36 +133,58 @@ export default function HomePage() {
           <div className="max-w-[1120px] mx-auto px-4">
             <div className="grid md:grid-cols-3 gap-3.5 py-4">
               {[
-                { icon: MapPin, title: "Regio analyse", desc: "Korte scan: wat blokkeert groei, waar zit je leverage." },
-                { icon: Users, title: "Samenwerking", desc: "Structuur + afspraken die werken (geen netwerkpraat)." },
-                { icon: Lightbulb, title: "Innovatie", desc: "Van idee naar pilot naar omzet. In de regio." },
-              ].map((item, i) => (
-                <div 
-                  key={i}
-                  className="rounded-[18px] p-4 flex gap-3 items-start"
-                  style={{ 
-                    background: "#ffffff",
-                    border: "1px solid #e6ebf2",
-                    boxShadow: "0 6px 18px rgba(15,23,42,.06)"
-                  }}
-                  data-testid={`card-dienst-${i}`}
-                >
-                  <div 
-                    className="w-[46px] h-[46px] rounded-[16px] flex items-center justify-center flex-shrink-0"
+                { icon: MapPin, title: "Regio analyse", desc: "Korte scan: wat blokkeert groei, waar zit je leverage.", link: "/regio-analyse" },
+                { icon: Users, title: "Samenwerking", desc: "Structuur + afspraken die werken (geen netwerkpraat).", link: null },
+                { icon: Lightbulb, title: "Innovatie", desc: "Van idee naar pilot naar omzet. In de regio.", link: null },
+              ].map((item, i) => {
+                const content = (
+                  <>
+                    <div 
+                      className="w-[46px] h-[46px] rounded-[16px] flex items-center justify-center flex-shrink-0"
+                      style={{ 
+                        background: "rgba(31,95,174,.10)",
+                        color: "#1f5fae",
+                        border: "1px solid rgba(31,95,174,.18)"
+                      }}
+                    >
+                      <item.icon className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-bold" style={{ margin: 0, fontSize: "16px" }}>{item.title}</h3>
+                      <p style={{ margin: "6px 0 0", color: "#5b677a", fontSize: "13px" }}>{item.desc}</p>
+                    </div>
+                  </>
+                );
+                return item.link ? (
+                  <Link
+                    key={i}
+                    href={item.link}
+                    className="rounded-[18px] p-4 flex gap-3 items-start no-underline"
                     style={{ 
-                      background: "rgba(31,95,174,.10)",
-                      color: "#1f5fae",
-                      border: "1px solid rgba(31,95,174,.18)"
+                      background: "#ffffff",
+                      border: "1px solid #e6ebf2",
+                      boxShadow: "0 6px 18px rgba(15,23,42,.06)",
+                      color: "inherit",
                     }}
+                    data-testid={`card-dienst-${i}`}
                   >
-                    <item.icon className="w-5 h-5" />
+                    {content}
+                  </Link>
+                ) : (
+                  <div 
+                    key={i}
+                    className="rounded-[18px] p-4 flex gap-3 items-start"
+                    style={{ 
+                      background: "#ffffff",
+                      border: "1px solid #e6ebf2",
+                      boxShadow: "0 6px 18px rgba(15,23,42,.06)"
+                    }}
+                    data-testid={`card-dienst-${i}`}
+                  >
+                    {content}
                   </div>
-                  <div>
-                    <h3 className="font-bold" style={{ margin: 0, fontSize: "16px" }}>{item.title}</h3>
-                    <p style={{ margin: "6px 0 0", color: "#5b677a", fontSize: "13px" }}>{item.desc}</p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>
