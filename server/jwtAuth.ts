@@ -21,7 +21,8 @@ if (!process.env.SESSION_SECRET) {
 }
 const JWT_SECRET = process.env.SESSION_SECRET;
 
-const isProduction = process.env.NODE_ENV === "production" || process.env.REPL_SLUG !== undefined;
+const isProduction = process.env.NODE_ENV === "production";
+const cookieSameSite: "strict" | "lax" = isProduction ? "strict" : "lax";
 
 const loginLimiter = new RateLimiterMemory({
   points: 10,
@@ -104,14 +105,14 @@ function setTokenCookies(res: Response, accessToken: string, refreshToken: strin
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
     secure: isProduction,
-    sameSite: isProduction ? "strict" : "lax",
+    sameSite: cookieSameSite,
     maxAge: 15 * 60 * 1000,
   });
   
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     secure: isProduction,
-    sameSite: isProduction ? "strict" : "lax",
+    sameSite: cookieSameSite,
     maxAge: REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
     path: "/api/auth",
   });
@@ -119,7 +120,7 @@ function setTokenCookies(res: Response, accessToken: string, refreshToken: strin
   res.cookie("tokenId", tokenId, {
     httpOnly: true,
     secure: isProduction,
-    sameSite: isProduction ? "strict" : "lax",
+    sameSite: cookieSameSite,
     maxAge: REFRESH_TOKEN_EXPIRY_DAYS * 24 * 60 * 60 * 1000,
     path: "/api/auth",
   });

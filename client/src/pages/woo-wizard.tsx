@@ -170,8 +170,16 @@ export default function WooWizardPage() {
   });
 
   const handleIntakeSubmit = () => {
+    if (!user) {
+      toast({ title: "Log in om te analyseren", description: "Zonder account kan ik geen dossier opslaan.", variant: "destructive" });
+      return;
+    }
     if (!authority.trim() || !subject.trim()) {
       toast({ title: "Velden verplicht", description: "Vul minimaal bestuursorgaan en onderwerp in.", variant: "destructive" });
+      return;
+    }
+    if (uploadedDocument && uploadedDocument.trim().length < 200) {
+      toast({ title: "Te weinig tekst", description: "Plak minimaal ~200 tekens documenttekst, of laat het veld leeg.", variant: "destructive" });
       return;
     }
     intakeMutation.mutate();

@@ -1460,6 +1460,10 @@ Maak een complete, direct bruikbare WOO-brief.`;
         return res.status(400).json({ error: "Dossier ID en documenttekst zijn verplicht" });
       }
 
+      if (typeof documentText === "string" && documentText.trim().length < 200) {
+        return res.status(400).json({ error: "Documenttekst is te kort. Voeg minimaal ~200 tekens toe voor een goede analyse." });
+      }
+
       if (!process.env.OPENAI_API_KEY) {
         return res.status(503).json({ error: "OpenAI API niet geconfigureerd" });
       }
