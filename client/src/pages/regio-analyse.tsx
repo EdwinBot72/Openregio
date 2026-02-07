@@ -1,5 +1,38 @@
-import { useState } from "react";
-import { ArrowLeft, ArrowRight, BarChart3, AlertTriangle, TrendingUp, RotateCcw, MapPin, Eye, Users, Shield } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link } from "wouter";
+import { ArrowLeft, ArrowRight, BarChart3, AlertTriangle, TrendingUp, RotateCcw, MapPin, Eye, Users, Shield, Share2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
+
+const STORAGE_KEY = "openregio_regioanalyse_v1";
+const EXPIRY_MS = 7 * 24 * 60 * 60 * 1000;
+
+type SavedState = {
+  answers: (number | null)[];
+  currentQ: number;
+  step: "intro" | "scan" | "result";
+  savedAt: number;
+};
+
+function loadSaved(): SavedState | null {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as SavedState;
+    if (Date.now() - parsed.savedAt > EXPIRY_MS) {
+      localStorage.removeItem(STORAGE_KEY);
+      return null;
+    }
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function saveState(state: SavedState) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  } catch {}
+}
 
 const QUESTIONS = [
   {
@@ -7,24 +40,28 @@ const QUESTIONS = [
     domainLabel: "Zichtbaarheid",
     question: "Sta je correct op Google/Maps met consistente NAW-gegevens?",
     tooltip: "NAW = Naam, Adres, Woonplaats. Consistent betekent: overal hetzelfde.",
+    inverted: false,
   },
   {
     domain: "zichtbaarheid",
     domainLabel: "Zichtbaarheid",
     question: "Kom je naar voren bij zoekopdrachten als \"regio + jouw dienst\"?",
     tooltip: "Bijvoorbeeld: 'loodgieter Achterhoek' of 'bakker Veluwe'.",
+    inverted: false,
   },
   {
     domain: "netwerk",
     domainLabel: "Netwerk & doorverwijzing",
     question: "Krijg je structureel werk via andere ondernemers in je regio?",
     tooltip: "Niet incidenteel, maar regelmatig doorverwijzingen.",
+    inverted: false,
   },
   {
     domain: "netwerk",
     domainLabel: "Netwerk & doorverwijzing",
     question: "Verwijs jij zelf structureel werk door naar andere lokale ondernemers?",
     tooltip: "Actief doorverwijzen als je iets niet zelf doet.",
+    inverted: false,
   },
   {
     domain: "instroom",
@@ -38,18 +75,21 @@ const QUESTIONS = [
     domainLabel: "Afhankelijkheid & instroom",
     question: "Heb je een eigen vaste instroom van klanten, partners of herhaalwerk?",
     tooltip: "Klanten die terugkomen, vaste samenwerkingen, abonnementen.",
+    inverted: false,
   },
   {
     domain: "basis",
     domainLabel: "Back to Basic / continuïteit",
     question: "Kun je doordraaien bij een digitale storing? (bereikbaarheid, betaling, planning)",
     tooltip: "Stel: internet valt uit, pin doet het niet, je agenda is offline.",
+    inverted: false,
   },
   {
     domain: "basis",
     domainLabel: "Back to Basic / continuïteit",
     question: "Heb je je basis juridisch en administratief op orde? (factuur, KvK, btw, voorwaarden)",
     tooltip: "Denk aan: correcte facturen, inschrijving KvK, algemene voorwaarden.",
+    inverted: false,
   },
 ];
 
@@ -212,13 +252,33 @@ export default function RegioAnalysePage() {
   const [step, setStep] = useState<"intro" | "scan" | "result">("intro");
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState<(number | null)[]>(Array(QUESTIONS.length).fill(null));
+  const [loaded, setLoaded] = useState(false);
+
+  useEffect(() => {
+    const saved = loadSaved();
+    if (saved) {
+      setAnswers(saved.answers);
+      setCurrentQ(saved.currentQ);
+      setStep(saved.step);
+    }
+    setLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!loaded) return;
+    saveState({ answers, currentQ, step, savedAt: Date.now() });
+  }, [answers, currentQ, step, loaded]);
 
   const handleAnswer = (value: number) => {
-    const newAnswers = [...answers];
-    newAnswers[currentQ] = value;
-    setAnswers(newAnswers);
+    setAnswers((prev) => {
+      const next = [...prev];
+      next[currentQ] = value;
+      return next;
+    });
     if (currentQ < QUESTIONS.length - 1) {
-      setTimeout(() => setCurrentQ(currentQ + 1), 250);
+      setTimeout(() => {
+        setCurrentQ((q) => Math.min(q + 1, QUESTIONS.length - 1));
+      }, 250);
     }
   };
 
@@ -229,15 +289,39 @@ export default function RegioAnalysePage() {
   const progress = ((currentQ + 1) / QUESTIONS.length) * 100;
 
   const restart = () => {
+    localStorage.removeItem(STORAGE_KEY);
     setStep("intro");
     setCurrentQ(0);
     setAnswers(Array(QUESTIONS.length).fill(null));
   };
 
-  return (
-    <div className="max-w-[800px] mx-auto" style={{ color: "#0f172a" }}>
+  const shareLink = () => {
+    if (navigator.share) {
+      navigator.share({ title: "OpenRegio Regio-analyse", url: window.location.href });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+    }
+  };
 
-        {/* INTRO */}
+  if (!loaded) return null;
+
+  return (
+    <div className="min-h-screen" style={{ background: "#f5f7fb", color: "#0f172a" }}>
+      <nav className="sticky top-0 z-50 backdrop-blur-lg border-b" style={{ background: "rgba(255,255,255,.92)", borderColor: "#e6ebf2" }}>
+        <div className="max-w-[1120px] mx-auto px-4 h-16 flex items-center justify-between gap-2 flex-wrap">
+          <Link href="/" className="font-black text-lg" style={{ color: "#1f5fae" }} data-testid="link-home-logo">
+            OpenRegio
+          </Link>
+          <Link href="/">
+            <Button variant="ghost" size="sm" data-testid="button-back-home">
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Terug naar home
+            </Button>
+          </Link>
+        </div>
+      </nav>
+
+      <main className="max-w-[800px] mx-auto px-4 py-10">
         {step === "intro" && (
           <div className="text-center" data-testid="section-intro">
             <div
@@ -253,7 +337,7 @@ export default function RegioAnalysePage() {
               Korte scan: wat blokkeert groei, waar zit je leverage.
             </p>
             <p style={{ color: "#8896a8", fontSize: "14px", marginBottom: "24px" }}>
-              8 vragen &middot; ± 3 minuten &middot; direct resultaat
+              8 vragen &middot; &plusmn; 3 minuten &middot; direct resultaat
             </p>
 
             <button
@@ -287,10 +371,8 @@ export default function RegioAnalysePage() {
           </div>
         )}
 
-        {/* SCAN */}
         {step === "scan" && (
           <div data-testid="section-scan">
-            {/* Progress bar */}
             <div className="mb-6">
               <div className="flex items-center justify-between mb-1.5">
                 <span className="text-xs font-bold" style={{ color: "#5b677a" }}>
@@ -309,7 +391,6 @@ export default function RegioAnalysePage() {
               </div>
             </div>
 
-            {/* Question */}
             <div
               className="rounded-[22px] p-6"
               style={{ background: "#fff", border: "1px solid #e6ebf2", boxShadow: "0 8px 22px rgba(15,23,42,.06)" }}
@@ -345,8 +426,7 @@ export default function RegioAnalysePage() {
               </div>
             </div>
 
-            {/* Navigation */}
-            <div className="flex items-center justify-between mt-4">
+            <div className="flex items-center justify-between mt-4 gap-2 flex-wrap">
               <button
                 onClick={() => currentQ > 0 && setCurrentQ(currentQ - 1)}
                 disabled={currentQ === 0}
@@ -389,7 +469,6 @@ export default function RegioAnalysePage() {
               )}
             </div>
 
-            {/* Question dots */}
             <div className="flex items-center justify-center gap-1.5 mt-4">
               {QUESTIONS.map((_, i) => (
                 <button
@@ -411,7 +490,6 @@ export default function RegioAnalysePage() {
           </div>
         )}
 
-        {/* RESULT */}
         {step === "result" && results && (
           <div data-testid="section-result">
             <div className="text-center mb-6">
@@ -419,7 +497,6 @@ export default function RegioAnalysePage() {
               <p style={{ color: "#5b677a", fontSize: "15px" }}>Op basis van 8 vragen over 4 domeinen</p>
             </div>
 
-            {/* Score Ring */}
             <div
               className="rounded-[22px] p-6 mb-4"
               style={{ background: "#fff", border: "1px solid #e6ebf2", boxShadow: "0 8px 22px rgba(15,23,42,.06)" }}
@@ -446,7 +523,6 @@ export default function RegioAnalysePage() {
               </div>
             </div>
 
-            {/* Blockers */}
             {results.blockers.length > 0 && (
               <div className="mb-4" data-testid="section-blockers">
                 <h2 className="font-bold text-lg mb-2 flex items-center gap-2">
@@ -485,7 +561,6 @@ export default function RegioAnalysePage() {
               </div>
             )}
 
-            {/* Leverage */}
             {results.leverage.length > 0 && (
               <div className="mb-4" data-testid="section-leverage">
                 <h2 className="font-bold text-lg mb-2 flex items-center gap-2">
@@ -524,7 +599,6 @@ export default function RegioAnalysePage() {
               </div>
             )}
 
-            {/* Pillar recommendations */}
             <div
               className="rounded-[22px] p-5 mb-4"
               style={{
@@ -559,7 +633,6 @@ export default function RegioAnalysePage() {
               </div>
             </div>
 
-            {/* Actions */}
             <div className="flex flex-wrap gap-3 justify-center mt-6">
               <button
                 onClick={restart}
@@ -568,6 +641,14 @@ export default function RegioAnalysePage() {
                 data-testid="button-restart"
               >
                 <RotateCcw className="w-4 h-4" /> Opnieuw scannen
+              </button>
+              <button
+                onClick={shareLink}
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-full font-bold text-sm"
+                style={{ background: "#fff", border: "1px solid #e6ebf2", color: "#0f172a" }}
+                data-testid="button-share"
+              >
+                <Share2 className="w-4 h-4" /> Deel link
               </button>
               <a
                 href="/#member"
@@ -580,6 +661,20 @@ export default function RegioAnalysePage() {
             </div>
           </div>
         )}
+      </main>
+
+      <footer className="py-6 mt-8 border-t" style={{ borderColor: "#e6ebf2" }}>
+        <div className="max-w-[1120px] mx-auto px-4 flex items-center justify-between gap-2 flex-wrap">
+          <span style={{ color: "#8896a8", fontSize: "13px" }}>
+            &copy; {new Date().getFullYear()} OpenRegio
+          </span>
+          <div className="flex items-center gap-4">
+            <Link href="/privacy" className="text-xs" style={{ color: "#8896a8" }} data-testid="link-footer-privacy">Privacy</Link>
+            <Link href="/disclaimer" className="text-xs" style={{ color: "#8896a8" }} data-testid="link-footer-disclaimer">Disclaimer</Link>
+            <Link href="/voorwaarden" className="text-xs" style={{ color: "#8896a8" }} data-testid="link-footer-voorwaarden">Voorwaarden</Link>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

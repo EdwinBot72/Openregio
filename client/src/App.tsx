@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Switch, Route, useRoute } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
@@ -44,7 +45,7 @@ import CookiebeleidPage from "@/pages/cookiebeleid";
 import RegioAnalysePage from "@/pages/regio-analyse";
 
 // Routes that should NOT have the sidebar/header layout
-const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid"];
+const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse"];
 
 function PublicRouter() {
   return (
@@ -65,6 +66,7 @@ function PublicRouter() {
       <Route path="/reset-password" component={ResetPasswordPage} />
       <Route path="/disclaimer" component={DisclaimerPage} />
       <Route path="/cookiebeleid" component={CookiebeleidPage} />
+      <Route path="/regio-analyse" component={RegioAnalysePage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -74,7 +76,6 @@ function AuthenticatedRouter() {
   return (
     <Switch>
       <Route path="/onboarding" component={OnboardingPage} />
-      <Route path="/regio-analyse" component={RegioAnalysePage} />
       <Route path="/dashboard" component={DashboardPage} />
       <Route path="/bedrijfsprofiel" component={BedrijfsprofielPage} />
       <Route path="/network" component={NetworkPage} />
@@ -113,8 +114,9 @@ function AppContent() {
   const [isResetPasswordPage] = useRoute("/reset-password");
   const [isDisclaimerPage] = useRoute("/disclaimer");
   const [isCookiebeleidPage] = useRoute("/cookiebeleid");
+  const [isRegioAnalysePage] = useRoute("/regio-analyse");
   
-  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isLidmaatschapPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage || isBlogsPage || isForgotPasswordPage || isResetPasswordPage || isDisclaimerPage || isCookiebeleidPage;
+  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isLidmaatschapPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage || isBlogsPage || isForgotPasswordPage || isResetPasswordPage || isDisclaimerPage || isCookiebeleidPage || isRegioAnalysePage;
 
   if (isPublicRoute) {
     return <PublicRouter />;
@@ -125,7 +127,7 @@ function AppContent() {
   };
 
   return (
-    <SidebarProvider style={style as React.CSSProperties}>
+    <SidebarProvider style={style as CSSProperties}>
       <div className="flex h-screen w-full">
         <AppSidebar />
         <div className="flex flex-col flex-1 overflow-hidden bg-regio-base dark:bg-background">
