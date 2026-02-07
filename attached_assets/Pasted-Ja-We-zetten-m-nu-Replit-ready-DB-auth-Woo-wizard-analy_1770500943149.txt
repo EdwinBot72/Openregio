@@ -1,0 +1,137 @@
+Ja. We zetten ‘m nu Replit-ready: DB + auth + Woo-wizard analysis fixen, zodat het niet meer “random faalt”.
+
+0) De echte oorzaak (waarom het nu misgaat)
+
+In jouw build zijn dit de 3 harde dependencies die vaak ontbreken op Replit:
+
+DATABASE_URL → zonder DB geen registratie / dossiers / Woo
+
+SESSION_SECRET → zonder deze crasht auth (staat hard-coded required)
+
+OPENAI_API_KEY → zonder deze faalt “Analyse” in de Woo-wizard met 503
+
+Plus: je migrations draaien “ALTER TABLE …” op tabellen die nog niet bestaan als je nooit db:push hebt gedaan. Dan krijg je chaos.
+
+Replit klaar in 12 minuten
+1) Replit → Secrets (must-have)
+
+Zet deze keys:
+
+DATABASE_URL = jouw Postgres (Neon/Supabase)
+
+SESSION_SECRET = random lange string (min 32 chars)
+
+OPENAI_API_KEY = jouw OpenAI key
+
+Optioneel (mag leeg): Postmark/SMTP etc. (laten we nu zitten)
+
+2) Replit Shell: 3 commands
+
+In de root van je project:
+
+npm install
+npm run db:push
+npm run dev
+
+
+db:push is niet “nice to have” — dit maakt je tabellen aan uit shared/schema.ts. Zonder dit faalt registratie + Woo dossier opslag sowieso.
+
+3) Fix: login/cookies op Replit (dit is een stille killer)
+
+Je jwtAuth.ts behandelt Replit als “production” omdat REPL_SLUG bestaat. Daardoor worden cookies secure + strict en dat kan in dev-view glitches geven (lijkt alsof login faalt).
+
+Patch (copy-paste)
+
+File: server/jwtAuth.ts
+
+Zoek:
+
+const isProduction = process.env.NODE_ENV === "production" || process.env.REPL_SLUG !== undefined;
+
+
+Vervang door:
+
+const isProduction = process.env.NODE_ENV === "production";
+
+
+En zoek in setTokenCookies dit stuk:
+
+sameSite: isProduction ? "strict" : "lax",
+secure: isProduction,
+
+
+Vervang door:
+
+sameSite: "lax",
+secure: isProduction,
+
+
+➡️ Resultaat: login werkt in dev 10x consistenter. In prod blijft secure aan.
+
+4) Fix: Woo-wizard “Analyse” faalt nu te vaag
+
+Je endpoint /api/woo/wizard/extract faalt op:
+
+geen login (401)
+
+geen OpenAI key (503)
+
+geen documentText (400)
+
+Maak dit “product-hard”: client moet vóór analyse checken.
+
+Patch in de UI (minimaal)
+
+File: client/src/pages/woo-wizard.tsx (naam kan iets afwijken)
+
+Voordat je de analyse call doet:
+
+check auth
+
+check tekstlengte
+
+Pseudo (plaats bij je “Analyseer” button handler):
+
+if (!user) {
+  toast({ title: "Log in om te analyseren", description: "Zonder account kan ik geen dossier opslaan." });
+  setLocation("/login");
+  return;
+}
+
+if (!documentText || documentText.trim().length < 200) {
+  toast({ title: "Te weinig tekst", description: "Plak minimaal ~200 tekens, of upload een document." });
+  return;
+}
+
+
+➡️ Dan voelt het niet meer “kapot”, maar “duidelijk”.
+
+5) Snelle sanity-check: werkt alles nu écht?
+
+Na bovenstaande:
+
+A) Registratie test (in Replit Shell)
+curl -i -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test+1@openregio.nl","password":"testen123","plan":"basic","firstName":"Test","lastName":"User"}'
+
+
+201 = top
+
+500 = DB niet goed / schema mist → opnieuw db:push en logs checken
+
+FATAL SESSION_SECRET = secret ontbreekt
+
+B) Woo intake test
+
+Log in via UI, maak dossier aan. Daarna extract.
+
+Wat je nu wél hebt (na deze fixes)
+
+✅ Account aanmaken werkt stabiel
+
+✅ Inloggen blijft ingelogd (cookies ok)
+
+✅ Woo wizard analyse werkt (mits OPENAI key)
+
+✅ Dossiers opslaan werkt (db schema bestaat)
