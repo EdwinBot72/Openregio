@@ -1,0 +1,264 @@
+) Brieven uploaden / controleren
+Status nu
+
+Er zijn upload endpoints, maar ze staan Pro-only:
+
+/api/regiobot/upload → requirePro
+
+/api/rag/documents → requirePro
+
+Dus als je (nog) geen Pro bent of je account/auth niet werkt: upload = dood.
+
+“Controleren” (AI check)
+
+Er is geen “brief → analyse → feedback” flow die end-to-end zichtbaar is als 1 simpele knop voor de user.
+
+Je hebt wel RAG/document opslag + RegioBot dingen, maar dat is niet productized als: “Upload → check → output”.
+
+Kort: upload = technisch aanwezig, maar praktisch ontoegankelijk en niet netjes gekoppeld aan UX.
+
+2) WOO-verzoek generator
+Status nu
+
+Endpoint bestaat: POST /api/woo/generate
+
+Dus “WOO verzoek maken” kan technisch.
+
+Maar: als de UI/flow niet prominent is of achter Pro/login zit, voelt het als “bestaat niet”.
+
+3) Account aanmaken “lukt niet”
+Waarschijnlijk probleem
+
+Je backend heeft registratie wel degelijk (via setupJwtAuth):
+
+POST /api/auth/register bestaat in server/jwtAuth.ts
+
+Dus als “account aanmaken” faalt, is het meestal één van deze 3:
+
+DATABASE_URL ontbreekt / DB down
+→ register geeft 500, want storage.createUser kan niks wegschrijven.
+
+Cookies/sessions issue op Replit preview
+→ register lijkt te slagen, maar je “bent niet ingelogd” daarna.
+
+Frontend route/redirect mismatch
+→ je wordt naar /dashboard gestuurd, maar auth state is niet gezet/gelezen zoals je verwacht.
+
+Meest voorkomende op Replit: DATABASE_URL niet gezet.
+
+4) Dashboard rommelig
+Waarom het rommelig voelt
+
+Je dashboard toont te veel modules terwijl veel dingen nog “placeholder” zijn.
+
+UX = “platform-etalage” i.p.v. “1 taak afmaken”.
+
+Replit-fixplan (behapbaar, per blok)
+Blok A — Maak registratie 100% werkend (30 min)
+
+Replit → Secrets
+
+Zet DATABASE_URL
+
+(optioneel) JWT_SECRET
+
+Test in Replit Shell
+
+curl -i -X POST http://localhost:5000/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test+1@demo.nl","password":"testen123","plan":"basic","firstName":"Test","lastName":"User"}'
+
+
+Krijg je 201 terug? Dan is backend ok.
+
+Krijg je 500? → DB/migrations.
+
+👉 Als dit faalt: fix eerst DB. Zonder DB is alles nep.
+
+Blok B — Maak “Upload brief” bruikbaar (MVP) (20 min)
+
+Keuze (MVP): niet Pro-only. Iedereen mag uploaden, maar “AI check” is beperkt.
+
+In server/routes.ts:
+
+haal requirePro weg op:
+
+/api/rag/documents
+
+(eventueel) /api/regiobot/upload
+
+Of: maak het Basic = 1 upload, Pro = onbeperkt.
+
+Blok C — Maak 1 duidelijke flow op dashboard (1 uur)
+
+Nieuwe dashboard regels:
+
+1 kolom, max max-w-3xl
+
+3 knoppen totaal:
+
+Start Regio-analyse
+
+Maak WOO-verzoek
+
+Upload brief voor check (MVP: “we geven checklist + verbetersuggesties”)
+
+Alles wat “RegioBot / modules / tegels / extra’s” is: naar /tools pagina later.
+
+Blok D — Zet WOO generator zichtbaar aan (30 min)
+
+Maak een pagina/kaart die direct dit doet:
+
+Dropdown: regio / bestuursorgaan / categorie
+
+Input: onderwerp
+
+Button: Genereer WOO-brief
+
+Output: kopieerbaar + download
+
+Je endpoint is er al (/api/woo/generate). Het is vooral UX.
+
+Wat ik nu meteen voor je kan doen (zonder gelul)
+
+Ik kan je een exact patch-set geven met:
+
+Welke Secrets je moet zetten + DB check
+
+De minimale code wijziging om upload niet Pro-only te maken
+
+Een opgeschoonde dashboard JSX (copy-paste)
+
+Een simpele “WOO generator” UI die je endpoint al gebruikt
+
+Zeg even: wil je upload voor iedereen (free/basic) of basic=1 upload, pro=onbeperkt? (Ik maak ‘m dan direct passend.)
+
+Heb ik dan alles? Zie jij nog gekke dingen?
+Nagedacht gedurende 2m 2s
+
+Nee, je hebt niet “alles” in de zin van: klaar voor echte ondernemers die inloggen, uploaden, checken, WOO genereren en door kunnen. Je hebt wél een dikke basis. Maar er zitten nog een paar harde blockers / rare dingen.
+
+De 5 grootste “gekke dingen” die ik zie
+1) DB + migraties: dit is nu de #1 reden dat registratie faalt
+
+Je server gooit direct een error als DATABASE_URL ontbreekt (db/index.ts).
+
+En je runMigrations() doet ALTER TABLE op tabellen die op een verse DB nog niet bestaan → dan knalt de server bij start.
+
+Fix in Replit (must-do):
+
+Secrets: DATABASE_URL zetten
+
+Eenmalig draaien: npm run db:push
+(maakt tabellen uit shared/schema.ts)
+
+Daarna pas npm run dev
+
+Zonder dit: register/login blijft random kapot.
+
+2) Brief uploaden / RegioBot docs bestaan, maar staan Pro-only
+
+Deze endpoints zijn “aanwezig”, maar in praktijk dicht:
+
+/api/regiobot/upload → requirePro
+
+/api/rag/documents → requirePro
+
+/api/rag/ask → requirePro
+
+Dus ja: je kan geen brieven uploaden als:
+
+je account niet werkt
+
+of je plan niet Pro is
+
+of je pro-status niet goed gezet wordt
+
+MVP-keuze: Basic = 1 upload / Pro = onbeperkt.
+(Anders voelt je product nep.)
+
+3) WOO generator endpoint bestaat, maar werkt alleen met OpenAI key
+
+POST /api/woo/generate is public, maar:
+
+Zonder OPENAI_API_KEY geeft hij 503 (“AI-config niet voltooid”).
+
+Fix: Secret OPENAI_API_KEY zetten.
+
+Nog iets: dit endpoint is public → kan misbruikt worden (kost geld).
+Later: rate limit of requireAuth.
+
+4) Je hebt dubbele auth/middleware spul (verwarrend onderhoud)
+
+Ik zie twee requirePro implementaties:
+
+server/jwtAuth.ts
+
+server/middleware/auth.ts
+
+Dat is asking for bugs (“waarom werkt het hier wel en daar niet?”).
+
+Fix: kies één auth pad (jwtAuth) en kill/stop gebruik van de andere.
+
+5) Dashboard voelt rommelig omdat het “platform etalage” is
+
+Er staan teveel tools/tegels terwijl de kernflow nog niet “af” voelt:
+
+user kan niet soepel registreren
+
+upload/check loopt vast
+
+WOO wizard/generator niet super zichtbaar
+
+dan is dashboard alleen maar ruis
+
+Fix: dashboard terugbrengen naar 3 acties:
+
+Start Regio-analyse
+
+Upload brief (MVP)
+
+Maak WOO-verzoek
+
+Alles anders naar /tools later.
+
+Heb je “dan alles” als je dit fixt?
+
+Je hebt dan een kloppende MVP:
+
+✅ registratie werkt (DB + db:push)
+✅ WOO generator werkt (OpenAI key)
+✅ upload werkt (Basic/Pro beleid)
+✅ dashboard is clean (1 kolom, 3 knoppen)
+
+Mini-checklist (Replit) die je nu direct afvinkt
+
+Secrets
+
+ DATABASE_URL
+
+ OPENAI_API_KEY
+
+(later) payment keys (Mollie/Stripe) alleen als je ze echt gebruikt
+
+Commands
+
+ npm install
+
+ npm run db:push
+
+ npm run dev
+
+Product
+
+ Upload endpoint niet “dicht” voor iedereen
+
+ Dashboard opgeruimd
+
+Als je wil, pak ik ‘m “schaakmat” aan: ik geef je exacte patches per file om:
+
+Pro-only upload om te zetten naar Basic=1 upload,
+
+dashboard te strippen,
+
+en runMigrations() veilig te maken op een verse DB (dus geen crashes).
