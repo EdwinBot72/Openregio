@@ -33,7 +33,7 @@ export default function FirstLoginPage() {
     valid: boolean;
     user?: { email: string; plan: string };
   }>({
-    queryKey: ["/api/first-login/validate", { token }],
+    queryKey: ["/api/first-login/validate", { search: { token: token || "" } }],
     enabled: !!token,
     retry: false,
   });

@@ -360,8 +360,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Return user info (excluding sensitive data)
       res.json({
-        email: user.email,
-        plan: user.plan,
+        valid: true,
+        user: {
+          email: user.email,
+          plan: user.plan,
+        },
       });
     } catch (error) {
       console.error("Error validating onboarding token:", error);
