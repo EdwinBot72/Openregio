@@ -9,6 +9,7 @@ import {
   Download,
   Shield,
   Users,
+  UserPlus,
   ArrowRight,
 } from "lucide-react";
 import { Link } from "wouter";
@@ -169,15 +170,21 @@ export default function DashboardPage() {
               </CardContent>
             </Card>
 
-            <Card data-testid="card-admin-stats">
+            <Card data-testid="card-admin-create-user">
               <CardContent className="p-5 flex flex-col gap-3">
                 <div className="flex items-center gap-3">
-                  <Users className="w-5 h-5 text-muted-foreground" />
-                  <h3 className="font-medium text-sm">Platform statistieken</h3>
+                  <UserPlus className="w-5 h-5 text-muted-foreground" />
+                  <h3 className="font-medium text-sm">Gebruiker aanmaken</h3>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  Overzicht van leden en activiteit komt binnenkort.
+                  Maak gratis accounts aan voor vrienden en kennissen.
                 </p>
+                <Link href="/admin/users">
+                  <Button size="sm" data-testid="button-admin-create-user">
+                    Nieuw account
+                    <ArrowRight className="w-4 h-4 ml-1" />
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           </div>

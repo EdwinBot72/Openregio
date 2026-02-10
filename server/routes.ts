@@ -3026,6 +3026,76 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
+  // Admin: POST /api/admin/create-user - Create user without payment (backdoor for friends/family)
+  app.post("/api/admin/create-user", requireAdmin, async (req, res) => {
+    try {
+      const { email, firstName, lastName, plan } = req.body;
+
+      if (!email || !plan) {
+        return res.status(400).json({ error: "Email en plan zijn verplicht" });
+      }
+
+      if (!["basic", "pro"].includes(plan)) {
+        return res.status(400).json({ error: "Plan moet 'basic' of 'pro' zijn" });
+      }
+
+      const existing = await storage.getUserByEmail(email);
+      if (existing) {
+        return res.status(409).json({ error: "Er bestaat al een gebruiker met dit e-mailadres" });
+      }
+
+      const tempPassword = generateRandomPassword();
+      const onboardingToken = generateOnboardingToken();
+      const referralCode = generateReferralCode();
+      const passwordHash = await bcrypt.hash(tempPassword, 10);
+
+      const user = await storage.createUser({
+        email,
+        passwordHash,
+        firstName: firstName || undefined,
+        lastName: lastName || undefined,
+        plan: plan as "basic" | "pro",
+        role: "member",
+        mustCompleteOnboarding: true,
+        onboardingToken,
+        referralCode,
+      });
+
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30);
+
+      await storage.createOnboardingToken({
+        userId: user.id,
+        token: onboardingToken,
+        expiresAt,
+      });
+
+      const baseUrl = process.env.PUBLIC_BASE_URL || getBaseUrl(req);
+      const onboardingLink = `${baseUrl}/first-login?token=${onboardingToken}`;
+
+      const emailSent = await sendOnboardingEmail(email, tempPassword, onboardingLink, plan);
+
+      console.log(`[Admin] User created by ${req.user!.email}: ${email} (${plan})`);
+      console.log(`[Admin] Onboarding link: ${onboardingLink}`);
+
+      res.status(201).json({
+        message: "Gebruiker aangemaakt",
+        user: {
+          id: user.id,
+          email: user.email,
+          plan: user.plan,
+          firstName: user.firstName,
+          lastName: user.lastName,
+        },
+        onboardingLink,
+        emailSent,
+      });
+    } catch (error: any) {
+      console.error("Error creating user via admin:", error);
+      res.status(500).json({ error: "Kon gebruiker niet aanmaken" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }
