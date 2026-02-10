@@ -155,28 +155,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const baseUrl = getBaseUrl(req);
+      const webhookBaseUrl = process.env.PUBLIC_BASE_URL || baseUrl;
       const amount = getPlanPrice(plan);
       const description = `${getPlanDisplayName(plan)} - Maandelijks abonnement`;
       
-      // Create Mollie payment with referral in metadata
+      // Create Mollie customer first (needed for recurring payments)
+      const customer = await mollieClient.customers.create({
+        name: email.split("@")[0],
+        email: email,
+      });
+      
+      console.log(`✓ Mollie customer created: ${customer.id} for ${email}`);
+      
+      // Create first payment with sequenceType "first" to establish mandate for recurring billing
       const payment = await mollieClient.payments.create({
         amount: {
           value: amount,
           currency: "EUR"
         },
+        customerId: customer.id,
+        sequenceType: "first" as any,
         description,
         redirectUrl: `${baseUrl}/betaling-geslaagd?email=${encodeURIComponent(email)}`,
-        webhookUrl: `${baseUrl}/api/mollie/webhook`,
+        webhookUrl: `${webhookBaseUrl}/api/mollie/webhook`,
         metadata: {
           email,
           plan,
           source: "openregio-signup",
+          mollieCustomerId: customer.id,
           referrerUserId: referrerUserId || undefined,
           referralCode: ref || undefined
         }
       });
       
-      console.log(`✓ Mollie payment created: ${payment.id} for ${email} (${plan})`);
+      console.log(`✓ Mollie first payment created: ${payment.id} for ${email} (${plan}) - mandate will be established`);
       
       // Redirect to Mollie checkout
       const checkoutUrl = payment.getCheckoutUrl();
@@ -214,30 +226,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Only process paid payments
       if (payment.status === "paid") {
-        const { email, plan, referrerUserId } = payment.metadata as { 
+        const { email, plan, referrerUserId, mollieCustomerId } = payment.metadata as { 
           email: string; 
           plan: string; 
           referrerUserId?: string;
+          mollieCustomerId?: string;
         };
         
         if (!email || !plan) {
           console.error("Payment metadata incomplete:", payment.metadata);
-          return res.status(200).send("OK"); // Still return 200 to acknowledge webhook
+          return res.status(200).send("OK");
         }
         
         console.log(`✓ Payment PAID for ${email} (${plan})`);
+        
+        // Idempotency check: skip if this payment was already processed
+        const existingSub = await storage.getSubscriptionByMolliePaymentId(paymentId);
+        if (existingSub) {
+          console.log(`⚠ Payment ${paymentId} already processed (subscription ${existingSub.id}) - skipping`);
+          return res.status(200).send("OK");
+        }
         
         // Check if user already exists
         let user = await storage.getUserByEmail(email);
         
         if (!user) {
-          // Generate random password, onboarding token, and referral code
           const tempPassword = generateRandomPassword();
           const onboardingToken = generateOnboardingToken();
           const referralCode = generateReferralCode();
           const passwordHash = await bcrypt.hash(tempPassword, 10);
           
-          // Create new user with referral info
           user = await storage.createUser({
             email,
             passwordHash,
@@ -250,7 +268,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             referredAt: referrerUserId ? new Date() : null,
           });
           
-          // Create onboarding token record (expires in 7 days)
           const expiresAt = new Date();
           expiresAt.setDate(expiresAt.getDate() + 7);
           
@@ -261,15 +278,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
           
           console.log(`✓ User created: ${user.id} (${email})`);
-          console.log(`  Referral code: ${referralCode}`);
-          if (referrerUserId) {
-            console.log(`  Referred by: ${referrerUserId}`);
-          }
-          console.log(`  Onboarding token: ${onboardingToken}`);
           const onboardingLink = `${baseUrl}/first-login?token=${onboardingToken}`;
           console.log(`  Onboarding link: ${onboardingLink}`);
           
-          // Send welcome email with credentials and onboarding link
           const emailSent = await sendOnboardingEmail(email, tempPassword, onboardingLink, plan);
           if (emailSent) {
             console.log(`✓ Onboarding email sent to ${email}`);
@@ -280,26 +291,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
         } else {
           console.log(`✓ User already exists: ${user.id} (${email})`);
           
-          // Update user plan if different
           if (user.plan !== plan) {
             await storage.updateUserPlan(user.id, plan as "basic" | "pro");
             console.log(`  Updated plan: ${user.plan} → ${plan}`);
           }
         }
         
-        // Create subscription record
+        // Create subscription record with Mollie customer ID for recurring billing
         const subscription = await storage.createSubscription({
           userId: user.id,
           molliePaymentId: payment.id,
+          mollieCustomerId: mollieCustomerId || null,
           plan: plan as "basic" | "pro",
           status: "active",
         });
         
         console.log(`✓ Subscription created: ${subscription.id}`);
         
+        // Set up recurring monthly subscription in Mollie if this was a first payment with mandate
+        if (mollieCustomerId && mollieClient && (payment as any).sequenceType === "first") {
+          try {
+            const mollieSubscription = await mollieClient.customerSubscriptions.create({
+              customerId: mollieCustomerId,
+              amount: {
+                currency: "EUR",
+                value: getPlanPrice(plan)
+              },
+              interval: "1 month",
+              description: `${getPlanDisplayName(plan)} - Maandelijks abonnement`,
+              webhookUrl: `${baseUrl}/api/mollie/webhook`
+            });
+            
+            const nextMonth = new Date();
+            nextMonth.setMonth(nextMonth.getMonth() + 1);
+            
+            await storage.updateSubscription(subscription.id, {
+              mollieSubscriptionId: mollieSubscription.id,
+              currentPeriodEnd: nextMonth
+            });
+            
+            console.log(`✓ Mollie recurring subscription created: ${mollieSubscription.id} (maandelijks €${getPlanPrice(plan)})`);
+          } catch (subError: any) {
+            console.error(`⚠ Failed to create Mollie recurring subscription:`, subError);
+          }
+        }
+        
         // Create commission for referrer if applicable
         if (referrerUserId) {
-          // Commission rates: €2.95 for basic (€12.95), €4.00 for pro (€24.00)
           const commissionAmount = plan === "pro" ? 4.00 : 2.95;
           
           try {
@@ -316,7 +354,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             console.log(`✓ Commission created: ${commission.id} (€${commissionAmount.toFixed(2)} for ${referrerUserId})`);
           } catch (commissionError: any) {
             console.error(`⚠ Failed to create commission:`, commissionError);
-            // Don't fail the webhook for commission errors
           }
         }
       }
