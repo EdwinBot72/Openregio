@@ -55,7 +55,7 @@ const menuItems = [
     color: "text-regio-purple",
   },
   {
-    title: "Signaalinstrument",
+    title: "Juridische Instrumenten",
     icon: FileText,
     url: "/woo-wizard",
     color: "text-regio-purple",

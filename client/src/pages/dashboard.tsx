@@ -124,16 +124,16 @@ export default function DashboardPage() {
                 <FileText className="w-5 h-5 text-regio-blue" />
               </div>
               <div className="flex-1">
-                <h2 className="font-semibold">Signaalinstrument</h2>
+                <h2 className="font-semibold">Juridische Instrumenten</h2>
                 <p className="text-sm text-muted-foreground">
-                  Stel bestuursorganen op scherp met een juridische kennisgeving over bevoegdheid en mandaat.
+                  Signaalinstrument of BevoegdheidsScan: kies het juridische middel dat past bij jouw situatie.
                 </p>
               </div>
             </div>
             <div className="mt-1">
               <Link href="/woo-wizard">
                 <Button size="sm" data-testid="button-woo-wizard">
-                  Brief opstellen
+                  Instrument kiezen
                   <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
               </Link>

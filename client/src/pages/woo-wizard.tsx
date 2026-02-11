@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { FileText, Mail, Download, Check, Copy, ChevronRight, ChevronLeft, Shield, AlertTriangle, Target } from "lucide-react";
+import { FileText, Mail, Download, Check, Copy, ChevronRight, ChevronLeft, Shield, AlertTriangle, Target, Scale, Gavel } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 import { Link } from "wouter";
+
+type InstrumentType = "signaal" | "bevoegdheidsscan";
 
 const STEPS = [
   { id: 1, title: "Gegevens", icon: FileText },
@@ -16,7 +18,7 @@ const STEPS = [
   { id: 3, title: "Export", icon: Download },
 ];
 
-function generateLetter(data: {
+function generateSignaalLetter(data: {
   naam: string;
   adres: string;
   postcodeWoonplaats: string;
@@ -60,9 +62,79 @@ Hoogachtend,
 ${data.naam}`;
 }
 
+function generateBevoegdheidsScanLetter(data: {
+  naam: string;
+  adres: string;
+  postcodeWoonplaats: string;
+  bestuursorgaan: string;
+  adresBestuursorgaan: string;
+  onderwerp: string;
+  periode: string;
+}): string {
+  return `OPENREGIO \u2013 AFDWINGBAAR CONTROLEMIDDEL (WOO)
+
+Afzender:
+${data.naam}
+${data.adres}
+${data.postcodeWoonplaats}
+
+Aan:
+${data.bestuursorgaan}
+${data.adresBestuursorgaan}
+
+Betreft: Verzoek ex art. 3.1 Wet open overheid \u2013 bevoegdheids- en mandaatcontrole
+
+Geacht bestuur,
+
+Op grond van artikel 3.1 Wet open overheid verzoek ik om openbaarmaking van de onderstaande documenten, teneinde de juridische herleidbaarheid, bevoegdheid en toerekening van ${data.onderwerp} te kunnen vaststellen.
+
+I. Bevoegdheidsgrondslag
+
+Het formele besluit waaruit blijkt welk bestuursorgaan bevoegd is tot het nemen van het betreffende besluit.
+
+De wettelijke bepaling(en) waarop deze bevoegdheid rust.
+
+Publicatie van dit besluit (indien van toepassing).
+
+II. Mandaat en ondermandaat (art. 10:1 e.v. Awb)
+
+Het geldende mandaatbesluit.
+
+Ondermandaatbesluiten (art. 10:5 Awb).
+
+Functies en bevoegdheidsomschrijvingen van gemandateerde functionarissen.
+
+Inwerkingtredingsdatum van deze mandaten.
+
+III. Ondertekenings- en toerekeningsstructuur
+
+De regeling waaruit blijkt wie bevoegd is tot ondertekening.
+
+Documentatie waaruit blijkt hoe besluiten juridisch worden toegerekend aan het bevoegde bestuursorgaan.
+
+Eventuele overeenkomsten met externe uitvoeringspartijen.
+
+IV. Juridische advisering
+
+Interne juridische adviezen inzake de bevoegdheids- en mandaatconstructie.
+
+Periode: ${data.periode}
+
+Ik verzoek u dit verzoek te behandelen conform de wettelijke termijn van artikel 4.4 Woo.
+
+Indien (gedeeltelijke) weigering plaatsvindt, verzoek ik om een gemotiveerd besluit onder vermelding van de toepasselijke uitzonderingsgrond.
+
+Hoogachtend,
+
+
+[Handtekening]
+${data.naam}`;
+}
+
 export default function WooWizardPage() {
   const { toast } = useToast();
   const { user, isLoading: authLoading } = useAuth();
+  const [selectedType, setSelectedType] = useState<InstrumentType | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [copied, setCopied] = useState(false);
 
@@ -72,8 +144,21 @@ export default function WooWizardPage() {
   const [bestuursorgaan, setBestuursorgaan] = useState("");
   const [adresBestuursorgaan, setAdresBestuursorgaan] = useState("");
   const [onderwerp, setOnderwerp] = useState("");
+  const [periode, setPeriode] = useState("");
 
   const [generatedLetter, setGeneratedLetter] = useState("");
+
+  const resetForm = () => {
+    setCurrentStep(1);
+    setGeneratedLetter("");
+    setNaam("");
+    setAdres("");
+    setPostcodeWoonplaats("");
+    setBestuursorgaan("");
+    setAdresBestuursorgaan("");
+    setOnderwerp("");
+    setPeriode("");
+  };
 
   const handleGenerate = () => {
     if (!naam.trim() || !bestuursorgaan.trim() || !onderwerp.trim()) {
@@ -84,14 +169,19 @@ export default function WooWizardPage() {
       });
       return;
     }
-    const letter = generateLetter({
-      naam,
-      adres,
-      postcodeWoonplaats,
-      bestuursorgaan,
-      adresBestuursorgaan,
-      onderwerp,
-    });
+    if (selectedType === "bevoegdheidsscan" && !periode.trim()) {
+      toast({
+        title: "Verplicht veld",
+        description: "Vul de periode in voor het Woo-verzoek.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const letter = selectedType === "bevoegdheidsscan"
+      ? generateBevoegdheidsScanLetter({ naam, adres, postcodeWoonplaats, bestuursorgaan, adresBestuursorgaan, onderwerp, periode })
+      : generateSignaalLetter({ naam, adres, postcodeWoonplaats, bestuursorgaan, adresBestuursorgaan, onderwerp });
+
     setGeneratedLetter(letter);
     setCurrentStep(2);
   };
@@ -112,7 +202,8 @@ export default function WooWizardPage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `Signaalinstrument-${onderwerp.replace(/\s+/g, "-").slice(0, 30)}.txt`;
+    const prefix = selectedType === "bevoegdheidsscan" ? "BevoegdheidsScan" : "Signaalinstrument";
+    a.download = `${prefix}-${onderwerp.replace(/\s+/g, "-").slice(0, 30)}.txt`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -133,7 +224,7 @@ export default function WooWizardPage() {
         <Card>
           <CardHeader className="text-center">
             <CardTitle>Inloggen vereist</CardTitle>
-            <CardDescription>Log in om het Signaalinstrument te gebruiken.</CardDescription>
+            <CardDescription>Log in om de juridische instrumenten te gebruiken.</CardDescription>
           </CardHeader>
           <CardContent className="text-center">
             <Link href="/login">
@@ -145,13 +236,87 @@ export default function WooWizardPage() {
     );
   }
 
+  if (!selectedType) {
+    return (
+      <div className="container mx-auto py-8 px-4 max-w-4xl">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold mb-2" data-testid="text-page-title">Juridische Instrumenten</h1>
+          <p className="text-muted-foreground">Kies het instrument dat past bij jouw situatie</p>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
+          <Card className="hover-elevate cursor-pointer" onClick={() => setSelectedType("signaal")} data-testid="card-signaalinstrument">
+            <CardHeader className="gap-2">
+              <div className="p-2.5 rounded-full bg-primary/10 w-fit">
+                <Shield className="h-6 w-6 text-primary" />
+              </div>
+              <CardTitle className="text-lg">Signaalinstrument</CardTitle>
+              <CardDescription>
+                Juridische kennisgeving die het bestuursorgaan op scherp zet over bevoegdheid en mandaat. Geen verplichting tot reactie.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                <Badge variant="secondary">Dossieropbouw</Badge>
+                <Badge variant="secondary">Geen termijn</Badge>
+                <Badge variant="secondary">Preventief</Badge>
+              </div>
+              <Button className="w-full" data-testid="button-select-signaal">
+                Signaalinstrument kiezen
+                <ChevronRight className="h-4 w-4 ml-2" />
+              </Button>
+            </CardContent>
+          </Card>
+
+          <Card className="hover-elevate cursor-pointer" onClick={() => setSelectedType("bevoegdheidsscan")} data-testid="card-bevoegdheidsscan">
+            <CardHeader className="gap-2">
+              <div className="p-2.5 rounded-full bg-destructive/10 w-fit">
+                <Gavel className="h-6 w-6 text-destructive" />
+              </div>
+              <CardTitle className="text-lg">BevoegdheidsScan</CardTitle>
+              <CardDescription>
+                Formeel Woo-verzoek dat het bestuursorgaan verplicht te reageren. Afdwingbaar met termijn, ingebrekestelling en dwangsom.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-wrap gap-1.5 mb-4">
+                <Badge variant="secondary">Woo-verzoek</Badge>
+                <Badge variant="secondary">Beslisplicht</Badge>
+                <Badge variant="secondary">Afdwingbaar</Badge>
+              </div>
+              <Button className="w-full" data-testid="button-select-bevoegdheidsscan">
+                BevoegdheidsScan kiezen
+                <ChevronRight className="h-4 w-4 ml-2" />
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   const progress = (currentStep / 3) * 100;
+  const instrumentLabel = selectedType === "bevoegdheidsscan" ? "BevoegdheidsScan" : "Signaalinstrument";
+  const instrumentSubtitle = selectedType === "bevoegdheidsscan"
+    ? "Afdwingbaar Woo-verzoek voor bevoegdheids- en mandaatcontrole"
+    : "Juridische positionering & herleidbaarheid richting bestuursorganen";
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2" data-testid="text-page-title">Signaalinstrument</h1>
-        <p className="text-muted-foreground">Juridische positionering & herleidbaarheid richting bestuursorganen</p>
+        <div className="flex items-center gap-2 mb-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => { setSelectedType(null); resetForm(); }}
+            data-testid="button-back-choose"
+          >
+            <ChevronLeft className="h-4 w-4 mr-1" />
+            Kies ander instrument
+          </Button>
+        </div>
+        <h1 className="text-3xl font-bold mb-2" data-testid="text-page-title">{instrumentLabel}</h1>
+        <p className="text-muted-foreground">{instrumentSubtitle}</p>
       </div>
 
       <div className="mb-8">
@@ -256,17 +421,36 @@ export default function WooWizardPage() {
 
             <div className="border-t pt-6">
               <h3 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">Onderwerp</h3>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Onderwerp van de toets *</label>
-                <Input
-                  placeholder="bijv. de handhaving van bestemmingsplan X"
-                  value={onderwerp}
-                  onChange={(e) => setOnderwerp(e.target.value)}
-                  data-testid="input-onderwerp"
-                />
-                <p className="text-xs text-muted-foreground">
-                  Dit wordt ingevuld in de brief als het onderwerp waarop de rechtmatigheidstoets betrekking heeft
-                </p>
+              <div className="space-y-3">
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium">Onderwerp van de toets *</label>
+                  <Input
+                    placeholder="bijv. de handhaving van bestemmingsplan X"
+                    value={onderwerp}
+                    onChange={(e) => setOnderwerp(e.target.value)}
+                    data-testid="input-onderwerp"
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    {selectedType === "bevoegdheidsscan"
+                      ? "Dit wordt ingevuld in het Woo-verzoek als het onderwerp waarvoor documenten worden opgevraagd"
+                      : "Dit wordt ingevuld in de brief als het onderwerp waarop de rechtmatigheidstoets betrekking heeft"}
+                  </p>
+                </div>
+
+                {selectedType === "bevoegdheidsscan" && (
+                  <div className="space-y-1.5">
+                    <label className="text-sm font-medium">Periode *</label>
+                    <Input
+                      placeholder="bijv. 2020 tot heden"
+                      value={periode}
+                      onChange={(e) => setPeriode(e.target.value)}
+                      data-testid="input-periode"
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      De periode waarover juridische adviezen worden opgevraagd (sectie IV van het verzoek)
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
 
@@ -321,7 +505,7 @@ export default function WooWizardPage() {
                 Stap 3: Export
               </CardTitle>
               <CardDescription>
-                Download of kopieer je Signaalinstrument brief
+                Download of kopieer je {instrumentLabel} brief
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -349,97 +533,156 @@ export default function WooWizardPage() {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => {
-                    setCurrentStep(1);
-                    setGeneratedLetter("");
-                    setNaam("");
-                    setAdres("");
-                    setPostcodeWoonplaats("");
-                    setBestuursorgaan("");
-                    setAdresBestuursorgaan("");
-                    setOnderwerp("");
-                  }}
+                  onClick={() => resetForm()}
                   data-testid="button-new"
                 >
-                  Nieuw signaalinstrument
+                  Nieuwe brief
                 </Button>
               </div>
             </CardContent>
           </Card>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <Card>
-              <CardHeader className="gap-2">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <Target className="h-4 w-4 text-primary" />
-                  Wat dit instrument doet
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm">
-                  <li className="flex items-start gap-2">
-                    <Shield className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Zet het bestuursorgaan op scherp</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Shield className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Laat zien dat je bevoegdheidsstructuur kent</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Shield className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Creëert dossieropbouw</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Shield className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Is herbruikbaar per onderwerp</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <Shield className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
-                    <span>Geen civielrechtelijke discussie</span>
-                  </li>
-                </ul>
-              </CardContent>
-            </Card>
+          {selectedType === "signaal" && (
+            <div className="grid gap-4 md:grid-cols-2">
+              <Card>
+                <CardHeader className="gap-2">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Target className="h-4 w-4 text-primary" />
+                    Wat dit instrument doet
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-start gap-2">
+                      <Shield className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Zet het bestuursorgaan op scherp</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Shield className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Laat zien dat je bevoegdheidsstructuur kent</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Shield className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Cre\u00ebert dossieropbouw</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Shield className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Is herbruikbaar per onderwerp</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Shield className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Geen civielrechtelijke discussie</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
 
-            <Card>
-              <CardHeader className="gap-2">
-                <CardTitle className="flex items-center gap-2 text-base">
-                  <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-                  Wat het niet doet
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li className="flex items-start gap-2">
-                    <span className="mt-0.5 flex-shrink-0">-</span>
-                    <span>Geen verplichting tot reactie</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="mt-0.5 flex-shrink-0">-</span>
-                    <span>Geen termijn</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="mt-0.5 flex-shrink-0">-</span>
-                    <span>Geen rechtsmiddel</span>
-                  </li>
-                  <li className="flex items-start gap-2">
-                    <span className="mt-0.5 flex-shrink-0">-</span>
-                    <span>Geen drukmiddel</span>
-                  </li>
-                </ul>
+              <Card>
+                <CardHeader className="gap-2">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+                    Wat het niet doet
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 text-sm text-muted-foreground">
+                    <li className="flex items-start gap-2">
+                      <span className="mt-0.5 flex-shrink-0">-</span>
+                      <span>Geen verplichting tot reactie</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="mt-0.5 flex-shrink-0">-</span>
+                      <span>Geen termijn</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="mt-0.5 flex-shrink-0">-</span>
+                      <span>Geen rechtsmiddel</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <span className="mt-0.5 flex-shrink-0">-</span>
+                      <span>Geen drukmiddel</span>
+                    </li>
+                  </ul>
 
-                <div className="mt-4 pt-4 border-t">
-                  <p className="text-sm font-medium mb-2">Strategische inzet</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    <Badge variant="secondary">Voorafgaand aan Woo</Badge>
-                    <Badge variant="secondary">Voorafgaand aan bezwaar</Badge>
-                    <Badge variant="secondary">Als dossieropbouw</Badge>
-                    <Badge variant="secondary">Signaal naar meerdere bestuursorganen</Badge>
+                  <div className="mt-4 pt-4 border-t">
+                    <p className="text-sm font-medium mb-2">Strategische inzet</p>
+                    <div className="flex flex-wrap gap-1.5">
+                      <Badge variant="secondary">Voorafgaand aan Woo</Badge>
+                      <Badge variant="secondary">Voorafgaand aan bezwaar</Badge>
+                      <Badge variant="secondary">Als dossieropbouw</Badge>
+                      <Badge variant="secondary">Signaal naar meerdere bestuursorganen</Badge>
+                    </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {selectedType === "bevoegdheidsscan" && (
+            <div className="grid gap-4 md:grid-cols-2">
+              <Card>
+                <CardHeader className="gap-2">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Scale className="h-4 w-4 text-primary" />
+                    Waarom dit afdwingbaar is
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <ul className="space-y-2 text-sm">
+                    <li className="flex items-start gap-2">
+                      <Gavel className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Woo = beslisplicht</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Gavel className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>4 weken termijn</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Gavel className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Verlenging moet gemotiveerd</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Gavel className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Geen besluit = ingebrekestelling</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Gavel className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Daarna beroep mogelijk</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Gavel className="h-4 w-4 text-primary mt-0.5 flex-shrink-0" />
+                      <span>Dwangsom mogelijk</span>
+                    </li>
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="gap-2">
+                  <CardTitle className="flex items-center gap-2 text-base">
+                    <Target className="h-4 w-4 text-primary" />
+                    Universeel inzetbaar bij
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-wrap gap-1.5">
+                    <Badge variant="secondary">Milieuzones</Badge>
+                    <Badge variant="secondary">Belastingaanslagen</Badge>
+                    <Badge variant="secondary">Erfpacht</Badge>
+                    <Badge variant="secondary">Handhaving</Badge>
+                    <Badge variant="secondary">Dwangbevelen</Badge>
+                    <Badge variant="secondary">Vergunningen</Badge>
+                  </div>
+
+                  <div className="mt-4 pt-4 border-t">
+                    <p className="text-sm font-medium text-muted-foreground">
+                      Dit is geen signaal. Dit is juridisch drukmiddel.
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
         </>
       )}
     </div>
