@@ -30,9 +30,18 @@ export default function LoginPage() {
     setIsLoading(true);
     
     try {
-      await apiRequest("POST", "/api/auth/login", { email, password });
+      const response = await apiRequest("POST", "/api/auth/login", { email, password });
+      const data = await response.json();
 
-      // Invalidate and refetch user data to update authentication state
+      if (data.mustCompleteOnboarding && data.onboardingToken) {
+        toast({
+          title: "Welkom!",
+          description: "Je moet eerst je profiel voltooien om verder te gaan.",
+        });
+        setLocation(`/first-login?token=${data.onboardingToken}`);
+        return;
+      }
+
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
 
       toast({
@@ -40,7 +49,6 @@ export default function LoginPage() {
         description: "Je wordt doorgestuurd naar het dashboard...",
       });
 
-      // Redirect to dashboard after successful login
       setTimeout(() => {
         setLocation("/dashboard");
       }, 500);

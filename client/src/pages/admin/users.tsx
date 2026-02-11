@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, UserPlus, Copy, Check, ArrowLeft } from "lucide-react";
+import { Loader2, UserPlus, Copy, Check, ArrowLeft, RefreshCw } from "lucide-react";
 import { Link } from "wouter";
 
 export default function AdminUsersPage() {
@@ -23,6 +23,13 @@ export default function AdminUsersPage() {
     emailSent: boolean;
   } | null>(null);
   const [copied, setCopied] = useState(false);
+
+  const [resendEmail, setResendEmail] = useState("");
+  const [resendResult, setResendResult] = useState<{
+    onboardingLink: string;
+    emailSent: boolean;
+  } | null>(null);
+  const [resendCopied, setResendCopied] = useState(false);
 
   const createUserMutation = useMutation({
     mutationFn: async () => {
@@ -52,6 +59,43 @@ export default function AdminUsersPage() {
       });
     },
   });
+
+  const resendMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/admin/resend-activation", {
+        email: resendEmail,
+      });
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setResendResult(data);
+      toast({
+        title: "Activatielink verstuurd",
+        description: `Nieuwe activatielink is aangemaakt voor ${resendEmail}.`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        variant: "destructive",
+        title: "Fout",
+        description: error.message || "Kon activatielink niet opnieuw versturen",
+      });
+    },
+  });
+
+  const handleResend = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!resendEmail) return;
+    setResendResult(null);
+    resendMutation.mutate();
+  };
+
+  const copyResendLink = async () => {
+    if (!resendResult?.onboardingLink) return;
+    await navigator.clipboard.writeText(resendResult.onboardingLink);
+    setResendCopied(true);
+    setTimeout(() => setResendCopied(false), 2000);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -193,6 +237,80 @@ export default function AdminUsersPage() {
                 data-testid="button-copy-link"
               >
                 {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              </Button>
+            </div>
+          </AlertDescription>
+        </Alert>
+      )}
+
+      <Card data-testid="card-resend-activation">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-lg">
+            <RefreshCw className="w-5 h-5" />
+            Activatielink opnieuw versturen
+          </CardTitle>
+          <CardDescription>
+            Stuur een nieuwe activatielink als de vorige is verlopen of niet is aangekomen.
+          </CardDescription>
+        </CardHeader>
+        <form onSubmit={handleResend}>
+          <CardContent className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="resendEmail">E-mailadres</Label>
+              <Input
+                id="resendEmail"
+                type="email"
+                placeholder="naam@voorbeeld.nl"
+                value={resendEmail}
+                onChange={(e) => setResendEmail(e.target.value)}
+                disabled={resendMutation.isPending}
+                required
+                data-testid="input-resend-email"
+              />
+            </div>
+            <Button
+              type="submit"
+              variant="outline"
+              className="w-full"
+              disabled={resendMutation.isPending || !resendEmail}
+              data-testid="button-resend-activation"
+            >
+              {resendMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Nieuwe activatielink versturen
+            </Button>
+          </CardContent>
+        </form>
+      </Card>
+
+      {resendResult && (
+        <Alert data-testid="alert-resend-success">
+          <AlertDescription className="space-y-3">
+            <p className="font-medium">
+              Nieuwe activatielink aangemaakt
+            </p>
+            {resendResult.emailSent ? (
+              <p className="text-sm text-muted-foreground">
+                Een nieuwe activatie-email is verstuurd met een nieuw tijdelijk wachtwoord.
+              </p>
+            ) : (
+              <p className="text-sm text-muted-foreground">
+                De email kon niet worden verstuurd. Deel de activatielink hieronder handmatig.
+              </p>
+            )}
+            <div className="flex items-center gap-2">
+              <Input
+                readOnly
+                value={resendResult.onboardingLink}
+                className="text-xs font-mono"
+                data-testid="input-resend-link"
+              />
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={copyResendLink}
+                data-testid="button-copy-resend-link"
+              >
+                {resendCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               </Button>
             </div>
           </AlertDescription>

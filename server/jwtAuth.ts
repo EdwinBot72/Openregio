@@ -9,6 +9,7 @@ import { fromZodError } from "zod-validation-error";
 import { db } from "db";
 import { eq, and, lt, isNull } from "drizzle-orm";
 import { sendPasswordResetEmail, sendWelcomeEmail } from "./services/emailService";
+import { generateOnboardingToken } from "./utils/auth";
 
 const ADMIN_EMAIL = "edwin@stroombox.nl";
 
@@ -247,6 +248,23 @@ export function setupJwtAuth(app: Express) {
       const isValid = await bcrypt.compare(password, user.passwordHash);
       if (!isValid) {
         return res.status(401).json({ error: "Ongeldige inloggegevens" });
+      }
+      
+      if (user.mustCompleteOnboarding) {
+        await storage.deleteOnboardingTokensByUserId(user.id);
+        const newToken = generateOnboardingToken();
+        const expiresAt = new Date();
+        expiresAt.setDate(expiresAt.getDate() + 30);
+        await storage.createOnboardingToken({
+          userId: user.id,
+          token: newToken,
+          expiresAt,
+        });
+        return res.json({
+          mustCompleteOnboarding: true,
+          onboardingToken: newToken,
+          user: formatUserResponse(user),
+        });
       }
       
       const tokenId = generateTokenId();

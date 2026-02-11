@@ -3133,6 +3133,66 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
+  app.post("/api/admin/resend-activation", requireAdmin, async (req, res) => {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ error: "Email is verplicht" });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ error: "Gebruiker niet gevonden" });
+      }
+
+      if (!user.mustCompleteOnboarding) {
+        return res.status(400).json({ error: "Deze gebruiker heeft de onboarding al voltooid" });
+      }
+
+      await storage.deleteOnboardingTokensByUserId(user.id);
+
+      const tempPassword = generateRandomPassword();
+      const onboardingToken = generateOnboardingToken();
+      const passwordHash = await bcrypt.hash(tempPassword, 10);
+
+      await storage.upsertUser({
+        id: user.id,
+        email: user.email,
+        passwordHash,
+        plan: user.plan as "basic" | "pro",
+        role: user.role as "member" | "master" | "admin",
+        mustCompleteOnboarding: true,
+      });
+
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30);
+
+      await storage.createOnboardingToken({
+        userId: user.id,
+        token: onboardingToken,
+        expiresAt,
+      });
+
+      const baseUrl = process.env.PUBLIC_BASE_URL || getBaseUrl(req);
+      const onboardingLink = `${baseUrl}/first-login?token=${onboardingToken}`;
+
+      const emailSent = await sendOnboardingEmail(email, tempPassword, onboardingLink, user.plan || "basic");
+
+      console.log(`[Admin] Activation resent by ${req.user!.email}: ${email}`);
+      console.log(`[Admin] New onboarding link: ${onboardingLink}`);
+
+      res.json({
+        message: "Activatielink opnieuw verstuurd",
+        onboardingLink,
+        emailSent,
+      });
+    } catch (error: any) {
+      console.error("Error resending activation:", error);
+      res.status(500).json({ error: "Kon activatielink niet opnieuw versturen" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

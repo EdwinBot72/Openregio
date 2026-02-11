@@ -155,6 +155,7 @@ export interface IStorage {
   createOnboardingToken(token: InsertOnboardingToken): Promise<OnboardingToken>;
   getOnboardingTokenByToken(token: string): Promise<OnboardingToken | undefined>;
   deleteOnboardingToken(token: string): Promise<boolean>;
+  deleteOnboardingTokensByUserId(userId: string): Promise<boolean>;
 
   // Bedrijfsprofielen (Business Profiles)
   getBedrijfsprofielByUserId(userId: string): Promise<Bedrijfsprofiel | undefined>;
@@ -1183,6 +1184,17 @@ export class MemStorage implements IStorage {
     return this.onboardingTokens.delete(token);
   }
 
+  async deleteOnboardingTokensByUserId(userId: string): Promise<boolean> {
+    let deleted = false;
+    for (const [key, t] of this.onboardingTokens.entries()) {
+      if (t.userId === userId) {
+        this.onboardingTokens.delete(key);
+        deleted = true;
+      }
+    }
+    return deleted;
+  }
+
   async getBedrijfsprofielByUserId(userId: string): Promise<Bedrijfsprofiel | undefined> {
     return Array.from(this.bedrijfsprofielen.values()).find(p => p.gebruikerId === userId);
   }
@@ -2109,6 +2121,11 @@ class DbStorage implements IStorage {
 
   async deleteOnboardingToken(token: string): Promise<boolean> {
     const results = await db.delete(onboardingTokens).where(eq(onboardingTokens.token, token)).returning();
+    return results.length > 0;
+  }
+
+  async deleteOnboardingTokensByUserId(userId: string): Promise<boolean> {
+    const results = await db.delete(onboardingTokens).where(eq(onboardingTokens.userId, userId)).returning();
     return results.length > 0;
   }
 
