@@ -55,7 +55,7 @@ const menuItems = [
     color: "text-regio-purple",
   },
   {
-    title: "WOO-verzoek",
+    title: "Signaalinstrument",
     icon: FileText,
     url: "/woo-wizard",
     color: "text-regio-purple",

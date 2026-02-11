@@ -124,16 +124,16 @@ export default function DashboardPage() {
                 <FileText className="w-5 h-5 text-regio-blue" />
               </div>
               <div className="flex-1">
-                <h2 className="font-semibold">WOO-verzoek maken</h2>
+                <h2 className="font-semibold">Signaalinstrument</h2>
                 <p className="text-sm text-muted-foreground">
-                  Genereer een professioneel WOO-verzoek. Kies je onderwerp, wij schrijven de brief.
+                  Stel bestuursorganen op scherp met een juridische kennisgeving over bevoegdheid en mandaat.
                 </p>
               </div>
             </div>
             <div className="mt-1">
               <Link href="/woo-wizard">
                 <Button size="sm" data-testid="button-woo-wizard">
-                  Maak WOO-verzoek
+                  Brief opstellen
                   <ArrowRight className="w-4 h-4 ml-1" />
                 </Button>
               </Link>
