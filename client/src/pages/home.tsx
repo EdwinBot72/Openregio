@@ -34,14 +34,14 @@ export default function HomePage() {
               <Link href="/login">
                 <Button variant="ghost" size="sm" data-testid="button-nav-login">Inloggen</Button>
               </Link>
-              <a 
-                href="#member"
+              <Link 
+                href="/lidmaatschap"
                 className="inline-flex items-center justify-center px-4 py-2.5 rounded-full font-black text-white text-sm"
                 style={{ background: "#1f5fae", boxShadow: "0 14px 40px rgba(31,95,174,.25)" }}
-                data-testid="button-nav-info"
+                data-testid="button-nav-lid"
               >
-                Meer informatie
-              </a>
+                Word lid
+              </Link>
             </div>
           </div>
         </div>
@@ -72,14 +72,14 @@ export default function HomePage() {
                   Oplossingen voor regionale samenwerking en innovatie. Minder praat, meer uitvoering.
                 </p>
                 <div className="flex flex-wrap gap-2.5">
-                  <a 
-                    href="#member"
+                  <Link 
+                    href="/lidmaatschap"
                     className="inline-flex items-center justify-center px-4 py-3 rounded-full font-black text-sm"
                     style={{ background: "#f28a1a", color: "#1b1307", boxShadow: "0 14px 40px rgba(242,138,26,.25)" }}
                     data-testid="button-hero-lid"
                   >
                     Word lid
-                  </a>
+                  </Link>
                   <a 
                     href="#cases"
                     className="inline-flex items-center justify-center px-4 py-3 rounded-full font-black text-sm"
@@ -350,15 +350,17 @@ export default function HomePage() {
                   €12,95 <span style={{ fontSize: "14px", color: "#5b677a", fontWeight: 900 }}>excl. BTW / maand</span>
                 </div>
 
-                <div 
-                  className="w-full rounded-[14px] p-3 text-center font-black mb-3"
+                <Link 
+                  href="/lidmaatschap?plan=basic"
+                  className="block w-full rounded-[14px] p-3 text-center font-black mb-3"
                   style={{ 
                     background: "linear-gradient(180deg, rgba(31,95,174,.08), rgba(31,95,174,.02))",
                     border: "1px solid rgba(31,95,174,.25)"
                   }}
+                  data-testid="button-plan-basic-select"
                 >
-                  Geselecteerd
-                </div>
+                  Kies Basis-lid
+                </Link>
 
                 <ul className="space-y-0">
                   {[
@@ -413,15 +415,17 @@ export default function HomePage() {
                   €24 <span style={{ fontSize: "14px", color: "#5b677a", fontWeight: 900 }}>excl. BTW / maand</span>
                 </div>
 
-                <div 
-                  className="w-full rounded-[14px] p-3 text-center font-black mb-3"
+                <Link 
+                  href="/lidmaatschap?plan=pro"
+                  className="block w-full rounded-[14px] p-3 text-center font-black mb-3"
                   style={{ 
                     background: "linear-gradient(180deg, rgba(242,138,26,.10), rgba(242,138,26,.02))",
                     border: "1px solid rgba(242,138,26,.28)"
                   }}
+                  data-testid="button-plan-pro-select"
                 >
-                  Selecteer dit plan
-                </div>
+                  Kies Pro-bijdrager
+                </Link>
 
                 <ul className="space-y-0">
                   {[
@@ -472,7 +476,7 @@ export default function HomePage() {
                   Start meteen met lokale samenwerking. Vul je e-mailadres in en ga door naar betaling.
                 </p>
 
-                <form className="flex flex-wrap gap-2.5 items-center mt-2.5" onSubmit={(e) => { e.preventDefault(); window.location.href = "/start?plan=basic"; }}>
+                <form className="flex flex-wrap gap-2.5 items-center mt-2.5" onSubmit={(e) => { e.preventDefault(); const email = (e.currentTarget.querySelector('input[type=email]') as HTMLInputElement)?.value; window.location.href = `/lidmaatschap?email=${encodeURIComponent(email || '')}`; }}>
                   <input 
                     type="email" 
                     required 
@@ -539,7 +543,7 @@ export default function HomePage() {
               <span className="opacity-50">·</span>
               <a href="#cases" className="opacity-90 hover:opacity-100 hover:underline" data-testid="link-footer-cases">Cases</a>
               <span className="opacity-50">·</span>
-              <a href="#member" className="opacity-90 hover:opacity-100 hover:underline" data-testid="link-footer-lid">Word lid</a>
+              <Link href="/lidmaatschap" className="opacity-90 hover:opacity-100 hover:underline" data-testid="link-footer-lid">Word lid</Link>
               <span className="opacity-50">·</span>
               <a href="#contact" className="opacity-90 hover:opacity-100 hover:underline" data-testid="link-footer-contact">Contact</a>
             </div>

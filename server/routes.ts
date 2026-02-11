@@ -167,14 +167,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`✓ Mollie customer created: ${customer.id} for ${email}`);
       
-      // Create first payment with sequenceType "first" to establish mandate for recurring billing
       const payment = await mollieClient.payments.create({
         amount: {
           value: amount,
           currency: "EUR"
         },
         customerId: customer.id,
-        sequenceType: "first" as any,
         description,
         redirectUrl: `${baseUrl}/betaling-geslaagd?email=${encodeURIComponent(email)}`,
         webhookUrl: `${webhookBaseUrl}/api/mollie/webhook`,
@@ -188,7 +186,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       });
       
-      console.log(`✓ Mollie first payment created: ${payment.id} for ${email} (${plan}) - mandate will be established`);
+      console.log(`✓ Mollie payment created: ${payment.id} for ${email} (${plan})`);
       
       // Redirect to Mollie checkout
       const checkoutUrl = payment.getCheckoutUrl();
@@ -199,7 +197,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ checkoutUrl });
     } catch (error: any) {
       console.error("Fout bij aanmaken Mollie payment:", error);
-      res.status(500).json({ error: "Kon betaling niet aanmaken" });
+      const userMessage = error?.statusCode === 422 
+        ? "Geen geschikte betaalmethoden beschikbaar. Neem contact op met info@openregio.nl."
+        : "Kon betaling niet aanmaken. Probeer het later opnieuw.";
+      res.status(500).json({ error: userMessage });
     }
   });
   
@@ -308,31 +309,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         console.log(`✓ Subscription created: ${subscription.id}`);
         
-        // Set up recurring monthly subscription in Mollie if this was a first payment with mandate
-        if (mollieCustomerId && mollieClient && (payment as any).sequenceType === "first") {
+        if (mollieCustomerId && mollieClient) {
           try {
-            const mollieSubscription = await mollieClient.customerSubscriptions.create({
-              customerId: mollieCustomerId,
-              amount: {
-                currency: "EUR",
-                value: getPlanPrice(plan)
-              },
-              interval: "1 month",
-              description: `${getPlanDisplayName(plan)} - Maandelijks abonnement`,
-              webhookUrl: `${baseUrl}/api/mollie/webhook`
-            });
+            const mandatesPage: any = await mollieClient.customerMandates.page({ customerId: mollieCustomerId });
+            const mandatesList = mandatesPage?.length ? Array.from(mandatesPage) : [];
+            const hasValidMandate = mandatesList.length > 0 && mandatesList.some((m: any) => m.status === "valid" || m.status === "pending");
             
-            const nextMonth = new Date();
-            nextMonth.setMonth(nextMonth.getMonth() + 1);
-            
-            await storage.updateSubscription(subscription.id, {
-              mollieSubscriptionId: mollieSubscription.id,
-              currentPeriodEnd: nextMonth
-            });
-            
-            console.log(`✓ Mollie recurring subscription created: ${mollieSubscription.id} (maandelijks €${getPlanPrice(plan)})`);
+            if (hasValidMandate) {
+              const mollieSubscription = await mollieClient.customerSubscriptions.create({
+                customerId: mollieCustomerId,
+                amount: {
+                  currency: "EUR",
+                  value: getPlanPrice(plan)
+                },
+                interval: "1 month",
+                description: `${getPlanDisplayName(plan)} - Maandelijks abonnement`,
+                webhookUrl: `${baseUrl}/api/mollie/webhook`
+              });
+              
+              const nextMonth = new Date();
+              nextMonth.setMonth(nextMonth.getMonth() + 1);
+              
+              await storage.updateSubscription(subscription.id, {
+                mollieSubscriptionId: mollieSubscription.id,
+                currentPeriodEnd: nextMonth
+              });
+              
+              console.log(`✓ Mollie recurring subscription created: ${mollieSubscription.id} (maandelijks €${getPlanPrice(plan)})`);
+            } else {
+              console.log(`ℹ No valid mandate found for customer ${mollieCustomerId} - recurring subscription will need to be set up separately`);
+              
+              const nextMonth = new Date();
+              nextMonth.setMonth(nextMonth.getMonth() + 1);
+              await storage.updateSubscription(subscription.id, {
+                currentPeriodEnd: nextMonth
+              });
+            }
           } catch (subError: any) {
             console.error(`⚠ Failed to create Mollie recurring subscription:`, subError);
+            const nextMonth = new Date();
+            nextMonth.setMonth(nextMonth.getMonth() + 1);
+            await storage.updateSubscription(subscription.id, {
+              currentPeriodEnd: nextMonth
+            });
           }
         }
         

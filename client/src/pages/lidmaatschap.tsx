@@ -68,27 +68,32 @@ export default function StartPage() {
   const [, setLocation] = useLocation();
   const searchParams = useSearch();
   const { toast } = useToast();
-  const [selectedPlan, setSelectedPlan] = useState<"basic" | "pro">("basic");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const params = new URLSearchParams(searchParams);
+  const urlPlan = params.get("plan");
+  const urlEmail = params.get("email");
+  const ref = params.get("ref") || undefined;
   
-  // Get referral code from URL
-  const ref = new URLSearchParams(searchParams).get("ref") || undefined;
+  const initialPlan = (urlPlan === "pro" ? "pro" : "basic") as "basic" | "pro";
+  const [selectedPlan, setSelectedPlan] = useState<"basic" | "pro">(initialPlan);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
-      plan: "basic",
+      email: urlEmail || "",
+      plan: initialPlan,
       ref: ref,
     },
   });
   
-  // Update form if ref changes
   useEffect(() => {
-    if (ref) {
-      form.setValue("ref", ref);
+    if (ref) form.setValue("ref", ref);
+    if (urlPlan === "pro" || urlPlan === "basic") {
+      form.setValue("plan", urlPlan);
+      setSelectedPlan(urlPlan);
     }
-  }, [ref, form]);
+    if (urlEmail) form.setValue("email", urlEmail);
+  }, [ref, urlPlan, urlEmail, form]);
 
   const onSubmit = async (data: FormData) => {
     setIsSubmitting(true);
