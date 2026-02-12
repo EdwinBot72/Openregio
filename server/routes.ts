@@ -1044,12 +1044,38 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
     }
   });
 
-  // Digitale Buurman - quick RegioBot for dashboard
-  app.post("/api/regiobot/buurman", requireAuth, async (req, res) => {
+  // Rate limiter for public RegioBot endpoint (5 requests per IP per minute)
+  const buurmanRateLimit = new Map<string, { count: number; resetAt: number }>();
+  const BUURMAN_RATE_WINDOW = 60_000;
+  const BUURMAN_RATE_MAX = 5;
+
+  // Digitale Buurman - quick RegioBot for dashboard (public, no auth needed)
+  app.post("/api/regiobot/buurman", async (req, res) => {
     try {
+      const ip = req.ip || req.socket.remoteAddress || "unknown";
+      const now = Date.now();
+      const entry = buurmanRateLimit.get(ip);
+      if (entry && now < entry.resetAt) {
+        if (entry.count >= BUURMAN_RATE_MAX) {
+          return res.status(429).json({ error: "Te veel verzoeken. Probeer het over een minuut opnieuw." });
+        }
+        entry.count++;
+      } else {
+        buurmanRateLimit.set(ip, { count: 1, resetAt: now + BUURMAN_RATE_WINDOW });
+      }
+      // Clean old entries periodically
+      if (buurmanRateLimit.size > 1000) {
+        for (const [key, val] of buurmanRateLimit) {
+          if (now > val.resetAt) buurmanRateLimit.delete(key);
+        }
+      }
+
       const { beroep, stad, vraag } = req.body;
-      if (!beroep || !stad) {
+      if (!beroep || !stad || typeof beroep !== "string" || typeof stad !== "string") {
         return res.status(400).json({ error: "Beroep en stad zijn verplicht" });
+      }
+      if (beroep.length > 100 || stad.length > 100 || (vraag && typeof vraag === "string" && vraag.length > 500)) {
+        return res.status(400).json({ error: "Invoer te lang" });
       }
 
       if (!process.env.OPENAI_API_KEY) {

@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
-import { MapPin, Users, Lightbulb, Settings, Target, MessageCircle, Check, Mail, Phone, MapPinned, Search } from "lucide-react";
+import { MapPin, Users, Lightbulb, Settings, Target, MessageCircle, Check, Mail, Phone, MapPinned, Search, Bot, Send, Loader2 } from "lucide-react";
 
 function getRegioFromPostcode(pc: string): { regio: string; beschrijving: string } | null {
   const clean = pc.toUpperCase().replace(/\s+/g, "");
@@ -111,6 +111,29 @@ export default function HomePage() {
   const [postcode, setPostcode] = useState("");
   const [regioResult, setRegioResult] = useState<{ regio: string; beschrijving: string } | null>(null);
   const [regioError, setRegioError] = useState("");
+  const [botBeroep, setBotBeroep] = useState("");
+  const [botStad, setBotStad] = useState("");
+  const [botAntwoord, setBotAntwoord] = useState("");
+  const [botLoading, setBotLoading] = useState(false);
+
+  const handleBotVraag = async () => {
+    if (!botBeroep.trim() || !botStad.trim()) return;
+    setBotLoading(true);
+    setBotAntwoord("");
+    try {
+      const res = await fetch("/api/regiobot/buurman", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ beroep: botBeroep.trim(), stad: botStad.trim() }),
+      });
+      const data = await res.json();
+      setBotAntwoord(data.antwoord || data.error || "Geen antwoord ontvangen.");
+    } catch {
+      setBotAntwoord("Kon geen verbinding maken. Probeer het later opnieuw.");
+    } finally {
+      setBotLoading(false);
+    }
+  };
 
   const handleRegioCheck = () => {
     setRegioError("");
@@ -304,6 +327,77 @@ export default function HomePage() {
                 )}
                 {regioError && (
                   <p className="mt-2 text-sm" style={{ color: "#e55353" }} data-testid="text-regiocheck-error">{regioError}</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Test de RegioBot */}
+        <section className="py-8" style={{ background: "#f8f9fb", borderBottom: "1px solid #e6ebf2" }} data-testid="section-regiobot-test">
+          <div className="max-w-[1120px] mx-auto px-4">
+            <div className="grid md:grid-cols-[1fr_1fr] gap-6 items-start">
+              <div>
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div 
+                    className="w-10 h-10 rounded-full flex items-center justify-center"
+                    style={{ background: "rgba(31,95,174,.10)", color: "#1f5fae" }}
+                  >
+                    <Bot className="w-5 h-5" />
+                  </div>
+                  <h2 className="font-black text-xl" style={{ color: "#0f172a" }} data-testid="text-regiobot-test-title">
+                    Test de RegioBot
+                  </h2>
+                </div>
+                <p style={{ color: "#5b677a", fontSize: "14px" }}>
+                  Vul je beroep en stad in. Onze digitale buurman zoekt direct kansen en mogelijkheden voor jou in de regio.
+                </p>
+              </div>
+              <div className="space-y-3">
+                <div className="flex gap-2.5">
+                  <Input
+                    placeholder="Je beroep (bijv. Bakker)"
+                    value={botBeroep}
+                    onChange={(e) => setBotBeroep(e.target.value)}
+                    className="flex-1"
+                    data-testid="input-bot-beroep"
+                  />
+                  <Input
+                    placeholder="Je stad"
+                    value={botStad}
+                    onChange={(e) => setBotStad(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleBotVraag()}
+                    className="flex-1"
+                    data-testid="input-bot-stad"
+                  />
+                </div>
+                <Button 
+                  onClick={handleBotVraag}
+                  disabled={botLoading || !botBeroep.trim() || !botStad.trim()}
+                  className="w-full"
+                  style={{ background: "#1f5fae" }}
+                  data-testid="button-bot-vraag"
+                >
+                  {botLoading ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      RegioBot denkt na...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4 mr-2" />
+                      Vraag de RegioBot naar kansen
+                    </>
+                  )}
+                </Button>
+                {botAntwoord && (
+                  <div 
+                    className="rounded-xl p-4 text-sm leading-relaxed"
+                    style={{ background: "rgba(31,95,174,.06)", border: "1px solid rgba(31,95,174,.15)", color: "#334155" }}
+                    data-testid="text-bot-antwoord"
+                  >
+                    {botAntwoord}
+                  </div>
                 )}
               </div>
             </div>
