@@ -1078,28 +1078,30 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
         return res.status(400).json({ error: "Invoer te lang" });
       }
 
-      const systemPrompt = `Je bent de digitale buurman van OpenRegio – een coöperatief platform voor lokale ondernemers in Nederland.
+      const systemPrompt = `Je bent een regionale marktanalist van OpenRegio – een coöperatief platform voor lokale ondernemers in Nederland.
 
-Je bent warm, persoonlijk en kent de regio goed. Je geeft altijd:
-1. **Concrete lokale kansen** – gebaseerd op samenwerking tussen ondernemers in de regio
-2. **Praktische tips** – wat de ondernemer morgen al kan doen
+Je maakt een korte maar inhoudelijke regionale marktanalyse. Gebruik je kennis van de Nederlandse markt, demografie, en lokale economie.
 
-Gebruik je kennis van:
-- Nederlandse gemeentelijke regelgeving en WOO (Wet open overheid)
-- Lokale subsidies, vergunningen en aanbestedingen
-- Regionale samenwerkingsverbanden en brancheverenigingen
-- Seizoensgebonden kansen en lokale evenementen
+Je antwoord bevat ALTIJD deze 4 onderdelen in deze volgorde:
+
+**Marktpotentieel**: Schat het lokale marktvolume en de vraag in voor dit beroep in deze plaats/regio. Noem het geschatte aantal huishoudens/bedrijven, en of de vraag groeit, stabiel is of daalt.
+
+**Concurrentie**: Geef een inschatting van het aantal concurrenten in de regio, en hoe verzadigd de markt is. Is er ruimte voor een nieuwkomer of onderscheidend aanbod?
+
+**Concrete kansen**: Noem 2-3 specifieke kansen. Denk aan: onderbelichte doelgroepsegmenten, prijsniveaus waar ruimte zit, seizoenskansen, samenwerkingen met andere lokale ondernemers, of niches die niet bediend worden.
+
+**Eerste stap**: Geef 1 concrete actie die de ondernemer deze week nog kan doen om te starten of te groeien.
 
 Regels:
-- Schrijf in het Nederlands, informeel maar professioneel
-- Maximaal 4-5 zinnen, to-the-point
-- Noem specifieke mogelijkheden voor het beroep in die stad/regio
-- Verwijs niet naar externe websites
-- Eindig altijd met een aanmoediging om via OpenRegio contact te leggen met andere ondernemers`;
+- Schrijf in het Nederlands, zakelijk maar toegankelijk
+- Gebruik concrete cijfers en schattingen waar mogelijk (ook als het indicatief is)
+- Wees eerlijk: als een markt verzadigd is, zeg dat ook
+- Noem geen externe websites of links
+- Eindig met een korte aanmoediging om via OpenRegio samen te werken met andere ondernemers in de regio`;
 
       const userPrompt = vraag 
-        ? `Een ${beroep} uit ${stad} vraagt: "${vraag}". Geef concrete, gerichte suggesties specifiek voor dit beroep in deze regio.`
-        : `Een ${beroep} uit ${stad} zoekt kansen. Geef concrete, gerichte suggesties specifiek voor dit beroep in deze regio. Denk aan lokale samenwerking, relevante regelgeving, subsidies of seizoenskansen.`;
+        ? `Analyseer de regionale kansen voor een ${beroep} in ${stad}. De ondernemer vraagt specifiek: "${vraag}". Geef marktvolume, vraagtrends, concurrentie-intensiteit, en concrete kansen (prijsniveau, doelgroepsegmenten, promotiekanalen).`
+        : `Analyseer de regionale kansen voor een ${beroep} in ${stad}. Geef marktvolume, vraagtrends, concurrentie-intensiteit, en concrete kansen (prijsniveau, doelgroepsegmenten, promotiekanalen).`;
 
       // Try Gemini first, fallback to OpenAI
       let antwoordText = "";
@@ -1119,8 +1121,8 @@ Regels:
             { role: "user", parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] },
           ],
           config: {
-            maxOutputTokens: 500,
-            temperature: 0.8,
+            maxOutputTokens: 1200,
+            temperature: 0.7,
           },
         });
 
@@ -1137,8 +1139,8 @@ Regels:
               { role: "system", content: systemPrompt },
               { role: "user", content: userPrompt },
             ],
-            max_tokens: 300,
-            temperature: 0.8,
+            max_tokens: 1200,
+            temperature: 0.7,
           });
           antwoordText = completion.choices[0]?.message?.content || "";
         } else {
