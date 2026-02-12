@@ -168,30 +168,23 @@ export default function HomePage() {
         </section>
 
         {/* RegioBot Lichtkrant */}
-        <section className="overflow-hidden" style={{ background: "#1f5fae", borderBottom: "1px solid #e6ebf2" }} data-testid="section-lichtkrant">
-          <div className="py-3">
-            <div className="flex items-center gap-3 mb-2 px-4 max-w-[1120px] mx-auto">
-              <Bot className="w-4 h-4 text-white/80 flex-shrink-0" />
-              <span className="text-xs font-bold text-white/80 uppercase tracking-wider">RegioBot &mdash; WOO-verzoeken die je via OpenRegio kunt doen</span>
-            </div>
+        <section className="overflow-hidden" style={{ background: "#f5f7fb", borderBottom: "1px solid #e6ebf2" }} data-testid="section-lichtkrant">
+          <div className="py-2">
             <div className="relative">
               <div 
-                className="flex gap-4 animate-scroll"
+                className="flex gap-5 animate-scroll"
                 style={{ width: "max-content" }}
                 data-testid="lichtkrant-ticker"
               >
                 {[...WOO_ITEMS, ...WOO_ITEMS].map((item, i) => (
                   <div 
                     key={i} 
-                    className="flex items-center gap-2.5 rounded-lg px-4 py-2 flex-shrink-0"
-                    style={{ background: "rgba(255,255,255,.12)", border: "1px solid rgba(255,255,255,.15)" }}
+                    className="flex items-center gap-2 flex-shrink-0"
                     data-testid={`lichtkrant-item-${i}`}
                   >
-                    <item.icon className="w-4 h-4 text-[#f28a1a] flex-shrink-0" />
-                    <div>
-                      <span className="text-sm font-bold text-white">{item.label}</span>
-                      <span className="text-xs text-white/70 ml-2">{item.desc}</span>
-                    </div>
+                    <item.icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#1f5fae" }} />
+                    <span className="text-xs" style={{ color: "#5b677a" }}>{item.label}</span>
+                    <span style={{ color: "#d1d5db" }}>&middot;</span>
                   </div>
                 ))}
               </div>
@@ -203,7 +196,7 @@ export default function HomePage() {
               100% { transform: translateX(-50%); }
             }
             .animate-scroll {
-              animation: scroll-ticker 45s linear infinite;
+              animation: scroll-ticker 60s linear infinite;
             }
             .animate-scroll:hover {
               animation-play-state: paused;
@@ -253,7 +246,7 @@ export default function HomePage() {
                   onClick={handleBotVraag}
                   disabled={botLoading || !botBeroep.trim() || !botStad.trim()}
                   className="w-full"
-                  style={{ background: "#f28a1a", borderColor: "#f28a1a" }}
+                  style={{ background: "#1f5fae" }}
                   data-testid="button-bot-vraag"
                 >
                   {botLoading ? (
