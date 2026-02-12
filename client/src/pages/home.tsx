@@ -6,15 +6,13 @@ import { Link } from "wouter";
 import { MapPin, Users, Lightbulb, Settings, Target, MessageCircle, Check, Mail, Phone, MapPinned, Search, Bot, Send, Loader2, FileText, Scale, Shield, Building2, Leaf, AlertTriangle, Landmark, Receipt, Eye } from "lucide-react";
 
 const WOO_ITEMS = [
-  { icon: Leaf, label: "Milieuzone", desc: "WOO-verzoek: milieuzonebeleid en uitzonderingen voor ondernemers" },
-  { icon: AlertTriangle, label: "Muizenplaag", desc: "WOO-verzoek: gemeentelijk ongediertebeleid en aansprakelijkheid" },
-  { icon: Building2, label: "Vergunningen", desc: "WOO-verzoek: bouwvergunningen, terrasvergunningen en bezwaarprocedures" },
-  { icon: Receipt, label: "Subsidies", desc: "WOO-verzoek: beschikbare subsidies voor lokale ondernemers" },
-  { icon: Shield, label: "Handhaving", desc: "WOO-verzoek: handhavingsbeleid en boetecriteria voor bedrijven" },
-  { icon: Scale, label: "Aanbesteding", desc: "WOO-verzoek: lokale aanbestedingen en inkoopbeleid gemeente" },
-  { icon: Landmark, label: "Bestemmingsplan", desc: "WOO-verzoek: bestemmingsplanwijzigingen en impact op bedrijven" },
-  { icon: Eye, label: "Openbaarheid", desc: "WOO-verzoek: openbaarmaking van gemeentelijke besluiten en notulen" },
-  { icon: FileText, label: "Mandaten", desc: "WOO-verzoek: mandaatregister en bevoegdheden van ambtenaren" },
+  { icon: Building2, label: "Vastgoed & Grondposities", desc: "Welke grond koopt, verkoopt of reserveert de gemeente en wie profiteert?" },
+  { icon: Receipt, label: "Externe Inhuur", desc: "Welke adviesbureaus en consultants verdienen aan gemeentebeleid en hoeveel?" },
+  { icon: Shield, label: "Handhaving Ondernemers", desc: "Wordt er selectief gehandhaafd per branche en op welke criteria?" },
+  { icon: Scale, label: "Subsidies & Staatssteun", desc: "Welke bedrijven krijgen subsidie, hoeveel en waarom juist zij?" },
+  { icon: Landmark, label: "Mandaat & Delegatie", desc: "Wie heeft beslisbevoegdheid binnen de gemeente en op basis waarvan?" },
+  { icon: Leaf, label: "Milieuzones", desc: "Wat is de juridische grondslag en economische impact voor MKB?" },
+  { icon: AlertTriangle, label: "Invordering & Incasso", desc: "Hoe verdient de gemeente aan boetes, dwang en deurwaarderscontracten?" },
 ];
 
 export default function HomePage() {
