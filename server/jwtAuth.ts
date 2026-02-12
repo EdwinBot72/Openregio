@@ -251,20 +251,15 @@ export function setupJwtAuth(app: Express) {
       }
       
       if (user.mustCompleteOnboarding) {
+        await storage.upsertUser({
+          id: user.id,
+          email: user.email,
+          mustCompleteOnboarding: false,
+          plan: user.plan as "basic" | "pro",
+          role: user.role as "member" | "master" | "admin",
+        });
         await storage.deleteOnboardingTokensByUserId(user.id);
-        const newToken = generateOnboardingToken();
-        const expiresAt = new Date();
-        expiresAt.setDate(expiresAt.getDate() + 30);
-        await storage.createOnboardingToken({
-          userId: user.id,
-          token: newToken,
-          expiresAt,
-        });
-        return res.json({
-          mustCompleteOnboarding: true,
-          onboardingToken: newToken,
-          user: formatUserResponse(user),
-        });
+        console.log(`[Auth] Auto-cleared onboarding for user ${user.email} (successful password login)`);
       }
       
       const tokenId = generateTokenId();

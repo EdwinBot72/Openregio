@@ -44,6 +44,7 @@ import ResetPasswordPage from "@/pages/reset-password";
 import DisclaimerPage from "@/pages/disclaimer";
 import CookiebeleidPage from "@/pages/cookiebeleid";
 import RegioAnalysePage from "@/pages/regio-analyse";
+import BeleidsmonitorPage from "@/pages/beleidsmonitor";
 
 // Routes that should NOT have the sidebar/header layout
 const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse"];
@@ -91,6 +92,7 @@ function AuthenticatedRouter() {
       <Route path="/woo-bibliotheek" component={WooBibliotheekPage} />
       <Route path="/regiocrew" component={RegioCrewPage} />
       <Route path="/affiliate" component={AffiliatePage} />
+      <Route path="/beleidsmonitor" component={BeleidsmonitorPage} />
       <Route path="/admin/blogs" component={AdminBlogsPage} />
       <Route path="/admin/commissions" component={AdminCommissionsPage} />
       <Route path="/admin/users" component={AdminUsersPage} />

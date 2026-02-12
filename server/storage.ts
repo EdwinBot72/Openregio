@@ -68,6 +68,9 @@ import {
   blogs,
   wooCategories,
   commissions,
+  type MonitorItem,
+  type InsertMonitorItem,
+  monitorItems,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
@@ -248,6 +251,12 @@ export interface IStorage {
   getAllCommissions(): Promise<Commission[]>;
   updateCommissionStatus(id: string, status: "pending" | "approved" | "paid" | "cancelled", paidAt?: Date): Promise<Commission | undefined>;
   getCommissionSummary(affiliateUserId: string): Promise<{ total: number; pending: number; approved: number; paid: number }>;
+
+  // Beleidsmonitor
+  getMonitorItems(region?: string): Promise<MonitorItem[]>;
+  getMonitorItem(id: string): Promise<MonitorItem | undefined>;
+  createMonitorItem(item: InsertMonitorItem): Promise<MonitorItem>;
+  deleteMonitorItem(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -1638,6 +1647,19 @@ export class MemStorage implements IStorage {
       paid: userCommissions.filter(c => c.status === "paid").reduce((sum, c) => sum + c.amount, 0),
     };
   }
+
+  async getMonitorItems(region?: string): Promise<MonitorItem[]> {
+    return [];
+  }
+  async getMonitorItem(id: string): Promise<MonitorItem | undefined> {
+    return undefined;
+  }
+  async createMonitorItem(item: InsertMonitorItem): Promise<MonitorItem> {
+    return { id: randomUUID(), ...item, createdAt: new Date() } as MonitorItem;
+  }
+  async deleteMonitorItem(id: string): Promise<boolean> {
+    return false;
+  }
 }
 
 class DbStorage implements IStorage {
@@ -2659,6 +2681,28 @@ class DbStorage implements IStorage {
       approved: userCommissions.filter(c => c.status === "approved").reduce((sum, c) => sum + c.amount, 0),
       paid: userCommissions.filter(c => c.status === "paid").reduce((sum, c) => sum + c.amount, 0),
     };
+  }
+
+  async getMonitorItems(region?: string): Promise<MonitorItem[]> {
+    if (region) {
+      return await db.select().from(monitorItems).where(eq(monitorItems.region, region)).orderBy(desc(monitorItems.createdAt));
+    }
+    return await db.select().from(monitorItems).orderBy(desc(monitorItems.createdAt));
+  }
+
+  async getMonitorItem(id: string): Promise<MonitorItem | undefined> {
+    const [item] = await db.select().from(monitorItems).where(eq(monitorItems.id, id));
+    return item;
+  }
+
+  async createMonitorItem(item: InsertMonitorItem): Promise<MonitorItem> {
+    const [created] = await db.insert(monitorItems).values(item).returning();
+    return created;
+  }
+
+  async deleteMonitorItem(id: string): Promise<boolean> {
+    const result = await db.delete(monitorItems).where(eq(monitorItems.id, id)).returning();
+    return result.length > 0;
   }
 }
 

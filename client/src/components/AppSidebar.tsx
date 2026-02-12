@@ -10,7 +10,7 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Home, Users, Bot, Building2, User, LogOut, MessageCircle, CreditCard, Shield, Eye, UserPlus, BookOpen, Settings, Share2, FolderOpen, Euro, FileText } from "lucide-react";
+import { Home, Users, Bot, Building2, User, LogOut, MessageCircle, CreditCard, Shield, Eye, UserPlus, BookOpen, Settings, Share2, FolderOpen, Euro, FileText, Activity } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -59,6 +59,12 @@ const menuItems = [
     icon: FileText,
     url: "/woo-wizard",
     color: "text-regio-purple",
+  },
+  {
+    title: "Beleidsmonitor",
+    icon: Activity,
+    url: "/beleidsmonitor",
+    color: "text-regio-graph",
   },
   {
     title: "Coöperatie",

@@ -1,8 +1,133 @@
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
-import { MapPin, Users, Lightbulb, Settings, Target, MessageCircle, Check, Mail, Phone, MapPinned } from "lucide-react";
+import { MapPin, Users, Lightbulb, Settings, Target, MessageCircle, Check, Mail, Phone, MapPinned, Search } from "lucide-react";
+
+function getRegioFromPostcode(pc: string): { regio: string; beschrijving: string } | null {
+  const clean = pc.toUpperCase().replace(/\s+/g, "");
+  if (clean.length < 4) return null;
+  const num = clean.slice(0, 4);
+
+  const mapping: Record<string, { regio: string; beschrijving: string }> = {
+    "10": { regio: "Amsterdam", beschrijving: "Regio Amsterdam - Metropoolregio" },
+    "11": { regio: "Amsterdam", beschrijving: "Regio Amsterdam - Metropoolregio" },
+    "12": { regio: "Hilversum", beschrijving: "Regio Gooi en Vechtstreek" },
+    "13": { regio: "Amersfoort", beschrijving: "Regio Amersfoort / Eemland" },
+    "14": { regio: "Almere", beschrijving: "Regio Flevoland" },
+    "15": { regio: "Haarlem", beschrijving: "Regio Kennemerland" },
+    "16": { regio: "Alkmaar", beschrijving: "Regio Noord-Holland Noord" },
+    "17": { regio: "Den Helder", beschrijving: "Regio Kop van Noord-Holland" },
+    "18": { regio: "Hoorn", beschrijving: "Regio West-Friesland" },
+    "19": { regio: "Purmerend", beschrijving: "Regio Waterland" },
+    "20": { regio: "Haarlem", beschrijving: "Regio Zuid-Kennemerland" },
+    "21": { regio: "Den Haag", beschrijving: "Regio Haaglanden" },
+    "22": { regio: "Den Haag", beschrijving: "Regio Haaglanden" },
+    "23": { regio: "Leiden", beschrijving: "Regio Holland Rijnland" },
+    "24": { regio: "Alphen a/d Rijn", beschrijving: "Regio Midden-Holland" },
+    "25": { regio: "Den Haag", beschrijving: "Regio Haaglanden" },
+    "26": { regio: "Delft", beschrijving: "Regio Delft / Westland" },
+    "27": { regio: "Zoetermeer", beschrijving: "Regio Haaglanden" },
+    "28": { regio: "Gouda", beschrijving: "Regio Midden-Holland" },
+    "29": { regio: "Dordrecht", beschrijving: "Regio Drechtsteden" },
+    "30": { regio: "Rotterdam", beschrijving: "Regio Rotterdam-Rijnmond" },
+    "31": { regio: "Rotterdam", beschrijving: "Regio Rotterdam-Rijnmond" },
+    "32": { regio: "Gorinchem", beschrijving: "Regio Alblasserwaard-Vijfheerenlanden" },
+    "33": { regio: "Breda", beschrijving: "Regio West-Brabant" },
+    "34": { regio: "Utrecht", beschrijving: "Regio Utrecht" },
+    "35": { regio: "Utrecht", beschrijving: "Regio Utrecht" },
+    "36": { regio: "Zeist", beschrijving: "Regio Utrechtse Heuvelrug" },
+    "37": { regio: "Arnhem", beschrijving: "Regio Arnhem / Stadsregio" },
+    "38": { regio: "Zwolle", beschrijving: "Regio Zwolle" },
+    "39": { regio: "Apeldoorn", beschrijving: "Regio Stedendriehoek" },
+    "40": { regio: "Bergen op Zoom", beschrijving: "Regio West-Brabant" },
+    "41": { regio: "Roosendaal", beschrijving: "Regio West-Brabant" },
+    "42": { regio: "Breda", beschrijving: "Regio Breda" },
+    "43": { regio: "Middelburg", beschrijving: "Regio Zeeland" },
+    "44": { regio: "Goes", beschrijving: "Regio Zeeland" },
+    "45": { regio: "Terneuzen", beschrijving: "Regio Zeeuws-Vlaanderen" },
+    "46": { regio: "Tilburg", beschrijving: "Regio Midden-Brabant" },
+    "47": { regio: "Tilburg", beschrijving: "Regio Midden-Brabant" },
+    "48": { regio: "Waalwijk", beschrijving: "Regio Langstraat" },
+    "49": { regio: "Oss", beschrijving: "Regio Noordoost-Brabant" },
+    "50": { regio: "'s-Hertogenbosch", beschrijving: "Regio Noordoost-Brabant" },
+    "51": { regio: "'s-Hertogenbosch", beschrijving: "Regio Noordoost-Brabant" },
+    "52": { regio: "Eindhoven", beschrijving: "Regio Eindhoven / Brainport" },
+    "53": { regio: "Eindhoven", beschrijving: "Regio Eindhoven / Brainport" },
+    "54": { regio: "Helmond", beschrijving: "Regio Zuidoost-Brabant" },
+    "55": { regio: "Valkenswaard", beschrijving: "Regio De Kempen" },
+    "56": { regio: "Eindhoven", beschrijving: "Regio Eindhoven / Brainport" },
+    "57": { regio: "Venray", beschrijving: "Regio Noord-Limburg" },
+    "58": { regio: "Venlo", beschrijving: "Regio Noord-Limburg" },
+    "59": { regio: "Venlo", beschrijving: "Regio Noord-Limburg" },
+    "60": { regio: "Roermond", beschrijving: "Regio Midden-Limburg" },
+    "61": { regio: "Sittard", beschrijving: "Regio Westelijke Mijnstreek" },
+    "62": { regio: "Maastricht", beschrijving: "Regio Maastricht / Heuvelland" },
+    "63": { regio: "Maastricht", beschrijving: "Regio Maastricht / Heuvelland" },
+    "64": { regio: "Heerlen", beschrijving: "Regio Parkstad Limburg" },
+    "65": { regio: "Nijmegen", beschrijving: "Regio Nijmegen" },
+    "66": { regio: "Nijmegen", beschrijving: "Regio Rijk van Nijmegen" },
+    "67": { regio: "Doetinchem", beschrijving: "Regio Achterhoek" },
+    "68": { regio: "Arnhem", beschrijving: "Regio Arnhem" },
+    "69": { regio: "Wageningen", beschrijving: "Regio FoodValley" },
+    "70": { regio: "Enschede", beschrijving: "Regio Twente" },
+    "71": { regio: "Enschede", beschrijving: "Regio Twente" },
+    "72": { regio: "Almelo", beschrijving: "Regio Twente" },
+    "73": { regio: "Hardenberg", beschrijving: "Regio Vechtdal" },
+    "74": { regio: "Deventer", beschrijving: "Regio Stedendriehoek" },
+    "75": { regio: "Zwolle", beschrijving: "Regio Zwolle" },
+    "76": { regio: "Kampen", beschrijving: "Regio IJsselland" },
+    "77": { regio: "Hoogeveen", beschrijving: "Regio Drenthe" },
+    "78": { regio: "Emmen", beschrijving: "Regio Zuidoost-Drenthe" },
+    "79": { regio: "Meppel", beschrijving: "Regio Drenthe" },
+    "80": { regio: "Lelystad", beschrijving: "Regio Flevoland" },
+    "81": { regio: "Emmeloord", beschrijving: "Regio Noordoostpolder" },
+    "82": { regio: "Steenwijk", beschrijving: "Regio Kop van Overijssel" },
+    "83": { regio: "Assen", beschrijving: "Regio Drenthe" },
+    "84": { regio: "Heerenveen", beschrijving: "Regio Zuidoost-Friesland" },
+    "85": { regio: "Sneek", beschrijving: "Regio Zuidwest-Friesland" },
+    "86": { regio: "Drachten", beschrijving: "Regio Smallingerland" },
+    "87": { regio: "Leeuwarden", beschrijving: "Regio Leeuwarden / Frysl\u00e2n" },
+    "88": { regio: "Leeuwarden", beschrijving: "Regio Leeuwarden / Frysl\u00e2n" },
+    "89": { regio: "Harlingen", beschrijving: "Regio Noordwest-Friesland" },
+    "90": { regio: "Groningen", beschrijving: "Regio Groningen" },
+    "91": { regio: "Groningen", beschrijving: "Regio Groningen" },
+    "92": { regio: "Stadskanaal", beschrijving: "Regio Oost-Groningen" },
+    "93": { regio: "Veendam", beschrijving: "Regio Oost-Groningen" },
+    "94": { regio: "Winschoten", beschrijving: "Regio Oldambt" },
+    "95": { regio: "Delfzijl", beschrijving: "Regio Eemsdelta" },
+    "96": { regio: "Appingedam", beschrijving: "Regio Eemsdelta" },
+    "97": { regio: "Groningen", beschrijving: "Regio Groningen" },
+    "98": { regio: "Drachten", beschrijving: "Regio Smallingerland" },
+    "99": { regio: "Dokkum", beschrijving: "Regio Noordoost-Friesland" },
+  };
+
+  const prefix2 = num.slice(0, 2);
+  return mapping[prefix2] || null;
+}
 
 export default function HomePage() {
+  const [postcode, setPostcode] = useState("");
+  const [regioResult, setRegioResult] = useState<{ regio: string; beschrijving: string } | null>(null);
+  const [regioError, setRegioError] = useState("");
+
+  const handleRegioCheck = () => {
+    setRegioError("");
+    setRegioResult(null);
+    const clean = postcode.replace(/\s+/g, "");
+    if (clean.length < 4) {
+      setRegioError("Vul minimaal 4 cijfers van je postcode in.");
+      return;
+    }
+    const result = getRegioFromPostcode(postcode);
+    if (result) {
+      setRegioResult(result);
+    } else {
+      setRegioError("Postcode niet herkend. Controleer de invoer.");
+    }
+  };
+
   return (
     <div className="min-h-screen" style={{ background: "#f5f7fb", color: "#0f172a" }}>
       {/* Navigation */}
@@ -124,6 +249,63 @@ export default function HomePage() {
                   ))}
                 </div>
               </aside>
+            </div>
+          </div>
+        </section>
+
+        {/* Regio-check */}
+        <section className="py-6" style={{ background: "#fff", borderBottom: "1px solid #e6ebf2" }} data-testid="section-regiocheck">
+          <div className="max-w-[1120px] mx-auto px-4">
+            <div className="grid md:grid-cols-[1fr_1fr] gap-6 items-center">
+              <div>
+                <h2 className="font-black text-xl mb-1" style={{ color: "#0f172a" }} data-testid="text-regiocheck-title">
+                  Regio-check
+                </h2>
+                <p style={{ color: "#5b677a", fontSize: "14px" }}>
+                  Vul je postcode in en ontdek direct in welke regio je valt. Zo weet je meteen welke lokale updates, beleid en netwerk voor jou relevant zijn.
+                </p>
+              </div>
+              <div>
+                <div className="flex gap-2.5 items-center">
+                  <Input
+                    placeholder="Vul je postcode in (bijv. 1012 AB)"
+                    value={postcode}
+                    onChange={(e) => { setPostcode(e.target.value); setRegioResult(null); setRegioError(""); }}
+                    onKeyDown={(e) => e.key === "Enter" && handleRegioCheck()}
+                    className="flex-1"
+                    data-testid="input-regiocheck"
+                  />
+                  <Button onClick={handleRegioCheck} data-testid="button-regiocheck">
+                    <Search className="w-4 h-4 mr-1.5" />
+                    Check
+                  </Button>
+                </div>
+                {regioResult && (
+                  <div 
+                    className="mt-3 rounded-xl p-3.5 flex items-center justify-between gap-3 flex-wrap"
+                    style={{ background: "rgba(31,95,174,.06)", border: "1px solid rgba(31,95,174,.15)" }}
+                    data-testid="result-regiocheck"
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-9 h-9 rounded-full flex items-center justify-center" style={{ background: "#1f5fae", color: "#fff" }}>
+                        <MapPin className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <div className="font-bold" style={{ fontSize: "15px" }} data-testid="text-regio-naam">{regioResult.regio}</div>
+                        <div style={{ fontSize: "12px", color: "#5b677a" }} data-testid="text-regio-beschrijving">{regioResult.beschrijving}</div>
+                      </div>
+                    </div>
+                    <Link href="/lidmaatschap">
+                      <Button size="sm" data-testid="button-regiocheck-lid">
+                        Word lid in {regioResult.regio}
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+                {regioError && (
+                  <p className="mt-2 text-sm" style={{ color: "#e55353" }} data-testid="text-regiocheck-error">{regioError}</p>
+                )}
+              </div>
             </div>
           </div>
         </section>

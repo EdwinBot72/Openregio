@@ -3212,6 +3212,52 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
+  // ===================== Beleidsmonitor =====================
+  app.get("/api/monitor-items", attachUser, async (req, res) => {
+    try {
+      const region = req.query.region as string | undefined;
+      const items = await storage.getMonitorItems(region);
+      res.json(items);
+    } catch (error: any) {
+      console.error("Error fetching monitor items:", error);
+      res.status(500).json({ error: "Kon beleidsmonitor items niet ophalen" });
+    }
+  });
+
+  app.post("/api/monitor-items", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { region, title, summary, sourceUrl, tags } = req.body;
+      if (!region || !title || !summary) {
+        return res.status(400).json({ error: "Regio, titel en samenvatting zijn verplicht" });
+      }
+      const item = await storage.createMonitorItem({
+        region,
+        title,
+        summary,
+        sourceUrl: sourceUrl || null,
+        tags: tags || "",
+        createdByUserId: req.user!.id,
+      });
+      res.status(201).json(item);
+    } catch (error: any) {
+      console.error("Error creating monitor item:", error);
+      res.status(500).json({ error: "Kon beleidsmonitor item niet aanmaken" });
+    }
+  });
+
+  app.delete("/api/monitor-items/:id", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const deleted = await storage.deleteMonitorItem(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Item niet gevonden" });
+      }
+      res.json({ message: "Item verwijderd" });
+    } catch (error: any) {
+      console.error("Error deleting monitor item:", error);
+      res.status(500).json({ error: "Kon item niet verwijderen" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

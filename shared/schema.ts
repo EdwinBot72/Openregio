@@ -1221,9 +1221,21 @@ export const leads = pgTable("leads", {
   source: text("source").default("openregio"),
 });
 
+export const monitorItems = pgTable("monitor_items", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  region: varchar("region").notNull(),
+  title: varchar("title").notNull(),
+  summary: text("summary").notNull(),
+  sourceUrl: varchar("source_url"),
+  tags: varchar("tags").default(""),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  createdByUserId: varchar("created_by_user_id"),
+});
+
 export const insertRagDocumentSchema = createInsertSchema(ragDocuments).omit({ id: true, createdAt: true });
 export const insertRagChunkSchema = createInsertSchema(ragChunks).omit({ id: true });
 export const insertLeadSchema = createInsertSchema(leads).omit({ id: true, createdAt: true });
+export const insertMonitorItemSchema = createInsertSchema(monitorItems).omit({ id: true, createdAt: true });
 
 export type InsertRagDocument = z.infer<typeof insertRagDocumentSchema>;
 export type RagDocument = typeof ragDocuments.$inferSelect;
@@ -1231,3 +1243,5 @@ export type InsertRagChunk = z.infer<typeof insertRagChunkSchema>;
 export type RagChunk = typeof ragChunks.$inferSelect;
 export type InsertLead = z.infer<typeof insertLeadSchema>;
 export type Lead = typeof leads.$inferSelect;
+export type InsertMonitorItem = z.infer<typeof insertMonitorItemSchema>;
+export type MonitorItem = typeof monitorItems.$inferSelect;
