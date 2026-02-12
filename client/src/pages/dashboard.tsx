@@ -1,23 +1,44 @@
+import { useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import {
-  BarChart3,
-  FileUp,
-  FileText,
-  Download,
+  Search,
+  Handshake,
+  TrendingUp,
   Shield,
-  Users,
+  Download,
   UserPlus,
   ArrowRight,
+  FileUp,
+  FileText,
+  Lightbulb,
+  Bot,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 
+const SECTORS = ["Bouw", "IT & Marketing", "Horeca", "Advies", "Detailhandel", "Zorg", "Groenvoorziening", "Transport"];
+
+const KANSEN_DATA = [
+  { datum: "12-02", onderwerp: "Herinrichting Marktplein", kansVoor: "Horeca & Groenvoorziening" },
+  { datum: "10-02", onderwerp: "Subsidie Verduurzaming Bedrijfspanden", kansVoor: "Alle ondernemers" },
+  { datum: "08-02", onderwerp: "Nieuwe aanbesteding gemeentelijk groen", kansVoor: "Groenvoorziening & Bouw" },
+];
+
+type TabId = "kansen" | "samenwerken" | "impact";
+
 export default function DashboardPage() {
   const { user, isLoading: authLoading } = useAuth();
+  const [activeTab, setActiveTab] = useState<TabId>("kansen");
+  const [vraag, setVraag] = useState("");
+  const [sector, setSector] = useState("");
+  const [lokaalPercentage, setLokaalPercentage] = useState([25]);
 
   const { data: bedrijfsprofiel } = useQuery<{ naam: string; status: string; regio: string } | null>({
     queryKey: ["/api/business-profile/me"],
@@ -26,9 +47,8 @@ export default function DashboardPage() {
 
   if (authLoading) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
+      <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
         <Skeleton className="h-16 w-full" />
-        <Skeleton className="h-40" />
         <Skeleton className="h-40" />
         <Skeleton className="h-40" />
       </div>
@@ -37,7 +57,7 @@ export default function DashboardPage() {
 
   if (!user) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-8">
+      <div className="max-w-4xl mx-auto px-4 py-8">
         <Card className="p-8 text-center">
           <p className="text-muted-foreground">Log opnieuw in om door te gaan.</p>
         </Card>
@@ -48,99 +68,251 @@ export default function DashboardPage() {
   const isPro = user.plan === "pro";
   const isAdmin = user.isAdmin || false;
   const displayName = bedrijfsprofiel?.naam || user.firstName || "ondernemer";
+  const impact = lokaalPercentage[0] * 1.5;
+
+  const tabs: { id: TabId; label: string; icon: typeof Search }[] = [
+    { id: "kansen", label: "Kansen in de regio", icon: Search },
+    { id: "samenwerken", label: "Lokaal samenwerken", icon: Handshake },
+    { id: "impact", label: "Mijn Impact", icon: TrendingUp },
+  ];
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-      <header className="space-y-2">
+    <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+      <header className="space-y-1">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <h1 className="text-2xl font-bold" data-testid="text-welcome">
-            Welkom, {displayName}
+            Hallo, {displayName}!
           </h1>
           <Badge variant={isPro ? "default" : "secondary"} data-testid="badge-plan">
             {isPro ? "Pro-bijdrager" : "Basis-lid"}
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground">
-          Kies wat je wilt doen. Geen omwegen, direct aan de slag.
+          Ik ben je digitale buurman. Waar kan ik je vandaag mee helpen?
         </p>
       </header>
 
-      <section className="space-y-4">
-        <Card data-testid="card-regio-analyse" className="hover-elevate">
-          <CardContent className="p-5 flex flex-col gap-3">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-regio-blue/10">
-                <BarChart3 className="w-5 h-5 text-regio-blue" />
-              </div>
-              <div className="flex-1">
-                <h2 className="font-semibold">Regio-analyse</h2>
-                <p className="text-sm text-muted-foreground">
-                  Ontdek in 8 vragen waar jouw regio sterk in is en waar kansen liggen.
-                </p>
-              </div>
-            </div>
-            <div className="mt-1">
-              <Link href="/regio-analyse">
-                <Button size="sm" data-testid="button-start-analyse">
-                  Start analyse
-                  <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+      <div className="flex gap-2 flex-wrap" data-testid="tab-bar">
+        {tabs.map((tab) => (
+          <Button
+            key={tab.id}
+            variant={activeTab === tab.id ? "default" : "outline"}
+            onClick={() => setActiveTab(tab.id)}
+            className="toggle-elevate"
+            data-testid={`tab-${tab.id}`}
+          >
+            <tab.icon className="h-4 w-4 mr-2" />
+            {tab.label}
+          </Button>
+        ))}
+      </div>
 
-        <Card data-testid="card-upload-brief" className="hover-elevate">
-          <CardContent className="p-5 flex flex-col gap-3">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-regio-blue/10">
-                <FileUp className="w-5 h-5 text-regio-blue" />
+      {activeTab === "kansen" && (
+        <section className="space-y-4" data-testid="section-kansen">
+          <Card>
+            <CardContent className="pt-6 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-[#1f5fae]/10">
+                  <Bot className="h-5 w-5 text-[#1f5fae]" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-lg">RegioBot: Wat gebeurt er bij de gemeente?</h2>
+                  <p className="text-sm text-muted-foreground">
+                    Ik heb de laatste WOO-documenten gescand. Hier is wat relevant is voor jou:
+                  </p>
+                </div>
               </div>
-              <div className="flex-1">
-                <h2 className="font-semibold">Brief uploaden</h2>
-                <p className="text-sm text-muted-foreground">
-                  Upload een brief of document. We checken het en geven verbetersuggesties.
-                </p>
-              </div>
-              {!isPro && (
-                <Badge variant="secondary" className="text-[10px] shrink-0">1x per dag</Badge>
-              )}
-            </div>
-            <div className="mt-1">
-              <Link href="/woo-bibliotheek">
-                <Button size="sm" data-testid="button-upload-brief">
-                  Upload document
-                  <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
 
-        <Card data-testid="card-woo-verzoek" className="hover-elevate">
-          <CardContent className="p-5 flex flex-col gap-3">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-regio-blue/10">
-                <FileText className="w-5 h-5 text-regio-blue" />
+              <div className="rounded-md border overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b bg-muted/50">
+                      <th className="text-left p-3 font-medium text-muted-foreground">Datum</th>
+                      <th className="text-left p-3 font-medium text-muted-foreground">Onderwerp</th>
+                      <th className="text-left p-3 font-medium text-muted-foreground">Kans voor</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {KANSEN_DATA.map((k, i) => (
+                      <tr key={i} className="border-b last:border-0">
+                        <td className="p-3 text-muted-foreground whitespace-nowrap" data-testid={`text-kans-datum-${i}`}>{k.datum}</td>
+                        <td className="p-3 font-medium" data-testid={`text-kans-onderwerp-${i}`}>{k.onderwerp}</td>
+                        <td className="p-3">
+                          <Badge variant="secondary" data-testid={`badge-kans-sector-${i}`}>{k.kansVoor}</Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-              <div className="flex-1">
-                <h2 className="font-semibold">Juridische Instrumenten</h2>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-muted-foreground">Stel een vraag aan de RegioBot</label>
+                <div className="flex gap-2">
+                  <Input
+                    value={vraag}
+                    onChange={(e) => setVraag(e.target.value)}
+                    placeholder="Bijv: 'Is er nieuws over parkeertarieven?'"
+                    data-testid="input-regiobot-vraag"
+                  />
+                  <Link href="/regiobot">
+                    <Button data-testid="button-naar-regiobot">
+                      <Search className="h-4 w-4 mr-2" />
+                      Zoek
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid sm:grid-cols-2 gap-4">
+            <Card className="hover-elevate" data-testid="card-upload-brief">
+              <CardContent className="pt-6 space-y-3">
+                <div className="flex items-center gap-3">
+                  <FileUp className="h-5 w-5 text-[#1f5fae]" />
+                  <h3 className="font-semibold">Brief uploaden</h3>
+                  {!isPro && (
+                    <Badge variant="secondary" className="text-[10px]">1x per dag</Badge>
+                  )}
+                </div>
                 <p className="text-sm text-muted-foreground">
-                  Signaalinstrument of BevoegdheidsScan: kies het juridische middel dat past bij jouw situatie.
+                  Upload een brief of document voor analyse.
                 </p>
+                <Link href="/woo-bibliotheek">
+                  <Button size="sm" data-testid="button-upload-brief">
+                    Upload
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+
+            <Card className="hover-elevate" data-testid="card-juridisch">
+              <CardContent className="pt-6 space-y-3">
+                <div className="flex items-center gap-3">
+                  <FileText className="h-5 w-5 text-[#1f5fae]" />
+                  <h3 className="font-semibold">Juridische Instrumenten</h3>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Signaalinstrument of BevoegdheidsScan kiezen.
+                </p>
+                <Link href="/woo-wizard">
+                  <Button size="sm" data-testid="button-woo-wizard">
+                    Kiezen
+                    <ArrowRight className="h-4 w-4 ml-1" />
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+        </section>
+      )}
+
+      {activeTab === "samenwerken" && (
+        <section className="space-y-4" data-testid="section-samenwerken">
+          <Card>
+            <CardContent className="pt-6 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-[#f28a1a]/10">
+                  <Handshake className="h-5 w-5 text-[#f28a1a]" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-lg">De RegioMarkt</h2>
+                  <p className="text-sm text-muted-foreground">Wie heb je nodig?</p>
+                </div>
               </div>
-            </div>
-            <div className="mt-1">
-              <Link href="/woo-wizard">
-                <Button size="sm" data-testid="button-woo-wizard">
-                  Instrument kiezen
-                  <ArrowRight className="w-4 h-4 ml-1" />
-                </Button>
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
+
+              <div className="flex gap-3 flex-wrap items-end">
+                <div className="flex-1 min-w-[180px]">
+                  <label className="text-sm font-medium text-muted-foreground mb-1 block">Sector</label>
+                  <Select value={sector} onValueChange={setSector}>
+                    <SelectTrigger data-testid="select-sector">
+                      <SelectValue placeholder="Kies een sector" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {SECTORS.map((s) => (
+                        <SelectItem key={s} value={s}>{s}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Link href="/network">
+                  <Button data-testid="button-vind-partners">
+                    Vind lokale partners
+                  </Button>
+                </Link>
+              </div>
+
+              <div className="flex items-start gap-3 rounded-md bg-muted/50 p-4">
+                <Lightbulb className="h-5 w-5 text-[#f28a1a] shrink-0 mt-0.5" />
+                <div>
+                  <p className="text-sm font-medium">Tip</p>
+                  <p className="text-sm text-muted-foreground">
+                    Bekijk de RegioCrew voor flexibele inzet bij personeelstekorten.
+                  </p>
+                  <Link href="/regiocrew">
+                    <Button size="sm" variant="outline" className="mt-2" data-testid="button-naar-regiocrew">
+                      Naar RegioCrew
+                      <ArrowRight className="h-4 w-4 ml-1" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+      )}
+
+      {activeTab === "impact" && (
+        <section className="space-y-4" data-testid="section-impact">
+          <Card>
+            <CardContent className="pt-6 space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-green-500/10">
+                  <TrendingUp className="h-5 w-5 text-green-600" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-lg">Jouw Regionale Voetafdruk</h2>
+                  <p className="text-sm text-muted-foreground">Hoeveel van jouw euro's blijven in de buurt?</p>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="text-sm font-medium text-muted-foreground">
+                  Hoeveel procent koop jij lokaal in? <span className="font-bold text-foreground">{lokaalPercentage[0]}%</span>
+                </label>
+                <Slider
+                  value={lokaalPercentage}
+                  onValueChange={setLokaalPercentage}
+                  max={100}
+                  min={0}
+                  step={5}
+                  data-testid="slider-lokaal-percentage"
+                />
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Card>
+                  <CardContent className="pt-6 text-center">
+                    <p className="text-sm text-muted-foreground mb-1">Regionale Groeifactor</p>
+                    <p className="text-3xl font-bold text-green-600" data-testid="text-impact-factor">{impact.toFixed(0)}%</p>
+                    <Badge variant="secondary" className="mt-2">Boven gemiddelde</Badge>
+                  </CardContent>
+                </Card>
+                <Card>
+                  <CardContent className="pt-6 text-center">
+                    <p className="text-sm text-muted-foreground mb-1">Regionaal effect</p>
+                    <p className="text-sm leading-relaxed" data-testid="text-impact-beschrijving">
+                      Door <span className="font-bold">{lokaalPercentage[0]}%</span> lokaal te besteden, help je direct <span className="font-bold text-green-600">{Math.max(1, Math.round(lokaalPercentage[0] / 8))} banen</span> in de regio te behouden.
+                    </p>
+                  </CardContent>
+                </Card>
+              </div>
+            </CardContent>
+          </Card>
+        </section>
+      )}
 
       {isAdmin && (
         <section className="space-y-4 pt-4 border-t">
@@ -150,7 +322,7 @@ export default function DashboardPage() {
           </div>
           <div className="grid sm:grid-cols-2 gap-4">
             <Card data-testid="card-admin-export">
-              <CardContent className="p-5 flex flex-col gap-3">
+              <CardContent className="pt-6 space-y-3">
                 <div className="flex items-center gap-3">
                   <Download className="w-5 h-5 text-muted-foreground" />
                   <h3 className="font-medium text-sm">Leden export</h3>
@@ -171,7 +343,7 @@ export default function DashboardPage() {
             </Card>
 
             <Card data-testid="card-admin-create-user">
-              <CardContent className="p-5 flex flex-col gap-3">
+              <CardContent className="pt-6 space-y-3">
                 <div className="flex items-center gap-3">
                   <UserPlus className="w-5 h-5 text-muted-foreground" />
                   <h3 className="font-medium text-sm">Gebruiker aanmaken</h3>
