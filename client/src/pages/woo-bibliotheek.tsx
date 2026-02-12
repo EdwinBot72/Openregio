@@ -53,7 +53,7 @@ export default function WooBibliotheekPage() {
 
   const { data: documents = [], isLoading: docsLoading } = useQuery<RagDocument[]>({
     queryKey: ["/api/rag/documents"],
-    enabled: isPro,
+    enabled: !!user,
   });
 
   const uploadMutation = useMutation({
@@ -202,26 +202,12 @@ export default function WooBibliotheekPage() {
     return <FileText className="h-4 w-4" />;
   };
 
-  if (!authLoading && !isPro) {
+  if (!authLoading && !user) {
     return (
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <Card data-testid="card-upgrade-prompt">
+        <Card data-testid="card-login-prompt">
           <CardContent className="p-6 space-y-6 text-center">
-            <div className="flex justify-center">
-              <div className="p-4 rounded-full bg-primary/10">
-                <Crown className="h-10 w-10 text-primary" />
-              </div>
-            </div>
-            <h1 className="text-2xl font-bold">WOO-bibliotheek voor Pro-bijdragers</h1>
-            <p className="text-muted-foreground">
-              Als Pro-bijdrager kun je documenten uploaden naar je persoonlijke WOO-bibliotheek. 
-              RegioBot gebruikt deze documenten om je vragen te beantwoorden.
-            </p>
-            <Link href="/lidmaatschap?plan=pro" asChild>
-              <Button size="lg" data-testid="button-upgrade-to-pro">
-                <Crown className="mr-2 h-5 w-5" /> Word Pro-bijdrager
-              </Button>
-            </Link>
+            <p className="text-muted-foreground">Log in om de WOO-bibliotheek te gebruiken.</p>
           </CardContent>
         </Card>
       </div>
@@ -239,6 +225,12 @@ export default function WooBibliotheekPage() {
           Upload documenten (PDF's, foto's van brieven) naar je persoonlijke bibliotheek. 
           RegioBot doorzoekt deze documenten bij het beantwoorden van je vragen.
         </p>
+        {!isPro && (
+          <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 rounded-md p-3" data-testid="text-upload-limit-info">
+            <AlertCircle className="h-4 w-4 shrink-0" />
+            <span>Als basis-lid kun je 1 document per dag uploaden. <Link href="/lidmaatschap?plan=pro" className="text-[#1f5fae] hover:underline font-medium">Upgrade naar Pro</Link> voor onbeperkt uploaden.</span>
+          </div>
+        )}
       </header>
 
       <div className="grid md:grid-cols-[1fr,1.5fr] gap-6">
