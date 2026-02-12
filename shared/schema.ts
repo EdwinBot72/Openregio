@@ -1245,3 +1245,5 @@ export type InsertLead = z.infer<typeof insertLeadSchema>;
 export type Lead = typeof leads.$inferSelect;
 export type InsertMonitorItem = z.infer<typeof insertMonitorItemSchema>;
 export type MonitorItem = typeof monitorItems.$inferSelect;
+
+export * from "./models/chat";

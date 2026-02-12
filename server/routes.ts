@@ -1078,36 +1078,75 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
         return res.status(400).json({ error: "Invoer te lang" });
       }
 
-      if (!process.env.OPENAI_API_KEY) {
-        const antwoord = `Hoi ${beroep}! In ${stad} zijn er altijd kansen voor lokale ondernemers. ` +
-          `Check de Beleidsmonitor voor actuele ontwikkelingen in jouw regio, ` +
-          `of stel een gerichte vraag via de uitgebreide RegioBot (Pro).`;
-        return res.json({ antwoord });
-      }
+      const systemPrompt = `Je bent de digitale buurman van OpenRegio – een coöperatief platform voor lokale ondernemers in Nederland.
 
-      const OpenAI = (await import("openai")).default;
-      const openai = new OpenAI();
+Je bent warm, persoonlijk en kent de regio goed. Je geeft altijd:
+1. **Concrete lokale kansen** – gebaseerd op samenwerking tussen ondernemers in de regio
+2. **Praktische tips** – wat de ondernemer morgen al kan doen
 
-      const systemPrompt = `Je bent de digitale buurman van OpenRegio. Je bent warm, behulpzaam en je kent de regio.
-Je geeft altijd 2 concrete, hoopvolle suggesties op basis van lokale samenwerking en WOO-inzichten.
-Houd het kort (max 3-4 zinnen), persoonlijk en positief. Schrijf in het Nederlands.
-Verwijs niet naar externe websites. Focus op concrete kansen en samenwerking.`;
+Gebruik je kennis van:
+- Nederlandse gemeentelijke regelgeving en WOO (Wet open overheid)
+- Lokale subsidies, vergunningen en aanbestedingen
+- Regionale samenwerkingsverbanden en brancheverenigingen
+- Seizoensgebonden kansen en lokale evenementen
+
+Regels:
+- Schrijf in het Nederlands, informeel maar professioneel
+- Maximaal 4-5 zinnen, to-the-point
+- Noem specifieke mogelijkheden voor het beroep in die stad/regio
+- Verwijs niet naar externe websites
+- Eindig altijd met een aanmoediging om via OpenRegio contact te leggen met andere ondernemers`;
 
       const userPrompt = vraag 
-        ? `Een ${beroep} uit ${stad} vraagt: "${vraag}". Geef 2 concrete, hoopvolle suggesties.`
-        : `Een ${beroep} uit ${stad} vraagt naar kansen. Geef 2 concrete, hoopvolle suggesties op basis van lokale samenwerking en WOO-inzichten.`;
+        ? `Een ${beroep} uit ${stad} vraagt: "${vraag}". Geef concrete, gerichte suggesties specifiek voor dit beroep in deze regio.`
+        : `Een ${beroep} uit ${stad} zoekt kansen. Geef concrete, gerichte suggesties specifiek voor dit beroep in deze regio. Denk aan lokale samenwerking, relevante regelgeving, subsidies of seizoenskansen.`;
 
-      const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        max_tokens: 300,
-        temperature: 0.8,
-      });
+      // Try Gemini first, fallback to OpenAI
+      let antwoordText = "";
+      try {
+        const { GoogleGenAI } = await import("@google/genai");
+        const ai = new GoogleGenAI({
+          apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
+          httpOptions: {
+            apiVersion: "",
+            baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL!,
+          },
+        });
 
-      const antwoord = completion.choices[0]?.message?.content || "Ik kon helaas geen antwoord genereren. Probeer het later opnieuw.";
+        const response = await ai.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: [
+            { role: "user", parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] },
+          ],
+          config: {
+            maxOutputTokens: 500,
+            temperature: 0.8,
+          },
+        });
+
+        antwoordText = response.text || "";
+      } catch (geminiErr) {
+        console.error("[RegioBot] Gemini failed, trying OpenAI fallback:", geminiErr);
+        
+        if (process.env.OPENAI_API_KEY) {
+          const OpenAI = (await import("openai")).default;
+          const openai = new OpenAI();
+          const completion = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userPrompt },
+            ],
+            max_tokens: 300,
+            temperature: 0.8,
+          });
+          antwoordText = completion.choices[0]?.message?.content || "";
+        } else {
+          antwoordText = `Hoi ${beroep}! In ${stad} zijn er altijd kansen voor lokale ondernemers. Check de Beleidsmonitor voor actuele ontwikkelingen in jouw regio, of stel een gerichte vraag via de uitgebreide RegioBot (Pro).`;
+        }
+      }
+
+      const antwoord = antwoordText || "Ik kon helaas geen antwoord genereren. Probeer het later opnieuw.";
       res.json({ antwoord });
     } catch (err: any) {
       console.error("Buurman error:", err);
