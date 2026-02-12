@@ -1078,30 +1078,19 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
         return res.status(400).json({ error: "Invoer te lang" });
       }
 
-      const systemPrompt = `Je bent een regionale marktanalist van OpenRegio – een coöperatief platform voor lokale ondernemers in Nederland.
+      const systemPrompt = `Je bent de regionale marktanalist van OpenRegio.
 
-Je maakt een korte maar inhoudelijke regionale marktanalyse. Gebruik je kennis van de Nederlandse markt, demografie, en lokale economie.
+STRIKTE REGELS:
+- Antwoord in PRECIES 3 korte zinnen, niet meer.
+- Zin 1: Markt + concurrentie (bijv. "In [stad] is de vraag naar [beroep] [groeiend/stabiel/verzadigd], met [weinig/gemiddeld/veel] concurrentie.")
+- Zin 2: De beste concrete kans (specifiek doelgroepsegment, niche of seizoenskans)
+- Zin 3: Eerste actie die je deze week kunt doen
 
-Je antwoord bevat ALTIJD deze 4 onderdelen in deze volgorde:
-
-**Marktpotentieel**: Schat het lokale marktvolume en de vraag in voor dit beroep in deze plaats/regio. Noem het geschatte aantal huishoudens/bedrijven, en of de vraag groeit, stabiel is of daalt.
-
-**Concurrentie**: Geef een inschatting van het aantal concurrenten in de regio, en hoe verzadigd de markt is. Is er ruimte voor een nieuwkomer of onderscheidend aanbod?
-
-**Concrete kansen**: Noem 2-3 specifieke kansen. Denk aan: onderbelichte doelgroepsegmenten, prijsniveaus waar ruimte zit, seizoenskansen, samenwerkingen met andere lokale ondernemers, of niches die niet bediend worden.
-
-**Eerste stap**: Geef 1 concrete actie die de ondernemer deze week nog kan doen om te starten of te groeien.
-
-Regels:
-- Schrijf in het Nederlands, zakelijk maar toegankelijk
-- Gebruik concrete cijfers en schattingen waar mogelijk (ook als het indicatief is)
-- Wees eerlijk: als een markt verzadigd is, zeg dat ook
-- Noem geen externe websites of links
-- Eindig met een korte aanmoediging om via OpenRegio samen te werken met andere ondernemers in de regio`;
+Gebruik geen opsommingstekens, geen kopjes, geen markdown. Geen begroeting. Direct to-the-point. Schrijf in het Nederlands.`;
 
       const userPrompt = vraag 
-        ? `Analyseer de regionale kansen voor een ${beroep} in ${stad}. De ondernemer vraagt specifiek: "${vraag}". Geef marktvolume, vraagtrends, concurrentie-intensiteit, en concrete kansen (prijsniveau, doelgroepsegmenten, promotiekanalen).`
-        : `Analyseer de regionale kansen voor een ${beroep} in ${stad}. Geef marktvolume, vraagtrends, concurrentie-intensiteit, en concrete kansen (prijsniveau, doelgroepsegmenten, promotiekanalen).`;
+        ? `Regionale kansen voor een ${beroep} in ${stad}. Vraag: "${vraag}". Antwoord in exact 3 zinnen.`
+        : `Regionale kansen voor een ${beroep} in ${stad}. Antwoord in exact 3 zinnen.`;
 
       // Try Gemini first, fallback to OpenAI
       let antwoordText = "";
@@ -1121,12 +1110,23 @@ Regels:
             { role: "user", parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] },
           ],
           config: {
-            maxOutputTokens: 1200,
+            maxOutputTokens: 600,
             temperature: 0.7,
+            thinkingConfig: { thinkingBudget: 0 },
           },
         });
 
-        antwoordText = response.text || "";
+        const parts = response.candidates?.[0]?.content?.parts;
+        if (parts && parts.length > 0) {
+          antwoordText = parts
+            .filter((p: any) => p.text && !p.thought)
+            .map((p: any) => p.text)
+            .join("");
+        }
+        if (!antwoordText) {
+          antwoordText = response.text || "";
+        }
+        console.log("[RegioBot] Gemini response length:", antwoordText.length);
       } catch (geminiErr) {
         console.error("[RegioBot] Gemini failed, trying OpenAI fallback:", geminiErr);
         
@@ -1139,7 +1139,7 @@ Regels:
               { role: "system", content: systemPrompt },
               { role: "user", content: userPrompt },
             ],
-            max_tokens: 1200,
+            max_tokens: 300,
             temperature: 0.7,
           });
           antwoordText = completion.choices[0]?.message?.content || "";
