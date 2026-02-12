@@ -18,10 +18,14 @@ import {
   FileText,
   Lightbulb,
   Bot,
+  Send,
+  Loader2,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 const SECTORS = ["Bouw", "IT & Marketing", "Horeca", "Advies", "Detailhandel", "Zorg", "Groenvoorziening", "Transport"];
 
@@ -35,14 +39,31 @@ type TabId = "kansen" | "samenwerken" | "impact";
 
 export default function DashboardPage() {
   const { user, isLoading: authLoading } = useAuth();
+  const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<TabId>("kansen");
+  const [beroep, setBeroep] = useState("");
+  const [stad, setStad] = useState("");
   const [vraag, setVraag] = useState("");
+  const [buurmanAntwoord, setBuurmanAntwoord] = useState("");
   const [sector, setSector] = useState("");
   const [lokaalPercentage, setLokaalPercentage] = useState([25]);
 
   const { data: bedrijfsprofiel } = useQuery<{ naam: string; status: string; regio: string } | null>({
     queryKey: ["/api/business-profile/me"],
     enabled: !!user,
+  });
+
+  const buurmanMutation = useMutation({
+    mutationFn: async (data: { beroep: string; stad: string; vraag?: string }) => {
+      const res = await apiRequest("POST", "/api/regiobot/buurman", data);
+      return res.json() as Promise<{ antwoord: string }>;
+    },
+    onSuccess: (data) => {
+      setBuurmanAntwoord(data.antwoord);
+    },
+    onError: () => {
+      toast({ title: "Kon geen antwoord ophalen", variant: "destructive" });
+    },
   });
 
   if (authLoading) {
@@ -75,6 +96,15 @@ export default function DashboardPage() {
     { id: "samenwerken", label: "Lokaal samenwerken", icon: Handshake },
     { id: "impact", label: "Mijn Impact", icon: TrendingUp },
   ];
+
+  const handleBuurmanVraag = () => {
+    if (!beroep.trim() || !stad.trim()) {
+      toast({ title: "Vul je beroep en stad in", variant: "destructive" });
+      return;
+    }
+    setBuurmanAntwoord("");
+    buurmanMutation.mutate({ beroep: beroep.trim(), stad: stad.trim(), vraag: vraag.trim() || undefined });
+  };
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
@@ -145,24 +175,71 @@ export default function DashboardPage() {
                   </tbody>
                 </table>
               </div>
+            </CardContent>
+          </Card>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">Stel een vraag aan de RegioBot</label>
+          <Card data-testid="card-buurman">
+            <CardContent className="pt-6 space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-full bg-[#f28a1a]/10">
+                  <Lightbulb className="h-5 w-5 text-[#f28a1a]" />
+                </div>
+                <div>
+                  <h2 className="font-semibold text-lg">Vraag je digitale buurman</h2>
+                  <p className="text-sm text-muted-foreground">Vertel wat je doet en waar, dan zoek ik kansen voor je.</p>
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground mb-1 block">Wat is je beroep?</label>
+                  <Input
+                    value={beroep}
+                    onChange={(e) => setBeroep(e.target.value)}
+                    placeholder="Bijv: schilder, bakker, IT-er"
+                    data-testid="input-beroep"
+                  />
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground mb-1 block">In welke stad/regio?</label>
+                  <Input
+                    value={stad}
+                    onChange={(e) => setStad(e.target.value)}
+                    placeholder="Bijv: Utrecht, Amersfoort"
+                    data-testid="input-stad"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="text-sm font-medium text-muted-foreground mb-1 block">Extra vraag (optioneel)</label>
                 <div className="flex gap-2">
                   <Input
                     value={vraag}
                     onChange={(e) => setVraag(e.target.value)}
                     placeholder="Bijv: 'Is er nieuws over parkeertarieven?'"
-                    data-testid="input-regiobot-vraag"
+                    onKeyDown={(e) => e.key === "Enter" && handleBuurmanVraag()}
+                    data-testid="input-buurman-vraag"
                   />
-                  <Link href="/regiobot">
-                    <Button data-testid="button-naar-regiobot">
-                      <Search className="h-4 w-4 mr-2" />
-                      Zoek
-                    </Button>
-                  </Link>
+                  <Button
+                    onClick={handleBuurmanVraag}
+                    disabled={buurmanMutation.isPending || !beroep.trim() || !stad.trim()}
+                    data-testid="button-buurman-vraag"
+                  >
+                    {buurmanMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Send className="h-4 w-4" />
+                    )}
+                  </Button>
                 </div>
               </div>
+
+              {buurmanAntwoord && (
+                <div className="rounded-md bg-muted/50 p-4 text-sm leading-relaxed" data-testid="text-buurman-antwoord">
+                  {buurmanAntwoord}
+                </div>
+              )}
             </CardContent>
           </Card>
 

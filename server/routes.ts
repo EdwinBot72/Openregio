@@ -1044,6 +1044,51 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
     }
   });
 
+  // Digitale Buurman - quick RegioBot for dashboard
+  app.post("/api/regiobot/buurman", requireAuth, async (req, res) => {
+    try {
+      const { beroep, stad, vraag } = req.body;
+      if (!beroep || !stad) {
+        return res.status(400).json({ error: "Beroep en stad zijn verplicht" });
+      }
+
+      if (!process.env.OPENAI_API_KEY) {
+        const antwoord = `Hoi ${beroep}! In ${stad} zijn er altijd kansen voor lokale ondernemers. ` +
+          `Check de Beleidsmonitor voor actuele ontwikkelingen in jouw regio, ` +
+          `of stel een gerichte vraag via de uitgebreide RegioBot (Pro).`;
+        return res.json({ antwoord });
+      }
+
+      const OpenAI = (await import("openai")).default;
+      const openai = new OpenAI();
+
+      const systemPrompt = `Je bent de digitale buurman van OpenRegio. Je bent warm, behulpzaam en je kent de regio.
+Je geeft altijd 2 concrete, hoopvolle suggesties op basis van lokale samenwerking en WOO-inzichten.
+Houd het kort (max 3-4 zinnen), persoonlijk en positief. Schrijf in het Nederlands.
+Verwijs niet naar externe websites. Focus op concrete kansen en samenwerking.`;
+
+      const userPrompt = vraag 
+        ? `Een ${beroep} uit ${stad} vraagt: "${vraag}". Geef 2 concrete, hoopvolle suggesties.`
+        : `Een ${beroep} uit ${stad} vraagt naar kansen. Geef 2 concrete, hoopvolle suggesties op basis van lokale samenwerking en WOO-inzichten.`;
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: userPrompt },
+        ],
+        max_tokens: 300,
+        temperature: 0.8,
+      });
+
+      const antwoord = completion.choices[0]?.message?.content || "Ik kon helaas geen antwoord genereren. Probeer het later opnieuw.";
+      res.json({ antwoord });
+    } catch (err: any) {
+      console.error("Buurman error:", err);
+      res.status(500).json({ error: "Kon geen antwoord genereren" });
+    }
+  });
+
   // RAG System Routes - Document Upload and Vector Search
   app.post("/api/rag/documents", requireAuth, checkDailyUploadLimit, uploadMemory.single('file'), async (req, res) => {
     try {
