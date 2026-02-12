@@ -6,13 +6,20 @@ import { Link } from "wouter";
 import { MapPin, Users, Lightbulb, Settings, Target, MessageCircle, Check, Mail, Phone, MapPinned, Search, Bot, Send, Loader2, FileText, Scale, Shield, Building2, Leaf, AlertTriangle, Landmark, Receipt, Eye } from "lucide-react";
 
 const WOO_ITEMS = [
-  { icon: Building2, label: "Vastgoed & Grondposities", desc: "Welke grond koopt, verkoopt of reserveert de gemeente en wie profiteert?" },
-  { icon: Receipt, label: "Externe Inhuur", desc: "Welke adviesbureaus en consultants verdienen aan gemeentebeleid en hoeveel?" },
-  { icon: Shield, label: "Handhaving Ondernemers", desc: "Wordt er selectief gehandhaafd per branche en op welke criteria?" },
-  { icon: Scale, label: "Subsidies & Staatssteun", desc: "Welke bedrijven krijgen subsidie, hoeveel en waarom juist zij?" },
-  { icon: Landmark, label: "Mandaat & Delegatie", desc: "Wie heeft beslisbevoegdheid binnen de gemeente en op basis waarvan?" },
-  { icon: Leaf, label: "Milieuzones", desc: "Wat is de juridische grondslag en economische impact voor MKB?" },
-  { icon: AlertTriangle, label: "Invordering & Incasso", desc: "Hoe verdient de gemeente aan boetes, dwang en deurwaarderscontracten?" },
+  { icon: Building2, label: "Vastgoed & Grondposities", desc: "Welke grond koopt of verkoopt de gemeente en wie profiteert?" },
+  { icon: Receipt, label: "Externe Inhuur", desc: "Welke adviesbureaus verdienen aan gemeentebeleid en hoeveel?" },
+  { icon: Shield, label: "Handhaving", desc: "Wordt er selectief gehandhaafd per branche en op welke criteria?" },
+  { icon: Scale, label: "Subsidies & Staatssteun", desc: "Welke bedrijven krijgen subsidie en waarom juist zij?" },
+  { icon: Landmark, label: "Mandaat & Delegatie", desc: "Wie heeft beslisbevoegdheid en op basis waarvan?" },
+  { icon: Leaf, label: "Milieuzones", desc: "Wat is de juridische grondslag en impact op MKB?" },
+  { icon: AlertTriangle, label: "Invordering & Incasso", desc: "Hoe verdient de gemeente aan boetes en deurwaarderscontracten?" },
+  { icon: FileText, label: "Aanbestedingen", desc: "Stille gunningen onder de Europese drempel: wie wordt gekozen?" },
+  { icon: Eye, label: "PPS-constructies", desc: "Publiek-private deals: risicoverdeling, winstdeling, contracten." },
+  { icon: Receipt, label: "Parkeeropbrengsten", desc: "Hoeveel pakt de gemeente en waar gaat het geld naartoe?" },
+  { icon: Shield, label: "BOA-instructies", desc: "Interne werkinstructies, bonussen en quota van handhavers." },
+  { icon: Eye, label: "Cameratoezicht", desc: "Welke data wordt verzameld, door wie en hoe lang bewaard?" },
+  { icon: Scale, label: "WOZ-modellen", desc: "Hoe berekent de gemeente jouw WOZ-waarde en met welke data?" },
+  { icon: Landmark, label: "Lobbycontacten", desc: "Welke projectontwikkelaars en bedrijven spreken het bestuur?" },
 ];
 
 export default function HomePage() {
