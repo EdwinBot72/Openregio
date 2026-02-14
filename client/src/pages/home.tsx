@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { MapPin, Users, Settings, Target, MessageCircle, Check, Mail, Phone, MapPinned, Search, Bot, Send, Loader2, FileText, Scale, Shield, Building2, Leaf, AlertTriangle, Landmark, Receipt, Eye } from "lucide-react";
-import regioSamenwerkingImg from "@assets/regio-samenwerking.jpg";
+import wooVerzoekenImg from "@assets/woo-verzoeken.jpg";
 
 const WOO_ITEMS = [
   { icon: Building2, label: "Vastgoed & Grondposities", desc: "Welke grond koopt of verkoopt de gemeente en wie profiteert?" },
@@ -346,18 +346,15 @@ export default function HomePage() {
         {/* Sfeerbeeld */}
         <section className="relative overflow-hidden" style={{ height: "280px" }} data-testid="section-sfeerbeeld">
           <img 
-            src={regioSamenwerkingImg} 
-            alt="Lokale ondernemers werken samen" 
+            src={wooVerzoekenImg} 
+            alt="WOO-verzoeken en transparantie" 
             className="absolute inset-0 w-full h-full object-cover"
           />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(31,95,174,.75) 0%, rgba(15,23,42,.65) 100%)" }} />
+          <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(31,95,174,.80) 0%, rgba(15,23,42,.70) 100%)" }} />
           <div className="relative h-full flex items-center justify-center px-4">
-            <div className="text-center max-w-[640px]">
-              <p className="font-bold text-white" style={{ fontSize: "clamp(20px, 2.8vw, 28px)", lineHeight: 1.4, textShadow: "0 2px 12px rgba(0,0,0,.25)" }} data-testid="text-sfeerbeeld-quote">
-                Samen sterker in je regio — dat is waar het om draait.
-              </p>
-              <p style={{ color: "rgba(255,255,255,.75)", fontSize: "14px", marginTop: "8px" }}>
-                Al meer dan 50 ondernemers werken mee aan een eerlijker lokaal speelveld.
+            <div className="text-center max-w-[720px]">
+              <p className="font-bold text-white" style={{ fontSize: "clamp(18px, 2.5vw, 24px)", lineHeight: 1.5, textShadow: "0 2px 12px rgba(0,0,0,.25)", fontStyle: "italic" }} data-testid="text-sfeerbeeld-quote">
+                "Zodra aannames het fundament worden van beleid, is het slechts een kwestie van tijd voordat bevoegdheid, motivering en gelijke behandeling onderuitgaan."
               </p>
             </div>
           </div>
