@@ -4,7 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { MapPin, Users, Settings, Target, MessageCircle, Check, Mail, Phone, MapPinned, Search, Bot, Send, Loader2, FileText, Scale, Shield, Building2, Leaf, AlertTriangle, Landmark, Receipt, Eye } from "lucide-react";
-import wooVerzoekenImg from "@assets/woo-verzoeken.jpg";
+import sfeerbeeldImg from "@assets/pexels-thisisengineering-3861969_1771083749018.jpg";
 
 const WOO_ITEMS = [
   { icon: Building2, label: "Vastgoed & Grondposities", desc: "Welke grond koopt of verkoopt de gemeente en wie profiteert?" },
@@ -346,11 +346,11 @@ export default function HomePage() {
         {/* Sfeerbeeld */}
         <section className="relative overflow-hidden" style={{ height: "280px" }} data-testid="section-sfeerbeeld">
           <img 
-            src={wooVerzoekenImg} 
-            alt="WOO-verzoeken en transparantie" 
+            src={sfeerbeeldImg} 
+            alt="Data en transparantie" 
             className="absolute inset-0 w-full h-full object-cover"
           />
-          <div className="absolute inset-0" style={{ background: "linear-gradient(135deg, rgba(31,95,174,.80) 0%, rgba(15,23,42,.70) 100%)" }} />
+          <div className="absolute inset-0" style={{ background: "rgba(31,95,174,.25)" }} />
           <div className="relative h-full flex items-center justify-center px-4">
             <div className="text-center max-w-[720px]">
               <p className="font-bold text-white" style={{ fontSize: "clamp(18px, 2.5vw, 24px)", lineHeight: 1.5, textShadow: "0 2px 12px rgba(0,0,0,.25)", fontStyle: "italic" }} data-testid="text-sfeerbeeld-quote">
