@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
-import { MapPin, Users, Lightbulb, Settings, Target, MessageCircle, Check, Mail, Phone, MapPinned, Search, Bot, Send, Loader2, FileText, Scale, Shield, Building2, Leaf, AlertTriangle, Landmark, Receipt, Eye } from "lucide-react";
+import { MapPin, Users, Settings, Target, MessageCircle, Check, Mail, Phone, MapPinned, Search, Bot, Send, Loader2, FileText, Scale, Shield, Building2, Leaf, AlertTriangle, Landmark, Receipt, Eye } from "lucide-react";
 
 const WOO_ITEMS = [
   { icon: Building2, label: "Vastgoed & Grondposities", desc: "Welke grond koopt of verkoopt de gemeente en wie profiteert?" },
@@ -68,8 +68,7 @@ export default function HomePage() {
 
             <nav className="hidden md:flex items-center gap-2.5 font-extrabold" style={{ color: "#0f172a" }}>
               <a href="#home" className="px-3 py-2.5 rounded-xl hover:bg-[#eef3fb]" data-testid="link-nav-home">Home</a>
-              <a href="#diensten" className="px-3 py-2.5 rounded-xl hover:bg-[#eef3fb]" data-testid="link-nav-diensten">Diensten</a>
-              <a href="#cases" className="px-3 py-2.5 rounded-xl hover:bg-[#eef3fb]" data-testid="link-nav-cases">Cases</a>
+              <a href="#diensten" className="px-3 py-2.5 rounded-xl hover:bg-[#eef3fb]" data-testid="link-nav-diensten">Pijlers</a>
               <a href="#over" className="px-3 py-2.5 rounded-xl hover:bg-[#eef3fb]" data-testid="link-nav-over">Over ons</a>
               <a href="#contact" className="px-3 py-2.5 rounded-xl hover:bg-[#eef3fb]" data-testid="link-nav-contact">Contact</a>
             </nav>
@@ -125,7 +124,7 @@ export default function HomePage() {
                     Word lid
                   </Link>
                   <a 
-                    href="#cases"
+                    href="#diensten"
                     className="inline-flex items-center justify-center px-4 py-3 rounded-full font-black text-sm"
                     style={{ background: "rgba(255,255,255,.12)", color: "#fff", border: "1px solid rgba(255,255,255,.25)" }}
                     data-testid="button-hero-discover"
@@ -280,189 +279,96 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Strip Icons */}
-        <div id="diensten" className="border-b" style={{ background: "#fff", borderColor: "#e6ebf2" }} data-testid="section-diensten">
+        {/* Vier Pijlers */}
+        <section id="diensten" className="py-8" style={{ background: "#fff", borderBottom: "1px solid #e6ebf2" }} data-testid="section-diensten">
           <div className="max-w-[1120px] mx-auto px-4">
-            <div className="grid md:grid-cols-3 gap-3.5 py-4">
-              {[
-                { icon: MapPin, title: "Regio analyse", desc: "Korte scan: wat blokkeert groei, waar zit je leverage.", link: "/regio-analyse" },
-                { icon: Users, title: "Samenwerking", desc: "Structuur + afspraken die werken (geen netwerkpraat).", link: null },
-                { icon: Lightbulb, title: "Innovatie", desc: "Van idee naar pilot naar omzet. In de regio.", link: null },
-              ].map((item, i) => {
-                const content = (
-                  <>
-                    <div 
-                      className="w-[46px] h-[46px] rounded-[16px] flex items-center justify-center flex-shrink-0"
-                      style={{ 
-                        background: "rgba(31,95,174,.10)",
-                        color: "#1f5fae",
-                        border: "1px solid rgba(31,95,174,.18)"
-                      }}
-                    >
-                      <item.icon className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h3 className="font-bold" style={{ margin: 0, fontSize: "16px" }}>{item.title}</h3>
-                      <p style={{ margin: "6px 0 0", color: "#5b677a", fontSize: "13px" }}>{item.desc}</p>
-                    </div>
-                  </>
-                );
-                return item.link ? (
-                  <Link
-                    key={i}
-                    href={item.link}
-                    className="rounded-[18px] p-4 flex gap-3 items-start no-underline"
-                    style={{ 
-                      background: "#ffffff",
-                      border: "1px solid #e6ebf2",
-                      boxShadow: "0 6px 18px rgba(15,23,42,.06)",
-                      color: "inherit",
-                    }}
-                    data-testid={`card-dienst-${i}`}
-                  >
-                    {content}
-                  </Link>
-                ) : (
-                  <div 
-                    key={i}
-                    className="rounded-[18px] p-4 flex gap-3 items-start"
-                    style={{ 
-                      background: "#ffffff",
-                      border: "1px solid #e6ebf2",
-                      boxShadow: "0 6px 18px rgba(15,23,42,.06)"
-                    }}
-                    data-testid={`card-dienst-${i}`}
-                  >
-                    {content}
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+            <h2 className="font-bold mb-1" style={{ fontSize: "28px", letterSpacing: "-0.3px" }} data-testid="text-pijlers-title">Vier pijlers</h2>
+            <p style={{ color: "#5b677a", marginBottom: "18px" }} data-testid="text-pijlers-lead">Alles wat je nodig hebt om je regio sterker te maken.</p>
 
-        {/* Projects Section */}
-        <section id="cases" className="py-8" data-testid="section-cases">
-          <div className="max-w-[1120px] mx-auto px-4">
-            <h2 className="font-bold mb-2" style={{ fontSize: "28px", letterSpacing: "-0.3px" }} data-testid="text-cases-title">Onze Projecten</h2>
-            <p style={{ color: "#5b677a", marginBottom: "18px", maxWidth: "78ch" }} data-testid="text-cases-lead">Een kijkje in onze succesvolle cases.</p>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-3.5">
+            <div className="grid md:grid-cols-2 gap-3.5">
               {[
-                { img: "/img/regiomarkt.png?v=3", title: "RegioMarkt", desc: "Vaste regionale werkverdeling.", slug: "regiomarkt" },
-                { img: "/img/regiobot.png?v=3", title: "RegioBot", desc: "WOO-documenten en beleidsregels.", slug: "regiobot" },
-                { img: "/img/zichtbaarheid.png?v=3", title: "Zichtbaarheid", desc: "Lokale vindbaarheid op orde.", slug: "zichtbaarheid" },
-                { img: "/img/basischeck.png?v=3", title: "Back to Basic", desc: "Blijf draaien zonder digitale afhankelijkheid.", slug: "backtobasic" },
-              ].map((project, i) => (
-                <article 
+                { 
+                  icon: Users, 
+                  title: "RegioMarkt", 
+                  desc: "Vaste regionale werkverdeling. Werk dat jij niet doet, verwijs je door naar iemand in je regio die het wél kan. Geen algoritmes, gewoon lokaal.",
+                  color: "#1f5fae",
+                  bg: "rgba(31,95,174,.08)",
+                  border: "rgba(31,95,174,.15)",
+                },
+                { 
+                  icon: Bot, 
+                  title: "RegioBot", 
+                  desc: "Toont welke regels, besluiten en mandaten er zijn. Geen advies, geen mening — alleen controleerbare documenten en wat ontbreekt.",
+                  color: "#1f5fae",
+                  bg: "rgba(31,95,174,.08)",
+                  border: "rgba(31,95,174,.15)",
+                },
+                { 
+                  icon: MapPin, 
+                  title: "Zichtbaarheid", 
+                  desc: "Zorgt dat je bedrijf correct en vindbaar is in je regio. Juiste gegevens, reviews en lokale zoekresultaten — zonder advertenties.",
+                  color: "#f28a1a",
+                  bg: "rgba(242,138,26,.08)",
+                  border: "rgba(242,138,26,.15)",
+                },
+                { 
+                  icon: Shield, 
+                  title: "Back to Basic", 
+                  desc: "Je bedrijf draait ook zonder digitale systemen. Bereikbaarheid, eenvoudige betalingen en papier als het nodig is. Betrouwbaar, altijd.",
+                  color: "#f28a1a",
+                  bg: "rgba(242,138,26,.08)",
+                  border: "rgba(242,138,26,.15)",
+                },
+              ].map((pillar, i) => (
+                <div 
                   key={i}
-                  className="rounded-[18px] overflow-hidden"
-                  style={{ 
-                    border: "1px solid #e6ebf2",
-                    background: "#ffffff",
-                    boxShadow: "0 8px 22px rgba(15,23,42,.08)"
-                  }}
-                  data-testid={`card-project-${i}`}
+                  className="rounded-md p-4 flex gap-3.5 items-start"
+                  style={{ background: pillar.bg, border: `1px solid ${pillar.border}` }}
+                  data-testid={`card-pijler-${i}`}
                 >
-                  <img 
-                    src={project.img}
-                    alt={project.title}
-                    className="h-32 w-full object-cover"
-                  />
-                  <div className="p-3">
-                    <h4 className="font-bold mb-1" data-testid={`text-project-title-${i}`}>{project.title}</h4>
-                    <p style={{ color: "#5b677a", fontSize: "12px", margin: 0 }} data-testid={`text-project-desc-${i}`}>{project.desc}</p>
-                    <div className="mt-2.5">
-                      <a 
-                        href={`#${project.slug}`}
-                        className="inline-flex items-center justify-center px-3 py-2 rounded-full font-black text-white text-xs"
-                        style={{ background: "#1f5fae", boxShadow: "0 14px 40px rgba(31,95,174,.25)" }}
-                        data-testid={`button-project-readmore-${project.slug}`}
-                      >
-                        Lees meer
-                      </a>
-                    </div>
+                  <div 
+                    className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0"
+                    style={{ background: pillar.color, color: "#fff" }}
+                  >
+                    <pillar.icon className="w-5 h-5" />
                   </div>
-                </article>
+                  <div>
+                    <h3 className="font-bold" style={{ margin: 0, fontSize: "16px" }} data-testid={`text-pijler-title-${i}`}>{pillar.title}</h3>
+                    <p style={{ margin: "4px 0 0", color: "#5b677a", fontSize: "13px", lineHeight: 1.6 }}>{pillar.desc}</p>
+                  </div>
+                </div>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Project Details */}
-        <section className="py-8" style={{ background: "#fff" }}>
-          <div className="max-w-[1120px] mx-auto px-4 space-y-8">
-            
-            {/* RegioMarkt */}
-            <div id="regiomarkt" className="scroll-mt-20" data-testid="section-regiomarkt">
-              <h3 className="font-bold text-xl mb-2" style={{ color: "#1f5fae" }}>RegioMarkt</h3>
-              <p style={{ color: "#374151", lineHeight: 1.7 }}>
-                RegioMarkt is een vaste regionale werkverdeling tussen ondernemers. Als jij werk krijgt dat je zelf niet doet, verwijs je het binnen je regio door naar iemand die het wél kan. Geen advertenties, geen algoritmes—gewoon werk blijft lokaal en zichtbaar.
-              </p>
-            </div>
-
-            {/* RegioBot */}
-            <div id="regiobot" className="scroll-mt-20" data-testid="section-regiobot">
-              <h3 className="font-bold text-xl mb-2" style={{ color: "#1f5fae" }}>RegioBot</h3>
-              <p style={{ color: "#374151", lineHeight: 1.7 }}>
-                RegioBot laat zien welke regels, besluiten en mandaten er zijn door de onderliggende documenten te tonen. Hij geeft geen advies en geen mening, alleen wat er ligt en wat ontbreekt. Zo werk je niet op aannames, maar op controleerbare informatie.
-              </p>
-            </div>
-
-            {/* Zichtbaarheid */}
-            <div id="zichtbaarheid" className="scroll-mt-20" data-testid="section-zichtbaarheid">
-              <h3 className="font-bold text-xl mb-2" style={{ color: "#1f5fae" }}>Zichtbaarheid</h3>
-              <p style={{ color: "#374151", lineHeight: 1.7 }}>
-                Zichtbaarheid zorgt dat je bedrijf correct en vindbaar is binnen je eigen regio. Het gaat om juiste gegevens, reviews en regionale zoekresultaten — zonder advertenties of contenttrucs. Zo kunnen klanten en andere ondernemers je vinden zoals je werkelijk bent.
-              </p>
-            </div>
-
-            {/* Back to Basic */}
-            <div id="backtobasic" className="scroll-mt-20" data-testid="section-backtobasic">
-              <h3 className="font-bold text-xl mb-2" style={{ color: "#1f5fae" }}>Back to Basic</h3>
-              <p style={{ color: "#374151", lineHeight: 1.7 }}>
-                Back to Basic betekent dat je bedrijf kan blijven draaien zonder afhankelijk te zijn van digitale systemen. Het gaat om bereikbaarheid, eenvoudige betalingen en werken met papier als dat nodig is. Zo blijft je onderneming betrouwbaar, ook als techniek of systemen tijdelijk uitvallen.
-              </p>
-            </div>
-
-          </div>
-        </section>
-
-        {/* Why OpenRegio */}
-        <section id="over" className="py-8 border-t border-b" style={{ background: "#fff", borderColor: "#e6ebf2" }} data-testid="section-why">
+        {/* Waarom OpenRegio */}
+        <section id="over" className="py-8" style={{ borderBottom: "1px solid #e6ebf2" }} data-testid="section-why">
           <div className="max-w-[1120px] mx-auto px-4">
-            <h2 className="font-bold mb-2" style={{ fontSize: "28px", letterSpacing: "-0.3px" }} data-testid="text-why-title">Waarom OpenRegio?</h2>
-            <p style={{ color: "#5b677a", marginBottom: "18px", maxWidth: "78ch" }} data-testid="text-why-lead">Heldere waarde. Geen gedoe. Gewoon: regio sterker maken en ondernemers laten draaien.</p>
+            <h2 className="font-bold mb-1" style={{ fontSize: "28px", letterSpacing: "-0.3px" }} data-testid="text-why-title">Waarom OpenRegio?</h2>
+            <p style={{ color: "#5b677a", marginBottom: "18px" }} data-testid="text-why-lead">Heldere waarde. Geen gedoe. Regio sterker, ondernemers draaien.</p>
 
-            <div className="grid md:grid-cols-3 gap-3.5 mt-3">
+            <div className="grid md:grid-cols-3 gap-3.5">
               {[
                 { icon: Settings, title: "Deskundige aanpak", desc: "Structuur, uitvoering, meetbaar resultaat." },
-                { icon: Target, title: "Heldere strategie", desc: "KPI's + prioriteiten, geen eindeloze plannen." },
-                { icon: MessageCircle, title: "Persoonlijke service", desc: "Snel schakelen, korte lijnen." },
+                { icon: Target, title: "Heldere strategie", desc: "Prioriteiten en KPI's, geen eindeloze plannen." },
+                { icon: MessageCircle, title: "Korte lijnen", desc: "Snel schakelen. Persoonlijk contact." },
               ].map((item, i) => (
                 <div 
                   key={i}
-                  className="rounded-[18px] p-4 flex gap-3 items-start"
-                  style={{ 
-                    border: "1px solid #e6ebf2",
-                    background: "#ffffff",
-                    boxShadow: "0 8px 22px rgba(15,23,42,.08)"
-                  }}
+                  className="rounded-md p-4 flex gap-3 items-start"
+                  style={{ background: "#fff", border: "1px solid #e6ebf2" }}
                   data-testid={`card-why-${i}`}
                 >
                   <div 
-                    className="w-[46px] h-[46px] rounded-[16px] flex items-center justify-center flex-shrink-0"
-                    style={{ 
-                      background: "rgba(242,138,26,.12)",
-                      color: "#f28a1a",
-                      border: "1px solid rgba(242,138,26,.22)"
-                    }}
+                    className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0"
+                    style={{ background: "rgba(242,138,26,.10)", color: "#f28a1a" }}
                   >
                     <item.icon className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold" style={{ margin: 0, fontSize: "16px" }}>{item.title}</h3>
-                    <p style={{ margin: "6px 0 0", color: "#5b677a", fontSize: "13px" }}>{item.desc}</p>
+                    <h3 className="font-bold" style={{ margin: 0, fontSize: "15px" }}>{item.title}</h3>
+                    <p style={{ margin: "4px 0 0", color: "#5b677a", fontSize: "13px" }}>{item.desc}</p>
                   </div>
                 </div>
               ))}
@@ -693,7 +599,7 @@ export default function HomePage() {
             <div className="flex flex-wrap gap-2">
               <a href="#home" className="opacity-90 hover:opacity-100 hover:underline" data-testid="link-footer-home">Home</a>
               <span className="opacity-50">·</span>
-              <a href="#cases" className="opacity-90 hover:opacity-100 hover:underline" data-testid="link-footer-cases">Cases</a>
+              <a href="#diensten" className="opacity-90 hover:opacity-100 hover:underline" data-testid="link-footer-cases">Pijlers</a>
               <span className="opacity-50">·</span>
               <Link href="/lidmaatschap" className="opacity-90 hover:opacity-100 hover:underline" data-testid="link-footer-lid">Word lid</Link>
               <span className="opacity-50">·</span>
