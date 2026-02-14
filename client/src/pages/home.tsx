@@ -344,13 +344,20 @@ export default function HomePage() {
         </section>
 
         {/* Sfeerbeeld */}
-        <section className="relative overflow-hidden" style={{ height: "280px" }} data-testid="section-sfeerbeeld">
+        <section 
+          className="relative overflow-hidden" 
+          style={{ height: "280px" }} 
+          data-testid="section-sfeerbeeld"
+        >
           <img 
             src={sfeerbeeldImg} 
             alt="Data en transparantie" 
             className="absolute inset-0 w-full h-full object-cover"
           />
-          <div className="absolute inset-0" style={{ background: "rgba(31,95,174,.25)" }} />
+          <div 
+            className="absolute inset-0" 
+            style={{ background: "linear-gradient(90deg, rgba(14,63,134,.88), rgba(14,63,134,.55))" }} 
+          />
           <div className="relative h-full flex items-center justify-center px-4">
             <div className="text-center max-w-[720px]">
               <p className="font-bold text-white" style={{ fontSize: "clamp(18px, 2.5vw, 24px)", lineHeight: 1.5, textShadow: "0 2px 12px rgba(0,0,0,.25)", fontStyle: "italic" }} data-testid="text-sfeerbeeld-quote">
