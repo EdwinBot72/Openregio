@@ -56,7 +56,7 @@ export default function HomePage() {
         <div className="max-w-[1120px] mx-auto px-4">
           <div className="flex items-center justify-between py-3.5 gap-3">
             <Link href="/" className="flex items-center gap-2 font-black" data-testid="link-home-logo">
-              <img src={logoImg} alt="OpenRegio logo" className="h-9 w-auto" />
+              <img src={logoImg} alt="OpenRegio logo" className="h-12 w-auto" />
             </Link>
 
             <nav className="hidden md:flex items-center gap-2.5 font-extrabold" style={{ color: "#0f172a" }}>
