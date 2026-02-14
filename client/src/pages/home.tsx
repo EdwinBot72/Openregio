@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { MapPin, Users, Settings, Target, MessageCircle, Check, Mail, Phone, MapPinned, Search, Bot, Send, Loader2, FileText, Scale, Shield, Building2, Leaf, AlertTriangle, Landmark, Receipt, Eye } from "lucide-react";
 import sfeerbeeldImg from "@assets/pexels-thisisengineering-3861969_1771083749018.jpg";
+import logoImg from "@assets/afbeelding_1771084318315.png";
 
 const WOO_ITEMS = [
   { icon: Building2, label: "Vastgoed & Grondposities", desc: "Welke grond koopt of verkoopt de gemeente en wie profiteert?" },
@@ -54,17 +55,8 @@ export default function HomePage() {
       <header className="sticky top-0 z-50 backdrop-blur-lg border-b" style={{ background: "rgba(255,255,255,.92)", borderColor: "#e6ebf2" }} data-testid="nav-main">
         <div className="max-w-[1120px] mx-auto px-4">
           <div className="flex items-center justify-between py-3.5 gap-3">
-            <Link href="/" className="flex items-center gap-3 font-black" data-testid="link-home-logo">
-              <div 
-                className="w-9 h-9 rounded-xl relative"
-                style={{ 
-                  background: "conic-gradient(from 200deg, #1f5fae, #3aa0ff, #f28a1a, #5ccf8a, #1f5fae)",
-                  boxShadow: "0 8px 22px rgba(15,23,42,.08)"
-                }}
-              >
-                <div className="absolute rounded-lg border" style={{ inset: "11px", borderColor: "rgba(255,255,255,.6)" }} />
-              </div>
-              <span>OpenRegio</span>
+            <Link href="/" className="flex items-center gap-2 font-black" data-testid="link-home-logo">
+              <img src={logoImg} alt="OpenRegio logo" className="h-9 w-auto" />
             </Link>
 
             <nav className="hidden md:flex items-center gap-2.5 font-extrabold" style={{ color: "#0f172a" }}>
