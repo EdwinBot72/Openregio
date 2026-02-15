@@ -52,7 +52,7 @@ export default function HomePage() {
   return (
     <div className="min-h-screen" style={{ background: "#f5f7fb", color: "#0f172a" }}>
       {/* Navigation */}
-      <header className="sticky top-0 z-50 backdrop-blur-lg border-b" style={{ background: "rgba(255,255,255,.92)", borderColor: "#e6ebf2" }} data-testid="nav-main">
+      <header className="sticky top-0 z-50 backdrop-blur-lg border-b" style={{ background: "rgba(245,247,251,.97)", borderColor: "#e6ebf2" }} data-testid="nav-main">
         <div className="max-w-[1120px] mx-auto px-4">
           <div className="flex items-center justify-between py-3.5 gap-3">
             <Link href="/" className="flex items-center gap-2 font-black" data-testid="link-home-logo">
