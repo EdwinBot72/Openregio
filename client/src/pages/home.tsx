@@ -372,64 +372,53 @@ export default function HomePage() {
         </section>
 
         {/* Wat je krijgt */}
-        <section id="over" className="py-8" style={{ borderBottom: "1px solid #e6ebf2" }} data-testid="section-why">
+        <section id="over" className="py-10" style={{ background: "#fff", borderBottom: "1px solid #e6ebf2" }} data-testid="section-why">
           <div className="max-w-[1120px] mx-auto px-4">
-            <h2 className="font-bold mb-1" style={{ fontSize: "28px", letterSpacing: "-0.3px" }} data-testid="text-why-title">Wat je krijgt</h2>
-            <p style={{ color: "#5b677a", marginBottom: "18px" }} data-testid="text-why-lead">Geen beloftes, maar structuur. Dit is wat OpenRegio concreet oplevert.</p>
+            <div className="text-center mb-6">
+              <h2 className="font-bold mb-1" style={{ fontSize: "28px", letterSpacing: "-0.3px" }} data-testid="text-why-title">Wat je krijgt</h2>
+              <p style={{ color: "#5b677a" }} data-testid="text-why-lead">Geen beloftes, maar structuur. Dit is wat OpenRegio concreet oplevert.</p>
+            </div>
 
-            <div className="grid md:grid-cols-2 gap-3.5">
+            <div className="grid md:grid-cols-2 gap-5">
               {[
                 { 
                   icon: Eye, 
                   title: "Helder inzicht", 
                   lines: ["Je ziet wat er lokaal verandert — voordat het je raakt.", "Beleid, vergunningen, ontwikkelingen. Geen aannames, maar feiten."],
-                  color: "#1f5fae",
-                  bg: "rgba(31,95,174,.08)",
-                  border: "rgba(31,95,174,.15)",
+                  accent: "#1f5fae",
                 },
                 { 
                   icon: Settings, 
                   title: "Structuur die werkt", 
                   lines: ["Geen losse netwerkmomenten.", "Een vaste regionale infrastructuur waarin werk, informatie en mensen samenkomen."],
-                  color: "#1f5fae",
-                  bg: "rgba(31,95,174,.08)",
-                  border: "rgba(31,95,174,.15)",
+                  accent: "#1f5fae",
                 },
                 { 
                   icon: Target, 
                   title: "Meetbaar voordeel", 
                   lines: ["Meer regionale doorverwijzing.", "Minder afhankelijkheid van externe platformen.", "Meer grip op je positie."],
-                  color: "#f28a1a",
-                  bg: "rgba(242,138,26,.08)",
-                  border: "rgba(242,138,26,.15)",
+                  accent: "#f28a1a",
                 },
                 { 
                   icon: MessageCircle, 
                   title: "Korte lijnen", 
                   lines: ["Direct contact met ondernemers uit je regio.", "Geen tussenlagen. Geen algoritmes."],
-                  color: "#f28a1a",
-                  bg: "rgba(242,138,26,.08)",
-                  border: "rgba(242,138,26,.15)",
+                  accent: "#f28a1a",
                 },
               ].map((item, i) => (
                 <div 
                   key={i}
-                  className="rounded-md p-4 flex gap-3.5 items-start"
-                  style={{ background: item.bg, border: `1px solid ${item.border}` }}
+                  className="rounded-md p-5"
+                  style={{ background: "#f5f7fb", borderTop: `3px solid ${item.accent}` }}
                   data-testid={`card-why-${i}`}
                 >
-                  <div 
-                    className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0"
-                    style={{ background: item.color, color: "#fff" }}
-                  >
-                    <item.icon className="w-5 h-5" />
-                  </div>
-                  <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <item.icon className="w-5 h-5 flex-shrink-0" style={{ color: item.accent }} />
                     <h3 className="font-bold" style={{ margin: 0, fontSize: "16px" }}>{item.title}</h3>
-                    {item.lines.map((line, j) => (
-                      <p key={j} style={{ margin: j === 0 ? "6px 0 0" : "2px 0 0", color: "#5b677a", fontSize: "13px", lineHeight: 1.6 }}>{line}</p>
-                    ))}
                   </div>
+                  {item.lines.map((line, j) => (
+                    <p key={j} style={{ margin: j === 0 ? "0" : "2px 0 0", color: "#5b677a", fontSize: "13px", lineHeight: 1.7 }}>{line}</p>
+                  ))}
                 </div>
               ))}
             </div>
