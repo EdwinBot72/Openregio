@@ -290,7 +290,7 @@ export default function HomePage() {
             <h2 className="font-bold mb-1" style={{ fontSize: "28px", letterSpacing: "-0.3px" }} data-testid="text-pijlers-title">Vier pijlers</h2>
             <p style={{ color: "#5b677a", marginBottom: "18px" }} data-testid="text-pijlers-lead">Alles wat je nodig hebt om je regio sterker te maken.</p>
 
-            <div className="grid md:grid-cols-2 gap-3.5">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
               {[
                 { 
                   icon: Users, 
@@ -327,20 +327,18 @@ export default function HomePage() {
               ].map((pillar, i) => (
                 <div 
                   key={i}
-                  className="rounded-md p-4 flex gap-3.5 items-start"
+                  className="rounded-md p-4"
                   style={{ background: pillar.bg, border: `1px solid ${pillar.border}` }}
                   data-testid={`card-pijler-${i}`}
                 >
                   <div 
-                    className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0"
+                    className="w-10 h-10 rounded-md flex items-center justify-center mb-2.5"
                     style={{ background: pillar.color, color: "#fff" }}
                   >
                     <pillar.icon className="w-5 h-5" />
                   </div>
-                  <div>
-                    <h3 className="font-bold" style={{ margin: 0, fontSize: "16px" }} data-testid={`text-pijler-title-${i}`}>{pillar.title}</h3>
-                    <p style={{ margin: "4px 0 0", color: "#5b677a", fontSize: "13px", lineHeight: 1.6 }}>{pillar.desc}</p>
-                  </div>
+                  <h3 className="font-bold" style={{ margin: 0, fontSize: "15px" }} data-testid={`text-pijler-title-${i}`}>{pillar.title}</h3>
+                  <p style={{ margin: "4px 0 0", color: "#5b677a", fontSize: "12.5px", lineHeight: 1.6 }}>{pillar.desc}</p>
                 </div>
               ))}
             </div>
