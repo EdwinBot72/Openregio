@@ -62,7 +62,7 @@ export default function HomePage() {
             <nav className="hidden md:flex items-center gap-2.5 font-extrabold" style={{ color: "#0f172a" }}>
               <a href="#home" className="px-3 py-2.5 rounded-xl hover:bg-[#eef3fb]" data-testid="link-nav-home">Home</a>
               <a href="#diensten" className="px-3 py-2.5 rounded-xl hover:bg-[#eef3fb]" data-testid="link-nav-diensten">Pijlers</a>
-              <a href="#over" className="px-3 py-2.5 rounded-xl hover:bg-[#eef3fb]" data-testid="link-nav-over">Over ons</a>
+              <a href="#over" className="px-3 py-2.5 rounded-xl hover:bg-[#eef3fb]" data-testid="link-nav-over">Wat je krijgt</a>
               <a href="#contact" className="px-3 py-2.5 rounded-xl hover:bg-[#eef3fb]" data-testid="link-nav-contact">Contact</a>
             </nav>
 
@@ -359,33 +359,64 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Waarom OpenRegio */}
+        {/* Wat je krijgt */}
         <section id="over" className="py-8" style={{ borderBottom: "1px solid #e6ebf2" }} data-testid="section-why">
           <div className="max-w-[1120px] mx-auto px-4">
-            <h2 className="font-bold mb-1" style={{ fontSize: "28px", letterSpacing: "-0.3px" }} data-testid="text-why-title">Waarom OpenRegio?</h2>
-            <p style={{ color: "#5b677a", marginBottom: "18px" }} data-testid="text-why-lead">Heldere waarde. Geen gedoe. Regio sterker, ondernemers draaien.</p>
+            <h2 className="font-bold mb-1" style={{ fontSize: "28px", letterSpacing: "-0.3px" }} data-testid="text-why-title">Wat je krijgt</h2>
+            <p style={{ color: "#5b677a", marginBottom: "18px" }} data-testid="text-why-lead">Geen beloftes, maar structuur. Dit is wat OpenRegio concreet oplevert.</p>
 
-            <div className="grid md:grid-cols-3 gap-3.5">
+            <div className="grid md:grid-cols-2 gap-3.5">
               {[
-                { icon: Settings, title: "Deskundige aanpak", desc: "Structuur, uitvoering, meetbaar resultaat." },
-                { icon: Target, title: "Heldere strategie", desc: "Prioriteiten en KPI's, geen eindeloze plannen." },
-                { icon: MessageCircle, title: "Korte lijnen", desc: "Snel schakelen. Persoonlijk contact." },
+                { 
+                  icon: Eye, 
+                  title: "Helder inzicht", 
+                  lines: ["Je ziet wat er lokaal verandert — voordat het je raakt.", "Beleid, vergunningen, ontwikkelingen. Geen aannames, maar feiten."],
+                  color: "#1f5fae",
+                  bg: "rgba(31,95,174,.08)",
+                  border: "rgba(31,95,174,.15)",
+                },
+                { 
+                  icon: Settings, 
+                  title: "Structuur die werkt", 
+                  lines: ["Geen losse netwerkmomenten.", "Een vaste regionale infrastructuur waarin werk, informatie en mensen samenkomen."],
+                  color: "#1f5fae",
+                  bg: "rgba(31,95,174,.08)",
+                  border: "rgba(31,95,174,.15)",
+                },
+                { 
+                  icon: Target, 
+                  title: "Meetbaar voordeel", 
+                  lines: ["Meer regionale doorverwijzing.", "Minder afhankelijkheid van externe platformen.", "Meer grip op je positie."],
+                  color: "#f28a1a",
+                  bg: "rgba(242,138,26,.08)",
+                  border: "rgba(242,138,26,.15)",
+                },
+                { 
+                  icon: MessageCircle, 
+                  title: "Korte lijnen", 
+                  lines: ["Direct contact met ondernemers uit je regio.", "Geen tussenlagen. Geen algoritmes."],
+                  color: "#f28a1a",
+                  bg: "rgba(242,138,26,.08)",
+                  border: "rgba(242,138,26,.15)",
+                },
               ].map((item, i) => (
                 <div 
                   key={i}
-                  className="rounded-md p-4 flex gap-3 items-start"
-                  style={{ background: "#fff", border: "1px solid #e6ebf2" }}
+                  className="rounded-md p-4 flex gap-3.5 items-start"
+                  style={{ background: item.bg, border: `1px solid ${item.border}` }}
                   data-testid={`card-why-${i}`}
                 >
                   <div 
                     className="w-10 h-10 rounded-md flex items-center justify-center flex-shrink-0"
-                    style={{ background: "rgba(242,138,26,.10)", color: "#f28a1a" }}
+                    style={{ background: item.color, color: "#fff" }}
                   >
                     <item.icon className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-bold" style={{ margin: 0, fontSize: "15px" }}>{item.title}</h3>
-                    <p style={{ margin: "4px 0 0", color: "#5b677a", fontSize: "13px" }}>{item.desc}</p>
+                    <h3 className="font-bold" style={{ margin: 0, fontSize: "16px" }}>{item.title}</h3>
+                    {item.lines.map((line, j) => (
+                      <p key={j} style={{ margin: j === 0 ? "6px 0 0" : "2px 0 0", color: "#5b677a", fontSize: "13px", lineHeight: 1.6 }}>{line}</p>
+                    ))}
                   </div>
                 </div>
               ))}
