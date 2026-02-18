@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
@@ -30,6 +30,17 @@ export default function HomePage() {
   const [botStad, setBotStad] = useState("");
   const [botAntwoord, setBotAntwoord] = useState("");
   const [botLoading, setBotLoading] = useState(false);
+  const [showCookieBanner, setShowCookieBanner] = useState(false);
+
+  useEffect(() => {
+    const consent = localStorage.getItem("cookie_consent");
+    if (!consent) setShowCookieBanner(true);
+  }, []);
+
+  const handleCookieChoice = (accepted: boolean) => {
+    localStorage.setItem("cookie_consent", accepted ? "accepted" : "rejected");
+    setShowCookieBanner(false);
+  };
 
   const handleBotVraag = async () => {
     if (!botBeroep.trim() || !botStad.trim()) return;
@@ -658,6 +669,41 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+
+      {showCookieBanner && (
+        <div 
+          className="fixed bottom-0 left-0 right-0 z-50"
+          style={{ background: "rgba(11,16,32,.95)", backdropFilter: "blur(12px)", borderTop: "1px solid rgba(255,255,255,.10)" }}
+          data-testid="cookie-banner"
+        >
+          <div className="max-w-[1120px] mx-auto px-4 py-4 flex flex-wrap items-center justify-between gap-3">
+            <p className="text-sm" style={{ color: "#e5e7eb", maxWidth: "640px" }}>
+              Wij gebruiken cookies om je ervaring te verbeteren. Lees ons{" "}
+              <Link href="/cookiebeleid" className="underline" style={{ color: "#3aa0ff" }} data-testid="link-cookie-policy">cookiebeleid</Link>.
+            </p>
+            <div className="flex gap-2">
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={() => handleCookieChoice(false)}
+                className="text-white"
+                data-testid="button-cookie-reject"
+              >
+                Weigeren
+              </Button>
+              <Button 
+                size="sm" 
+                onClick={() => handleCookieChoice(true)}
+                style={{ background: "#1f5fae" }}
+                className="text-white"
+                data-testid="button-cookie-accept"
+              >
+                Accepteren
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
