@@ -6,6 +6,7 @@ import { Link } from "wouter";
 import { MapPin, Users, Settings, Target, MessageCircle, Check, Mail, Phone, MapPinned, Search, Bot, Send, Loader2, FileText, Scale, Shield, Building2, Leaf, AlertTriangle, Landmark, Receipt, Eye } from "lucide-react";
 import sfeerbeeldImg from "@assets/pexels-thisisengineering-3861969_1771083749018.jpg";
 import logoImg from "@assets/ChatGPT_Image_15_feb_2026,_15_15_16_1771164937665.png";
+import footerLogoImg from "@assets/afbeelding_1771441188699.png";
 
 const WOO_ITEMS = [
   { icon: Building2, label: "Vastgoed & Grondposities", desc: "Welke grond koopt of verkoopt de gemeente en wie profiteert?" },
@@ -630,17 +631,8 @@ export default function HomePage() {
         <div className="max-w-[1120px] mx-auto px-4">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="flex gap-3 items-center">
-              <div 
-                className="w-9 h-9 rounded-xl relative"
-                style={{ 
-                  background: "conic-gradient(from 200deg, #1f5fae, #3aa0ff, #f28a1a, #5ccf8a, #1f5fae)",
-                  boxShadow: "0 8px 22px rgba(15,23,42,.08)"
-                }}
-              >
-                <div className="absolute rounded-lg border" style={{ inset: "11px", borderColor: "rgba(255,255,255,.6)" }} />
-              </div>
+              <img src={footerLogoImg} alt="OpenRegio logo" className="h-14 w-auto" />
               <div>
-                <div className="font-black">OpenRegio</div>
                 <div style={{ fontSize: "12px", color: "rgba(229,231,235,.70)" }}>Samen bouwen aan een sterke regio</div>
               </div>
             </div>
