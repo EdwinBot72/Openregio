@@ -1,11 +1,12 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RegionSelect } from "@/components/region-select";
-import { ExternalLink, Calendar, Info, Building2, AlertCircle, FileText } from "lucide-react";
+import { ExternalLink, Calendar, Info, Building2, AlertCircle, FileText, ArrowUpDown } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface GemeenteUpdate {
@@ -16,6 +17,35 @@ interface GemeenteUpdate {
   type: string | null;
   subjects: string[];
   creator: string | null;
+}
+
+type SortKey = "datum-nieuw" | "datum-oud" | "titel-az" | "titel-za" | "type";
+
+const SORT_LABELS: Record<SortKey, string> = {
+  "datum-nieuw": "Nieuwst eerst",
+  "datum-oud": "Oudst eerst",
+  "titel-az": "Titel A → Z",
+  "titel-za": "Titel Z → A",
+  "type": "Type",
+};
+
+function sortItems(items: GemeenteUpdate[], key: SortKey): GemeenteUpdate[] {
+  return [...items].sort((a, b) => {
+    switch (key) {
+      case "datum-nieuw":
+        return (b.date ?? "").localeCompare(a.date ?? "");
+      case "datum-oud":
+        return (a.date ?? "").localeCompare(b.date ?? "");
+      case "titel-az":
+        return a.title.localeCompare(b.title, "nl");
+      case "titel-za":
+        return b.title.localeCompare(a.title, "nl");
+      case "type":
+        return (a.type ?? "").localeCompare(b.type ?? "", "nl");
+      default:
+        return 0;
+    }
+  });
 }
 
 function TypeBadge({ type }: { type: string | null }) {
@@ -52,6 +82,7 @@ export default function GemeenteUpdatesPage() {
   const { user } = useAuth();
   const [gemeente, setGemeente] = useState("");
   const [zoekGemeente, setZoekGemeente] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>("datum-nieuw");
 
   const { data: profiel } = useQuery<{ regio?: string } | null>({
     queryKey: ["/api/business-profile/me"],
@@ -79,6 +110,11 @@ export default function GemeenteUpdatesPage() {
     enabled: !!activeGemeente,
     staleTime: 30 * 60 * 1000,
   });
+
+  const sortedItems = useMemo(
+    () => sortItems(data?.items ?? [], sortKey),
+    [data?.items, sortKey]
+  );
 
   const handleSearch = () => {
     if (gemeente) setZoekGemeente(gemeente);
@@ -204,18 +240,37 @@ export default function GemeenteUpdatesPage() {
       {/* Resultaten */}
       {data && data.count > 0 && !isLoading && (
         <>
-          <p
-            className="text-sm text-muted-foreground mb-4"
-            data-testid="text-result-count"
-          >
-            {data.count} publicatie{data.count !== 1 ? "s" : ""} gevonden voor{" "}
-            <strong>{activeGemeente}</strong>
-            {data.total > data.count && (
-              <span className="ml-1 text-xs">(van {data.total.toLocaleString("nl-NL")} totaal)</span>
-            )}
-          </p>
+          {/* Resultaten-header met sortering */}
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <p className="text-sm text-muted-foreground" data-testid="text-result-count">
+              {data.count} publicatie{data.count !== 1 ? "s" : ""} voor{" "}
+              <strong>{activeGemeente}</strong>
+              {data.total > data.count && (
+                <span className="ml-1 text-xs">(van {data.total.toLocaleString("nl-NL")} totaal)</span>
+              )}
+            </p>
+            <div className="flex items-center gap-2">
+              <ArrowUpDown className="w-3.5 h-3.5 text-muted-foreground" />
+              <Select
+                value={sortKey}
+                onValueChange={(v) => setSortKey(v as SortKey)}
+              >
+                <SelectTrigger className="w-[160px]" data-testid="select-sortering">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {(Object.keys(SORT_LABELS) as SortKey[]).map((key) => (
+                    <SelectItem key={key} value={key} data-testid={`sort-option-${key}`}>
+                      {SORT_LABELS[key]}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
           <div className="space-y-4">
-            {data.items.map((item) => (
+            {sortedItems.map((item) => (
               <Card key={item.id} data-testid={`card-update-${item.id}`}>
                 <CardHeader className="pb-2 pt-4 px-5 flex flex-row flex-wrap items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
