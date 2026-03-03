@@ -56,13 +56,6 @@ app.use((req, res, next) => {
 });
 
 (async () => {
-  // Run database migrations before starting the server
-  try {
-    await runMigrations();
-  } catch (err) {
-    console.error("[Startup] Migration warning (non-fatal):", (err as Error).message);
-  }
-  
   const server = await registerRoutes(app);
 
   // Global error handler with structured logging
@@ -71,7 +64,6 @@ app.use((req, res, next) => {
     const message = err.message || "Internal Server Error";
     const isServerError = status >= 500;
 
-    // Structured JSON log for all errors
     const errorLog = {
       level: isServerError ? 'error' : 'warn',
       timestamp: new Date().toISOString(),
@@ -89,7 +81,6 @@ app.use((req, res, next) => {
       console.warn('[WARN]', JSON.stringify(errorLog));
     }
 
-    // Send user-friendly response
     res.status(status).json({ 
       error: isServerError ? "Er is een fout opgetreden" : message,
       code: status,
@@ -105,10 +96,7 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on the port specified in the environment variable PORT
-  // Other ports are firewalled. Default to 5000 if not specified.
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
+  // Start listening FIRST so healthchecks pass immediately
   const port = parseInt(process.env.PORT || '5000', 10);
   server.listen({
     port,
@@ -116,5 +104,11 @@ app.use((req, res, next) => {
     reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
+  });
+
+  // Run migrations in the background — schema already exists in production,
+  // these are just safety checks and won't block serving requests
+  runMigrations().catch((err) => {
+    console.error("[Startup] Migration warning (non-fatal):", (err as Error).message);
   });
 })();
