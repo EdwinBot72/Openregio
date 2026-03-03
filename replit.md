@@ -129,6 +129,15 @@ Nieuwe sidebar met 6 collapsible hoofdsecties:
 5. **Data & Inzicht** — Beleidsmonitor, WOO-bibliotheek, RegioBot, Juridische tools, Marktanalyse, Impact-rapportages
 6. **Coöperatie** — Overzicht, Stemmen, Besluiten, Financiële resultaten
 
+## Gemeente-updates
+
+Actuele officiële publicaties per gemeente via de KOOP SRU API (overheid.nl):
+- **Endpoint**: `GET /api/gemeente-updates?gemeente=Amsterdam&limit=15`
+- **Databron**: `repository.overheid.nl/sru` — officiële SRU-zoekmachine voor Gemeentebladen, raadsbesluiten, vergunningen en andere overheidspublicaties
+- **Caching**: in-memory TTL-cache van 30 minuten per gemeente
+- **Frontend**: `/kansen/gemeente-updates` — zoek per gemeente, kaarten met publicatietype-badge, datum, onderwerpen en link naar officielebekendmakingen.nl
+- **Geen API-key nodig** — volledig publiek toegankelijk
+
 ## Pending Tasks
 
 (Geen openstaande taken)

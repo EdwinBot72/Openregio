@@ -3442,6 +3442,99 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
+  // Gemeente-updates — officiële publicaties via KOOP SRU API (overheid.nl)
+  // ──────────────────────────────────────────────────────────────────────────
+  const gemeenteUpdatesCache = new Map<string, { data: any; expiresAt: number }>();
+  const GEMEENTE_TTL_MS = 30 * 60 * 1000; // 30 minuten
+  const SRU_BASE = "https://repository.overheid.nl/sru";
+
+  function extractSruField(xml: string, field: string): string[] {
+    const results: string[] = [];
+    const re = new RegExp(`<(?:dcterms:|gzd:|dc:)?${field}[^>]*>([^<]+)<`, "g");
+    let m;
+    while ((m = re.exec(xml)) !== null) {
+      results.push(m[1].trim());
+    }
+    return results;
+  }
+
+  function parseSruXml(xml: string): any[] {
+    const records = xml.split("<sru:record>");
+    if (records.length <= 1) return [];
+    const items: any[] = [];
+
+    for (let i = 1; i < records.length; i++) {
+      const rec = records[i];
+      const title = extractSruField(rec, "title")[0] ?? null;
+      if (!title) continue;
+
+      const dates = extractSruField(rec, "date");
+      const issued = extractSruField(rec, "issued");
+      const date = issued[0] ?? dates[0] ?? null;
+
+      const identifiers = extractSruField(rec, "identifier");
+      const preferredUrl = (rec.match(/<gzd:preferredURL>([^<]+)</) ?? [])[1] ?? null;
+      const url = preferredUrl ?? identifiers.find(id => id.startsWith("http")) ?? null;
+
+      const types = extractSruField(rec, "type");
+      const publicationType = types.find(t => t.match(/^[A-Z]/)) ?? types[0] ?? null;
+
+      const subjects = extractSruField(rec, "subject");
+      const creator = extractSruField(rec, "creator")[0] ?? null;
+
+      items.push({
+        id: identifiers[0] ?? String(i),
+        title,
+        date,
+        url,
+        type: publicationType,
+        subjects: subjects.slice(0, 4),
+        creator,
+      });
+    }
+    return items;
+  }
+
+  app.get("/api/gemeente-updates", requireAuth, async (req, res) => {
+    const gemeente = (req.query.gemeente as string || "").trim();
+    if (!gemeente) {
+      return res.status(400).json({ error: "Gemeente is verplicht" });
+    }
+    const limit = Math.min(Number(req.query.limit) || 15, 40);
+    const cacheKey = gemeente.toLowerCase();
+    const cached = gemeenteUpdatesCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) {
+      return res.json(cached.data);
+    }
+
+    try {
+      const query = encodeURIComponent(
+        `"${gemeente}" AND c.product-area = "officielepublicaties"`
+      );
+      const url = `${SRU_BASE}?operation=searchRetrieve&version=1.2&query=${query}&maximumRecords=${limit + 10}&sortKeys=dcterms.issued,,0`;
+
+      const response = await fetch(url, {
+        headers: { "User-Agent": "OpenRegio/1.0", "Accept": "application/xml" },
+        signal: AbortSignal.timeout(12000),
+      });
+      if (!response.ok) throw new Error(`SRU responded with ${response.status}`);
+
+      const xml = await response.text();
+      const countMatch = xml.match(/numberOfRecords>(\d+)/);
+      const total = countMatch ? parseInt(countMatch[1]) : 0;
+      const allItems = parseSruXml(xml).slice(0, limit);
+
+      const result = { gemeente, total, count: allItems.length, items: allItems };
+      gemeenteUpdatesCache.set(cacheKey, { data: result, expiresAt: Date.now() + GEMEENTE_TTL_MS });
+      res.json(result);
+    } catch (err: any) {
+      console.error("Gemeente-updates fout:", err.message);
+      res.status(503).json({
+        error: "Overheid.nl tijdelijk niet bereikbaar. Probeer het later opnieuw.",
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

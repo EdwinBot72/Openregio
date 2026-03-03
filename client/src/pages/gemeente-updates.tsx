@@ -1,0 +1,283 @@
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { RegionSelect } from "@/components/region-select";
+import { ExternalLink, Calendar, Info, Building2, AlertCircle, FileText } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+
+interface GemeenteUpdate {
+  id: string;
+  title: string;
+  date: string | null;
+  url: string | null;
+  type: string | null;
+  subjects: string[];
+  creator: string | null;
+}
+
+function TypeBadge({ type }: { type: string | null }) {
+  if (!type) return null;
+  const map: Record<string, string> = {
+    Gemeenteblad: "bg-blue-100 text-blue-800",
+    Staatscourant: "bg-purple-100 text-purple-800",
+    Provinciaalblad: "bg-teal-100 text-teal-800",
+    Stcrt: "bg-purple-100 text-purple-800",
+    gmb: "bg-blue-100 text-blue-800",
+  };
+  const cls = map[type] ?? "bg-muted text-muted-foreground";
+  return (
+    <Badge variant="outline" className={`text-xs ${cls}`}>
+      {type}
+    </Badge>
+  );
+}
+
+function formatDate(iso: string | null) {
+  if (!iso) return null;
+  try {
+    return new Date(iso).toLocaleDateString("nl-NL", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
+  } catch {
+    return iso;
+  }
+}
+
+export default function GemeenteUpdatesPage() {
+  const { user } = useAuth();
+  const [gemeente, setGemeente] = useState("");
+  const [zoekGemeente, setZoekGemeente] = useState("");
+
+  const { data: profiel } = useQuery<{ regio?: string } | null>({
+    queryKey: ["/api/business-profile/me"],
+    enabled: !!user,
+  });
+
+  const defaultGemeente = profiel?.regio ?? "";
+  const activeGemeente = zoekGemeente || defaultGemeente;
+
+  const { data, isLoading, error, refetch } = useQuery<{
+    gemeente: string;
+    total: number;
+    count: number;
+    items: GemeenteUpdate[];
+  }>({
+    queryKey: ["/api/gemeente-updates", activeGemeente],
+    queryFn: () =>
+      fetch(
+        `/api/gemeente-updates?gemeente=${encodeURIComponent(activeGemeente)}&limit=20`,
+        { credentials: "include" }
+      ).then((r) => {
+        if (!r.ok) throw new Error("Fout bij ophalen");
+        return r.json();
+      }),
+    enabled: !!activeGemeente,
+    staleTime: 30 * 60 * 1000,
+  });
+
+  const handleSearch = () => {
+    if (gemeente) setZoekGemeente(gemeente);
+  };
+
+  return (
+    <div className="max-w-4xl mx-auto" data-testid="page-gemeente-updates">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold mb-1" data-testid="text-page-title">
+          Gemeente-updates
+        </h1>
+        <p className="text-muted-foreground text-sm">
+          Actuele besluiten, plannen en updates van jouw gemeente — rechtstreeks uit de officiële bekendmakingen.
+        </p>
+      </div>
+
+      {/* Zoekbalk */}
+      <Card className="mb-6">
+        <CardContent className="pt-5 pb-4">
+          <div className="flex gap-3 flex-wrap items-end">
+            <div className="flex-1 min-w-[220px]">
+              <label className="text-sm font-medium mb-1.5 block">Gemeente</label>
+              <RegionSelect
+                value={gemeente || activeGemeente}
+                onValueChange={setGemeente}
+                placeholder="Selecteer gemeente"
+                data-testid="select-gemeente"
+              />
+            </div>
+            <Button
+              onClick={handleSearch}
+              disabled={!gemeente}
+              data-testid="button-zoek"
+            >
+              Zoek updates
+            </Button>
+          </div>
+          {defaultGemeente && !zoekGemeente && (
+            <p className="text-xs text-muted-foreground mt-2">
+              Resultaten voor jouw gemeente: <strong>{defaultGemeente}</strong>
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Info banner */}
+      <div
+        className="flex items-center gap-2 text-xs text-muted-foreground mb-5 px-1"
+        data-testid="banner-info"
+      >
+        <Info className="w-3.5 h-3.5 flex-shrink-0" />
+        <span>
+          Bron: Officiële Bekendmakingen (overheid.nl) · Data ververst elke 30 minuten
+        </span>
+      </div>
+
+      {/* Laden */}
+      {isLoading && (
+        <div className="space-y-4" data-testid="skeleton-loading">
+          {[1, 2, 3].map((i) => (
+            <Card key={i}>
+              <CardContent className="pt-5 space-y-2">
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-4 w-1/3" />
+                <Skeleton className="h-3 w-1/2" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      {/* Fout */}
+      {error && !isLoading && (
+        <Card data-testid="card-error">
+          <CardContent className="pt-6 flex items-start gap-3">
+            <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-medium text-sm">Overheid.nl tijdelijk niet bereikbaar</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Probeer het over enkele minuten opnieuw.
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-3"
+                onClick={() => refetch()}
+                data-testid="button-retry"
+              >
+                Opnieuw proberen
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Geen gemeente */}
+      {!activeGemeente && !isLoading && (
+        <div
+          className="text-center py-16 text-muted-foreground"
+          data-testid="state-empty-gemeente"
+        >
+          <Building2 className="w-10 h-10 mx-auto mb-3 opacity-30" />
+          <p className="text-sm">Selecteer een gemeente om updates te zien.</p>
+        </div>
+      )}
+
+      {/* Geen resultaten */}
+      {data && data.count === 0 && !isLoading && (
+        <div
+          className="text-center py-16 text-muted-foreground"
+          data-testid="state-no-results"
+        >
+          <FileText className="w-10 h-10 mx-auto mb-3 opacity-30" />
+          <p className="text-sm font-medium mb-1">
+            Geen publicaties gevonden voor <strong>{activeGemeente}</strong>
+          </p>
+          <p className="text-xs">
+            Overheid.nl bevat mogelijk geen recente publicaties van deze gemeente.
+          </p>
+        </div>
+      )}
+
+      {/* Resultaten */}
+      {data && data.count > 0 && !isLoading && (
+        <>
+          <p
+            className="text-sm text-muted-foreground mb-4"
+            data-testid="text-result-count"
+          >
+            {data.count} publicatie{data.count !== 1 ? "s" : ""} gevonden voor{" "}
+            <strong>{activeGemeente}</strong>
+            {data.total > data.count && (
+              <span className="ml-1 text-xs">(van {data.total.toLocaleString("nl-NL")} totaal)</span>
+            )}
+          </p>
+          <div className="space-y-4">
+            {data.items.map((item) => (
+              <Card key={item.id} data-testid={`card-update-${item.id}`}>
+                <CardHeader className="pb-2 pt-4 px-5 flex flex-row flex-wrap items-start justify-between gap-2">
+                  <div className="flex-1 min-w-0">
+                    <h2
+                      className="font-semibold text-sm leading-snug"
+                      data-testid="text-update-title"
+                    >
+                      {item.title}
+                    </h2>
+                    {item.creator && (
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {item.creator}
+                      </p>
+                    )}
+                  </div>
+                  <TypeBadge type={item.type} />
+                </CardHeader>
+                <CardContent className="px-5 pb-4">
+                  {item.subjects.length > 0 && (
+                    <div className="flex flex-wrap gap-1.5 mb-3">
+                      {item.subjects.map((s, idx) => (
+                        <Badge
+                          key={idx}
+                          variant="outline"
+                          className="text-xs"
+                          data-testid={`badge-subject-${idx}`}
+                        >
+                          {s}
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    {item.date && (
+                      <span
+                        className="flex items-center gap-1 text-xs text-muted-foreground"
+                        data-testid="text-update-date"
+                      >
+                        <Calendar className="w-3 h-3" />
+                        {formatDate(item.date)}
+                      </span>
+                    )}
+                    {item.url && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        asChild
+                        data-testid="button-bekijk-publicatie"
+                      >
+                        <a href={item.url} target="_blank" rel="noopener noreferrer">
+                          <ExternalLink className="w-3.5 h-3.5 mr-1.5" />
+                          Bekijk publicatie
+                        </a>
+                      </Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
