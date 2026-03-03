@@ -3403,12 +3403,14 @@ Maak het verzoek professioneel en juridisch correct.`;
     const gemeenteLc = gemeente.toLowerCase();
 
     try {
-      // Haal 2 pagina's op (400 resultaten) voor voldoende dekking
-      const [page0, page1] = await Promise.all([
-        fetchTenderPage(0, 200),
-        fetchTenderPage(1, 200),
+      // Haal 4 pagina's op (max size=100 per pagina = 400 resultaten totaal)
+      const [page0, page1, page2, page3] = await Promise.all([
+        fetchTenderPage(0, 100),
+        fetchTenderPage(1, 100),
+        fetchTenderPage(2, 100),
+        fetchTenderPage(3, 100),
       ]);
-      const all = [...page0, ...page1];
+      const all = [...page0, ...page1, ...page2, ...page3];
 
       const matched = all
         .filter((p: any) => (p.opdrachtgeverNaam ?? "").toLowerCase().includes(gemeenteLc))
