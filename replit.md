@@ -101,6 +101,34 @@ Clean 3-card layout (single column, max-w-3xl):
 3. **WOO-verzoek maken** → links to /woo-wizard (auth required)
 Admin section shown conditionally for admin users.
 
+## Gemeenten (342 Municipalities)
+
+The platform uses 342 official Dutch municipalities (CBS 2024) instead of regional groupings:
+- `GEMEENTEN` in `shared/schema.ts` — flat array of all municipality names
+- `PROVINCES_GEMEENTEN` — municipalities grouped by province (12 provinces)
+- `PROVINCES_REGIONS` and `REGIONS` are backward-compatible aliases
+- All dropdowns (bedrijfsprofiel, network, regiocrew) now show municipalities per province
+- The `regio` field in `bedrijfsprofiel` stores the selected municipality name
+
+## TenderNed Integratie
+
+Live aanbestedingen van alle Nederlandse gemeenten via TenderNed public API:
+- **Endpoint**: `GET /api/tenderned/aanbestedingen?gemeente=Amsterdam&limit=20`
+- **Caching**: in-memory TTL-cache van 15 minuten per pagina
+- **Frontend**: `/kansen/aanbestedingen` — zoek per gemeente, kaarten met deadline-badges
+- **Pre-fill**: gemeente uit bedrijfsprofiel van ingelogde gebruiker
+- **Geen API-key nodig** — TenderNed is volledig publiek
+
+## Dashboard Menu Structuur (6 secties)
+
+Nieuwe sidebar met 6 collapsible hoofdsecties:
+1. **Dashboard** — directe cockpit-link
+2. **Kansen** — Subsidies, Aanbestedingen (live TenderNed), Gemeente-updates, Regio Deals, Financiering
+3. **Samenwerken** — Vind partners, Project starten, RegioCrew, Initiatieven, Pitchbord
+4. **Projecten** — Mijn projecten, Regionaal, Documenten, Taken & rollen, Resultaten
+5. **Data & Inzicht** — Beleidsmonitor, WOO-bibliotheek, RegioBot, Juridische tools, Marktanalyse, Impact-rapportages
+6. **Coöperatie** — Overzicht, Stemmen, Besluiten, Financiële resultaten
+
 ## Pending Tasks
 
 (Geen openstaande taken)

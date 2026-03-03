@@ -3370,6 +3370,76 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
+  // ──────────────────────────────────────────────────────────────────────────
+  // TenderNed integratie — publieke aanbestedingen per gemeente
+  // ──────────────────────────────────────────────────────────────────────────
+  const tenderCache = new Map<string, { data: any; expiresAt: number }>();
+  const TENDER_TTL_MS = 15 * 60 * 1000; // 15 minuten
+  const TENDERNED_URL = "https://www.tenderned.nl/papi/tenderned-rs-tns/v2/publicaties";
+
+  async function fetchTenderPage(page: number, size: number): Promise<any[]> {
+    const url = `${TENDERNED_URL}?page=${page}&size=${size}`;
+    const cacheKey = `page_${page}_${size}`;
+    const cached = tenderCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) return cached.data;
+
+    const res = await fetch(url, {
+      headers: { "User-Agent": "OpenRegio/1.0" },
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!res.ok) throw new Error(`TenderNed responded with ${res.status}`);
+    const json: any = await res.json();
+    const items = json.content ?? json.publicaties ?? json.items ?? [];
+    tenderCache.set(cacheKey, { data: items, expiresAt: Date.now() + TENDER_TTL_MS });
+    return items;
+  }
+
+  app.get("/api/tenderned/aanbestedingen", requireAuth, async (req, res) => {
+    const gemeente = (req.query.gemeente as string || "").trim();
+    if (!gemeente) {
+      return res.status(400).json({ error: "Gemeente is verplicht" });
+    }
+    const limit = Math.min(Number(req.query.limit) || 20, 50);
+    const gemeenteLc = gemeente.toLowerCase();
+
+    try {
+      // Haal 2 pagina's op (400 resultaten) voor voldoende dekking
+      const [page0, page1] = await Promise.all([
+        fetchTenderPage(0, 200),
+        fetchTenderPage(1, 200),
+      ]);
+      const all = [...page0, ...page1];
+
+      const matched = all
+        .filter((p: any) => (p.opdrachtgeverNaam ?? "").toLowerCase().includes(gemeenteLc))
+        .slice(0, limit)
+        .map((p: any) => {
+          const deadline = p.sluitingsDatum ? p.sluitingsDatum.split("T")[0] : null;
+          return {
+            id: String(p.publicatieId ?? p.kenmerk ?? Math.random()),
+            title: p.aanbestedingNaam ?? "Onbekende titel",
+            buyer: p.opdrachtgeverNaam ?? "",
+            type: p.typeOpdracht?.omschrijving ?? null,
+            procedure: p.procedure?.omschrijving ?? null,
+            description: p.opdrachtBeschrijving ?? null,
+            deadline,
+            daysLeft: typeof p.aantalDagenTotSluitingsDatum === "number"
+              ? p.aantalDagenTotSluitingsDatum
+              : null,
+            publicationDate: p.publicatieDatum ?? null,
+            url: p.link?.href ?? null,
+          };
+        });
+
+      res.json({ gemeente, count: matched.length, items: matched });
+    } catch (err: any) {
+      console.error("TenderNed fout:", err.message);
+      res.status(503).json({
+        error: "TenderNed tijdelijk niet bereikbaar. Probeer het later opnieuw.",
+      });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

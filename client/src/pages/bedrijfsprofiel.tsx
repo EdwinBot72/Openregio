@@ -1,7 +1,7 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { insertBedrijfsprofielSchema, type InsertBedrijfsprofiel, type Bedrijfsprofiel, PROVINCES_REGIONS, PROVINCES } from "@shared/schema";
+import { insertBedrijfsprofielSchema, type InsertBedrijfsprofiel, type Bedrijfsprofiel, PROVINCES_GEMEENTEN, PROVINCES } from "@shared/schema";
 import { z } from "zod";
 import { useEffect } from "react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
@@ -207,23 +207,23 @@ export default function BedrijfsprofielPage() {
                 name="regio"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Regio *</FormLabel>
+                    <FormLabel>Gemeente *</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       value={field.value}
                     >
                       <FormControl>
                         <SelectTrigger data-testid="select-regio">
-                          <SelectValue placeholder="Selecteer je regio" />
+                          <SelectValue placeholder="Selecteer je gemeente" />
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent className="max-h-80">
                         {PROVINCES.map((province) => (
                           <SelectGroup key={province}>
                             <SelectLabel className="font-semibold text-primary">{province}</SelectLabel>
-                            {PROVINCES_REGIONS[province].map((region) => (
-                              <SelectItem key={region} value={region} className="pl-6">
-                                {region}
+                            {PROVINCES_GEMEENTEN[province].map((gemeente) => (
+                              <SelectItem key={gemeente} value={gemeente} className="pl-6">
+                                {gemeente}
                               </SelectItem>
                             ))}
                           </SelectGroup>
@@ -231,7 +231,7 @@ export default function BedrijfsprofielPage() {
                       </SelectContent>
                     </Select>
                     <FormDescription>
-                      De regio waar je bedrijf gevestigd is
+                      De gemeente waar je bedrijf gevestigd is
                     </FormDescription>
                     <FormMessage />
                   </FormItem>

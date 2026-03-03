@@ -45,6 +45,7 @@ import DisclaimerPage from "@/pages/disclaimer";
 import CookiebeleidPage from "@/pages/cookiebeleid";
 import RegioAnalysePage from "@/pages/regio-analyse";
 import BeleidsmonitorPage from "@/pages/beleidsmonitor";
+import AanbestedingenPage from "@/pages/aanbestedingen";
 import { ComingSoon } from "@/components/ComingSoon";
 
 // Routes that should NOT have the sidebar/header layout
@@ -100,7 +101,7 @@ function AuthenticatedRouter() {
 
       {/* Kansen */}
       <Route path="/kansen/subsidies">{() => <ComingSoon title="Subsidies" description="Overzicht van subsidies beschikbaar voor ondernemers in jouw regio." />}</Route>
-      <Route path="/kansen/aanbestedingen">{() => <ComingSoon title="Aanbestedingen" description="Openbare opdrachten van gemeenten en overheden in jouw regio." />}</Route>
+      <Route path="/kansen/aanbestedingen" component={AanbestedingenPage} />
       <Route path="/kansen/gemeente-updates">{() => <ComingSoon title="Gemeente-updates" description="Actuele besluiten, plannen en updates van jouw gemeente." />}</Route>
       <Route path="/kansen/regio-deals">{() => <ComingSoon title="Regio Deals" description="Collectieve afspraken en deals speciaal voor leden van OpenRegio." />}</Route>
       <Route path="/kansen/financiering">{() => <ComingSoon title="Crowdfund & Financiering" description="Financieringsmogelijkheden en crowdfunding voor regionale initiatieven." />}</Route>

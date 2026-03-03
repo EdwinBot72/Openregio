@@ -1,5 +1,5 @@
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { PROVINCES_REGIONS, PROVINCES } from "@shared/schema";
+import { PROVINCES_GEMEENTEN, PROVINCES } from "@shared/schema";
 
 interface RegionSelectProps {
   value: string;
@@ -13,7 +13,7 @@ interface RegionSelectProps {
 export function RegionSelect({
   value,
   onValueChange,
-  placeholder = "Selecteer regio",
+  placeholder = "Selecteer gemeente",
   showAllOption = false,
   className,
   "data-testid": testId,
@@ -25,14 +25,14 @@ export function RegionSelect({
       </SelectTrigger>
       <SelectContent className="max-h-80">
         {showAllOption && (
-          <SelectItem value="all">Alle regio's</SelectItem>
+          <SelectItem value="all">Alle gemeenten</SelectItem>
         )}
         {PROVINCES.map((province) => (
           <SelectGroup key={province}>
             <SelectLabel className="font-semibold text-primary">{province}</SelectLabel>
-            {PROVINCES_REGIONS[province].map((region) => (
-              <SelectItem key={region} value={region} className="pl-6">
-                {region}
+            {PROVINCES_GEMEENTEN[province].map((gemeente) => (
+              <SelectItem key={gemeente} value={gemeente} className="pl-6">
+                {gemeente}
               </SelectItem>
             ))}
           </SelectGroup>
