@@ -48,6 +48,8 @@ import BeleidsmonitorPage from "@/pages/beleidsmonitor";
 import AanbestedingenPage from "@/pages/aanbestedingen";
 import GemeenteUpdatesPage from "@/pages/gemeente-updates";
 import FinancieringPage from "@/pages/financiering";
+import RegiodealsPage from "@/pages/regio-deals";
+import RegiodealsAdminPage from "@/pages/admin/regio-deals-admin";
 import { ComingSoon } from "@/components/ComingSoon";
 
 // Routes that should NOT have the sidebar/header layout
@@ -100,12 +102,13 @@ function AuthenticatedRouter() {
       <Route path="/admin/blogs" component={AdminBlogsPage} />
       <Route path="/admin/commissions" component={AdminCommissionsPage} />
       <Route path="/admin/users" component={AdminUsersPage} />
+      <Route path="/admin/regio-deals" component={RegiodealsAdminPage} />
 
       {/* Kansen */}
       <Route path="/kansen/subsidies">{() => <ComingSoon title="Subsidies" description="Overzicht van subsidies beschikbaar voor ondernemers in jouw regio." />}</Route>
       <Route path="/kansen/aanbestedingen" component={AanbestedingenPage} />
       <Route path="/kansen/gemeente-updates" component={GemeenteUpdatesPage} />
-      <Route path="/kansen/regio-deals">{() => <ComingSoon title="Regio Deals" description="Collectieve afspraken en deals speciaal voor leden van OpenRegio." />}</Route>
+      <Route path="/kansen/regio-deals" component={RegiodealsPage} />
       <Route path="/kansen/financiering" component={FinancieringPage} />
 
       {/* Samenwerken */}

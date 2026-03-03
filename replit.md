@@ -138,6 +138,22 @@ Actuele officiële publicaties per gemeente via de KOOP SRU API (overheid.nl):
 - **Frontend**: `/kansen/gemeente-updates` — zoek per gemeente, kaarten met publicatietype-badge, datum, onderwerpen en link naar officielebekendmakingen.nl
 - **Geen API-key nodig** — volledig publiek toegankelijk
 
+## Regio Deals (IMPLEMENTED)
+
+Exclusieve ledendeals en collectieve afspraken voor OpenRegio-leden:
+- **Database tabel**: `regio_deals` (id, title, provider, category, description, discount, url, promo_code, valid_until, is_active, created_at)
+- **Categories**: Software, Kantoor, Marketing, Verzekering, Energie, Overig
+- **Ledenpagina**: `/kansen/regio-deals` — kaartweergave met categorie-filter, kortingsbadge, promocode kopieer-knop, "Claim deal" knop
+- **Admin-beheer**: `/admin/regio-deals` — deals aanmaken, bewerken, actief/inactief schakelen, verwijderen
+- **API Endpoints**:
+  - `GET /api/regio-deals` — actieve deals (requireAuth)
+  - `GET /api/regio-deals/all` — alle deals incl. inactief (requireAdmin)
+  - `POST /api/regio-deals` — nieuwe deal aanmaken (requireAdmin)
+  - `PUT /api/regio-deals/:id` — deal bijwerken (requireAdmin)
+  - `DELETE /api/regio-deals/:id` — deal verwijderen (requireAdmin)
+- **Admin sidebar**: link "Regio Deals" in Beheer-sectie
+- **Voorbeelddeal**: 3 deals toegevoegd (Twinfield, Hollandia Koffie, LinkedIn)
+
 ## Pending Tasks
 
 (Geen openstaande taken)

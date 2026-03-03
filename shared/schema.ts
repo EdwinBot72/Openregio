@@ -1019,10 +1019,34 @@ export const monitorItems = pgTable("monitor_items", {
   createdByUserId: varchar("created_by_user_id"),
 });
 
+export const REGIO_DEAL_CATEGORIES = [
+  "Software",
+  "Kantoor",
+  "Marketing",
+  "Verzekering",
+  "Energie",
+  "Overig",
+] as const;
+
+export const regioDeals = pgTable("regio_deals", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: varchar("title").notNull(),
+  provider: varchar("provider").notNull(),
+  category: varchar("category").notNull(),
+  description: text("description").notNull(),
+  discount: varchar("discount").notNull(),
+  url: varchar("url").notNull(),
+  promoCode: varchar("promo_code"),
+  validUntil: varchar("valid_until"),
+  isActive: boolean("is_active").default(true).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
 export const insertRagDocumentSchema = createInsertSchema(ragDocuments).omit({ id: true, createdAt: true });
 export const insertRagChunkSchema = createInsertSchema(ragChunks).omit({ id: true });
 export const insertLeadSchema = createInsertSchema(leads).omit({ id: true, createdAt: true });
 export const insertMonitorItemSchema = createInsertSchema(monitorItems).omit({ id: true, createdAt: true });
+export const insertRegioDealSchema = createInsertSchema(regioDeals).omit({ id: true, createdAt: true });
 
 export type InsertRagDocument = z.infer<typeof insertRagDocumentSchema>;
 export type RagDocument = typeof ragDocuments.$inferSelect;
@@ -1032,5 +1056,7 @@ export type InsertLead = z.infer<typeof insertLeadSchema>;
 export type Lead = typeof leads.$inferSelect;
 export type InsertMonitorItem = z.infer<typeof insertMonitorItemSchema>;
 export type MonitorItem = typeof monitorItems.$inferSelect;
+export type InsertRegioDeal = z.infer<typeof insertRegioDealSchema>;
+export type RegioDeal = typeof regioDeals.$inferSelect;
 
 export * from "./models/chat";

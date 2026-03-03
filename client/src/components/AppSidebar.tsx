@@ -51,6 +51,7 @@ import {
   FileText,
   MessageCircle,
   UserPlus,
+  Tag,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -328,6 +329,14 @@ export function AppSidebar() {
                     <a href="/admin/users" className="flex items-center gap-2">
                       <Users className="h-4 w-4" />
                       <span>Gebruikers</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={location === "/admin/regio-deals"} data-testid="link-admin-regio-deals">
+                    <a href="/admin/regio-deals" className="flex items-center gap-2">
+                      <Tag className="h-4 w-4" />
+                      <span>Regio Deals</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>

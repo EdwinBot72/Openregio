@@ -71,6 +71,9 @@ import {
   type MonitorItem,
   type InsertMonitorItem,
   monitorItems,
+  type RegioDeal,
+  type InsertRegioDeal,
+  regioDeals,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
@@ -257,6 +260,12 @@ export interface IStorage {
   getMonitorItem(id: string): Promise<MonitorItem | undefined>;
   createMonitorItem(item: InsertMonitorItem): Promise<MonitorItem>;
   deleteMonitorItem(id: string): Promise<boolean>;
+
+  // Regio Deals
+  getRegioDeals(onlyActive?: boolean): Promise<RegioDeal[]>;
+  createRegioDeal(deal: InsertRegioDeal): Promise<RegioDeal>;
+  updateRegioDeal(id: string, updates: Partial<InsertRegioDeal>): Promise<RegioDeal | null>;
+  deleteRegioDeal(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -1660,6 +1669,19 @@ export class MemStorage implements IStorage {
   async deleteMonitorItem(id: string): Promise<boolean> {
     return false;
   }
+
+  async getRegioDeals(onlyActive?: boolean): Promise<RegioDeal[]> {
+    return [];
+  }
+  async createRegioDeal(deal: InsertRegioDeal): Promise<RegioDeal> {
+    return { id: randomUUID(), ...deal, createdAt: new Date() } as RegioDeal;
+  }
+  async updateRegioDeal(id: string, updates: Partial<InsertRegioDeal>): Promise<RegioDeal | null> {
+    return null;
+  }
+  async deleteRegioDeal(id: string): Promise<boolean> {
+    return false;
+  }
 }
 
 class DbStorage implements IStorage {
@@ -2702,6 +2724,28 @@ class DbStorage implements IStorage {
 
   async deleteMonitorItem(id: string): Promise<boolean> {
     const result = await db.delete(monitorItems).where(eq(monitorItems.id, id)).returning();
+    return result.length > 0;
+  }
+
+  async getRegioDeals(onlyActive?: boolean): Promise<RegioDeal[]> {
+    if (onlyActive) {
+      return await db.select().from(regioDeals).where(eq(regioDeals.isActive, true)).orderBy(desc(regioDeals.createdAt));
+    }
+    return await db.select().from(regioDeals).orderBy(desc(regioDeals.createdAt));
+  }
+
+  async createRegioDeal(deal: InsertRegioDeal): Promise<RegioDeal> {
+    const [created] = await db.insert(regioDeals).values(deal).returning();
+    return created;
+  }
+
+  async updateRegioDeal(id: string, updates: Partial<InsertRegioDeal>): Promise<RegioDeal | null> {
+    const [updated] = await db.update(regioDeals).set(updates).where(eq(regioDeals.id, id)).returning();
+    return updated ?? null;
+  }
+
+  async deleteRegioDeal(id: string): Promise<boolean> {
+    const result = await db.delete(regioDeals).where(eq(regioDeals.id, id)).returning();
     return result.length > 0;
   }
 }

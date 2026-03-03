@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema, insertBedrijfsprofielSchema, regioBotChatSchema, visibilitySettingsSchema, DEFAULT_VISIBILITY_SETTINGS, insertCrewProfileSchema, insertCrewRequestSchema, insertCrewApplicationSchema, CREW_CATEGORIES, users, ragDocuments, documents } from "@shared/schema";
+import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema, insertBedrijfsprofielSchema, regioBotChatSchema, visibilitySettingsSchema, DEFAULT_VISIBILITY_SETTINGS, insertCrewProfileSchema, insertCrewRequestSchema, insertCrewApplicationSchema, CREW_CATEGORIES, users, ragDocuments, documents, insertRegioDealSchema } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { createMollieClient } from "@mollie/api-client";
@@ -3532,6 +3532,65 @@ Maak het verzoek professioneel en juridisch correct.`;
       res.status(503).json({
         error: "Overheid.nl tijdelijk niet bereikbaar. Probeer het later opnieuw.",
       });
+    }
+  });
+
+  // ─── Regio Deals ───────────────────────────────────────────────────────────
+
+  app.get("/api/regio-deals", requireAuth, async (req, res) => {
+    try {
+      const deals = await storage.getRegioDeals(true);
+      res.json(deals);
+    } catch (err: any) {
+      res.status(500).json({ error: "Kon deals niet ophalen." });
+    }
+  });
+
+  app.get("/api/regio-deals/all", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const deals = await storage.getRegioDeals(false);
+      res.json(deals);
+    } catch (err: any) {
+      res.status(500).json({ error: "Kon deals niet ophalen." });
+    }
+  });
+
+  app.post("/api/regio-deals", requireAuth, requireAdmin, async (req, res) => {
+    const parsed = insertRegioDealSchema.safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: fromZodError(parsed.error).message });
+    }
+    try {
+      const deal = await storage.createRegioDeal(parsed.data);
+      res.status(201).json(deal);
+    } catch (err: any) {
+      res.status(500).json({ error: "Kon deal niet aanmaken." });
+    }
+  });
+
+  app.put("/api/regio-deals/:id", requireAuth, requireAdmin, async (req, res) => {
+    const { id } = req.params;
+    const parsed = insertRegioDealSchema.partial().safeParse(req.body);
+    if (!parsed.success) {
+      return res.status(400).json({ error: fromZodError(parsed.error).message });
+    }
+    try {
+      const updated = await storage.updateRegioDeal(id, parsed.data);
+      if (!updated) return res.status(404).json({ error: "Deal niet gevonden." });
+      res.json(updated);
+    } catch (err: any) {
+      res.status(500).json({ error: "Kon deal niet bijwerken." });
+    }
+  });
+
+  app.delete("/api/regio-deals/:id", requireAuth, requireAdmin, async (req, res) => {
+    const { id } = req.params;
+    try {
+      const deleted = await storage.deleteRegioDeal(id);
+      if (!deleted) return res.status(404).json({ error: "Deal niet gevonden." });
+      res.json({ success: true });
+    } catch (err: any) {
+      res.status(500).json({ error: "Kon deal niet verwijderen." });
     }
   });
 
