@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -7,77 +8,208 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubButton,
+  SidebarMenuSubItem,
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Home, Users, Bot, Building2, User, LogOut, MessageCircle, CreditCard, Shield, Eye, UserPlus, BookOpen, Settings, Share2, FolderOpen, Euro, FileText, Activity } from "lucide-react";
+import {
+  LayoutDashboard,
+  TrendingUp,
+  Handshake,
+  FolderKanban,
+  BarChart2,
+  Building2,
+  User,
+  LogOut,
+  CreditCard,
+  Shield,
+  Eye,
+  Share2,
+  BookOpen,
+  Euro,
+  ChevronDown,
+  ChevronRight,
+  Landmark,
+  Megaphone,
+  MapPin,
+  Coins,
+  Users,
+  Rocket,
+  Layers,
+  ListChecks,
+  Trophy,
+  Activity,
+  FolderOpen,
+  Bot,
+  LineChart,
+  FileBarChart,
+  Vote,
+  Gavel,
+  PiggyBank,
+  FileText,
+  MessageCircle,
+  UserPlus,
+} from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
-import { getLoginUrl, getLogoutUrl } from "@/lib/authUtils";
+import { getLogoutUrl } from "@/lib/authUtils";
+import { useLocation } from "wouter";
 
-const menuItems = [
+type NavSubItem = {
+  title: string;
+  url: string;
+  icon: React.ElementType;
+};
+
+type NavSection = {
+  id: string;
+  title: string;
+  icon: React.ElementType;
+  url?: string;
+  sub?: NavSubItem[];
+};
+
+const navSections: NavSection[] = [
   {
+    id: "dashboard",
     title: "Dashboard",
-    icon: Home,
+    icon: LayoutDashboard,
     url: "/dashboard",
-    color: "text-regio-graph",
   },
   {
-    title: "Netwerk",
-    icon: Users,
-    url: "/network",
-    color: "text-regio-blue",
+    id: "kansen",
+    title: "Kansen",
+    icon: TrendingUp,
+    sub: [
+      { title: "Subsidies", url: "/kansen/subsidies", icon: Coins },
+      { title: "Aanbestedingen", url: "/kansen/aanbestedingen", icon: Landmark },
+      { title: "Gemeente-updates", url: "/kansen/gemeente-updates", icon: Megaphone },
+      { title: "Regio Deals", url: "/kansen/regio-deals", icon: MapPin },
+      { title: "Crowdfund & Financiering", url: "/kansen/financiering", icon: PiggyBank },
+    ],
   },
   {
-    title: "RegioCrew",
-    icon: UserPlus,
-    url: "/regiocrew",
-    color: "text-regio-blue",
+    id: "samenwerken",
+    title: "Samenwerken",
+    icon: Handshake,
+    sub: [
+      { title: "Vind partners", url: "/network", icon: Users },
+      { title: "Project starten", url: "/samenwerken/project-starten", icon: Rocket },
+      { title: "RegioCrew", url: "/regiocrew", icon: UserPlus },
+      { title: "Lopende initiatieven", url: "/samenwerken/initiatieven", icon: Layers },
+      { title: "Pitchbord", url: "/samenwerken/pitchbord", icon: Megaphone },
+    ],
   },
   {
-    title: "Chat",
-    icon: MessageCircle,
-    url: "/chat",
-    color: "text-regio-blue",
+    id: "projecten",
+    title: "Projecten",
+    icon: FolderKanban,
+    sub: [
+      { title: "Mijn projecten", url: "/projecten", icon: FolderOpen },
+      { title: "Regionale projecten", url: "/projecten/regionaal", icon: MapPin },
+      { title: "Documenten", url: "/projecten/documenten", icon: FileText },
+      { title: "Taken & rollen", url: "/projecten/taken", icon: ListChecks },
+      { title: "Resultaten", url: "/projecten/resultaten", icon: Trophy },
+    ],
   },
   {
-    title: "RegioBot",
-    icon: Bot,
-    url: "/regiobot",
-    color: "text-regio-purple",
+    id: "data",
+    title: "Data & Inzicht",
+    icon: BarChart2,
+    sub: [
+      { title: "Beleidsmonitor", url: "/beleidsmonitor", icon: Activity },
+      { title: "WOO-bibliotheek", url: "/woo-bibliotheek", icon: FolderOpen },
+      { title: "RegioBot", url: "/regiobot", icon: Bot },
+      { title: "Juridische tools", url: "/woo-wizard", icon: Gavel },
+      { title: "Marktanalyse", url: "/data/marktanalyse", icon: LineChart },
+      { title: "Impact-rapportages", url: "/data/impact-rapportages", icon: FileBarChart },
+    ],
   },
   {
-    title: "WOO-bibliotheek",
-    icon: FolderOpen,
-    url: "/woo-bibliotheek",
-    color: "text-regio-purple",
-  },
-  {
-    title: "Juridische Instrumenten",
-    icon: FileText,
-    url: "/woo-wizard",
-    color: "text-regio-purple",
-  },
-  {
-    title: "Beleidsmonitor",
-    icon: Activity,
-    url: "/beleidsmonitor",
-    color: "text-regio-graph",
-  },
-  {
+    id: "cooperatie",
     title: "Coöperatie",
     icon: Building2,
-    url: "/cooperative",
-    color: "text-regio-graph",
+    sub: [
+      { title: "Overzicht", url: "/cooperative", icon: Building2 },
+      { title: "Stemmen", url: "/cooperatie/stemmen", icon: Vote },
+      { title: "Besluiten", url: "/cooperatie/besluiten", icon: Gavel },
+      { title: "Financiële resultaten", url: "/cooperatie/resultaten", icon: BarChart2 },
+    ],
   },
 ];
 
+function NavSectionItem({ section, currentPath }: { section: NavSection; currentPath: string }) {
+  const isActive = section.url
+    ? currentPath === section.url
+    : section.sub?.some((s) => currentPath === s.url || currentPath.startsWith(s.url + "/"));
+
+  const [open, setOpen] = useState(isActive ?? false);
+
+  if (section.url && !section.sub) {
+    return (
+      <SidebarMenuItem>
+        <SidebarMenuButton
+          asChild
+          isActive={isActive}
+          data-testid={`link-nav-${section.id}`}
+        >
+          <a href={section.url} className="flex items-center gap-2">
+            <section.icon className="h-4 w-4" />
+            <span>{section.title}</span>
+          </a>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    );
+  }
+
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        isActive={isActive && !open}
+        onClick={() => setOpen((v) => !v)}
+        data-testid={`toggle-nav-${section.id}`}
+        className="w-full justify-between"
+      >
+        <span className="flex items-center gap-2">
+          <section.icon className="h-4 w-4" />
+          <span>{section.title}</span>
+        </span>
+        {open ? <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" /> : <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />}
+      </SidebarMenuButton>
+
+      {open && section.sub && (
+        <SidebarMenuSub>
+          {section.sub.map((sub) => {
+            const subActive = currentPath === sub.url || currentPath.startsWith(sub.url + "/");
+            return (
+              <SidebarMenuSubItem key={sub.url}>
+                <SidebarMenuSubButton
+                  asChild
+                  isActive={subActive}
+                  data-testid={`link-sub-${sub.url.replace(/\//g, "-").replace(/^-/, "")}`}
+                >
+                  <a href={sub.url} className="flex items-center gap-2">
+                    <sub.icon className="h-3.5 w-3.5" />
+                    <span>{sub.title}</span>
+                  </a>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            );
+          })}
+        </SidebarMenuSub>
+      )}
+    </SidebarMenuItem>
+  );
+}
+
 export function AppSidebar() {
   const { user, profile, isLoading } = useAuth();
+  const [location] = useLocation();
 
-  // Helper to get user initials
   const getInitials = () => {
     if (user?.firstName || user?.lastName) {
       return `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase();
@@ -110,18 +242,11 @@ export function AppSidebar() {
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigatie</SidebarGroupLabel>
+          <SidebarGroupLabel>Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {menuItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild data-testid={`link-${item.title.toLowerCase()}`}>
-                    <a href={item.url}>
-                      <item.icon className={`h-4 w-4 ${item.color}`} />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+              {navSections.map((section) => (
+                <NavSectionItem key={section.id} section={section} currentPath={location} />
               ))}
             </SidebarMenu>
           </SidebarGroupContent>
@@ -132,44 +257,44 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild data-testid="link-bedrijfsprofiel">
-                  <a href="/bedrijfsprofiel">
-                    <Building2 className="h-4 w-4 text-regio-blue" />
+                <SidebarMenuButton asChild isActive={location === "/bedrijfsprofiel"} data-testid="link-bedrijfsprofiel">
+                  <a href="/bedrijfsprofiel" className="flex items-center gap-2">
+                    <Building2 className="h-4 w-4" />
                     <span>Bedrijfsprofiel</span>
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild data-testid="link-lidmaatschap">
-                  <a href="/lidmaatschap">
-                    <CreditCard className="h-4 w-4 text-regio-alert" />
-                    <span>Lidmaatschap</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild data-testid="link-privacy-dashboard">
-                  <a href="/privacy-dashboard">
-                    <Shield className="h-4 w-4 text-regio-graph" />
+                <SidebarMenuButton asChild isActive={location === "/privacy-dashboard"} data-testid="link-privacy-dashboard">
+                  <a href="/privacy-dashboard" className="flex items-center gap-2">
+                    <Shield className="h-4 w-4" />
                     <span>Privacy & Gegevens</span>
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               {user?.plan === "pro" && (
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild data-testid="link-visibility-settings">
-                    <a href="/pro/visibility-settings">
-                      <Eye className="h-4 w-4 text-regio-blue" />
+                  <SidebarMenuButton asChild isActive={location === "/pro/visibility-settings"} data-testid="link-visibility-settings">
+                    <a href="/pro/visibility-settings" className="flex items-center gap-2">
+                      <Eye className="h-4 w-4" />
                       <span>Zichtbaarheidsbeheer</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}
               <SidebarMenuItem>
-                <SidebarMenuButton asChild data-testid="link-affiliate">
-                  <a href="/affiliate">
-                    <Share2 className="h-4 w-4 text-regio-alert" />
+                <SidebarMenuButton asChild isActive={location === "/affiliate"} data-testid="link-affiliate">
+                  <a href="/affiliate" className="flex items-center gap-2">
+                    <Share2 className="h-4 w-4" />
                     <span>Affiliate</span>
+                  </a>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={location === "/chat"} data-testid="link-chat">
+                  <a href="/chat" className="flex items-center gap-2">
+                    <MessageCircle className="h-4 w-4" />
+                    <span>Berichten</span>
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -183,18 +308,26 @@ export function AppSidebar() {
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild data-testid="link-admin-blogs">
-                    <a href="/admin/blogs">
-                      <BookOpen className="h-4 w-4 text-regio-purple" />
+                  <SidebarMenuButton asChild isActive={location === "/admin/blogs"} data-testid="link-admin-blogs">
+                    <a href="/admin/blogs" className="flex items-center gap-2">
+                      <BookOpen className="h-4 w-4" />
                       <span>Blogs</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild data-testid="link-admin-commissions">
-                    <a href="/admin/commissions">
-                      <Euro className="h-4 w-4 text-regio-alert" />
+                  <SidebarMenuButton asChild isActive={location === "/admin/commissions"} data-testid="link-admin-commissions">
+                    <a href="/admin/commissions" className="flex items-center gap-2">
+                      <Euro className="h-4 w-4" />
                       <span>Commissies</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild isActive={location === "/admin/users"} data-testid="link-admin-users">
+                    <a href="/admin/users" className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />
+                      <span>Gebruikers</span>
                     </a>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
@@ -237,9 +370,9 @@ export function AppSidebar() {
               data-testid="button-logout"
               onClick={async () => {
                 try {
-                  await fetch(getLogoutUrl(), { 
-                    method: "POST", 
-                    credentials: "include" 
+                  await fetch(getLogoutUrl(), {
+                    method: "POST",
+                    credentials: "include"
                   });
                   window.location.href = "/";
                 } catch (e) {
@@ -258,7 +391,7 @@ export function AppSidebar() {
             className="w-full gap-2"
             data-testid="button-login"
             onClick={() => {
-              window.location.href = getLoginUrl();
+              window.location.href = "/login";
             }}
           >
             <User className="h-4 w-4" />
