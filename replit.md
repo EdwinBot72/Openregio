@@ -119,15 +119,17 @@ Live aanbestedingen van alle Nederlandse gemeenten via TenderNed public API:
 - **Pre-fill**: gemeente uit bedrijfsprofiel van ingelogde gebruiker
 - **Geen API-key nodig** — TenderNed is volledig publiek
 
-## Dashboard Menu Structuur (6 secties)
+## Dashboard Menu Structuur (5 secties)
 
-Nieuwe sidebar met 6 collapsible hoofdsecties:
+Sidebar met Dashboard + 4 collapsible hoofdsecties:
 1. **Dashboard** — directe cockpit-link
-2. **Kansen** — Subsidies, Aanbestedingen (live TenderNed), Gemeente-updates, Regio Deals, Financiering
-3. **Samenwerken** — Vind partners, Project starten, RegioCrew, Initiatieven, Pitchbord
-4. **Projecten** — Mijn projecten, Regionaal, Documenten, Taken & rollen, Resultaten
-5. **Data & Inzicht** — Beleidsmonitor, WOO-bibliotheek, RegioBot, Juridische tools, Marktanalyse, Impact-rapportages
-6. **Coöperatie** — Overzicht, Stemmen, Besluiten, Financiële resultaten
+2. **Informatie** — Regelmonitor (Beleidsmonitor), Regelkaart, RegioBot, Aanbestedingen (TenderNed), Gemeente-updates
+3. **Actie** — Check mijn situatie, Documenten (WOO-bibliotheek), Juridische tools
+4. **Zichtbaarheid** — Website onderhoud, Lokale vindbaarheid, Bedrijfsprofiel regio
+5. **Samenwerken** — Vind partners, RegioCrew, Project starten
+
+Regio Deals en Crowdfunding zijn uit het menu verwijderd (pagina's bestaan nog via directe URL).
+Website onderhoud pagina op `/zichtbaarheid/website-onderhoud` met inhoud over "Digitale basis op orde".
 
 ## Gemeente-updates
 

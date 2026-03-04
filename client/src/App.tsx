@@ -50,6 +50,7 @@ import GemeenteUpdatesPage from "@/pages/gemeente-updates";
 import FinancieringPage from "@/pages/financiering";
 import RegiodealsPage from "@/pages/regio-deals";
 import RegiodealsAdminPage from "@/pages/admin/regio-deals-admin";
+import WebsiteOnderhoudPage from "@/pages/zichtbaarheid/website-onderhoud";
 import { ComingSoon } from "@/components/ComingSoon";
 
 // Routes that should NOT have the sidebar/header layout
@@ -104,12 +105,20 @@ function AuthenticatedRouter() {
       <Route path="/admin/users" component={AdminUsersPage} />
       <Route path="/admin/regio-deals" component={RegiodealsAdminPage} />
 
-      {/* Kansen */}
+      {/* Kansen / Informatie */}
       <Route path="/kansen/subsidies">{() => <ComingSoon title="Subsidies" description="Overzicht van subsidies beschikbaar voor ondernemers in jouw regio." />}</Route>
       <Route path="/kansen/aanbestedingen" component={AanbestedingenPage} />
       <Route path="/kansen/gemeente-updates" component={GemeenteUpdatesPage} />
       <Route path="/kansen/regio-deals" component={RegiodealsPage} />
       <Route path="/kansen/financiering" component={FinancieringPage} />
+      <Route path="/informatie/regelkaart">{() => <ComingSoon title="Regelkaart" description="Overzicht van wet- en regelgeving relevant voor ondernemers in jouw gemeente." />}</Route>
+
+      {/* Actie */}
+      <Route path="/actie/check">{() => <ComingSoon title="Check mijn situatie" description="Beantwoord een paar vragen en ontdek wat er voor jou van toepassing is." />}</Route>
+
+      {/* Zichtbaarheid */}
+      <Route path="/zichtbaarheid/website-onderhoud" component={WebsiteOnderhoudPage} />
+      <Route path="/zichtbaarheid/vindbaarheid">{() => <ComingSoon title="Lokale vindbaarheid" description="Vergroot je zichtbaarheid in Google voor zoekopdrachten in jouw regio." />}</Route>
 
       {/* Samenwerken */}
       <Route path="/samenwerken/project-starten">{() => <ComingSoon title="Project starten" description="Start een nieuw samenwerkingsproject met ondernemers uit jouw regio." />}</Route>
