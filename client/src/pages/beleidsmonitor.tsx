@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Activity, Plus, Trash2, ExternalLink, Filter } from "lucide-react";
+import { Activity, Plus, Trash2, ExternalLink, Filter, Info, Lightbulb } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
@@ -121,6 +121,30 @@ export default function BeleidsmonitorPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+
+      {/* Uitleg */}
+      <Card className="border-l-0 border-r-0 border-t-0 rounded-none border-b bg-muted/30 -mx-4 px-4 py-4 shadow-none">
+        <CardContent className="p-0 space-y-3">
+          <div className="flex items-start gap-3">
+            <Info className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
+            <div className="space-y-1.5">
+              <p className="text-sm font-medium">Wat is de Regelmonitor?</p>
+              <p className="text-sm text-muted-foreground">
+                Een actueel overzicht van beleids- en regelgevingswijzigingen die relevant zijn voor ondernemers in jouw regio.
+                OpenRegio-beheerders plaatsen updates zodra er iets wijzigt in wet- en regelgeving, gemeentelijk beleid of subsidieregels.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Filter op regio om alleen updates te zien die op jou van toepassing zijn. Klik op de bronlink om het officiële document te lezen.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 pl-8">
+            <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
+            <span className="text-xs text-muted-foreground">Nieuwe items verschijnen zodra wetgeving of gemeentelijk beleid wijzigt.</span>
+          </div>
+        </CardContent>
+      </Card>
+
       <div className="flex items-center gap-3 flex-wrap">
         <Activity className="h-8 w-8 text-[#1f5fae]" />
         <div className="flex-1 min-w-0">

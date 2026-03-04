@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useSearch } from "wouter";
-import { Crown, Scale, FileText, Zap, Tag, MapPin, FolderOpen } from "lucide-react";
+import { Crown, Scale, FileText, Zap, Tag, MapPin, FolderOpen, Info, Lightbulb } from "lucide-react";
 
 type Task =
   | "analyse_besluit"
@@ -243,6 +243,46 @@ export default function RegioBotPage() {
         </p>
         <p className="text-[11px] text-muted-foreground">{outOfScopeHint}</p>
       </header>
+
+      {/* Uitleg */}
+      <Card className="bg-muted/30">
+        <CardContent className="pt-4 pb-4 space-y-3">
+          <div className="flex items-start gap-3">
+            <Info className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
+            <div className="space-y-2">
+              <p className="text-sm font-medium">Hoe werkt RegioBot?</p>
+              <p className="text-sm text-muted-foreground">
+                RegioBot is een AI-assistent die antwoorden geeft op basis van jouw eigen geüploade documenten: WOO-brieven,
+                gemeentebesluiten, mandaatregisters en meer. Zo krijg je altijd een antwoord mét bronverwijzing — geen giswerk.
+              </p>
+              <div className="text-sm text-muted-foreground space-y-1">
+                <p className="font-medium text-foreground">Stap 1:</p>
+                <p>Upload documenten via <span className="font-medium">Documenten (WOO-bibliotheek)</span> in het menu.</p>
+                <p className="font-medium text-foreground">Stap 2:</p>
+                <p>Kies hier een taak, selecteer een dossier (optioneel) en stel je vraag.</p>
+              </div>
+              <div className="flex flex-wrap gap-1.5 pt-1">
+                {[
+                  "Besluit analyseren",
+                  "Mandaat-check",
+                  "Wat ontbreekt?",
+                  "Vervolg-WOO",
+                  "Tijdlijn maken",
+                  "Samenvatting",
+                ].map((label) => (
+                  <Badge key={label} variant="secondary" className="text-xs font-normal">{label}</Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 pl-8">
+            <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
+            <span className="text-xs text-muted-foreground">
+              RegioBot is exclusief voor Pro-leden en weigert vragen over verkeersboetes en niet-zakelijke zaken.
+            </span>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* TASK BUTTONS */}
       <section className="flex flex-wrap gap-2 text-xs md:text-sm">

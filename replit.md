@@ -156,6 +156,15 @@ Exclusieve ledendeals en collectieve afspraken voor OpenRegio-leden:
 - **Admin sidebar**: link "Regio Deals" in Beheer-sectie
 - **Voorbeelddeal**: 3 deals toegevoegd (Twinfield, Hollandia Koffie, LinkedIn)
 
+## Uitleg-cards op Informatie-pagina's
+
+Alle 5 "Informatie" pagina's hebben een uitleg-card bovenaan:
+- **Regelmonitor**: Wat is het + filter-tip (beleidsmonitor.tsx)
+- **Regelkaart**: Volledige informatieve coming-soon pagina (`/informatie/regelkaart`) met features, badges en mailto-CTA
+- **RegioBot**: Stap-voor-stap uitleg + task-badges (regiobot.tsx)
+- **Aanbestedingen**: Uitleg TenderNed + auto-fill tip (aanbestedingen.tsx)
+- **Gemeente-updates**: Uitleg officielebekendmakingen.nl + versheid-tip (gemeente-updates.tsx)
+
 ## Pending Tasks
 
 (Geen openstaande taken)

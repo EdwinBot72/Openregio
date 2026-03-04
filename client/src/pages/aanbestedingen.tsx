@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RegionSelect } from "@/components/region-select";
-import { ExternalLink, Calendar, Info, Building2, AlertCircle } from "lucide-react";
+import { ExternalLink, Calendar, Info, Building2, AlertCircle, Lightbulb } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface Aanbesteding {
@@ -93,6 +93,32 @@ export default function AanbestedingenPage() {
           Live aanbestedingen van alle 342 Nederlandse gemeenten, rechtstreeks van TenderNed.
         </p>
       </div>
+
+      {/* Uitleg */}
+      <Card className="mb-6 bg-muted/30">
+        <CardContent className="pt-4 pb-4 space-y-3">
+          <div className="flex items-start gap-3">
+            <Info className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
+            <div className="space-y-1.5">
+              <p className="text-sm font-medium">Wat zijn Aanbestedingen?</p>
+              <p className="text-sm text-muted-foreground">
+                Overheden zijn verplicht opdrachten boven een drempelwaarde openbaar aan te besteden. Via TenderNed — de officiële
+                aanbestedingsdatabank van de Nederlandse overheid — zie je hier alle lopende aanbestedingen van gemeenten in Nederland.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Kies jouw gemeente en zie welke opdrachten er open staan, met type (Werken / Diensten / Leveringen),
+                sluitingsdatum en een directe link naar de aanbestedingspagina.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 pl-8">
+            <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
+            <span className="text-xs text-muted-foreground">
+              Jouw gemeente wordt automatisch ingevuld vanuit je bedrijfsprofiel.
+            </span>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Zoekbalk */}
       <Card className="mb-6">

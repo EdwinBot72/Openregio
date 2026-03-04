@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { RegionSelect } from "@/components/region-select";
-import { ExternalLink, Calendar, Info, Building2, AlertCircle, FileText, ArrowUpDown } from "lucide-react";
+import { ExternalLink, Calendar, Info, Building2, AlertCircle, FileText, ArrowUpDown, Lightbulb } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface GemeenteUpdate {
@@ -130,6 +130,32 @@ export default function GemeenteUpdatesPage() {
           Actuele besluiten, plannen en updates van jouw gemeente — rechtstreeks uit de officiële bekendmakingen.
         </p>
       </div>
+
+      {/* Uitleg */}
+      <Card className="mb-6 bg-muted/30">
+        <CardContent className="pt-4 pb-4 space-y-3">
+          <div className="flex items-start gap-3">
+            <Info className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
+            <div className="space-y-1.5">
+              <p className="text-sm font-medium">Wat zijn Gemeente-updates?</p>
+              <p className="text-sm text-muted-foreground">
+                Officiële publicaties van jouw gemeente: Gemeenteblad, raadsbesluiten, vergunningsbesluiten en meer —
+                rechtstreeks opgehaald van <span className="font-medium">officielebekendmakingen.nl</span> via de overheids-API.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Kies een gemeente, filter op publicatietype en sorteer op datum of titel. Klik op een publicatie voor
+                het volledige document op de officiële overheidspagina.
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 pl-8">
+            <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
+            <span className="text-xs text-muted-foreground">
+              Publicaties zijn actueel tot op de dag — de API haalt dagelijks nieuwe bekendmakingen op.
+            </span>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Zoekbalk */}
       <Card className="mb-6">

@@ -51,6 +51,7 @@ import FinancieringPage from "@/pages/financiering";
 import RegiodealsPage from "@/pages/regio-deals";
 import RegiodealsAdminPage from "@/pages/admin/regio-deals-admin";
 import WebsiteOnderhoudPage from "@/pages/zichtbaarheid/website-onderhoud";
+import RegelkaartPage from "@/pages/informatie/regelkaart";
 import { ComingSoon } from "@/components/ComingSoon";
 
 // Routes that should NOT have the sidebar/header layout
@@ -111,7 +112,7 @@ function AuthenticatedRouter() {
       <Route path="/kansen/gemeente-updates" component={GemeenteUpdatesPage} />
       <Route path="/kansen/regio-deals" component={RegiodealsPage} />
       <Route path="/kansen/financiering" component={FinancieringPage} />
-      <Route path="/informatie/regelkaart">{() => <ComingSoon title="Regelkaart" description="Overzicht van wet- en regelgeving relevant voor ondernemers in jouw gemeente." />}</Route>
+      <Route path="/informatie/regelkaart" component={RegelkaartPage} />
 
       {/* Actie */}
       <Route path="/actie/check">{() => <ComingSoon title="Check mijn situatie" description="Beantwoord een paar vragen en ontdek wat er voor jou van toepassing is." />}</Route>
