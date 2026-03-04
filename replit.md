@@ -165,6 +165,13 @@ Alle 5 "Informatie" pagina's hebben een uitleg-card bovenaan:
 - **Aanbestedingen**: Uitleg TenderNed + auto-fill tip (aanbestedingen.tsx)
 - **Gemeente-updates**: Uitleg officielebekendmakingen.nl + versheid-tip (gemeente-updates.tsx)
 
+## Uitleg-cards op Actie-pagina's
+
+Alle 3 "Actie" pagina's hebben uitleg:
+- **Check mijn situatie**: Volledige informatieve coming-soon pagina (`/actie/check`) met features, badges, doelgroepen en mailto-CTA (check-situatie.tsx)
+- **Documenten (WOO-bibliotheek)**: Uitleg-card met upload-flow, bestandstypen en upload-limiet tip (woo-bibliotheek.tsx)
+- **Juridische tools (WOO-wizard)**: Uitleg-card met uitleg van beide instrumenten (Signaalinstrument + Bevoegdheidsscan) en wettelijke basis (woo-wizard.tsx)
+
 ## Pending Tasks
 
 (Geen openstaande taken)

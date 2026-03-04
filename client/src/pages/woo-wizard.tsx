@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { FileText, Mail, Download, Check, Copy, ChevronRight, ChevronLeft, Shield, AlertTriangle, Target, Scale, Gavel } from "lucide-react";
+import { FileText, Mail, Download, Check, Copy, ChevronRight, ChevronLeft, Shield, AlertTriangle, Target, Scale, Gavel, Info, Lightbulb } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
@@ -243,6 +243,51 @@ export default function WooWizardPage() {
           <h1 className="text-3xl font-bold mb-2" data-testid="text-page-title">Juridische Instrumenten</h1>
           <p className="text-muted-foreground">Kies het instrument dat past bij jouw situatie</p>
         </div>
+
+        {/* Uitleg */}
+        <Card className="mb-6 bg-muted/30">
+          <CardContent className="pt-4 pb-4 space-y-3">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Wat zijn Juridische Instrumenten?</p>
+                <p className="text-sm text-muted-foreground">
+                  Twee kant-en-klare juridische brieven waarmee je als ondernemer jouw positie tegenover
+                  de overheid formeel vastlegt — zonder advocaat. Je vult jouw gegevens in, de brief wordt
+                  automatisch gegenereerd en is klaar om op te sturen.
+                </p>
+                <div className="space-y-2 pt-1">
+                  <div className="flex items-start gap-2">
+                    <Shield className="h-4 w-4 text-[#1f5fae] mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs font-medium">Signaalinstrument</p>
+                      <p className="text-xs text-muted-foreground">
+                        Een formele kennisgeving aan het bestuursorgaan dat jij de juridische grondslag
+                        en bevoegdheid van hun optreden beoordeelt op basis van de Awb.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <Gavel className="h-4 w-4 text-[#1f5fae] mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs font-medium">Bevoegdheidsscan (WOO-verzoek)</p>
+                      <p className="text-xs text-muted-foreground">
+                        Een afdwingbaar WOO-verzoek om inzage in mandaten, bevoegdheden en
+                        uitvoeringsbesluiten — de gemeente is wettelijk verplicht te reageren.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5 pl-8">
+              <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
+              <span className="text-xs text-muted-foreground">
+                Beide instrumenten zijn juridisch gepositioneerd op basis van de Awb en de Wet open overheid (WOO).
+              </span>
+            </div>
+          </CardContent>
+        </Card>
 
         <div className="grid gap-4 md:grid-cols-2">
           <Card className="hover-elevate cursor-pointer" onClick={() => setSelectedType("signaal")} data-testid="card-signaalinstrument">

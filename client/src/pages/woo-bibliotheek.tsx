@@ -10,7 +10,7 @@ import { Progress } from "@/components/ui/progress";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
-import { Crown, Upload, FileText, Image, Trash2, Check, AlertCircle, FolderOpen } from "lucide-react";
+import { Crown, Upload, FileText, Image, Trash2, Check, AlertCircle, FolderOpen, Info, Lightbulb } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 const WOO_CATEGORIES = [
@@ -232,6 +232,45 @@ export default function WooBibliotheekPage() {
           </div>
         )}
       </header>
+
+      {/* Uitleg */}
+      <Card className="bg-muted/30">
+        <CardContent className="pt-4 pb-4 space-y-3">
+          <div className="flex items-start gap-3">
+            <Info className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
+            <div className="space-y-1.5">
+              <p className="text-sm font-medium">Hoe werkt de WOO-bibliotheek?</p>
+              <p className="text-sm text-muted-foreground">
+                Dit is jouw persoonlijke bibliotheek van WOO-documenten. Upload hier gemeentebrieven,
+                besluiten, mandaatregisters en andere officiële stukken. RegioBot gebruikt deze
+                documenten om jouw vragen te beantwoorden mét exacte bronverwijzing.
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Upload een document → kies de juiste WOO-categorie → het document wordt automatisch
+                opgesplitst en doorzoekbaar gemaakt → ga naar RegioBot en stel je vraag.
+              </p>
+              <div className="flex flex-wrap gap-1.5 pt-0.5">
+                {[
+                  { label: "PDF", desc: "tekst direct" },
+                  { label: "JPG / PNG", desc: "via OCR" },
+                  { label: "TXT", desc: "platte tekst" },
+                ].map(({ label, desc }) => (
+                  <Badge key={label} variant="secondary" className="text-xs font-normal gap-1">
+                    {label}
+                    <span className="text-muted-foreground">— {desc}</span>
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-1.5 pl-8">
+            <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
+            <span className="text-xs text-muted-foreground">
+              Gratis leden kunnen 1 document per dag uploaden. Pro-leden uploaden onbeperkt.
+            </span>
+          </div>
+        </CardContent>
+      </Card>
 
       <div className="grid md:grid-cols-[1fr,1.5fr] gap-6">
         {/* Upload Section */}

@@ -52,6 +52,7 @@ import RegiodealsPage from "@/pages/regio-deals";
 import RegiodealsAdminPage from "@/pages/admin/regio-deals-admin";
 import WebsiteOnderhoudPage from "@/pages/zichtbaarheid/website-onderhoud";
 import RegelkaartPage from "@/pages/informatie/regelkaart";
+import CheckSituatiePage from "@/pages/actie/check-situatie";
 import { ComingSoon } from "@/components/ComingSoon";
 
 // Routes that should NOT have the sidebar/header layout
@@ -115,7 +116,7 @@ function AuthenticatedRouter() {
       <Route path="/informatie/regelkaart" component={RegelkaartPage} />
 
       {/* Actie */}
-      <Route path="/actie/check">{() => <ComingSoon title="Check mijn situatie" description="Beantwoord een paar vragen en ontdek wat er voor jou van toepassing is." />}</Route>
+      <Route path="/actie/check" component={CheckSituatiePage} />
 
       {/* Zichtbaarheid */}
       <Route path="/zichtbaarheid/website-onderhoud" component={WebsiteOnderhoudPage} />
