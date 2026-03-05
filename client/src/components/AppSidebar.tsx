@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard,
-  Handshake,
   Building2,
   User,
   LogOut,
@@ -24,26 +23,19 @@ import {
   Eye,
   Share2,
   BookOpen,
-  Euro,
   ChevronDown,
   ChevronRight,
   Landmark,
   Megaphone,
   MapPin,
-  Users,
-  Rocket,
   Activity,
   FolderOpen,
   Bot,
   Gavel,
-  FileText,
-  MessageCircle,
-  UserPlus,
-  Tag,
-  Zap,
-  CheckCircle,
   Monitor,
-  Map as MapIcon,
+  BookMarked,
+  ScanText,
+  Wrench,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -78,21 +70,21 @@ const navSections: NavSection[] = [
     title: "Informatie",
     icon: BookOpen,
     sub: [
-      { title: "Regelmonitor", url: "/beleidsmonitor", icon: Activity },
-      { title: "Regelkaart", url: "/informatie/regelkaart", icon: MapIcon },
+      { title: "Regels", url: "/beleidsmonitor", icon: Activity },
+      { title: "Besluiten", url: "/kansen/gemeente-updates", icon: Megaphone },
       { title: "RegioBot", url: "/regiobot", icon: Bot },
       { title: "Aanbestedingen", url: "/kansen/aanbestedingen", icon: Landmark },
-      { title: "Gemeente-updates", url: "/kansen/gemeente-updates", icon: Megaphone },
+      { title: "Kennisbank", url: "/informatie/kennisbank", icon: BookMarked },
     ],
   },
   {
-    id: "actie",
-    title: "Actie",
-    icon: Zap,
+    id: "tools",
+    title: "Tools",
+    icon: Wrench,
     sub: [
-      { title: "Check mijn situatie", url: "/actie/check", icon: CheckCircle },
+      { title: "Brief analyse", url: "/tools/brief-analyse", icon: ScanText },
+      { title: "Informatie opvragen", url: "/woo-wizard", icon: Gavel },
       { title: "Documenten", url: "/woo-bibliotheek", icon: FolderOpen },
-      { title: "Juridische tools", url: "/woo-wizard", icon: Gavel },
     ],
   },
   {
@@ -100,19 +92,8 @@ const navSections: NavSection[] = [
     title: "Zichtbaarheid",
     icon: Eye,
     sub: [
-      { title: "Website onderhoud", url: "/zichtbaarheid/website-onderhoud", icon: Monitor },
+      { title: "Website check", url: "/zichtbaarheid/website-onderhoud", icon: Monitor },
       { title: "Lokale vindbaarheid", url: "/zichtbaarheid/vindbaarheid", icon: MapPin },
-      { title: "Bedrijfsprofiel regio", url: "/bedrijfsprofiel", icon: Building2 },
-    ],
-  },
-  {
-    id: "samenwerken",
-    title: "Samenwerken",
-    icon: Handshake,
-    sub: [
-      { title: "Vind partners", url: "/network", icon: Users },
-      { title: "RegioCrew", url: "/regiocrew", icon: UserPlus },
-      { title: "Project starten", url: "/samenwerken/project-starten", icon: Rocket },
     ],
   },
 ];
@@ -210,7 +191,7 @@ export function AppSidebar() {
           </div>
           <div>
             <h2 className="font-accent font-bold text-lg">OpenRegio</h2>
-            <p className="text-xs text-muted-foreground">Coöperatief platform</p>
+            <p className="text-xs text-muted-foreground">Regelgeving transparant</p>
           </div>
         </div>
       </SidebarHeader>
@@ -265,122 +246,68 @@ export function AppSidebar() {
                   </a>
                 </SidebarMenuButton>
               </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={location === "/chat"} data-testid="link-chat">
-                  <a href="/chat" className="flex items-center gap-2">
-                    <MessageCircle className="h-4 w-4" />
-                    <span>Berichten</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {user?.isAdmin && (
+                <>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton asChild isActive={location.startsWith("/admin")} data-testid="link-admin">
+                      <a href="/admin/users" className="flex items-center gap-2">
+                        <Shield className="h-4 w-4" />
+                        <span>Beheer</span>
+                      </a>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                </>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-
-        {user?.isAdmin && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Beheer</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={location === "/admin/blogs"} data-testid="link-admin-blogs">
-                    <a href="/admin/blogs" className="flex items-center gap-2">
-                      <BookOpen className="h-4 w-4" />
-                      <span>Blogs</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={location === "/admin/commissions"} data-testid="link-admin-commissions">
-                    <a href="/admin/commissions" className="flex items-center gap-2">
-                      <Euro className="h-4 w-4" />
-                      <span>Commissies</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={location === "/admin/users"} data-testid="link-admin-users">
-                    <a href="/admin/users" className="flex items-center gap-2">
-                      <Users className="h-4 w-4" />
-                      <span>Gebruikers</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild isActive={location === "/admin/regio-deals"} data-testid="link-admin-regio-deals">
-                    <a href="/admin/regio-deals" className="flex items-center gap-2">
-                      <Tag className="h-4 w-4" />
-                      <span>Regio Deals</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-sidebar-border">
         {isLoading ? (
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <Skeleton className="h-9 w-9 rounded-full" />
-              <div className="flex-1 space-y-2">
-                <Skeleton className="h-4 w-24" />
-                <Skeleton className="h-3 w-32" />
-              </div>
+          <div className="flex items-center gap-3">
+            <Skeleton className="h-9 w-9 rounded-full" />
+            <div className="flex-1 space-y-1">
+              <Skeleton className="h-3.5 w-28" />
+              <Skeleton className="h-3 w-36" />
             </div>
-            <Skeleton className="h-8 w-full" />
           </div>
         ) : user ? (
-          <>
-            <div className="flex items-center gap-3 mb-3">
-              <Avatar className="h-9 w-9">
-                {user.profileImageUrl && <AvatarImage src={user.profileImageUrl} alt={displayName} />}
-                <AvatarFallback className="bg-primary text-primary-foreground">
-                  {getInitials()}
-                </AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate" data-testid="text-user-name">{displayName}</p>
-                <p className="text-xs text-muted-foreground truncate" data-testid="text-user-email">{displayEmail}</p>
-              </div>
+          <div className="flex items-center gap-3">
+            <Avatar className="h-9 w-9">
+              <AvatarImage src={profile?.avatarUrl || undefined} alt={displayName} />
+              <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
+                {getInitials()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate" data-testid="text-sidebar-name">{displayName}</p>
+              <p className="text-xs text-muted-foreground truncate" data-testid="text-sidebar-email">{displayEmail}</p>
             </div>
-            <Button
-              variant="outline"
-              size="sm"
-              className="w-full gap-2"
-              data-testid="button-logout"
-              onClick={async () => {
-                try {
-                  await fetch(getLogoutUrl(), {
-                    method: "POST",
-                    credentials: "include"
-                  });
-                  window.location.href = "/";
-                } catch (e) {
-                  window.location.href = "/";
-                }
-              }}
-            >
-              <LogOut className="h-4 w-4" />
-              Uitloggen
-            </Button>
-          </>
-        ) : (
-          <Button
-            variant="default"
-            size="sm"
-            className="w-full gap-2"
-            data-testid="button-login"
-            onClick={() => {
-              window.location.href = "/login";
-            }}
-          >
-            <User className="h-4 w-4" />
-            Inloggen
-          </Button>
-        )}
+            <div className="flex gap-1">
+              <Button
+                size="icon"
+                variant="ghost"
+                asChild
+                data-testid="link-profiel"
+              >
+                <a href="/bedrijfsprofiel">
+                  <User className="h-4 w-4" />
+                </a>
+              </Button>
+              <Button
+                size="icon"
+                variant="ghost"
+                asChild
+                data-testid="button-logout"
+              >
+                <a href={getLogoutUrl()}>
+                  <LogOut className="h-4 w-4" />
+                </a>
+              </Button>
+            </div>
+          </div>
+        ) : null}
       </SidebarFooter>
     </Sidebar>
   );

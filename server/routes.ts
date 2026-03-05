@@ -1156,6 +1156,94 @@ Gebruik geen opsommingstekens, geen kopjes, geen markdown. Geen begroeting. Dire
     }
   });
 
+  // Brief Analyse - gestructureerde analyse van overheidsbrieven
+  app.post("/api/brief-analyse", requireAuth, async (req, res) => {
+    try {
+      const { tekst } = req.body;
+      if (!tekst || typeof tekst !== "string" || tekst.trim().length < 20) {
+        return res.status(400).json({ error: "Tekst te kort of ontbrekend (minimaal 20 tekens)" });
+      }
+      if (tekst.length > 8000) {
+        return res.status(400).json({ error: "Tekst te lang (maximaal 8000 tekens)" });
+      }
+
+      const systemPrompt = `Je bent een expert in Nederlandse overheidsdocumenten en bestuursrecht.
+Analyseer de gegeven tekst van een overheidsbrief of besluit en geef de volgende informatie terug als valide JSON (geen extra tekst, alleen JSON):
+
+{
+  "afzender": "naam van de organisatie die de brief stuurde",
+  "documentType": "type document, bijv. Besluit, Aanschrijving, Vergunning, WOO-reactie, Beschikking",
+  "juridischeBasis": "de genoemde wettelijke grondslag of wet, bijv. Awb artikel 4:5, Omgevingswet",
+  "bevoegdheid": "wie het bevoegd gezag is, bijv. College van B&W, burgemeester, minister",
+  "termijn": "relevante termijn, bijv. Bezwaar binnen 6 weken, Reageer voor 15 maart",
+  "aanbevolenActie": "kort advies wat de ontvanger kan of moet doen"
+}
+
+Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in het Nederlands. Geef alleen de JSON terug, geen inleidende tekst.`;
+
+      let resultaatText = "";
+
+      try {
+        const { GoogleGenAI } = await import("@google/genai");
+        const ai = new GoogleGenAI({
+          apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
+          httpOptions: {
+            apiVersion: "",
+            baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL!,
+          },
+        });
+
+        const response = await ai.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: [
+            { role: "user", parts: [{ text: `${systemPrompt}\n\nTEKST:\n${tekst.trim()}` }] },
+          ],
+          config: {
+            maxOutputTokens: 800,
+            temperature: 0.3,
+            thinkingConfig: { thinkingBudget: 0 },
+          },
+        });
+
+        const parts = response.candidates?.[0]?.content?.parts;
+        if (parts && parts.length > 0) {
+          resultaatText = parts.filter((p: any) => p.text && !p.thought).map((p: any) => p.text).join("");
+        }
+        if (!resultaatText) resultaatText = response.text || "";
+      } catch (geminiErr) {
+        console.error("[BriefAnalyse] Gemini failed:", geminiErr);
+        if (process.env.OPENAI_API_KEY) {
+          const OpenAI = (await import("openai")).default;
+          const openai = new OpenAI();
+          const completion = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: `TEKST:\n${tekst.trim()}` },
+            ],
+            max_tokens: 600,
+            temperature: 0.3,
+          });
+          resultaatText = completion.choices[0]?.message?.content || "";
+        } else {
+          throw geminiErr;
+        }
+      }
+
+      const jsonMatch = resultaatText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        console.error("[BriefAnalyse] No JSON in response:", resultaatText.substring(0, 200));
+        return res.status(500).json({ error: "Kon de analyse niet verwerken" });
+      }
+
+      const resultaat = JSON.parse(jsonMatch[0]);
+      res.json(resultaat);
+    } catch (err: any) {
+      console.error("[BriefAnalyse] Error:", err);
+      res.status(500).json({ error: "Analyse mislukt" });
+    }
+  });
+
   // RAG System Routes - Document Upload and Vector Search
   app.post("/api/rag/documents", requireAuth, checkDailyUploadLimit, uploadMemory.single('file'), async (req, res) => {
     try {

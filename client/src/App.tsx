@@ -53,6 +53,8 @@ import RegiodealsAdminPage from "@/pages/admin/regio-deals-admin";
 import WebsiteOnderhoudPage from "@/pages/zichtbaarheid/website-onderhoud";
 import RegelkaartPage from "@/pages/informatie/regelkaart";
 import CheckSituatiePage from "@/pages/actie/check-situatie";
+import KennisbankPage from "@/pages/informatie/kennisbank";
+import BriefAnalysePage from "@/pages/tools/brief-analyse";
 import { ComingSoon } from "@/components/ComingSoon";
 
 // Routes that should NOT have the sidebar/header layout
@@ -114,9 +116,13 @@ function AuthenticatedRouter() {
       <Route path="/kansen/regio-deals" component={RegiodealsPage} />
       <Route path="/kansen/financiering" component={FinancieringPage} />
       <Route path="/informatie/regelkaart" component={RegelkaartPage} />
+      <Route path="/informatie/kennisbank" component={KennisbankPage} />
 
       {/* Actie */}
       <Route path="/actie/check" component={CheckSituatiePage} />
+
+      {/* Tools */}
+      <Route path="/tools/brief-analyse" component={BriefAnalysePage} />
 
       {/* Zichtbaarheid */}
       <Route path="/zichtbaarheid/website-onderhoud" component={WebsiteOnderhoudPage} />

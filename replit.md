@@ -119,17 +119,31 @@ Live aanbestedingen van alle Nederlandse gemeenten via TenderNed public API:
 - **Pre-fill**: gemeente uit bedrijfsprofiel van ingelogde gebruiker
 - **Geen API-key nodig** — TenderNed is volledig publiek
 
-## Dashboard Menu Structuur (5 secties)
+## Dashboard Menu Structuur (4 secties)
+
+Dashboard-kernbelofte: "Begrijp regels, brieven en besluiten."
+Dashboard toont 4 gefocuste blokken (geen tabs): Regels in jouw regio, Begrijp een brief, Stel een vraag, Digitale zichtbaarheid.
 
 Sidebar met Dashboard + 4 collapsible hoofdsecties:
 1. **Dashboard** — directe cockpit-link
-2. **Informatie** — Regelmonitor (Beleidsmonitor), Regelkaart, RegioBot, Aanbestedingen (TenderNed), Gemeente-updates
-3. **Actie** — Check mijn situatie, Documenten (WOO-bibliotheek), Juridische tools
-4. **Zichtbaarheid** — Website onderhoud, Lokale vindbaarheid, Bedrijfsprofiel regio
-5. **Samenwerken** — Vind partners, RegioCrew, Project starten
+2. **Informatie** — Regels (Beleidsmonitor), Besluiten (Gemeente-updates), RegioBot, Aanbestedingen (TenderNed), Kennisbank (stub)
+3. **Tools** — Brief analyse (nieuw, AI-analyse), Informatie opvragen (WOO-wizard), Documenten (WOO-bibliotheek)
+4. **Zichtbaarheid** — Website check (website-onderhoud), Lokale vindbaarheid
+- **Account** — Bedrijfsprofiel, Privacy & Gegevens, Zichtbaarheidsbeheer (Pro), Affiliate
 
-Regio Deals en Crowdfunding zijn uit het menu verwijderd (pagina's bestaan nog via directe URL).
-Website onderhoud pagina op `/zichtbaarheid/website-onderhoud` met inhoud over "Digitale basis op orde".
+Verwijderd uit sidebar: Samenwerken-sectie, Regelkaart, Check mijn situatie (pagina's bereikbaar via directe URL).
+Header tagline gewijzigd van "Coöperatief platform" naar "Regelgeving transparant".
+Upgrade/premium taal vervangen door neutrale taal ("Extra tools beschikbaar").
+
+## Brief Analyse (IMPLEMENTED)
+
+Nieuwe AI-functie voor gestructureerde analyse van overheidsbrieven:
+- **Pagina**: `/tools/brief-analyse`
+- **Endpoint**: `POST /api/brief-analyse` (requireAuth)
+- **AI**: Gemini 2.5-flash (fallback: gpt-4o-mini)
+- **Input**: tekst van overheidsbrief (max 8000 tekens)
+- **Output**: JSON met Afzender, Type document, Juridische basis, Bevoegdheid, Termijn, Aanbevolen actie
+- **Kennisbank stub**: `/informatie/kennisbank` — 5 aangekondigde artikelen
 
 ## Gemeente-updates
 

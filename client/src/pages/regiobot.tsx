@@ -215,16 +215,16 @@ export default function RegioBotPage() {
           <CardContent className="p-6 space-y-6 text-center">
             <div className="flex justify-center">
               <div className="p-4 rounded-full bg-primary/10">
-                <Crown className="h-10 w-10 text-primary" />
+                <Scale className="h-10 w-10 text-primary" />
               </div>
             </div>
-            <h1 className="text-2xl font-bold">RegioBot voor Pro-bijdragers</h1>
+            <h1 className="text-2xl font-bold">Extra tools beschikbaar</h1>
             <p className="text-muted-foreground">
-              RegioBot werkt met WOO-bronnen en regionale dossiers. Als Pro-bijdrager krijg je deze krachtige tool erbij.
+              RegioBot werkt met WOO-bronnen en regionale dossiers. Deze tool is beschikbaar voor leden met uitgebreide toegang.
             </p>
-            <Link href="/lidmaatschap?plan=pro" asChild>
-              <Button size="lg" data-testid="button-upgrade-to-pro">
-                <Crown className="mr-2 h-5 w-5" /> Word Pro-bijdrager
+            <Link href="/lidmaatschap" asChild>
+              <Button size="lg" variant="outline" data-testid="button-meer-informatie">
+                Meer informatie
               </Button>
             </Link>
           </CardContent>

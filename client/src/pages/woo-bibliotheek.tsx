@@ -228,7 +228,7 @@ export default function WooBibliotheekPage() {
         {!isPro && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 rounded-md p-3" data-testid="text-upload-limit-info">
             <AlertCircle className="h-4 w-4 shrink-0" />
-            <span>Als basis-lid kun je 1 document per dag uploaden. <Link href="/lidmaatschap?plan=pro" className="text-[#1f5fae] hover:underline font-medium">Upgrade naar Pro</Link> voor onbeperkt uploaden.</span>
+            <span>Gratis toegang: 1 document per dag. Extra uploads beschikbaar voor leden met uitgebreide toegang.</span>
           </div>
         )}
       </header>
