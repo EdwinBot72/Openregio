@@ -190,6 +190,16 @@ Alle 3 "Actie" pagina's hebben uitleg:
 
 (Geen openstaande taken)
 
+## Completed Session Plan (March 2026)
+
+Alle 5 taken uit het session plan zijn geïmplementeerd en getest:
+- T001: Dashboard herontwerp — 4 gefocuste blokken (Regels, Brief, Vraag, Zichtbaarheid), geen tabs
+- T002: Menu vereenvoudigd — Samenwerken verwijderd, "Actie" → "Tools", tagline → "Regelgeving transparant"
+- T003: Brief analyse pagina + `POST /api/brief-analyse` endpoint (Gemini 2.5-flash + OpenAI fallback)
+- T004: Kennisbank stub op `/informatie/kennisbank` — 5 coming-soon artikelen
+- T005: Taal opgeschoond — geen "upgrade/premium/Word Pro", wel "Extra tools beschikbaar"
+- Homepage bijgewerkt: subtitle, toolkit-kaart, "Wat je kunt doen" (was "Vier pijlers"), "Wat je krijgt", CTA, footer tagline
+
 ## External Dependencies
 
 -   **Database**: Neon Database (PostgreSQL)

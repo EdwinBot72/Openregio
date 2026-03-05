@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
-import { MapPin, Users, Settings, Target, MessageCircle, Check, Mail, Phone, MapPinned, Search, Bot, Send, Loader2, FileText, Scale, Shield, Building2, Leaf, AlertTriangle, Landmark, Receipt, Eye } from "lucide-react";
+import { MapPin, Settings, Target, Check, Mail, Phone, MapPinned, Search, Bot, Loader2, Scale, Shield, Building2, Leaf, AlertTriangle, Landmark, Receipt, FileText, Eye, Activity, FileSearch } from "lucide-react";
 import sfeerbeeldImg from "@assets/pexels-thisisengineering-3861969_1771083749018.jpg";
 import logoImg from "@assets/ChatGPT_Image_15_feb_2026,_15_15_16_1771164937665.png";
 import footerLogoImg from "@assets/afbeelding_1771441188699.png";
@@ -73,7 +73,7 @@ export default function HomePage() {
 
             <nav className="hidden md:flex items-center gap-2.5 font-extrabold" style={{ color: "#0f172a" }}>
               <a href="#home" className="px-3 py-2.5 rounded-xl hover:bg-[#eef3fb]" data-testid="link-nav-home">Home</a>
-              <a href="#diensten" className="px-3 py-2.5 rounded-xl hover:bg-[#eef3fb]" data-testid="link-nav-diensten">Pijlers</a>
+              <a href="#diensten" className="px-3 py-2.5 rounded-xl hover:bg-[#eef3fb]" data-testid="link-nav-diensten">Tools</a>
               <a href="#over" className="px-3 py-2.5 rounded-xl hover:bg-[#eef3fb]" data-testid="link-nav-over">Wat je krijgt</a>
               <a href="#contact" className="px-3 py-2.5 rounded-xl hover:bg-[#eef3fb]" data-testid="link-nav-contact">Contact</a>
             </nav>
@@ -110,14 +110,14 @@ export default function HomePage() {
                   style={{ fontSize: "clamp(30px, 4.4vw, 54px)", letterSpacing: "-0.6px" }}
                   data-testid="text-hero-title"
                 >
-                  Samen bouwen<br/>aan een sterke regio
+                  Begrijp regels,<br/>brieven en besluiten
                 </h1>
                 <p 
                   className="mb-4"
                   style={{ color: "rgba(255,255,255,.90)", fontSize: "clamp(15px, 1.7vw, 18px)", maxWidth: "68ch" }}
                   data-testid="text-hero-subtitle"
                 >
-                  Oplossingen voor regionale samenwerking en innovatie. Minder praat, meer uitvoering.
+                  OpenRegio maakt regelgeving en brieven begrijpelijk voor ondernemers. Zie wie beslist, waarom, en wat je kunt doen.
                 </p>
                 <div className="flex flex-wrap gap-2.5">
                   <Link 
@@ -148,15 +148,15 @@ export default function HomePage() {
                 }}
                 data-testid="card-hero-toolkit"
               >
-                <strong style={{ fontSize: "18px" }}>Jouw regionale toolkit</strong>
+                <strong style={{ fontSize: "18px" }}>Jouw regelgeving-toolkit</strong>
 
                 <div className="grid grid-cols-2 gap-2.5 mt-2.5">
                   {[
-                    { label: "RegioBot", hint: "WOO & Beleid AI" },
-                    { label: "RegioCrew", hint: "Regionale samenwerking" },
+                    { label: "Regelmonitor", hint: "Actuele regelupdates" },
+                    { label: "Brief analyse", hint: "AI-analyse in seconden" },
+                    { label: "RegioBot", hint: "WOO & beleidsvragen" },
                     { label: "Zichtbaarheid", hint: "Lokale vindbaarheid" },
-                    { label: "Back to Basis", hint: "Betrouwbaarheidscheck" },
-                  ].map((pillar, i) => (
+                  ].map((tool, i) => (
                     <div 
                       key={i}
                       className="rounded-[14px] p-3"
@@ -166,8 +166,8 @@ export default function HomePage() {
                       }}
                       data-testid={`pillar-hero-${i}`}
                     >
-                      <div style={{ fontSize: "15px", fontWeight: 900, marginBottom: "4px" }}>{pillar.label}</div>
-                      <div style={{ fontSize: "12px", color: "rgba(255,255,255,.78)" }}>{pillar.hint}</div>
+                      <div style={{ fontSize: "15px", fontWeight: 900, marginBottom: "4px" }}>{tool.label}</div>
+                      <div style={{ fontSize: "12px", color: "rgba(255,255,255,.78)" }}>{tool.hint}</div>
                     </div>
                   ))}
                 </div>
@@ -284,18 +284,26 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Vier Pijlers */}
+        {/* Tools sectie */}
         <section id="diensten" className="py-8" style={{ background: "#fff", borderBottom: "1px solid #e6ebf2" }} data-testid="section-diensten">
           <div className="max-w-[1120px] mx-auto px-4">
-            <h2 className="font-bold mb-1" style={{ fontSize: "28px", letterSpacing: "-0.3px" }} data-testid="text-pijlers-title">Vier pijlers</h2>
-            <p style={{ color: "#5b677a", marginBottom: "18px" }} data-testid="text-pijlers-lead">Alles wat je nodig hebt om je regio sterker te maken.</p>
+            <h2 className="font-bold mb-1" style={{ fontSize: "28px", letterSpacing: "-0.3px" }} data-testid="text-pijlers-title">Wat je kunt doen</h2>
+            <p style={{ color: "#5b677a", marginBottom: "18px" }} data-testid="text-pijlers-lead">Vier tools om regelgeving te begrijpen en actie te ondernemen.</p>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
               {[
                 { 
-                  icon: Users, 
-                  title: "RegioMarkt", 
-                  desc: "Vaste regionale werkverdeling. Werk dat jij niet doet, verwijs je door naar iemand in je regio die het wél kan. Geen algoritmes, gewoon lokaal.",
+                  icon: Activity, 
+                  title: "Regelmonitor", 
+                  desc: "Volg lokale regelgeving, besluiten en aanbestedingen. Zie wat er verandert voordat het je raakt.",
+                  color: "#1f5fae",
+                  bg: "rgba(31,95,174,.08)",
+                  border: "rgba(31,95,174,.15)",
+                },
+                { 
+                  icon: FileSearch, 
+                  title: "Brief analyse", 
+                  desc: "Plak een overheidsbrief en ontvang direct een gestructureerde analyse: afzender, termijn en wat je kunt doen.",
                   color: "#1f5fae",
                   bg: "rgba(31,95,174,.08)",
                   border: "rgba(31,95,174,.15)",
@@ -303,42 +311,34 @@ export default function HomePage() {
                 { 
                   icon: Bot, 
                   title: "RegioBot", 
-                  desc: "Toont welke regels, besluiten en mandaten er zijn. Geen advies, geen mening — alleen controleerbare documenten en wat ontbreekt.",
-                  color: "#1f5fae",
-                  bg: "rgba(31,95,174,.08)",
-                  border: "rgba(31,95,174,.15)",
+                  desc: "Stel een vraag over regels, mandaten en bevoegdheden. RegioBot doorzoekt officiële WOO-documenten.",
+                  color: "#f28a1a",
+                  bg: "rgba(242,138,26,.08)",
+                  border: "rgba(242,138,26,.15)",
                 },
                 { 
                   icon: MapPin, 
                   title: "Zichtbaarheid", 
-                  desc: "Zorgt dat je bedrijf correct en vindbaar is in je regio. Juiste gegevens, reviews en lokale zoekresultaten — zonder advertenties.",
+                  desc: "Controleer je online aanwezigheid en verbeter je lokale vindbaarheid. Zonder advertenties.",
                   color: "#f28a1a",
                   bg: "rgba(242,138,26,.08)",
                   border: "rgba(242,138,26,.15)",
                 },
-                { 
-                  icon: Shield, 
-                  title: "Back to Basic", 
-                  desc: "Je bedrijf draait ook zonder digitale systemen. Bereikbaarheid, eenvoudige betalingen en papier als het nodig is. Betrouwbaar, altijd.",
-                  color: "#f28a1a",
-                  bg: "rgba(242,138,26,.08)",
-                  border: "rgba(242,138,26,.15)",
-                },
-              ].map((pillar, i) => (
+              ].map((tool, i) => (
                 <div 
                   key={i}
                   className="rounded-md p-4"
-                  style={{ background: pillar.bg, border: `1px solid ${pillar.border}` }}
+                  style={{ background: tool.bg, border: `1px solid ${tool.border}` }}
                   data-testid={`card-pijler-${i}`}
                 >
                   <div 
                     className="w-10 h-10 rounded-md flex items-center justify-center mb-2.5"
-                    style={{ background: pillar.color, color: "#fff" }}
+                    style={{ background: tool.color, color: "#fff" }}
                   >
-                    <pillar.icon className="w-5 h-5" />
+                    <tool.icon className="w-5 h-5" />
                   </div>
-                  <h3 className="font-bold" style={{ margin: 0, fontSize: "15px" }} data-testid={`text-pijler-title-${i}`}>{pillar.title}</h3>
-                  <p style={{ margin: "4px 0 0", color: "#5b677a", fontSize: "12.5px", lineHeight: 1.6 }}>{pillar.desc}</p>
+                  <h3 className="font-bold" style={{ margin: 0, fontSize: "15px" }} data-testid={`text-pijler-title-${i}`}>{tool.title}</h3>
+                  <p style={{ margin: "4px 0 0", color: "#5b677a", fontSize: "12.5px", lineHeight: 1.6 }}>{tool.desc}</p>
                 </div>
               ))}
             </div>
@@ -382,25 +382,25 @@ export default function HomePage() {
                 { 
                   icon: Eye, 
                   title: "Helder inzicht", 
-                  lines: ["Je ziet wat er lokaal verandert — voordat het je raakt.", "Beleid, vergunningen, ontwikkelingen. Geen aannames, maar feiten."],
+                  lines: ["Je ziet wat er lokaal verandert — voordat het je raakt.", "Beleid, vergunningen, besluiten. Geen aannames, maar feiten."],
                   accent: "#1f5fae",
                 },
                 { 
-                  icon: Settings, 
-                  title: "Structuur die werkt", 
-                  lines: ["Geen losse netwerkmomenten.", "Een vaste regionale infrastructuur waarin werk, informatie en mensen samenkomen."],
+                  icon: FileSearch, 
+                  title: "Brieven begrijpen", 
+                  lines: ["Geen juridisch jargon meer.", "Plak een brief en ontvang direct: afzender, grondslag, termijn en wat je moet doen."],
                   accent: "#1f5fae",
                 },
                 { 
                   icon: Target, 
-                  title: "Meetbaar voordeel", 
-                  lines: ["Meer regionale doorverwijzing.", "Minder afhankelijkheid van externe platformen.", "Meer grip op je positie."],
+                  title: "Grip op regelgeving", 
+                  lines: ["Weet welke regels op jou van toepassing zijn.", "Mandaten, bevoegdheden en uitvoeringsbesluiten inzichtelijk gemaakt."],
                   accent: "#f28a1a",
                 },
                 { 
-                  icon: MessageCircle, 
-                  title: "Korte lijnen", 
-                  lines: ["Direct contact met ondernemers uit je regio.", "Geen tussenlagen. Geen algoritmes."],
+                  icon: Settings, 
+                  title: "Actie ondernemen", 
+                  lines: ["WOO-verzoek indienen, bezwaar maken of brief analyseren.", "Tools die direct klaar zijn voor gebruik."],
                   accent: "#f28a1a",
                 },
               ].map((item, i) => (
@@ -578,7 +578,7 @@ export default function HomePage() {
               <div className="p-6">
                 <h3 className="font-bold" style={{ fontSize: "30px", letterSpacing: "-0.4px", marginBottom: "8px" }} data-testid="text-cta-title">Zet de eerste stap!</h3>
                 <p style={{ color: "rgba(255,255,255,.86)", marginBottom: "14px", maxWidth: "70ch" }}>
-                  Start meteen met lokale samenwerking. Vul je e-mailadres in en ga door naar betaling.
+                  Start meteen. Vul je e-mailadres in en ga aan de slag met regelgeving, brieven en zichtbaarheid.
                 </p>
 
                 <form className="flex flex-wrap gap-2.5 items-center mt-2.5" onSubmit={(e) => { e.preventDefault(); const email = (e.currentTarget.querySelector('input[type=email]') as HTMLInputElement)?.value; window.location.href = `/lidmaatschap?email=${encodeURIComponent(email || '')}`; }}>
@@ -631,13 +631,13 @@ export default function HomePage() {
             <div className="flex gap-3 items-center">
               <img src={footerLogoImg} alt="OpenRegio logo" className="h-14 w-auto" />
               <div>
-                <div style={{ fontSize: "12px", color: "rgba(229,231,235,.70)" }}>Samen bouwen aan een sterke regio</div>
+                <div style={{ fontSize: "12px", color: "rgba(229,231,235,.70)" }}>Regelgeving transparant voor ondernemers</div>
               </div>
             </div>
             <div className="flex flex-wrap gap-2">
               <a href="#home" className="opacity-90 hover:opacity-100 hover:underline" data-testid="link-footer-home">Home</a>
               <span className="opacity-50">·</span>
-              <a href="#diensten" className="opacity-90 hover:opacity-100 hover:underline" data-testid="link-footer-cases">Pijlers</a>
+              <a href="#diensten" className="opacity-90 hover:opacity-100 hover:underline" data-testid="link-footer-cases">Tools</a>
               <span className="opacity-50">·</span>
               <Link href="/lidmaatschap" className="opacity-90 hover:opacity-100 hover:underline" data-testid="link-footer-lid">Word lid</Link>
               <span className="opacity-50">·</span>
