@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  Activity,
   ArrowRight,
   Download,
   FileSearch,
@@ -12,6 +11,7 @@ import {
   MessageSquare,
   Shield,
   UserPlus,
+  Activity,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -33,20 +33,19 @@ export default function DashboardPage() {
 
   if (authLoading) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-8 space-y-4">
-        <Skeleton className="h-16 w-full" />
-        <Skeleton className="h-48" />
-        <Skeleton className="h-48" />
+      <div className="max-w-2xl mx-auto px-6 py-10 space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-4 w-64" />
+        <Skeleton className="h-40 w-full" />
+        <Skeleton className="h-40 w-full" />
       </div>
     );
   }
 
   if (!user) {
     return (
-      <div className="max-w-3xl mx-auto px-4 py-8">
-        <Card className="p-8 text-center">
-          <p className="text-muted-foreground">Log opnieuw in om door te gaan.</p>
-        </Card>
+      <div className="max-w-2xl mx-auto px-6 py-10">
+        <p className="text-muted-foreground">Log opnieuw in om door te gaan.</p>
       </div>
     );
   }
@@ -56,205 +55,182 @@ export default function DashboardPage() {
   const displayName = bedrijfsprofiel?.naam || user.firstName || "ondernemer";
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
-      <header className="space-y-1">
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <h1 className="text-2xl font-bold" data-testid="text-welcome">
+    <div className="max-w-2xl mx-auto px-6 py-10 space-y-8">
+
+      {/* Header */}
+      <div className="space-y-1">
+        <div className="flex items-center justify-between gap-2">
+          <h1 className="text-xl font-semibold tracking-tight" data-testid="text-welcome">
             Hallo, {displayName}
           </h1>
-          <Badge variant={isPro ? "default" : "secondary"} data-testid="badge-plan">
+          <Badge variant={isPro ? "default" : "outline"} className="text-xs" data-testid="badge-plan">
             {isPro ? "Pro" : "Basis"}
           </Badge>
         </div>
-        <p className="text-muted-foreground text-sm">
+        <p className="text-sm text-muted-foreground">
           Begrijp regels, brieven en besluiten.
         </p>
-      </header>
+      </div>
 
-      <div className="space-y-4">
-        {/* Blok 1: Regels in jouw regio */}
+      {/* Kaarten */}
+      <div className="space-y-3">
+
+        {/* 1. Regels */}
         <Card data-testid="card-regels">
-          <CardContent className="pt-6 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-[#1f5fae]/10">
-                <Activity className="h-5 w-5 text-[#1f5fae]" />
-              </div>
+          <CardContent className="pt-5 pb-5 space-y-4">
+            <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="font-semibold">Regels in jouw regio</h2>
-                <p className="text-sm text-muted-foreground">Wat verandert er bij de gemeente</p>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <Activity className="h-4 w-4 text-muted-foreground" />
+                  <h2 className="font-medium text-sm">Regels in jouw regio</h2>
+                </div>
+                <p className="text-xs text-muted-foreground">Recente publicaties van de gemeente</p>
               </div>
+              <Link href="/beleidsmonitor">
+                <Button size="sm" variant="ghost" className="text-xs shrink-0" data-testid="button-naar-regelmonitor">
+                  Alles zien <ArrowRight className="h-3 w-3 ml-1" />
+                </Button>
+              </Link>
             </div>
 
-            <div className="rounded-md border overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b bg-muted/50">
-                    <th className="text-left p-3 font-medium text-muted-foreground">Datum</th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Onderwerp</th>
-                    <th className="text-left p-3 font-medium text-muted-foreground">Type</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {REGELS_DATA.map((r, i) => (
-                    <tr key={i} className="border-b last:border-0">
-                      <td className="p-3 text-muted-foreground whitespace-nowrap" data-testid={`text-regel-datum-${i}`}>{r.datum}</td>
-                      <td className="p-3 font-medium" data-testid={`text-regel-onderwerp-${i}`}>{r.onderwerp}</td>
-                      <td className="p-3">
-                        <Badge variant="secondary" data-testid={`badge-regel-type-${i}`}>{r.type}</Badge>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+            <div className="divide-y rounded-md border">
+              {REGELS_DATA.map((r, i) => (
+                <div key={i} className="flex items-center justify-between px-3 py-2.5 text-sm">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-xs text-muted-foreground shrink-0" data-testid={`text-regel-datum-${i}`}>{r.datum}</span>
+                    <span className="truncate font-medium" data-testid={`text-regel-onderwerp-${i}`}>{r.onderwerp}</span>
+                  </div>
+                  <Badge variant="secondary" className="text-xs ml-2 shrink-0" data-testid={`badge-regel-type-${i}`}>{r.type}</Badge>
+                </div>
+              ))}
             </div>
-
-            <Link href="/beleidsmonitor">
-              <Button size="sm" variant="outline" data-testid="button-naar-regelmonitor">
-                Bekijk regelmonitor
-                <ArrowRight className="h-4 w-4 ml-1" />
-              </Button>
-            </Link>
           </CardContent>
         </Card>
 
-        {/* Blok 2: Begrijp een brief */}
+        {/* 2. Brief analyse */}
         <Card data-testid="card-brief">
-          <CardContent className="pt-6 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-[#f28a1a]/10">
-                <FileSearch className="h-5 w-5 text-[#f28a1a]" />
-              </div>
+          <CardContent className="pt-5 pb-5 space-y-4">
+            <div className="flex items-start justify-between gap-4">
               <div>
-                <h2 className="font-semibold">Begrijp een brief</h2>
-                <p className="text-sm text-muted-foreground">Analyseer een overheidsbrief of besluit</p>
+                <div className="flex items-center gap-2 mb-0.5">
+                  <FileSearch className="h-4 w-4 text-muted-foreground" />
+                  <h2 className="font-medium text-sm">Begrijp een brief</h2>
+                </div>
+                <p className="text-xs text-muted-foreground">Plak een overheidsbrief en ontvang direct uitleg</p>
               </div>
             </div>
 
-            <div className="rounded-md border bg-muted/30 p-4 space-y-2 text-sm">
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-                <span className="text-muted-foreground">Afzender</span>
-                <span className="font-medium">Gemeente Utrecht</span>
-                <span className="text-muted-foreground">Type document</span>
-                <span className="font-medium">Besluit</span>
-                <span className="text-muted-foreground">Termijn</span>
-                <span className="font-medium">Bezwaar binnen 6 weken</span>
-                <span className="text-muted-foreground">Aanbevolen actie</span>
-                <span className="font-medium">Controleer inhoud</span>
-              </div>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-1.5 text-sm rounded-md bg-muted/40 px-4 py-3">
+              <span className="text-muted-foreground text-xs">Afzender</span>
+              <span className="text-xs font-medium">Gemeente Utrecht</span>
+              <span className="text-muted-foreground text-xs">Type</span>
+              <span className="text-xs font-medium">Besluit</span>
+              <span className="text-muted-foreground text-xs">Termijn</span>
+              <span className="text-xs font-medium">Bezwaar binnen 6 weken</span>
+              <span className="text-muted-foreground text-xs">Aanbevolen actie</span>
+              <span className="text-xs font-medium">Controleer inhoud</span>
             </div>
 
             <Link href="/tools/brief-analyse">
               <Button size="sm" data-testid="button-analyseer-document">
                 Analyseer een document
-                <ArrowRight className="h-4 w-4 ml-1" />
+                <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
               </Button>
             </Link>
           </CardContent>
         </Card>
 
-        {/* Blok 3: Stel een vraag */}
+        {/* 3. RegioBot */}
         <Card data-testid="card-vraag">
-          <CardContent className="pt-6 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-[#1f5fae]/10">
-                <MessageSquare className="h-5 w-5 text-[#1f5fae]" />
+          <CardContent className="pt-5 pb-5 space-y-3">
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                <h2 className="font-medium text-sm">Stel een vraag</h2>
               </div>
-              <div>
-                <h2 className="font-semibold">Stel een vraag</h2>
-                <p className="text-sm text-muted-foreground">RegioBot beantwoordt vragen over regels en brieven</p>
-              </div>
+              <p className="text-xs text-muted-foreground">RegioBot zoekt in officiële WOO-documenten</p>
             </div>
 
-            <div className="rounded-md bg-muted/30 p-4 space-y-2 text-sm text-muted-foreground">
-              <p className="font-medium text-foreground">Voorbeeldvragen:</p>
-              <ul className="space-y-1 list-none">
-                <li>"Mag mijn terras groter?"</li>
-                <li>"Moet ik reageren op deze brief?"</li>
-                <li>"Welke subsidie bestaat er voor verduurzaming?"</li>
-              </ul>
-            </div>
+            <ul className="text-xs text-muted-foreground space-y-1 pl-1">
+              <li>"Mag mijn terras groter?"</li>
+              <li>"Moet ik reageren op deze brief?"</li>
+              <li>"Welke subsidie bestaat er voor verduurzaming?"</li>
+            </ul>
 
             <Link href="/regiobot">
               <Button size="sm" variant="outline" data-testid="button-naar-regiobot">
                 Naar RegioBot
-                <ArrowRight className="h-4 w-4 ml-1" />
+                <ArrowRight className="h-3.5 w-3.5 ml-1.5" />
               </Button>
             </Link>
           </CardContent>
         </Card>
 
-        {/* Blok 4: Digitale zichtbaarheid */}
+        {/* 4. Zichtbaarheid */}
         <Card data-testid="card-zichtbaarheid">
-          <CardContent className="pt-6 space-y-4">
-            <div className="flex items-center gap-3">
-              <div className="p-2 rounded-full bg-green-500/10">
-                <Globe className="h-5 w-5 text-green-600" />
+          <CardContent className="pt-5 pb-5 space-y-3">
+            <div>
+              <div className="flex items-center gap-2 mb-0.5">
+                <Globe className="h-4 w-4 text-muted-foreground" />
+                <h2 className="font-medium text-sm">Digitale zichtbaarheid</h2>
               </div>
-              <div>
-                <h2 className="font-semibold">Digitale zichtbaarheid</h2>
-                <p className="text-sm text-muted-foreground">Controleer je aanwezigheid online</p>
-              </div>
+              <p className="text-xs text-muted-foreground">Controleer je aanwezigheid online</p>
             </div>
 
             <div className="flex flex-wrap gap-2">
               <Link href="/zichtbaarheid/website-onderhoud">
                 <Button size="sm" variant="outline" data-testid="button-website-check">
-                  <Globe className="h-4 w-4 mr-1.5" />
+                  <Globe className="h-3.5 w-3.5 mr-1.5" />
                   Website check
                 </Button>
               </Link>
               <Link href="/zichtbaarheid/vindbaarheid">
                 <Button size="sm" variant="outline" data-testid="button-lokale-vindbaarheid">
-                  <MapPin className="h-4 w-4 mr-1.5" />
+                  <MapPin className="h-3.5 w-3.5 mr-1.5" />
                   Lokale vindbaarheid
                 </Button>
               </Link>
             </div>
           </CardContent>
         </Card>
+
       </div>
 
+      {/* Admin sectie */}
       {isAdmin && (
         <section className="space-y-4 pt-4 border-t">
           <div className="flex items-center gap-2">
-            <Shield className="w-5 h-5 text-muted-foreground" />
-            <h2 className="font-semibold">Admin</h2>
+            <Shield className="w-4 h-4 text-muted-foreground" />
+            <h2 className="text-sm font-medium text-muted-foreground">Beheer</h2>
           </div>
-          <div className="grid sm:grid-cols-2 gap-4">
+          <div className="grid sm:grid-cols-2 gap-3">
             <Card data-testid="card-admin-export">
-              <CardContent className="pt-6 space-y-3">
-                <div className="flex items-center gap-3">
-                  <Download className="w-5 h-5 text-muted-foreground" />
-                  <h3 className="font-medium text-sm">Leden export</h3>
+              <CardContent className="pt-5 pb-5 space-y-3">
+                <div className="flex items-center gap-2">
+                  <Download className="w-4 h-4 text-muted-foreground" />
+                  <h3 className="text-sm font-medium">Leden export</h3>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <a href="/api/export/nieuwe-leden?days=7&format=csv">
-                    <Button size="sm" variant="outline" data-testid="button-export-csv-7">
-                      CSV (7 dagen)
-                    </Button>
+                    <Button size="sm" variant="outline" data-testid="button-export-csv-7">CSV (7 dagen)</Button>
                   </a>
                   <a href="/api/export/nieuwe-leden?days=30&format=csv">
-                    <Button size="sm" variant="outline" data-testid="button-export-csv-30">
-                      CSV (30 dagen)
-                    </Button>
+                    <Button size="sm" variant="outline" data-testid="button-export-csv-30">CSV (30 dagen)</Button>
                   </a>
                 </div>
               </CardContent>
             </Card>
 
             <Card data-testid="card-admin-create-user">
-              <CardContent className="pt-6 space-y-3">
-                <div className="flex items-center gap-3">
-                  <UserPlus className="w-5 h-5 text-muted-foreground" />
-                  <h3 className="font-medium text-sm">Gebruiker aanmaken</h3>
+              <CardContent className="pt-5 pb-5 space-y-3">
+                <div className="flex items-center gap-2">
+                  <UserPlus className="w-4 h-4 text-muted-foreground" />
+                  <h3 className="text-sm font-medium">Gebruiker aanmaken</h3>
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Maak gratis accounts aan voor vrienden en kennissen.
-                </p>
                 <Link href="/admin/users">
                   <Button size="sm" data-testid="button-admin-create-user">
                     Nieuw account
-                    <ArrowRight className="w-4 h-4 ml-1" />
+                    <ArrowRight className="w-3.5 h-3.5 ml-1.5" />
                   </Button>
                 </Link>
               </CardContent>
@@ -262,6 +238,7 @@ export default function DashboardPage() {
           </div>
         </section>
       )}
+
     </div>
   );
 }
