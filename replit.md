@@ -2,9 +2,7 @@
 
 ## Overview
 
-OpenRegio is a Dutch cooperative platform designed to empower local entrepreneurs by providing an alternative to large tech platforms. It facilitates business networking, offers AI-powered marketing tools, and implements a democratic governance model. Entrepreneurs can create profiles, collaborate, leverage AI for content and SEO, and participate in platform decision-making through a proposal voting system.
-
-The project aims to foster a community-first approach with a professional full-stack application, ensuring a robust and scalable solution for its members.
+OpenRegio is a Dutch cooperative platform designed to empower local entrepreneurs by offering an alternative to large tech platforms. It provides tools for business networking, AI-powered marketing, and a democratic governance model. Members can create profiles, collaborate, leverage AI for content and SEO, and participate in platform decision-making through a proposal voting system. The platform aims to foster a community-first approach with a professional, robust, and scalable full-stack application.
 
 ## User Preferences
 
@@ -14,197 +12,45 @@ Preferred communication style: Simple, everyday language.
 
 ### Frontend Architecture
 
-The frontend is built with React and TypeScript, using Vite for development and Wouter for routing. State management is handled by TanStack Query, and styling is implemented with Tailwind CSS, leveraging a custom design system based on shadcn/ui and Radix UI primitives. The design emphasizes a professional aesthetic with Inter and Space Grotesk fonts and an HSL-based color system supporting light/dark themes. Key patterns include atomic design, a multi-select onboarding flow, and careful z-index management.
+The frontend is built with React and TypeScript, using Vite for development and Wouter for routing. State management is handled by TanStack Query. Styling is implemented with Tailwind CSS, leveraging a custom design system based on shadcn/ui and Radix UI primitives, with a professional aesthetic and HSL-based color system supporting light/dark themes. Key patterns include atomic design and a multi-select onboarding flow.
 
 ### Backend Architecture
 
-The backend utilizes Express.js with TypeScript, adhering to a RESTful API design. It employs a stateless JWT-based authentication system for scalability and uses Zod for comprehensive request and response validation. The storage layer abstracts data access through an `IStorage` interface, with `DbStorage` using Drizzle ORM for PostgreSQL and `MemStorage` for development. All entities use UUIDs as primary keys.
+The backend uses Express.js with TypeScript, following a RESTful API design. It features stateless JWT-based authentication and Zod for request/response validation. Data access is abstracted via an `IStorage` interface, with `DbStorage` using Drizzle ORM for PostgreSQL and `MemStorage` for development. All entities use UUIDs as primary keys.
 
 ### Data Storage Solutions
 
-PostgreSQL is the primary database, accessed via the `pg` driver (node-postgres), with Drizzle ORM managing schema and queries. Database connection is in `db/index.ts`. Key data models include `Bedrijfsprofielen` (business profiles), `Proposals` for democratic governance, `Votes`, `Blogs`, `Activities`, and `User Profiles` with features like `pain points` for personalization and `onboarding_tokens` for secure initial access.
-
-**RAG Vector Storage**: The platform uses pgvector extension for semantic document search. Tables:
-- `rag_documents`: User-uploaded documents (PDF, images, text) with metadata including `woo_category`
-- `rag_chunks`: Text chunks split on Dutch government document markers (Geachte, Betreft, Kenmerk, etc.)
-- `rag_embeddings`: 1536-dimensional vectors from OpenAI text-embedding-3-small
-- `leads`: Signup leads tracking with plan, region, and badge preferences
-
-**Document Upload with OCR**: The WOO-bibliotheek supports uploading:
-- PDF documents (direct text extraction)
-- Images (JPG/PNG) with OCR via tesseract.js
-- Plain text files
-Documents are automatically processed through the RAG pipeline (chunking → embedding → storage).
+PostgreSQL, accessed via Drizzle ORM, is the primary database. Key data models include business profiles, proposals, votes, blogs, activities, and user profiles with `pain points` and `onboarding_tokens`. For RAG, the `pgvector` extension stores `rag_documents`, `rag_chunks`, and `rag_embeddings` (1536-dimensional vectors from OpenAI's text-embedding-3-small). Leads data is also stored.
 
 ### Authentication and Authorization
 
-The system uses a robust JWT authentication flow with short-lived access tokens (httpOnly cookies) and rotating refresh tokens (stored in PostgreSQL) for enhanced security and scalability, suitable for high concurrent user loads. `bcrypt` is used for password hashing. Rate limiting is implemented for login and registration endpoints to prevent brute-force attacks. Role-Based Access Control (`requirePro` middleware) restricts certain features, like RegioBot, to Pro plan users.
+The system implements JWT authentication with short-lived access tokens and rotating refresh tokens for security. `bcrypt` handles password hashing. Rate limiting is applied to login/registration. Role-Based Access Control (`requirePro` middleware) restricts features like RegioBot to Pro plan users.
 
 ### Core Features
 
--   **RegioBot with RAG**: A regional WOO & Legal AI assistant using Retrieval-Augmented Generation (RAG) for dossier-driven answers. Users upload PDF documents to their personal WOO-bibliotheek, which are chunked, embedded with OpenAI text-embedding-3-small, and stored using pgvector for semantic similarity search. The system uses gpt-4o-mini for answer generation with source citations. Focus: wet- en regelgeving analysis, WOO-verzoeken, mandaten, bevoegdheden. Explicitly refuses traffic violations, personal fines, and non-business-related queries. PRO-exclusive feature.
--   **WOO Categories**: Database-enforced categorization for WOO requests with 9 allowed categories (mandaat_delegatie, beleid_verordening, vergunningen, heffingen_leges, handhaving_kaders, aanbesteding, subsidies, uitvoering_partijen, openbaarheid_archief) and 1 blocked category (persoonlijk_verkeer_boete). Hard blocking via database trigger prevents non-business queries from entering the WOO library.
--   **Privacy & Consent Dashboard (AVG/GDPR Compliance)**: Enables users to manage per-field data visibility, view consent logs, export their data, and perform soft account deletion. This feature is enhanced for PRO members to allow customization of visibility settings.
--   **Affiliate System**: Allows users to refer new members and earn recurring commissions. It tracks referrals, calculates commissions, and provides an affiliate dashboard.
+-   **RegioBot with RAG**: A regional WOO & Legal AI assistant using Retrieval-Augmented Generation for dossier-driven answers. It processes user-uploaded documents (PDF, images with OCR, text) by chunking and embedding them with OpenAI's `text-embedding-3-small`, storing them via `pgvector` for semantic search. Answers are generated using `gpt-4o-mini` with source citations. It focuses on wet- en regelgeving analysis, WOO-verzoeken, mandates, and authorities, explicitly refusing non-business queries. This is a PRO-exclusive feature.
+-   **WOO Categories**: Enforced database categorization for WOO requests, allowing specific categories and blocking personal/non-business queries.
+-   **Privacy & Consent Dashboard (AVG/GDPR Compliance)**: Allows users to manage data visibility, view consent logs, export data, and perform soft account deletion. PRO members have enhanced customization options.
+-   **Affiliate System**: Tracks referrals and calculates recurring commissions for members.
+-   **Object Storage**: Personal file storage for entrepreneurs using Replit's built-in Object Storage (Google Cloud Storage) with public and private directories, tracked in a `user_files` database table. It uses a two-step presigned URL upload flow.
+-   **Email Integration**: Implemented via SMTP for welcome messages, password resets, notifications, and newsletters.
+-   **TenderNed Integration**: Displays live public tenders from Dutch municipalities via the TenderNed public API, with in-memory caching and pre-filling based on user profiles.
+-   **Brief Analyse**: An AI function using Gemini 2.5-flash (with gpt-4o-mini fallback) to analyze government letters, extracting key information like sender, document type, legal basis, and recommended actions.
+-   **Gemeente-updates**: Displays official publications per municipality from the KOOP SRU API (overheid.nl), with in-memory caching and search functionality.
+-   **Regio Deals**: Manages exclusive member deals and collective agreements via a `regio_deals` database table, with admin management and a dedicated member interface.
 
 ### Security and Observability
 
-Security is a paramount concern, with comprehensive measures including HSTS, Content-Security-Policy, secure cookie settings, input sanitization, and type validation. File uploads are secured with MIME type validation and random filenames. Observability includes structured JSON logging for server errors and client-side error boundaries with user-friendly error displays and recovery options.
-
-## Object Storage (IMPLEMENTED)
-
-Personal file storage for entrepreneurs using Replit's built-in Object Storage (Google Cloud Storage):
-- **Bucket ID**: replit-objstore-d1f0cf16-6b2b-44b9-9e66-6c8748d9c8b0
-- **Public Directory**: /public (for publicly accessible files)
-- **Private Directory**: /.private (for user-specific files with ACL)
-- **Database Table**: `user_files` tracks uploaded files per user
-- **Upload Flow**: Two-step presigned URL flow (metadata request → direct GCS upload)
-- **API Endpoints**:
-  - `POST /api/uploads/request-url` - Get presigned upload URL
-  - `POST /api/user-files/register` - Register uploaded file
-  - `GET /api/user-files` - List user's files
-  - `DELETE /api/user-files/:id` - Delete a file
-  - `GET /api/user-files/:id/download` - Download a file
-- **Components**: `ObjectUploader.tsx`, `use-upload.ts` hook
-
-## Email Integration (IMPLEMENTED)
-
-E-mail functionaliteit is geïmplementeerd via SMTP:
-- **Email adres**: info@openregio.nl
-- **SMTP Host**: mail.mijndomein.nl
-- **SMTP Port**: 587 (STARTTLS)
-- **Geïmplementeerde functies**:
-  - Welkomstberichten bij registratie
-  - Wachtwoord reset emails
-  - Notificatie emails (template gereed)
-  - Nieuwsbrief emails (template gereed)
-- **Environment variables**:
-  - `SMTP_HOST` = mail.mijndomein.nl
-  - `SMTP_PORT` = 587
-  - `SMTP_USER` = info@openregio.nl
-  - `SMTP_PASSWORD` = (secret)
-  - `APP_BASE_URL` = https://openregio.replit.app
-
-## Upload Policy
-
-Document upload is available to all authenticated users with tiered limits:
-- **Basic/Free**: 1 upload per day (enforced via `checkDailyUploadLimit` middleware in `server/routes.ts`)
-- **Pro**: Unlimited uploads
-- Middleware checks `rag_documents` table for today's uploads by the user
-- RegioBot chat remains Pro-only
-
-## Dashboard
-
-Clean 3-card layout (single column, max-w-3xl):
-1. **Regio-analyse** → links to /regio-analyse (public)
-2. **Brief uploaden** → links to /woo-bibliotheek (auth required)
-3. **WOO-verzoek maken** → links to /woo-wizard (auth required)
-Admin section shown conditionally for admin users.
-
-## Gemeenten (342 Municipalities)
-
-The platform uses 342 official Dutch municipalities (CBS 2024) instead of regional groupings:
-- `GEMEENTEN` in `shared/schema.ts` — flat array of all municipality names
-- `PROVINCES_GEMEENTEN` — municipalities grouped by province (12 provinces)
-- `PROVINCES_REGIONS` and `REGIONS` are backward-compatible aliases
-- All dropdowns (bedrijfsprofiel, network, regiocrew) now show municipalities per province
-- The `regio` field in `bedrijfsprofiel` stores the selected municipality name
-
-## TenderNed Integratie
-
-Live aanbestedingen van alle Nederlandse gemeenten via TenderNed public API:
-- **Endpoint**: `GET /api/tenderned/aanbestedingen?gemeente=Amsterdam&limit=20`
-- **Caching**: in-memory TTL-cache van 15 minuten per pagina
-- **Frontend**: `/kansen/aanbestedingen` — zoek per gemeente, kaarten met deadline-badges
-- **Pre-fill**: gemeente uit bedrijfsprofiel van ingelogde gebruiker
-- **Geen API-key nodig** — TenderNed is volledig publiek
-
-## Dashboard Menu Structuur (4 secties)
-
-Dashboard-kernbelofte: "Begrijp regels, brieven en besluiten."
-Dashboard toont 4 gefocuste blokken (geen tabs): Regels in jouw regio, Begrijp een brief, Stel een vraag, Digitale zichtbaarheid.
-
-Sidebar met Dashboard + 4 collapsible hoofdsecties:
-1. **Dashboard** — directe cockpit-link
-2. **Informatie** — Regels (Beleidsmonitor), Besluiten (Gemeente-updates), RegioBot, Aanbestedingen (TenderNed), Kennisbank (stub)
-3. **Tools** — Brief analyse (nieuw, AI-analyse), Informatie opvragen (WOO-wizard), Documenten (WOO-bibliotheek)
-4. **Zichtbaarheid** — Website check (website-onderhoud), Lokale vindbaarheid
-- **Account** — Bedrijfsprofiel, Privacy & Gegevens, Zichtbaarheidsbeheer (Pro), Affiliate
-
-Verwijderd uit sidebar: Samenwerken-sectie, Regelkaart, Check mijn situatie (pagina's bereikbaar via directe URL).
-Header tagline gewijzigd van "Coöperatief platform" naar "Regelgeving transparant".
-Upgrade/premium taal vervangen door neutrale taal ("Extra tools beschikbaar").
-
-## Brief Analyse (IMPLEMENTED)
-
-Nieuwe AI-functie voor gestructureerde analyse van overheidsbrieven:
-- **Pagina**: `/tools/brief-analyse`
-- **Endpoint**: `POST /api/brief-analyse` (requireAuth)
-- **AI**: Gemini 2.5-flash (fallback: gpt-4o-mini)
-- **Input**: tekst van overheidsbrief (max 8000 tekens)
-- **Output**: JSON met Afzender, Type document, Juridische basis, Bevoegdheid, Termijn, Aanbevolen actie
-- **Kennisbank stub**: `/informatie/kennisbank` — 5 aangekondigde artikelen
-
-## Gemeente-updates
-
-Actuele officiële publicaties per gemeente via de KOOP SRU API (overheid.nl):
-- **Endpoint**: `GET /api/gemeente-updates?gemeente=Amsterdam&limit=15`
-- **Databron**: `repository.overheid.nl/sru` — officiële SRU-zoekmachine voor Gemeentebladen, raadsbesluiten, vergunningen en andere overheidspublicaties
-- **Caching**: in-memory TTL-cache van 30 minuten per gemeente
-- **Frontend**: `/kansen/gemeente-updates` — zoek per gemeente, kaarten met publicatietype-badge, datum, onderwerpen en link naar officielebekendmakingen.nl
-- **Geen API-key nodig** — volledig publiek toegankelijk
-
-## Regio Deals (IMPLEMENTED)
-
-Exclusieve ledendeals en collectieve afspraken voor OpenRegio-leden:
-- **Database tabel**: `regio_deals` (id, title, provider, category, description, discount, url, promo_code, valid_until, is_active, created_at)
-- **Categories**: Software, Kantoor, Marketing, Verzekering, Energie, Overig
-- **Ledenpagina**: `/kansen/regio-deals` — kaartweergave met categorie-filter, kortingsbadge, promocode kopieer-knop, "Claim deal" knop
-- **Admin-beheer**: `/admin/regio-deals` — deals aanmaken, bewerken, actief/inactief schakelen, verwijderen
-- **API Endpoints**:
-  - `GET /api/regio-deals` — actieve deals (requireAuth)
-  - `GET /api/regio-deals/all` — alle deals incl. inactief (requireAdmin)
-  - `POST /api/regio-deals` — nieuwe deal aanmaken (requireAdmin)
-  - `PUT /api/regio-deals/:id` — deal bijwerken (requireAdmin)
-  - `DELETE /api/regio-deals/:id` — deal verwijderen (requireAdmin)
-- **Admin sidebar**: link "Regio Deals" in Beheer-sectie
-- **Voorbeelddeal**: 3 deals toegevoegd (Twinfield, Hollandia Koffie, LinkedIn)
-
-## Uitleg-cards op Informatie-pagina's
-
-Alle 5 "Informatie" pagina's hebben een uitleg-card bovenaan:
-- **Regelmonitor**: Wat is het + filter-tip (beleidsmonitor.tsx)
-- **Regelkaart**: Volledige informatieve coming-soon pagina (`/informatie/regelkaart`) met features, badges en mailto-CTA
-- **RegioBot**: Stap-voor-stap uitleg + task-badges (regiobot.tsx)
-- **Aanbestedingen**: Uitleg TenderNed + auto-fill tip (aanbestedingen.tsx)
-- **Gemeente-updates**: Uitleg officielebekendmakingen.nl + versheid-tip (gemeente-updates.tsx)
-
-## Uitleg-cards op Actie-pagina's
-
-Alle 3 "Actie" pagina's hebben uitleg:
-- **Check mijn situatie**: Volledige informatieve coming-soon pagina (`/actie/check`) met features, badges, doelgroepen en mailto-CTA (check-situatie.tsx)
-- **Documenten (WOO-bibliotheek)**: Uitleg-card met upload-flow, bestandstypen en upload-limiet tip (woo-bibliotheek.tsx)
-- **Juridische tools (WOO-wizard)**: Uitleg-card met uitleg van beide instrumenten (Signaalinstrument + Bevoegdheidsscan) en wettelijke basis (woo-wizard.tsx)
-
-## Pending Tasks
-
-(Geen openstaande taken)
-
-## Completed Session Plan (March 2026)
-
-Alle 5 taken uit het session plan zijn geïmplementeerd en getest:
-- T001: Dashboard herontwerp — 4 gefocuste blokken (Regels, Brief, Vraag, Zichtbaarheid), geen tabs
-- T002: Menu vereenvoudigd — Samenwerken verwijderd, "Actie" → "Tools", tagline → "Regelgeving transparant"
-- T003: Brief analyse pagina + `POST /api/brief-analyse` endpoint (Gemini 2.5-flash + OpenAI fallback)
-- T004: Kennisbank stub op `/informatie/kennisbank` — 5 coming-soon artikelen
-- T005: Taal opgeschoond — geen "upgrade/premium/Word Pro", wel "Extra tools beschikbaar"
-- Homepage bijgewerkt: subtitle, toolkit-kaart, "Wat je kunt doen" (was "Vier pijlers"), "Wat je krijgt", CTA, footer tagline
+Security measures include HSTS, Content-Security-Policy, secure cookie settings, input sanitization, type validation, and secure file uploads with MIME type validation and random filenames. Observability features structured JSON logging for server errors and client-side error boundaries.
 
 ## External Dependencies
 
--   **Database**: Neon Database (PostgreSQL)
--   **AI Integration**: OpenAI (text-embedding-3-small for RAG embeddings, gpt-4o-mini for chat), pgvector for vector similarity search
+-   **Database**: Neon Database (PostgreSQL), pgvector
+-   **AI Integration**: OpenAI (text-embedding-3-small, gpt-4o-mini), Gemini 2.5-flash, tesseract.js (for OCR)
 -   **UI Components**: Radix UI, shadcn/ui, Lucide React, cmdk, embla-carousel, vaul
 -   **Build Tools**: Vite, esbuild, tsx
 -   **Styling**: Tailwind CSS
 -   **Utilities**: date-fns, clsx, tailwind-merge, zod, react-hook-form
+-   **Object Storage**: Replit's built-in Object Storage (Google Cloud Storage)
+-   **Email Service**: SMTP (via mail.mijndomein.nl)
+-   **External APIs**: TenderNed public API, KOOP SRU API (overheid.nl)

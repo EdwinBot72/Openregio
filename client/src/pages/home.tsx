@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
-import { MapPin, Settings, Target, Check, Mail, Phone, MapPinned, Search, Bot, Loader2, Scale, Shield, Building2, Leaf, AlertTriangle, Landmark, Receipt, FileText, Eye, Activity, FileSearch } from "lucide-react";
+import { MapPin, Settings, Target, Check, Mail, Phone, MapPinned, Search, Bot, Loader2, Scale, Shield, Building2, Leaf, AlertTriangle, Landmark, Receipt, FileText, Eye, Activity, FileSearch, BookOpen, Bell } from "lucide-react";
 import sfeerbeeldImg from "@assets/pexels-thisisengineering-3861969_1771083749018.jpg";
 import logoImg from "@assets/ChatGPT_Image_15_feb_2026,_15_15_16_1771164937665.png";
 import footerLogoImg from "@assets/afbeelding_1771441188699.png";
@@ -117,7 +117,7 @@ export default function HomePage() {
                   style={{ color: "rgba(255,255,255,.90)", fontSize: "clamp(15px, 1.7vw, 18px)", maxWidth: "68ch" }}
                   data-testid="text-hero-subtitle"
                 >
-                  OpenRegio maakt regelgeving en brieven begrijpelijk voor ondernemers. Zie wie beslist, waarom, en wat je kunt doen.
+                  Weet wat er van je verwacht wordt. Begrijp brieven en besluiten. Doe mee op gelijke voet.
                 </p>
                 <div className="flex flex-wrap gap-2.5">
                   <Link 
@@ -211,6 +211,69 @@ export default function HomePage() {
               animation-play-state: paused;
             }
           `}</style>
+        </section>
+
+        {/* Herkenbaar sectie */}
+        <section className="py-10" style={{ background: "#fff", borderBottom: "1px solid #e6ebf2" }} data-testid="section-herkenbaar">
+          <div className="max-w-[900px] mx-auto px-4">
+            <div className="mb-6">
+              <h2 className="font-black mb-1" style={{ fontSize: "28px", letterSpacing: "-0.3px", color: "#0f172a" }} data-testid="text-herkenbaar-title">Herkenbaar?</h2>
+              <p style={{ color: "#5b677a", fontSize: "15px" }}>Dit horen we regelmatig van ondernemers.</p>
+            </div>
+
+            <div className="space-y-0" data-testid="list-pijnpunten">
+              {[
+                {
+                  citaat: "Regels zijn te complex om bij te houden.",
+                  toelichting: "Beleid verandert, maar niemand waarschuwt je tijdig.",
+                },
+                {
+                  citaat: "De brief van de gemeente is onleesbaar.",
+                  toelichting: "Juridisch jargon, geen duidelijke termijn, geen uitleg wat je moet doen.",
+                },
+                {
+                  citaat: "De gemeente is moeilijk bereikbaar als het erop aankomt.",
+                  toelichting: "Vragen blijven onbeantwoord, het loket stuurt je door.",
+                },
+                {
+                  citaat: "Ik moet alles zelf uitzoeken.",
+                  toelichting: "Geen loket dat meedenkt, geen praktisch houvast bij regelgeving.",
+                },
+                {
+                  citaat: "Grote platforms spelen een ander spel.",
+                  toelichting: "Andere regels, andere handhaving — een ongelijk speelveld.",
+                },
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className="grid md:grid-cols-[1fr_1fr] gap-x-6 gap-y-0.5 py-4"
+                  style={{ borderTop: i === 0 ? "1px solid #e6ebf2" : "1px solid #e6ebf2", borderBottom: i === 4 ? "1px solid #e6ebf2" : "none" }}
+                  data-testid={`pijnpunt-${i}`}
+                >
+                  <div className="flex items-start gap-3">
+                    <span
+                      className="flex-shrink-0 font-black text-xl leading-none mt-0.5"
+                      style={{ color: "#f28a1a" }}
+                    >"</span>
+                    <p className="font-bold" style={{ fontSize: "15px", color: "#0f172a", margin: 0 }}>{item.citaat}</p>
+                  </div>
+                  <p style={{ fontSize: "13.5px", color: "#5b677a", margin: 0, lineHeight: 1.7 }}>{item.toelichting}</p>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-6 flex flex-wrap items-center gap-3">
+              <p style={{ color: "#5b677a", fontSize: "14px", margin: 0 }}>OpenRegio helpt je bij elk van deze vijf punten.</p>
+              <a
+                href="#over"
+                className="inline-flex items-center justify-center px-4 py-2.5 rounded-full font-black text-sm"
+                style={{ background: "#1f5fae", color: "#fff" }}
+                data-testid="button-herkenbaar-bekijkhoe"
+              >
+                Bekijk hoe
+              </a>
+            </div>
+          </div>
         </section>
 
         {/* Regio-analyse */}
@@ -369,38 +432,38 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* Wat je krijgt */}
+        {/* Hoe OpenRegio helpt */}
         <section id="over" className="py-10" style={{ background: "#fff", borderBottom: "1px solid #e6ebf2" }} data-testid="section-why">
           <div className="max-w-[1120px] mx-auto px-4">
             <div className="text-center mb-6">
-              <h2 className="font-bold mb-1" style={{ fontSize: "28px", letterSpacing: "-0.3px" }} data-testid="text-why-title">Wat je krijgt</h2>
-              <p style={{ color: "#5b677a" }} data-testid="text-why-lead">Geen beloftes, maar structuur. Dit is wat OpenRegio concreet oplevert.</p>
+              <h2 className="font-bold mb-1" style={{ fontSize: "28px", letterSpacing: "-0.3px" }} data-testid="text-why-title">Hoe OpenRegio helpt</h2>
+              <p style={{ color: "#5b677a" }} data-testid="text-why-lead">Vijf concrete antwoorden op vijf reële problemen.</p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-5">
               {[
                 { 
-                  icon: Eye, 
-                  title: "Helder inzicht", 
-                  lines: ["Je ziet wat er lokaal verandert — voordat het je raakt.", "Beleid, vergunningen, besluiten. Geen aannames, maar feiten."],
+                  icon: BookOpen, 
+                  title: "Regeluitleg zonder jargon", 
+                  desc: "Regelmonitor zet besluiten, vergunningen en beleid om naar begrijpelijke updates voor jouw gemeente.",
+                  accent: "#1f5fae",
+                },
+                { 
+                  icon: Bell, 
+                  title: "Altijd op de hoogte", 
+                  desc: "Beleid verandert — je ziet het voordat het je raakt. Aanbestedingen, subsidies en gemeente-updates in één overzicht.",
                   accent: "#1f5fae",
                 },
                 { 
                   icon: FileSearch, 
-                  title: "Brieven begrijpen", 
-                  lines: ["Geen juridisch jargon meer.", "Plak een brief en ontvang direct: afzender, grondslag, termijn en wat je moet doen."],
-                  accent: "#1f5fae",
-                },
-                { 
-                  icon: Target, 
-                  title: "Grip op regelgeving", 
-                  lines: ["Weet welke regels op jou van toepassing zijn.", "Mandaten, bevoegdheden en uitvoeringsbesluiten inzichtelijk gemaakt."],
+                  title: "Brieven en besluiten begrijpen", 
+                  desc: "Plak een overheidsbrief. Brief analyse geeft je direct: afzender, grondslag, termijn en aanbevolen actie.",
                   accent: "#f28a1a",
                 },
                 { 
-                  icon: Settings, 
-                  title: "Actie ondernemen", 
-                  lines: ["WOO-verzoek indienen, bezwaar maken of brief analyseren.", "Tools die direct klaar zijn voor gebruik."],
+                  icon: Bot, 
+                  title: "Tools die meedenken", 
+                  desc: "RegioBot doorzoekt officiële WOO-documenten en beantwoordt vragen over mandaten, bevoegdheden en uitvoeringsbesluiten.",
                   accent: "#f28a1a",
                 },
               ].map((item, i) => (
@@ -414,11 +477,22 @@ export default function HomePage() {
                     <item.icon className="w-5 h-5 flex-shrink-0" style={{ color: item.accent }} />
                     <h3 className="font-bold" style={{ margin: 0, fontSize: "16px" }}>{item.title}</h3>
                   </div>
-                  {item.lines.map((line, j) => (
-                    <p key={j} style={{ margin: j === 0 ? "0" : "2px 0 0", color: "#5b677a", fontSize: "13px", lineHeight: 1.7 }}>{line}</p>
-                  ))}
+                  <p style={{ margin: 0, color: "#5b677a", fontSize: "13px", lineHeight: 1.7 }}>{item.desc}</p>
                 </div>
               ))}
+
+              {/* 5e kaart — volle breedte */}
+              <div 
+                className="md:col-span-2 rounded-md p-5"
+                style={{ background: "#f5f7fb", borderTop: "3px solid #1f5fae" }}
+                data-testid="card-why-4"
+              >
+                <div className="flex items-center gap-3 mb-2">
+                  <MapPin className="w-5 h-5 flex-shrink-0" style={{ color: "#1f5fae" }} />
+                  <h3 className="font-bold" style={{ margin: 0, fontSize: "16px" }}>Zichtbaar op gelijke voet</h3>
+                </div>
+                <p style={{ margin: 0, color: "#5b677a", fontSize: "13px", lineHeight: 1.7 }}>Controleer je online aanwezigheid en verbeter je lokale vindbaarheid — zonder advertentiebudget.</p>
+              </div>
             </div>
           </div>
         </section>
