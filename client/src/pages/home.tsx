@@ -128,38 +128,47 @@ export default function HomePage() {
               {/* Dashboard preview */}
               <div
                 className="rounded-2xl overflow-hidden"
-                style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.12)", backdropFilter: "blur(8px)" }}
+                style={{ background: "#fff", boxShadow: "0 24px 64px rgba(0,0,0,.28)" }}
                 data-testid="card-hero-preview"
               >
+                {/* Titlebar */}
                 <div
-                  className="px-4 py-3 flex items-center gap-2 border-b"
-                  style={{ borderColor: "rgba(255,255,255,.10)" }}
+                  className="px-4 py-3 flex items-center gap-2"
+                  style={{ background: "#1a3c6e", borderBottom: "1px solid #0e2a52" }}
                 >
                   <div className="flex gap-1.5">
-                    {[0, 1, 2].map(i => (
-                      <div key={i} className="w-2.5 h-2.5 rounded-full" style={{ background: "rgba(255,255,255,.25)" }} />
+                    {["#ff5f57","#febc2e","#28c840"].map((c, i) => (
+                      <div key={i} className="w-2.5 h-2.5 rounded-full" style={{ background: c }} />
                     ))}
                   </div>
-                  <span style={{ fontSize: "12px", color: "rgba(255,255,255,.55)", fontWeight: 600, marginLeft: "6px" }}>OpenRegio</span>
+                  <span style={{ fontSize: "12px", color: "rgba(255,255,255,.70)", fontWeight: 700, marginLeft: "6px", letterSpacing: ".4px" }}>OpenRegio Dashboard</span>
                 </div>
-                <div className="p-5 space-y-2.5">
+
+                {/* Items */}
+                <div className="p-4 space-y-2" style={{ background: "#f4f6f9" }}>
                   {[
-                    { icon: FileSearch, label: "Brief analyse", hint: "AI-analyse in seconden" },
-                    { icon: Activity, label: "Regio updates", hint: "Lokaal beleid en besluiten" },
-                    { icon: Globe, label: "Website check", hint: "Vindbaarheid controleren" },
-                    { icon: Bot, label: "RegioBot", hint: "WOO & beleidsvragen" },
+                    { icon: FileSearch, label: "Brief analyse", hint: "AI-analyse in seconden", accent: "#1f5fae", bg: "#eaf1fb" },
+                    { icon: Activity, label: "Regio updates", hint: "Lokaal beleid en besluiten", accent: "#0e9062", bg: "#e6f7f1" },
+                    { icon: Globe, label: "Website check", hint: "Vindbaarheid controleren", accent: "#7c3aed", bg: "#f0ebfd" },
+                    { icon: Bot, label: "RegioBot", hint: "WOO & beleidsvragen", accent: "#f28a1a", bg: "#fff4e6" },
                   ].map((item, i) => (
                     <div
                       key={i}
                       className="flex items-center gap-3 rounded-xl px-4 py-3"
-                      style={{ background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.08)" }}
+                      style={{ background: "#fff", border: "1px solid #e2e8f0" }}
                       data-testid={`hero-preview-item-${i}`}
                     >
-                      <item.icon className="w-4 h-4 flex-shrink-0" style={{ color: "#f28a1a" }} />
-                      <div>
-                        <div style={{ fontSize: "13px", fontWeight: 800, color: "#fff" }}>{item.label}</div>
-                        <div style={{ fontSize: "11px", color: "rgba(255,255,255,.50)" }}>{item.hint}</div>
+                      <div
+                        className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
+                        style={{ background: item.bg, color: item.accent }}
+                      >
+                        <item.icon className="w-4 h-4" />
                       </div>
+                      <div>
+                        <div style={{ fontSize: "13px", fontWeight: 800, color: "#0f172a" }}>{item.label}</div>
+                        <div style={{ fontSize: "11px", color: "#94a3b8", marginTop: "1px" }}>{item.hint}</div>
+                      </div>
+                      <div className="ml-auto w-2 h-2 rounded-full flex-shrink-0" style={{ background: item.accent, opacity: 0.5 }} />
                     </div>
                   ))}
                 </div>
