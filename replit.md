@@ -43,6 +43,18 @@ The system implements JWT authentication with short-lived access tokens and rota
 
 Security measures include HSTS, Content-Security-Policy, secure cookie settings, input sanitization, type validation, and secure file uploads with MIME type validation and random filenames. Observability features structured JSON logging for server errors and client-side error boundaries.
 
+## Homepage Redesign (March 2026)
+
+Nieuwe 7-sectie opbouw op basis van structuurdocument:
+- **Hero**: "Grip op regels, zichtbaarheid en ondernemerschap in je regio." — knoppen: Bekijk dashboard + Ontdek wat er speelt; hero-card met 4 feature-rijen
+- **Het probleem**: 4 probleemkaarten (regels, brieven, digitaal, administratie)
+- **Regio-analyse**: interactieve AI-tool (behouden)
+- **Wat OpenRegio doet**: 3 grote oplossingsblokken (brieven/regels, zichtbaarheid, samenwerking)
+- **GROW-sectie**: donkerblauwe sectie met G/R/O/W acronym
+- **Dashboard uitleg**: uitleg + CSS-mockup van dashboard
+- **Voor wie**: 4 doelgroepkaarten
+- **Membership + CTA**: prijskaarten behouden, CTA aangepast naar "Start met OpenRegio"
+
 ## External Dependencies
 
 -   **Database**: Neon Database (PostgreSQL), pgvector
