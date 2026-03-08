@@ -75,7 +75,7 @@ export default function HomePage() {
       {/* ── Nav ── */}
       <header
         className="sticky top-0 z-50 border-b"
-        style={{ background: "rgba(255,255,255,.96)", borderColor: "#e8ecf2", backdropFilter: "blur(12px)" }}
+        style={{ background: "rgba(235,242,252,.97)", borderColor: "#c5d5eb", backdropFilter: "blur(12px)" }}
         data-testid="nav-main"
       >
         <div className="max-w-[1100px] mx-auto px-6">
@@ -84,12 +84,12 @@ export default function HomePage() {
               <img src={logoImg} alt="OpenRegio" className="h-12 w-auto" />
             </Link>
 
-            <nav className="hidden md:flex items-center gap-1" style={{ color: "#334155" }}>
-              <a href="#home" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-slate-100" data-testid="link-nav-home">Home</a>
-              <a href="#probleem" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-slate-100" data-testid="link-nav-probleem">Het probleem</a>
-              <a href="#oplossingen" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-slate-100" data-testid="link-nav-oplossingen">Oplossingen</a>
-              <a href="#dashboard-uitleg" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-slate-100" data-testid="link-nav-dashboard">Dashboard</a>
-              <a href="#contact" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-slate-100" data-testid="link-nav-contact">Contact</a>
+            <nav className="hidden md:flex items-center gap-1" style={{ color: "#1e3a5f" }}>
+              <a href="#home" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100" data-testid="link-nav-home">Home</a>
+              <a href="#probleem" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100" data-testid="link-nav-probleem">Het probleem</a>
+              <a href="#oplossingen" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100" data-testid="link-nav-oplossingen">Oplossingen</a>
+              <a href="#dashboard-uitleg" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100" data-testid="link-nav-dashboard">Dashboard</a>
+              <a href="#contact" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100" data-testid="link-nav-contact">Contact</a>
             </nav>
 
             <div className="flex items-center gap-2">
