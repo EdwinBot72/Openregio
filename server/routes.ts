@@ -1156,6 +1156,109 @@ Gebruik geen opsommingstekens, geen kopjes, geen markdown. Geen begroeting. Dire
     }
   });
 
+  // Regelgeving-check - publieke endpoint voor homepage (rate-limited)
+  const regelgevingRateLimit = new Map<string, { count: number; resetAt: number }>();
+  const REGELGEVING_RATE_WINDOW = 60_000;
+  const REGELGEVING_RATE_MAX = 5;
+
+  app.post("/api/regelgeving/check", async (req, res) => {
+    try {
+      const ip = req.ip || req.socket.remoteAddress || "unknown";
+      const now = Date.now();
+      const entry = regelgevingRateLimit.get(ip);
+      if (entry && now < entry.resetAt) {
+        if (entry.count >= REGELGEVING_RATE_MAX) {
+          return res.status(429).json({ error: "Te veel verzoeken. Probeer het over een minuut opnieuw." });
+        }
+        entry.count++;
+      } else {
+        regelgevingRateLimit.set(ip, { count: 1, resetAt: now + REGELGEVING_RATE_WINDOW });
+      }
+      if (regelgevingRateLimit.size > 1000) {
+        for (const [key, val] of regelgevingRateLimit) {
+          if (now > val.resetAt) regelgevingRateLimit.delete(key);
+        }
+      }
+
+      const { branche, onderwerp } = req.body;
+      if (!branche || !onderwerp || typeof branche !== "string" || typeof onderwerp !== "string") {
+        return res.status(400).json({ error: "Branche en onderwerp zijn verplicht" });
+      }
+      if (branche.length > 150 || onderwerp.length > 150) {
+        return res.status(400).json({ error: "Invoer te lang" });
+      }
+
+      const systemPrompt = `Je bent een regelgeving-adviseur van OpenRegio. Je helpt ondernemers begrijpen hoe het systeem werkt en hoe ze hun rechten kunnen opeisen.
+
+STRIKTE REGELS:
+- Antwoord in PRECIES 3 korte zinnen, niet meer.
+- Zin 1: Welke wet of regeling van toepassing is (noem de naam, bijv. "Wet open overheid (Woo)", "Omgevingswet", "AVG").
+- Zin 2: Wat dit concreet betekent voor dit bedrijf in de praktijk.
+- Zin 3: De eerste concrete stap die de ondernemer NU kan zetten — denk aan bezwaar maken, een Woo-verzoek indienen, of contact opnemen met de gemeente.
+
+Gebruik geen opsommingstekens, geen kopjes, geen markdown. Geen begroeting. Direct to-the-point. Schrijf in het Nederlands. Toon: begripvol maar daadkrachtig.`;
+
+      const userPrompt = `Branche: ${branche}. Onderwerp: ${onderwerp}. Geef regelgeving-uitleg in exact 3 zinnen.`;
+
+      let antwoordText = "";
+      try {
+        const { GoogleGenAI } = await import("@google/genai");
+        const ai = new GoogleGenAI({
+          apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
+          httpOptions: {
+            apiVersion: "",
+            baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL!,
+          },
+        });
+
+        const response = await ai.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: [
+            { role: "user", parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] },
+          ],
+          config: {
+            maxOutputTokens: 600,
+            temperature: 0.5,
+            thinkingConfig: { thinkingBudget: 0 },
+          },
+        });
+
+        const parts = response.candidates?.[0]?.content?.parts;
+        if (parts && parts.length > 0) {
+          antwoordText = parts
+            .filter((p: any) => p.text && !p.thought)
+            .map((p: any) => p.text)
+            .join("");
+        }
+        if (!antwoordText) antwoordText = response.text || "";
+      } catch (geminiErr) {
+        console.error("[Regelgeving] Gemini failed, trying OpenAI fallback:", geminiErr);
+        if (process.env.OPENAI_API_KEY) {
+          const OpenAI = (await import("openai")).default;
+          const openai = new OpenAI();
+          const completion = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userPrompt },
+            ],
+            max_tokens: 300,
+            temperature: 0.5,
+          });
+          antwoordText = completion.choices[0]?.message?.content || "";
+        } else {
+          antwoordText = `Voor ${branche} in het kader van ${onderwerp} zijn er specifieke regels van toepassing. Controleer de relevante wetgeving via wetten.overheid.nl of vraag een uittreksel op via de Wet open overheid (Woo). Neem contact op met uw gemeente of de bevoegde toezichthouder voor een concreet advies.`;
+        }
+      }
+
+      const antwoord = antwoordText || "Ik kon helaas geen antwoord genereren. Probeer het later opnieuw.";
+      res.json({ antwoord });
+    } catch (err: any) {
+      console.error("Regelgeving check error:", err);
+      res.status(500).json({ error: "Kon geen antwoord genereren" });
+    }
+  });
+
   // Brief Analyse - gestructureerde analyse van overheidsbrieven
   app.post("/api/brief-analyse", requireAuth, async (req, res) => {
     try {

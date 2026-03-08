@@ -15,6 +15,10 @@ export default function HomePage() {
   const [botStad, setBotStad] = useState("");
   const [botAntwoord, setBotAntwoord] = useState("");
   const [botLoading, setBotLoading] = useState(false);
+  const [regelgevingBranche, setRegelgevingBranche] = useState("");
+  const [regelgevingOnderwerp, setRegelgevingOnderwerp] = useState("");
+  const [regelgevingAntwoord, setRegelgevingAntwoord] = useState("");
+  const [regelgevingLoading, setRegelgevingLoading] = useState(false);
   const [showCookieBanner, setShowCookieBanner] = useState(false);
 
   useEffect(() => {
@@ -43,6 +47,25 @@ export default function HomePage() {
       setBotAntwoord("Kon geen verbinding maken. Probeer het later opnieuw.");
     } finally {
       setBotLoading(false);
+    }
+  };
+
+  const handleRegelgevingCheck = async () => {
+    if (!regelgevingBranche.trim() || !regelgevingOnderwerp.trim()) return;
+    setRegelgevingLoading(true);
+    setRegelgevingAntwoord("");
+    try {
+      const res = await fetch("/api/regelgeving/check", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ branche: regelgevingBranche.trim(), onderwerp: regelgevingOnderwerp.trim() }),
+      });
+      const data = await res.json();
+      setRegelgevingAntwoord(data.antwoord || data.error || "Geen antwoord ontvangen.");
+    } catch {
+      setRegelgevingAntwoord("Kon geen verbinding maken. Probeer het later opnieuw.");
+    } finally {
+      setRegelgevingLoading(false);
     }
   };
 
@@ -237,6 +260,65 @@ export default function HomePage() {
                 {botAntwoord && (
                   <div className="rounded-xl p-4 text-sm leading-relaxed" style={{ background: "rgba(31,95,174,.05)", border: "1px solid rgba(31,95,174,.12)", color: "#334155" }} data-testid="text-bot-antwoord">
                     {botAntwoord}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Regelgeving-check ── */}
+        <section data-testid="section-regelgeving-check" style={{ background: "#fff", borderTop: "1px solid #e8ecf2", borderBottom: "1px solid #e8ecf2" }}>
+          <div className="max-w-[1100px] mx-auto px-6 py-14">
+            <div className="grid md:grid-cols-[1fr_1.2fr] gap-10 items-start">
+              <div>
+                <div className="flex items-center gap-2.5 mb-3">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(31,95,174,.10)", color: "#1f5fae" }}>
+                    <Scale className="w-4 h-4" />
+                  </div>
+                  <h2 className="font-black text-lg" style={{ color: "#0f172a" }}>Regelgeving-check</h2>
+                </div>
+                <p style={{ color: "#64748b", fontSize: "14px", lineHeight: 1.75 }}>
+                  Vul je branche en een onderwerp in. Je krijgt direct uitleg over welke wet geldt, wat dat voor jou betekent, en welke stap je kunt zetten.
+                </p>
+              </div>
+              <div className="space-y-3">
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Je branche (bijv. Horeca)"
+                    value={regelgevingBranche}
+                    onChange={(e) => setRegelgevingBranche(e.target.value)}
+                    className="flex-1"
+                    data-testid="input-regelgeving-branche"
+                  />
+                  <Input
+                    placeholder="Onderwerp (bijv. terrasvergunning)"
+                    value={regelgevingOnderwerp}
+                    onChange={(e) => setRegelgevingOnderwerp(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleRegelgevingCheck()}
+                    className="flex-1"
+                    data-testid="input-regelgeving-onderwerp"
+                  />
+                </div>
+                <Button
+                  onClick={handleRegelgevingCheck}
+                  disabled={regelgevingLoading || !regelgevingBranche.trim() || !regelgevingOnderwerp.trim()}
+                  className="w-full font-bold"
+                  style={{ background: "#1f5fae" }}
+                  data-testid="button-regelgeving-check"
+                >
+                  {regelgevingLoading
+                    ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Analyse loopt...</>
+                    : <><Scale className="w-4 h-4 mr-2" />Controleer regelgeving</>
+                  }
+                </Button>
+                {regelgevingAntwoord && (
+                  <div
+                    className="rounded-xl p-4 text-sm leading-relaxed"
+                    style={{ background: "rgba(31,95,174,.05)", border: "1px solid rgba(31,95,174,.12)", color: "#334155" }}
+                    data-testid="text-regelgeving-antwoord"
+                  >
+                    {regelgevingAntwoord}
                   </div>
                 )}
               </div>
