@@ -170,10 +170,10 @@ export default function HomePage() {
                 {/* Items */}
                 <div className="p-4 space-y-2" style={{ background: "#f0f4f8" }}>
                   {[
-                    { icon: FileSearch, label: "Brief analyse", hint: "AI-analyse in seconden", iconColor: "#fff", bg: "#2563eb" },
-                    { icon: Activity, label: "Regio updates", hint: "Lokaal beleid en besluiten", iconColor: "#fff", bg: "#059669" },
-                    { icon: Globe, label: "Website check", hint: "Vindbaarheid controleren", iconColor: "#fff", bg: "#7c3aed" },
-                    { icon: Bot, label: "RegioBot", hint: "WOO & beleidsvragen", iconColor: "#fff", bg: "#ea580c" },
+                    { icon: FileSearch, label: "Brief analyse", hint: "Begrijp overheidsbrieven direct", iconColor: "#fff", bg: "#2563eb" },
+                    { icon: Activity, label: "Regio updates", hint: "Volg beleid en besluiten", iconColor: "#fff", bg: "#059669" },
+                    { icon: Globe, label: "Website check", hint: "Zichtbaar voor klanten", iconColor: "#fff", bg: "#7c3aed" },
+                    { icon: Bot, label: "RegioBot", hint: "Stel vragen over regelgeving", iconColor: "#fff", bg: "#ea580c" },
                   ].map((item, i) => (
                     <div
                       key={i}
