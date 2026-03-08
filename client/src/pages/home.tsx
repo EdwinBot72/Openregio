@@ -189,7 +189,7 @@ export default function HomePage() {
                       </div>
                       <div>
                         <div style={{ fontSize: "13px", fontWeight: 800, color: "#0f172a" }}>{item.label}</div>
-                        <div style={{ fontSize: "11px", color: "#94a3b8", marginTop: "1px" }}>{item.hint}</div>
+                        <div style={{ fontSize: "11px", color: "#0f172a", marginTop: "1px" }}>{item.hint}</div>
                       </div>
                       <div className="ml-auto w-2 h-2 rounded-full flex-shrink-0" style={{ background: item.bg }} />
                     </div>
