@@ -168,12 +168,12 @@ export default function HomePage() {
                 </div>
 
                 {/* Items */}
-                <div className="p-4 space-y-2" style={{ background: "#f4f6f9" }}>
+                <div className="p-4 space-y-2" style={{ background: "#f0f4f8" }}>
                   {[
-                    { icon: FileSearch, label: "Brief analyse", hint: "AI-analyse in seconden", accent: "#1f5fae", bg: "#eaf1fb" },
-                    { icon: Activity, label: "Regio updates", hint: "Lokaal beleid en besluiten", accent: "#0e9062", bg: "#e6f7f1" },
-                    { icon: Globe, label: "Website check", hint: "Vindbaarheid controleren", accent: "#7c3aed", bg: "#f0ebfd" },
-                    { icon: Bot, label: "RegioBot", hint: "WOO & beleidsvragen", accent: "#f28a1a", bg: "#fff4e6" },
+                    { icon: FileSearch, label: "Brief analyse", hint: "AI-analyse in seconden", iconColor: "#fff", bg: "#2563eb" },
+                    { icon: Activity, label: "Regio updates", hint: "Lokaal beleid en besluiten", iconColor: "#fff", bg: "#059669" },
+                    { icon: Globe, label: "Website check", hint: "Vindbaarheid controleren", iconColor: "#fff", bg: "#7c3aed" },
+                    { icon: Bot, label: "RegioBot", hint: "WOO & beleidsvragen", iconColor: "#fff", bg: "#ea580c" },
                   ].map((item, i) => (
                     <div
                       key={i}
@@ -183,7 +183,7 @@ export default function HomePage() {
                     >
                       <div
                         className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-                        style={{ background: item.bg, color: item.accent }}
+                        style={{ background: item.bg, color: item.iconColor }}
                       >
                         <item.icon className="w-4 h-4" />
                       </div>
@@ -191,7 +191,7 @@ export default function HomePage() {
                         <div style={{ fontSize: "13px", fontWeight: 800, color: "#0f172a" }}>{item.label}</div>
                         <div style={{ fontSize: "11px", color: "#94a3b8", marginTop: "1px" }}>{item.hint}</div>
                       </div>
-                      <div className="ml-auto w-2 h-2 rounded-full flex-shrink-0" style={{ background: item.accent, opacity: 0.5 }} />
+                      <div className="ml-auto w-2 h-2 rounded-full flex-shrink-0" style={{ background: item.bg }} />
                     </div>
                   ))}
                 </div>
