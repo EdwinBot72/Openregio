@@ -24,7 +24,7 @@ PostgreSQL, accessed via Drizzle ORM, is the primary database. Key data models i
 
 ### Authentication and Authorization
 
-The system implements JWT authentication with short-lived access tokens and rotating refresh tokens for security. `bcrypt` handles password hashing. Rate limiting is applied to login/registration. Role-Based Access Control (`requirePro` middleware) restricts features like RegioBot to Pro plan users.
+The system implements JWT authentication with short-lived access tokens and rotating refresh tokens for security. `bcrypt` handles password hashing. Rate limiting is applied to login/registration. Role-Based Access Control (`requirePro`, `requireAdmin` middleware) restricts features by plan and admin status. All auth logic is consolidated in `server/jwtAuth.ts` — dead legacy files (`simpleAuth.ts`, `auth.ts`, `middleware/auth.ts`) have been removed. Admin detection uses `user.role === "admin" || user.role === "master"` (DB-driven, no hardcoded emails). The master account has `role: "master"`.
 
 ### Core Features
 

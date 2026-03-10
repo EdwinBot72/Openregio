@@ -1,4 +1,24 @@
 import type { Express, Request, Response, NextFunction } from "express";
+
+declare global {
+  namespace Express {
+    interface Request {
+      user?: {
+        id: string;
+        email: string;
+        plan: string;
+        role: string;
+        firstName: string | null;
+        lastName: string | null;
+        businessName: string | null;
+        bio: string | null;
+        category: string | null;
+        mustCompleteOnboarding: boolean;
+        isAdmin: boolean;
+      };
+    }
+  }
+}
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
@@ -10,8 +30,6 @@ import { db } from "db";
 import { eq, and, lt, isNull } from "drizzle-orm";
 import { sendPasswordResetEmail, sendWelcomeEmail } from "./services/emailService";
 import { generateOnboardingToken } from "./utils/auth";
-
-const ADMIN_EMAIL = "edwin@stroombox.nl";
 
 const SALT_ROUNDS = 10;
 const ACCESS_TOKEN_EXPIRY = "15m";
@@ -145,7 +163,7 @@ function formatUserResponse(user: User) {
     bio: user.bio,
     category: user.category,
     mustCompleteOnboarding: user.mustCompleteOnboarding,
-    isAdmin: user.email === "edwin@stroombox.nl",
+    isAdmin: user.role === "admin" || user.role === "master",
   };
 }
 
@@ -476,14 +494,26 @@ function toAuthUser(user: User) {
     id: user.id,
     email: user.email,
     plan: user.plan || "basic",
+    role: user.role,
     firstName: user.firstName,
     lastName: user.lastName,
     businessName: user.businessName,
     bio: user.bio,
     category: user.category,
     mustCompleteOnboarding: user.mustCompleteOnboarding,
-    isAdmin: user.email === ADMIN_EMAIL,
+    isAdmin: user.role === "admin" || user.role === "master",
   };
+}
+
+export function requireAdmin(req: Request, res: Response, next: NextFunction) {
+  const token = req.cookies?.accessToken || req.headers.authorization?.replace("Bearer ", "");
+  if (!token) {
+    return res.status(401).json({ error: "Authenticatie vereist" });
+  }
+  if (!req.user?.isAdmin) {
+    return res.status(403).json({ error: "Alleen admin heeft toegang" });
+  }
+  next();
 }
 
 export function requireAuth(req: Request, res: Response, next: NextFunction) {

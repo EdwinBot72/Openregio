@@ -5,13 +5,14 @@ import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchem
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { createMollieClient } from "@mollie/api-client";
-import { setupJwtAuth, attachUser, requireAuth, requirePro, issueTokensForUser, clearTokenCookies, revokeAllUserTokens } from "./jwtAuth";
-import { requireAdmin } from "./middleware/auth";
+import { setupJwtAuth, attachUser, requireAuth, requireAdmin, requirePro, issueTokensForUser, clearTokenCookies, revokeAllUserTokens } from "./jwtAuth";
 import { seedMasterAccount } from "./seed";
 import { generateRandomPassword, generateOnboardingToken, getPlanPrice, getPlanDisplayName, generateReferralCode } from "./utils/auth";
 import { sendOnboardingEmail } from "./services/emailService";
 import bcrypt from "bcrypt";
-import { upload, uploadMemory, getDocumentType } from "./middleware/upload";
+import { uploadMemory, getDocumentType } from "./middleware/upload";
+import { objectStorageClient } from "./replit_integrations/object_storage";
+import { randomUUID } from "crypto";
 import { runRegioBot } from "./regiobot";
 import { db } from "db";
 import { eq, sql, gte, and, count } from "drizzle-orm";
@@ -960,7 +961,7 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
   });
 
   // BLOK 5: RegioBot document upload endpoint (Pro-only)
-  app.post("/api/regiobot/upload", requireAuth, checkDailyUploadLimit, upload.single('file'), async (req, res) => {
+  app.post("/api/regiobot/upload", requireAuth, checkDailyUploadLimit, uploadMemory.single('file'), async (req, res) => {
     try {
       if (!req.user) {
         return res.status(401).json({ error: "Niet geauthenticeerd" });
@@ -973,10 +974,28 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
       // Determine document type from mime type
       const docType = getDocumentType(req.file.mimetype);
 
+      // Upload buffer to Object Storage (private dir) instead of local disk
+      const privateDir = process.env.PRIVATE_OBJECT_DIR || "";
+      let storedPath = `local:${req.user.id}/${req.file.originalname}`;
+
+      if (privateDir) {
+        const ext = req.file.originalname.substring(req.file.originalname.lastIndexOf("."));
+        const objectId = randomUUID();
+        const fullPath = `${privateDir}/regiobot-docs/${req.user.id}/${objectId}${ext}`;
+        const parts = fullPath.replace(/^\//, "").split("/");
+        const bucketName = parts[0];
+        const objectName = parts.slice(1).join("/");
+
+        const bucket = objectStorageClient.bucket(bucketName);
+        const gcsFile = bucket.file(objectName);
+        await gcsFile.save(req.file.buffer, { contentType: req.file.mimetype });
+        storedPath = `/${fullPath.replace(/^\//, "")}`;
+      }
+
       // Store document metadata in database
       const document = await storage.createDocument({
         userId: req.user.id,
-        filePath: req.file.path,
+        filePath: storedPath,
         originalName: req.file.originalname,
         mimeType: req.file.mimetype,
         type: docType,
