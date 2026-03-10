@@ -2262,8 +2262,8 @@ Maak het verzoek professioneel en juridisch correct.`;
         email: userProfile.email,
       });
 
-      // Get base URL for redirects and webhooks
-      const baseUrl = getBaseUrl(req);
+      // Canonical public URL for webhooks and redirects
+      const publicUrl = process.env.PUBLIC_BASE_URL || getBaseUrl(req);
 
       // Create first payment to establish mandate
       const firstPayment = await mollieClient.payments.create({
@@ -2274,8 +2274,8 @@ Maak het verzoek professioneel en juridisch correct.`;
         customerId: customer.id,
         sequenceType: "first" as any,
         description: `OpenRegio ${plan === "pro" ? "Pro" : "Basic"} lidmaatschap`,
-        redirectUrl: returnUrl || `${baseUrl}/lidmaatschap`,
-        webhookUrl: `${baseUrl}/api/webhooks/mollie`,
+        redirectUrl: returnUrl || `${publicUrl}/lidmaatschap`,
+        webhookUrl: `${publicUrl}/api/webhooks/mollie`,
         metadata: {
           userId,
           plan

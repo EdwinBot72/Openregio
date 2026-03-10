@@ -2,7 +2,7 @@ import * as postmark from 'postmark';
 
 const POSTMARK_API_KEY = process.env.POSTMARK_API_KEY;
 const FROM_EMAIL = 'OpenRegio <info@openregio.nl>';
-const BASE_URL = process.env.APP_BASE_URL || 'https://openregio.replit.app';
+const BASE_URL = process.env.PUBLIC_BASE_URL || 'https://www.openregio.nl';
 
 let client: postmark.ServerClient | null = null;
 
