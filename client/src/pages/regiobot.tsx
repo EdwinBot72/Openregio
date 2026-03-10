@@ -123,7 +123,7 @@ export default function RegioBotPage() {
     const p = new URLSearchParams();
     if (selectedRegion && selectedRegion !== "all") p.set("region", selectedRegion);
     if (selectedAuthority && selectedAuthority !== "all") p.set("authority", selectedAuthority);
-    return `/api/woo/dossiers?${p.toString()}`;
+    return `/api/woo/library?${p.toString()}`;
   }, [selectedRegion, selectedAuthority]);
 
   const { data: dossiers = [] } = useQuery<DossierRow[]>({ queryKey: [dossiersUrl] });

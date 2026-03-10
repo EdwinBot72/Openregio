@@ -1,0 +1,146 @@
+De dubbele /api/woo/dossiers route zit er nog steeds in
+
+Dit is niet opgelost.
+
+Je hebt nog steeds:
+
+publieke GET /api/woo/dossiers
+
+authenticated GET /api/woo/dossiers
+
+Dat blijft een route-conflict.
+In Express wint de eerste match, dus dit is nog steeds architectonisch en functioneel fout.
+
+Hard oordeel: blocker.
+
+2. Crew authorisatie is nog steeds open
+
+Deze code staat er nog letterlijk:
+
+PUT /api/crew/applications/:id/status
+
+comment: TODO: Add authorization check
+
+Dus deze bug is niet gefixt.
+
+Hard oordeel: blocker.
+
+3. .replit lekt nog steeds gevoelige config
+
+De zwaarste keys lijken eruit, dat is goed.
+Maar in .replit staan nog steeds mail/public config values in [userenv.shared], zoals:
+
+SMTP_HOST
+
+SMTP_USER
+
+SMTP_FROM
+
+PUBLIC_BASE_URL
+
+APP_BASE_URL
+
+Dat is minder erg dan live Mollie secrets, maar nog steeds het verkeerde patroon.
+Secrets/config horen in Replit Secrets of duidelijke env-config buiten gedeelde projectconfig.
+
+Hard oordeel: niet netjes genoeg, maar geen absolute blocker als er geen wachtwoorden/tokens meer in staan.
+
+4. Upload-architectuur is half goed, half rommelig
+
+Je hebt nu Replit Object Storage routes, dat is positief.
+Maar server/middleware/upload.ts schrijft nog steeds naar lokale uploads/.
+
+Dus:
+
+er is nog steeds lokale disk uploadcode aanwezig
+
+dat is op autoscale een slecht patroon
+
+ik kan niet hard zeggen dat die code nergens meer actief gebruikt wordt zonder live flowtest
+
+Hard oordeel: nog steeds riskant tot lokale uploadcode eruit of aantoonbaar dood is.
+
+5. Hardcoded admin-email zit er nog steeds in
+
+Nog steeds aanwezig in meerdere files:
+
+server/jwtAuth.ts
+
+server/middleware/auth.ts
+
+server/simpleAuth.ts
+
+Dat betekent:
+
+role model is nog steeds niet schoon
+
+auth-stack is nog steeds vervuild
+
+adminrechten hangen nog steeds deels aan een mailstring
+
+Hard oordeel: geen directe showstopper, wel structureel slecht.
+
+6. Auth-stack is nog steeds versnipperd
+
+Je hebt nog steeds meerdere auth-paden:
+
+jwtAuth.ts
+
+simpleAuth.ts
+
+middleware/auth.ts
+
+Ook als niet alles actief is: zolang dit blijft bestaan, blijft de kans op inconsistent gedrag en verkeerde middleware groot.
+
+Hard oordeel: technisch schuldblok, nog niet opgeruimd.
+
+Mijn eindscore, zonder knuffels
+Security
+
+Verbeterd, maar niet af
+
+user-profile: beter
+
+billing: beter
+
+crew status auth: nog fout
+
+Replit deployment hygiene
+
+Nog niet strak genoeg
+
+.replit is schoner, maar nog niet clean
+
+uploads zijn niet eenduidig object-storage only
+
+API contracten
+
+Nog fout
+
+dubbele /api/woo/dossiers is nog steeds een echte bug
+
+Architectuur
+
+Nog te los
+
+meerdere auth-systemen
+
+hardcoded admin-mail
+
+lokale uploadcode blijft hangen
+
+Mijn harde conclusie
+
+Nee. Dit is nog niet “goed opgelost”.
+Ja, het is beter dan de vorige versie.
+Maar zolang deze twee niet dicht zijn, is mijn oordeel simpel:
+
+dubbele /api/woo/dossiers
+
+ontbrekende authorisatie op crew status update
+
+=> nog geen production go voor Replit
+
+Dus mijn directe antwoord is:
+
+Verbeterd? Ja. Klaar? Nee. Deploy-waardig? Nog niet.

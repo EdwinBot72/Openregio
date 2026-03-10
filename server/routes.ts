@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema, insertBedrijfsprofielSchema, regioBotChatSchema, visibilitySettingsSchema, DEFAULT_VISIBILITY_SETTINGS, insertCrewProfileSchema, insertCrewRequestSchema, insertCrewApplicationSchema, CREW_CATEGORIES, users, ragDocuments, documents, insertRegioDealSchema } from "@shared/schema";
+import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema, insertBedrijfsprofielSchema, regioBotChatSchema, visibilitySettingsSchema, DEFAULT_VISIBILITY_SETTINGS, insertCrewProfileSchema, insertCrewRequestSchema, insertCrewApplicationSchema, CREW_CATEGORIES, users, ragDocuments, documents, insertRegioDealSchema, crewApplications, crewRequests, bedrijfsprofielen } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { createMollieClient } from "@mollie/api-client";
@@ -1558,8 +1558,8 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
     }
   });
 
-  // WOO Dossiers - for RegioBot dossier selector with filters (collective library)
-  app.get("/api/woo/dossiers", async (req, res) => {
+  // WOO Library - public collective library for RegioBot dossier selector with filters
+  app.get("/api/woo/library", async (req, res) => {
     try {
       const { region, authority, q } = req.query as { region?: string; authority?: string; q?: string };
       
@@ -3036,7 +3036,25 @@ Maak het verzoek professioneel en juridisch correct.`;
         return res.status(400).json({ error: "Ongeldige status" });
       }
 
-      // TODO: Add authorization check - only request owner can update status
+      const userId = (req.user as any).id;
+      const isAdmin = (req.user as any).isAdmin;
+
+      // Resolve ownership: application → crewRequest → bedrijfsprofiel → gebruikerId
+      const [ownerRow] = await db
+        .select({ gebruikerId: bedrijfsprofielen.gebruikerId })
+        .from(crewApplications)
+        .innerJoin(crewRequests, eq(crewApplications.requestId, crewRequests.id))
+        .innerJoin(bedrijfsprofielen, eq(crewRequests.businessId, bedrijfsprofielen.id))
+        .where(eq(crewApplications.id, req.params.id));
+
+      if (!ownerRow) {
+        return res.status(404).json({ error: "Reactie niet gevonden" });
+      }
+
+      if (!isAdmin && ownerRow.gebruikerId !== userId) {
+        return res.status(403).json({ error: "Geen toegang" });
+      }
+
       const updated = await storage.updateCrewApplication(req.params.id, status);
       if (!updated) {
         return res.status(404).json({ error: "Reactie niet gevonden" });
