@@ -2159,9 +2159,14 @@ Maak het verzoek professioneel en juridisch correct.`;
   });
 
   // User Profile routes
-  app.get("/api/user-profile/:id", async (req, res) => {
+  app.get("/api/user-profile/:id", requireAuth, async (req, res) => {
     try {
-      const profile = await storage.getUserProfile(req.params.id);
+      const requestedId = req.params.id;
+      const caller = req.user as any;
+      if (caller.id !== requestedId && !caller.isAdmin) {
+        return res.status(403).json({ error: "Toegang geweigerd" });
+      }
+      const profile = await storage.getUserProfile(requestedId);
       if (!profile) {
         return res.status(404).json({ error: "User profile not found" });
       }
@@ -2171,7 +2176,7 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
-  app.get("/api/user-profile/email/:email", async (req, res) => {
+  app.get("/api/user-profile/email/:email", requireAuth, requireAdmin, async (req, res) => {
     try {
       const profile = await storage.getUserProfileByEmail(req.params.email);
       if (!profile) {
@@ -2183,10 +2188,14 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
-  app.post("/api/user-profile", async (req, res) => {
+  app.post("/api/user-profile", requireAuth, async (req, res) => {
     try {
+      const caller = req.user as any;
       const validatedData = insertUserProfileSchema.parse(req.body);
-      const profile = await storage.createUserProfile(validatedData);
+      if (validatedData.userId && validatedData.userId !== caller.id && !caller.isAdmin) {
+        return res.status(403).json({ error: "Toegang geweigerd" });
+      }
+      const profile = await storage.createUserProfile({ ...validatedData, userId: caller.id });
       res.status(201).json(profile);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -2196,10 +2205,15 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
-  app.patch("/api/user-profile/:id", async (req, res) => {
+  app.patch("/api/user-profile/:id", requireAuth, async (req, res) => {
     try {
+      const requestedId = req.params.id;
+      const caller = req.user as any;
+      if (caller.id !== requestedId && !caller.isAdmin) {
+        return res.status(403).json({ error: "Toegang geweigerd" });
+      }
       const validatedData = insertUserProfileSchema.partial().parse(req.body);
-      const profile = await storage.updateUserProfile(req.params.id, validatedData);
+      const profile = await storage.updateUserProfile(requestedId, validatedData);
       if (!profile) {
         return res.status(404).json({ error: "User profile not found" });
       }
@@ -2213,21 +2227,22 @@ Maak het verzoek professioneel en juridisch correct.`;
   });
 
   // Billing & Subscription routes
-  app.post("/api/billing/create-checkout", async (req, res) => {
+  app.post("/api/billing/create-checkout", requireAuth, async (req, res) => {
     try {
       if (!mollieClient) {
         return res.status(503).json({ error: "Payment provider not configured. Please contact administrator." });
       }
 
-      // Validate request with Zod
+      const userId = (req.user as any).id;
+
+      // Validate request with Zod — userId comes from session, not body
       const checkoutSchema = z.object({
-        userId: z.string().min(1, "userId is required"),
         plan: z.enum(["basic", "pro"], { required_error: "plan must be 'basic' or 'pro'" }),
         returnUrl: z.string().url().optional()
       });
 
       const validatedData = checkoutSchema.parse(req.body);
-      const { userId, plan, returnUrl } = validatedData;
+      const { plan, returnUrl } = validatedData;
 
       // Get or create user profile
       const userProfile = await storage.getUserProfile(userId);
@@ -2291,15 +2306,10 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
-  app.get("/api/billing/subscription", async (req, res) => {
+  app.get("/api/billing/subscription", requireAuth, async (req, res) => {
     try {
-      const { userId } = req.query;
-      
-      if (!userId) {
-        return res.status(400).json({ error: "userId is required" });
-      }
-
-      const subscription = await storage.getSubscription(userId as string);
+      const userId = (req.user as any).id;
+      const subscription = await storage.getSubscription(userId);
       
       if (!subscription) {
         return res.status(404).json({ error: "No subscription found" });
