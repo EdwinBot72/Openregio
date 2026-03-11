@@ -38,6 +38,10 @@ import BlogsPage from "@/pages/blogs";
 import AdminBlogsPage from "@/pages/admin/blogs";
 import AdminCommissionsPage from "@/pages/admin/commissions";
 import AdminUsersPage from "@/pages/admin/users";
+import AdminIndexPage from "@/pages/admin/index";
+import AdminWooPage from "@/pages/admin/woo";
+import AdminRegiosPage from "@/pages/admin/regios";
+import AdminInzichtPage from "@/pages/admin/inzicht";
 import AffiliatePage from "@/pages/affiliate";
 import ForgotPasswordPage from "@/pages/forgot-password";
 import ResetPasswordPage from "@/pages/reset-password";
@@ -104,6 +108,10 @@ function AuthenticatedRouter() {
       <Route path="/regiocrew" component={RegioCrewPage} />
       <Route path="/affiliate" component={AffiliatePage} />
       <Route path="/beleidsmonitor" component={BeleidsmonitorPage} />
+      <Route path="/admin" component={AdminIndexPage} />
+      <Route path="/admin/woo" component={AdminWooPage} />
+      <Route path="/admin/regios" component={AdminRegiosPage} />
+      <Route path="/admin/inzicht" component={AdminInzichtPage} />
       <Route path="/admin/blogs" component={AdminBlogsPage} />
       <Route path="/admin/commissions" component={AdminCommissionsPage} />
       <Route path="/admin/users" component={AdminUsersPage} />

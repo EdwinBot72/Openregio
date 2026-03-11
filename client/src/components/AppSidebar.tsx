@@ -38,6 +38,8 @@ import {
   HandshakeIcon,
   Newspaper,
   Activity,
+  BarChart2,
+  ShieldCheck,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -112,6 +114,60 @@ const navSections: NavSection[] = [
     ],
   },
 ];
+
+const adminSubItems = [
+  { title: "Admin Cockpit", url: "/admin", icon: ShieldCheck },
+  { title: "Woo-monitoring", url: "/admin/woo", icon: Gavel },
+  { title: "Regio-beheer", url: "/admin/regios", icon: MapPin },
+  { title: "Platform-inzicht", url: "/admin/inzicht", icon: BarChart2 },
+  { title: "Gebruikers", url: "/admin/users", icon: Users },
+];
+
+function AdminNavSection({ currentPath }: { currentPath: string }) {
+  const isActive = currentPath.startsWith("/admin");
+  const [open, setOpen] = useState(isActive);
+  return (
+    <SidebarMenuItem>
+      <SidebarMenuButton
+        isActive={isActive && !open}
+        onClick={() => setOpen((v) => !v)}
+        data-testid="toggle-nav-admin"
+        className="w-full justify-between"
+      >
+        <span className="flex items-center gap-2">
+          <Shield className="h-4 w-4" />
+          <span>Beheer</span>
+        </span>
+        {open ? (
+          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+        ) : (
+          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+        )}
+      </SidebarMenuButton>
+      {open && (
+        <SidebarMenuSub>
+          {adminSubItems.map((item) => {
+            const subActive = currentPath === item.url || (item.url !== "/admin" && currentPath.startsWith(item.url + "/"));
+            return (
+              <SidebarMenuSubItem key={item.url}>
+                <SidebarMenuSubButton
+                  asChild
+                  isActive={subActive}
+                  data-testid={`link-admin-${item.url.replace(/\//g, "-").replace(/^-/, "")}`}
+                >
+                  <a href={item.url} className="flex items-center gap-2">
+                    <item.icon className="h-3.5 w-3.5" />
+                    <span>{item.title}</span>
+                  </a>
+                </SidebarMenuSubButton>
+              </SidebarMenuSubItem>
+            );
+          })}
+        </SidebarMenuSub>
+      )}
+    </SidebarMenuItem>
+  );
+}
 
 function NavSectionItem({
   section,
@@ -277,18 +333,7 @@ export function AppSidebar() {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               {user?.isAdmin && (
-                <SidebarMenuItem>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location.startsWith("/admin")}
-                    data-testid="link-admin"
-                  >
-                    <a href="/admin/users" className="flex items-center gap-2">
-                      <Shield className="h-4 w-4" />
-                      <span>Beheer</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
+                <AdminNavSection currentPath={location} />
               )}
             </SidebarMenu>
           </SidebarGroupContent>

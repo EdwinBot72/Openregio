@@ -3832,6 +3832,206 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
+  // ─── ADMIN COCKPIT ─────────────────────────────────────────────────────────
+
+  // GET /api/admin/stats — platform overview stats
+  app.get("/api/admin/stats", requireAuth, requireAdmin, async (_req, res) => {
+    try {
+      const [userStats, wooStats, regionCount, crewCount, newUsers] = await Promise.all([
+        db.execute(sql`SELECT plan, COUNT(*)::int AS cnt FROM users WHERE deleted_at IS NULL GROUP BY plan`),
+        db.execute(sql`SELECT status, COUNT(*)::int AS cnt FROM woo_requests GROUP BY status`),
+        db.execute(sql`SELECT COUNT(*)::int AS cnt FROM regions`),
+        db.execute(sql`SELECT COUNT(*)::int AS cnt FROM crew_profiles`),
+        db.execute(sql`SELECT COUNT(*)::int AS cnt FROM users WHERE deleted_at IS NULL AND created_at > NOW() - INTERVAL '30 days'`),
+      ]);
+      const byPlan: Record<string, number> = {};
+      for (const row of userStats.rows as any[]) byPlan[row.plan || "basic"] = row.cnt;
+      const byStatus: Record<string, number> = {};
+      for (const row of wooStats.rows as any[]) byStatus[row.status || "sent"] = row.cnt;
+      res.json({
+        users: { total: Object.values(byPlan).reduce((a, b) => a + b, 0), byPlan },
+        woo: { total: Object.values(byStatus).reduce((a, b) => a + b, 0), byStatus },
+        regions: (regionCount.rows[0] as any)?.cnt || 0,
+        crewProfiles: (crewCount.rows[0] as any)?.cnt || 0,
+        newUsersLast30Days: (newUsers.rows[0] as any)?.cnt || 0,
+      });
+    } catch (err: any) {
+      console.error("Admin stats error:", err);
+      res.status(500).json({ error: "Kon statistieken niet ophalen" });
+    }
+  });
+
+  // GET /api/admin/woo/stats — woo monitoring stats
+  app.get("/api/admin/woo/stats", requireAuth, requireAdmin, async (_req, res) => {
+    try {
+      const [byRegion, byCategory, byMonth] = await Promise.all([
+        db.execute(sql`
+          SELECT COALESCE(r.name, 'Onbekend') AS name, COUNT(wr.id)::int AS cnt
+          FROM woo_requests wr
+          LEFT JOIN regions r ON r.id = wr.region_id
+          GROUP BY r.name ORDER BY cnt DESC LIMIT 8
+        `),
+        db.execute(sql`
+          SELECT COALESCE(wc.label, wr.category_slug, 'Onbekend') AS name, COUNT(wr.id)::int AS cnt
+          FROM woo_requests wr
+          LEFT JOIN woo_categories wc ON wc.slug = wr.category_slug
+          GROUP BY wc.label, wr.category_slug ORDER BY cnt DESC LIMIT 8
+        `),
+        db.execute(sql`
+          SELECT TO_CHAR(DATE_TRUNC('month', created_at), 'Mon YYYY') AS month,
+                 DATE_TRUNC('month', created_at) AS sort_key,
+                 COUNT(*)::int AS cnt
+          FROM woo_requests
+          WHERE created_at > NOW() - INTERVAL '6 months'
+          GROUP BY DATE_TRUNC('month', created_at)
+          ORDER BY sort_key ASC
+        `),
+      ]);
+      res.json({
+        byRegion: byRegion.rows,
+        byCategory: byCategory.rows,
+        byMonth: byMonth.rows,
+      });
+    } catch (err: any) {
+      console.error("Admin woo stats error:", err);
+      res.status(500).json({ error: "Kon Woo-statistieken niet ophalen" });
+    }
+  });
+
+  // GET /api/admin/woo/requests — all woo requests list
+  app.get("/api/admin/woo/requests", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const limit = Math.min(parseInt((req.query.limit as string) || "50"), 100);
+      const offset = parseInt((req.query.offset as string) || "0");
+      const rows = await db.execute(sql`
+        SELECT wr.id, wr.title, wr.status, wr.reference_code,
+               wr.created_at, wr.sent_at,
+               COALESCE(rg.name, '') AS region,
+               COALESCE(au.name, '') AS authority,
+               COALESCE(wc.label, wr.category_slug, '') AS category
+        FROM woo_requests wr
+        LEFT JOIN regions rg ON rg.id = wr.region_id
+        LEFT JOIN authorities au ON au.id = wr.authority_id
+        LEFT JOIN woo_categories wc ON wc.slug = wr.category_slug
+        ORDER BY wr.created_at DESC
+        LIMIT ${limit} OFFSET ${offset}
+      `);
+      const total = await db.execute(sql`SELECT COUNT(*)::int AS cnt FROM woo_requests`);
+      res.json({ requests: rows.rows, total: (total.rows[0] as any)?.cnt || 0 });
+    } catch (err: any) {
+      console.error("Admin woo requests error:", err);
+      res.status(500).json({ error: "Kon Woo-verzoeken niet ophalen" });
+    }
+  });
+
+  // GET /api/admin/regions — list all regions
+  app.get("/api/admin/regions", requireAuth, requireAdmin, async (_req, res) => {
+    try {
+      const rows = await db.execute(sql`
+        SELECT r.id, r.name, r.slug,
+               (SELECT COUNT(*)::int FROM woo_requests wr WHERE wr.region_id = r.id) AS woo_count
+        FROM regions r ORDER BY r.name ASC
+      `);
+      res.json(rows.rows);
+    } catch (err: any) {
+      console.error("Admin regions error:", err);
+      res.status(500).json({ error: "Kon regio's niet ophalen" });
+    }
+  });
+
+  // POST /api/admin/regions — create region
+  app.post("/api/admin/regions", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { name, slug } = req.body as { name: string; slug: string };
+      if (!name || !slug) return res.status(400).json({ error: "Naam en slug zijn verplicht" });
+      const rows = await db.execute(sql`
+        INSERT INTO regions (name, slug) VALUES (${name}, ${slug})
+        RETURNING id, name, slug
+      `);
+      res.json(rows.rows[0]);
+    } catch (err: any) {
+      if (err.code === "23505") return res.status(409).json({ error: "Slug bestaat al" });
+      console.error("Admin create region error:", err);
+      res.status(500).json({ error: "Kon regio niet aanmaken" });
+    }
+  });
+
+  // PATCH /api/admin/regions/:id — update region
+  app.patch("/api/admin/regions/:id", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { name, slug } = req.body as { name?: string; slug?: string };
+      if (!name && !slug) return res.status(400).json({ error: "Geen wijzigingen opgegeven" });
+      const rows = await db.execute(sql`
+        UPDATE regions SET
+          name = COALESCE(${name || null}, name),
+          slug = COALESCE(${slug || null}, slug)
+        WHERE id = ${id}
+        RETURNING id, name, slug
+      `);
+      if (rows.rows.length === 0) return res.status(404).json({ error: "Regio niet gevonden" });
+      res.json(rows.rows[0]);
+    } catch (err: any) {
+      if (err.code === "23505") return res.status(409).json({ error: "Slug bestaat al" });
+      console.error("Admin update region error:", err);
+      res.status(500).json({ error: "Kon regio niet bijwerken" });
+    }
+  });
+
+  // DELETE /api/admin/regions/:id — delete region
+  app.delete("/api/admin/regions/:id", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      await db.execute(sql`DELETE FROM regions WHERE id = ${id}`);
+      res.json({ success: true });
+    } catch (err: any) {
+      console.error("Admin delete region error:", err);
+      res.status(500).json({ error: "Kon regio niet verwijderen" });
+    }
+  });
+
+  // GET /api/admin/inzicht — platform analytics
+  app.get("/api/admin/inzicht", requireAuth, requireAdmin, async (_req, res) => {
+    try {
+      const [userGrowth, wooGrowth, topWooCategories, planDistribution] = await Promise.all([
+        db.execute(sql`
+          SELECT TO_CHAR(DATE_TRUNC('month', created_at), 'Mon YYYY') AS month,
+                 DATE_TRUNC('month', created_at) AS sort_key,
+                 COUNT(*)::int AS cnt
+          FROM users WHERE deleted_at IS NULL
+          AND created_at > NOW() - INTERVAL '6 months'
+          GROUP BY DATE_TRUNC('month', created_at)
+          ORDER BY sort_key ASC
+        `),
+        db.execute(sql`
+          SELECT TO_CHAR(DATE_TRUNC('month', created_at), 'Mon YYYY') AS month,
+                 DATE_TRUNC('month', created_at) AS sort_key,
+                 COUNT(*)::int AS cnt
+          FROM woo_requests
+          WHERE created_at > NOW() - INTERVAL '6 months'
+          GROUP BY DATE_TRUNC('month', created_at)
+          ORDER BY sort_key ASC
+        `),
+        db.execute(sql`
+          SELECT COALESCE(wc.label, wr.category_slug, 'Onbekend') AS name, COUNT(wr.id)::int AS cnt
+          FROM woo_requests wr
+          LEFT JOIN woo_categories wc ON wc.slug = wr.category_slug
+          GROUP BY wc.label, wr.category_slug ORDER BY cnt DESC LIMIT 5
+        `),
+        db.execute(sql`SELECT plan, COUNT(*)::int AS cnt FROM users WHERE deleted_at IS NULL GROUP BY plan`),
+      ]);
+      res.json({
+        userGrowth: userGrowth.rows,
+        wooGrowth: wooGrowth.rows,
+        topWooCategories: topWooCategories.rows,
+        planDistribution: planDistribution.rows,
+      });
+    } catch (err: any) {
+      console.error("Admin inzicht error:", err);
+      res.status(500).json({ error: "Kon inzicht niet ophalen" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

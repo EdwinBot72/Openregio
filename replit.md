@@ -38,6 +38,7 @@ The system implements JWT authentication with short-lived access tokens and rota
 -   **Brief Analyse**: An AI function using Gemini 2.5-flash (with gpt-4o-mini fallback) to analyze government letters, extracting key information like sender, document type, legal basis, and recommended actions.
 -   **Gemeente-updates**: Displays official publications per municipality from the KOOP SRU API (overheid.nl), with in-memory caching and search functionality.
 -   **Regio Deals**: Manages exclusive member deals and collective agreements via a `regio_deals` database table, with admin management and a dedicated member interface.
+-   **Admin Cockpit**: Central admin dashboard at `/admin` with platform stats and navigation to all admin sections. Sub-pages: Woo-monitoring (`/admin/woo`), Regio-beheer (`/admin/regios`), Platform-inzicht (`/admin/inzicht`), Gebruikers (`/admin/users`), Blogs, Commissies, Regio Deals. All require `requireAdmin` middleware.
 
 ### Security and Observability
 
