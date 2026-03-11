@@ -5,6 +5,14 @@ import { setupVite, serveStatic, log } from "./vite";
 import { securityHeaders } from "./middleware/security";
 import { runMigrations } from "./db-migrate";
 
+// Use Replit-managed OpenAI key if the direct secret is not set
+if (!process.env.OPENAI_API_KEY && process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
+  process.env.OPENAI_API_KEY = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;
+}
+if (!process.env.OPENAI_BASE_URL && process.env.AI_INTEGRATIONS_OPENAI_BASE_URL) {
+  process.env.OPENAI_BASE_URL = process.env.AI_INTEGRATIONS_OPENAI_BASE_URL;
+}
+
 const app = express();
 
 // Security headers middleware (privacy-first, geen trackers)

@@ -1,0 +1,205 @@
+Deployment-run klopt nu niet helemaal
+
+In .replit staat nu:
+
+build: npm run build
+
+run: NODE_ENV=production node dist/index.js
+
+Maar in DEPLOYMENT.md staat juist dat je deploy via scripts/deploy.sh wilt laten lopen, zodat de DB eerst wordt gesynct.
+
+Er is al een script aanwezig:
+scripts/deploy.sh
+
+draait drizzle-kit push --force
+
+start daarna npm run start
+
+Issue: dat script wordt nu niet gebruikt door deployment.
+
+Fix
+Zet in .replit dit:
+
+[deployment]
+deploymentTarget = "autoscale"
+build = ["npm", "run", "build"]
+run = ["sh", "scripts/deploy.sh"]
+
+Waarom dit telt:
+anders kan je deploy live komen terwijl je productie-DB nog niet gelijk loopt met je schema.
+
+2. SESSION_SECRET is hard required
+
+In server/jwtAuth.ts crasht de app direct als SESSION_SECRET ontbreekt.
+
+Dus in Replit Secrets moet minimaal staan:
+
+SESSION_SECRET
+
+Maak hier gewoon een lange random string van 32+ chars.
+
+Zonder deze start auth niet.
+
+3. DATABASE_URL moet in deployment beschikbaar zijn
+
+In db/index.ts en drizzle.config.ts wordt hard gefaald als DATABASE_URL mist.
+
+Dus:
+
+Replit Postgres moet gekoppeld zijn
+
+deployment environment moet echt die DATABASE_URL meekrijgen
+
+Zonder DB start of werkt de app niet goed.
+
+Waarschijnlijk verplicht voor jouw app-flow
+4. OPENAI_API_KEY voor AI-features
+
+De app start waarschijnlijk wel zonder OpenAI, maar meerdere routes geven dan errors of 503 op AI-functionaliteit.
+
+Dus als je dit live als echte productervaring wilt:
+
+OPENAI_API_KEY
+
+Anders werkt een deel van:
+
+analyses
+
+RegioBot
+
+document AI-flow
+niet goed.
+
+5. MOLLIE_API_KEY voor betalingen
+
+In server/routes.ts wordt Mollie alleen geactiveerd als key bestaat.
+
+Dus:
+
+zonder MOLLIE_API_KEY draait de app waarschijnlijk deels
+
+maar betaalflow / membership onboarding gaat stuk of blijft incompleet
+
+Voor live:
+
+MOLLIE_API_KEY
+
+waarschijnlijk ook MOLLIE_PROFILE_ID als je webhook/payment flow dat verwacht
+
+Eén opvallende mismatch
+6. Mail-config is nu inconsistent
+
+In .replit zie ik gedeelde vars zoals:
+
+SMTP_HOST
+
+SMTP_PORT
+
+SMTP_USER
+
+SMTP_FROM
+
+Maar in de code gebruikt server/services/emailService.ts Postmark, niet SMTP.
+
+De code kijkt naar:
+
+POSTMARK_API_KEY
+
+Dus nu heb je een mismatch:
+
+config suggereert SMTP
+
+code verwacht Postmark
+
+Keuze maken:
+
+of je zet POSTMARK_API_KEY en gebruikt de huidige code
+
+of je herschrijft mailservice naar nodemailer/SMTP
+
+Zoals het nu staat:
+SMTP vars alleen zetten is niet genoeg.
+
+Replit-specifieke checkpunten
+7. Secrets niet in userenv.shared laten staan als ze gevoelig zijn
+
+In .replit staan nu publiek gedeelde configwaarden zoals mailhost/user en base URLs.
+Dat zijn niet per se directe secrets, maar ik zou alles wat operationeel gevoelig is liever naar Replit Secrets trekken.
+
+Hou in .replit alleen neutrale defaults:
+
+PORT
+
+eventueel PUBLIC_BASE_URL
+
+eventueel APP_BASE_URL
+
+Maar dit liever als echte deployment vars/secrets beheren:
+
+SESSION_SECRET
+
+DATABASE_URL
+
+OPENAI_API_KEY
+
+MOLLIE_API_KEY
+
+POSTMARK_API_KEY
+
+8. Productie-DB één keer echt syncen
+
+Er is al migration logic, maar ik zou alsnog 1 harde check doen in deployment console:
+
+npx drizzle-kit push --force
+
+Waarom:
+in je eigen docs staat al dat production schema anders achter kan lopen.
+
+9. Opschonen van de zip/workspace
+
+Niet per se blocker voor Replit-run, maar wel slim:
+
+.git/ eruit
+
+.local/ eruit
+
+zware attached_assets/ reviewen
+
+oude dist/ liever niet meeleveren als source of truth
+
+Dat maakt deploys cleaner en minder onduidelijk.
+
+Mijn harde prioriteitlijst
+Moet eerst
+
+.replit deployment laten starten via scripts/deploy.sh
+
+DATABASE_URL checken
+
+SESSION_SECRET zetten
+
+Daarna direct
+
+OPENAI_API_KEY zetten
+
+MOLLIE_API_KEY zetten
+
+beslissen: Postmark of SMTP
+
+Daarna polish
+
+production DB sync valideren
+
+ballast uit workspace halen
+
+Praktisch: minimale live set voor Replit
+
+Dit zou ik minimaal zetten in Secrets:
+
+DATABASE_URL=...
+SESSION_SECRET=...
+OPENAI_API_KEY=...
+MOLLIE_API_KEY=...
+POSTMARK_API_KEY=...
+PUBLIC_BASE_URL=https://www.openregio.nl
+APP_BASE_URL=https://open-regio.replit.app
