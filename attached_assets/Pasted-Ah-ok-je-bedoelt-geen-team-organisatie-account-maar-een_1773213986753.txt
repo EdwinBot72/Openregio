@@ -1,0 +1,287 @@
+Ah oké — je bedoelt **geen team/organisatie-account**, maar een **platform eigenaar / super admin account**.
+Dus jij kunt **alle gebruikers beheren**, **accounts maken**, **abonnementen aanpassen**, **accounts blokkeren of verwijderen**.
+
+Dat is gewoon een **platform admin / master account**.
+Dat moet je altijd hebben.
+
+Ik leg het simpel en praktisch uit.
+
+---
+
+# 1. Wat jouw Master account moet kunnen
+
+Dit is eigenlijk je **platform control panel**.
+
+### Gebruikers beheren
+
+* gebruiker zoeken
+* account bekijken
+* account aanmaken
+* account verwijderen
+* account blokkeren
+* wachtwoord reset
+
+### Abonnement beheren
+
+* Basic → Pro zetten
+* Pro → Basic zetten
+* Business / manual activeren
+* abonnement stopzetten
+* account blokkeren bij wanbetaling
+
+### Betaling controleren
+
+* Mollie status bekijken
+* handmatig abonnement geven
+* abonnement verlengen
+
+### Content beheren
+
+* Woo dossiers bekijken
+* projecten bekijken
+* posts verwijderen
+* misbruik modereren
+
+### Platform beheer
+
+* statistieken
+* nieuwe regio’s
+* instellingen
+
+---
+
+# 2. Hoe je dit technisch oplost
+
+Heel simpel.
+
+Voeg aan je user model een **role** toe.
+
+Bijvoorbeeld:
+
+```
+role
+
+USER
+ADMIN
+SUPER_ADMIN
+```
+
+Jij bent dan:
+
+```
+SUPER_ADMIN
+```
+
+Alle andere mensen:
+
+```
+USER
+```
+
+Eventueel moderators:
+
+```
+ADMIN
+```
+
+---
+
+# 3. Wat SUPER_ADMIN kan
+
+Alleen SUPER_ADMIN kan:
+
+* accounts aanmaken
+* accounts verwijderen
+* abonnement wijzigen
+* billing aanpassen
+* accounts blokkeren
+* gebruikers rollen aanpassen
+
+Dus bijvoorbeeld:
+
+```
+DELETE /admin/users/:id
+```
+
+alleen voor SUPER_ADMIN.
+
+---
+
+# 4. Admin dashboard (wat je nodig hebt)
+
+Maak een **admin pagina**.
+
+Bijvoorbeeld:
+
+```
+/admin
+```
+
+Met:
+
+### Gebruikers
+
+* lijst van alle accounts
+* filter
+* zoeken
+
+### Abonnementen
+
+* Basic
+* Pro
+* Business
+* verlopen accounts
+
+### Betalingen
+
+* Mollie status
+* handmatige accounts
+
+### Platform statistieken
+
+* aantal gebruikers
+* actieve abonnementen
+* nieuwe accounts
+
+---
+
+# 5. Accounts blokkeren bij niet betalen
+
+Dit moet automatisch kunnen.
+
+Bijvoorbeeld:
+
+```
+subscriptionStatus
+
+ACTIVE
+PAST_DUE
+CANCELLED
+BLOCKED
+```
+
+Als Mollie zegt:
+
+```
+subscription cancelled
+```
+
+dan zet je:
+
+```
+accountType = BASIC
+```
+
+of
+
+```
+accountStatus = BLOCKED
+```
+
+---
+
+# 6. Handmatig accounts maken
+
+Je wil waarschijnlijk ook:
+
+**"Nieuwe gebruiker aanmaken"**
+
+in admin.
+
+Dan kun je:
+
+* email invullen
+* wachtwoord instellen
+* account type kiezen
+
+Bijvoorbeeld:
+
+```
+Basic
+Pro
+Business
+```
+
+Dit is handig voor:
+
+* partners
+* pilots
+* klanten
+
+---
+
+# 7. Accounts verwijderen
+
+Super admin moet kunnen:
+
+* account verwijderen
+* account blokkeren
+* account opschorten
+
+Bijvoorbeeld:
+
+```
+status
+
+ACTIVE
+SUSPENDED
+DELETED
+```
+
+Suspended is vaak beter dan direct verwijderen.
+
+---
+
+# 8. Belangrijk beveiligingspunt
+
+Je moet **SUPER_ADMIN extreem beschermen**.
+
+Dus:
+
+* niet zichtbaar in UI
+* niet aanpasbaar via normale routes
+* liefst alleen jouw email
+
+Bijvoorbeeld:
+
+```
+edwin@...
+role = SUPER_ADMIN
+```
+
+---
+
+# 9. Wat jij eigenlijk bouwt
+
+Je platform heeft dus drie lagen:
+
+### Gebruiker
+
+normale ondernemer
+
+### Admin
+
+moderator / beheer
+
+### Super Admin
+
+jij → platform eigenaar
+
+---
+
+# Mijn eerlijke advies
+
+Je moet **een simpel admin dashboard bouwen** met:
+
+* users
+* subscriptions
+* content
+* stats
+
+Meer niet.
+
+Veel platforms maken hier een **mega CMS van**, dat is niet nodig.
+
+---
+
+Als je wilt kan ik ook laten zien **de 10 admin functies die elke SaaS eigenaar uiteindelijk nodig heeft**, want daar zitten een paar dingen bij waar bijna iedereen later spijt van krijgt als ze die niet meteen bouwen.

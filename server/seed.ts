@@ -9,7 +9,12 @@ export async function seedMasterAccount() {
     const existingMaster = await storage.getUserByEmail("edwin@stroombox.nl");
     
     if (existingMaster) {
-      console.log("✓ Master account already exists:", existingMaster.email);
+      if (existingMaster.plan !== "pro" || existingMaster.role !== "master") {
+        await storage.updateUser(existingMaster.id, { plan: "pro", role: "master" });
+        console.log("✓ Master account updated to pro/master:", existingMaster.email);
+      } else {
+        console.log("✓ Master account already exists:", existingMaster.email);
+      }
       return;
     }
     

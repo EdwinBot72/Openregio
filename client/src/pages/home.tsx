@@ -5,7 +5,7 @@ import { Link } from "wouter";
 import {
   FileSearch, Activity, Globe, Bot, Scale, FileText,
   MapPin, Check, Mail, Phone, MapPinned, Search, Loader2,
-  Briefcase, ShoppingBag, Building2, Target, Users
+  Briefcase, ShoppingBag, Building2, Target, Users, Gavel, ScanText
 } from "lucide-react";
 import logoImg from "@assets/ChatGPT_Image_15_feb_2026,_15_15_16_1771164937665.png";
 import footerLogoImg from "@assets/afbeelding_1771441188699.png";
@@ -119,14 +119,14 @@ export default function HomePage() {
                   style={{ fontSize: "clamp(30px, 4vw, 52px)", letterSpacing: "-1px", color: "#fff" }}
                   data-testid="text-hero-title"
                 >
-                  Grip op regels,<br />zichtbaarheid en<br />ondernemerschap<br />in je regio.
+                  Begrijp regels,<br />brieven en besluiten —<br />en neem actie.
                 </h1>
                 <p
                   className="mb-8"
                   style={{ color: "rgba(255,255,255,.82)", fontSize: "17px", lineHeight: 1.75, maxWidth: "44ch" }}
                   data-testid="text-hero-subtitle"
                 >
-                  OpenRegio helpt ondernemers begrijpen wat er verandert, hoe je met regels omgaat en hoe je zichtbaar blijft voor klanten.
+                  OpenRegio helpt ondernemers begrijpen wat de overheid doet — en er actie op nemen. Van brief tot Woo-verzoek, van beleid tot kans.
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <Link
@@ -170,10 +170,10 @@ export default function HomePage() {
                 {/* Items */}
                 <div className="p-4 space-y-2" style={{ background: "#f0f4f8" }}>
                   {[
-                    { icon: FileSearch, label: "Brief analyse", hint: "Begrijp overheidsbrieven direct", iconColor: "#fff", bg: "#2563eb" },
-                    { icon: Activity, label: "Regio updates", hint: "Volg beleid en besluiten", iconColor: "#fff", bg: "#059669" },
-                    { icon: Globe, label: "Website check", hint: "Zichtbaar voor klanten", iconColor: "#fff", bg: "#7c3aed" },
-                    { icon: Bot, label: "RegioBot", hint: "Stel vragen over regelgeving", iconColor: "#fff", bg: "#ea580c" },
+                    { icon: ScanText, label: "Brief analyse", hint: "Begrijp overheidsbrieven direct", iconColor: "#fff", bg: "#2563eb" },
+                    { icon: Gavel, label: "Woo-verzoek", hint: "Vraag informatie op bij overheid", iconColor: "#fff", bg: "#f28a1a" },
+                    { icon: Activity, label: "Regio-inzicht", hint: "Volg beleid, kansen en besluiten", iconColor: "#fff", bg: "#059669" },
+                    { icon: Bot, label: "RegioBot", hint: "Stel vragen over regelgeving", iconColor: "#fff", bg: "#7c3aed" },
                   ].map((item, i) => (
                     <div
                       key={i}
@@ -331,47 +331,94 @@ export default function HomePage() {
           <div className="max-w-[1100px] mx-auto px-6">
             <div className="text-center mb-14">
               <h2 className="font-black mb-3" style={{ fontSize: "clamp(24px, 3vw, 36px)", letterSpacing: "-0.5px" }} data-testid="text-oplossingen-title">
-                Eén plek voor regels, brieven en zichtbaarheid.
+                Drie tools die het verschil maken.
               </h2>
+              <p style={{ color: "#64748b", fontSize: "16px", maxWidth: "54ch", margin: "0 auto" }}>
+                Hier zit de echte waarde van OpenRegio.
+              </p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-6" data-testid="grid-oplossingen">
-              {[
-                {
-                  icon: Scale,
-                  titel: "Begrijp regels en brieven",
-                  tekst: "Analyseer brieven, begrijp regelgeving en zie welke stappen logisch zijn.",
-                  accent: "#1f5fae",
-                },
-                {
-                  icon: Globe,
-                  titel: "Houd je bedrijf zichtbaar",
-                  tekst: "Controleer je website en lokale vindbaarheid zodat klanten je blijven vinden.",
-                  accent: "#1f5fae",
-                },
-                {
-                  icon: Activity,
-                  titel: "Zie wat er gebeurt in je regio",
-                  tekst: "Volg veranderingen in beleid, projecten, subsidies en kansen voor ondernemers.",
-                  accent: "#1f5fae",
-                },
-              ].map((item, i) => (
-                <div
-                  key={i}
-                  className="rounded-2xl p-8"
-                  style={{ background: "#f8fafc", border: "1px solid #e8ecf2" }}
-                  data-testid={`card-oplossing-${i}`}
-                >
-                  <div
-                    className="w-11 h-11 rounded-xl flex items-center justify-center mb-5"
-                    style={{ background: "rgba(31,95,174,.10)", color: item.accent }}
-                  >
-                    <item.icon className="w-5 h-5" />
-                  </div>
-                  <h3 className="font-black mb-2" style={{ fontSize: "17px", color: "#0f172a" }}>{item.titel}</h3>
-                  <p style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.75, margin: 0 }}>{item.tekst}</p>
+
+              {/* 1. Brief analyse */}
+              <div
+                className="rounded-2xl p-8"
+                style={{ background: "#f0f6ff", border: "1px solid #c5d9f5" }}
+                data-testid="card-oplossing-0"
+              >
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(31,95,174,.12)", color: "#1f5fae" }}>
+                  <ScanText className="w-5 h-5" />
                 </div>
-              ))}
+                <h3 className="font-black mb-2" style={{ fontSize: "17px", color: "#0f172a" }}>Brief & besluit analyse</h3>
+                <p style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.75, marginBottom: "16px" }}>
+                  Elke ondernemer krijgt brieven van de overheid. Wij leggen ze uit.
+                </p>
+                <ul className="space-y-1.5">
+                  {["Begrijp direct wat een brief betekent", "Zie risico's en deadlines", "Ontvang aanbevolen acties"].map((b, i) => (
+                    <li key={i} className="flex items-center gap-2" style={{ fontSize: "13px", color: "#334155" }}>
+                      <Check className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#1f5fae" }} />
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-5">
+                  <span className="text-xs font-semibold px-2 py-1 rounded-full" style={{ background: "rgba(31,95,174,.10)", color: "#1f5fae" }}>Gratis te proberen</span>
+                </div>
+              </div>
+
+              {/* 2. Woo-verzoeken */}
+              <div
+                className="rounded-2xl p-8 relative"
+                style={{ background: "#fff8f0", border: "1px solid rgba(242,138,26,.30)" }}
+                data-testid="card-oplossing-1"
+              >
+                <div className="absolute top-5 right-5 px-2.5 py-0.5 rounded-full text-xs font-black" style={{ background: "#f28a1a", color: "#fff" }}>Pro</div>
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(242,138,26,.12)", color: "#f28a1a" }}>
+                  <Gavel className="w-5 h-5" />
+                </div>
+                <h3 className="font-black mb-2" style={{ fontSize: "17px", color: "#0f172a" }}>Woo-verzoeken</h3>
+                <p style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.75, marginBottom: "16px" }}>
+                  Jouw sterkste tool voor informatieopvraag bij de overheid — nu toegankelijk voor het MKB.
+                </p>
+                <ul className="space-y-1.5">
+                  {["Genereer een compleet Woo-verzoek", "Bouw dossiers op met documenten", "Volg de status van je verzoek"].map((b, i) => (
+                    <li key={i} className="flex items-center gap-2" style={{ fontSize: "13px", color: "#334155" }}>
+                      <Check className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#f28a1a" }} />
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-5">
+                  <span className="text-xs font-semibold px-2 py-1 rounded-full" style={{ background: "rgba(242,138,26,.10)", color: "#c07010" }}>Pro-bijdrager</span>
+                </div>
+              </div>
+
+              {/* 3. Regio-inzicht */}
+              <div
+                className="rounded-2xl p-8"
+                style={{ background: "#f0faf5", border: "1px solid #b3dfc8" }}
+                data-testid="card-oplossing-2"
+              >
+                <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(5,150,105,.10)", color: "#059669" }}>
+                  <Activity className="w-5 h-5" />
+                </div>
+                <h3 className="font-black mb-2" style={{ fontSize: "17px", color: "#0f172a" }}>Regio-inzicht</h3>
+                <p style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.75, marginBottom: "16px" }}>
+                  Jouw economische radar voor de regio — zie wat er speelt voordat anderen het weten.
+                </p>
+                <ul className="space-y-1.5">
+                  {["Lokale beleidsupdates per gemeente", "Aanbestedingen en subsidies", "Relevante projecten en kansen"].map((b, i) => (
+                    <li key={i} className="flex items-center gap-2" style={{ fontSize: "13px", color: "#334155" }}>
+                      <Check className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#059669" }} />
+                      {b}
+                    </li>
+                  ))}
+                </ul>
+                <div className="mt-5">
+                  <span className="text-xs font-semibold px-2 py-1 rounded-full" style={{ background: "rgba(5,150,105,.10)", color: "#047857" }}>Beschikbaar voor alle leden</span>
+                </div>
+              </div>
+
             </div>
           </div>
         </section>
@@ -387,10 +434,10 @@ export default function HomePage() {
                 </h2>
                 <ul className="space-y-4 mb-8">
                   {[
-                    { icon: FileSearch, tekst: "Brieven analyseren" },
-                    { icon: Activity, tekst: "Regels bekijken" },
-                    { icon: Bot, tekst: "Vragen stellen" },
-                    { icon: Globe, tekst: "Je website controleren" },
+                    { icon: ScanText, tekst: "Brieven analyseren" },
+                    { icon: Activity, tekst: "Regio-inzicht volgen" },
+                    { icon: Gavel, tekst: "Woo-verzoek opstellen" },
+                    { icon: Bot, tekst: "Vragen stellen aan RegioBot" },
                   ].map((item, i) => (
                     <li key={i} className="flex items-center gap-3" data-testid={`dashboard-feature-${i}`}>
                       <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(31,95,174,.08)", color: "#1f5fae" }}>
@@ -417,10 +464,10 @@ export default function HomePage() {
                   <p className="font-bold mb-4" style={{ fontSize: "11px", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.6px" }}>Snelle acties</p>
                   <div className="grid grid-cols-2 gap-3">
                     {[
-                      { icon: FileSearch, label: "Analyseer brief" },
-                      { icon: Activity, label: "Regio updates" },
-                      { icon: Bot, label: "Stel vraag" },
-                      { icon: Globe, label: "Website check" },
+                      { icon: ScanText, label: "Brief analyseren" },
+                      { icon: Gavel, label: "Woo-verzoek" },
+                      { icon: Activity, label: "Regio-inzicht" },
+                      { icon: Bot, label: "RegioBot" },
                     ].map((btn, i) => (
                       <div key={i} className="rounded-xl p-4 flex flex-col items-center gap-2 text-center" style={{ background: "#fff", border: "1px solid #e8ecf2" }} data-testid={`mockup-btn-${i}`}>
                         <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: i < 2 ? "rgba(31,95,174,.08)" : "rgba(242,138,26,.08)", color: i < 2 ? "#1f5fae" : "#f28a1a" }}>
@@ -501,7 +548,13 @@ export default function HomePage() {
                   Kies Basis-lid
                 </Link>
                 <ul className="space-y-3">
-                  {["Toegang tot regio updates", "Kennisbank", "Voorbeeld analyses", "Netwerk basis"].map((f, i) => (
+                  {[
+                    "Regio-inzicht (gemeenteupdates, beleid)",
+                    "Brief analyse (beperkt)",
+                    "RegioBot (beperkt)",
+                    "Woo uitleg & voorbeelden",
+                    "Samenwerken meekijken",
+                  ].map((f, i) => (
                     <li key={i} className="flex items-center gap-2.5">
                       <Check className="w-4 h-4 flex-shrink-0" style={{ color: "#1f5fae" }} />
                       <span style={{ fontSize: "14px", color: "#334155" }}>{f}</span>
@@ -522,7 +575,15 @@ export default function HomePage() {
                   Kies Pro-bijdrager
                 </Link>
                 <ul className="space-y-3">
-                  {["Alles van Basis", "Document upload", "Brief analyse", "Website check"].map((f, i) => (
+                  {[
+                    "Alles van Basis",
+                    "Brief analyse (volledig)",
+                    "RegioBot onbeperkt",
+                    "Woo-verzoek genereren",
+                    "Dossiers bouwen & beheren",
+                    "Website onderhoud & zichtbaarheid",
+                    "Projecten starten in RegioCrew",
+                  ].map((f, i) => (
                     <li key={i} className="flex items-center gap-2.5">
                       <Check className="w-4 h-4 flex-shrink-0" style={{ color: "#f28a1a" }} />
                       <span style={{ fontSize: "14px", color: "#334155" }}>{f}</span>
@@ -543,10 +604,10 @@ export default function HomePage() {
         >
           <div className="max-w-[640px] mx-auto px-6 text-center">
             <h2 className="font-black text-white mb-3" style={{ fontSize: "clamp(24px, 3vw, 36px)", letterSpacing: "-0.5px" }} data-testid="text-cta-title">
-              Ontdek wat er speelt in jouw regio.
+              Start met OpenRegio.
             </h2>
             <p className="mb-8" style={{ color: "rgba(255,255,255,.75)", fontSize: "16px", lineHeight: 1.7 }}>
-              Start eenvoudig en krijg overzicht in regels, brieven en zichtbaarheid.
+              Begrijp wat de overheid doet — en neem actie. Brieven, Woo-verzoeken, regio-inzicht.
             </p>
             <form
               className="flex flex-col sm:flex-row gap-3 justify-center"

@@ -43,6 +43,23 @@ The system implements JWT authentication with short-lived access tokens and rota
 
 Security measures include HSTS, Content-Security-Policy, secure cookie settings, input sanitization, type validation, and secure file uploads with MIME type validation and random filenames. Observability features structured JSON logging for server errors and client-side error boundaries.
 
+## Product Strategie — 3 Killer Features
+
+- **Simpele regel**: Basis = kijken en meedoen, Pro = tools gebruiken en initiatieven starten
+- **Feature matrix**:
+  | Feature | Basis | Pro |
+  |---|---|---|
+  | Regio-inzicht | ✔ | ✔ uitgebreid |
+  | Brief analyse | ✔ beperkt | ✔ volledig |
+  | RegioBot | ✔ beperkt | ✔ onbeperkt |
+  | Woo uitleg | ✔ | ✔ |
+  | Woo-verzoek maken | ❌ | ✔ |
+  | Woo dossiers | ❌ | ✔ |
+  | Bedrijfsprofiel | ✔ basis | ✔ uitgebreid |
+  | Website onderhoud | ❌ | ✔ |
+  | Samenwerken meedoen | ✔ | ✔ |
+  | Project starten | ❌ | ✔ |
+
 ## Homepage Redesign (March 2026)
 
 Nieuwe 7-sectie opbouw op basis van structuurdocument:
