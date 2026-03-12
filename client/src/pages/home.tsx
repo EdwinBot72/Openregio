@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
 import {
-  FileSearch, Activity, Globe, Bot, Scale, FileText,
-  MapPin, Check, Mail, Phone, MapPinned, Search, Loader2,
-  Briefcase, ShoppingBag, Building2, Target, Users, Gavel, ScanText
+  Activity, Globe, Bot, Scale, Check, Mail, Phone, MapPinned, Search, Loader2,
+  Briefcase, ShoppingBag, Building2, Target, Gavel, ScanText,
+  AlertCircle, Clock, EyeOff, CheckCircle2, ChevronRight, BarChart2
 } from "lucide-react";
 import logoImg from "@assets/ChatGPT_Image_15_feb_2026,_15_15_16_1771164937665.png";
 import footerLogoImg from "@assets/afbeelding_1771441188699.png";
@@ -83,15 +83,13 @@ export default function HomePage() {
             <Link href="/" className="flex items-center" data-testid="link-home-logo">
               <img src={logoImg} alt="OpenRegio" className="h-12 w-auto" />
             </Link>
-
             <nav className="hidden md:flex items-center gap-1" style={{ color: "#1e3a5f" }}>
               <a href="#home" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100" data-testid="link-nav-home">Home</a>
-              <a href="#probleem" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100" data-testid="link-nav-probleem">Het probleem</a>
-              <a href="#oplossingen" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100" data-testid="link-nav-oplossingen">Oplossingen</a>
-              <a href="#dashboard-uitleg" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100" data-testid="link-nav-dashboard">Dashboard</a>
-              <a href="#contact" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100" data-testid="link-nav-contact">Contact</a>
+              <a href="#diensten" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100" data-testid="link-nav-diensten">Diensten</a>
+              <a href="#probleem" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100" data-testid="link-nav-probleem">Herken je dit?</a>
+              <a href="#voor-wie" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100" data-testid="link-nav-voorwie">Voor wie</a>
+              <a href="#member" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100" data-testid="link-nav-lid">Abonnementen</a>
             </nav>
-
             <div className="flex items-center gap-2">
               <Link href="/login">
                 <Button variant="ghost" size="sm" className="text-sm font-semibold" data-testid="button-nav-login">Inloggen</Button>
@@ -112,38 +110,38 @@ export default function HomePage() {
         <section id="home" className="hero relative" data-testid="section-hero">
           <div className="max-w-[1100px] mx-auto px-6">
             <div className="grid md:grid-cols-[1fr_1fr] gap-12 py-20 md:py-28 items-center">
-
               <div>
                 <h1
                   className="font-black leading-tight mb-5"
                   style={{ fontSize: "clamp(30px, 4vw, 52px)", letterSpacing: "-1px", color: "#fff" }}
                   data-testid="text-hero-title"
                 >
-                  Begrijp regels,<br />brieven en besluiten —<br />en neem actie.
+                  Grip op regels én<br />zichtbaarheid<br />
+                  <span style={{ color: "#f28a1a" }}>in je regio.</span>
                 </h1>
                 <p
                   className="mb-8"
                   style={{ color: "rgba(255,255,255,.82)", fontSize: "17px", lineHeight: 1.75, maxWidth: "44ch" }}
                   data-testid="text-hero-subtitle"
                 >
-                  OpenRegio helpt ondernemers begrijpen wat de overheid doet — en er actie op nemen. Van brief tot Woo-verzoek, van beleid tot kans.
+                  OpenRegio helpt ondernemers bij twee dingen: begrijpen wat de overheid doet — WOO, brieven, regelgeving — én controleren hoe zichtbaar je bent voor klanten in je regio.
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <Link
-                    href="/dashboard"
+                    href="/lidmaatschap"
                     className="inline-flex items-center justify-center px-6 py-3 rounded-full text-sm font-black"
                     style={{ background: "#f28a1a", color: "#1b1307" }}
-                    data-testid="button-hero-dashboard"
+                    data-testid="button-hero-lid"
                   >
-                    Bekijk dashboard
+                    Bekijk abonnementen
                   </Link>
                   <a
-                    href="#probleem"
+                    href="#diensten"
                     className="inline-flex items-center justify-center px-6 py-3 rounded-full text-sm font-black"
                     style={{ background: "rgba(255,255,255,.12)", color: "#fff", border: "1px solid rgba(255,255,255,.22)" }}
                     data-testid="button-hero-discover"
                   >
-                    Ontdek wat er speelt
+                    Ontdek meer
                   </a>
                 </div>
               </div>
@@ -154,11 +152,7 @@ export default function HomePage() {
                 style={{ background: "#fff", boxShadow: "0 24px 64px rgba(0,0,0,.28)" }}
                 data-testid="card-hero-preview"
               >
-                {/* Titlebar */}
-                <div
-                  className="px-4 py-3 flex items-center gap-2"
-                  style={{ background: "#1a3c6e", borderBottom: "1px solid #0e2a52" }}
-                >
+                <div className="px-4 py-3 flex items-center gap-2" style={{ background: "#1a3c6e", borderBottom: "1px solid #0e2a52" }}>
                   <div className="flex gap-1.5">
                     {["#ff5f57","#febc2e","#28c840"].map((c, i) => (
                       <div key={i} className="w-2.5 h-2.5 rounded-full" style={{ background: c }} />
@@ -166,14 +160,12 @@ export default function HomePage() {
                   </div>
                   <span style={{ fontSize: "12px", color: "rgba(255,255,255,.70)", fontWeight: 700, marginLeft: "6px", letterSpacing: ".4px" }}>OpenRegio Dashboard</span>
                 </div>
-
-                {/* Items */}
                 <div className="p-4 space-y-2" style={{ background: "#f0f4f8" }}>
                   {[
-                    { icon: ScanText, label: "Brief analyse", hint: "Begrijp overheidsbrieven direct", iconColor: "#fff", bg: "#2563eb" },
-                    { icon: Gavel, label: "Woo-verzoek", hint: "Vraag informatie op bij overheid", iconColor: "#fff", bg: "#f28a1a" },
-                    { icon: Activity, label: "Regio-inzicht", hint: "Volg beleid, kansen en besluiten", iconColor: "#fff", bg: "#059669" },
-                    { icon: Bot, label: "RegioBot", hint: "Stel vragen over regelgeving", iconColor: "#fff", bg: "#7c3aed" },
+                    { icon: ScanText, label: "Brief analyse", hint: "Begrijp overheidsbrieven direct", bg: "#2563eb" },
+                    { icon: Gavel, label: "Woo-verzoek", hint: "Vraag informatie op bij overheid", bg: "#1f5fae" },
+                    { icon: BarChart2, label: "Zichtbaarheid check", hint: "Hoe vindbaar ben je in de regio?", bg: "#059669" },
+                    { icon: Bot, label: "RegioBot", hint: "Stel vragen over regelgeving", bg: "#7c3aed" },
                   ].map((item, i) => (
                     <div
                       key={i}
@@ -181,19 +173,104 @@ export default function HomePage() {
                       style={{ background: "#fff", border: "1px solid #e2e8f0" }}
                       data-testid={`hero-preview-item-${i}`}
                     >
-                      <div
-                        className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0"
-                        style={{ background: item.bg, color: item.iconColor }}
-                      >
+                      <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 text-white" style={{ background: item.bg }}>
                         <item.icon className="w-4 h-4" />
                       </div>
                       <div>
                         <div style={{ fontSize: "13px", fontWeight: 800, color: "#0f172a" }}>{item.label}</div>
-                        <div style={{ fontSize: "11px", color: "#0f172a", marginTop: "1px" }}>{item.hint}</div>
+                        <div style={{ fontSize: "11px", color: "#64748b", marginTop: "1px" }}>{item.hint}</div>
                       </div>
                       <div className="ml-auto w-2 h-2 rounded-full flex-shrink-0" style={{ background: item.bg }} />
                     </div>
                   ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── 2. TWEE-PIJLER SECTIE ── */}
+        <section id="diensten" className="py-20" style={{ background: "#f8fafc", borderTop: "1px solid #e8ecf2" }} data-testid="section-diensten">
+          <div className="max-w-[1100px] mx-auto px-6">
+            <div className="text-center mb-14">
+              <h2 className="font-black mb-3" style={{ fontSize: "clamp(24px, 3vw, 38px)", letterSpacing: "-0.5px", color: "#0f172a" }} data-testid="text-diensten-title">
+                Twee diensten. Één platform.
+              </h2>
+              <p style={{ color: "#64748b", fontSize: "17px", maxWidth: "54ch", margin: "0 auto" }}>
+                Wij helpen je grip krijgen op de overheid — én controleren hoe goed klanten jou online vinden.
+              </p>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-8" data-testid="grid-diensten">
+
+              {/* Pijler 1: WOO & Regelgeving */}
+              <div className="rounded-2xl overflow-hidden" style={{ background: "#fff", boxShadow: "0 4px 24px rgba(0,0,0,.08)" }} data-testid="card-dienst-woo">
+                <div style={{ height: "4px", background: "#1f5fae" }} />
+                <div className="p-8">
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: "rgba(31,95,174,.10)", color: "#1f5fae" }}>
+                      <Gavel className="w-7 h-7" />
+                    </div>
+                    <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: "rgba(31,95,174,.10)", color: "#1f5fae" }}>Basis + Pro</span>
+                  </div>
+                  <h3 className="font-black mb-2" style={{ fontSize: "22px", color: "#0f172a" }}>WOO & Regelgeving</h3>
+                  <p className="mb-6" style={{ color: "#64748b", fontSize: "15px", lineHeight: 1.7 }}>
+                    Grip op wat de overheid besluit. Brieven begrijpen, informatie opvragen, beleid volgen.
+                  </p>
+                  <ul className="space-y-4 mb-8">
+                    {[
+                      { label: "Brieven en besluiten begrijpen", desc: "Upload een onduidelijke brief — je krijgt direct een heldere uitleg." },
+                      { label: "Woo-verzoeken opstellen", desc: "Maak in een paar stappen een waterdicht verzoek om overheidsinformatie." },
+                      { label: "Beleid en regelgeving volgen", desc: "Blijf op de hoogte van wijzigingen die jouw sector direct raken." },
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-start gap-3" data-testid={`dienst-woo-item-${i}`}>
+                        <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "#1f5fae" }} />
+                        <span style={{ fontSize: "14px", color: "#334155", lineHeight: 1.6 }}>
+                          <strong style={{ fontWeight: 700 }}>{item.label}</strong> — {item.desc}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link href="/lidmaatschap" className="flex items-center justify-center w-full rounded-xl py-3 font-bold text-sm text-white gap-1" style={{ background: "#1f5fae" }} data-testid="button-dienst-woo">
+                    Bekijk abonnementen <ChevronRight className="w-4 h-4" />
+                  </Link>
+                </div>
+              </div>
+
+              {/* Pijler 2: Zichtbaarheid checks */}
+              <div className="rounded-2xl overflow-hidden" style={{ background: "#fff", boxShadow: "0 4px 24px rgba(0,0,0,.08)" }} data-testid="card-dienst-zichtbaarheid">
+                <div style={{ height: "4px", background: "#f28a1a" }} />
+                <div className="p-8">
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ background: "rgba(242,138,26,.10)", color: "#f28a1a" }}>
+                      <Activity className="w-7 h-7" />
+                    </div>
+                    <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: "rgba(242,138,26,.10)", color: "#c07010" }}>Basis + Pro</span>
+                  </div>
+                  <h3 className="font-black mb-2" style={{ fontSize: "22px", color: "#0f172a" }}>Zichtbaarheid checks</h3>
+                  <p className="mb-6" style={{ color: "#64748b", fontSize: "15px", lineHeight: 1.7 }}>
+                    Wij controleren hoe vindbaar jij bent in je regio — zodat je weet waar je staat.
+                  </p>
+                  <ul className="space-y-4 mb-6">
+                    {[
+                      { label: "Online zichtbaarheid meten", desc: "Hoe goed vinden klanten jou via Google, kaarten en lokale platforms?" },
+                      { label: "Bedrijfsprofiel beoordelen", desc: "Check of je gegevens kloppen en compleet zijn op alle relevante plekken." },
+                      { label: "Regio-analyse opvragen", desc: "Zie hoe je presteert ten opzichte van concurrenten in jouw gemeente." },
+                    ].map((item, i) => (
+                      <li key={i} className="flex items-start gap-3" data-testid={`dienst-zichtbaarheid-item-${i}`}>
+                        <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "#f28a1a" }} />
+                        <span style={{ fontSize: "14px", color: "#334155", lineHeight: 1.6 }}>
+                          <strong style={{ fontWeight: 700 }}>{item.label}</strong> — {item.desc}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                  <p className="mb-6" style={{ fontSize: "12px", color: "#94a3b8", fontStyle: "italic" }}>
+                    Wil je ook actief aan je website werken? Dat doen wij via Stroombox.
+                  </p>
+                  <Link href="/lidmaatschap" className="flex items-center justify-center w-full rounded-xl py-3 font-bold text-sm text-white gap-1" style={{ background: "#f28a1a" }} data-testid="button-dienst-zichtbaarheid">
+                    Bekijk abonnementen <ChevronRight className="w-4 h-4" />
+                  </Link>
                 </div>
               </div>
 
@@ -201,41 +278,76 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 2. PROBLEEM ── */}
-        <section id="probleem" className="py-20" style={{ background: "#fff" }} data-testid="section-probleem">
-          <div className="max-w-[720px] mx-auto px-6">
-            <h2
-              className="font-black mb-4"
-              style={{ fontSize: "clamp(24px, 3vw, 36px)", letterSpacing: "-0.5px", color: "#0f172a" }}
-              data-testid="text-probleem-title"
-            >
-              Ondernemen wordt steeds ingewikkelder.
-            </h2>
-            <p className="mb-8" style={{ color: "#475569", fontSize: "17px", lineHeight: 1.8 }}>
-              Regels veranderen, brieven zijn onduidelijk en online zichtbaarheid wordt steeds belangrijker. OpenRegio helpt dit overzichtelijk te maken.
-            </p>
-            <ul className="space-y-4" data-testid="list-probleem">
+        {/* ── 3. PROBLEEM ── */}
+        <section id="probleem" className="py-20" style={{ background: "#fff", borderTop: "1px solid #e8ecf2" }} data-testid="section-probleem">
+          <div className="max-w-[1100px] mx-auto px-6">
+            <div className="text-center mb-14">
+              <h2 className="font-black mb-3" style={{ fontSize: "clamp(24px, 3vw, 36px)", letterSpacing: "-0.5px", color: "#0f172a" }} data-testid="text-probleem-title">
+                Herken je dit?
+              </h2>
+              <p style={{ color: "#64748b", fontSize: "17px" }}>Dit zijn de problemen waarvoor OpenRegio is gebouwd.</p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-6" data-testid="grid-probleem">
               {[
-                "Begrijp regels en overheidsbrieven",
-                "Zie wat er verandert in jouw regio",
-                "Houd je bedrijf zichtbaar voor klanten",
+                { icon: AlertCircle, color: "#1f5fae", bg: "rgba(31,95,174,.08)", title: "Overheidsbrieven zijn onleesbaar", desc: "Vol jargon en juridische termen — je weet niet wat je ermee moet." },
+                { icon: Clock, color: "#1f5fae", bg: "rgba(31,95,174,.08)", title: "Woo-verzoeken zijn tijdrovend", desc: "Het proces is ingewikkeld en je weet niet precies waar je recht op hebt." },
+                { icon: EyeOff, color: "#f28a1a", bg: "rgba(242,138,26,.08)", title: "Klanten vinden je niet online", desc: "Je bent actief in de regio, maar online ben je nauwelijks zichtbaar." },
+                { icon: Search, color: "#f28a1a", bg: "rgba(242,138,26,.08)", title: "Je weet niet hoe je scoort", desc: "Geen idee hoe je bedrijfsprofiel eruitziet voor klanten die naar je zoeken." },
               ].map((item, i) => (
-                <li key={i} className="flex items-center gap-3" data-testid={`probleem-item-${i}`}>
-                  <div
-                    className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0"
-                    style={{ background: "rgba(31,95,174,.10)", color: "#1f5fae" }}
-                  >
-                    <Check className="w-3.5 h-3.5" />
+                <div key={i} className="rounded-2xl p-7 flex items-start gap-5" style={{ background: "#f8fafc", border: "1px solid #e8ecf2" }} data-testid={`card-probleem-${i}`}>
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: item.bg, color: item.color }}>
+                    <item.icon className="w-6 h-6" />
                   </div>
-                  <span style={{ fontSize: "16px", fontWeight: 600, color: "#0f172a" }}>{item}</span>
-                </li>
+                  <div>
+                    <h3 className="font-black mb-1.5" style={{ fontSize: "16px", color: "#0f172a" }}>{item.title}</h3>
+                    <p style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.7 }}>{item.desc}</p>
+                  </div>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         </section>
 
-        {/* ── Regio-analyse ── */}
-        <section style={{ background: "#f8fafc", borderTop: "1px solid #e8ecf2", borderBottom: "1px solid #e8ecf2" }} data-testid="section-regio-analyse">
+        {/* ── 4. TOOLS ── */}
+        <section id="oplossingen" className="py-20" style={{ background: "#0e3f86" }} data-testid="section-oplossingen">
+          <div className="max-w-[1100px] mx-auto px-6">
+            <div className="text-center mb-14">
+              <h2 className="font-black mb-3 text-white" style={{ fontSize: "clamp(24px, 3vw, 36px)", letterSpacing: "-0.5px" }} data-testid="text-oplossingen-title">
+                Vier tools die het verschil maken.
+              </h2>
+              <p style={{ color: "rgba(255,255,255,.65)", fontSize: "16px" }}>Direct inzetbaar via je dashboard.</p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-5" data-testid="grid-oplossingen">
+              {[
+                { icon: ScanText, label: "Brief analyse", badge: "Gratis te proberen", badgeColor: "#1f5fae", desc: "Upload een brief — krijg direct begrijpelijke uitleg en aanbevolen actie.", border: "#2563eb" },
+                { icon: Gavel, label: "Woo-verzoek", badge: "Pro", badgeColor: "#f28a1a", desc: "Genereer een compleet, juridisch kloppend Woo-verzoek in enkele stappen.", border: "#1f5fae" },
+                { icon: BarChart2, label: "Zichtbaarheid check", badge: "Basis", badgeColor: "#059669", desc: "Controleer direct hoe goed klanten jou vinden op Google en lokale platforms.", border: "#f28a1a" },
+                { icon: Bot, label: "RegioBot", badge: "Basis + Pro", badgeColor: "#7c3aed", desc: "Stel vragen over regels, beleid en besluiten — RegioBot antwoordt direct.", border: "#7c3aed" },
+              ].map((item, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl p-6 flex items-start gap-5"
+                  style={{ background: "rgba(255,255,255,.07)", borderLeft: `4px solid ${item.border}` }}
+                  data-testid={`card-oplossing-${i}`}
+                >
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(255,255,255,.10)" }}>
+                    <item.icon className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2 flex-wrap">
+                      <span className="font-black text-white" style={{ fontSize: "15px" }}>{item.label}</span>
+                      <span className="text-xs font-bold text-white px-2 py-0.5 rounded-full" style={{ background: item.badgeColor }}>{item.badge}</span>
+                    </div>
+                    <p style={{ fontSize: "13px", color: "rgba(255,255,255,.65)", lineHeight: 1.65 }}>{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── 5. REGIO-ANALYSE (interactief) ── */}
+        <section id="regio-analyse" style={{ background: "#f8fafc", borderTop: "1px solid #e8ecf2", borderBottom: "1px solid #e8ecf2" }} data-testid="section-regio-analyse">
           <div className="max-w-[1100px] mx-auto px-6 py-14">
             <div className="grid md:grid-cols-[1fr_1.2fr] gap-10 items-start">
               <div>
@@ -267,8 +379,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── Regelgeving-check ── */}
-        <section data-testid="section-regelgeving-check" style={{ background: "#fff", borderTop: "1px solid #e8ecf2", borderBottom: "1px solid #e8ecf2" }}>
+        {/* ── 6. REGELGEVING-CHECK (interactief) ── */}
+        <section id="regelgeving-check" style={{ background: "#fff", borderBottom: "1px solid #e8ecf2" }} data-testid="section-regelgeving-check">
           <div className="max-w-[1100px] mx-auto px-6 py-14">
             <div className="grid md:grid-cols-[1fr_1.2fr] gap-10 items-start">
               <div>
@@ -284,40 +396,14 @@ export default function HomePage() {
               </div>
               <div className="space-y-3">
                 <div className="flex gap-2">
-                  <Input
-                    placeholder="Je branche (bijv. Horeca)"
-                    value={regelgevingBranche}
-                    onChange={(e) => setRegelgevingBranche(e.target.value)}
-                    className="flex-1"
-                    data-testid="input-regelgeving-branche"
-                  />
-                  <Input
-                    placeholder="Onderwerp (bijv. terrasvergunning)"
-                    value={regelgevingOnderwerp}
-                    onChange={(e) => setRegelgevingOnderwerp(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && handleRegelgevingCheck()}
-                    className="flex-1"
-                    data-testid="input-regelgeving-onderwerp"
-                  />
+                  <Input placeholder="Je branche (bijv. Horeca)" value={regelgevingBranche} onChange={(e) => setRegelgevingBranche(e.target.value)} className="flex-1" data-testid="input-regelgeving-branche" />
+                  <Input placeholder="Onderwerp (bijv. terrasvergunning)" value={regelgevingOnderwerp} onChange={(e) => setRegelgevingOnderwerp(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleRegelgevingCheck()} className="flex-1" data-testid="input-regelgeving-onderwerp" />
                 </div>
-                <Button
-                  onClick={handleRegelgevingCheck}
-                  disabled={regelgevingLoading || !regelgevingBranche.trim() || !regelgevingOnderwerp.trim()}
-                  className="w-full font-bold"
-                  style={{ background: "#1f5fae" }}
-                  data-testid="button-regelgeving-check"
-                >
-                  {regelgevingLoading
-                    ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Analyse loopt...</>
-                    : <><Scale className="w-4 h-4 mr-2" />Controleer regelgeving</>
-                  }
+                <Button onClick={handleRegelgevingCheck} disabled={regelgevingLoading || !regelgevingBranche.trim() || !regelgevingOnderwerp.trim()} className="w-full font-bold" style={{ background: "#1f5fae" }} data-testid="button-regelgeving-check">
+                  {regelgevingLoading ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" />Analyse loopt...</> : <><Scale className="w-4 h-4 mr-2" />Controleer regelgeving</>}
                 </Button>
                 {regelgevingAntwoord && (
-                  <div
-                    className="rounded-xl p-4 text-sm leading-relaxed"
-                    style={{ background: "rgba(31,95,174,.05)", border: "1px solid rgba(31,95,174,.12)", color: "#334155" }}
-                    data-testid="text-regelgeving-antwoord"
-                  >
+                  <div className="rounded-xl p-4 text-sm leading-relaxed" style={{ background: "rgba(31,95,174,.05)", border: "1px solid rgba(31,95,174,.12)", color: "#334155" }} data-testid="text-regelgeving-antwoord">
                     {regelgevingAntwoord}
                   </div>
                 )}
@@ -326,198 +412,22 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 3. WAT OPENREGIO DOET — 3 kaarten ── */}
-        <section id="oplossingen" className="py-20" style={{ background: "#fff" }} data-testid="section-oplossingen">
-          <div className="max-w-[1100px] mx-auto px-6">
-            <div className="text-center mb-14">
-              <h2 className="font-black mb-3" style={{ fontSize: "clamp(24px, 3vw, 36px)", letterSpacing: "-0.5px" }} data-testid="text-oplossingen-title">
-                Drie tools die het verschil maken.
-              </h2>
-              <p style={{ color: "#64748b", fontSize: "16px", maxWidth: "54ch", margin: "0 auto" }}>
-                Hier zit de echte waarde van OpenRegio.
-              </p>
-            </div>
-
-            <div className="grid md:grid-cols-3 gap-6" data-testid="grid-oplossingen">
-
-              {/* 1. Brief analyse */}
-              <div
-                className="rounded-2xl p-8"
-                style={{ background: "#f0f6ff", border: "1px solid #c5d9f5" }}
-                data-testid="card-oplossing-0"
-              >
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(31,95,174,.12)", color: "#1f5fae" }}>
-                  <ScanText className="w-5 h-5" />
-                </div>
-                <h3 className="font-black mb-2" style={{ fontSize: "17px", color: "#0f172a" }}>Brief & besluit analyse</h3>
-                <p style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.75, marginBottom: "16px" }}>
-                  Elke ondernemer krijgt brieven van de overheid. Wij leggen ze uit.
-                </p>
-                <ul className="space-y-1.5">
-                  {["Begrijp direct wat een brief betekent", "Zie risico's en deadlines", "Ontvang aanbevolen acties"].map((b, i) => (
-                    <li key={i} className="flex items-center gap-2" style={{ fontSize: "13px", color: "#334155" }}>
-                      <Check className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#1f5fae" }} />
-                      {b}
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-5">
-                  <span className="text-xs font-semibold px-2 py-1 rounded-full" style={{ background: "rgba(31,95,174,.10)", color: "#1f5fae" }}>Gratis te proberen</span>
-                </div>
-              </div>
-
-              {/* 2. Woo-verzoeken */}
-              <div
-                className="rounded-2xl p-8 relative"
-                style={{ background: "#fff8f0", border: "1px solid rgba(242,138,26,.30)" }}
-                data-testid="card-oplossing-1"
-              >
-                <div className="absolute top-5 right-5 px-2.5 py-0.5 rounded-full text-xs font-black" style={{ background: "#f28a1a", color: "#fff" }}>Pro</div>
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(242,138,26,.12)", color: "#f28a1a" }}>
-                  <Gavel className="w-5 h-5" />
-                </div>
-                <h3 className="font-black mb-2" style={{ fontSize: "17px", color: "#0f172a" }}>Woo-verzoeken</h3>
-                <p style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.75, marginBottom: "16px" }}>
-                  Jouw sterkste tool voor informatieopvraag bij de overheid — nu toegankelijk voor het MKB.
-                </p>
-                <ul className="space-y-1.5">
-                  {["Genereer een compleet Woo-verzoek", "Bouw dossiers op met documenten", "Volg de status van je verzoek"].map((b, i) => (
-                    <li key={i} className="flex items-center gap-2" style={{ fontSize: "13px", color: "#334155" }}>
-                      <Check className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#f28a1a" }} />
-                      {b}
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-5">
-                  <span className="text-xs font-semibold px-2 py-1 rounded-full" style={{ background: "rgba(242,138,26,.10)", color: "#c07010" }}>Pro-bijdrager</span>
-                </div>
-              </div>
-
-              {/* 3. Regio-inzicht */}
-              <div
-                className="rounded-2xl p-8"
-                style={{ background: "#f0faf5", border: "1px solid #b3dfc8" }}
-                data-testid="card-oplossing-2"
-              >
-                <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(5,150,105,.10)", color: "#059669" }}>
-                  <Activity className="w-5 h-5" />
-                </div>
-                <h3 className="font-black mb-2" style={{ fontSize: "17px", color: "#0f172a" }}>Regio-inzicht</h3>
-                <p style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.75, marginBottom: "16px" }}>
-                  Jouw economische radar voor de regio — zie wat er speelt voordat anderen het weten.
-                </p>
-                <ul className="space-y-1.5">
-                  {["Lokale beleidsupdates per gemeente", "Aanbestedingen en subsidies", "Relevante projecten en kansen"].map((b, i) => (
-                    <li key={i} className="flex items-center gap-2" style={{ fontSize: "13px", color: "#334155" }}>
-                      <Check className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#059669" }} />
-                      {b}
-                    </li>
-                  ))}
-                </ul>
-                <div className="mt-5">
-                  <span className="text-xs font-semibold px-2 py-1 rounded-full" style={{ background: "rgba(5,150,105,.10)", color: "#047857" }}>Beschikbaar voor alle leden</span>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* ── 4. DASHBOARD SECTIE ── */}
-        <section id="dashboard-uitleg" className="py-20" style={{ background: "#f8fafc", borderTop: "1px solid #e8ecf2", borderBottom: "1px solid #e8ecf2" }} data-testid="section-dashboard-uitleg">
-          <div className="max-w-[1100px] mx-auto px-6">
-            <div className="grid md:grid-cols-[1fr_1.1fr] gap-14 items-center">
-
-              <div>
-                <h2 className="font-black mb-4" style={{ fontSize: "clamp(22px, 2.8vw, 34px)", letterSpacing: "-0.4px", color: "#0f172a" }} data-testid="text-dashboard-title">
-                  Alles overzichtelijk op één dashboard.
-                </h2>
-                <ul className="space-y-4 mb-8">
-                  {[
-                    { icon: ScanText, tekst: "Brieven analyseren" },
-                    { icon: Activity, tekst: "Regio-inzicht volgen" },
-                    { icon: Gavel, tekst: "Woo-verzoek opstellen" },
-                    { icon: Bot, tekst: "Vragen stellen aan RegioBot" },
-                  ].map((item, i) => (
-                    <li key={i} className="flex items-center gap-3" data-testid={`dashboard-feature-${i}`}>
-                      <div className="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(31,95,174,.08)", color: "#1f5fae" }}>
-                        <item.icon className="w-4 h-4" />
-                      </div>
-                      <span className="font-semibold" style={{ fontSize: "15px", color: "#0f172a" }}>{item.tekst}</span>
-                    </li>
-                  ))}
-                </ul>
-                <Link href="/dashboard" className="inline-flex items-center justify-center px-6 py-3 rounded-full text-sm font-black text-white" style={{ background: "#1f5fae" }} data-testid="button-dashboard-link">
-                  Naar het dashboard
-                </Link>
-              </div>
-
-              {/* Mockup */}
-              <div className="rounded-2xl overflow-hidden" style={{ border: "1px solid #e8ecf2", boxShadow: "0 16px 48px rgba(15,23,42,.08)" }} data-testid="mockup-dashboard">
-                <div className="px-4 py-3 flex items-center gap-2" style={{ background: "#1f5fae" }}>
-                  <div className="flex gap-1.5">
-                    {[0, 1, 2].map(i => <div key={i} className="w-2.5 h-2.5 rounded-full" style={{ background: "rgba(255,255,255,.28)" }} />)}
-                  </div>
-                  <span className="text-white font-bold text-xs ml-2">OpenRegio Dashboard</span>
-                </div>
-                <div className="p-6" style={{ background: "#f8fafc" }}>
-                  <p className="font-bold mb-4" style={{ fontSize: "11px", color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.6px" }}>Snelle acties</p>
-                  <div className="grid grid-cols-2 gap-3">
-                    {[
-                      { icon: ScanText, label: "Brief analyseren" },
-                      { icon: Gavel, label: "Woo-verzoek" },
-                      { icon: Activity, label: "Regio-inzicht" },
-                      { icon: Bot, label: "RegioBot" },
-                    ].map((btn, i) => (
-                      <div key={i} className="rounded-xl p-4 flex flex-col items-center gap-2 text-center" style={{ background: "#fff", border: "1px solid #e8ecf2" }} data-testid={`mockup-btn-${i}`}>
-                        <div className="w-9 h-9 rounded-lg flex items-center justify-center" style={{ background: i < 2 ? "rgba(31,95,174,.08)" : "rgba(242,138,26,.08)", color: i < 2 ? "#1f5fae" : "#f28a1a" }}>
-                          <btn.icon className="w-4 h-4" />
-                        </div>
-                        <span className="font-bold" style={{ fontSize: "12px", color: "#0f172a" }}>{btn.label}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
-        {/* ── 5. VOOR WIE — 3 kaarten ── */}
-        <section id="voor-wie" className="py-20" style={{ background: "#fff" }} data-testid="section-voor-wie">
+        {/* ── 7. VOOR WIE ── */}
+        <section id="voor-wie" className="py-20" style={{ background: "#f8fafc" }} data-testid="section-voor-wie">
           <div className="max-w-[1100px] mx-auto px-6">
             <div className="text-center mb-14">
               <h2 className="font-black mb-3" style={{ fontSize: "clamp(24px, 3vw, 36px)", letterSpacing: "-0.5px" }} data-testid="text-voor-wie-title">
                 Voor ondernemers die grip willen houden.
               </h2>
             </div>
-
             <div className="grid md:grid-cols-3 gap-6" data-testid="grid-voor-wie">
               {[
-                {
-                  icon: Briefcase,
-                  titel: "Zelfstandigen",
-                  tekst: "Je werkt alleen en hebt geen juridisch team. Wij helpen je de weg vinden in regels en brieven.",
-                },
-                {
-                  icon: ShoppingBag,
-                  titel: "Lokale ondernemers",
-                  tekst: "Je bent geworteld in je regio. We helpen je lokaal sterk en zichtbaar te blijven.",
-                },
-                {
-                  icon: Building2,
-                  titel: "MKB-bedrijven",
-                  tekst: "Je groeit. We helpen je schaalbaar grip houden op regelgeving terwijl je team uitbreidt.",
-                },
+                { icon: Briefcase, color: "#1f5fae", bg: "rgba(31,95,174,.08)", titel: "Zelfstandigen", tekst: "Je werkt alleen en hebt geen juridisch team. Wij helpen je de weg vinden in regels, brieven én je zichtbaarheid in de regio." },
+                { icon: ShoppingBag, color: "#f28a1a", bg: "rgba(242,138,26,.08)", titel: "Lokale ondernemers", tekst: "Je bent geworteld in je regio. Weet wat er in de gemeente speelt en zorg dat klanten je online weten te vinden." },
+                { icon: Building2, color: "#059669", bg: "rgba(5,150,105,.08)", titel: "MKB-bedrijven", tekst: "Je groeit. Hou grip op regelgeving terwijl je team uitbreidt — en check regelmatig hoe vindbaar je bent." },
               ].map((item, i) => (
-                <div
-                  key={i}
-                  className="rounded-2xl p-8"
-                  style={{ background: "#f8fafc", border: "1px solid #e8ecf2" }}
-                  data-testid={`card-voor-wie-${i}`}
-                >
-                  <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(31,95,174,.08)", color: "#1f5fae" }}>
+                <div key={i} className="rounded-2xl p-8" style={{ background: "#fff", border: "1px solid #e8ecf2" }} data-testid={`card-voor-wie-${i}`}>
+                  <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style={{ background: item.bg, color: item.color }}>
                     <item.icon className="w-5 h-5" />
                   </div>
                   <h3 className="font-black mb-2" style={{ fontSize: "17px", color: "#0f172a" }}>{item.titel}</h3>
@@ -528,14 +438,13 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 6. LID WORDEN ── */}
-        <section id="member" className="py-20" style={{ background: "#f8fafc", borderTop: "1px solid #e8ecf2" }} data-testid="section-member">
+        {/* ── 8. ABONNEMENTEN ── */}
+        <section id="member" className="py-20" style={{ background: "#fff", borderTop: "1px solid #e8ecf2" }} data-testid="section-member">
           <div className="max-w-[880px] mx-auto px-6">
             <div className="text-center mb-12">
-              <h2 className="font-black mb-3" style={{ fontSize: "clamp(24px, 3vw, 36px)", letterSpacing: "-0.5px" }} data-testid="text-member-title">Word lid van OpenRegio</h2>
-              <p style={{ color: "#64748b", fontSize: "16px" }}>Kies een plan dat bij jouw onderneming past.</p>
+              <h2 className="font-black mb-3" style={{ fontSize: "clamp(24px, 3vw, 36px)", letterSpacing: "-0.5px" }} data-testid="text-member-title">Kies jouw abonnement</h2>
+              <p style={{ color: "#64748b", fontSize: "16px" }}>Transparante tarieven, geen verrassingen.</p>
             </div>
-
             <div className="grid md:grid-cols-2 gap-6">
               {/* Basis */}
               <div className="rounded-2xl p-8 bg-white" style={{ border: "1.5px solid #dbe4f0" }} data-testid="card-plan-basis">
@@ -548,13 +457,7 @@ export default function HomePage() {
                   Kies Basis-lid
                 </Link>
                 <ul className="space-y-3">
-                  {[
-                    "Regio-inzicht (gemeenteupdates, beleid)",
-                    "Brief analyse (beperkt)",
-                    "RegioBot (beperkt)",
-                    "Woo uitleg & voorbeelden",
-                    "Samenwerken meekijken",
-                  ].map((f, i) => (
+                  {["Regio-inzicht (gemeenteupdates, beleid)", "Brief analyse (beperkt)", "RegioBot (beperkt)", "Woo uitleg & voorbeelden", "Zichtbaarheid check", "Bedrijfsprofiel"].map((f, i) => (
                     <li key={i} className="flex items-center gap-2.5">
                       <Check className="w-4 h-4 flex-shrink-0" style={{ color: "#1f5fae" }} />
                       <span style={{ fontSize: "14px", color: "#334155" }}>{f}</span>
@@ -575,15 +478,7 @@ export default function HomePage() {
                   Kies Pro-bijdrager
                 </Link>
                 <ul className="space-y-3">
-                  {[
-                    "Alles van Basis",
-                    "Brief analyse (volledig)",
-                    "RegioBot onbeperkt",
-                    "Woo-verzoek genereren",
-                    "Dossiers bouwen & beheren",
-                    "Website onderhoud & zichtbaarheid",
-                    "Projecten starten in RegioCrew",
-                  ].map((f, i) => (
+                  {["Alles van Basis", "Brief analyse (volledig)", "RegioBot onbeperkt", "Woo-verzoek genereren", "Dossiers bouwen & beheren", "Uitgebreide zichtbaarheid check", "Projecten starten in RegioCrew"].map((f, i) => (
                     <li key={i} className="flex items-center gap-2.5">
                       <Check className="w-4 h-4 flex-shrink-0" style={{ color: "#f28a1a" }} />
                       <span style={{ fontSize: "14px", color: "#334155" }}>{f}</span>
@@ -595,7 +490,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 7. CTA ONDERAAN ── */}
+        {/* ── 9. CTA ── */}
         <section
           id="contact"
           className="py-20"
@@ -607,7 +502,7 @@ export default function HomePage() {
               Start met OpenRegio.
             </h2>
             <p className="mb-8" style={{ color: "rgba(255,255,255,.75)", fontSize: "16px", lineHeight: 1.7 }}>
-              Begrijp wat de overheid doet — en neem actie. Brieven, Woo-verzoeken, regio-inzicht.
+              Begrijp wat de overheid doet — en weet hoe goed klanten jou vinden.
             </p>
             <form
               className="flex flex-col sm:flex-row gap-3 justify-center"
@@ -653,8 +548,8 @@ export default function HomePage() {
           </div>
           <nav className="flex flex-wrap gap-5 text-sm">
             <a href="#home" className="hover:text-white transition-colors" data-testid="link-footer-home">Home</a>
-            <a href="#oplossingen" className="hover:text-white transition-colors" data-testid="link-footer-oplossingen">Oplossingen</a>
-            <Link href="/lidmaatschap" className="hover:text-white transition-colors" data-testid="link-footer-lid">Word lid</Link>
+            <a href="#diensten" className="hover:text-white transition-colors" data-testid="link-footer-diensten">Diensten</a>
+            <Link href="/lidmaatschap" className="hover:text-white transition-colors" data-testid="link-footer-lid">Abonnementen</Link>
             <a href="#contact" className="hover:text-white transition-colors" data-testid="link-footer-contact">Contact</a>
           </nav>
           <div className="w-full flex flex-wrap gap-1 text-xs mt-2" style={{ color: "#334155" }}>
