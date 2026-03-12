@@ -171,9 +171,6 @@ export function TwoPillars() {
                     </li>
                   ))}
                 </ul>
-                <p className="text-xs text-slate-400 mt-4 italic">
-                  Wil je ook actief aan je website werken? Dat doen wij via Stroombox.
-                </p>
               </CardContent>
               <CardFooter className="px-8 pb-8 pt-2">
                 <a href="/lidmaatschap" className="w-full">

@@ -265,9 +265,6 @@ export default function HomePage() {
                       </li>
                     ))}
                   </ul>
-                  <p className="mb-6" style={{ fontSize: "12px", color: "#94a3b8", fontStyle: "italic" }}>
-                    Wil je ook actief aan je website werken? Dat doen wij via Stroombox.
-                  </p>
                   <Link href="/lidmaatschap" className="flex items-center justify-center w-full rounded-xl py-3 font-bold text-sm text-white gap-1" style={{ background: "#f28a1a" }} data-testid="button-dienst-zichtbaarheid">
                     Bekijk abonnementen <ChevronRight className="w-4 h-4" />
                   </Link>
