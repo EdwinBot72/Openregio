@@ -37,7 +37,7 @@ function buildActions(isPro: boolean): ActionCard[] {
     {
       id: "brief",
       label: "Brief of besluit begrijpen",
-      description: "Plak een overheidsbrief en ontvang direct uitleg, termijnen en aanbevolen acties.",
+      description: "Plak een overheidsbrief en ontvang direct uitleg, termijnen en aanbevolen acties. Geen verrassingen meer — alleen inzicht.",
       icon: FileSearch,
       href: "/tools/brief-analyse",
       cta: isPro ? "Brief analyseren" : "Analyse starten",
@@ -47,10 +47,10 @@ function buildActions(isPro: boolean): ActionCard[] {
     },
     {
       id: "woo",
-      label: "Woo-verzoek schrijven",
+      label: "Verborgen informatie opvragen",
       description: isPro
-        ? "Genereer, sla op en beheer Woo-verzoeken. Bouw dossiers op met documenten en volg de status."
-        : "Vraag officieel informatie op bij een gemeente. Beschikbaar voor Pro-bijdragers.",
+        ? "Vraag officiële overheidsinformatie op die anderen niet gebruiken. Bouw dossiers op en creëer een strategisch voordeel."
+        : "Haal marktinformatie op bij overheden die publiek beschikbaar is maar moeilijk toegankelijk. Beschikbaar voor Pro-bijdragers.",
       icon: Gavel,
       href: isPro ? "/woo-wizard" : "/lidmaatschap?plan=pro",
       cta: isPro ? "Verzoek starten" : "Ontgrendelen",
@@ -65,8 +65,8 @@ function buildActions(isPro: boolean): ActionCard[] {
     },
     {
       id: "regio",
-      label: "Wat speelt er in jouw regio?",
-      description: "Volg lokale beleidsupdates, aanbestedingen en subsidies die relevant zijn voor jouw onderneming.",
+      label: "Als eerste weten wat er speelt",
+      description: "Beleidsupdates, aanbestedingen en subsidies in jouw gemeente — dagelijks ververst. Wie het eerst weet, heeft een voorsprong.",
       icon: Activity,
       href: "/kansen/gemeente-updates",
       cta: "Regio volgen",
@@ -133,7 +133,7 @@ export default function DashboardPage() {
           </Badge>
         </div>
         <p className="text-sm text-muted-foreground">
-          Begrijp wat de overheid doet — en neem actie.
+          Informatie is openbaar. Slimme ondernemers gebruiken het.
         </p>
       </div>
 
