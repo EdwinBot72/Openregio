@@ -297,7 +297,12 @@ export default function GemeenteUpdatesPage() {
 
           <div className="space-y-4">
             {sortedItems.map((item) => (
-              <Card key={item.id} data-testid={`card-update-${item.id}`}>
+              <Card
+                key={item.id}
+                data-testid={`card-update-${item.id}`}
+                className={item.url ? "hover-elevate transition-shadow cursor-pointer" : ""}
+                onClick={() => item.url && window.open(item.url, "_blank", "noopener,noreferrer")}
+              >
                 <CardHeader className="pb-2 pt-4 px-5 flex flex-row flex-wrap items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
                     <h2
@@ -340,17 +345,13 @@ export default function GemeenteUpdatesPage() {
                       </span>
                     )}
                     {item.url && (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        asChild
-                        data-testid="button-bekijk-publicatie"
+                      <span
+                        className="flex items-center gap-1.5 text-xs font-medium text-[#1f5fae]"
+                        data-testid="link-bekijk-publicatie"
                       >
-                        <a href={item.url} target="_blank" rel="noopener noreferrer">
-                          <ExternalLink className="w-3.5 h-3.5 mr-1.5" />
-                          Bekijk publicatie
-                        </a>
-                      </Button>
+                        <ExternalLink className="w-3.5 h-3.5" />
+                        Opent in nieuw tabblad
+                      </span>
                     )}
                   </div>
                 </CardContent>
