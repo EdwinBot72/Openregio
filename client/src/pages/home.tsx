@@ -203,7 +203,7 @@ export default function HomePage() {
             <div className="grid md:grid-cols-2 gap-6" data-testid="grid-probleem">
               {[
                 { icon: AlertCircle, color: "#1f5fae", bg: "rgba(31,95,174,.08)", title: "Verborgen marktinformatie", desc: "Besluiten over bouwplannen, vergunningen en aanbestedingen staan online. Maar wie leest ze? De ondernemer die het weet, heeft een strategisch voordeel." },
-                { icon: Clock, color: "#1f5fae", bg: "rgba(31,95,174,.08)", title: "Kansen die voorbijgaan", desc: "Subsidies, aanbestedingen en beleidsupdates verschijnen dagelijks. Wie als eerste weet wat er speelt, heeft een voorsprong op de concurrentie." },
+                { icon: Clock, color: "#1f5fae", bg: "rgba(31,95,174,.08)", title: "Regelgeving die verandert", desc: "Nieuwe verplichtingen, hogere boetes en gewijzigde regels gaan in zonder dat je het weet. Wie het op tijd leest, voorkomt problemen — en behoudt een voorsprong." },
                 { icon: EyeOff, color: "#f28a1a", bg: "rgba(242,138,26,.08)", title: "Je zichtbaarheid lekt klanten", desc: "Je bent actief in de regio, maar online ben je nauwelijks vindbaar voor klanten die naar jou zoeken." },
                 { icon: Search, color: "#f28a1a", bg: "rgba(242,138,26,.08)", title: "Geen inzicht in je positie", desc: "Je weet niet hoe je scoort ten opzichte van anderen in de regio — terwijl dat bepaalt wie de klant kiest." },
               ].map((item, i) => (
