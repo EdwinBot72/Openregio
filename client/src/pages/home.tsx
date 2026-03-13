@@ -124,7 +124,7 @@ export default function HomePage() {
                   style={{ color: "rgba(255,255,255,.82)", fontSize: "17px", lineHeight: 1.75, maxWidth: "44ch" }}
                   data-testid="text-hero-subtitle"
                 >
-                  OpenRegio helpt ondernemers bij twee dingen: begrijpen wat de overheid doet — WOO, brieven, regelgeving — én controleren hoe zichtbaar je bent voor klanten in je regio.
+                  Informatie is openbaar. Slimme ondernemers gebruiken het al. OpenRegio geeft je inzicht in regelgeving, besluiten en kansen — én laat zien hoe zichtbaar je bent in je regio.
                 </p>
                 <div className="flex flex-wrap gap-3">
                   <Link
@@ -189,7 +189,39 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 2. TWEE-PIJLER SECTIE ── */}
+        {/* ── 2. PROBLEEM ── */}
+        <section id="probleem" className="py-20" style={{ background: "#fff", borderTop: "1px solid #e8ecf2" }} data-testid="section-probleem">
+          <div className="max-w-[1100px] mx-auto px-6">
+            <div className="text-center mb-14">
+              <h2 className="font-black mb-4" style={{ fontSize: "clamp(24px, 3vw, 38px)", letterSpacing: "-0.5px", color: "#0f172a" }} data-testid="text-probleem-title">
+                Herken je dit?
+              </h2>
+              <p style={{ color: "#64748b", fontSize: "17px", maxWidth: "58ch", margin: "0 auto", lineHeight: 1.7 }}>
+                Veel waardevolle informatie van de overheid is publiek beschikbaar — maar blijft verborgen in documenten, besluiten en procedures. Slimme ondernemers gebruiken het al.
+              </p>
+            </div>
+            <div className="grid md:grid-cols-2 gap-6" data-testid="grid-probleem">
+              {[
+                { icon: AlertCircle, color: "#1f5fae", bg: "rgba(31,95,174,.08)", title: "Verborgen marktinformatie", desc: "Besluiten over bouwplannen, vergunningen en aanbestedingen staan online. Maar wie leest ze? De ondernemer die het weet, heeft een strategisch voordeel." },
+                { icon: Clock, color: "#1f5fae", bg: "rgba(31,95,174,.08)", title: "Kansen die voorbijgaan", desc: "Subsidies, aanbestedingen en beleidsupdates verschijnen dagelijks. Wie als eerste weet wat er speelt, heeft een voorsprong op de concurrentie." },
+                { icon: EyeOff, color: "#f28a1a", bg: "rgba(242,138,26,.08)", title: "Je zichtbaarheid lekt klanten", desc: "Je bent actief in de regio, maar online ben je nauwelijks vindbaar voor klanten die naar jou zoeken." },
+                { icon: Search, color: "#f28a1a", bg: "rgba(242,138,26,.08)", title: "Geen inzicht in je positie", desc: "Je weet niet hoe je scoort ten opzichte van anderen in de regio — terwijl dat bepaalt wie de klant kiest." },
+              ].map((item, i) => (
+                <div key={i} className="rounded-2xl p-7 flex items-start gap-5" style={{ background: "#f8fafc", border: "1px solid #e8ecf2" }} data-testid={`card-probleem-${i}`}>
+                  <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: item.bg, color: item.color }}>
+                    <item.icon className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="font-black mb-1.5" style={{ fontSize: "16px", color: "#0f172a" }}>{item.title}</h3>
+                    <p style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.7 }}>{item.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
+        {/* ── 3. TWEE-PIJLER SECTIE ── */}
         <section id="diensten" className="py-20" style={{ background: "#f8fafc", borderTop: "1px solid #e8ecf2" }} data-testid="section-diensten">
           <div className="max-w-[1100px] mx-auto px-6">
             <div className="text-center mb-14">
@@ -203,8 +235,8 @@ export default function HomePage() {
 
             <div className="grid md:grid-cols-2 gap-8" data-testid="grid-diensten">
 
-              {/* Pijler 1: WOO & Regelgeving */}
-              <div className="rounded-2xl overflow-hidden" style={{ background: "#fff", boxShadow: "0 4px 24px rgba(0,0,0,.08)" }} data-testid="card-dienst-woo">
+              {/* Pijler 1: Regelgeving & Inzicht */}
+              <div className="rounded-2xl overflow-hidden" style={{ background: "#fff", boxShadow: "0 4px 24px rgba(0,0,0,.08)" }} data-testid="card-dienst-regelgeving">
                 <div style={{ height: "4px", background: "#1f5fae" }} />
                 <div className="p-8">
                   <div className="flex items-start justify-between mb-6">
@@ -213,17 +245,17 @@ export default function HomePage() {
                     </div>
                     <span className="text-xs font-bold px-3 py-1 rounded-full" style={{ background: "rgba(31,95,174,.10)", color: "#1f5fae" }}>Basis + Pro</span>
                   </div>
-                  <h3 className="font-black mb-2" style={{ fontSize: "22px", color: "#0f172a" }}>WOO & Regelgeving</h3>
+                  <h3 className="font-black mb-2" style={{ fontSize: "22px", color: "#0f172a" }}>Regelgeving & Inzicht</h3>
                   <p className="mb-6" style={{ color: "#64748b", fontSize: "15px", lineHeight: 1.7 }}>
-                    Grip op wat de overheid besluit. Brieven begrijpen, informatie opvragen, beleid volgen.
+                    Informatie is openbaar — maar moeilijk leesbaar. Wij vertalen besluiten, brieven en regelgeving naar bruikbaar inzicht.
                   </p>
                   <ul className="space-y-4 mb-8">
                     {[
-                      { label: "Brieven en besluiten begrijpen", desc: "Upload een onduidelijke brief — je krijgt direct een heldere uitleg." },
-                      { label: "Woo-verzoeken opstellen", desc: "Maak in een paar stappen een waterdicht verzoek om overheidsinformatie." },
-                      { label: "Beleid en regelgeving volgen", desc: "Blijf op de hoogte van wijzigingen die jouw sector direct raken." },
+                      { label: "Brieven en besluiten begrijpen", desc: "Upload een onduidelijke brief — je krijgt direct uitleg en een aanbevolen actie." },
+                      { label: "Verborgen informatie opvragen", desc: "Vraag overheidsdocumenten op die van invloed zijn op jouw bedrijf of branche." },
+                      { label: "Als eerste inzicht in beleid", desc: "Volg wijzigingen die jouw sector raken voordat anderen er weet van hebben." },
                     ].map((item, i) => (
-                      <li key={i} className="flex items-start gap-3" data-testid={`dienst-woo-item-${i}`}>
+                      <li key={i} className="flex items-start gap-3" data-testid={`dienst-regelgeving-item-${i}`}>
                         <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "#1f5fae" }} />
                         <span style={{ fontSize: "14px", color: "#334155", lineHeight: 1.6 }}>
                           <strong style={{ fontWeight: 700 }}>{item.label}</strong> — {item.desc}
@@ -231,7 +263,7 @@ export default function HomePage() {
                       </li>
                     ))}
                   </ul>
-                  <Link href="/lidmaatschap" className="flex items-center justify-center w-full rounded-xl py-3 font-bold text-sm text-white gap-1" style={{ background: "#1f5fae" }} data-testid="button-dienst-woo">
+                  <Link href="/lidmaatschap" className="flex items-center justify-center w-full rounded-xl py-3 font-bold text-sm text-white gap-1" style={{ background: "#1f5fae" }} data-testid="button-dienst-regelgeving">
                     Bekijk abonnementen <ChevronRight className="w-4 h-4" />
                   </Link>
                 </div>
@@ -249,13 +281,13 @@ export default function HomePage() {
                   </div>
                   <h3 className="font-black mb-2" style={{ fontSize: "22px", color: "#0f172a" }}>Zichtbaarheid checks</h3>
                   <p className="mb-6" style={{ color: "#64748b", fontSize: "15px", lineHeight: 1.7 }}>
-                    Wij controleren hoe vindbaar jij bent in je regio — zodat je weet waar je staat.
+                    Wij controleren hoe vindbaar jij bent in je regio — zodat je weet waar je staat en waar de kansen liggen.
                   </p>
                   <ul className="space-y-4 mb-6">
                     {[
                       { label: "Online zichtbaarheid meten", desc: "Hoe goed vinden klanten jou via Google, kaarten en lokale platforms?" },
                       { label: "Bedrijfsprofiel beoordelen", desc: "Check of je gegevens kloppen en compleet zijn op alle relevante plekken." },
-                      { label: "Regio-analyse opvragen", desc: "Zie hoe je presteert ten opzichte van concurrenten in jouw gemeente." },
+                      { label: "Regio-analyse opvragen", desc: "Zie hoe je presteert ten opzichte van anderen in jouw gemeente." },
                     ].map((item, i) => (
                       <li key={i} className="flex items-start gap-3" data-testid={`dienst-zichtbaarheid-item-${i}`}>
                         <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "#f28a1a" }} />
@@ -271,36 +303,6 @@ export default function HomePage() {
                 </div>
               </div>
 
-            </div>
-          </div>
-        </section>
-
-        {/* ── 3. PROBLEEM ── */}
-        <section id="probleem" className="py-20" style={{ background: "#fff", borderTop: "1px solid #e8ecf2" }} data-testid="section-probleem">
-          <div className="max-w-[1100px] mx-auto px-6">
-            <div className="text-center mb-14">
-              <h2 className="font-black mb-3" style={{ fontSize: "clamp(24px, 3vw, 36px)", letterSpacing: "-0.5px", color: "#0f172a" }} data-testid="text-probleem-title">
-                Herken je dit?
-              </h2>
-              <p style={{ color: "#64748b", fontSize: "17px" }}>Dit zijn de problemen waarvoor OpenRegio is gebouwd.</p>
-            </div>
-            <div className="grid md:grid-cols-2 gap-6" data-testid="grid-probleem">
-              {[
-                { icon: AlertCircle, color: "#1f5fae", bg: "rgba(31,95,174,.08)", title: "Overheidsbrieven zijn onleesbaar", desc: "Vol jargon en juridische termen — je weet niet wat je ermee moet." },
-                { icon: Clock, color: "#1f5fae", bg: "rgba(31,95,174,.08)", title: "Woo-verzoeken zijn tijdrovend", desc: "Het proces is ingewikkeld en je weet niet precies waar je recht op hebt." },
-                { icon: EyeOff, color: "#f28a1a", bg: "rgba(242,138,26,.08)", title: "Klanten vinden je niet online", desc: "Je bent actief in de regio, maar online ben je nauwelijks zichtbaar." },
-                { icon: Search, color: "#f28a1a", bg: "rgba(242,138,26,.08)", title: "Je weet niet hoe je scoort", desc: "Geen idee hoe je bedrijfsprofiel eruitziet voor klanten die naar je zoeken." },
-              ].map((item, i) => (
-                <div key={i} className="rounded-2xl p-7 flex items-start gap-5" style={{ background: "#f8fafc", border: "1px solid #e8ecf2" }} data-testid={`card-probleem-${i}`}>
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: item.bg, color: item.color }}>
-                    <item.icon className="w-6 h-6" />
-                  </div>
-                  <div>
-                    <h3 className="font-black mb-1.5" style={{ fontSize: "16px", color: "#0f172a" }}>{item.title}</h3>
-                    <p style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.7 }}>{item.desc}</p>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         </section>
