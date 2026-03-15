@@ -3,9 +3,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
 import {
-  Activity, Globe, Bot, Scale, Check, Mail, Phone, MapPinned, Search, Loader2,
-  Briefcase, ShoppingBag, Building2, Target, Gavel, ScanText,
-  AlertCircle, Clock, EyeOff, CheckCircle2, ChevronRight, BarChart2
+  Activity, Bot, Scale, Check, Mail, Phone, MapPinned, Search, Loader2,
+  Target, Gavel, ScanText, AlertCircle, Clock, EyeOff, CheckCircle2,
+  ChevronRight, BarChart2, Gift, Users, TrendingUp, Zap
 } from "lucide-react";
 import logoImg from "@assets/ChatGPT_Image_15_feb_2026,_15_15_16_1771164937665.png";
 import footerLogoImg from "@assets/afbeelding_1771441188699.png";
@@ -84,10 +84,9 @@ export default function HomePage() {
               <img src={logoImg} alt="OpenRegio" className="h-12 w-auto" />
             </Link>
             <nav className="hidden md:flex items-center gap-1" style={{ color: "#1e3a5f" }}>
-              <a href="#home" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100" data-testid="link-nav-home">Home</a>
-              <a href="#diensten" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100" data-testid="link-nav-diensten">Diensten</a>
-              <a href="#probleem" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100" data-testid="link-nav-probleem">Herken je dit?</a>
               <a href="#voor-wie" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100" data-testid="link-nav-voorwie">Voor wie</a>
+              <a href="#diensten" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100" data-testid="link-nav-diensten">Diensten</a>
+              <a href="#netwerk" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100" data-testid="link-nav-netwerk">Netwerk</a>
               <a href="#member" className="px-3 py-2 rounded-lg text-sm font-semibold hover:bg-blue-100" data-testid="link-nav-lid">Abonnementen</a>
             </nav>
             <div className="flex items-center gap-2">
@@ -111,13 +110,20 @@ export default function HomePage() {
           <div className="max-w-[1100px] mx-auto px-6">
             <div className="grid md:grid-cols-[1fr_1fr] gap-12 py-20 md:py-28 items-center">
               <div>
+                <div
+                  className="inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold mb-6"
+                  style={{ background: "rgba(242,138,26,.18)", color: "#f28a1a" }}
+                  data-testid="badge-hero-founding"
+                >
+                  <Zap className="w-3.5 h-3.5" />
+                  Founding-leden krijgen levenslang 20% korting
+                </div>
                 <h1
                   className="font-black leading-tight mb-5"
                   style={{ fontSize: "clamp(30px, 4vw, 52px)", letterSpacing: "-1px", color: "#fff" }}
                   data-testid="text-hero-title"
                 >
-                  Grip op regels én<br />zichtbaarheid<br />
-                  <span style={{ color: "#f28a1a" }}>in je regio.</span>
+                  Samen sterker<br />in jouw regio.
                 </h1>
                 <p
                   className="mb-8"
@@ -136,17 +142,17 @@ export default function HomePage() {
                     Bekijk abonnementen
                   </Link>
                   <a
-                    href="#diensten"
+                    href="#voor-wie"
                     className="inline-flex items-center justify-center px-6 py-3 rounded-full text-sm font-black"
                     style={{ background: "rgba(255,255,255,.12)", color: "#fff", border: "1px solid rgba(255,255,255,.22)" }}
                     data-testid="button-hero-discover"
                   >
-                    Ontdek meer
+                    Is dit voor mij?
                   </a>
                 </div>
               </div>
 
-              {/* Dashboard preview */}
+              {/* Stats preview */}
               <div
                 className="rounded-2xl overflow-hidden"
                 style={{ background: "#fff", boxShadow: "0 24px 64px rgba(0,0,0,.28)" }}
@@ -158,12 +164,12 @@ export default function HomePage() {
                       <div key={i} className="w-2.5 h-2.5 rounded-full" style={{ background: c }} />
                     ))}
                   </div>
-                  <span style={{ fontSize: "12px", color: "rgba(255,255,255,.70)", fontWeight: 700, marginLeft: "6px", letterSpacing: ".4px" }}>OpenRegio Dashboard</span>
+                  <span style={{ fontSize: "12px", color: "rgba(255,255,255,.70)", fontWeight: 700, marginLeft: "6px" }}>OpenRegio Dashboard</span>
                 </div>
                 <div className="p-4 space-y-2" style={{ background: "#f0f4f8" }}>
                   {[
                     { icon: ScanText, label: "Brief analyse", hint: "Begrijp overheidsbrieven direct", bg: "#2563eb" },
-                    { icon: Gavel, label: "Woo-verzoek", hint: "Vraag informatie op bij overheid", bg: "#1f5fae" },
+                    { icon: Gavel, label: "Verborgen info opvragen", hint: "Officiële overheidsinfo ophalen", bg: "#1f5fae" },
                     { icon: BarChart2, label: "Zichtbaarheid check", hint: "Hoe vindbaar ben je in de regio?", bg: "#059669" },
                     { icon: Bot, label: "RegioBot", hint: "Stel vragen over regelgeving", bg: "#7c3aed" },
                   ].map((item, i) => (
@@ -189,7 +195,42 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 2. PROBLEEM ── */}
+        {/* ── 2. VOOR WIE ── */}
+        <section id="voor-wie" className="py-14" style={{ background: "#f8fafc", borderTop: "1px solid #e8ecf2" }} data-testid="section-voor-wie">
+          <div className="max-w-[1100px] mx-auto px-6">
+            <p className="text-center text-sm font-bold mb-8 uppercase tracking-widest" style={{ color: "#94a3b8" }}>
+              Gemaakt voor ondernemers zoals jij
+            </p>
+            <div className="flex flex-wrap justify-center gap-3" data-testid="grid-beroepen">
+              {[
+                "Kappers & schoonheidsspecialisten",
+                "Installateurs",
+                "Horeca",
+                "Zzp'ers & freelancers",
+                "Coaches & trainers",
+                "Webshops",
+                "Bouwbedrijven",
+                "Retailers",
+                "Adviesbureaus",
+                "Zorgverleners",
+              ].map((b, i) => (
+                <span
+                  key={i}
+                  className="px-4 py-2 rounded-full text-sm font-semibold"
+                  style={{ background: "#fff", border: "1px solid #dbe4f0", color: "#334155" }}
+                  data-testid={`badge-beroep-${i}`}
+                >
+                  {b}
+                </span>
+              ))}
+            </div>
+            <p className="text-center text-sm mt-6" style={{ color: "#64748b" }}>
+              Werkzaam in Nederland? Dan is OpenRegio voor jou.
+            </p>
+          </div>
+        </section>
+
+        {/* ── 3. PROBLEEM ── */}
         <section id="probleem" className="py-20" style={{ background: "#fff", borderTop: "1px solid #e8ecf2" }} data-testid="section-probleem">
           <div className="max-w-[1100px] mx-auto px-6">
             <div className="text-center mb-14">
@@ -221,7 +262,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 3. TWEE-PIJLER SECTIE ── */}
+        {/* ── 4. TWEE-PIJLER SECTIE ── */}
         <section id="diensten" className="py-20" style={{ background: "#f8fafc", borderTop: "1px solid #e8ecf2" }} data-testid="section-diensten">
           <div className="max-w-[1100px] mx-auto px-6">
             <div className="text-center mb-14">
@@ -232,10 +273,7 @@ export default function HomePage() {
                 Wij helpen je grip krijgen op de overheid — én controleren hoe goed klanten jou online vinden.
               </p>
             </div>
-
             <div className="grid md:grid-cols-2 gap-8" data-testid="grid-diensten">
-
-              {/* Pijler 1: Regelgeving & Inzicht */}
               <div className="rounded-2xl overflow-hidden" style={{ background: "#fff", boxShadow: "0 4px 24px rgba(0,0,0,.08)" }} data-testid="card-dienst-regelgeving">
                 <div style={{ height: "4px", background: "#1f5fae" }} />
                 <div className="p-8">
@@ -255,7 +293,7 @@ export default function HomePage() {
                       { label: "Verborgen informatie opvragen", desc: "Vraag overheidsdocumenten op die van invloed zijn op jouw bedrijf of branche." },
                       { label: "Als eerste inzicht in beleid", desc: "Volg wijzigingen die jouw sector raken voordat anderen er weet van hebben." },
                     ].map((item, i) => (
-                      <li key={i} className="flex items-start gap-3" data-testid={`dienst-regelgeving-item-${i}`}>
+                      <li key={i} className="flex items-start gap-3">
                         <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "#1f5fae" }} />
                         <span style={{ fontSize: "14px", color: "#334155", lineHeight: 1.6 }}>
                           <strong style={{ fontWeight: 700 }}>{item.label}</strong> — {item.desc}
@@ -269,7 +307,6 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Pijler 2: Zichtbaarheid checks */}
               <div className="rounded-2xl overflow-hidden" style={{ background: "#fff", boxShadow: "0 4px 24px rgba(0,0,0,.08)" }} data-testid="card-dienst-zichtbaarheid">
                 <div style={{ height: "4px", background: "#f28a1a" }} />
                 <div className="p-8">
@@ -289,7 +326,7 @@ export default function HomePage() {
                       { label: "Bedrijfsprofiel beoordelen", desc: "Check of je gegevens kloppen en compleet zijn op alle relevante plekken." },
                       { label: "Regio-analyse opvragen", desc: "Zie hoe je presteert ten opzichte van anderen in jouw gemeente." },
                     ].map((item, i) => (
-                      <li key={i} className="flex items-start gap-3" data-testid={`dienst-zichtbaarheid-item-${i}`}>
+                      <li key={i} className="flex items-start gap-3">
                         <CheckCircle2 className="w-5 h-5 flex-shrink-0 mt-0.5" style={{ color: "#f28a1a" }} />
                         <span style={{ fontSize: "14px", color: "#334155", lineHeight: 1.6 }}>
                           <strong style={{ fontWeight: 700 }}>{item.label}</strong> — {item.desc}
@@ -302,24 +339,23 @@ export default function HomePage() {
                   </Link>
                 </div>
               </div>
-
             </div>
           </div>
         </section>
 
-        {/* ── 4. TOOLS ── */}
+        {/* ── 5. TOOLS ── */}
         <section id="oplossingen" className="py-20" style={{ background: "#0e3f86" }} data-testid="section-oplossingen">
           <div className="max-w-[1100px] mx-auto px-6">
             <div className="text-center mb-14">
-              <h2 className="font-black mb-3 text-white" style={{ fontSize: "clamp(24px, 3vw, 36px)", letterSpacing: "-0.5px" }} data-testid="text-oplossingen-title">
+              <h2 className="font-black mb-3 text-white" style={{ fontSize: "clamp(24px, 3vw, 36px)", letterSpacing: "-0.5px" }}>
                 Vier tools die het verschil maken.
               </h2>
               <p style={{ color: "rgba(255,255,255,.65)", fontSize: "16px" }}>Direct inzetbaar via je dashboard.</p>
             </div>
-            <div className="grid md:grid-cols-2 gap-5" data-testid="grid-oplossingen">
+            <div className="grid md:grid-cols-2 gap-5">
               {[
                 { icon: ScanText, label: "Brief analyse", badge: "Gratis te proberen", badgeColor: "#1f5fae", desc: "Upload een brief — krijg direct begrijpelijke uitleg en aanbevolen actie.", border: "#2563eb" },
-                { icon: Gavel, label: "Woo-verzoek", badge: "Pro", badgeColor: "#f28a1a", desc: "Genereer een compleet, juridisch kloppend Woo-verzoek in enkele stappen.", border: "#1f5fae" },
+                { icon: Gavel, label: "Verborgen info opvragen", badge: "Pro", badgeColor: "#f28a1a", desc: "Genereer een compleet, juridisch kloppend verzoek om overheidsinformatie.", border: "#1f5fae" },
                 { icon: BarChart2, label: "Zichtbaarheid check", badge: "Basis", badgeColor: "#059669", desc: "Controleer direct hoe goed klanten jou vinden op Google en lokale platforms.", border: "#f28a1a" },
                 { icon: Bot, label: "RegioBot", badge: "Basis + Pro", badgeColor: "#7c3aed", desc: "Stel vragen over regels, beleid en besluiten — RegioBot antwoordt direct.", border: "#7c3aed" },
               ].map((item, i) => (
@@ -345,8 +381,90 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 5. REGIO-ANALYSE (interactief) ── */}
-        <section id="regio-analyse" style={{ background: "#f8fafc", borderTop: "1px solid #e8ecf2", borderBottom: "1px solid #e8ecf2" }} data-testid="section-regio-analyse">
+        {/* ── 6. NETWERK EFFECT ── */}
+        <section id="netwerk" className="py-20" style={{ background: "#fff", borderTop: "1px solid #e8ecf2" }} data-testid="section-netwerk">
+          <div className="max-w-[1100px] mx-auto px-6">
+            <div className="grid md:grid-cols-2 gap-14 items-center">
+              <div>
+                <div className="flex items-center gap-2.5 mb-4">
+                  <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(31,95,174,.10)", color: "#1f5fae" }}>
+                    <Users className="w-4 h-4" />
+                  </div>
+                  <span className="text-sm font-bold uppercase tracking-widest" style={{ color: "#1f5fae" }}>Netwerk effect</span>
+                </div>
+                <h2 className="font-black mb-4" style={{ fontSize: "clamp(22px, 2.8vw, 34px)", letterSpacing: "-0.4px", color: "#0f172a" }} data-testid="text-netwerk-title">
+                  Meer leden = meer voordeel voor iedereen.
+                </h2>
+                <p className="mb-6" style={{ color: "#64748b", fontSize: "16px", lineHeight: 1.8 }}>
+                  OpenRegio is een coöperatie. Hoe meer ondernemers meedoen, hoe sterker het platform wordt — en hoe meer inzicht en kansen er beschikbaar komen voor iedereen in de regio.
+                </p>
+                <ul className="space-y-3">
+                  {[
+                    "Gezamenlijk meer marktinformatie ophalen",
+                    "Beleidsontwikkelingen gezamenlijk bijhouden",
+                    "Samen sterker staan tegenover overheid en regelgeving",
+                  ].map((item, i) => (
+                    <li key={i} className="flex items-center gap-3">
+                      <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style={{ background: "rgba(31,95,174,.10)", color: "#1f5fae" }}>
+                        <Check className="w-3 h-3" />
+                      </div>
+                      <span style={{ fontSize: "15px", color: "#334155" }}>{item}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+
+              {/* Stats */}
+              <div className="grid grid-cols-2 gap-4">
+                {[
+                  { icon: TrendingUp, value: "Dagelijks", label: "nieuwe beleidsupdates", color: "#1f5fae", bg: "rgba(31,95,174,.07)" },
+                  { icon: Users, value: "Coöperatie", label: "van en voor ondernemers", color: "#f28a1a", bg: "rgba(242,138,26,.07)" },
+                  { icon: BarChart2, value: "1 platform", label: "voor regelgeving én zichtbaarheid", color: "#059669", bg: "rgba(5,150,105,.07)" },
+                  { icon: Zap, value: "Direct", label: "inzetbaar via je dashboard", color: "#7c3aed", bg: "rgba(124,58,237,.07)" },
+                ].map((s, i) => (
+                  <div key={i} className="rounded-2xl p-6 text-center" style={{ background: s.bg, border: `1px solid ${s.bg}` }} data-testid={`stat-${i}`}>
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3" style={{ background: "rgba(255,255,255,.8)", color: s.color }}>
+                      <s.icon className="w-5 h-5" />
+                    </div>
+                    <div className="font-black mb-1" style={{ fontSize: "18px", color: "#0f172a" }}>{s.value}</div>
+                    <div style={{ fontSize: "12px", color: "#64748b", lineHeight: 1.5 }}>{s.label}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── 7. REFERRAL ── */}
+        <section className="py-16" style={{ background: "#f8fafc", borderTop: "1px solid #e8ecf2" }} data-testid="section-referral">
+          <div className="max-w-[860px] mx-auto px-6">
+            <div className="rounded-2xl p-8 md:p-12 flex flex-col md:flex-row items-center gap-8" style={{ background: "linear-gradient(135deg, #1f5fae, #0e3f86)" }}>
+              <div className="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(255,255,255,.15)" }}>
+                <Gift className="w-8 h-8 text-white" />
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="font-black text-white mb-2" style={{ fontSize: "22px" }}>
+                  Verwijs 3 collega-ondernemers — en jouw volgende maand is gratis.
+                </h3>
+                <p style={{ color: "rgba(255,255,255,.75)", fontSize: "15px", lineHeight: 1.7 }}>
+                  Elke ondernemer die jij aanbrengt versterkt het netwerk. En jij wordt beloond. Zo groeit OpenRegio samen met de regio.
+                </p>
+              </div>
+              <Link href="/lidmaatschap" className="flex-shrink-0">
+                <button
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-sm flex-shrink-0"
+                  style={{ background: "#f28a1a", color: "#1b1307" }}
+                  data-testid="button-referral-cta"
+                >
+                  Word lid <ChevronRight className="w-4 h-4" />
+                </button>
+              </Link>
+            </div>
+          </div>
+        </section>
+
+        {/* ── 8. REGIO-ANALYSE (interactief) ── */}
+        <section id="regio-analyse" style={{ background: "#fff", borderTop: "1px solid #e8ecf2", borderBottom: "1px solid #e8ecf2" }} data-testid="section-regio-analyse">
           <div className="max-w-[1100px] mx-auto px-6 py-14">
             <div className="grid md:grid-cols-[1fr_1.2fr] gap-10 items-start">
               <div>
@@ -354,7 +472,7 @@ export default function HomePage() {
                   <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: "rgba(242,138,26,.12)", color: "#f28a1a" }}>
                     <Target className="w-4 h-4" />
                   </div>
-                  <h2 className="font-black text-lg" style={{ color: "#0f172a" }} data-testid="text-regio-analyse-title">Regio-analyse</h2>
+                  <h2 className="font-black text-lg" style={{ color: "#0f172a" }}>Gratis regio-analyse</h2>
                 </div>
                 <p style={{ color: "#64748b", fontSize: "14px", lineHeight: 1.7 }}>
                   Vul je beroep en stad in voor een snelle analyse: concurrentie, kansen en je eerste stap.
@@ -378,8 +496,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 6. REGELGEVING-CHECK (interactief) ── */}
-        <section id="regelgeving-check" style={{ background: "#fff", borderBottom: "1px solid #e8ecf2" }} data-testid="section-regelgeving-check">
+        {/* ── 9. REGELGEVING-CHECK (interactief) ── */}
+        <section id="regelgeving-check" style={{ background: "#f8fafc", borderBottom: "1px solid #e8ecf2" }} data-testid="section-regelgeving-check">
           <div className="max-w-[1100px] mx-auto px-6 py-14">
             <div className="grid md:grid-cols-[1fr_1.2fr] gap-10 items-start">
               <div>
@@ -411,41 +529,14 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 7. VOOR WIE ── */}
-        <section id="voor-wie" className="py-20" style={{ background: "#f8fafc" }} data-testid="section-voor-wie">
-          <div className="max-w-[1100px] mx-auto px-6">
-            <div className="text-center mb-14">
-              <h2 className="font-black mb-3" style={{ fontSize: "clamp(24px, 3vw, 36px)", letterSpacing: "-0.5px" }} data-testid="text-voor-wie-title">
-                Voor ondernemers die grip willen houden.
-              </h2>
-            </div>
-            <div className="grid md:grid-cols-3 gap-6" data-testid="grid-voor-wie">
-              {[
-                { icon: Briefcase, color: "#1f5fae", bg: "rgba(31,95,174,.08)", titel: "Zelfstandigen", tekst: "Je werkt alleen en hebt geen juridisch team. Wij helpen je de weg vinden in regels, brieven én je zichtbaarheid in de regio." },
-                { icon: ShoppingBag, color: "#f28a1a", bg: "rgba(242,138,26,.08)", titel: "Lokale ondernemers", tekst: "Je bent geworteld in je regio. Weet wat er in de gemeente speelt en zorg dat klanten je online weten te vinden." },
-                { icon: Building2, color: "#059669", bg: "rgba(5,150,105,.08)", titel: "MKB-bedrijven", tekst: "Je groeit. Hou grip op regelgeving terwijl je team uitbreidt — en check regelmatig hoe vindbaar je bent." },
-              ].map((item, i) => (
-                <div key={i} className="rounded-2xl p-8" style={{ background: "#fff", border: "1px solid #e8ecf2" }} data-testid={`card-voor-wie-${i}`}>
-                  <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style={{ background: item.bg, color: item.color }}>
-                    <item.icon className="w-5 h-5" />
-                  </div>
-                  <h3 className="font-black mb-2" style={{ fontSize: "17px", color: "#0f172a" }}>{item.titel}</h3>
-                  <p style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.75, margin: 0 }}>{item.tekst}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── 8. ABONNEMENTEN ── */}
-        <section id="member" className="py-20" style={{ background: "#fff", borderTop: "1px solid #e8ecf2" }} data-testid="section-member">
+        {/* ── 10. ABONNEMENTEN ── */}
+        <section id="member" className="py-20" style={{ background: "#fff" }} data-testid="section-member">
           <div className="max-w-[880px] mx-auto px-6">
             <div className="text-center mb-12">
               <h2 className="font-black mb-3" style={{ fontSize: "clamp(24px, 3vw, 36px)", letterSpacing: "-0.5px" }} data-testid="text-member-title">Kies jouw abonnement</h2>
               <p style={{ color: "#64748b", fontSize: "16px" }}>Transparante tarieven, geen verrassingen.</p>
             </div>
             <div className="grid md:grid-cols-2 gap-6">
-              {/* Basis */}
               <div className="rounded-2xl p-8 bg-white" style={{ border: "1.5px solid #dbe4f0" }} data-testid="card-plan-basis">
                 <h3 className="font-black mb-1" style={{ fontSize: "22px" }}>Basis-lid</h3>
                 <p style={{ color: "#64748b", fontSize: "13px", marginBottom: "16px" }}>Volwaardig lid van de coöperatie</p>
@@ -465,7 +556,6 @@ export default function HomePage() {
                 </ul>
               </div>
 
-              {/* Pro */}
               <div className="rounded-2xl p-8 bg-white relative" style={{ border: "1.5px solid rgba(242,138,26,.45)" }} data-testid="card-plan-pro">
                 <div className="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-black text-white" style={{ background: "#1f5fae" }}>Populair</div>
                 <h3 className="font-black mb-1" style={{ fontSize: "22px" }}>Pro-bijdrager</h3>
@@ -477,7 +567,7 @@ export default function HomePage() {
                   Kies Pro-bijdrager
                 </Link>
                 <ul className="space-y-3">
-                  {["Alles van Basis", "Brief analyse (volledig)", "RegioBot onbeperkt", "Woo-verzoek genereren", "Dossiers bouwen & beheren", "Uitgebreide zichtbaarheid check", "Projecten starten in RegioCrew"].map((f, i) => (
+                  {["Alles van Basis", "Brief analyse (volledig)", "RegioBot onbeperkt", "Verborgen info opvragen (volledig)", "Dossiers bouwen & beheren", "Uitgebreide zichtbaarheid check", "Projecten starten in RegioCrew"].map((f, i) => (
                     <li key={i} className="flex items-center gap-2.5">
                       <Check className="w-4 h-4 flex-shrink-0" style={{ color: "#f28a1a" }} />
                       <span style={{ fontSize: "14px", color: "#334155" }}>{f}</span>
@@ -489,7 +579,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── 9. CTA ── */}
+        {/* ── 11. CTA ── */}
         <section
           id="contact"
           className="py-20"
@@ -501,7 +591,7 @@ export default function HomePage() {
               Start met OpenRegio.
             </h2>
             <p className="mb-8" style={{ color: "rgba(255,255,255,.75)", fontSize: "16px", lineHeight: 1.7 }}>
-              Begrijp wat de overheid doet — en weet hoe goed klanten jou vinden.
+              Informatie is openbaar. Tijd dat jij het ook gebruikt.
             </p>
             <form
               className="flex flex-col sm:flex-row gap-3 justify-center"
@@ -525,7 +615,7 @@ export default function HomePage() {
                 style={{ background: "#f28a1a", color: "#1b1307" }}
                 data-testid="button-cta-submit"
               >
-                Start met OpenRegio
+                Word founding-lid
               </button>
             </form>
             <div className="mt-10 pt-6 flex flex-wrap justify-center gap-4 text-sm" style={{ borderTop: "1px solid rgba(255,255,255,.12)", color: "rgba(255,255,255,.60)" }}>
@@ -543,22 +633,22 @@ export default function HomePage() {
         <div className="max-w-[1100px] mx-auto px-6 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <img src={footerLogoImg} alt="OpenRegio" className="h-10 w-auto opacity-80" />
-            <span style={{ fontSize: "12px", color: "#475569" }}>Regelgeving transparant voor ondernemers</span>
+            <span style={{ fontSize: "12px", color: "#475569" }}>Samen sterker in jouw regio</span>
           </div>
           <nav className="flex flex-wrap gap-5 text-sm">
             <a href="#home" className="hover:text-white transition-colors" data-testid="link-footer-home">Home</a>
-            <a href="#diensten" className="hover:text-white transition-colors" data-testid="link-footer-diensten">Diensten</a>
-            <Link href="/lidmaatschap" className="hover:text-white transition-colors" data-testid="link-footer-lid">Abonnementen</Link>
-            <a href="#contact" className="hover:text-white transition-colors" data-testid="link-footer-contact">Contact</a>
+            <a href="#diensten" className="hover:text-white transition-colors">Diensten</a>
+            <Link href="/lidmaatschap" className="hover:text-white transition-colors">Abonnementen</Link>
+            <a href="#contact" className="hover:text-white transition-colors">Contact</a>
           </nav>
           <div className="w-full flex flex-wrap gap-1 text-xs mt-2" style={{ color: "#334155" }}>
             <span>© {new Date().getFullYear()} OpenRegio.</span>
-            <span style={{ color: "#1e293b" }}>·</span>
-            <Link href="/privacy" className="hover:underline" data-testid="link-footer-privacy">Privacybeleid</Link>
-            <span style={{ color: "#1e293b" }}>·</span>
-            <Link href="/disclaimer" className="hover:underline" data-testid="link-footer-disclaimer">Disclaimer</Link>
-            <span style={{ color: "#1e293b" }}>·</span>
-            <Link href="/cookiebeleid" className="hover:underline" data-testid="link-footer-cookiebeleid">Cookiebeleid</Link>
+            <span>·</span>
+            <Link href="/privacy" className="hover:underline">Privacybeleid</Link>
+            <span>·</span>
+            <Link href="/disclaimer" className="hover:underline">Disclaimer</Link>
+            <span>·</span>
+            <Link href="/cookiebeleid" className="hover:underline">Cookiebeleid</Link>
           </div>
         </div>
       </footer>
@@ -568,7 +658,7 @@ export default function HomePage() {
           <div className="max-w-[1100px] mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-3">
             <p className="text-sm" style={{ color: "#94a3b8", maxWidth: "600px" }}>
               Wij gebruiken cookies om je ervaring te verbeteren. Lees ons{" "}
-              <Link href="/cookiebeleid" className="underline" style={{ color: "#60a5fa" }} data-testid="link-cookie-policy">cookiebeleid</Link>.
+              <Link href="/cookiebeleid" className="underline" style={{ color: "#60a5fa" }}>cookiebeleid</Link>.
             </p>
             <div className="flex gap-2">
               <Button variant="ghost" size="sm" onClick={() => handleCookieChoice(false)} className="text-slate-300" data-testid="button-cookie-reject">Weigeren</Button>
