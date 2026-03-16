@@ -6,7 +6,7 @@ import {
   BarChart2, Users, ArrowRight, MapPin,
   Lock, Gavel, TrendingUp, AlertTriangle,
   CheckCircle2, RotateCcw, FileText, ChevronUp,
-  Sparkles
+  Sparkles, Clock, TrendingDown, Layers
 } from "lucide-react";
 import logoImg from "@assets/ChatGPT_Image_15_feb_2026,_15_15_16_1771164937665.png";
 import footerLogoImg from "@assets/afbeelding_1771441188699.png";
@@ -273,36 +273,63 @@ export default function HomePage() {
         </section>
 
         {/* ─── PROBLEEM ─── */}
-        <section className="py-24 bg-white" data-testid="section-probleem">
+        <section className="py-24" style={{ background: "#0b2240" }} data-testid="section-probleem">
           <div className="max-w-6xl mx-auto px-6">
-            <div className="grid md:grid-cols-2 gap-16 items-center">
-              <div className="order-2 md:order-1">
-                <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#f28a1a" }}>Het probleem</span>
-                <h2 className="font-black mt-3 mb-5 text-slate-900" style={{ fontSize: "clamp(22px, 2.6vw, 34px)", letterSpacing: "-0.6px", lineHeight: 1.2 }} data-testid="text-probleem-title">
-                  Veel ondernemers missen signalen die direct impact hebben op hun bedrijf.
-                </h2>
-                <p className="text-slate-500 leading-relaxed mb-8" style={{ fontSize: "16px" }}>
-                  Regels veranderen. Besluiten worden genomen. Lokale kansen ontstaan en verdwijnen. Veel daarvan is openbaar, maar verspreid, technisch of te laat zichtbaar. Ondertussen kost lage zichtbaarheid gewoon klanten.
-                </p>
-                <ul className="space-y-4">
-                  {[
-                    "Je ziet relevante veranderingen vaak pas als het al speelt",
-                    "Je online zichtbaarheid laat omzet liggen",
-                    "Lokale kansen blijven versnipperd en onbenut",
-                  ].map((text, i) => (
-                    <li key={i} className="flex items-start gap-3" data-testid={`probleem-item-${i}`}>
-                      <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: "rgba(242,138,26,.12)", color: "#f28a1a" }}>
-                        <Check className="w-3 h-3" />
-                      </div>
-                      <span className="text-slate-600 text-sm leading-relaxed">{text}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="order-1 md:order-2">
-                <div className="rounded-2xl overflow-hidden" style={{ boxShadow: "0 16px 48px rgba(0,0,0,.1)" }}>
-                  <img src={groupImg} alt="Ondernemers bespreken OpenRegio" className="w-full object-cover" style={{ height: "400px" }} />
+            {/* Kop + intro — gecentreerd */}
+            <div className="max-w-2xl mx-auto text-center mb-16">
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#f28a1a" }}>Het probleem</span>
+              <h2 className="font-black mt-4 mb-6 text-white" style={{ fontSize: "clamp(24px, 2.8vw, 40px)", letterSpacing: "-0.6px", lineHeight: 1.2 }} data-testid="text-probleem-title">
+                Veel ondernemers missen signalen die direct impact hebben op hun bedrijf.
+              </h2>
+              <p className="leading-relaxed" style={{ fontSize: "16px", color: "rgba(255,255,255,0.65)" }}>
+                Regels veranderen. Besluiten worden genomen. Lokale kansen ontstaan en verdwijnen. Veel daarvan is openbaar, maar verspreid, technisch of te laat zichtbaar. Ondertussen kost lage zichtbaarheid gewoon klanten.
+              </p>
+            </div>
+
+            {/* 3 pijnpunten */}
+            <div className="grid md:grid-cols-3 gap-5 mb-16">
+              {[
+                {
+                  Icon: Clock,
+                  label: "Te laat",
+                  text: "Je ziet relevante veranderingen vaak pas als het al speelt",
+                },
+                {
+                  Icon: TrendingDown,
+                  label: "Gemiste omzet",
+                  text: "Je online zichtbaarheid laat omzet liggen",
+                },
+                {
+                  Icon: Layers,
+                  label: "Versnipperd",
+                  text: "Lokale kansen blijven versnipperd en onbenut",
+                },
+              ].map(({ Icon, label, text }, i) => (
+                <div
+                  key={i}
+                  className="rounded-2xl p-7"
+                  style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
+                  data-testid={`probleem-item-${i}`}
+                >
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(220,38,38,0.2)" }}>
+                    <Icon className="w-5 h-5" style={{ color: "#f87171" }} />
+                  </div>
+                  <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "#f87171" }}>{label}</div>
+                  <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>{text}</p>
                 </div>
+              ))}
+            </div>
+
+            {/* Foto — brede strip */}
+            <div className="rounded-2xl overflow-hidden" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
+              <img
+                src={groupImg}
+                alt="Ondernemers bespreken OpenRegio"
+                className="w-full object-cover"
+                style={{ height: "340px", objectPosition: "center 35%" }}
+              />
+              <div className="py-3 px-5 text-center" style={{ background: "rgba(255,255,255,0.05)" }}>
+                <span className="text-xs" style={{ color: "rgba(255,255,255,0.45)" }}>Ondernemers bespreken OpenRegio</span>
               </div>
             </div>
           </div>
