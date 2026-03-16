@@ -2,10 +2,9 @@ import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
 import {
-  Scale, Check, Mail, Search, Loader2, Target,
-  Gavel, ScanText, ChevronRight, ChevronDown,
-  BarChart2, Users, Shield, Briefcase, Store,
-  Clock, ArrowRight, MapPin, Eye
+  Scale, Check, Mail, Search, Loader2,
+  Gavel, ChevronRight, ChevronDown,
+  BarChart2, Users, ArrowRight, MapPin
 } from "lucide-react";
 import logoImg from "@assets/ChatGPT_Image_15_feb_2026,_15_15_16_1771164937665.png";
 import footerLogoImg from "@assets/afbeelding_1771441188699.png";
@@ -166,29 +165,6 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ─── TRUST STRIP ─── */}
-        <section className="py-6 border-y border-slate-100" style={{ background: "#f8fafd" }} data-testid="section-trust">
-          <div className="max-w-4xl mx-auto px-6">
-            <div className="grid sm:grid-cols-3 gap-4 text-center sm:text-left">
-              {[
-                { icon: Clock, label: "In 3 minuten een eerste beeld", sub: "Geen technische kennis nodig" },
-                { icon: MapPin, label: "Gericht op jouw regio", sub: "Lokale kansen en regelgeving" },
-                { icon: Store, label: "Voor elke ondernemer", sub: "Van zzp tot mkb" },
-              ].map((item, i) => (
-                <div key={i} className="flex flex-col sm:flex-row items-center sm:items-start gap-3" data-testid={`trust-item-${i}`}>
-                  <div className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0" style={{ background: "rgba(31,95,174,.09)", color: "#1f5fae" }}>
-                    <item.icon className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <div className="text-sm font-bold text-slate-800">{item.label}</div>
-                    <div className="text-xs text-slate-400 mt-0.5">{item.sub}</div>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         </section>
