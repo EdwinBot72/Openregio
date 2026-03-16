@@ -455,7 +455,12 @@ export default function HomePage() {
                   <Sparkles className="w-9 h-9 text-white" />
                 </div>
 
-                <p className="font-bold text-white text-lg mb-2 transition-all" data-testid="text-scan-message">
+                <p
+                  key={scanMsgIdx}
+                  className="font-bold text-white text-lg mb-2"
+                  style={{ animation: "fadeInUp .45s ease both" }}
+                  data-testid="text-scan-message"
+                >
                   {messages[scanMsgIdx]}
                 </p>
                 <p className="text-sm mb-10" style={{ color: "rgba(255,255,255,.45)" }}>
@@ -499,15 +504,16 @@ export default function HomePage() {
                     {/* Score badge */}
                     <div className="flex flex-col items-center" data-testid="badge-score">
                       <div
-                        className="w-20 h-20 rounded-full flex flex-col items-center justify-center border-4"
+                        className="w-24 h-24 rounded-full flex flex-col items-center justify-center border-4"
                         style={{ borderColor: scoreColor, background: `${scoreColor}18` }}
                       >
-                        <span className="font-black text-white leading-none" style={{ fontSize: "26px" }}>{score}</span>
+                        <span className="font-black text-white leading-none" style={{ fontSize: "30px" }}>{score}</span>
                         <span className="text-xs font-bold" style={{ color: "rgba(255,255,255,.5)" }}>/100</span>
                       </div>
                       <span className="text-xs font-black mt-1.5 px-2 py-0.5 rounded-full" style={{ background: `${scoreColor}25`, color: scoreColor }}>
                         {scoreLabel}
                       </span>
+                      <span className="text-xs mt-1" style={{ color: "rgba(255,255,255,.45)" }} data-testid="text-score-label">Zichtbaarheidsscore</span>
                     </div>
                   </div>
 
