@@ -1,28 +1,101 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
 import {
-  Scale, Check, Mail, Search, Loader2,
-  Gavel, ChevronRight, ChevronDown,
-  BarChart2, Users, ArrowRight, MapPin
+  Check, Mail, ChevronRight, ChevronDown,
+  BarChart2, Users, ArrowRight, MapPin,
+  Lock, Gavel, TrendingUp, AlertTriangle,
+  CheckCircle2, RotateCcw, FileText, ChevronUp,
+  Sparkles
 } from "lucide-react";
 import logoImg from "@assets/ChatGPT_Image_15_feb_2026,_15_15_16_1771164937665.png";
 import footerLogoImg from "@assets/afbeelding_1771441188699.png";
 import streetImg from "@assets/5dab2418-3038-4262-b4a0-233a5081e835_1773671805585.png";
 import groupImg from "@assets/ChatGPT_Image_16_mrt_2026,_14_46_04_1773671702074.png";
 
+type WizardStep = "input" | "scanning" | "rapport";
+type WizardMode = "regio" | "regelgeving";
+type FindingType = "goed" | "aandacht" | "verbeter";
+
+interface Finding {
+  text: string;
+  type: FindingType;
+}
+
+const SCAN_MESSAGES = [
+  "Jouw regio in kaart brengen…",
+  "Lokale signalen analyseren…",
+  "Kansen en risico's inventariseren…",
+  "Branchegegevens ophalen…",
+  "Rapport samenstellen…",
+];
+
+const SCAN_MESSAGES_REGELGEVING = [
+  "Regelgeving doorzoeken…",
+  "Relevante besluiten en wetten opzoeken…",
+  "Vergunningseisen in kaart brengen…",
+  "Lokale uitvoering analyseren…",
+  "Rapport samenstellen…",
+];
+
+function computeScore(antwoord: string, seed: string): number {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) & 0xffffffff;
+  const base = ((Math.abs(hash) % 28) + 52);
+  const bonus = Math.min(antwoord.length / 120, 8);
+  return Math.round(base + bonus);
+}
+
+function extractFindings(antwoord: string, field1: string, field2: string, mode: WizardMode): Finding[] {
+  const sentences = antwoord
+    .split(/[.\n]/)
+    .map(s => s.trim())
+    .filter(s => s.length > 20 && s.length < 140);
+
+  const findings: Finding[] = [];
+
+  if (mode === "regio") {
+    findings.push({ text: `Regionaal ondernemersklimaat in ${field2} biedt kansen voor ${field1}`, type: "goed" });
+    const mid = sentences.find(s => /verbeter|aandacht|let op|risico|check/i.test(s));
+    findings.push({ text: mid || `Digitale vindbaarheid van uw bedrijf als ${field1} kan worden versterkt`, type: "aandacht" });
+    const neg = sentences.find(s => /niet|mist|ontbreekt|zwak|laag/i.test(s));
+    findings.push({ text: neg || `Lokale regelgeving-signalen worden momenteel onvoldoende gevolgd`, type: "verbeter" });
+    findings.push({ text: `Actieve concurrenten in ${field2} professionaliseren hun online aanwezigheid`, type: "aandacht" });
+  } else {
+    findings.push({ text: `Relevante regelgeving voor ${field1} in uw gemeente is goed vindbaar`, type: "goed" });
+    const mid = sentences.find(s => /vergunning|melding|registratie|eis/i.test(s));
+    findings.push({ text: mid || `Meerdere vergunningsvereisten voor "${field2}" vereisen aandacht`, type: "aandacht" });
+    const neg = sentences.find(s => /boete|overtreding|handhaving|straf/i.test(s));
+    findings.push({ text: neg || `Handhavingsrisico aanwezig bij niet-naleving van recente wijzigingen`, type: "verbeter" });
+  }
+
+  return findings.slice(0, 4);
+}
+
+const findingConfig: Record<FindingType, { icon: typeof CheckCircle2; color: string; bg: string; label: string }> = {
+  goed:     { icon: CheckCircle2,   color: "#059669", bg: "rgba(5,150,105,.08)",   label: "Positief" },
+  aandacht: { icon: AlertTriangle,  color: "#d97706", bg: "rgba(217,119,6,.08)",   label: "Aandacht" },
+  verbeter: { icon: TrendingUp,     color: "#dc2626", bg: "rgba(220,38,38,.08)",   label: "Verbeterpunt" },
+};
+
 export default function HomePage() {
-  const [botBeroep, setBotBeroep] = useState("");
-  const [botStad, setBotStad] = useState("");
-  const [botAntwoord, setBotAntwoord] = useState("");
-  const [botLoading, setBotLoading] = useState(false);
-  const [regelgevingBranche, setRegelgevingBranche] = useState("");
-  const [regelgevingOnderwerp, setRegelgevingOnderwerp] = useState("");
-  const [regelgevingAntwoord, setRegelgevingAntwoord] = useState("");
-  const [regelgevingLoading, setRegelgevingLoading] = useState(false);
   const [showCookieBanner, setShowCookieBanner] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-  const [activeCheck, setActiveCheck] = useState<"regio" | "regelgeving">("regio");
+
+  // Wizard state
+  const [wizardStep, setWizardStep] = useState<WizardStep>("input");
+  const [wizardMode, setWizardMode] = useState<WizardMode>("regio");
+  const [field1, setField1] = useState(""); // beroep or branche
+  const [field2, setField2] = useState(""); // stad or onderwerp
+  const [scanProgress, setScanProgress] = useState(0);
+  const [scanMsgIdx, setScanMsgIdx] = useState(0);
+  const [antwoord, setAntwoord] = useState("");
+  const [score, setScore] = useState(0);
+  const [findings, setFindings] = useState<Finding[]>([]);
+  const [showFullText, setShowFullText] = useState(false);
+  const [apiStarted, setApiStarted] = useState(false);
+  const scanIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const msgIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     const consent = localStorage.getItem("cookie_consent");
@@ -34,53 +107,85 @@ export default function HomePage() {
     setShowCookieBanner(false);
   };
 
-  const handleBotVraag = async () => {
-    if (!botBeroep.trim() || !botStad.trim()) return;
-    setBotLoading(true);
-    setBotAntwoord("");
+  const startWizard = async () => {
+    if (!field1.trim() || !field2.trim()) return;
+    setWizardStep("scanning");
+    setScanProgress(0);
+    setScanMsgIdx(0);
+    setApiStarted(false);
+
+    // Progress bar animation
+    let prog = 0;
+    scanIntervalRef.current = setInterval(() => {
+      prog += Math.random() * 3.5 + 1.2;
+      if (prog >= 92) prog = 92; // hold at 92 until API returns
+      setScanProgress(Math.round(prog));
+    }, 80);
+
+    // Rotate scan messages
+    let msgIdx = 0;
+    msgIntervalRef.current = setInterval(() => {
+      msgIdx = (msgIdx + 1) % SCAN_MESSAGES.length;
+      setScanMsgIdx(msgIdx);
+    }, 700);
+
+    // Call API
     try {
-      const res = await fetch("/api/regiobot/buurman", {
+      const endpoint = wizardMode === "regio" ? "/api/regiobot/buurman" : "/api/regelgeving/check";
+      const body = wizardMode === "regio"
+        ? { beroep: field1.trim(), stad: field2.trim() }
+        : { branche: field1.trim(), onderwerp: field2.trim() };
+
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ beroep: botBeroep.trim(), stad: botStad.trim() }),
+        body: JSON.stringify(body),
       });
       const data = await res.json();
-      setBotAntwoord(data.antwoord || data.error || "Geen antwoord ontvangen.");
+      const rawAntwoord = data.antwoord || data.error || "Analyse voltooid.";
+      const computedScore = computeScore(rawAntwoord, field2 + field1);
+      const computedFindings = extractFindings(rawAntwoord, field1, field2, wizardMode);
+
+      setAntwoord(rawAntwoord);
+      setScore(computedScore);
+      setFindings(computedFindings);
+
+      // Complete progress to 100, then switch step
+      if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
+      if (msgIntervalRef.current) clearInterval(msgIntervalRef.current);
+      setScanProgress(100);
+      setTimeout(() => setWizardStep("rapport"), 500);
     } catch {
-      setBotAntwoord("Kon geen verbinding maken. Probeer het later opnieuw.");
-    } finally {
-      setBotLoading(false);
+      if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
+      if (msgIntervalRef.current) clearInterval(msgIntervalRef.current);
+      setAntwoord("Kon geen verbinding maken. Probeer het later opnieuw.");
+      setScore(60);
+      setFindings(extractFindings("", field1, field2, wizardMode));
+      setScanProgress(100);
+      setTimeout(() => setWizardStep("rapport"), 500);
     }
   };
 
-  const handleRegelgevingCheck = async () => {
-    if (!regelgevingBranche.trim() || !regelgevingOnderwerp.trim()) return;
-    setRegelgevingLoading(true);
-    setRegelgevingAntwoord("");
-    try {
-      const res = await fetch("/api/regelgeving/check", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ branche: regelgevingBranche.trim(), onderwerp: regelgevingOnderwerp.trim() }),
-      });
-      const data = await res.json();
-      setRegelgevingAntwoord(data.antwoord || data.error || "Geen antwoord ontvangen.");
-    } catch {
-      setRegelgevingAntwoord("Kon geen verbinding maken. Probeer het later opnieuw.");
-    } finally {
-      setRegelgevingLoading(false);
-    }
+  const resetWizard = () => {
+    setWizardStep("input");
+    setField1("");
+    setField2("");
+    setScanProgress(0);
+    setScanMsgIdx(0);
+    setAntwoord("");
+    setShowFullText(false);
   };
+
+  const messages = wizardMode === "regio" ? SCAN_MESSAGES : SCAN_MESSAGES_REGELGEVING;
+  const scoreColor = score >= 75 ? "#059669" : score >= 60 ? "#d97706" : "#dc2626";
+  const scoreLabel = score >= 75 ? "Goed" : score >= 60 ? "Matig" : "Kwetsbaar";
+  const today = new Date().toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" });
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
 
       {/* ─── STICKY HEADER ─── */}
-      <header
-        className="sticky top-0 z-50 bg-white border-b border-slate-100"
-        style={{ boxShadow: "0 1px 0 #e8ecf2" }}
-        data-testid="nav-main"
-      >
+      <header className="sticky top-0 z-50 bg-white border-b border-slate-100" style={{ boxShadow: "0 1px 0 #e8ecf2" }} data-testid="nav-main">
         <div className="max-w-6xl mx-auto px-6">
           <div className="flex items-center justify-between h-16 gap-4">
             <Link href="/" data-testid="link-home-logo">
@@ -95,14 +200,10 @@ export default function HomePage() {
             </nav>
             <div className="flex items-center gap-2">
               <Link href="/login">
-                <button className="hidden sm:block px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors" data-testid="button-nav-login">
-                  Inloggen
-                </button>
+                <button className="hidden sm:block px-4 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors" data-testid="button-nav-login">Inloggen</button>
               </Link>
               <a href="#basischeck" data-testid="button-nav-basischeck">
-                <button className="px-5 py-2.5 rounded-full text-sm font-bold text-white transition-opacity hover:opacity-90" style={{ background: "#f28a1a" }}>
-                  Start de Basischeck
-                </button>
+                <button className="px-5 py-2.5 rounded-full text-sm font-bold text-white transition-opacity hover:opacity-90" style={{ background: "#f28a1a" }}>Start de Basischeck</button>
               </a>
             </div>
           </div>
@@ -119,11 +220,7 @@ export default function HomePage() {
                 <span className="inline-block text-xs font-bold uppercase tracking-widest mb-5 px-3 py-1.5 rounded-full" style={{ background: "rgba(31,95,174,.08)", color: "#1f5fae" }}>
                   Voor Nederlandse ondernemers
                 </span>
-                <h1
-                  className="font-black leading-tight mb-5 text-slate-900"
-                  style={{ fontSize: "clamp(28px, 3.8vw, 52px)", letterSpacing: "-1.5px" }}
-                  data-testid="text-hero-title"
-                >
+                <h1 className="font-black leading-tight mb-5 text-slate-900" style={{ fontSize: "clamp(28px, 3.8vw, 52px)", letterSpacing: "-1.5px" }} data-testid="text-hero-title">
                   Grip op regels, zichtbaarheid en kansen{" "}
                   <span style={{ color: "#1f5fae" }}>in je regio.</span>
                 </h1>
@@ -142,20 +239,11 @@ export default function HomePage() {
                   Voor ondernemers die minder afhankelijk willen zijn van platformregels en gemiste kansen.
                 </p>
               </div>
-
               <div className="relative" data-testid="card-hero-photo">
                 <div className="rounded-2xl overflow-hidden" style={{ boxShadow: "0 20px 60px rgba(0,0,0,.12)" }}>
-                  <img
-                    src={streetImg}
-                    alt="Nederlandse winkelstraat"
-                    className="w-full object-cover"
-                    style={{ height: "420px" }}
-                  />
+                  <img src={streetImg} alt="Nederlandse winkelstraat" className="w-full object-cover" style={{ height: "420px" }} />
                 </div>
-                <div
-                  className="absolute -bottom-4 -left-4 rounded-2xl px-5 py-4 flex items-center gap-3"
-                  style={{ background: "#fff", boxShadow: "0 8px 32px rgba(0,0,0,.12)", maxWidth: "220px" }}
-                >
+                <div className="absolute -bottom-4 -left-4 rounded-2xl px-5 py-4 flex items-center gap-3" style={{ background: "#fff", boxShadow: "0 8px 32px rgba(0,0,0,.12)", maxWidth: "220px" }}>
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(31,95,174,.10)", color: "#1f5fae" }}>
                     <MapPin className="w-5 h-5" />
                   </div>
@@ -216,35 +304,12 @@ export default function HomePage() {
             </div>
             <div className="grid md:grid-cols-3 gap-6" data-testid="grid-pijlers">
               {[
-                {
-                  accent: "#1f5fae",
-                  icon: Gavel,
-                  label: "Inzicht",
-                  title: "Zie eerder wat verandert",
-                  desc: "Volg regelgeving, openbare documenten en signalen die relevant zijn voor jouw onderneming, branche of regio.",
-                },
-                {
-                  accent: "#f28a1a",
-                  icon: BarChart2,
-                  label: "Zichtbaarheid",
-                  title: "Word beter gevonden in je regio",
-                  desc: "Analyseer hoe zichtbaar jouw bedrijf is en ontdek waar je lokale kansen laat liggen.",
-                },
-                {
-                  accent: "#059669",
-                  icon: Users,
-                  label: "RegioVoordeel",
-                  title: "Pak meer kansen via je netwerk",
-                  desc: "Kom in beeld binnen een regionaal ondernemersnetwerk — zichtbaarheid, samenwerking en doorverwijzing in één.",
-                },
+                { accent: "#1f5fae", icon: Gavel,    label: "Inzicht",       title: "Zie eerder wat verandert",       desc: "Volg regelgeving, openbare documenten en signalen die relevant zijn voor jouw onderneming, branche of regio." },
+                { accent: "#f28a1a", icon: BarChart2, label: "Zichtbaarheid", title: "Word beter gevonden in je regio", desc: "Analyseer hoe zichtbaar jouw bedrijf is en ontdek waar je lokale kansen laat liggen." },
+                { accent: "#059669", icon: Users,     label: "RegioVoordeel", title: "Pak meer kansen via je netwerk",  desc: "Kom in beeld binnen een regionaal ondernemersnetwerk — zichtbaarheid, samenwerking en doorverwijzing in één." },
               ].map((p, i) => (
-                <div
-                  key={i}
-                  className="bg-white rounded-2xl p-7 border border-slate-100"
-                  style={{ boxShadow: "0 2px 16px rgba(0,0,0,.05)" }}
-                  data-testid={`card-pijler-${i}`}
-                >
-                  <div className="h-1 rounded-full mb-6 -mx-7 -mt-7 rounded-t-2xl" style={{ background: p.accent }} />
+                <div key={i} className="bg-white rounded-2xl p-7 border border-slate-100" style={{ boxShadow: "0 2px 16px rgba(0,0,0,.05)" }} data-testid={`card-pijler-${i}`}>
+                  <div className="h-1 mb-6 -mx-7 -mt-7 rounded-t-2xl" style={{ background: p.accent }} />
                   <div className="w-11 h-11 rounded-xl flex items-center justify-center mb-5" style={{ background: `${p.accent}18`, color: p.accent }}>
                     <p.icon className="w-5 h-5" />
                   </div>
@@ -262,143 +327,235 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ─── ZO WERKT HET / BASISCHECK ─── */}
-        <section id="basischeck" className="py-24 bg-white" data-testid="section-basischeck">
-          <div className="max-w-6xl mx-auto px-6">
-            <div className="grid md:grid-cols-2 gap-16 items-start">
+        {/* ─── BASISCHECK WIZARD ─── */}
+        <section id="basischeck" data-testid="section-basischeck"
+          className="py-0"
+          style={{ background: wizardStep === "rapport" ? "#f8fafd" : "#0e3a70" }}
+        >
 
-              {/* Linkerkolom: stappen + tools */}
-              <div>
-                <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#1f5fae" }}>Begin hier</span>
-                <h2 className="font-black mt-3 mb-8 text-slate-900" style={{ fontSize: "clamp(22px, 2.6vw, 34px)", letterSpacing: "-0.6px" }} data-testid="text-basischeck-title">
-                  Begin met de Basischeck
+          {/* STAP 1 — INPUT */}
+          {wizardStep === "input" && (
+            <div className="py-24 px-6">
+              <div className="max-w-xl mx-auto text-center">
+                <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6" style={{ background: "rgba(255,255,255,.12)", color: "rgba(255,255,255,.8)" }}>
+                  <Sparkles className="w-3.5 h-3.5" /> Gratis Basischeck
+                </div>
+                <h2 className="font-black text-white mb-3" style={{ fontSize: "clamp(26px, 3.2vw, 42px)", letterSpacing: "-1px", lineHeight: 1.15 }} data-testid="text-wizard-title">
+                  Wat is jouw regio-positie?
                 </h2>
+                <p className="mb-10 text-base" style={{ color: "rgba(255,255,255,.6)" }}>
+                  Duurt minder dan 30 seconden. Geen account nodig.
+                </p>
 
-                {/* Stappen */}
-                <div className="space-y-5 mb-10">
-                  {[
-                    { n: "01", title: "Vul je beroep en stad in", desc: "Of kies een branche en regelgevingsonderwerp." },
-                    { n: "02", title: "Start de analyse", desc: "OpenRegio analyseert direct je regio of regelgevingsvraag." },
-                    { n: "03", title: "Ontvang concreet inzicht", desc: "Je krijgt een helder overzicht van kansen, signalen en een vervolgadvies." },
-                  ].map((s, i) => (
-                    <div key={i} className="flex items-start gap-4" data-testid={`stap-${i}`}>
-                      <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 font-black text-sm" style={{ background: "rgba(31,95,174,.08)", color: "#1f5fae" }}>
-                        {s.n}
-                      </div>
-                      <div>
-                        <div className="font-bold text-slate-800 text-sm">{s.title}</div>
-                        <div className="text-slate-400 text-sm mt-0.5 leading-relaxed">{s.desc}</div>
-                      </div>
-                    </div>
+                {/* Mode toggle */}
+                <div className="flex rounded-xl p-1 mb-8 mx-auto max-w-xs" style={{ background: "rgba(255,255,255,.1)" }}>
+                  {(["regio", "regelgeving"] as WizardMode[]).map((m) => (
+                    <button
+                      key={m}
+                      onClick={() => setWizardMode(m)}
+                      className="flex-1 py-2 rounded-lg text-sm font-bold transition-all"
+                      style={wizardMode === m
+                        ? { background: "#fff", color: "#0e3a70" }
+                        : { color: "rgba(255,255,255,.6)" }}
+                      data-testid={`button-mode-${m}`}
+                    >
+                      {m === "regio" ? "Regio-analyse" : "Regelgeving"}
+                    </button>
                   ))}
                 </div>
 
-                {/* Tabs */}
-                <div className="rounded-2xl border border-slate-100 overflow-hidden" style={{ boxShadow: "0 2px 12px rgba(0,0,0,.04)" }}>
-                  <div className="flex border-b border-slate-100">
-                    <button
-                      className={`flex-1 py-3 text-sm font-bold transition-colors ${activeCheck === "regio" ? "text-slate-900 bg-white" : "text-slate-400 bg-slate-50 hover:text-slate-600"}`}
-                      onClick={() => setActiveCheck("regio")}
-                      data-testid="tab-regio"
-                    >
-                      Regio-analyse
-                    </button>
-                    <button
-                      className={`flex-1 py-3 text-sm font-bold transition-colors ${activeCheck === "regelgeving" ? "text-slate-900 bg-white" : "text-slate-400 bg-slate-50 hover:text-slate-600"}`}
-                      onClick={() => setActiveCheck("regelgeving")}
-                      data-testid="tab-regelgeving"
-                    >
-                      Regelgeving-check
-                    </button>
-                  </div>
-
-                  <div className="p-5">
-                    {activeCheck === "regio" ? (
-                      <div className="space-y-3">
-                        <p className="text-slate-400 text-xs mb-3">Vul je beroep en stad in voor een snelle analyse.</p>
-                        <Input
-                          placeholder="Je beroep (bijv. Bakker)"
-                          aria-label="Je beroep"
-                          value={botBeroep}
-                          onChange={(e) => setBotBeroep(e.target.value)}
-                          className="text-sm"
-                          data-testid="input-bot-beroep"
-                        />
-                        <Input
-                          placeholder="Je stad"
-                          aria-label="Je stad"
-                          value={botStad}
-                          onChange={(e) => setBotStad(e.target.value)}
-                          onKeyDown={(e) => e.key === "Enter" && handleBotVraag()}
-                          className="text-sm"
-                          data-testid="input-bot-stad"
-                        />
-                        <button
-                          onClick={handleBotVraag}
-                          disabled={botLoading || !botBeroep.trim() || !botStad.trim()}
-                          className="w-full py-2.5 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-opacity hover:opacity-90 disabled:opacity-40"
-                          style={{ background: "#1f5fae" }}
-                          data-testid="button-bot-vraag"
-                        >
-                          {botLoading ? <><Loader2 className="w-4 h-4 animate-spin" />Analyse loopt…</> : <><Search className="w-4 h-4" />Analyseer mijn regio</>}
-                        </button>
-                        {botAntwoord && (
-                          <div className="rounded-xl p-4 text-sm leading-relaxed" style={{ background: "rgba(31,95,174,.05)", border: "1px solid rgba(31,95,174,.12)", color: "#334155" }} data-testid="text-bot-antwoord">
-                            {botAntwoord}
-                          </div>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="space-y-3">
-                        <p className="text-slate-400 text-xs mb-3">Vul je branche en een onderwerp in voor direct inzicht.</p>
-                        <Input
-                          placeholder="Je branche (bijv. Horeca)"
-                          aria-label="Je branche"
-                          value={regelgevingBranche}
-                          onChange={(e) => setRegelgevingBranche(e.target.value)}
-                          className="text-sm"
-                          data-testid="input-regelgeving-branche"
-                        />
-                        <Input
-                          placeholder="Onderwerp (bijv. terrasvergunning)"
-                          aria-label="Onderwerp"
-                          value={regelgevingOnderwerp}
-                          onChange={(e) => setRegelgevingOnderwerp(e.target.value)}
-                          onKeyDown={(e) => e.key === "Enter" && handleRegelgevingCheck()}
-                          className="text-sm"
-                          data-testid="input-regelgeving-onderwerp"
-                        />
-                        <button
-                          onClick={handleRegelgevingCheck}
-                          disabled={regelgevingLoading || !regelgevingBranche.trim() || !regelgevingOnderwerp.trim()}
-                          className="w-full py-2.5 rounded-xl text-sm font-bold text-white flex items-center justify-center gap-2 transition-opacity hover:opacity-90 disabled:opacity-40"
-                          style={{ background: "#1f5fae" }}
-                          data-testid="button-regelgeving-check"
-                        >
-                          {regelgevingLoading ? <><Loader2 className="w-4 h-4 animate-spin" />Analyse loopt…</> : <><Scale className="w-4 h-4" />Controleer regelgeving</>}
-                        </button>
-                        {regelgevingAntwoord && (
-                          <div className="rounded-xl p-4 text-sm leading-relaxed" style={{ background: "rgba(31,95,174,.05)", border: "1px solid rgba(31,95,174,.12)", color: "#334155" }} data-testid="text-regelgeving-antwoord">
-                            {regelgevingAntwoord}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
+                <div className="space-y-3 text-left mb-6">
+                  <input
+                    type="text"
+                    placeholder={wizardMode === "regio" ? "Je beroep (bijv. Bakker, Horeca, Fysiotherapeut)" : "Je branche (bijv. Horeca, Detailhandel, Bouw)"}
+                    value={field1}
+                    onChange={(e) => setField1(e.target.value)}
+                    className="w-full px-4 py-4 rounded-xl text-slate-900 font-medium placeholder:text-slate-400 outline-none focus:ring-2 text-sm"
+                    style={{ background: "#fff", border: "none", boxShadow: "0 2px 12px rgba(0,0,0,.15)" }}
+                    data-testid="input-wizard-field1"
+                  />
+                  <input
+                    type="text"
+                    placeholder={wizardMode === "regio" ? "Je stad of gemeente" : "Onderwerp (bijv. terrasvergunning, reclame-uiting)"}
+                    value={field2}
+                    onChange={(e) => setField2(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && startWizard()}
+                    className="w-full px-4 py-4 rounded-xl text-slate-900 font-medium placeholder:text-slate-400 outline-none focus:ring-2 text-sm"
+                    style={{ background: "#fff", border: "none", boxShadow: "0 2px 12px rgba(0,0,0,.15)" }}
+                    data-testid="input-wizard-field2"
+                  />
                 </div>
 
-                <p className="text-xs text-slate-400 text-center mt-4">Laagdrempelig. Praktisch. Gericht op actie.</p>
-              </div>
+                <button
+                  onClick={startWizard}
+                  disabled={!field1.trim() || !field2.trim()}
+                  className="w-full py-4 rounded-xl text-base font-black flex items-center justify-center gap-2 transition-opacity hover:opacity-90 disabled:opacity-30"
+                  style={{ background: "#f28a1a", color: "#1b1307" }}
+                  data-testid="button-wizard-start"
+                >
+                  Start de analyse <ArrowRight className="w-5 h-5" />
+                </button>
 
-              {/* Rechterkolom: foto */}
-              <div className="hidden md:block" data-testid="card-basischeck-photo">
-                <div className="rounded-2xl overflow-hidden sticky top-24" style={{ boxShadow: "0 16px 48px rgba(0,0,0,.1)" }}>
-                  <img src={groupImg} alt="Ondernemers met OpenRegio" className="w-full object-cover" style={{ height: "500px" }} />
-                </div>
+                <p className="text-xs mt-4" style={{ color: "rgba(255,255,255,.35)" }}>
+                  AI-gegenereerd inzicht op basis van openbare bronnen. Geen opslag van persoonsgegevens.
+                </p>
               </div>
-
             </div>
-          </div>
+          )}
+
+          {/* STAP 2 — SCANNING */}
+          {wizardStep === "scanning" && (
+            <div className="py-24 px-6 flex items-center justify-center min-h-80">
+              <div className="max-w-md mx-auto text-center w-full">
+                {/* Animated logo pulse */}
+                <div className="w-20 h-20 rounded-full mx-auto mb-8 flex items-center justify-center relative" style={{ background: "rgba(255,255,255,.1)" }}>
+                  <div className="absolute inset-0 rounded-full animate-ping" style={{ background: "rgba(242,138,26,.2)" }} />
+                  <Sparkles className="w-9 h-9 text-white" />
+                </div>
+
+                <p className="font-bold text-white text-lg mb-2 transition-all" data-testid="text-scan-message">
+                  {messages[scanMsgIdx]}
+                </p>
+                <p className="text-sm mb-10" style={{ color: "rgba(255,255,255,.45)" }}>
+                  {field1} · {field2}
+                </p>
+
+                {/* Progress bar */}
+                <div className="rounded-full h-2 mb-3 overflow-hidden" style={{ background: "rgba(255,255,255,.15)" }}>
+                  <div
+                    className="h-full rounded-full transition-all duration-300"
+                    style={{ width: `${scanProgress}%`, background: "linear-gradient(90deg, #1f5fae, #f28a1a)" }}
+                    data-testid="bar-scan-progress"
+                  />
+                </div>
+                <p className="text-xs font-bold" style={{ color: "rgba(255,255,255,.4)" }}>{scanProgress}%</p>
+              </div>
+            </div>
+          )}
+
+          {/* STAP 3 — RAPPORT */}
+          {wizardStep === "rapport" && (
+            <div className="py-16 px-6">
+              <div className="max-w-2xl mx-auto">
+
+                {/* Rapport header */}
+                <div className="bg-white rounded-2xl overflow-hidden mb-5" style={{ boxShadow: "0 4px 24px rgba(0,0,0,.08)" }} data-testid="card-rapport">
+                  <div className="px-7 py-5 flex flex-wrap items-start justify-between gap-4" style={{ background: "#0e3a70" }}>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <FileText className="w-4 h-4 text-white opacity-60" />
+                        <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "rgba(255,255,255,.55)" }}>
+                          {wizardMode === "regio" ? "Regio Rapport" : "Regelgeving Rapport"}
+                        </span>
+                      </div>
+                      <h3 className="font-black text-white text-xl leading-tight" data-testid="text-rapport-title">
+                        {field1} · {field2}
+                      </h3>
+                      <p className="text-xs mt-1" style={{ color: "rgba(255,255,255,.4)" }}>{today}</p>
+                    </div>
+
+                    {/* Score badge */}
+                    <div className="flex flex-col items-center" data-testid="badge-score">
+                      <div
+                        className="w-20 h-20 rounded-full flex flex-col items-center justify-center border-4"
+                        style={{ borderColor: scoreColor, background: `${scoreColor}18` }}
+                      >
+                        <span className="font-black text-white leading-none" style={{ fontSize: "26px" }}>{score}</span>
+                        <span className="text-xs font-bold" style={{ color: "rgba(255,255,255,.5)" }}>/100</span>
+                      </div>
+                      <span className="text-xs font-black mt-1.5 px-2 py-0.5 rounded-full" style={{ background: `${scoreColor}25`, color: scoreColor }}>
+                        {scoreLabel}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Bevindingen */}
+                  <div className="px-7 py-5">
+                    <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Bevindingen</p>
+                    <div className="space-y-3" data-testid="grid-findings">
+                      {findings.map((f, i) => {
+                        const cfg = findingConfig[f.type];
+                        const Icon = cfg.icon;
+                        return (
+                          <div key={i} className="flex items-start gap-3 p-3.5 rounded-xl" style={{ background: cfg.bg }} data-testid={`finding-${i}`}>
+                            <Icon className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: cfg.color }} />
+                            <div className="flex-1 min-w-0">
+                              <span className="text-xs font-black uppercase mr-2" style={{ color: cfg.color }}>{cfg.label}</span>
+                              <span className="text-sm text-slate-700 leading-relaxed">{f.text}</span>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Vergrendelde Pro-inzichten */}
+                  <div className="px-7 pb-5">
+                    <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Pro-inzichten</p>
+                    <div className="space-y-2.5">
+                      {[
+                        "Volledig overzicht van gemiste lokale kansen in jouw branche",
+                        "Persoonlijk regelgevingssignaal — nieuwe besluiten die jou raken",
+                      ].map((text, i) => (
+                        <div
+                          key={i}
+                          className="relative flex items-center gap-3 p-3.5 rounded-xl overflow-hidden cursor-pointer group"
+                          style={{ border: "1.5px dashed #e2e8f0", background: "#f8fafd" }}
+                          onClick={() => window.location.href = "/lidmaatschap"}
+                          data-testid={`locked-insight-${i}`}
+                        >
+                          <Lock className="w-4 h-4 flex-shrink-0 text-slate-400" />
+                          <span className="text-sm text-slate-400 select-none" style={{ filter: "blur(3.5px)" }}>{text}</span>
+                          <span className="ml-auto text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: "rgba(31,95,174,.1)", color: "#1f5fae" }}>
+                            Pro
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Volledige tekst toggle */}
+                  {antwoord && (
+                    <div className="border-t border-slate-100">
+                      <button
+                        className="w-full flex items-center justify-between px-7 py-3.5 text-sm font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-colors"
+                        onClick={() => setShowFullText(!showFullText)}
+                        data-testid="button-toggle-full-text"
+                      >
+                        <span>Volledige analyse bekijken</span>
+                        {showFullText ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                      </button>
+                      {showFullText && (
+                        <div className="px-7 pb-6 text-sm text-slate-500 leading-relaxed border-t border-slate-50" data-testid="text-full-antwoord">
+                          {antwoord}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* CTA */}
+                <div className="bg-white rounded-2xl p-6 text-center" style={{ boxShadow: "0 4px 24px rgba(0,0,0,.07)", border: "1.5px solid rgba(31,95,174,.12)" }} data-testid="card-rapport-cta">
+                  <p className="font-black text-slate-900 mb-1" style={{ fontSize: "18px" }}>Ontgrendel het volledige rapport</p>
+                  <p className="text-slate-400 text-sm mb-5">Krijg toegang tot alle Pro-inzichten, persoonlijke signalen en je volledige regionaal profiel.</p>
+                  <Link href="/lidmaatschap">
+                    <button className="w-full py-4 rounded-xl text-base font-black text-white transition-opacity hover:opacity-90 mb-3" style={{ background: "#f28a1a" }} data-testid="button-rapport-cta">
+                      Bekijk lidmaatschap <ChevronRight className="w-4 h-4 inline" />
+                    </button>
+                  </Link>
+                  <button
+                    onClick={resetWizard}
+                    className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-600 transition-colors mx-auto"
+                    data-testid="button-rapport-reset"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" /> Doe de check opnieuw
+                  </button>
+                </div>
+
+              </div>
+            </div>
+          )}
+
         </section>
 
         {/* ─── OVER ONS ─── */}
@@ -512,7 +669,7 @@ export default function HomePage() {
                 { q: "Is OpenRegio juridisch advies?", a: "Nee. OpenRegio helpt je signaleren, structureren en sneller zien wat relevant kan zijn. Voor juridisch advies verwijzen we je door naar een specialist." },
                 { q: "Is dit alleen voor grote bedrijven?", a: "Nee. Juist ook voor kleine en lokale ondernemers die meer grip willen. Van zzp'er tot mkb — iedereen profiteert van betere informatie en zichtbaarheid." },
                 { q: "Wat is het verschil tussen Basis en Pro?", a: "Basis is voor zichtbaarheid en regio-deelname. Pro is voor ondernemers die meer diepgang en informatievoordeel willen — zoals uitgebreide scans, regelgeving-inzichten en dossiers." },
-                { q: "Waarom eerst de Basischeck?", a: "Omdat je dan direct ziet waar jouw grootste kansen of zwakke punten zitten. Zo weet je meteen wat je hebt aan OpenRegio — voordat je kiest." },
+                { q: "Waarom eerst de Basischeck?", a: "Omdat je dan direct ziet waar jouw bedrijf staat — en welke kansen je nu laat liggen. Zo weet je meteen wat je hebt aan OpenRegio, voordat je kiest." },
               ].map((item, i) => (
                 <div key={i} className="rounded-xl border border-slate-100 overflow-hidden" data-testid={`faq-item-${i}`}>
                   <button
@@ -523,10 +680,7 @@ export default function HomePage() {
                     data-testid={`button-faq-${i}`}
                   >
                     <span className="font-semibold text-slate-800 text-sm pr-4">{item.q}</span>
-                    <ChevronDown
-                      className="w-4 h-4 flex-shrink-0 text-slate-400 transition-transform"
-                      style={{ transform: openFaq === i ? "rotate(180deg)" : "rotate(0deg)" }}
-                    />
+                    <ChevronDown className="w-4 h-4 flex-shrink-0 text-slate-400 transition-transform" style={{ transform: openFaq === i ? "rotate(180deg)" : "rotate(0deg)" }} />
                   </button>
                   {openFaq === i && (
                     <div className="px-5 pb-4" id={`faq-answer-${i}`} role="region">
@@ -540,12 +694,7 @@ export default function HomePage() {
         </section>
 
         {/* ─── EIND-CTA ─── */}
-        <section
-          id="contact"
-          className="py-24 relative overflow-hidden"
-          style={{ background: "#0e3a70" }}
-          data-testid="section-cta"
-        >
+        <section id="contact" className="py-24 relative overflow-hidden" style={{ background: "#0e3a70" }} data-testid="section-cta">
           <div className="absolute inset-0 opacity-10" style={{ backgroundImage: `url(${streetImg})`, backgroundSize: "cover", backgroundPosition: "center" }} />
           <div className="relative max-w-2xl mx-auto px-6 text-center">
             <h2 className="font-black text-white mb-4" style={{ fontSize: "clamp(24px, 3vw, 40px)", letterSpacing: "-0.8px" }} data-testid="text-cta-title">
@@ -554,28 +703,13 @@ export default function HomePage() {
             <p className="mb-8 text-base leading-relaxed" style={{ color: "rgba(255,255,255,.65)" }}>
               In een paar stappen zie je waar jouw bedrijf staat — en welke kansen je nu laat liggen.
             </p>
-            <form
-              className="flex flex-col sm:flex-row gap-3 justify-center"
-              onSubmit={(e) => {
-                e.preventDefault();
-                const email = (e.currentTarget.querySelector('input[type=email]') as HTMLInputElement)?.value;
-                window.location.href = `/lidmaatschap?email=${encodeURIComponent(email || '')}`;
-              }}
-            >
-              <input
-                type="email"
-                required
-                placeholder="Je e-mailadres"
-                aria-label="Je e-mailadres"
-                className="flex-1 max-w-xs px-4 py-3.5 rounded-xl text-sm outline-none bg-white/10 text-white placeholder:text-white/50 border border-white/20 focus:border-white/40 transition-colors"
-                data-testid="input-cta-email"
-              />
-              <button
-                type="submit"
-                className="px-6 py-3.5 rounded-xl font-bold text-sm flex-shrink-0 transition-opacity hover:opacity-90"
-                style={{ background: "#f28a1a", color: "#1b1307" }}
-                data-testid="button-cta-submit"
-              >
+            <form className="flex flex-col sm:flex-row gap-3 justify-center" onSubmit={(e) => {
+              e.preventDefault();
+              const email = (e.currentTarget.querySelector('input[type=email]') as HTMLInputElement)?.value;
+              window.location.href = `/lidmaatschap?email=${encodeURIComponent(email || '')}`;
+            }}>
+              <input type="email" required placeholder="Je e-mailadres" aria-label="Je e-mailadres" className="flex-1 max-w-xs px-4 py-3.5 rounded-xl text-sm outline-none bg-white/10 text-white placeholder:text-white/50 border border-white/20 focus:border-white/40 transition-colors" data-testid="input-cta-email" />
+              <button type="submit" className="px-6 py-3.5 rounded-xl font-bold text-sm flex-shrink-0 transition-opacity hover:opacity-90" style={{ background: "#f28a1a", color: "#1b1307" }} data-testid="button-cta-submit">
                 Start de Basischeck
               </button>
             </form>

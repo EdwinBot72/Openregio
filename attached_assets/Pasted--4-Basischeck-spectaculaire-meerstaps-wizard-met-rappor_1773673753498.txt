@@ -1,0 +1,71 @@
+#4 - Basischeck: spectaculaire meerstaps wizard met rapport-UI
+What & Why
+
+De huidige Basischeck is een simpel tabblad met twee inputs en een tekst-antwoord. Dit ziet er functioneel uit maar geeft geen "wow" moment. Doel: de Basischeck omzetten naar een meerstaps wizard die eindigt met een visueel indrukwekkend "Regio Rapport" — inclusief score, gekleurde bevindingen en vergrendelde Pro-inzichten. Dit is het conversie-moment waarop een ondernemer denkt: "dit wil ik volledig hebben."
+Done looks like
+Fase 1 — Invoerscherm (step === "input")
+
+    Donkerblauwe achtergrond (#0e3a70) of gradient, wit tekst
+    Groot label "Gratis Basischeck" met ondertitel
+    Twee velden: beroep + stad (of branche + onderwerp voor regelgeving)
+    Grote oranje CTA-knop "Start de analyse →"
+    Subtekst: "Duurt minder dan 30 seconden. Geen account nodig."
+
+Fase 2 — Scan-animatie (step === "scanning")
+
+    Animated progress bar die oploopt (0–100% over 2.5 sec)
+    Wisselende statusberichten met fade-in:
+        "Jouw regio in kaart brengen…"
+        "Lokale signalen analyseren…"
+        "Kansen en risico's inventariseren…"
+        "Rapport samenstellen…"
+    Daarna: API-call naar /api/regiobot/buurman of /api/regelgeving/check
+    Na ontvangen antwoord → parse naar gestructureerde resultaten → step "rapport"
+
+Fase 3 — Rapport-scherm (step === "rapport")
+
+Layout als een professioneel visueel rapport:
+
+Header: "Regio Rapport — [beroep] in [stad]" + datum
+
+Score-badge: grote cirkel met score (bijv. 74/100) + label "Zichtbaarheidsscore"
+
+    Score wordt pseudo-random maar consistent bepaald op basis van antwoord-lengte + stad
+
+Bevindingen (3–4 items, kleur-gecodeerd):
+
+    Groen (goed): bijv. "Actief lokaal netwerk aanwezig in [stad]"
+    Oranje (aandacht): bijv. "Digitale aanwezigheid kan sterker"
+    Rood (verbeterpunt): bijv. "Regelgeving-signalen gemist"
+    Bevindingen worden geëxtraheerd uit de AI-tekst OF als fallback gegenereerd
+
+Vergrendelde inzichten (2 items, blur-effect + lock-icoon):
+
+    "Volledig overzicht van gemiste lokale kansen"
+    "Persoonlijk regelgevingssignaal voor jouw branche"
+    Klik → scroll naar membership
+
+Volledige tekst (uitklapbaar, subtiel)
+
+CTA-knop: "Ontgrendel het volledige rapport" (oranje, groot) → /lidmaatschap
+
+Reset-link: "Doe de check opnieuw" (kleine link onderaan)
+Technical approach
+
+    Alles in client/src/pages/home.tsx — geen backend-wijzigingen
+    State-machine: step: "input" | "scanning" | "rapport"
+    Scanning-animatie via useEffect + setInterval voor progress + setTimeout voor statusberichten
+    Score berekening: deterministisch op basis van stad-naam + antwoord-lengte (geen extra API-call)
+    Bevindingen-parsing: zoek naar bullet-achtige zinnen in AI-antwoord; fallback naar 3 vaste bevindingen
+    Blur-effect: filter: blur(4px) + overlay met slotje
+    Beide tools (regio + regelgeving) doorlopen dezelfde wizard, maar met aangepaste labels
+
+Out of scope
+
+    Geen echte scoring-API
+    Geen opslaan van resultaten
+    Geen account-aanmaken flow vanuit rapport (alleen link naar /lidmaatschap)
+
+Relevant files
+
+    client/src/pages/home.tsx
