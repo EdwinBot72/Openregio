@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import heroImg from "@assets/856951b8-160c-43ab-ae38-c328cb362aa4_1773678418402.png";
 
 type RegelgevingItem = {
   id: string;
@@ -115,17 +116,20 @@ export default function RegelgevingVerkennerPage() {
 
   return (
     <div className="max-w-4xl mx-auto px-6 py-10">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-2 mb-2">
-          <Gavel className="w-5 h-5 text-orange-600" />
-          <span className="text-xs font-bold uppercase tracking-widest text-orange-600">Regelgeving & WOO</span>
+      {/* Hero */}
+      <div className="relative rounded-2xl overflow-hidden mb-8" style={{ height: "220px" }}>
+        <img src={heroImg} alt="Regelgeving verkenner" className="w-full h-full object-cover" style={{ objectPosition: "center 40%" }} />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(15,42,78,0.90) 0%, rgba(15,42,78,0.60) 55%, rgba(15,42,78,0.2) 100%)" }} />
+        <div className="absolute inset-0 flex flex-col justify-end p-7">
+          <div className="flex items-center gap-2 mb-2">
+            <Gavel className="w-4 h-4 text-orange-300" />
+            <span className="text-xs font-bold uppercase tracking-widest text-orange-300">Regelgeving & WOO</span>
+          </div>
+          <h1 className="text-2xl font-bold text-white mb-1">Regelgeving Verkenner</h1>
+          <p className="text-sm text-white/70">
+            Doorzoek officiële verordeningen en beleidsregels door heel Nederland — en genereer direct een Woo-verzoek.
+          </p>
         </div>
-        <h1 className="text-2xl font-bold text-slate-900 mb-2">Regelgeving Verkenner</h1>
-        <p className="text-slate-600">
-          Zoek door officiële overheidspublicaties — verordeningen, beleidsregels en besluiten van gemeenten
-          en andere bestuursorganen door heel Nederland. Gebruik de gevonden documenten als basis voor een Woo-verzoek.
-        </p>
       </div>
 
       {/* Search */}

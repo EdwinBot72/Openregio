@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
+import heroImg from "@assets/9bfd39e2-10d7-4ef1-99a5-7470a127e2ec_1773678478784.png";
 
 type Categorie = {
   naam: string;
@@ -143,16 +144,20 @@ export default function WebsiteScanPage() {
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-10">
-      {/* Header */}
-      <div className="mb-7">
-        <div className="flex items-center gap-2 mb-1.5">
-          <Globe className="w-4 h-4 text-blue-600" />
-          <span className="text-xs font-bold uppercase tracking-widest text-blue-600">Pro-tool · Zichtbaarheid</span>
+      {/* Hero */}
+      <div className="relative rounded-2xl overflow-hidden mb-8" style={{ height: "220px" }}>
+        <img src={heroImg} alt="Website analyse & SEO" className="w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(15,42,78,0.88) 0%, rgba(15,42,78,0.55) 60%, rgba(15,42,78,0.2) 100%)" }} />
+        <div className="absolute inset-0 flex flex-col justify-end p-7">
+          <div className="flex items-center gap-2 mb-2">
+            <Globe className="w-4 h-4 text-blue-300" />
+            <span className="text-xs font-bold uppercase tracking-widest text-blue-300">Pro-tool · Zichtbaarheid</span>
+          </div>
+          <h1 className="text-2xl font-bold text-white mb-1">Website Scan</h1>
+          <p className="text-sm text-white/70">
+            Voer je websiteadres in en ontdek direct wat je moet aanpakken voor betere vindbaarheid.
+          </p>
         </div>
-        <h1 className="text-2xl font-bold text-slate-900 mb-1.5">Website Scan</h1>
-        <p className="text-slate-500 text-sm">
-          Voer je websiteadres in. Je krijgt direct een overzicht van wat goed gaat en — belangrijker — wat je moet aanpakken.
-        </p>
       </div>
 
       {/* Input */}
