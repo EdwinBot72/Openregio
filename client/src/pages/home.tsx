@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import logoImg from "@assets/ChatGPT_Image_15_feb_2026,_15_15_16_1771164937665.png";
 import footerLogoImg from "@assets/afbeelding_1771441188699.png";
-import streetImg from "@assets/5dab2418-3038-4262-b4a0-233a5081e835_1773671805585.png";
+import streetImg from "@assets/ChatGPT_Image_16_mrt_2026,_17_09_39_1773677423650.png";
 import groupImg from "@assets/ChatGPT_Image_16_mrt_2026,_14_46_04_1773671702074.png";
 
 type WizardStep = "input" | "scanning" | "rapport";
