@@ -45,8 +45,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
-import { getLogoutUrl } from "@/lib/authUtils";
 import { useLocation } from "wouter";
+import { queryClient } from "@/lib/queryClient";
 
 type NavSubItem = {
   title: string;
@@ -251,7 +251,17 @@ function NavSectionItem({
 
 export function AppSidebar() {
   const { user, profile, isLoading } = useAuth();
-  const [location] = useLocation();
+  const [location, setLocation] = useLocation();
+
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
+    } catch {
+    } finally {
+      queryClient.clear();
+      setLocation("/");
+    }
+  };
 
   const isPro = user?.plan === "pro";
 
@@ -372,10 +382,8 @@ export function AppSidebar() {
                   <User className="h-4 w-4" />
                 </a>
               </Button>
-              <Button size="icon" variant="ghost" asChild data-testid="button-logout">
-                <a href={getLogoutUrl()}>
-                  <LogOut className="h-4 w-4" />
-                </a>
+              <Button size="icon" variant="ghost" data-testid="button-logout" onClick={handleLogout}>
+                <LogOut className="h-4 w-4" />
               </Button>
             </div>
           </div>
