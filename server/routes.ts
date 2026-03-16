@@ -4133,14 +4133,59 @@ Geef een JSON-analyse in exact dit formaat (geen markdown):
 }
 Wees kritisch maar opbouwend. Focus op lokale vindbaarheid voor Nederlandse ondernemers. Max 5 aanbevelingen.`;
 
+    function extractJson(raw: string): any {
+      const cleaned = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+      // First try direct parse
+      try { return JSON.parse(cleaned); } catch {}
+      // Try to extract first JSON object
+      const match = cleaned.match(/\{[\s\S]+\}/);
+      if (match) {
+        try { return JSON.parse(match[0]); } catch {}
+      }
+      return null;
+    }
+
+    // Fallback analysis when AI fails
+    function buildFallbackAnalysis() {
+      const httpsScore = s.isHttps ? 20 : 0;
+      const seoScore = (s.title ? 15 : 0) + (s.metaDesc ? 15 : 0) + (s.h1Count === 1 ? 10 : 0);
+      const mobileScore = s.hasViewport ? 20 : 0;
+      const localScore = (s.hasPhone ? 10 : 0) + (s.hasEmail ? 10 : 0) + (s.hasGoogleMaps ? 10 : 0);
+      const overall = Math.round(Math.min(100, httpsScore + seoScore + mobileScore + localScore));
+      return {
+        overallScore: overall || 45,
+        categories: [
+          { naam: "Vindbaarheid (SEO)", score: Math.min(100, seoScore * 2), oordeel: seoScore > 30 ? "goed" : "matig", toelichting: s.title ? "Er is een paginatitel gevonden." : "Geen paginatitel gevonden — dit is essentieel voor Google." },
+          { naam: "Lokale aanwezigheid", score: Math.min(100, localScore * 3), oordeel: localScore > 20 ? "goed" : "slecht", toelichting: s.hasPhone ? "Telefoonnummer aanwezig." : "Geen contactgegevens gevonden op de pagina." },
+          { naam: "Mobiel & Technisch", score: mobileScore + httpsScore, oordeel: (mobileScore + httpsScore) > 30 ? "goed" : "matig", toelichting: s.isHttps ? "Website draait via HTTPS." : "Geen HTTPS — dit schaadt zowel veiligheid als SEO." },
+          { naam: "Social & Deelbaarheid", score: s.hasOgTitle ? 60 : 20, oordeel: s.hasOgTitle ? "matig" : "slecht", toelichting: s.hasOgTitle ? "Open Graph titel aanwezig." : "Geen Open Graph tags — links op social media worden niet mooi weergegeven." },
+        ],
+        sterkePunten: [
+          ...(s.isHttps ? ["Website draait via HTTPS"] : []),
+          ...(s.hasViewport ? ["Mobielvriendelijke viewport ingesteld"] : []),
+          ...(s.title ? ["Paginatitel aanwezig"] : []),
+        ],
+        aanbevelingen: [
+          ...(!s.isHttps ? [{ prioriteit: "hoog", actie: "Schakel HTTPS in", waarom: "Google geeft voorkeur aan veilige websites en laat zonder HTTPS een waarschuwing zien." }] : []),
+          ...(!s.metaDesc ? [{ prioriteit: "hoog", actie: "Voeg een meta-beschrijving toe", waarom: "Dit is de tekst die in Google zoekresultaten verschijnt — cruciaal voor klikken." }] : []),
+          ...(!s.hasPhone ? [{ prioriteit: "midden", actie: "Zet een telefoonnummer op de website", waarom: "Lokale klanten zoeken snel contactmogelijkheden — een zichtbaar nummer verhoogt vertrouwen en conversie." }] : []),
+          ...(!s.hasStructuredData ? [{ prioriteit: "midden", actie: "Voeg structured data (JSON-LD) toe", waarom: "Dit helpt Google begrijpen wie je bent en kan leiden tot rich results in zoekresultaten." }] : []),
+          ...(!s.hasOgImage ? [{ prioriteit: "laag", actie: "Voeg een Open Graph afbeelding toe", waarom: "Wanneer mensen je link delen op social media, wordt er nu geen afbeelding getoond." }] : []),
+        ].slice(0, 5),
+        samenvattend: `Analyse van ${finalUrl} op basis van technische signalen. ${overall >= 60 ? "De website heeft een solide basis maar er zijn verbeterpunten." : "Er zijn meerdere aandachtspunten die de online vindbaarheid verbeteren."}`,
+      };
+    }
+
     try {
       const { GoogleGenerativeAI } = await import("@google/generative-ai");
       const genAI = new GoogleGenerativeAI(process.env.AI_INTEGRATIONS_GEMINI_API_KEY!);
       const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-      const result = await model.generateContent({ contents: [{ role: "user", parts: [{ text: prompt }] }] });
-      let raw = result.response.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
-      raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-      const analysis = JSON.parse(raw);
+      const result = await model.generateContent({
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        generationConfig: { responseMimeType: "application/json" },
+      });
+      const raw = result.response.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
+      const analysis = extractJson(raw) ?? buildFallbackAnalysis();
       return res.json({ url: finalUrl, signals: s, analysis });
     } catch (geminiErr) {
       try {
@@ -4153,10 +4198,11 @@ Wees kritisch maar opbouwend. Focus op lokale vindbaarheid voor Nederlandse onde
           max_tokens: 1500,
           response_format: { type: "json_object" },
         });
-        const analysis = JSON.parse(completion.choices[0].message.content ?? "{}");
+        const analysis = extractJson(completion.choices[0].message.content ?? "{}") ?? buildFallbackAnalysis();
         return res.json({ url: finalUrl, signals: s, analysis });
       } catch {
-        return res.status(500).json({ error: "AI-analyse mislukt. Probeer het later opnieuw." });
+        // Both AI services failed — return rule-based analysis
+        return res.json({ url: finalUrl, signals: s, analysis: buildFallbackAnalysis() });
       }
     }
   });
