@@ -1,0 +1,416 @@
+Top. Hier is een **strakke homepage-wireframe + concrete copy** voor OpenRegio, zodat je dit direct in je Replit-project kunt zetten.
+
+---
+
+# OpenRegio homepage-opzet
+
+## 1. Sticky navigation
+
+**Links**
+OpenRegio logo
+
+**Midden / rechts**
+
+* Home
+* Oplossingen
+* Basischeck
+* Lidmaatschap
+* Contact
+
+**CTA knop**
+
+* Start de Basischeck
+
+### Waarom zo
+
+Je wilt één duidelijke hoofdactie.
+Niet 6 richtingen. Niet teveel denkwerk.
+
+---
+
+# 2. Hero sectie
+
+## Headline
+
+**Grip op regels, zichtbaarheid en kansen in je regio.**
+
+## Subheadline
+
+**OpenRegio helpt ondernemers om eerder te zien wat er verandert, beter gevonden te worden en sterker te staan in hun eigen regio.**
+
+## CTA’s
+
+**Primaire knop:**
+Start de Basischeck
+
+**Secundaire knop:**
+Bekijk lidmaatschap
+
+## Vertrouwenszin onder de knoppen
+
+**Voor ondernemers die minder afhankelijk willen zijn van platformregels, onduidelijke besluiten en gemiste lokale kansen.**
+
+## Rechterkant visual
+
+Geen generieke stockfoto.
+Gebruik liever:
+
+* dashboard mockup
+* regio kaart met signalen
+* scan/result scherm
+* combinatie van “zichtbaarheid + regelgeving”
+
+### Waarom dit werkt
+
+Je verkoopt hier niet “een leuk platform”.
+Je verkoopt:
+
+* grip
+* overzicht
+* voorsprong
+
+---
+
+# 3. Direct onder hero: pijn + herkenning
+
+## Titel
+
+**Veel ondernemers missen signalen die direct impact hebben op hun bedrijf.**
+
+## Tekst
+
+**Regels veranderen. Besluiten worden genomen. Lokale kansen ontstaan en verdwijnen. Veel daarvan is openbaar, maar verspreid, technisch of te laat zichtbaar. Ondertussen kost lage zichtbaarheid gewoon klanten.**
+
+## 3 korte bullets
+
+* Je ziet relevante veranderingen vaak pas als het al speelt
+* Je online zichtbaarheid laat omzet liggen
+* Lokale kansen blijven versnipperd en onbenut
+
+### Waarom dit blok nodig is
+
+Je moet eerst het probleem laten landen.
+Anders voelt je aanbod als “weer een tool”.
+
+---
+
+# 4. Oplossingsblok met 3 pijlers
+
+## Titel
+
+**Eén platform. Drie manieren om sterker te staan.**
+
+### Card 1 — Inzicht
+
+**Zie eerder wat verandert**
+Volg regelgeving, openbare documenten en signalen die relevant kunnen zijn voor jouw onderneming, branche of regio.
+
+### Card 2 — Zichtbaarheid
+
+**Word beter gevonden in je regio**
+Krijg inzicht in hoe zichtbaar jouw bedrijf echt is en waar je lokale kansen laat liggen.
+
+### Card 3 — RegioVoordeel
+
+**Pak meer kansen via je netwerk**
+Kom in beeld binnen een regionaal ondernemersnetwerk waar zichtbaarheid, samenwerking en doorverwijzing samenkomen.
+
+## CTA onder de cards
+
+**Doe eerst de Basischeck**
+
+### Waarom zo
+
+Je bundelt alles wat nu los voelt in drie logische bakken.
+Dat maakt je verhaal meteen rustiger.
+
+---
+
+# 5. Basischeck als hoofdinstap
+
+## Titel
+
+**Begin met de Basischeck**
+
+## Tekst
+
+**In een paar stappen zie je waar jouw bedrijf nu staat op het gebied van zichtbaarheid, informatiepositie en regionale kansen. Zonder gedoe, gewoon helder.**
+
+## Wat de bezoeker krijgt
+
+* een eerste scan van de huidige situatie
+* zicht op gemiste kansen
+* een duidelijk vervolgadvies
+* inzicht of Basis of Pro beter past
+
+## CTA
+
+**Start nu de Basischeck**
+
+## Kleine no-nonsense regel eronder
+
+**Laagdrempelig. Praktisch. Gericht op actie.**
+
+### Waarom dit blok zwaar moet staan
+
+Dit is je beste instappunt.
+Niet direct “koop nu”, maar eerst: **laat iets zien**.
+
+---
+
+# 6. Bewijs / voorbeeldresultaten
+
+## Titel
+
+**Zo ziet grip eruit in de praktijk**
+
+Maak hier 3 voorbeeldpanelen of demo-cards.
+
+### Demo 1
+
+**Regelgeving-signaal**
+“Relevant besluit of wijziging gespot in jouw regio of branche.”
+
+### Demo 2
+
+**Zichtbaarheidsscan**
+“Je bedrijf scoort laag op lokale vindbaarheid en laat aanvragen liggen.”
+
+### Demo 3
+
+**Kansensignaal**
+“Nieuwe samenwerking, opdracht of regiokans zichtbaar.”
+
+## Ondertekst
+
+**Geen vaag verhaal, maar concrete signalen waar je iets mee kunt.**
+
+### Waarom dit werkt
+
+Mensen moeten kunnen voelen wat ze krijgen.
+Niet alleen lezen dat het slim is.
+
+---
+
+# 7. Voor wie OpenRegio is
+
+## Titel
+
+**Voor ondernemers die niet achter de feiten aan willen lopen**
+
+## 3 profielen
+
+### 1
+
+**Lokale ondernemers**
+Die beter gevonden willen worden en meer grip willen op hun regio.
+
+### 2
+
+**Ondernemers in gereguleerde of veranderende markten**
+Die eerder willen zien wat beleid, besluiten of regels kunnen betekenen.
+
+### 3
+
+**Ondernemers die minder afhankelijk willen zijn van grote platforms**
+En liever bouwen op hun eigen positie, netwerk en informatievoordeel.
+
+---
+
+# 8. Lidmaatschap sectie
+
+## Titel
+
+**Kies wat past bij jouw fase**
+
+### Basis
+
+**Voor ondernemers die zichtbaar willen zijn en regionaal mee willen doen**
+
+Bijvoorbeeld:
+
+* profiel / aanwezigheid binnen platform
+* basis zichtbaarheid
+* toegang tot netwerkvoordelen
+* eerste signalen en updates
+
+**CTA:** Kies Basis
+
+### Pro
+
+**Voor ondernemers die actief informatievoordeel willen pakken**
+
+Bijvoorbeeld:
+
+* diepere scans
+* regelgeving / Woo-gerichte inzichten
+* uitgebreidere signalen
+* strategisch voordeel voor ondernemers die vooruit willen kijken
+
+**CTA:** Kies Pro
+
+## Extra zin onderaan
+
+**Twijfel je nog? Start met de Basischeck en zie wat past.**
+
+### Waarom dit beter is
+
+Je verkoopt Pro niet als “meer features”, maar als:
+**serieuzere ondernemerspositie**.
+
+---
+
+# 9. Positioneringsblok
+
+## Titel
+
+**Waarom OpenRegio anders is**
+
+## Tekst
+
+**OpenRegio is geen zoveelste advertentieplatform of vrijblijvende community. Het is gebouwd voor ondernemers die sterker willen staan met betere informatie, meer regionale zichtbaarheid en minder afhankelijkheid van grote tussenlagen.**
+
+## 4 korte punten
+
+* Niet alleen zichtbaar zijn, maar slimmer positioneren
+* Niet pas reageren als iets verandert, maar eerder zien wat eraan komt
+* Niet alleen netwerken, maar ook voordeel pakken uit je regio
+* Niet leunen op Big Tech, maar bouwen aan je eigen basis
+
+---
+
+# 10. FAQ
+
+## Voorbeelden
+
+### Is OpenRegio juridisch advies?
+
+Nee. OpenRegio helpt je signaleren, structureren en sneller zien wat relevant kan zijn.
+
+### Is dit alleen voor grote bedrijven?
+
+Nee. Juist ook voor kleine en lokale ondernemers die meer grip willen.
+
+### Wat is het verschil tussen Basis en Pro?
+
+Basis is voor zichtbaarheid en regio-deelname. Pro is voor ondernemers die meer diepgang en informatievoordeel willen.
+
+### Waarom eerst de Basischeck?
+
+Omdat je dan direct ziet waar jouw grootste kansen of zwakke punten zitten.
+
+---
+
+# 11. Footer
+
+* Over OpenRegio
+* Oplossingen
+* Basischeck
+* Lidmaatschap
+* Contact
+* Privacy
+* Voorwaarden
+
+Extra regel:
+**Grip op regels, zichtbaarheid en kansen in je regio.**
+
+---
+
+# Korte versie van de volledige homepage-flow
+
+Dit is de volgorde:
+
+1. Navigatie
+2. Hero
+3. Probleem / herkenning
+4. 3 pijlers
+5. Basischeck
+6. Voorbeeldresultaten
+7. Voor wie
+8. Lidmaatschap
+9. Waarom anders
+10. FAQ
+11. Footer
+
+Dat is je conversieflow.
+
+---
+
+# Concrete hero-copy die je direct kunt testen
+
+## Variant A
+
+**Grip op regels, zichtbaarheid en kansen in je regio.**
+OpenRegio helpt ondernemers om eerder te zien wat er verandert, beter gevonden te worden en sterker te staan in hun eigen regio.
+
+## Variant B
+
+**Zie eerder wat verandert. Word beter gevonden.**
+Voor ondernemers die minder afhankelijk willen zijn van platformregels, gemiste signalen en versnipperde regionale kansen.
+
+## Variant C
+
+**Sterker ondernemen in je eigen regio.**
+Met beter inzicht in regelgeving, meer lokale zichtbaarheid en een netwerk dat echt waarde oplevert.
+
+Mijn favoriet voor nu: **Variant A**.
+
+---
+
+# Cards-copy die harder binnenkomt
+
+## Oude richting
+
+* lokaal netwerk
+* simpel betalen
+* bereikbaar blijven
+
+## Nieuwe richting
+
+* **Zie eerder wat verandert**
+* **Word beter gevonden**
+* **Pak meer regionale kansen**
+
+Dat is gewoon veel scherper.
+
+---
+
+# Mijn advies voor je Replit build
+
+Bouw het zo op in secties:
+
+* `HeroSection`
+* `ProblemSection`
+* `PillarsSection`
+* `BasischeckSection`
+* `ProofSection`
+* `AudienceSection`
+* `MembershipSection`
+* `PositioningSection`
+* `FaqSection`
+* `Footer`
+
+Dat maakt je codebase ook meteen netter.
+
+---
+
+# Wat ik als eerste zou aanpassen in jouw huidige homepage
+
+1. Hero headline vervangen
+2. Direct onder hero een probleemblok zetten
+3. Bestaande cards herschrijven naar resultaattaal
+4. Basischeck veel prominenter maken
+5. Membership pas later op de pagina tonen
+6. Minimaal 1 demo-resultaat visueel tonen
+
+---
+
+# Hard oordeel
+
+Je concept is goed.
+Je homepage moet alleen stoppen met **uitleggen wat het ongeveer is**
+en beginnen met **verkopen wat het oplost**.
+
+Dat is de hele shift.
+
+Ik kan dit nu ook direct omzetten naar een **kant-en-klare React/Tailwind homepage in één bestand**, zodat je het bijna 1-op-1 in Replit kunt plakken.
