@@ -669,7 +669,7 @@ export default function HomePage() {
             <a href="#home" className="hover:text-white transition-colors" data-testid="link-footer-home">Home</a>
             <a href="#oplossingen" className="hover:text-white transition-colors" data-testid="link-footer-oplossingen">Oplossingen</a>
             <a href="#basischeck" className="hover:text-white transition-colors" data-testid="link-footer-basischeck">Basischeck</a>
-            <Link href="/lidmaatschap" className="hover:text-white transition-colors" data-testid="link-footer-lid">Lidmaatschap</Link>
+            <a href="#member" className="hover:text-white transition-colors" data-testid="link-footer-lid">Lidmaatschap</a>
             <a href="#contact" className="hover:text-white transition-colors" data-testid="link-footer-contact">Contact</a>
           </nav>
           <div className="w-full flex flex-wrap gap-1 text-xs mt-2" style={{ color: "#334155" }}>
