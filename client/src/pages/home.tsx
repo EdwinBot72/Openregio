@@ -15,13 +15,6 @@ import groupImg from "@assets/ChatGPT_Image_16_mrt_2026,_14_46_04_1773671702074.
 
 type WizardStep = "input" | "scanning" | "rapport";
 type WizardMode = "regio" | "regelgeving";
-type FindingType = "goed" | "aandacht" | "verbeter";
-
-interface Finding {
-  text: string;
-  type: FindingType;
-}
-
 const SCAN_MESSAGES = [
   "Jouw regio in kaart brengen…",
   "Lokale signalen analyseren…",
@@ -38,45 +31,68 @@ const SCAN_MESSAGES_REGELGEVING = [
   "Rapport samenstellen…",
 ];
 
+interface Section {
+  label: string;
+  content: string;
+  icon: typeof CheckCircle2;
+  color: string;
+  bg: string;
+  tag: string;
+}
+
+const REGIO_LABELS = ["MARKTKLIMAAT", "KANS", "RISICO", "ACTIE", "LOKALE TIP"];
+const REGEL_LABELS = ["WETTELIJK KADER", "PRAKTIJK", "RISICO", "ACTIE", "SLIMME TIP"];
+
+const LABEL_CONFIG: Record<string, { icon: typeof CheckCircle2; color: string; bg: string; tag: string }> = {
+  "MARKTKLIMAAT":   { icon: BarChart2,    color: "#1f5fae", bg: "rgba(31,95,174,.07)",  tag: "Marktklimaat" },
+  "KANS":           { icon: TrendingUp,   color: "#059669", bg: "rgba(5,150,105,.07)",  tag: "Kans" },
+  "RISICO":         { icon: AlertTriangle,color: "#dc2626", bg: "rgba(220,38,38,.07)",  tag: "Risico" },
+  "ACTIE":          { icon: CheckCircle2, color: "#f28a1a", bg: "rgba(242,138,26,.07)", tag: "Eerste stap" },
+  "LOKALE TIP":     { icon: MapPin,       color: "#7c3aed", bg: "rgba(124,58,237,.07)", tag: "Lokale tip" },
+  "WETTELIJK KADER":{ icon: Gavel,        color: "#1f5fae", bg: "rgba(31,95,174,.07)",  tag: "Wet & Regelgeving" },
+  "PRAKTIJK":       { icon: CheckCircle2, color: "#059669", bg: "rgba(5,150,105,.07)",  tag: "In de praktijk" },
+  "SLIMME TIP":     { icon: Sparkles,     color: "#7c3aed", bg: "rgba(124,58,237,.07)", tag: "Slimme tip" },
+};
+
+function parseStructuredResponse(antwoord: string, mode: WizardMode): Section[] {
+  const labels = mode === "regio" ? REGIO_LABELS : REGEL_LABELS;
+  const sections: Section[] = [];
+
+  for (const label of labels) {
+    const regex = new RegExp(`${label}:\\s*(.+?)(?=(?:${labels.join("|")}):|\s*$)`, "si");
+    const match = antwoord.match(regex);
+    if (match && match[1]) {
+      const cfg = LABEL_CONFIG[label];
+      if (cfg) {
+        sections.push({
+          label,
+          content: match[1].trim().replace(/\n+/g, " "),
+          ...cfg,
+        });
+      }
+    }
+  }
+
+  // Fallback als parsing mislukt
+  if (sections.length === 0 && antwoord.length > 30) {
+    const fallbackCfg = LABEL_CONFIG[mode === "regio" ? "KANS" : "WETTELIJK KADER"];
+    sections.push({
+      label: "Analyse",
+      content: antwoord.slice(0, 400),
+      ...fallbackCfg,
+    });
+  }
+
+  return sections;
+}
+
 function computeScore(antwoord: string, seed: string): number {
   let hash = 0;
   for (let i = 0; i < seed.length; i++) hash = (hash * 31 + seed.charCodeAt(i)) & 0xffffffff;
-  const base = ((Math.abs(hash) % 28) + 52);
-  const bonus = Math.min(antwoord.length / 120, 8);
+  const base = ((Math.abs(hash) % 24) + 56);
+  const bonus = Math.min(antwoord.length / 100, 10);
   return Math.round(base + bonus);
 }
-
-function extractFindings(antwoord: string, field1: string, field2: string, mode: WizardMode): Finding[] {
-  const sentences = antwoord
-    .split(/[.\n]/)
-    .map(s => s.trim())
-    .filter(s => s.length > 20 && s.length < 140);
-
-  const findings: Finding[] = [];
-
-  if (mode === "regio") {
-    findings.push({ text: `Regionaal ondernemersklimaat in ${field2} biedt kansen voor ${field1}`, type: "goed" });
-    const mid = sentences.find(s => /verbeter|aandacht|let op|risico|check/i.test(s));
-    findings.push({ text: mid || `Digitale vindbaarheid van uw bedrijf als ${field1} kan worden versterkt`, type: "aandacht" });
-    const neg = sentences.find(s => /niet|mist|ontbreekt|zwak|laag/i.test(s));
-    findings.push({ text: neg || `Lokale regelgeving-signalen worden momenteel onvoldoende gevolgd`, type: "verbeter" });
-    findings.push({ text: `Actieve concurrenten in ${field2} professionaliseren hun online aanwezigheid`, type: "aandacht" });
-  } else {
-    findings.push({ text: `Relevante regelgeving voor ${field1} in uw gemeente is goed vindbaar`, type: "goed" });
-    const mid = sentences.find(s => /vergunning|melding|registratie|eis/i.test(s));
-    findings.push({ text: mid || `Meerdere vergunningsvereisten voor "${field2}" vereisen aandacht`, type: "aandacht" });
-    const neg = sentences.find(s => /boete|overtreding|handhaving|straf/i.test(s));
-    findings.push({ text: neg || `Handhavingsrisico aanwezig bij niet-naleving van recente wijzigingen`, type: "verbeter" });
-  }
-
-  return findings.slice(0, 4);
-}
-
-const findingConfig: Record<FindingType, { icon: typeof CheckCircle2; color: string; bg: string; label: string }> = {
-  goed:     { icon: CheckCircle2,   color: "#059669", bg: "rgba(5,150,105,.08)",   label: "Positief" },
-  aandacht: { icon: AlertTriangle,  color: "#d97706", bg: "rgba(217,119,6,.08)",   label: "Aandacht" },
-  verbeter: { icon: TrendingUp,     color: "#dc2626", bg: "rgba(220,38,38,.08)",   label: "Verbeterpunt" },
-};
 
 export default function HomePage() {
   const [showCookieBanner, setShowCookieBanner] = useState(false);
@@ -91,9 +107,8 @@ export default function HomePage() {
   const [scanMsgIdx, setScanMsgIdx] = useState(0);
   const [antwoord, setAntwoord] = useState("");
   const [score, setScore] = useState(0);
-  const [findings, setFindings] = useState<Finding[]>([]);
+  const [sections, setSections] = useState<Section[]>([]);
   const [showFullText, setShowFullText] = useState(false);
-  const [apiStarted, setApiStarted] = useState(false);
   const scanIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const msgIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -112,7 +127,6 @@ export default function HomePage() {
     setWizardStep("scanning");
     setScanProgress(0);
     setScanMsgIdx(0);
-    setApiStarted(false);
 
     // Progress bar animation
     let prog = 0;
@@ -144,11 +158,11 @@ export default function HomePage() {
       const data = await res.json();
       const rawAntwoord = data.antwoord || data.error || "Analyse voltooid.";
       const computedScore = computeScore(rawAntwoord, field2 + field1);
-      const computedFindings = extractFindings(rawAntwoord, field1, field2, wizardMode);
+      const computedSections = parseStructuredResponse(rawAntwoord, wizardMode);
 
       setAntwoord(rawAntwoord);
       setScore(computedScore);
-      setFindings(computedFindings);
+      setSections(computedSections);
 
       // Complete progress to 100, then switch step
       if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
@@ -160,7 +174,7 @@ export default function HomePage() {
       if (msgIntervalRef.current) clearInterval(msgIntervalRef.current);
       setAntwoord("Kon geen verbinding maken. Probeer het later opnieuw.");
       setScore(60);
-      setFindings(extractFindings("", field1, field2, wizardMode));
+      setSections([]);
       setScanProgress(100);
       setTimeout(() => setWizardStep("rapport"), 500);
     }
@@ -173,6 +187,7 @@ export default function HomePage() {
     setScanProgress(0);
     setScanMsgIdx(0);
     setAntwoord("");
+    setSections([]);
     setShowFullText(false);
   };
 
@@ -469,23 +484,28 @@ export default function HomePage() {
                     </div>
                   </div>
 
-                  {/* Bevindingen */}
+                  {/* Analyse secties */}
                   <div className="px-7 py-5">
-                    <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Bevindingen</p>
+                    <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">
+                      {wizardMode === "regio" ? "Regio-analyse" : "Regelgeving-analyse"}
+                    </p>
                     <div className="space-y-3" data-testid="grid-findings">
-                      {findings.map((f, i) => {
-                        const cfg = findingConfig[f.type];
-                        const Icon = cfg.icon;
+                      {sections.length > 0 ? sections.map((s, i) => {
+                        const Icon = s.icon;
                         return (
-                          <div key={i} className="flex items-start gap-3 p-3.5 rounded-xl" style={{ background: cfg.bg }} data-testid={`finding-${i}`}>
-                            <Icon className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: cfg.color }} />
-                            <div className="flex-1 min-w-0">
-                              <span className="text-xs font-black uppercase mr-2" style={{ color: cfg.color }}>{cfg.label}</span>
-                              <span className="text-sm text-slate-700 leading-relaxed">{f.text}</span>
+                          <div key={i} className="rounded-xl p-4" style={{ background: s.bg }} data-testid={`finding-${i}`}>
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: s.color }} />
+                              <span className="text-xs font-black uppercase tracking-widest" style={{ color: s.color }}>{s.tag}</span>
                             </div>
+                            <p className="text-sm text-slate-700 leading-relaxed">{s.content}</p>
                           </div>
                         );
-                      })}
+                      }) : (
+                        <div className="rounded-xl p-4 text-sm text-slate-500 leading-relaxed" style={{ background: "#f8fafd" }}>
+                          {antwoord}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -493,10 +513,13 @@ export default function HomePage() {
                   <div className="px-7 pb-5">
                     <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Pro-inzichten</p>
                     <div className="space-y-2.5">
-                      {[
-                        "Volledig overzicht van gemiste lokale kansen in jouw branche",
-                        "Persoonlijk regelgevingssignaal — nieuwe besluiten die jou raken",
-                      ].map((text, i) => (
+                      {(wizardMode === "regio" ? [
+                        `Concurrentieanalyse: wie zijn de 3 sterkste spelers als ${field1} in ${field2} en wat doen zij beter?`,
+                        `Subsidie- en fondsencheck: welke gemeentelijke regelingen zijn beschikbaar voor ${field1} in ${field2}?`,
+                      ] : [
+                        `Historisch handhavingsoverzicht: hoe heeft de gemeente dit onderwerp de afgelopen 2 jaar gehandhaafd?`,
+                        `Bezwaar- en beroepsmogelijkheden: welke stappen kun je zetten als je het niet eens bent met een beslissing?`,
+                      ]).map((text, i) => (
                         <div
                           key={i}
                           className="relative flex items-center gap-3 p-3.5 rounded-xl overflow-hidden cursor-pointer group"

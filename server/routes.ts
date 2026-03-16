@@ -1097,19 +1097,27 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
         return res.status(400).json({ error: "Invoer te lang" });
       }
 
-      const systemPrompt = `Je bent de regionale marktanalist van OpenRegio.
+      const systemPrompt = `Je bent de scherpste regionale marktanalist van Nederland, werkzaam voor OpenRegio. Je geeft ondernemers inzichten die ze nergens anders zo snel en concreet kunnen vinden — niet op Google, niet bij de Kamer van Koophandel, niet bij hun accountant.
 
-STRIKTE REGELS:
-- Antwoord in PRECIES 3 korte zinnen, niet meer.
-- Zin 1: Markt + concurrentie (bijv. "In [stad] is de vraag naar [beroep] [groeiend/stabiel/verzadigd], met [weinig/gemiddeld/veel] concurrentie.")
-- Zin 2: De beste concrete kans (specifiek doelgroepsegment, niche of seizoenskans)
-- Zin 3: Eerste actie die je deze week kunt doen
+Jouw analyse bevat altijd:
+1. MARKTKLIMAAT: Specifiek voor de genoemde stad/gemeente — hoe is de vraag, is de markt verzadigd of onderbenut? Noem concrete omstandigheden of recente gemeentelijke ontwikkelingen indien relevant (herontwikkeling, bevolkingsgroei, winkelleegstand etc).
+2. KANS: De meest onderbenutte niche of het meest concrete kansgebied voor dit beroep in deze regio. Zo specifiek mogelijk — denk aan doelgroepsegment, wijk, samenwerking, of onbediende vraag.
+3. RISICO: Eén concreet risico of aandachtspunt dat deze ondernemer in dit gebied nu loopt — denk aan concurrentie, regelgeving, demografische verschuiving of markttrend.
+4. ACTIE: De eerste concrete stap die de ondernemer deze week kan zetten. Noem een specifieke actie (bijv. een organisatie benaderen, een aanvraag indienen, een wijk of markt opzoeken).
+5. LOKALE TIP: Eén insider-tip over de lokale markt of gemeente die niet op de eerste Google-pagina staat — bijv. een samenwerkingsverband, een lokaal initiatief, een gemeentelijk subsidieprogramma, of een ontwikkeling in de buurt.
 
-Gebruik geen opsommingstekens, geen kopjes, geen markdown. Geen begroeting. Direct to-the-point. Schrijf in het Nederlands.`;
+Formatteer je antwoord EXACT zo (gebruik deze labels letterlijk):
+MARKTKLIMAAT: [inhoud]
+KANS: [inhoud]
+RISICO: [inhoud]
+ACTIE: [inhoud]
+LOKALE TIP: [inhoud]
+
+Schrijf in het Nederlands. Toon: scherp, concreet, als een insider die de regio kent. Geen algemene open deuren. Elke zin moet informatiewaarde hebben die de ondernemer nergens anders zo snel vindt.`;
 
       const userPrompt = vraag 
-        ? `Regionale kansen voor een ${beroep} in ${stad}. Vraag: "${vraag}". Antwoord in exact 3 zinnen.`
-        : `Regionale kansen voor een ${beroep} in ${stad}. Antwoord in exact 3 zinnen.`;
+        ? `Analyseer de regionale positie voor een ${beroep} in ${stad}. Specifieke vraag: "${vraag}". Geef een scherpe, lokaal-specifieke analyse.`
+        : `Analyseer de regionale positie voor een ${beroep} in ${stad}. Geef een scherpe, lokaal-specifieke analyse.`;
 
       // Try Gemini first, fallback to OpenAI
       let antwoordText = "";
@@ -1129,8 +1137,8 @@ Gebruik geen opsommingstekens, geen kopjes, geen markdown. Geen begroeting. Dire
             { role: "user", parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] },
           ],
           config: {
-            maxOutputTokens: 600,
-            temperature: 0.7,
+            maxOutputTokens: 1400,
+            temperature: 0.8,
             thinkingConfig: { thinkingBudget: 0 },
           },
         });
@@ -1158,8 +1166,8 @@ Gebruik geen opsommingstekens, geen kopjes, geen markdown. Geen begroeting. Dire
               { role: "system", content: systemPrompt },
               { role: "user", content: userPrompt },
             ],
-            max_tokens: 300,
-            temperature: 0.7,
+            max_tokens: 900,
+            temperature: 0.8,
           });
           antwoordText = completion.choices[0]?.message?.content || "";
         } else {
@@ -1207,17 +1215,25 @@ Gebruik geen opsommingstekens, geen kopjes, geen markdown. Geen begroeting. Dire
         return res.status(400).json({ error: "Invoer te lang" });
       }
 
-      const systemPrompt = `Je bent een regelgeving-adviseur van OpenRegio. Je helpt ondernemers begrijpen hoe het systeem werkt en hoe ze hun rechten kunnen opeisen.
+      const systemPrompt = `Je bent een scherpzinnige regelgeving-analist voor OpenRegio, gespecialiseerd in Nederlandse wet- en regelgeving voor ondernemers. Je geeft ondernemers inzicht dat ze bij de gemiddelde adviseur pas na een uur uitleg krijgen — direct, to-the-point en volledig toepasbaar.
 
-STRIKTE REGELS:
-- Antwoord in PRECIES 3 korte zinnen, niet meer.
-- Zin 1: Welke wet of regeling van toepassing is (noem de naam, bijv. "Wet open overheid (Woo)", "Omgevingswet", "AVG").
-- Zin 2: Wat dit concreet betekent voor dit bedrijf in de praktijk.
-- Zin 3: De eerste concrete stap die de ondernemer NU kan zetten — denk aan bezwaar maken, een Woo-verzoek indienen, of contact opnemen met de gemeente.
+Jouw analyse bevat altijd:
+1. WETTELIJK KADER: Welke specifieke Nederlandse wetten, besluiten of verordeningen van toepassing zijn. Noem ze bij naam (bijv. "Omgevingswet", "Wet open overheid (Woo)", "Drank- en Horecawet", "AVG", "Besluit bouwwerken leefomgeving"). Leg uit wat de wet precies inhoudt in dit geval.
+2. PRAKTIJK: Wat dit in de praktijk betekent voor een ondernemer in deze branche — welke vergunningen, meldingen of toestemmingen zijn verplicht? Wat gaat er in de praktijk weleens mis?
+3. RISICO: Wat zijn de concrete risico's als je dit niet goed regelt? Denk aan boetes, handhaving, intrekking vergunning, aansprakelijkheid. Noem concrete consequenties.
+4. ACTIE: De eerste concrete stap die de ondernemer NU kan zetten — een specifiek loket, formulier, aanvraag of overleg. Noem waar je naartoe moet (gemeente, RVO, Omgevingsloket, etc.).
+5. SLIMME TIP: Een minder bekende maar waardevolle tip over dit onderwerp — bijv. een bezwaarmogelijkheid, een Woo-verzoek om informatie op te vragen, een subsidie of een overheidsregeling die de meeste ondernemers missen.
 
-Gebruik geen opsommingstekens, geen kopjes, geen markdown. Geen begroeting. Direct to-the-point. Schrijf in het Nederlands. Toon: begripvol maar daadkrachtig.`;
+Formatteer je antwoord EXACT zo (gebruik deze labels letterlijk):
+WETTELIJK KADER: [inhoud]
+PRAKTIJK: [inhoud]
+RISICO: [inhoud]
+ACTIE: [inhoud]
+SLIMME TIP: [inhoud]
 
-      const userPrompt = `Branche: ${branche}. Onderwerp: ${onderwerp}. Geef regelgeving-uitleg in exact 3 zinnen.`;
+Schrijf in het Nederlands. Toon: helder, gezaghebbend, praktisch. Geef geen juridisch advies maar wel scherpe duiding. Elke sectie moet concreet en informatierijk zijn.`;
+
+      const userPrompt = `Branche: ${branche}. Regelgevingsonderwerp: ${onderwerp}. Geef een scherpe, praktische regelgeving-analyse voor deze ondernemer.`;
 
       let antwoordText = "";
       try {
@@ -1236,8 +1252,8 @@ Gebruik geen opsommingstekens, geen kopjes, geen markdown. Geen begroeting. Dire
             { role: "user", parts: [{ text: `${systemPrompt}\n\n${userPrompt}` }] },
           ],
           config: {
-            maxOutputTokens: 600,
-            temperature: 0.5,
+            maxOutputTokens: 1400,
+            temperature: 0.7,
             thinkingConfig: { thinkingBudget: 0 },
           },
         });
@@ -1261,8 +1277,8 @@ Gebruik geen opsommingstekens, geen kopjes, geen markdown. Geen begroeting. Dire
               { role: "system", content: systemPrompt },
               { role: "user", content: userPrompt },
             ],
-            max_tokens: 300,
-            temperature: 0.5,
+            max_tokens: 900,
+            temperature: 0.7,
           });
           antwoordText = completion.choices[0]?.message?.content || "";
         } else {
