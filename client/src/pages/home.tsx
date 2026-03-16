@@ -117,6 +117,13 @@ export default function HomePage() {
     if (!consent) setShowCookieBanner(true);
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
+      if (msgIntervalRef.current) clearInterval(msgIntervalRef.current);
+    };
+  }, []);
+
   const handleCookieChoice = (accepted: boolean) => {
     localStorage.setItem("cookie_consent", accepted ? "accepted" : "rejected");
     setShowCookieBanner(false);
@@ -137,9 +144,10 @@ export default function HomePage() {
     }, 80);
 
     // Rotate scan messages
+    const msgs = wizardMode === "regio" ? SCAN_MESSAGES : SCAN_MESSAGES_REGELGEVING;
     let msgIdx = 0;
     msgIntervalRef.current = setInterval(() => {
-      msgIdx = (msgIdx + 1) % SCAN_MESSAGES.length;
+      msgIdx = (msgIdx + 1) % msgs.length;
       setScanMsgIdx(msgIdx);
     }, 700);
 
