@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,9 +15,10 @@ import {
   Loader2,
   Scale,
   ScanText,
+  Upload,
+  X,
 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
 interface AnalyseResultaat {
@@ -29,39 +30,86 @@ interface AnalyseResultaat {
   aanbevolenActie: string;
 }
 
+type Modus = "tekst" | "upload";
+
 export default function BriefAnalysePage() {
   const { toast } = useToast();
+  const [modus, setModus] = useState<Modus>("tekst");
   const [tekst, setTekst] = useState("");
+  const [bestand, setBestand] = useState<File | null>(null);
   const [resultaat, setResultaat] = useState<AnalyseResultaat | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const analyseMutation = useMutation({
+  const tekstMutation = useMutation({
     mutationFn: async (tekst: string) => {
-      const res = await apiRequest("POST", "/api/brief-analyse", { tekst });
+      const res = await fetch("/api/brief-analyse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ tekst }),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Analyse mislukt");
+      }
       return res.json() as Promise<AnalyseResultaat>;
     },
-    onSuccess: (data) => {
-      setResultaat(data);
-    },
-    onError: () => {
-      toast({
-        title: "Analyse mislukt",
-        description: "Probeer het opnieuw. Zorg dat de tekst minimaal een paar zinnen bevat.",
-        variant: "destructive",
-      });
+    onSuccess: (data) => setResultaat(data),
+    onError: (err: Error) => {
+      toast({ title: "Analyse mislukt", description: err.message, variant: "destructive" });
     },
   });
 
-  const handleAnalyseer = () => {
-    if (!tekst.trim() || tekst.trim().length < 20) {
-      toast({
-        title: "Tekst te kort",
-        description: "Plak de volledige tekst van het document.",
-        variant: "destructive",
+  const uploadMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/brief-analyse/upload", {
+        method: "POST",
+        credentials: "include",
+        body: form,
       });
-      return;
-    }
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Analyse mislukt");
+      }
+      return res.json() as Promise<AnalyseResultaat>;
+    },
+    onSuccess: (data) => setResultaat(data),
+    onError: (err: Error) => {
+      toast({ title: "Analyse mislukt", description: err.message, variant: "destructive" });
+    },
+  });
+
+  const isLoading = tekstMutation.isPending || uploadMutation.isPending;
+
+  const handleAnalyseer = () => {
     setResultaat(null);
-    analyseMutation.mutate(tekst.trim());
+    if (modus === "tekst") {
+      if (!tekst.trim() || tekst.trim().length < 20) {
+        toast({ title: "Tekst te kort", description: "Plak de volledige tekst van het document.", variant: "destructive" });
+        return;
+      }
+      tekstMutation.mutate(tekst.trim());
+    } else {
+      if (!bestand) {
+        toast({ title: "Geen bestand", description: "Selecteer eerst een bestand.", variant: "destructive" });
+        return;
+      }
+      uploadMutation.mutate(bestand);
+    }
+  };
+
+  const handleBestandKiezen = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0] ?? null;
+    setBestand(f);
+    setResultaat(null);
+  };
+
+  const handleBestandVerwijderen = () => {
+    setBestand(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+    setResultaat(null);
   };
 
   const velden: { label: string; key: keyof AnalyseResultaat; icon: typeof Building2 }[] = [
@@ -73,6 +121,8 @@ export default function BriefAnalysePage() {
     { label: "Aanbevolen actie", key: "aanbevolenActie", icon: ArrowRight },
   ];
 
+  const kanAnalyseren = modus === "tekst" ? tekst.trim().length >= 20 : bestand !== null;
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
       <header className="space-y-2">
@@ -83,7 +133,7 @@ export default function BriefAnalysePage() {
           </h1>
         </div>
         <p className="text-muted-foreground">
-          Plak de tekst van een overheidsbrief of besluit en ontvang een gestructureerde analyse.
+          Upload een overheidsbrief of plak de tekst — en ontvang direct een gestructureerde analyse.
         </p>
       </header>
 
@@ -94,9 +144,8 @@ export default function BriefAnalysePage() {
             <div className="space-y-1.5">
               <p className="text-sm font-medium">Hoe werkt het?</p>
               <p className="text-sm text-muted-foreground">
-                Kopieer de tekst van een gemeentebrief, besluit, vergunning of andere officiële brief
-                en plak deze hieronder. De analyse geeft je direct inzicht in wie de afzender is,
-                welk type document het is, de juridische grondslag, en wat je kunt doen.
+                Upload een PDF of foto van de brief, of plak de tekst hieronder.
+                De analyse geeft je inzicht in afzender, documenttype, juridische grondslag en wat je kunt doen.
               </p>
               <div className="flex flex-wrap gap-1.5 pt-0.5">
                 {["Besluiten", "Vergunningen", "WOO-reacties", "Aanschrijvingen", "Bezwaarbesluiten"].map((t) => (
@@ -108,29 +157,101 @@ export default function BriefAnalysePage() {
         </CardContent>
       </Card>
 
+      {/* Modus switcher */}
+      <div className="flex gap-2">
+        <Button
+          variant={modus === "upload" ? "default" : "outline"}
+          size="sm"
+          onClick={() => { setModus("upload"); setResultaat(null); }}
+          data-testid="button-modus-upload"
+        >
+          <Upload className="h-4 w-4 mr-2" />
+          Bestand uploaden
+        </Button>
+        <Button
+          variant={modus === "tekst" ? "default" : "outline"}
+          size="sm"
+          onClick={() => { setModus("tekst"); setResultaat(null); }}
+          data-testid="button-modus-tekst"
+        >
+          <FileText className="h-4 w-4 mr-2" />
+          Tekst plakken
+        </Button>
+      </div>
+
       <Card>
         <CardContent className="pt-6 space-y-4">
-          <div>
-            <label className="text-sm font-medium mb-2 block" htmlFor="tekst-input">
-              Tekst van het document
-            </label>
-            <Textarea
-              id="tekst-input"
-              value={tekst}
-              onChange={(e) => setTekst(e.target.value)}
-              placeholder="Plak hier de volledige tekst van de brief of het besluit..."
-              className="min-h-48 text-sm"
-              data-testid="textarea-document-tekst"
-            />
-            <p className="text-xs text-muted-foreground mt-1.5">{tekst.length} / 8000 tekens</p>
-          </div>
+          {modus === "upload" ? (
+            <div>
+              <label className="text-sm font-medium mb-2 block">
+                Bestand selecteren
+              </label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.jpg,.jpeg,.png,.txt"
+                onChange={handleBestandKiezen}
+                className="hidden"
+                id="brief-file-input"
+                data-testid="input-brief-bestand"
+              />
+              {!bestand ? (
+                <label
+                  htmlFor="brief-file-input"
+                  className="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-muted-foreground/25 rounded-lg p-10 cursor-pointer hover-elevate transition-colors"
+                  data-testid="dropzone-brief"
+                >
+                  <div className="p-3 rounded-full bg-muted">
+                    <Upload className="h-6 w-6 text-muted-foreground" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-sm font-medium">Klik om een bestand te kiezen</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">PDF, JPG, PNG of TXT — max 10 MB</p>
+                  </div>
+                </label>
+              ) : (
+                <div className="flex items-center gap-3 p-4 rounded-lg border bg-muted/30">
+                  <div className="p-2 rounded-md bg-muted">
+                    <FileText className="h-5 w-5 text-[#1f5fae]" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">{bestand.name}</p>
+                    <p className="text-xs text-muted-foreground">{(bestand.size / 1024).toFixed(0)} KB</p>
+                  </div>
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    onClick={handleBestandVerwijderen}
+                    data-testid="button-verwijder-bestand"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div>
+              <label className="text-sm font-medium mb-2 block" htmlFor="tekst-input">
+                Tekst van het document
+              </label>
+              <Textarea
+                id="tekst-input"
+                value={tekst}
+                onChange={(e) => setTekst(e.target.value)}
+                placeholder="Plak hier de volledige tekst van de brief of het besluit..."
+                className="min-h-48 text-sm"
+                data-testid="textarea-document-tekst"
+              />
+              <p className="text-xs text-muted-foreground mt-1.5">{tekst.length} / 8000 tekens</p>
+            </div>
+          )}
 
           <Button
             onClick={handleAnalyseer}
-            disabled={analyseMutation.isPending || !tekst.trim()}
+            disabled={isLoading || !kanAnalyseren}
             data-testid="button-analyseer"
           >
-            {analyseMutation.isPending ? (
+            {isLoading ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 Analyseren…
@@ -145,7 +266,7 @@ export default function BriefAnalysePage() {
         </CardContent>
       </Card>
 
-      {analyseMutation.isPending && (
+      {isLoading && (
         <Card>
           <CardContent className="pt-6 space-y-3">
             <p className="text-sm font-medium text-muted-foreground">Document wordt geanalyseerd…</p>

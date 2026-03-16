@@ -1382,6 +1382,93 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
     }
   });
 
+  // Brief Analyse — bestand uploaden (PDF / afbeelding / tekst)
+  app.post("/api/brief-analyse/upload", requireAuth, uploadMemory.single('file'), async (req, res) => {
+    try {
+      const file = req.file;
+      if (!file) return res.status(400).json({ error: "Geen bestand ontvangen" });
+
+      const allowedMimeTypes = ["application/pdf", "image/jpeg", "image/png", "image/jpg", "text/plain"];
+      if (!allowedMimeTypes.includes(file.mimetype)) {
+        return res.status(400).json({ error: "Bestandstype niet ondersteund. Upload een PDF, afbeelding (JPG/PNG) of tekstbestand." });
+      }
+
+      const { extractTextFromPDF } = await import("./rag/extract");
+      const { extractTextFromImage } = await import("./rag/ocr");
+
+      let tekst = "";
+      const isImage = file.mimetype.startsWith("image/");
+      const isText = file.mimetype === "text/plain";
+
+      if (isImage) {
+        const ocr = await extractTextFromImage(file.buffer);
+        tekst = ocr.text;
+      } else if (isText) {
+        tekst = file.buffer.toString("utf-8");
+      } else {
+        const pdf = await extractTextFromPDF(file.buffer);
+        tekst = pdf.text;
+      }
+
+      if (!tekst || tekst.trim().length < 20) {
+        return res.status(400).json({ error: "Geen tekst gevonden in het bestand. Probeer een duidelijker document." });
+      }
+
+      const tekst8k = tekst.slice(0, 8000);
+
+      const systemPrompt = `Je bent een expert in Nederlandse overheidsdocumenten en bestuursrecht.
+Analyseer de gegeven tekst van een overheidsbrief of besluit en geef de volgende informatie terug als valide JSON (geen extra tekst, alleen JSON):
+
+{
+  "afzender": "naam van de organisatie die de brief stuurde",
+  "documentType": "type document, bijv. Besluit, Aanschrijving, Vergunning, WOO-reactie, Beschikking",
+  "juridischeBasis": "de genoemde wettelijke grondslag of wet, bijv. Awb artikel 4:5, Omgevingswet",
+  "bevoegdheid": "wie het bevoegd gezag is, bijv. College van B&W, burgemeester, minister",
+  "termijn": "relevante termijn, bijv. Bezwaar binnen 6 weken, Reageer voor 15 maart",
+  "aanbevolenActie": "kort advies wat de ontvanger kan of moet doen"
+}
+
+Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in het Nederlands. Geef alleen de JSON terug, geen inleidende tekst.`;
+
+      let resultaatText = "";
+      try {
+        const { GoogleGenAI } = await import("@google/genai");
+        const ai = new GoogleGenAI({
+          apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
+          httpOptions: { apiVersion: "", baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL! },
+        });
+        const response = await ai.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: [{ role: "user", parts: [{ text: `${systemPrompt}\n\nTEKST:\n${tekst8k}` }] }],
+          config: { maxOutputTokens: 800, temperature: 0.3, thinkingConfig: { thinkingBudget: 0 } },
+        });
+        const parts = response.candidates?.[0]?.content?.parts;
+        if (parts?.length > 0) resultaatText = parts.filter((p: any) => p.text && !p.thought).map((p: any) => p.text).join("");
+        if (!resultaatText) resultaatText = response.text || "";
+      } catch (geminiErr) {
+        console.error("[BriefAnalyse/upload] Gemini failed:", geminiErr);
+        if (process.env.OPENAI_API_KEY) {
+          const OpenAI = (await import("openai")).default;
+          const openai = new OpenAI();
+          const completion = await openai.chat.completions.create({
+            model: "gpt-4o-mini",
+            messages: [{ role: "system", content: systemPrompt }, { role: "user", content: `TEKST:\n${tekst8k}` }],
+            max_tokens: 600, temperature: 0.3,
+          });
+          resultaatText = completion.choices[0]?.message?.content || "";
+        } else throw geminiErr;
+      }
+
+      const jsonMatch = resultaatText.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) return res.status(500).json({ error: "Kon de analyse niet verwerken" });
+
+      res.json(JSON.parse(jsonMatch[0]));
+    } catch (err: any) {
+      console.error("[BriefAnalyse/upload] Error:", err);
+      res.status(500).json({ error: "Analyse mislukt" });
+    }
+  });
+
   // RAG System Routes - Document Upload and Vector Search
   app.post("/api/rag/documents", requireAuth, checkDailyUploadLimit, uploadMemory.single('file'), async (req, res) => {
     try {
