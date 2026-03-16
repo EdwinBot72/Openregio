@@ -256,7 +256,7 @@ export default function HomePage() {
               </div>
               <div className="relative" data-testid="card-hero-photo">
                 <div className="rounded-2xl overflow-hidden" style={{ boxShadow: "0 20px 60px rgba(0,0,0,.12)" }}>
-                  <img src={streetImg} alt="Nederlandse winkelstraat" className="w-full object-cover" style={{ height: "420px" }} />
+                  <img src={streetImg} alt="Nederlandse winkelstraat" className="w-full object-cover" loading="eager" style={{ height: "340px" }} />
                 </div>
                 <div className="absolute -bottom-4 -left-4 rounded-2xl px-5 py-4 flex items-center gap-3" style={{ background: "#fff", boxShadow: "0 8px 32px rgba(0,0,0,.12)", maxWidth: "220px" }}>
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(31,95,174,.10)", color: "#1f5fae" }}>
@@ -613,7 +613,7 @@ export default function HomePage() {
           <div className="max-w-6xl mx-auto px-6">
             <div className="grid md:grid-cols-2 gap-16 items-center">
               <div className="rounded-2xl overflow-hidden" style={{ boxShadow: "0 16px 48px rgba(0,0,0,.1)" }} data-testid="img-over-ons">
-                <img src={streetImg} alt="Lokale ondernemers regio" className="w-full object-cover" style={{ height: "420px" }} />
+                <img src={groupImg} alt="Lokale ondernemers in de regio" className="w-full object-cover" loading="lazy" style={{ height: "420px", objectPosition: "center top" }} />
               </div>
               <div>
                 <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#1f5fae" }}>Over OpenRegio</span>
