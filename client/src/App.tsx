@@ -59,6 +59,8 @@ import RegelkaartPage from "@/pages/informatie/regelkaart";
 import CheckSituatiePage from "@/pages/actie/check-situatie";
 import KennisbankPage from "@/pages/informatie/kennisbank";
 import BriefAnalysePage from "@/pages/tools/brief-analyse";
+import WebsiteScanPage from "@/pages/tools/website-scan";
+import RegelgevingVerkennerPage from "@/pages/regelgeving-verkenner";
 import { ComingSoon } from "@/components/ComingSoon";
 
 // Routes that should NOT have the sidebar/header layout
@@ -131,6 +133,8 @@ function AuthenticatedRouter() {
 
       {/* Tools */}
       <Route path="/tools/brief-analyse" component={BriefAnalysePage} />
+      <Route path="/tools/website-scan" component={WebsiteScanPage} />
+      <Route path="/regelgeving-verkenner" component={RegelgevingVerkennerPage} />
 
       {/* Zichtbaarheid */}
       <Route path="/zichtbaarheid/website-onderhoud" component={WebsiteOnderhoudPage} />

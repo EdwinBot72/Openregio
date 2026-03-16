@@ -4048,6 +4048,223 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
+  // ─── Website Scan ──────────────────────────────────────────────────────────
+  app.post("/api/tools/website-scan", requireAuth, requirePro, async (req, res) => {
+    const rawUrl: string = (req.body.url || "").trim();
+    if (!rawUrl) return res.status(400).json({ error: "URL is vereist" });
+
+    let parsedUrl: URL;
+    try {
+      parsedUrl = new URL(rawUrl.startsWith("http") ? rawUrl : `https://${rawUrl}`);
+    } catch {
+      return res.status(400).json({ error: "Ongeldige URL. Voer een geldig webadres in." });
+    }
+
+    let html = "";
+    let finalUrl = parsedUrl.href;
+    let fetchError: string | null = null;
+
+    try {
+      const response = await fetch(parsedUrl.href, {
+        signal: AbortSignal.timeout(12000),
+        headers: {
+          "User-Agent": "Mozilla/5.0 (compatible; OpenRegio-Scanner/1.0)",
+          "Accept": "text/html,application/xhtml+xml",
+        },
+        redirect: "follow",
+      });
+      finalUrl = response.url;
+      html = await response.text();
+    } catch {
+      fetchError = "Kon de website niet bereiken. Controleer of de URL correct en bereikbaar is.";
+    }
+
+    const s: Record<string, any> = { url: finalUrl, fetchError };
+
+    if (html) {
+      s.title = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.replace(/<[^>]+>/g, "").trim() ?? null;
+      s.titleLength = s.title?.length ?? 0;
+      s.metaDesc = html.match(/<meta[^>]*name=["']description["'][^>]*content=["']([^"']{0,500})["']/i)?.[1]?.trim()
+        ?? html.match(/<meta[^>]*content=["']([^"']{0,500})["'][^>]*name=["']description["']/i)?.[1]?.trim() ?? null;
+      s.metaDescLength = s.metaDesc?.length ?? 0;
+      const h1s = [...html.matchAll(/<h1[^>]*>([\s\S]*?)<\/h1>/gi)];
+      s.h1Count = h1s.length;
+      s.h1First = h1s[0]?.[1]?.replace(/<[^>]+>/g, "").trim() ?? null;
+      s.h2Count = (html.match(/<h2[^>]*>/gi) ?? []).length;
+      const imgs = html.match(/<img[^>]*>/gi) ?? [];
+      s.imgTotal = imgs.length;
+      s.imgNoAlt = imgs.filter(i => !/alt=["'][^"']+["']/i.test(i)).length;
+      s.isHttps = finalUrl.startsWith("https://");
+      s.hasViewport = /<meta[^>]*name=["']viewport["']/i.test(html);
+      s.hasOgTitle = /<meta[^>]*property=["']og:title["']/i.test(html);
+      s.hasOgDesc = /<meta[^>]*property=["']og:description["']/i.test(html);
+      s.hasOgImage = /<meta[^>]*property=["']og:image["']/i.test(html);
+      s.hasStructuredData = /<script[^>]*type=["']application\/ld\+json["']/i.test(html);
+      s.hasPhone = /(\+31|0[1-9][0-9\-\s]{7,12})/.test(html);
+      s.hasEmail = /[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/.test(html);
+      s.hasGoogleMaps = /maps\.google|maps\.googleapis|google\.com\/maps/i.test(html);
+      s.hasCanonical = /<link[^>]*rel=["']canonical["']/i.test(html);
+      s.htmlLang = html.match(/<html[^>]*lang=["']([^"']+)["']/i)?.[1] ?? null;
+      s.wordCount = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().split(/\s+/).length;
+      s.pageSizeKb = Math.round(html.length / 1024);
+    }
+
+    const prompt = fetchError
+      ? `De website kon niet worden bereikt: ${fetchError}. Geef een JSON-object met overallScore: 0, categories: [], sterkePunten: [], aanbevelingen: [{prioriteit:"hoog", actie:"Controleer of de website online is", waarom:"De website is niet bereikbaar"}], samenvattend:"De website kon niet worden bereikt."`
+      : `Je bent een lokale SEO- en online-marketingexpert voor Nederlandse MKB-bedrijven.
+
+Analyseer deze website-signalen voor ${finalUrl}:
+${JSON.stringify(s, null, 2)}
+
+Geef een JSON-analyse in exact dit formaat (geen markdown):
+{
+  "overallScore": [0-100],
+  "categories": [
+    {"naam":"Vindbaarheid (SEO)","score":[0-100],"oordeel":"goed|matig|slecht","toelichting":"[1-2 zinnen observatie]"},
+    {"naam":"Lokale aanwezigheid","score":[0-100],"oordeel":"goed|matig|slecht","toelichting":"[1-2 zinnen]"},
+    {"naam":"Mobiel & Technisch","score":[0-100],"oordeel":"goed|matig|slecht","toelichting":"[1-2 zinnen]"},
+    {"naam":"Social & Deelbaarheid","score":[0-100],"oordeel":"goed|matig|slecht","toelichting":"[1-2 zinnen]"}
+  ],
+  "sterkePunten": ["punt 1","punt 2"],
+  "aanbevelingen": [
+    {"prioriteit":"hoog|midden|laag","actie":"[concrete actie]","waarom":"[waarom voor MKB]"}
+  ],
+  "samenvattend": "[2-3 zinnen overkoepelende beoordeling]"
+}
+Wees kritisch maar opbouwend. Focus op lokale vindbaarheid voor Nederlandse ondernemers. Max 5 aanbevelingen.`;
+
+    try {
+      const { GoogleGenerativeAI } = await import("@google/generative-ai");
+      const genAI = new GoogleGenerativeAI(process.env.AI_INTEGRATIONS_GEMINI_API_KEY!);
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      const result = await model.generateContent({ contents: [{ role: "user", parts: [{ text: prompt }] }] });
+      let raw = result.response.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
+      raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+      const analysis = JSON.parse(raw);
+      return res.json({ url: finalUrl, signals: s, analysis });
+    } catch (geminiErr) {
+      try {
+        const OpenAI = (await import("openai")).default;
+        const openai = new OpenAI();
+        const completion = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.3,
+          max_tokens: 1500,
+          response_format: { type: "json_object" },
+        });
+        const analysis = JSON.parse(completion.choices[0].message.content ?? "{}");
+        return res.json({ url: finalUrl, signals: s, analysis });
+      } catch {
+        return res.status(500).json({ error: "AI-analyse mislukt. Probeer het later opnieuw." });
+      }
+    }
+  });
+
+  // ─── Regelgeving Verkenner ──────────────────────────────────────────────────
+  const regelgevingCache = new Map<string, { data: any; expiresAt: number }>();
+  const REGELGEVING_TTL = 60 * 60 * 1000; // 1 uur
+
+  app.get("/api/regelgeving-verkenner", requireAuth, async (req, res) => {
+    const query = (req.query.query as string || "").trim();
+    const categorie = (req.query.categorie as string || "alle").trim();
+    const limit = Math.min(Number(req.query.limit) || 20, 40);
+
+    if (!query) return res.status(400).json({ error: "Zoekopdracht is vereist" });
+
+    const cacheKey = `${query}:${categorie}:${limit}`;
+    const cached = regelgevingCache.get(cacheKey);
+    if (cached && cached.expiresAt > Date.now()) return res.json(cached.data);
+
+    const categorieFilter: Record<string, string> = {
+      "verordening": ' AND dc.type = "Verordening"',
+      "beleidsregel": ' AND dc.type = "Beleidsregel"',
+      "besluit": ' AND dc.type = "Besluit"',
+      "regeling": ' AND dc.type = "Regeling"',
+      "alle": "",
+    };
+    const typeFilter = categorieFilter[categorie] ?? "";
+    const sruQuery = encodeURIComponent(`"${query}"${typeFilter} AND c.product-area = "officielepublicaties"`);
+    const url = `${SRU_BASE}?operation=searchRetrieve&version=1.2&query=${sruQuery}&maximumRecords=${limit + 10}&sortKeys=dcterms.issued,,0`;
+
+    try {
+      const response = await fetch(url, {
+        headers: { "User-Agent": "OpenRegio/1.0", "Accept": "application/xml" },
+        signal: AbortSignal.timeout(12000),
+      });
+      if (!response.ok) throw new Error(`SRU ${response.status}`);
+
+      const xml = await response.text();
+      const total = parseInt(xml.match(/numberOfRecords>(\d+)/)?.[1] ?? "0");
+      const items = parseSruXml(xml).slice(0, limit);
+
+      const result = { query, categorie, total, count: items.length, items };
+      regelgevingCache.set(cacheKey, { data: result, expiresAt: Date.now() + REGELGEVING_TTL });
+      res.json(result);
+    } catch (err: any) {
+      console.error("Regelgeving verkenner fout:", err.message);
+      res.status(503).json({ error: "Overheid.nl tijdelijk niet bereikbaar. Probeer het later opnieuw." });
+    }
+  });
+
+  // ─── WOO-concept generator ──────────────────────────────────────────────────
+  app.post("/api/regelgeving-verkenner/woo-concept", requireAuth, requirePro, async (req, res) => {
+    const { title, onderwerp, creator, url: bronUrl } = req.body;
+    const user = (req as any).user;
+    if (!title || !onderwerp) return res.status(400).json({ error: "Titel en onderwerp zijn vereist" });
+
+    const prompt = `Je bent een expert in de Wet open overheid (Woo) en juridische communicatie voor Nederlandse ondernemers.
+
+Een ondernemer wil een Woo-verzoek indienen op basis van het volgende overheidsDocument:
+- Titel: ${title}
+- Onderwerp: ${onderwerp}
+- Uitgegeven door: ${creator ?? "onbekend bestuursorgaan"}
+- Bron: ${bronUrl ?? "officiële publicatie"}
+
+Schrijf een professioneel en afdwingbaar Woo-verzoek in formele Nederlandse juridische stijl.
+Het verzoek moet:
+1. Beginnen met een duidelijke aanhef aan het juiste bestuursorgaan
+2. De wettelijke grondslag vermelden (Wet open overheid, art. 1.1 e.v.)
+3. Specifiek beschrijven welke informatie wordt gevraagd
+4. Een redelijke termijn stellen (artikel 4.4 Woo: 4 weken)
+5. Eindigen met een formele afsluiting
+
+Geef een JSON-object terug in exact dit formaat:
+{
+  "aanhef": "[bestuursorgaan aanschrijving]",
+  "brief": "[de volledige brief tekst]",
+  "aanbevolenDocumenten": ["document type 1", "document type 2", "document type 3"],
+  "juridischeGrondslag": "[relevante wetsartikelen]"
+}`;
+
+    try {
+      const { GoogleGenerativeAI } = await import("@google/generative-ai");
+      const genAI = new GoogleGenerativeAI(process.env.AI_INTEGRATIONS_GEMINI_API_KEY!);
+      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+      const result = await model.generateContent({ contents: [{ role: "user", parts: [{ text: prompt }] }] });
+      let raw = result.response.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
+      raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+      const concept = JSON.parse(raw);
+      return res.json(concept);
+    } catch {
+      try {
+        const OpenAI = (await import("openai")).default;
+        const openai = new OpenAI();
+        const completion = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: prompt }],
+          temperature: 0.4,
+          max_tokens: 1500,
+          response_format: { type: "json_object" },
+        });
+        const concept = JSON.parse(completion.choices[0].message.content ?? "{}");
+        return res.json(concept);
+      } catch {
+        return res.status(500).json({ error: "Kon geen concept genereren. Probeer het later opnieuw." });
+      }
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

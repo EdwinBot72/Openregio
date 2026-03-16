@@ -14,6 +14,8 @@ import {
   Activity,
   Lock,
   ChevronRight,
+  Globe,
+  Search,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -72,6 +74,30 @@ function buildActions(isPro: boolean): ActionCard[] {
       cta: "Regio volgen",
       color: "text-emerald-600 dark:text-emerald-400",
       bg: "bg-emerald-50 dark:bg-emerald-950/40",
+    },
+    {
+      id: "website-scan",
+      label: "Website scan",
+      description: isPro
+        ? "Analyseer jouw website op vindbaarheid, lokale aanwezigheid en technische kwaliteit. Krijg concrete verbeterpunten."
+        : "Uitgebreide scan van jouw website: vindbaarheid, lokale aanwezigheid, technische kwaliteit. Beschikbaar voor Pro-bijdragers.",
+      icon: Globe,
+      href: isPro ? "/tools/website-scan" : "/lidmaatschap?plan=pro",
+      cta: isPro ? "Scan starten" : "Ontgrendelen",
+      color: isPro ? "text-blue-600 dark:text-blue-400" : "text-muted-foreground",
+      bg: isPro ? "bg-blue-50 dark:bg-blue-950/40" : "bg-muted/40",
+      proOnly: !isPro,
+      badge: !isPro ? "Pro" : undefined,
+    },
+    {
+      id: "regelgeving",
+      label: "Regelgeving verkenner",
+      description: "Zoek door officiële verordeningen, beleidsregels en besluiten van gemeenten door heel Nederland. Gebruik als basis voor een Woo-verzoek.",
+      icon: Search,
+      href: "/regelgeving-verkenner",
+      cta: "Verkenner openen",
+      color: "text-orange-600 dark:text-orange-400",
+      bg: "bg-orange-50 dark:bg-orange-950/40",
     },
     {
       id: "samenwerken",

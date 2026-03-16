@@ -87,6 +87,7 @@ const navSections: NavSection[] = [
     title: "Woo-verzoeken",
     icon: Gavel,
     sub: [
+      { title: "Regelgeving verkenner", url: "/regelgeving-verkenner", icon: Activity },
       { title: "Nieuw verzoek", url: "/woo-wizard", icon: FileText },
       { title: "Mijn verzoeken", url: "/woo-bibliotheek", icon: FolderOpen },
       { title: "Documenten & dossiers", url: "/woo-bot", icon: Newspaper },
@@ -98,7 +99,7 @@ const navSections: NavSection[] = [
     icon: Eye,
     sub: [
       { title: "Bedrijfsprofiel", url: "/bedrijfsprofiel", icon: Building2 },
-      { title: "Website onderhoud", url: "/zichtbaarheid/website-onderhoud", icon: Monitor },
+      { title: "Website Scan", url: "/tools/website-scan", icon: Monitor, proOnly: true },
       { title: "Lokale vindbaarheid", url: "/zichtbaarheid/vindbaarheid", icon: MapPin },
       { title: "Zichtbaarheidsbeheer", url: "/pro/visibility-settings", icon: Shield, proOnly: true },
     ],
