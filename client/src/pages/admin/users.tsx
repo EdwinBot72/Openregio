@@ -121,7 +121,7 @@ export default function AdminUsersPage() {
         </Link>
         <div>
           <h1 className="text-xl font-semibold font-accent" data-testid="text-page-title">Gebruiker aanmaken</h1>
-          <p className="text-sm text-muted-foreground">Maak gratis accounts aan voor vrienden en kennissen</p>
+          <p className="text-sm text-muted-foreground">Maak accounts aan voor partners, team of leden</p>
         </div>
       </div>
 
@@ -189,7 +189,7 @@ export default function AdminUsersPage() {
                   <SelectValue placeholder="Kies een plan" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="basic">Basis (gratis)</SelectItem>
+                  <SelectItem value="basic">Basis (€12,95/maand)</SelectItem>
                   <SelectItem value="pro">Pro (alle functies)</SelectItem>
                 </SelectContent>
               </Select>
