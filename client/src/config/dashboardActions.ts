@@ -9,6 +9,7 @@ import {
   Eye,
   Bot,
   Landmark,
+  MessageSquare,
 } from "lucide-react";
 
 export type DashboardAction = {
@@ -25,6 +26,7 @@ export type DashboardAction = {
 };
 
 export const DASHBOARD_ACTIONS: DashboardAction[] = [
+  // --- ACTIES ---
   {
     id: "brief",
     label: "Brief begrijpen",
@@ -68,6 +70,49 @@ export const DASHBOARD_ACTIONS: DashboardAction[] = [
     badge: () => undefined,
   },
   {
+    id: "regiobot",
+    label: "RegioBot",
+    description: (isPro) =>
+      isPro
+        ? "Analyseer besluiten, voer mandaat-checks uit en genereer vervolg-WOO vragen op basis van jouw eigen dossiers."
+        : "AI-assistent voor WOO-analyse en juridische vragen. Beschikbaar voor Pro-bijdragers.",
+    icon: Bot,
+    href: (isPro) => (isPro ? "/regiobot" : "/lidmaatschap?plan=pro"),
+    cta: (isPro) => (isPro ? "RegioBot openen" : "Ontgrendelen"),
+    color: (isPro) =>
+      isPro ? "text-indigo-600 dark:text-indigo-400" : "text-muted-foreground",
+    bg: (isPro) => (isPro ? "bg-indigo-50 dark:bg-indigo-950/40" : "bg-muted/40"),
+    proOnly: (isPro) => !isPro,
+    badge: (isPro) => (!isPro ? "Pro" : undefined),
+  },
+  // --- BEHEER ---
+  {
+    id: "documenten",
+    label: "Mijn documenten",
+    description: () =>
+      "Beheer jouw persoonlijke WOO-bibliotheek. Upload brieven, besluiten en mandaatregisters — RegioBot gebruikt ze als bron.",
+    icon: FolderOpen,
+    href: () => "/woo-bibliotheek",
+    cta: () => "Naar documenten",
+    color: () => "text-violet-600 dark:text-violet-400",
+    bg: () => "bg-violet-50 dark:bg-violet-950/40",
+    proOnly: () => false,
+    badge: () => undefined,
+  },
+  {
+    id: "profiel",
+    label: "Bedrijfsprofiel",
+    description: () =>
+      "Beheer jouw zichtbaarheid op het platform en stel in wie welke informatie over jouw bedrijf kan zien.",
+    icon: Eye,
+    href: () => "/bedrijfsprofiel",
+    cta: () => "Profiel beheren",
+    color: () => "text-slate-600 dark:text-slate-400",
+    bg: () => "bg-slate-50 dark:bg-slate-950/40",
+    proOnly: () => false,
+    badge: () => undefined,
+  },
+  {
     id: "website-scan",
     label: "Website Scan",
     description: (isPro) =>
@@ -96,48 +141,7 @@ export const DASHBOARD_ACTIONS: DashboardAction[] = [
     proOnly: () => false,
     badge: () => undefined,
   },
-  {
-    id: "documenten",
-    label: "Mijn documenten",
-    description: () =>
-      "Beheer jouw persoonlijke WOO-bibliotheek. Upload brieven, besluiten en mandaatregisters — RegioBot gebruikt ze als bron.",
-    icon: FolderOpen,
-    href: () => "/woo-bibliotheek",
-    cta: () => "Naar documenten",
-    color: () => "text-violet-600 dark:text-violet-400",
-    bg: () => "bg-violet-50 dark:bg-violet-950/40",
-    proOnly: () => false,
-    badge: () => undefined,
-  },
-  {
-    id: "profiel",
-    label: "Bedrijfsprofiel",
-    description: () =>
-      "Beheer jouw zichtbaarheid op het platform en stel in wie welke informatie over jouw bedrijf kan zien.",
-    icon: Eye,
-    href: () => "/bedrijfsprofiel",
-    cta: () => "Profiel beheren",
-    color: () => "text-slate-600 dark:text-slate-400",
-    bg: () => "bg-slate-50 dark:bg-slate-950/40",
-    proOnly: () => false,
-    badge: () => undefined,
-  },
-  {
-    id: "regiobot",
-    label: "RegioBot",
-    description: (isPro) =>
-      isPro
-        ? "Analyseer besluiten, voer mandaat-checks uit en genereer vervolg-WOO vragen op basis van jouw eigen dossiers."
-        : "AI-assistent voor WOO-analyse en juridische vragen. Beschikbaar voor Pro-bijdragers.",
-    icon: Bot,
-    href: (isPro) => (isPro ? "/regiobot" : "/lidmaatschap?plan=pro"),
-    cta: (isPro) => (isPro ? "RegioBot openen" : "Ontgrendelen"),
-    color: (isPro) =>
-      isPro ? "text-indigo-600 dark:text-indigo-400" : "text-muted-foreground",
-    bg: (isPro) => (isPro ? "bg-indigo-50 dark:bg-indigo-950/40" : "bg-muted/40"),
-    proOnly: (isPro) => !isPro,
-    badge: (isPro) => (!isPro ? "Pro" : undefined),
-  },
+  // --- NETWERK ---
   {
     id: "samenwerken",
     label: "RegioCrew",
@@ -162,6 +166,19 @@ export const DASHBOARD_ACTIONS: DashboardAction[] = [
     cta: () => "Deals bekijken",
     color: () => "text-emerald-600 dark:text-emerald-400",
     bg: () => "bg-emerald-50 dark:bg-emerald-950/40",
+    proOnly: () => false,
+    badge: () => undefined,
+  },
+  {
+    id: "community",
+    label: "Community",
+    description: () =>
+      "Verbind met andere ondernemers uit jouw regio. Wissel inzichten uit, stel vragen en leer van ervaringen van vakgenoten.",
+    icon: MessageSquare,
+    href: () => "/community",
+    cta: () => "Naar Community",
+    color: () => "text-teal-600 dark:text-teal-400",
+    bg: () => "bg-teal-50 dark:bg-teal-950/40",
     proOnly: () => false,
     badge: () => undefined,
   },

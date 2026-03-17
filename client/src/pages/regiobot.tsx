@@ -236,7 +236,7 @@ export default function RegioBotPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
       <header className="space-y-2">
-        <h1 className="text-2xl md:text-3xl font-bold" data-testid="heading-regiobot">RegioBot – Regionale WOO & Juridische AI</h1>
+        <h1 className="text-2xl md:text-3xl font-bold" data-testid="heading-regiobot">RegioBot</h1>
         <p className="text-sm md:text-base text-muted-foreground">
           Samen bouwen we een WOO-bibliotheek om wet- en regelgeving die ondernemers raakt inzichtelijk te maken.
           RegioBot antwoordt document-gedreven (met bronnen), niet op gevoel.
