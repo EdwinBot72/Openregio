@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Users, Gavel, MapPin, Users2, TrendingUp, ArrowRight,
-  FileText, BarChart2, ShieldCheck, Landmark,
+  FileText, BarChart2, ShieldCheck, Landmark, Building2,
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -98,6 +98,14 @@ const sections = [
     title: "Regio Deals",
     description: "Beheer collectieve deals en voordelen voor leden.",
     color: "bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400",
+  },
+  {
+    id: "ondernemers",
+    href: "/admin/ondernemers",
+    icon: Building2,
+    title: "Ondernemers",
+    description: "Overzicht van geregistreerde leden met activiteits- en planstatus.",
+    color: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400",
   },
 ];
 

@@ -3965,10 +3965,24 @@ Maak het verzoek professioneel en juridisch correct.`;
   });
 
   // GET /api/admin/ondernemers — GDPR-compliant list of registered entrepreneurs
-  app.get("/api/admin/ondernemers", requireAuth, requireAdmin, async (_req, res) => {
+  // Query params: search, region, plan, page (default 1, pageSize 25)
+  app.get("/api/admin/ondernemers", requireAuth, requireAdmin, async (req, res) => {
     try {
       const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-      const rows = await db.execute(sql`
+      const search = typeof req.query.search === "string" ? req.query.search.trim() : "";
+      const regionFilter = typeof req.query.region === "string" ? req.query.region.trim() : "";
+      const planFilter = typeof req.query.plan === "string" && ["basic", "pro"].includes(req.query.plan) ? req.query.plan : "";
+      const page = Math.max(1, parseInt((req.query.page as string) || "1", 10));
+      const pageSize = 25;
+      const offset = (page - 1) * pageSize;
+
+      // Build dynamic filters using drizzle sql tag
+      const searchFilter = search ? sql`AND LOWER(COALESCE(u.business_name, '')) LIKE ${`%${search.toLowerCase()}%`}` : sql``;
+      const regionSqlFilter = regionFilter ? sql`AND u.region = ${regionFilter}` : sql``;
+      const planSqlFilter = planFilter ? sql`AND COALESCE(u.plan, 'basic') = ${planFilter}` : sql``;
+
+      // Main list query with pagination
+      const listRows = await db.execute(sql`
         SELECT
           u.id,
           COALESCE(u.business_name, '(geen bedrijfsnaam)') AS business_name,
@@ -3979,13 +3993,68 @@ Maak het verzoek professioneel en juridisch correct.`;
             SELECT 1 FROM refresh_tokens rt
             WHERE rt.user_id = u.id
               AND rt.expires_at > NOW()
-              AND rt.created_at > ${thirtyDaysAgo.toISOString()}
+              AND rt.created_at > ${thirtyDaysAgo}
           ) AS is_recently_active
         FROM users u
         WHERE u.deleted_at IS NULL
+        ${searchFilter}
+        ${regionSqlFilter}
+        ${planSqlFilter}
         ORDER BY u.created_at DESC
+        LIMIT ${pageSize} OFFSET ${offset}
       `);
-      res.json(rows.rows);
+
+      // Count query for pagination
+      const countRows = await db.execute(sql`
+        SELECT COUNT(*)::int AS total
+        FROM users u
+        WHERE u.deleted_at IS NULL
+        ${searchFilter}
+        ${regionSqlFilter}
+        ${planSqlFilter}
+      `);
+
+      // Aggregate stats (always unfiltered for the stat cards)
+      const statsRows = await db.execute(sql`
+        SELECT
+          COUNT(*)::int AS total,
+          COUNT(*) FILTER (WHERE COALESCE(u.plan, 'basic') = 'pro')::int AS total_pro,
+          COUNT(*) FILTER (
+            WHERE EXISTS (
+              SELECT 1 FROM refresh_tokens rt
+              WHERE rt.user_id = u.id
+                AND rt.expires_at > NOW()
+                AND rt.created_at > ${thirtyDaysAgo}
+            )
+          )::int AS total_active,
+          (
+            SELECT COALESCE(u2.region, '-')
+            FROM users u2
+            WHERE u2.deleted_at IS NULL AND u2.region IS NOT NULL AND u2.region != ''
+            GROUP BY u2.region
+            ORDER BY COUNT(*) DESC
+            LIMIT 1
+          ) AS top_region
+        FROM users u
+        WHERE u.deleted_at IS NULL
+      `);
+
+      const total = (countRows.rows[0] as any)?.total ?? 0;
+      const stats = (statsRows.rows[0] as any) ?? { total: 0, total_pro: 0, total_active: 0, top_region: "-" };
+
+      res.json({
+        items: listRows.rows,
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+        stats: {
+          total: stats.total,
+          totalPro: stats.total_pro,
+          totalActive: stats.total_active,
+          topRegion: stats.top_region || "-",
+        },
+      });
     } catch (err: any) {
       console.error("Admin ondernemers error:", err);
       res.status(500).json({ error: "Kon ondernemers niet ophalen" });
