@@ -19,11 +19,11 @@ import { PROVINCES_GEMEENTEN } from "@shared/schema";
 
 interface OndernemerRow {
   id: string;
-  business_name: string;
+  businessName: string;
   region: string;
   plan: string;
-  member_since: string;
-  is_recently_active: boolean;
+  memberSince: string;
+  isRecentlyActive: boolean;
 }
 
 interface OndernemersStats {
@@ -272,7 +272,7 @@ export default function AdminOndernemersPage() {
                         className="px-4 py-3 font-medium"
                         data-testid={`text-business-name-${row.id}`}
                       >
-                        {row.business_name}
+                        {row.businessName}
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">{row.region}</td>
                       <td className="px-4 py-3">
@@ -284,8 +284,8 @@ export default function AdminOndernemersPage() {
                         </Badge>
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">
-                        {row.member_since
-                          ? new Date(row.member_since + "-01").toLocaleDateString("nl-NL", {
+                        {row.memberSince
+                          ? new Date(row.memberSince + "-01").toLocaleDateString("nl-NL", {
                               year: "numeric",
                               month: "short",
                             })
@@ -294,7 +294,7 @@ export default function AdminOndernemersPage() {
                       <td className="px-4 py-3">
                         <span
                           className={`inline-flex items-center gap-1.5 text-xs ${
-                            row.is_recently_active
+                            row.isRecentlyActive
                               ? "text-emerald-600 dark:text-emerald-400"
                               : "text-muted-foreground"
                           }`}
@@ -302,10 +302,10 @@ export default function AdminOndernemersPage() {
                         >
                           <span
                             className={`h-1.5 w-1.5 rounded-full ${
-                              row.is_recently_active ? "bg-emerald-500" : "bg-muted-foreground/40"
+                              row.isRecentlyActive ? "bg-emerald-500" : "bg-muted-foreground/40"
                             }`}
                           />
-                          {row.is_recently_active ? "Actief" : "Inactief"}
+                          {row.isRecentlyActive ? "Actief" : "Inactief"}
                         </span>
                       </td>
                     </tr>

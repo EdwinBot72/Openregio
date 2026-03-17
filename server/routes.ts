@@ -3972,7 +3972,8 @@ Maak het verzoek professioneel en juridisch correct.`;
       const search = typeof req.query.search === "string" ? req.query.search.trim() : "";
       const regionFilter = typeof req.query.region === "string" ? req.query.region.trim() : "";
       const planFilter = typeof req.query.plan === "string" && ["basic", "pro"].includes(req.query.plan) ? req.query.plan : "";
-      const page = Math.max(1, parseInt((req.query.page as string) || "1", 10));
+      const rawPage = Number.parseInt((req.query.page as string) || "1", 10);
+      const page = Number.isFinite(rawPage) && rawPage > 0 ? rawPage : 1;
       const pageSize = 25;
       const offset = (page - 1) * pageSize;
 
@@ -3985,16 +3986,16 @@ Maak het verzoek professioneel en juridisch correct.`;
       const listRows = await db.execute(sql`
         SELECT
           u.id,
-          COALESCE(u.business_name, '(geen bedrijfsnaam)') AS business_name,
+          COALESCE(u.business_name, 'Geen naam opgegeven') AS "businessName",
           COALESCE(u.region, '-') AS region,
           COALESCE(u.plan, 'basic') AS plan,
-          TO_CHAR(DATE_TRUNC('month', u.created_at), 'YYYY-MM') AS member_since,
+          TO_CHAR(DATE_TRUNC('month', u.created_at), 'YYYY-MM') AS "memberSince",
           EXISTS (
             SELECT 1 FROM refresh_tokens rt
             WHERE rt.user_id = u.id
               AND rt.expires_at > NOW()
               AND rt.created_at > ${thirtyDaysAgo}
-          ) AS is_recently_active
+          ) AS "isRecentlyActive"
         FROM users u
         WHERE u.deleted_at IS NULL
         ${searchFilter}
