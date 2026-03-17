@@ -54,6 +54,7 @@ import GemeenteUpdatesPage from "@/pages/gemeente-updates";
 import FinancieringPage from "@/pages/financiering";
 import RegiodealsPage from "@/pages/regio-deals";
 import RegiodealsAdminPage from "@/pages/admin/regio-deals-admin";
+import AdminOndernemersPage from "@/pages/admin/ondernemers";
 import WebsiteOnderhoudPage from "@/pages/zichtbaarheid/website-onderhoud";
 import RegelkaartPage from "@/pages/informatie/regelkaart";
 import CheckSituatiePage from "@/pages/actie/check-situatie";
@@ -118,6 +119,7 @@ function AuthenticatedRouter() {
       <Route path="/admin/commissions" component={AdminCommissionsPage} />
       <Route path="/admin/users" component={AdminUsersPage} />
       <Route path="/admin/regio-deals" component={RegiodealsAdminPage} />
+      <Route path="/admin/ondernemers" component={AdminOndernemersPage} />
 
       {/* Kansen / Informatie */}
       <Route path="/kansen/subsidies">{() => <ComingSoon title="Subsidies" description="Overzicht van subsidies beschikbaar voor ondernemers in jouw regio." />}</Route>

@@ -122,6 +122,7 @@ const adminSubItems = [
   { title: "Regio-beheer", url: "/admin/regios", icon: MapPin },
   { title: "Platform-inzicht", url: "/admin/inzicht", icon: BarChart2 },
   { title: "Gebruikers", url: "/admin/users", icon: Users },
+  { title: "Ondernemers", url: "/admin/ondernemers", icon: Building2 },
 ];
 
 function AdminNavSection({ currentPath }: { currentPath: string }) {

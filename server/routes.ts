@@ -3964,6 +3964,34 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
+  // GET /api/admin/ondernemers — GDPR-compliant list of registered entrepreneurs
+  app.get("/api/admin/ondernemers", requireAuth, requireAdmin, async (_req, res) => {
+    try {
+      const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+      const rows = await db.execute(sql`
+        SELECT
+          u.id,
+          COALESCE(u.business_name, '(geen bedrijfsnaam)') AS business_name,
+          COALESCE(u.region, '-') AS region,
+          COALESCE(u.plan, 'basic') AS plan,
+          TO_CHAR(DATE_TRUNC('month', u.created_at), 'YYYY-MM') AS member_since,
+          EXISTS (
+            SELECT 1 FROM refresh_tokens rt
+            WHERE rt.user_id = u.id
+              AND rt.expires_at > NOW()
+              AND rt.created_at > ${thirtyDaysAgo.toISOString()}
+          ) AS is_recently_active
+        FROM users u
+        WHERE u.deleted_at IS NULL
+        ORDER BY u.created_at DESC
+      `);
+      res.json(rows.rows);
+    } catch (err: any) {
+      console.error("Admin ondernemers error:", err);
+      res.status(500).json({ error: "Kon ondernemers niet ophalen" });
+    }
+  });
+
   // GET /api/admin/woo/stats — woo monitoring stats
   app.get("/api/admin/woo/stats", requireAuth, requireAdmin, async (_req, res) => {
     try {
