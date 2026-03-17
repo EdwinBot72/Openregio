@@ -5,114 +5,16 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   ArrowRight,
   Download,
-  FileSearch,
-  Gavel,
   Eye,
-  Users,
   Shield,
   UserPlus,
-  Activity,
   Lock,
   ChevronRight,
-  Globe,
-  Search,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
-
-type ActionCard = {
-  id: string;
-  label: string;
-  description: string;
-  icon: React.ElementType;
-  href: string;
-  cta: string;
-  color: string;
-  bg: string;
-  proOnly?: boolean;
-  badge?: string;
-};
-
-function buildActions(isPro: boolean): ActionCard[] {
-  return [
-    {
-      id: "brief",
-      label: "Brief of besluit begrijpen",
-      description: "Plak een overheidsbrief en ontvang direct uitleg, termijnen en aanbevolen acties. Geen verrassingen meer — alleen inzicht.",
-      icon: FileSearch,
-      href: "/tools/brief-analyse",
-      cta: isPro ? "Brief analyseren" : "Analyse starten",
-      color: "text-blue-600 dark:text-blue-400",
-      bg: "bg-blue-50 dark:bg-blue-950/40",
-      badge: isPro ? undefined : "Beperkt",
-    },
-    {
-      id: "woo",
-      label: "Verborgen informatie opvragen",
-      description: isPro
-        ? "Vraag officiële overheidsinformatie op die anderen niet gebruiken. Bouw dossiers op en creëer een strategisch voordeel."
-        : "Haal marktinformatie op bij overheden die publiek beschikbaar is maar moeilijk toegankelijk. Beschikbaar voor Pro-bijdragers.",
-      icon: Gavel,
-      href: isPro ? "/woo-wizard" : "/lidmaatschap?plan=pro",
-      cta: isPro ? "Verzoek starten" : "Ontgrendelen",
-      color: isPro
-        ? "text-orange-600 dark:text-orange-400"
-        : "text-muted-foreground",
-      bg: isPro
-        ? "bg-orange-50 dark:bg-orange-950/40"
-        : "bg-muted/40",
-      proOnly: !isPro,
-      badge: !isPro ? "Pro" : undefined,
-    },
-    {
-      id: "regio",
-      label: "Als eerste weten wat er speelt",
-      description: "Beleidsupdates, aanbestedingen en subsidies in jouw gemeente — dagelijks ververst. Wie het eerst weet, heeft een voorsprong.",
-      icon: Activity,
-      href: "/kansen/gemeente-updates",
-      cta: "Regio volgen",
-      color: "text-emerald-600 dark:text-emerald-400",
-      bg: "bg-emerald-50 dark:bg-emerald-950/40",
-    },
-    {
-      id: "website-scan",
-      label: "Website scan",
-      description: isPro
-        ? "Analyseer jouw website op vindbaarheid, lokale aanwezigheid en technische kwaliteit. Krijg concrete verbeterpunten."
-        : "Uitgebreide scan van jouw website: vindbaarheid, lokale aanwezigheid, technische kwaliteit. Beschikbaar voor Pro-bijdragers.",
-      icon: Globe,
-      href: isPro ? "/tools/website-scan" : "/lidmaatschap?plan=pro",
-      cta: isPro ? "Scan starten" : "Ontgrendelen",
-      color: isPro ? "text-blue-600 dark:text-blue-400" : "text-muted-foreground",
-      bg: isPro ? "bg-blue-50 dark:bg-blue-950/40" : "bg-muted/40",
-      proOnly: !isPro,
-      badge: !isPro ? "Pro" : undefined,
-    },
-    {
-      id: "regelgeving",
-      label: "Regelgeving verkenner",
-      description: "Zoek door officiële verordeningen, beleidsregels en besluiten van gemeenten door heel Nederland. Gebruik als basis voor een Woo-verzoek.",
-      icon: Search,
-      href: "/regelgeving-verkenner",
-      cta: "Verkenner openen",
-      color: "text-orange-600 dark:text-orange-400",
-      bg: "bg-orange-50 dark:bg-orange-950/40",
-    },
-    {
-      id: "samenwerken",
-      label: "Samenwerking starten",
-      description: isPro
-        ? "Start projecten, plaats aanvragen bij RegioCrew en lanceer initiatieven in jouw regio."
-        : "Bekijk samenwerkingen en join bestaande RegioCrew projecten.",
-      icon: Users,
-      href: "/regiocrew",
-      cta: "Naar RegioCrew",
-      color: "text-violet-600 dark:text-violet-400",
-      bg: "bg-violet-50 dark:bg-violet-950/40",
-    },
-  ];
-}
+import { DASHBOARD_ACTIONS } from "@/config/dashboardActions";
 
 export default function DashboardPage() {
   const { user, isLoading: authLoading } = useAuth();
@@ -144,7 +46,19 @@ export default function DashboardPage() {
   const isPro = user.plan === "pro";
   const isAdmin = user.isAdmin || false;
   const displayName = bedrijfsprofiel?.naam || user.firstName || "ondernemer";
-  const actions = buildActions(isPro);
+
+  const actions = DASHBOARD_ACTIONS.map((action) => ({
+    id: action.id,
+    label: action.label,
+    description: action.description(isPro),
+    icon: action.icon,
+    href: action.href(isPro),
+    cta: action.cta(isPro),
+    color: action.color(isPro),
+    bg: action.bg(isPro),
+    proOnly: action.proOnly(isPro),
+    badge: action.badge(isPro),
+  }));
 
   return (
     <div className="max-w-2xl mx-auto px-6 py-10 space-y-8">
@@ -181,7 +95,7 @@ export default function DashboardPage() {
                   <div className="flex items-start gap-4">
                     <div className={`shrink-0 rounded-md p-2.5 ${action.bg}`}>
                       {locked
-                        ? <Lock className={`h-5 w-5 text-muted-foreground`} />
+                        ? <Lock className="h-5 w-5 text-muted-foreground" />
                         : <Icon className={`h-5 w-5 ${action.color}`} />
                       }
                     </div>

@@ -38,7 +38,8 @@ The system implements JWT authentication with short-lived access tokens and rota
 -   **Brief Analyse**: An AI function using Gemini 2.5-flash (with gpt-4o-mini fallback) to analyze government letters, extracting key information like sender, document type, legal basis, and recommended actions.
 -   **Gemeente-updates**: Displays official publications per municipality from the KOOP SRU API (overheid.nl), with in-memory caching and search functionality.
 -   **Regio Deals**: Manages exclusive member deals and collective agreements via a `regio_deals` database table, with admin management and a dedicated member interface.
--   **Admin Cockpit**: Central admin dashboard at `/admin` with platform stats and navigation to all admin sections. Sub-pages: Woo-monitoring (`/admin/woo`), Regio-beheer (`/admin/regios`), Platform-inzicht (`/admin/inzicht`), Gebruikers (`/admin/users`), Blogs, Commissies, Regio Deals. All require `requireAdmin` middleware.
+-   **Admin Cockpit**: Central admin dashboard at `/admin` with platform stats and navigation to all admin sections. Sub-pages: Woo-monitoring (`/admin/woo`), Regio-beheer (`/admin/regios`), Platform-inzicht (`/admin/inzicht`), Gebruikers (`/admin/users`), Ondernemers (`/admin/ondernemers`), Blogs, Commissies, Regio Deals. All require `requireAdmin` middleware. The Ondernemers page is GDPR-compliant, showing businessName, region, plan, memberSince (month/year), and isRecentlyActive (based on refresh tokens).
+-   **Navigation Config**: Data-driven navigation via `client/src/config/navigation.ts` (APP_NAV + ACCOUNT_NAV), page metadata via `client/src/config/pageMeta.ts`, and dashboard actions via `client/src/config/dashboardActions.ts`. AppSidebar consumes APP_NAV for the 5 main nav groups: Overzicht, Regio volgen, Documenten & verzoeken, Zichtbaarheid, Netwerk.
 
 ### Security and Observability
 

@@ -219,7 +219,7 @@ export default function WooBibliotheekPage() {
       <header className="space-y-2">
         <h1 className="text-2xl md:text-3xl font-bold" data-testid="heading-woo-bibliotheek">
           <FolderOpen className="inline-block mr-2 h-7 w-7" />
-          WOO-bibliotheek
+          Mijn documenten
         </h1>
         <p className="text-muted-foreground">
           Upload documenten (PDF's, foto's van brieven) naar je persoonlijke bibliotheek. 

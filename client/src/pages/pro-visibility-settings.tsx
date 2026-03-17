@@ -140,7 +140,7 @@ export default function ProVisibilitySettings() {
       <div className="mb-6">
         <h1 className="text-2xl font-bold flex items-center gap-2">
           <Shield className="h-6 w-6" />
-          Data & Consent Control
+          Privacy & zichtbaarheid
         </h1>
         <p className="text-muted-foreground mt-1">
           Bepaal wie welke informatie over jouw bedrijf kan zien.

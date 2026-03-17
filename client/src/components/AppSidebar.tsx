@@ -15,31 +15,17 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import {
-  LayoutDashboard,
-  Building2,
   User,
   LogOut,
   Shield,
-  Eye,
-  Share2,
   ChevronDown,
   ChevronRight,
-  Landmark,
-  Megaphone,
   MapPin,
-  Bot,
   Gavel,
-  Monitor,
-  ScanText,
-  Lightbulb,
-  FileText,
-  FolderOpen,
   Users,
-  HandshakeIcon,
-  Newspaper,
-  Activity,
   BarChart2,
   ShieldCheck,
+  Building2,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -47,74 +33,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { useLocation } from "wouter";
 import { queryClient } from "@/lib/queryClient";
-
-type NavSubItem = {
-  title: string;
-  url: string;
-  icon: React.ElementType;
-  proOnly?: boolean;
-};
-
-type NavSection = {
-  id: string;
-  title: string;
-  icon: React.ElementType;
-  url?: string;
-  sub?: NavSubItem[];
-};
-
-const navSections: NavSection[] = [
-  {
-    id: "dashboard",
-    title: "Dashboard",
-    icon: LayoutDashboard,
-    url: "/dashboard",
-  },
-  {
-    id: "inzicht",
-    title: "Inzicht",
-    icon: Lightbulb,
-    sub: [
-      { title: "Brief begrijpen", url: "/tools/brief-analyse", icon: ScanText },
-      { title: "Regels & besluiten", url: "/beleidsmonitor", icon: Activity },
-      { title: "Gemeente-updates", url: "/kansen/gemeente-updates", icon: Megaphone },
-      { title: "Aanbestedingen", url: "/kansen/aanbestedingen", icon: Landmark },
-      { title: "RegioBot", url: "/regiobot", icon: Bot },
-    ],
-  },
-  {
-    id: "woo",
-    title: "Woo-verzoeken",
-    icon: Gavel,
-    sub: [
-      { title: "Regelgeving verkenner", url: "/regelgeving-verkenner", icon: Activity },
-      { title: "Nieuw verzoek", url: "/woo-wizard", icon: FileText },
-      { title: "Mijn verzoeken", url: "/woo-bibliotheek", icon: FolderOpen },
-      { title: "Documenten & dossiers", url: "/woo-bot", icon: Newspaper },
-    ],
-  },
-  {
-    id: "zichtbaarheid",
-    title: "Zichtbaarheid",
-    icon: Eye,
-    sub: [
-      { title: "Bedrijfsprofiel", url: "/bedrijfsprofiel", icon: Building2 },
-      { title: "Website Scan", url: "/tools/website-scan", icon: Monitor, proOnly: true },
-      { title: "Lokale vindbaarheid", url: "/zichtbaarheid/vindbaarheid", icon: MapPin },
-      { title: "Zichtbaarheidsbeheer", url: "/pro/visibility-settings", icon: Shield, proOnly: true },
-    ],
-  },
-  {
-    id: "samenwerken",
-    title: "Samenwerken",
-    icon: HandshakeIcon,
-    sub: [
-      { title: "RegioCrew", url: "/regiocrew", icon: Users },
-      { title: "Regio Deals", url: "/regio-deals", icon: Landmark },
-      { title: "Community", url: "/community", icon: Share2 },
-    ],
-  },
-];
+import { APP_NAV, ACCOUNT_NAV, type NavSection } from "@/config/navigation";
 
 const adminSubItems = [
   { title: "Admin Cockpit", url: "/admin", icon: ShieldCheck },
@@ -304,7 +223,7 @@ export function AppSidebar() {
           <SidebarGroupLabel>Navigatie</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {navSections.map((section) => (
+              {APP_NAV.map((section) => (
                 <NavSectionItem
                   key={section.id}
                   section={section}
@@ -320,30 +239,20 @@ export function AppSidebar() {
           <SidebarGroupLabel>Account</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={location === "/privacy-dashboard"}
-                  data-testid="link-privacy-dashboard"
-                >
-                  <a href="/privacy-dashboard" className="flex items-center gap-2">
-                    <Shield className="h-4 w-4" />
-                    <span>Privacy & Gegevens</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  isActive={location === "/affiliate"}
-                  data-testid="link-affiliate"
-                >
-                  <a href="/affiliate" className="flex items-center gap-2">
-                    <Share2 className="h-4 w-4" />
-                    <span>Affiliate</span>
-                  </a>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
+              {ACCOUNT_NAV.map((item) => (
+                <SidebarMenuItem key={item.url}>
+                  <SidebarMenuButton
+                    asChild
+                    isActive={location === item.url}
+                    data-testid={`link-account-${item.url.replace(/\//g, "-").replace(/^-/, "")}`}
+                  >
+                    <a href={item.url} className="flex items-center gap-2">
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </a>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
               {user?.isAdmin && (
                 <AdminNavSection currentPath={location} />
               )}

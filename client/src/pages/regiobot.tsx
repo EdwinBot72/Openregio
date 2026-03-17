@@ -218,7 +218,7 @@ export default function RegioBotPage() {
                 <Scale className="h-10 w-10 text-primary" />
               </div>
             </div>
-            <h1 className="text-2xl font-bold">Extra tools beschikbaar</h1>
+            <h1 className="text-2xl font-bold" data-testid="heading-regiobot">RegioBot</h1>
             <p className="text-muted-foreground">
               RegioBot werkt met WOO-bronnen en regionale dossiers. Deze tool is beschikbaar voor leden met uitgebreide toegang.
             </p>

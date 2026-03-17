@@ -240,7 +240,7 @@ export default function WooWizardPage() {
     return (
       <div className="container mx-auto py-8 px-4 max-w-4xl">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2" data-testid="text-page-title">Juridische Instrumenten</h1>
+          <h1 className="text-3xl font-bold mb-2" data-testid="text-page-title">Nieuw Woo-verzoek</h1>
           <p className="text-muted-foreground">Kies het instrument dat past bij jouw situatie</p>
         </div>
 
