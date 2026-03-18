@@ -74,6 +74,14 @@ Nieuwe 7-sectie opbouw op basis van structuurdocument:
 - **Voor wie**: 4 doelgroepkaarten
 - **Membership + CTA**: prijskaarten behouden, CTA aangepast naar "Start met OpenRegio"
 
+## Startup & Portability Hardening (March 2026)
+
+- Early env validation in `server/index.ts`: DATABASE_URL + SESSION_SECRET → process.exit(1) on missing; optional vars (MOLLIE, POSTMARK, OPENAI, GEMINI) → warn only
+- `server/seed.ts`: non-fatal (removed throw); master account seed wrapped in try/catch in routes.ts
+- `package-lock.json` regenerated fresh (687 entries, lockfileVersion 3) to fix cross-platform `npm ci` compatibility
+- `.env.example` documents required vs optional environment variables
+- JWT: 15min access + 7-day rotating refresh tokens; no auto-refresh in frontend (redirects to /login)
+
 ## External Dependencies
 
 -   **Database**: Neon Database (PostgreSQL), pgvector
