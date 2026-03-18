@@ -233,7 +233,7 @@ export default function LidmaatschapPage() {
                 asChild
                 data-testid="button-basic-payment"
               >
-                <a href={MOLLIE_BASIC_LINK}>
+                <a href={MOLLIE_BASIC_LINK} target="_blank" rel="noopener noreferrer">
                   Ga naar betaling (€12,95/mnd)
                   <ExternalLink className="ml-2 h-4 w-4" />
                 </a>

@@ -66,11 +66,11 @@ function PostPaymentRegisterForm() {
       setTimeout(() => {
         setLocation("/dashboard");
       }, 500);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toast({
         variant: "destructive",
         title: "Registratie mislukt",
-        description: error.message || "Probeer het opnieuw",
+        description: error instanceof Error ? error.message : "Probeer het opnieuw",
       });
     }
   };
