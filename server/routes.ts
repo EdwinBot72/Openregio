@@ -2432,7 +2432,8 @@ Maak het verzoek professioneel en juridisch correct.`;
   app.get("/api/billing/subscription", requireAuth, async (req, res) => {
     try {
       const userId = (req.user as any).id;
-      const subscription = await storage.getSubscription(userId);
+      // Haal het laatste actieve abonnement op voor deterministische resultaten
+      const subscription = await storage.getActiveSubscription(userId);
       
       if (!subscription) {
         return res.status(404).json({ error: "No subscription found" });
@@ -2449,6 +2450,11 @@ Maak het verzoek professioneel en juridisch correct.`;
     try {
       const user = (req as any).user;
       const userId = user.id as string;
+
+      // Alleen Pro-leden kunnen opzeggen
+      if (user.plan !== "pro") {
+        return res.status(403).json({ error: "Alleen Pro-leden kunnen een abonnement opzeggen" });
+      }
 
       // Haal het laatste actieve abonnement op
       const subscription = await storage.getActiveSubscription(userId);
