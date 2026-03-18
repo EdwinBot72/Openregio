@@ -10,6 +10,11 @@ import {
   UserPlus,
   Lock,
   ChevronRight,
+  Radio,
+  ScrollText,
+  BookOpen,
+  Euro,
+  TrendingUp,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -60,6 +65,44 @@ export default function DashboardPage() {
     badge: action.badge(isPro),
   }));
 
+  const essentieleTools = [
+    {
+      id: "intel",
+      title: "Intel Dashboard",
+      description: "Laatste signalen voor ondernemers",
+      icon: Radio,
+      href: "/intel",
+    },
+    {
+      id: "woo-verzoek",
+      title: "Woo Verzoek",
+      description: "Stel sneller een verzoek op",
+      icon: ScrollText,
+      href: "/woo-wizard",
+    },
+    {
+      id: "lokale-regels",
+      title: "Lokale Regels",
+      description: "Bekijk regels in jouw regio",
+      icon: BookOpen,
+      href: "/regelgeving-verkenner",
+    },
+    {
+      id: "subsidies",
+      title: "Subsidies",
+      description: "Kansen die je niet wilt missen",
+      icon: Euro,
+      href: "/kansen/aanbestedingen",
+    },
+    {
+      id: "regio-kansen",
+      title: "Regio Kansen",
+      description: "Nieuwe kansen voor lokale ondernemers",
+      icon: TrendingUp,
+      href: "/kansen/gemeente-updates",
+    },
+  ] as const;
+
   return (
     <div className="max-w-2xl mx-auto px-6 py-10 space-y-8">
 
@@ -75,6 +118,37 @@ export default function DashboardPage() {
         <p className="text-sm text-muted-foreground">
           Informatie is openbaar. Slimme ondernemers gebruiken het.
         </p>
+      </div>
+
+      <div className="space-y-2" data-testid="section-essentiele-tools">
+        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          Essentiële tools
+        </p>
+        <div className="flex gap-3 overflow-x-auto pb-1 -mx-1 px-1">
+          {essentieleTools.map((tool) => {
+            const Icon = tool.icon;
+            return (
+              <Link href={tool.href} key={tool.id}>
+                <div
+                  className="flex-none w-36 rounded-md border bg-card p-3 space-y-2 cursor-pointer hover-elevate active-elevate-2"
+                  data-testid={`card-tool-${tool.id}`}
+                >
+                  <div className="flex items-center gap-2">
+                    <div className="rounded-md bg-primary/10 p-1.5 shrink-0">
+                      <Icon className="h-3.5 w-3.5 text-primary" />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold leading-snug">{tool.title}</p>
+                    <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">
+                      {tool.description}
+                    </p>
+                  </div>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
       </div>
 
       <div className="space-y-2">

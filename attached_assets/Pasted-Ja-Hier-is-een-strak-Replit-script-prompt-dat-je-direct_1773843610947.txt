@@ -1,0 +1,125 @@
+Ja. Hier is een strak **Replit-script/prompt** dat je direct kunt plakken.
+
+```text
+Act like a senior TypeScript full-stack engineer working in an existing Vite + React + Express + Drizzle/Postgres codebase.
+
+Your task is to improve the logged-in OpenRegio dashboard by adding a horizontal “essential tools” section near the top of the dashboard.
+
+Goal:
+Make the dashboard immediately useful after login by showing the most important OpenRegio tools as horizontal cards/buttons, without changing the rest of the app structure.
+
+Important:
+- Use the existing project structure and styling patterns
+- Do not create a new page for this task
+- Add this section to the existing logged-in dashboard
+- Keep changes minimal and clean
+- Do not refactor unrelated code
+- Reuse existing auth/session/dashboard layout patterns
+- Everything must remain buildable
+
+What I want
+1. Add a new dashboard section called:
+   **Essentiële tools**
+
+2. Place it high on the logged-in dashboard, preferably:
+   - below the welcome/header block
+   - above lower content sections such as activity/feed/cards if present
+
+3. Build it as a horizontal tool strip using cards or pill-like clickable panels
+
+4. Add these tools:
+   - Intel Dashboard
+   - Woo Verzoek
+   - Lokale Regels
+   - Subsidies
+   - Regio Kansen
+
+5. Each tool card should contain:
+   - title
+   - short one-line description
+   - clickable behavior
+   - optional small icon if the project already uses an icon library
+
+Use these descriptions:
+- Intel Dashboard — Laatste signalen voor ondernemers
+- Woo Verzoek — Stel sneller een verzoek op
+- Lokale Regels — Bekijk regels in jouw regio
+- Subsidies — Kansen die je niet wilt missen
+- Regio Kansen — Nieuwe kansen voor lokale ondernemers
+
+Routing behavior
+- Intel Dashboard should link to: `/intel`
+- For the other items:
+  - if matching routes already exist, use them
+  - if they do not exist yet, link them temporarily to safe placeholder routes or `#`
+  - do not invent full new features/pages unless they already exist
+
+UI requirements
+- Desktop: horizontal row or responsive multi-column row
+- Mobile: horizontally scrollable or stacked in a clean responsive way
+- Use the existing OpenRegio dashboard style
+- Cards should feel like quick-access tools
+- Keep the UI compact, clean, and business-like
+- Make the section visually clear but not oversized
+
+Technical requirements
+- Add the section to the actual dashboard component used after login
+- Do not create duplicate dashboards
+- Use existing UI components/utilities if available
+- Keep TypeScript clean
+- Avoid unused imports
+- Do not break current routes or auth logic
+
+Nice to have if already consistent with project patterns
+- small “Vandaag belangrijk” or “Snel starten” label above the tools
+- hover state
+- subtle active/focus states
+- compact icon treatment
+
+Constraints
+- No new auth system
+- No broad refactor
+- No unrelated cleanup
+- No backend work required for this task
+- No extra pages unless already present
+- Keep diffs targeted and readable
+
+Deliverables
+When done, provide:
+1. File(s) changed
+2. Where the section was inserted
+3. Which routes were linked
+4. Any placeholders used for tools without existing routes
+5. Verification that the project still passes:
+   - `npm run check`
+   - `npm run build`
+
+Definition of done
+This task is only done when:
+- the logged-in dashboard contains a visible horizontal section called “Essentiële tools”
+- the section includes the 5 requested tool cards
+- Intel Dashboard links to `/intel`
+- the UI is responsive
+- the project still typechecks and builds cleanly
+
+Do not stop after creating mock JSX in isolation.
+Actually wire the section into the real logged-in dashboard.
+```
+
+Als je wilt dat Replit nog minder ruimte krijgt om eigen dingen te verzinnen, plak deze eronder:
+
+```text
+Use the existing dashboard file and existing route structure. Do not create a second dashboard implementation.
+```
+
+En deze ook:
+
+```text
+If a requested tool route does not exist yet, keep the card visible and use a temporary safe placeholder link without breaking build.
+```
+
+Dit is de kortere, hardere versie als Replit langdradige prompts slecht pakt:
+
+```text
+Add a new horizontal section to the real logged-in OpenRegio dashboard called “Essentiële tools”. Place it below the welcome/header area. Add 5 clickable cards: Intel Dashboard (/intel), Woo Verzoek, Lokale Regels, Subsidies, Regio Kansen. Each card needs a title and short subtitle. Use existing styling/components/patterns. Keep it responsive, minimal, and build-safe. Do not create a new dashboard. Reuse the current authenticated dashboard file. Finish only when `npm run check` and `npm run build` still pass.
+```
