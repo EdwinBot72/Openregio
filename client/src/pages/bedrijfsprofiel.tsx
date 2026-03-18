@@ -65,6 +65,18 @@ export default function BedrijfsprofielPage() {
     queryKey: ["/api/business-profiles/public"],
   });
 
+  const { data: subscription } = useQuery<{
+    id: string;
+    status: string;
+    plan: string;
+    currentPeriodEnd?: string | null;
+    canceledAt?: string | null;
+  }>({
+    queryKey: ["/api/billing/subscription"],
+    enabled: user?.plan === "pro",
+    retry: false,
+  });
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -425,11 +437,25 @@ export default function BedrijfsprofielPage() {
           </CardHeader>
           <CardContent>
             <div className="flex flex-wrap items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <Badge variant="secondary" data-testid="badge-plan">
-                  Pro
-                </Badge>
-                <span className="text-sm text-muted-foreground">Actief abonnement</span>
+              <div className="flex flex-col gap-1">
+                <div className="flex items-center gap-3">
+                  <Badge variant="secondary" data-testid="badge-plan">
+                    Pro
+                  </Badge>
+                  <span className="text-sm text-muted-foreground">
+                    {subscription?.status === "cancelled" ? "Opgezegd" : "Actief abonnement"}
+                  </span>
+                </div>
+                {subscription?.currentPeriodEnd && (
+                  <span className="text-xs text-muted-foreground" data-testid="text-period-end">
+                    Huidige periode loopt tot{" "}
+                    {new Date(subscription.currentPeriodEnd).toLocaleDateString("nl-NL", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })}
+                  </span>
+                )}
               </div>
               <AlertDialog>
                 <AlertDialogTrigger asChild>
@@ -449,7 +475,7 @@ export default function BedrijfsprofielPage() {
                     </AlertDialogTitle>
                     <AlertDialogDescription className="space-y-2">
                       <span className="block">
-                        Als je je Pro-abonnement opzegt, verlies je toegang tot:
+                        Na opzegging verlies je per direct toegang tot:
                       </span>
                       <ul className="list-disc pl-4 space-y-1 text-sm">
                         <li>Onbeperkt gebruik van RegioBot</li>
@@ -458,7 +484,7 @@ export default function BedrijfsprofielPage() {
                         <li>WOO-verzoeken en geavanceerde tools</li>
                       </ul>
                       <span className="block pt-1">
-                        Je houdt tot het einde van de huidige periode toegang. Daarna wordt je plan teruggezet naar Basis.
+                        Je account wordt direct teruggezet naar het Basis-abonnement. Herabonneren kan altijd via de lidmaatschapspagina.
                       </span>
                     </AlertDialogDescription>
                   </AlertDialogHeader>

@@ -2462,21 +2462,17 @@ Maak het verzoek professioneel en juridisch correct.`;
       }
 
       // Cancel recurring Mollie-abonnement als dat beschikbaar is
+      // Als Mollie cancel mislukt → geef fout terug; doe GEEN lokale downgrade
       if (
         mollieClient &&
         subscription.mollieCustomerId &&
         subscription.mollieSubscriptionId
       ) {
-        try {
-          await mollieClient.customerSubscriptions.cancel(
-            subscription.mollieSubscriptionId,
-            { customerId: subscription.mollieCustomerId }
-          );
-          console.log(`✓ Mollie subscription cancelled: ${subscription.mollieSubscriptionId}`);
-        } catch (mollieError: any) {
-          // Log maar stop niet: sla lokaal toch op als gecanceld
-          console.warn(`⚠ Mollie cancel fout (doorgaan met lokale cancel):`, mollieError?.message);
-        }
+        await mollieClient.customerSubscriptions.cancel(
+          subscription.mollieSubscriptionId,
+          { customerId: subscription.mollieCustomerId }
+        );
+        console.log(`✓ Mollie subscription cancelled: ${subscription.mollieSubscriptionId}`);
       }
 
       // Markeer abonnement als gecanceld in de database
@@ -2490,7 +2486,7 @@ Maak het verzoek professioneel en juridisch correct.`;
       await sendNotificationEmail(
         user.email,
         "Je Pro-abonnement is opgezegd",
-        `Je hebt je Pro-abonnement bij OpenRegio opgezegd. Je houdt tot het einde van de huidige periode toegang tot alle Pro-functies. Daarna wordt je account automatisch omgezet naar het Basis-abonnement.\n\nWil je later opnieuw upgraden? Dat kan altijd via openregio.nl/lidmaatschap.\n\nHeb je vragen? Neem dan contact op via info@openregio.nl.`,
+        `Je hebt je Pro-abonnement bij OpenRegio opgezegd. Je Pro-toegang is per direct beëindigd en je account is omgezet naar het Basis-abonnement.\n\nWil je later opnieuw upgraden? Dat kan altijd via openregio.nl/lidmaatschap.\n\nHeb je vragen? Neem dan contact op via info@openregio.nl.`,
         firstName
       );
 
