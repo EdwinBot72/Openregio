@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Mail, AlertCircle, Loader2 } from "lucide-react";
 import { Link, useLocation } from "wouter";
@@ -24,7 +23,12 @@ const registerSchema = z.object({
 
 type RegisterFormData = z.infer<typeof registerSchema>;
 
-function PostPaymentRegisterForm() {
+const PLAN_LABELS: Record<string, string> = {
+  basic: "Basis-lid",
+  pro: "Pro-bijdrager",
+};
+
+function PostPaymentRegisterForm({ plan }: { plan: "basic" | "pro" }) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const { refetch } = useAuth();
@@ -42,11 +46,11 @@ function PostPaymentRegisterForm() {
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
-      const { confirmPassword, ...payload } = data;
+      const { confirmPassword, ...rest } = data;
       const response = await fetch("/api/auth/register-after-payment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify({ ...rest, plan }),
         credentials: "include",
       });
 
@@ -84,7 +88,7 @@ function PostPaymentRegisterForm() {
           </div>
           <CardTitle className="text-3xl font-accent">Betaling geslaagd!</CardTitle>
           <CardDescription className="text-lg">
-            Maak nu je account aan om direct aan de slag te gaan
+            Welkom als <span className="font-semibold text-foreground">{PLAN_LABELS[plan]}</span>. Maak nu je account aan.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -287,8 +291,8 @@ export default function BetalingGeslaagd() {
   const plan = params.get("plan");
   const email = params.get("email") || "";
 
-  if (plan === "basic") {
-    return <PostPaymentRegisterForm />;
+  if (plan === "basic" || plan === "pro") {
+    return <PostPaymentRegisterForm plan={plan} />;
   }
 
   return <EmailCheckPage email={email} />;

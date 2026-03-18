@@ -1,23 +1,11 @@
 import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Check, ArrowRight, Loader2, ExternalLink } from "lucide-react";
-import { Link, useLocation, useSearch } from "wouter";
-import { useToast } from "@/hooks/use-toast";
+import { Check, ExternalLink } from "lucide-react";
+import { Link, useSearch } from "wouter";
 
 const MOLLIE_BASIC_LINK = import.meta.env.VITE_MOLLIE_BASIC_PAYMENT_LINK as string || "https://payment-links.mollie.com/payment/FNnWr8uofpfEd6PJQMWHk";
-
-const proFormSchema = z.object({
-  email: z.string().email("Vul een geldig e-mailadres in"),
-  ref: z.string().optional(),
-});
-
-type ProFormData = z.infer<typeof proFormSchema>;
+const MOLLIE_PRO_LINK = import.meta.env.VITE_MOLLIE_PRO_PAYMENT_LINK as string || "https://payment-links.mollie.com/payment/nEdtEni7GkJG7rHHetyBs";
 
 interface PlanFeature {
   text: string;
@@ -28,8 +16,10 @@ interface Plan {
   id: "basic" | "pro";
   name: string;
   price: string;
+  priceNote: string;
   description: string;
   features: PlanFeature[];
+  paymentLink: string;
   popular?: boolean;
 }
 
@@ -37,12 +27,14 @@ const plans: Plan[] = [
   {
     id: "basic",
     name: "Basis-lid",
-    price: "€12,95 excl. BTW",
+    price: "€12,95",
+    priceNote: "excl. BTW / maand",
     description: "Volwaardig lid van de coöperatie",
+    paymentLink: MOLLIE_BASIC_LINK,
     features: [
       { text: "Bedrijfsprofiel in lokaal netwerk", included: true },
       { text: "Ontdek en ontmoet ondernemers", included: true },
-      { text: "Volledige stemrecht in de coöperatie", included: true },
+      { text: "Volledig stemrecht in de coöperatie", included: true },
       { text: "Basischeck & weerbaarheidsbadges", included: true },
       { text: "RegioBot & WOO-bibliotheek", included: false },
       { text: "Printbare overzichten", included: false },
@@ -51,8 +43,10 @@ const plans: Plan[] = [
   {
     id: "pro",
     name: "Pro-bijdrager",
-    price: "€24 excl. BTW",
+    price: "€24,95",
+    priceNote: "excl. BTW / maand",
     description: "Draag extra bij en krijg krachtige tools",
+    paymentLink: MOLLIE_PRO_LINK,
     features: [
       { text: "Alles van Basis-lid", included: true },
       { text: "RegioBot: WOO & regelgeving AI", included: true },
@@ -66,65 +60,20 @@ const plans: Plan[] = [
 ];
 
 export default function LidmaatschapPage() {
-  const [, setLocation] = useLocation();
   const searchParams = useSearch();
-  const { toast } = useToast();
   const params = new URLSearchParams(searchParams);
   const urlPlan = params.get("plan");
-  const urlEmail = params.get("email");
-  const ref = params.get("ref") || undefined;
 
   const initialPlan = (urlPlan === "pro" ? "pro" : "basic") as "basic" | "pro";
   const [selectedPlan, setSelectedPlan] = useState<"basic" | "pro">(initialPlan);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const form = useForm<ProFormData>({
-    resolver: zodResolver(proFormSchema),
-    defaultValues: {
-      email: urlEmail || "",
-      ref: ref,
-    },
-  });
 
   useEffect(() => {
-    if (ref) form.setValue("ref", ref);
     if (urlPlan === "pro" || urlPlan === "basic") {
       setSelectedPlan(urlPlan);
     }
-    if (urlEmail) form.setValue("email", urlEmail);
-  }, [ref, urlPlan, urlEmail, form]);
+  }, [urlPlan]);
 
-  const onProSubmit = async (data: ProFormData) => {
-    setIsSubmitting(true);
-    try {
-      const response = await fetch("/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: data.email, plan: "pro", ref: data.ref }),
-        credentials: "include",
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Er is iets misgegaan");
-      }
-
-      const result = await response.json();
-
-      if (result.checkoutUrl) {
-        window.location.href = result.checkoutUrl;
-      } else {
-        throw new Error("Geen betaallink ontvangen. Probeer het opnieuw.");
-      }
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Fout bij betaling",
-        description: error instanceof Error ? error.message : "Probeer het opnieuw",
-      });
-      setIsSubmitting(false);
-    }
-  };
+  const activePlan = plans.find((p) => p.id === selectedPlan)!;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-background">
@@ -164,9 +113,10 @@ export default function LidmaatschapPage() {
           {plans.map((plan) => (
             <Card
               key={plan.id}
-              className={`relative ${
+              className={`relative cursor-pointer transition-all ${
                 selectedPlan === plan.id ? "ring-2 ring-primary" : ""
               } ${plan.popular ? "border-primary" : ""}`}
+              onClick={() => setSelectedPlan(plan.id)}
               data-testid={`card-plan-${plan.id}`}
             >
               {plan.popular && (
@@ -179,7 +129,7 @@ export default function LidmaatschapPage() {
                 <CardDescription>{plan.description}</CardDescription>
                 <div className="mt-4">
                   <span className="text-4xl font-bold">{plan.price}</span>
-                  <span className="text-muted-foreground"> /maand</span>
+                  <span className="text-muted-foreground text-sm ml-1">{plan.priceNote}</span>
                 </div>
               </CardHeader>
               <CardContent>
@@ -187,7 +137,7 @@ export default function LidmaatschapPage() {
                   type="button"
                   variant={selectedPlan === plan.id ? "default" : "outline"}
                   className="w-full mb-6"
-                  onClick={() => setSelectedPlan(plan.id)}
+                  onClick={(e) => { e.stopPropagation(); setSelectedPlan(plan.id); }}
                   data-testid={`button-select-${plan.id}`}
                 >
                   {selectedPlan === plan.id ? "Geselecteerd" : "Selecteer dit plan"}
@@ -214,93 +164,33 @@ export default function LidmaatschapPage() {
           ))}
         </div>
 
-        {/* CTA section — conditional on selected plan */}
-        {selectedPlan === "basic" ? (
-          /* Basis: direct Mollie Payment Link */
-          <Card className="max-w-md mx-auto" data-testid="card-basic-cta">
-            <CardHeader>
-              <CardTitle>Start Basis-lidmaatschap</CardTitle>
-              <CardDescription>
-                Maandelijks abonnement van €12,95 excl. BTW — opzegbaar per maand
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <p className="text-sm text-muted-foreground">
-                Je betaalt veilig via Mollie. Na betaling maak je direct je account aan.
-              </p>
-              <Button
-                className="w-full"
-                asChild
-                data-testid="button-basic-payment"
-              >
-                <a href={MOLLIE_BASIC_LINK} target="_blank" rel="noopener noreferrer">
-                  Ga naar betaling (€12,95/mnd)
-                  <ExternalLink className="ml-2 h-4 w-4" />
-                </a>
-              </Button>
-              <p className="text-xs text-center text-muted-foreground">
-                Na betaling word je teruggestuurd om je account aan te maken
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          /* Pro: email form → dynamic Mollie checkout */
-          <Card className="max-w-md mx-auto" data-testid="card-payment-form">
-            <CardHeader>
-              <CardTitle>Start Pro-lidmaatschap</CardTitle>
-              <CardDescription>
-                Vul je e-mailadres in en ga door naar betaling
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onProSubmit)} className="space-y-4">
-                  <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>E-mailadres</FormLabel>
-                        <FormControl>
-                          <Input
-                            type="email"
-                            placeholder="jouw@email.nl"
-                            {...field}
-                            data-testid="input-email"
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="pt-2">
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Plan: <span className="font-semibold text-foreground">Pro-bijdrager (€24/maand excl. BTW)</span>
-                    </p>
-                    <Button
-                      type="submit"
-                      className="w-full"
-                      disabled={isSubmitting}
-                      data-testid="button-submit-payment"
-                    >
-                      {isSubmitting ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Bezig met voorbereiden...
-                        </>
-                      ) : (
-                        <>
-                          Ga naar betaling
-                          <ArrowRight className="ml-2 h-4 w-4" />
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-        )}
+        {/* CTA — always a direct Mollie Payment Link */}
+        <Card className="max-w-md mx-auto" data-testid="card-payment-cta">
+          <CardHeader>
+            <CardTitle>Start {activePlan.name}</CardTitle>
+            <CardDescription>
+              Maandelijks abonnement van {activePlan.price} {activePlan.priceNote} — opzegbaar per maand
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Je betaalt veilig via Mollie. Na betaling maak je direct je account aan.
+            </p>
+            <Button
+              className="w-full"
+              asChild
+              data-testid="button-payment-link"
+            >
+              <a href={activePlan.paymentLink} target="_blank" rel="noopener noreferrer">
+                Ga naar betaling ({activePlan.price}/mnd)
+                <ExternalLink className="ml-2 h-4 w-4" />
+              </a>
+            </Button>
+            <p className="text-xs text-center text-muted-foreground">
+              Na betaling word je teruggestuurd om je account aan te maken
+            </p>
+          </CardContent>
+        </Card>
 
         {/* Trust indicators */}
         <div className="mt-12 text-center text-sm text-muted-foreground">

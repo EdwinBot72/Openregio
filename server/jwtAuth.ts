@@ -25,6 +25,7 @@ import crypto from "crypto";
 import { RateLimiterMemory } from "rate-limiter-flexible";
 import { storage } from "./storage";
 import { registerUserSchema, loginUserSchema, refreshTokens, passwordResetTokens, type User } from "@shared/schema";
+import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { db } from "db";
 import { eq, and, lt, isNull } from "drizzle-orm";
@@ -231,7 +232,8 @@ export function setupJwtAuth(app: Express) {
 
   // POST /api/auth/register-after-payment
   // For users who paid via a Mollie Payment Link and now need to create an account.
-  // Creates user (plan=basic) + an active subscription record, then logs them in.
+  // Creates user + an active subscription record, then logs them in.
+  // Accepts optional `plan` field: "basic" (default) or "pro".
   app.post("/api/auth/register-after-payment", async (req: Request, res: Response) => {
     const ip = req.ip || req.socket.remoteAddress || "unknown";
 
@@ -247,6 +249,7 @@ export function setupJwtAuth(app: Express) {
       const schema = registerUserSchema.pick({ email: true, password: true }).extend({
         firstName: registerUserSchema.shape.firstName,
         lastName: registerUserSchema.shape.lastName,
+        plan: z.enum(["basic", "pro"]).optional().default("basic"),
       });
 
       const validationResult = schema.safeParse(req.body);
@@ -255,7 +258,7 @@ export function setupJwtAuth(app: Express) {
         return res.status(400).json({ error: errorMessage });
       }
 
-      const { email, password, firstName, lastName } = validationResult.data;
+      const { email, password, firstName, lastName, plan } = validationResult.data;
 
       const existingUser = await storage.getUserByEmail(email);
       if (existingUser) {
@@ -267,7 +270,7 @@ export function setupJwtAuth(app: Express) {
       const user = await storage.createUser({
         email,
         passwordHash,
-        plan: "basic",
+        plan,
         firstName: firstName || null,
         lastName: lastName || null,
         mustCompleteOnboarding: true,
@@ -279,7 +282,7 @@ export function setupJwtAuth(app: Express) {
 
       await storage.createSubscription({
         userId: user.id,
-        plan: "basic",
+        plan,
         status: "active",
         currentPeriodEnd: nextMonth,
       });
@@ -295,7 +298,7 @@ export function setupJwtAuth(app: Express) {
         console.error("Failed to send welcome email:", err);
       });
 
-      console.log(`✓ Post-payment registration: ${user.id} (${email}) - basis plan`);
+      console.log(`✓ Post-payment registration: ${user.id} (${email}) - ${plan} plan`);
 
       res.status(201).json({ user: formatUserResponse(user) });
     } catch (error) {
