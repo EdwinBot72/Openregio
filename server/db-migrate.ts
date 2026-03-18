@@ -186,6 +186,11 @@ export async function runMigrations(): Promise<void> {
     `);
     console.log("[Migration] ✓ woo_documents FTS trigger ensured");
 
+    await db.execute(sql`
+      ALTER TABLE user_profiles ADD COLUMN IF NOT EXISTS avatar_url TEXT;
+    `);
+    console.log("[Migration] ✓ user_profiles.avatar_url column ensured");
+
     console.log("[Migration] Database schema is up to date");
   } catch (error) {
     console.error("[Migration] Error running migrations:", error);

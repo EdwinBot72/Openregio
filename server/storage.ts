@@ -100,6 +100,7 @@ export interface IStorage {
   getAllUsers(): Promise<User[]>;
   upsertUser(user: UpsertUser): Promise<User>;
   createUser(user: { email: string; passwordHash: string; plan?: "basic" | "pro"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null; mustCompleteOnboarding?: boolean; onboardingToken?: string | null; referralCode?: string | null; referredByUserId?: string | null; referredAt?: Date | null }): Promise<User>;
+  updateUser(id: string, updates: Partial<Omit<User, "id" | "createdAt">>): Promise<User | undefined>;
   updateUserPlan(userId: string, plan: "basic" | "pro"): Promise<User | undefined>;
   updateUserPassword(userId: string, passwordHash: string): Promise<User | undefined>;
   getUserProfileByReplitUserId(replitUserId: string): Promise<UserProfile | undefined>;
@@ -376,6 +377,14 @@ export class MemStorage implements IStorage {
     return user;
   }
 
+  async updateUser(id: string, updates: Partial<Omit<User, "id" | "createdAt">>): Promise<User | undefined> {
+    const user = this.users.get(id);
+    if (!user) return undefined;
+    const updatedUser: User = { ...user, ...updates, updatedAt: new Date() };
+    this.users.set(id, updatedUser);
+    return updatedUser;
+  }
+
   async updateUserPlan(userId: string, plan: "basic" | "pro"): Promise<User | undefined> {
     const user = this.users.get(userId);
     if (!user) {
@@ -603,6 +612,7 @@ export class MemStorage implements IStorage {
         replitUserId: null,
         name: p.name,
         email: p.email,
+        avatarUrl: null,
         painPoints: p.painPoints || [],
         onboardingCompleted: p.onboardingCompleted ?? false,
         createdAt: new Date(),
@@ -1093,6 +1103,7 @@ export class MemStorage implements IStorage {
       replitUserId: profile.replitUserId ?? null,
       name: profile.name,
       email: profile.email,
+      avatarUrl: null,
       painPoints: profile.painPoints || [],
       onboardingCompleted: profile.onboardingCompleted ?? false,
       createdAt: new Date(),
@@ -1532,6 +1543,8 @@ export class MemStorage implements IStorage {
     const newBlog: Blog = {
       id,
       ...blog,
+      authorId: blog.authorId ?? "",
+      authorName: blog.authorName ?? "",
       status: blog.status || "draft",
       featuredImage: blog.featuredImage || null,
       publishedAt: blog.status === "published" ? new Date() : null,
@@ -1763,6 +1776,15 @@ class DbStorage implements IStorage {
           updatedAt: new Date(),
         },
       })
+      .returning();
+    return user;
+  }
+
+  async updateUser(id: string, updates: Partial<Omit<User, "id" | "createdAt">>): Promise<User | undefined> {
+    const [user] = await db
+      .update(users)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(users.id, id))
       .returning();
     return user;
   }
@@ -2564,6 +2586,8 @@ class DbStorage implements IStorage {
   async createBlog(blog: InsertBlog): Promise<Blog> {
     const [result] = await db.insert(blogs).values({
       ...blog,
+      authorId: blog.authorId ?? "",
+      authorName: blog.authorName ?? "",
       publishedAt: blog.status === "published" ? new Date() : null,
     }).returning();
     return result;

@@ -1,0 +1,101 @@
+Ja, deze prompt is al prima.
+Hij is strak, technisch en stuurt goed op minimale diffs.
+
+Maar ik zou hem net iets scherper maken zodat een model minder ruimte heeft om te freewheelen en je output consistenter wordt.
+
+Hier is een betere versie die je direct kunt plakken:
+
+```text
+Act like a senior TypeScript full-stack engineer working in an existing Vite + React + Express + Drizzle/Postgres codebase.
+
+Goal:
+Make the current codebase typecheck cleanly and run locally with minimal, targeted fixes. Do not add new features, redesign code, or refactor beyond what is required to pass typecheck/build/start.
+
+Primary objective:
+Eliminate all `npm run check` TypeScript errors and make sure `npm run build` and `npm run start` work when a valid `DATABASE_URL` is provided.
+
+Instructions:
+1. Reproduce the problem first:
+   - Run `npm ci`
+   - Run `npm run check`
+   - Use the actual TypeScript error output as the only backlog
+2. Fix errors step by step, re-running `npm run check` after each logical batch of changes
+3. Once typecheck is clean, run:
+   - `npm run build`
+   - `npm run start`
+4. If runtime startup requires environment variables, document the minimum required variables briefly and do not invent fake production values
+
+Required fixes:
+1. tsconfig
+   - Set an explicit `compilerOptions.target` of ES2017 or higher
+   - If needed, enable `downlevelIteration`
+   - Keep strictness intact unless a change is absolutely required to match current project patterns
+
+2. Google Gemini dependency mismatch
+   - Resolve the mismatch between `@google/generative-ai` usage and the installed package set
+   - Prefer the smallest diff that matches the current code intent
+   - Do not introduce a broader AI refactor
+
+3. Schema/type mismatches
+   - `AppSidebar` expects `avatarUrl`
+   - Either map it to an existing user/profile field or add it consistently across types and storage
+   - In routes, `userId` is referenced but missing from the validated Zod schema/type
+   - Align Zod schemas, shared types, and storage interfaces so they agree
+
+4. `server/seed.ts`
+   - Fix the missing `updateUser` issue
+   - Either implement `updateUser` on `DbStorage` or refactor seed to use an existing equivalent method
+   - Preserve current behavior
+
+5. Blog typing
+   - Ensure `authorId` is handled consistently
+   - Either make it always defined where required, or update the types/storage so optionality is accurately represented
+   - Apply one consistent approach across schema, storage, and returned types
+
+Constraints:
+- Make only the smallest necessary changes
+- No new features
+- No UI redesign
+- No unrelated cleanup
+- No broad refactors
+- Keep naming and patterns consistent with the existing codebase
+- Do not suppress errors unless the suppression is the correct minimal fix
+
+Output format:
+1. Brief diagnosis of the main error groups
+2. Files changed
+3. What was changed in each file and why
+4. Final verification results for:
+   - `npm run check`
+   - `npm run build`
+   - `npm run start`
+5. Exact commands to reproduce and verify locally
+6. Any remaining runtime assumptions, limited to required env vars such as `DATABASE_URL`
+
+Work step by step and prefer correctness over cleverness.
+```
+
+Waarom deze beter is:
+
+* minder ruis
+* duidelijker afgebakend
+* voorkomt “extra improvements”
+* dwingt op echte backlog uit `npm run check`
+* dwingt op output die jij direct kunt controleren
+
+Nog scherper voor Cursor / Claude Code / Codex gebruik je deze slotregel erbij:
+
+```text
+Do not stop after editing files. Only finish when `npm run check` is clean and `npm run build` succeeds, or when you can name the exact blocking error that still remains.
+```
+
+En deze ook, als je wilt voorkomen dat hij random dependencies gaat toevoegen:
+
+```text
+Do not add dependencies unless that is the smallest possible fix for an existing import actually used in the project.
+```
+
+Mijn oordeel:
+**goed prompt-framework, maar deze versie is production-strakker.**
+
+Als je wilt, maak ik er ook meteen een **ultra-korte versie voor Replit AI / Cursor** van in 8 regels.

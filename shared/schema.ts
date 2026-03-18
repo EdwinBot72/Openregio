@@ -307,6 +307,7 @@ export const userProfiles = pgTable("user_profiles", {
   replitUserId: varchar("replit_user_id").unique().references(() => users.id),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
+  avatarUrl: text("avatar_url"),
   painPoints: text("pain_points").array().notNull().default(sql`'{}'::text[]`),
   onboardingCompleted: boolean("onboarding_completed").notNull().default(false),
   createdAt: timestamp("created_at").defaultNow().notNull(),

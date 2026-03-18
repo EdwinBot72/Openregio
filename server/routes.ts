@@ -1443,7 +1443,7 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
           config: { maxOutputTokens: 800, temperature: 0.3, thinkingConfig: { thinkingBudget: 0 } },
         });
         const parts = response.candidates?.[0]?.content?.parts;
-        if (parts?.length > 0) resultaatText = parts.filter((p: any) => p.text && !p.thought).map((p: any) => p.text).join("");
+        if (parts && parts.length > 0) resultaatText = parts.filter((p: any) => p.text && !p.thought).map((p: any) => p.text).join("");
         if (!resultaatText) resultaatText = response.text || "";
       } catch (geminiErr) {
         console.error("[BriefAnalyse/upload] Gemini failed:", geminiErr);
@@ -2313,11 +2313,12 @@ Maak het verzoek professioneel en juridisch correct.`;
   app.post("/api/user-profile", requireAuth, async (req, res) => {
     try {
       const caller = req.user as any;
+      const bodyUserId = typeof req.body.userId === "string" ? req.body.userId : null;
       const validatedData = insertUserProfileSchema.parse(req.body);
-      if (validatedData.userId && validatedData.userId !== caller.id && !caller.isAdmin) {
+      if (bodyUserId && bodyUserId !== caller.id && !caller.isAdmin) {
         return res.status(403).json({ error: "Toegang geweigerd" });
       }
-      const profile = await storage.createUserProfile({ ...validatedData, userId: caller.id });
+      const profile = await storage.createUserProfile(validatedData);
       res.status(201).json(profile);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -4362,14 +4363,14 @@ Wees kritisch maar opbouwend. Focus op lokale vindbaarheid voor Nederlandse onde
     }
 
     try {
-      const { GoogleGenerativeAI } = await import("@google/generative-ai");
-      const genAI = new GoogleGenerativeAI(process.env.AI_INTEGRATIONS_GEMINI_API_KEY!);
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-      const result = await model.generateContent({
+      const { GoogleGenAI } = await import("@google/genai");
+      const genAI = new GoogleGenAI({ apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY! });
+      const result = await genAI.models.generateContent({
+        model: "gemini-2.5-flash",
         contents: [{ role: "user", parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: "application/json" },
+        config: { responseMimeType: "application/json" },
       });
-      const raw = result.response.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
+      const raw = result.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
       const analysis = extractJson(raw) ?? buildFallbackAnalysis();
       return res.json({ url: finalUrl, signals: s, analysis });
     } catch (geminiErr) {
@@ -4469,11 +4470,13 @@ Geef een JSON-object terug in exact dit formaat:
 }`;
 
     try {
-      const { GoogleGenerativeAI } = await import("@google/generative-ai");
-      const genAI = new GoogleGenerativeAI(process.env.AI_INTEGRATIONS_GEMINI_API_KEY!);
-      const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-      const result = await model.generateContent({ contents: [{ role: "user", parts: [{ text: prompt }] }] });
-      let raw = result.response.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
+      const { GoogleGenAI } = await import("@google/genai");
+      const genAI = new GoogleGenAI({ apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY! });
+      const result = await genAI.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+      });
+      let raw = result.candidates?.[0]?.content?.parts?.[0]?.text ?? "{}";
       raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
       const concept = JSON.parse(raw);
       return res.json(concept);
