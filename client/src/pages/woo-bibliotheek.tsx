@@ -207,7 +207,7 @@ export default function WooBibliotheekPage() {
       <div className="max-w-4xl mx-auto px-4 py-8">
         <Card data-testid="card-login-prompt">
           <CardContent className="p-6 space-y-6 text-center">
-            <p className="text-muted-foreground">Log in om de WOO-bibliotheek te gebruiken.</p>
+            <p className="text-muted-foreground">Log in om Mijn documenten te gebruiken.</p>
           </CardContent>
         </Card>
       </div>
@@ -239,7 +239,7 @@ export default function WooBibliotheekPage() {
           <div className="flex items-start gap-3">
             <Info className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
             <div className="space-y-1.5">
-              <p className="text-sm font-medium">Hoe werkt de WOO-bibliotheek?</p>
+              <p className="text-sm font-medium">Hoe werkt Mijn documenten?</p>
               <p className="text-sm text-muted-foreground">
                 Dit is jouw persoonlijke bibliotheek van WOO-documenten. Upload hier gemeentebrieven,
                 besluiten, mandaatregisters en andere officiële stukken. RegioBot gebruikt deze

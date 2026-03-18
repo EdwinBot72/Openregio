@@ -223,7 +223,7 @@ export default function WooBotPage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2" data-testid="heading-woo-bot">Document-assistent</h1>
         <p className="text-muted-foreground">
-          Zoek in WOO-documenten of genereer een WOO-verzoekbrief.
+          Zoek in overheidsdocumenten of genereer een verzoekbrief.
         </p>
       </div>
 

@@ -60,13 +60,13 @@ export const APP_NAV: NavSection[] = [
   },
   {
     id: "documenten",
-    title: "Documenten & verzoeken",
-    icon: Gavel,
+    title: "Wetgeving & Regelgeving",
+    icon: FileText,
     sub: [
       { title: "Regelgeving verkenner", url: "/regelgeving-verkenner", icon: Activity },
-      { title: "Nieuw Woo-verzoek", url: "/woo-wizard", icon: FileText },
+      { title: "Verzoek indienen", url: "/woo-wizard", icon: Gavel },
       { title: "Mijn documenten", url: "/woo-bibliotheek", icon: FolderOpen },
-      { title: "Document-assistent", url: "/woo-bot", icon: Newspaper },
+      { title: "Regelgeving-assistent", url: "/woo-bot", icon: Newspaper },
       { title: "RegioBot", url: "/regiobot", icon: Bot, proOnly: true },
     ],
   },

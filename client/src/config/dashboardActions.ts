@@ -42,11 +42,11 @@ export const DASHBOARD_ACTIONS: DashboardAction[] = [
   },
   {
     id: "woo",
-    label: "Nieuw Woo-verzoek",
+    label: "Verzoek indienen",
     description: (isPro) =>
       isPro
         ? "Vraag officiële overheidsinformatie op die anderen niet gebruiken. Bouw dossiers op en creëer een strategisch voordeel."
-        : "Haal marktinformatie op bij overheden die publiek beschikbaar is maar moeilijk toegankelijk. Beschikbaar voor Pro-bijdragers.",
+        : "Haal officiële overheidsinformatie op die publiek beschikbaar is maar moeilijk toegankelijk. Beschikbaar voor Pro-bijdragers.",
     icon: Gavel,
     href: (isPro) => (isPro ? "/woo-wizard" : "/lidmaatschap?plan=pro"),
     cta: (isPro) => (isPro ? "Verzoek starten" : "Ontgrendelen"),
@@ -74,8 +74,8 @@ export const DASHBOARD_ACTIONS: DashboardAction[] = [
     label: "RegioBot",
     description: (isPro) =>
       isPro
-        ? "Analyseer besluiten, voer mandaat-checks uit en genereer vervolg-WOO vragen op basis van jouw eigen dossiers."
-        : "AI-assistent voor WOO-analyse en juridische vragen. Beschikbaar voor Pro-bijdragers.",
+        ? "Analyseer besluiten, voer mandaat-checks uit en genereer vervolgvragen op basis van jouw eigen dossiers."
+        : "AI-assistent voor regelgevingsanalyse en juridische vragen. Beschikbaar voor Pro-bijdragers.",
     icon: Bot,
     href: (isPro) => (isPro ? "/regiobot" : "/lidmaatschap?plan=pro"),
     cta: (isPro) => (isPro ? "RegioBot openen" : "Ontgrendelen"),
@@ -90,7 +90,7 @@ export const DASHBOARD_ACTIONS: DashboardAction[] = [
     id: "documenten",
     label: "Mijn documenten",
     description: () =>
-      "Beheer jouw persoonlijke WOO-bibliotheek. Upload brieven, besluiten en mandaatregisters — RegioBot gebruikt ze als bron.",
+      "Beheer jouw persoonlijke documentenbibliotheek. Upload brieven, besluiten en mandaatregisters — RegioBot gebruikt ze als bron.",
     icon: FolderOpen,
     href: () => "/woo-bibliotheek",
     cta: () => "Naar documenten",
@@ -132,7 +132,7 @@ export const DASHBOARD_ACTIONS: DashboardAction[] = [
     id: "regelgeving",
     label: "Regelgeving verkenner",
     description: () =>
-      "Zoek door officiële verordeningen, beleidsregels en besluiten van gemeenten door heel Nederland. Gebruik als basis voor een Woo-verzoek.",
+      "Zoek door officiële verordeningen, beleidsregels en besluiten van gemeenten door heel Nederland. Gebruik als basis voor een verzoek.",
     icon: Search,
     href: () => "/regelgeving-verkenner",
     cta: () => "Verkenner openen",
