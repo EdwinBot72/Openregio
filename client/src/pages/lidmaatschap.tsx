@@ -6,17 +6,18 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Check, Sparkles, Users, Vote, ArrowRight, Loader2 } from "lucide-react";
+import { Check, ArrowRight, Loader2, ExternalLink } from "lucide-react";
 import { Link, useLocation, useSearch } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 
-const formSchema = z.object({
+const MOLLIE_BASIC_LINK = import.meta.env.VITE_MOLLIE_BASIC_PAYMENT_LINK as string || "https://payment-links.mollie.com/payment/FNnWr8uofpfEd6PJQMWHk";
+
+const proFormSchema = z.object({
   email: z.string().email("Vul een geldig e-mailadres in"),
-  plan: z.enum(["basic", "pro"]),
   ref: z.string().optional(),
 });
 
-type FormData = z.infer<typeof formSchema>;
+type ProFormData = z.infer<typeof proFormSchema>;
 
 interface PlanFeature {
   text: string;
@@ -64,7 +65,7 @@ const plans: Plan[] = [
   },
 ];
 
-export default function StartPage() {
+export default function LidmaatschapPage() {
   const [, setLocation] = useLocation();
   const searchParams = useSearch();
   const { toast } = useToast();
@@ -72,36 +73,34 @@ export default function StartPage() {
   const urlPlan = params.get("plan");
   const urlEmail = params.get("email");
   const ref = params.get("ref") || undefined;
-  
+
   const initialPlan = (urlPlan === "pro" ? "pro" : "basic") as "basic" | "pro";
   const [selectedPlan, setSelectedPlan] = useState<"basic" | "pro">(initialPlan);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<FormData>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<ProFormData>({
+    resolver: zodResolver(proFormSchema),
     defaultValues: {
       email: urlEmail || "",
-      plan: initialPlan,
       ref: ref,
     },
   });
-  
+
   useEffect(() => {
     if (ref) form.setValue("ref", ref);
     if (urlPlan === "pro" || urlPlan === "basic") {
-      form.setValue("plan", urlPlan);
       setSelectedPlan(urlPlan);
     }
     if (urlEmail) form.setValue("email", urlEmail);
   }, [ref, urlPlan, urlEmail, form]);
 
-  const onSubmit = async (data: FormData) => {
+  const onProSubmit = async (data: ProFormData) => {
     setIsSubmitting(true);
     try {
       const response = await fetch("/start", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify({ email: data.email, plan: "pro", ref: data.ref }),
         credentials: "include",
       });
 
@@ -111,8 +110,7 @@ export default function StartPage() {
       }
 
       const result = await response.json();
-      
-      // Redirect naar Mollie betaalpagina
+
       if (result.checkoutUrl) {
         window.location.href = result.checkoutUrl;
       } else {
@@ -133,16 +131,16 @@ export default function StartPage() {
       {/* Navigation */}
       <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
         <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-          <Link 
-            href="/" 
-            className="font-accent text-2xl font-bold text-primary" 
+          <Link
+            href="/"
+            className="font-accent text-2xl font-bold text-primary"
             data-testid="link-home-logo"
           >
             OpenRegio
           </Link>
-          <Link 
-            href="/login" 
-            className="text-sm font-medium hover:text-primary transition-colors" 
+          <Link
+            href="/login"
+            className="text-sm font-medium hover:text-primary transition-colors"
             data-testid="link-login"
           >
             Al lid? Inloggen
@@ -164,7 +162,7 @@ export default function StartPage() {
         {/* Plans */}
         <div className="grid md:grid-cols-2 gap-8 mb-12">
           {plans.map((plan) => (
-            <Card 
+            <Card
               key={plan.id}
               className={`relative ${
                 selectedPlan === plan.id ? "ring-2 ring-primary" : ""
@@ -189,10 +187,7 @@ export default function StartPage() {
                   type="button"
                   variant={selectedPlan === plan.id ? "default" : "outline"}
                   className="w-full mb-6"
-                  onClick={() => {
-                    setSelectedPlan(plan.id);
-                    form.setValue("plan", plan.id);
-                  }}
+                  onClick={() => setSelectedPlan(plan.id)}
                   data-testid={`button-select-${plan.id}`}
                 >
                   {selectedPlan === plan.id ? "Geselecteerd" : "Selecteer dit plan"}
@@ -200,12 +195,12 @@ export default function StartPage() {
                 <ul className="space-y-3">
                   {plan.features.map((feature, idx) => (
                     <li key={idx} className="flex items-start gap-3">
-                      <Check 
+                      <Check
                         className={`h-5 w-5 mt-0.5 flex-shrink-0 ${
                           feature.included ? "text-primary" : "text-muted-foreground/30"
-                        }`} 
+                        }`}
                       />
-                      <span 
+                      <span
                         className={feature.included ? "" : "text-muted-foreground line-through"}
                         data-testid={`text-feature-${plan.id}-${idx}`}
                       >
@@ -219,62 +214,93 @@ export default function StartPage() {
           ))}
         </div>
 
-        {/* Payment Form */}
-        <Card className="max-w-md mx-auto" data-testid="card-payment-form">
-          <CardHeader>
-            <CardTitle>Start jouw lidmaatschap</CardTitle>
-            <CardDescription>
-              Vul je e-mailadres in en ga door naar betaling
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>E-mailadres</FormLabel>
-                      <FormControl>
-                        <Input
-                          type="email"
-                          placeholder="jouw@email.nl"
-                          {...field}
-                          data-testid="input-email"
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <div className="pt-2">
-                  <p className="text-sm text-muted-foreground mb-4">
-                    Geselecteerd plan: <span className="font-semibold text-foreground">{selectedPlan === "basic" ? "Basic (€12,95/maand excl. BTW)" : "Pro (€24/maand excl. BTW)"}</span>
-                  </p>
-                  <Button
-                    type="submit"
-                    className="w-full"
-                    disabled={isSubmitting}
-                    data-testid="button-submit-payment"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Bezig met voorbereiden...
-                      </>
-                    ) : (
-                      <>
-                        Ga naar betaling
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                      </>
+        {/* CTA section — conditional on selected plan */}
+        {selectedPlan === "basic" ? (
+          /* Basis: direct Mollie Payment Link */
+          <Card className="max-w-md mx-auto" data-testid="card-basic-cta">
+            <CardHeader>
+              <CardTitle>Start Basis-lidmaatschap</CardTitle>
+              <CardDescription>
+                Maandelijks abonnement van €12,95 excl. BTW — opzegbaar per maand
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <p className="text-sm text-muted-foreground">
+                Je betaalt veilig via Mollie. Na betaling maak je direct je account aan.
+              </p>
+              <Button
+                className="w-full"
+                asChild
+                data-testid="button-basic-payment"
+              >
+                <a href={MOLLIE_BASIC_LINK}>
+                  Ga naar betaling (€12,95/mnd)
+                  <ExternalLink className="ml-2 h-4 w-4" />
+                </a>
+              </Button>
+              <p className="text-xs text-center text-muted-foreground">
+                Na betaling word je teruggestuurd om je account aan te maken
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          /* Pro: email form → dynamic Mollie checkout */
+          <Card className="max-w-md mx-auto" data-testid="card-payment-form">
+            <CardHeader>
+              <CardTitle>Start Pro-lidmaatschap</CardTitle>
+              <CardDescription>
+                Vul je e-mailadres in en ga door naar betaling
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onProSubmit)} className="space-y-4">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>E-mailadres</FormLabel>
+                        <FormControl>
+                          <Input
+                            type="email"
+                            placeholder="jouw@email.nl"
+                            {...field}
+                            data-testid="input-email"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
                     )}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
+                  />
+                  <div className="pt-2">
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Plan: <span className="font-semibold text-foreground">Pro-bijdrager (€24/maand excl. BTW)</span>
+                    </p>
+                    <Button
+                      type="submit"
+                      className="w-full"
+                      disabled={isSubmitting}
+                      data-testid="button-submit-payment"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Bezig met voorbereiden...
+                        </>
+                      ) : (
+                        <>
+                          Ga naar betaling
+                          <ArrowRight className="ml-2 h-4 w-4" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Trust indicators */}
         <div className="mt-12 text-center text-sm text-muted-foreground">

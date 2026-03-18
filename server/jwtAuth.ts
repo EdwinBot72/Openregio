@@ -228,7 +228,82 @@ export function setupJwtAuth(app: Express) {
       res.status(500).json({ error: "Registratie mislukt" });
     }
   });
-  
+
+  // POST /api/auth/register-after-payment
+  // For users who paid via a Mollie Payment Link and now need to create an account.
+  // Creates user (plan=basic) + an active subscription record, then logs them in.
+  app.post("/api/auth/register-after-payment", async (req: Request, res: Response) => {
+    const ip = req.ip || req.socket.remoteAddress || "unknown";
+
+    try {
+      await registerLimiter.consume(ip);
+    } catch {
+      return res.status(429).json({
+        error: "Te veel registratiepogingen. Probeer het over een uur opnieuw.",
+      });
+    }
+
+    try {
+      const schema = registerUserSchema.pick({ email: true, password: true }).extend({
+        firstName: registerUserSchema.shape.firstName,
+        lastName: registerUserSchema.shape.lastName,
+      });
+
+      const validationResult = schema.safeParse(req.body);
+      if (!validationResult.success) {
+        const errorMessage = fromZodError(validationResult.error).toString();
+        return res.status(400).json({ error: errorMessage });
+      }
+
+      const { email, password, firstName, lastName } = validationResult.data;
+
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ error: "Dit e-mailadres is al in gebruik. Heb je al een account? Log dan in." });
+      }
+
+      const passwordHash = await bcrypt.hash(password, SALT_ROUNDS);
+
+      const user = await storage.createUser({
+        email,
+        passwordHash,
+        plan: "basic",
+        firstName: firstName || null,
+        lastName: lastName || null,
+        mustCompleteOnboarding: true,
+      });
+
+      // Create an active subscription record for this user
+      const nextMonth = new Date();
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
+
+      await storage.createSubscription({
+        userId: user.id,
+        plan: "basic",
+        status: "active",
+        currentPeriodEnd: nextMonth,
+      });
+
+      const tokenId = generateTokenId();
+      const accessToken = generateAccessToken(user.id, user.email);
+      const refreshToken = generateRefreshToken();
+
+      await storeRefreshToken(user.id, refreshToken, tokenId);
+      setTokenCookies(res, accessToken, refreshToken, tokenId);
+
+      sendWelcomeEmail(user.email, user.firstName || "").catch((err) => {
+        console.error("Failed to send welcome email:", err);
+      });
+
+      console.log(`✓ Post-payment registration: ${user.id} (${email}) - basis plan`);
+
+      res.status(201).json({ user: formatUserResponse(user) });
+    } catch (error) {
+      console.error("Post-payment registration error:", error);
+      res.status(500).json({ error: "Registratie mislukt" });
+    }
+  });
+
   app.post("/api/auth/login", async (req: Request, res: Response) => {
     const ip = req.ip || req.socket.remoteAddress || "unknown";
     
