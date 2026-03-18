@@ -87,7 +87,7 @@ export const APP_NAV: NavSection[] = [
     icon: Users,
     sub: [
       { title: "RegioCrew", url: "/regiocrew", icon: Users },
-      { title: "Regio Deals", url: "/regio-deals", icon: Landmark },
+      { title: "Regio Deals", url: "/kansen/regio-deals", icon: Landmark },
       { title: "Community", url: "/community", icon: Share2 },
     ],
   },

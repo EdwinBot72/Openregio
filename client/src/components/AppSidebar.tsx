@@ -32,7 +32,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
-import { useLocation } from "wouter";
+import { Link, useLocation } from "wouter";
 import { queryClient } from "@/lib/queryClient";
 import { APP_NAV, ACCOUNT_NAV, type NavSection } from "@/config/navigation";
 
@@ -78,10 +78,10 @@ function AdminNavSection({ currentPath }: { currentPath: string }) {
                   isActive={subActive}
                   data-testid={`link-admin-${item.url.replace(/\//g, "-").replace(/^-/, "")}`}
                 >
-                  <a href={item.url} className="flex items-center gap-2">
+                  <Link href={item.url} className="flex items-center gap-2">
                     <item.icon className="h-3.5 w-3.5" />
                     <span>{item.title}</span>
-                  </a>
+                  </Link>
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>
             );
@@ -115,10 +115,10 @@ function NavSectionItem({
           isActive={isActive}
           data-testid={`link-nav-${section.id}`}
         >
-          <a href={section.url} className="flex items-center gap-2">
+          <Link href={section.url} className="flex items-center gap-2">
             <section.icon className="h-4 w-4" />
             <span>{section.title}</span>
-          </a>
+          </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
     );
@@ -157,10 +157,10 @@ function NavSectionItem({
                   isActive={subActive}
                   data-testid={`link-sub-${sub.url.replace(/\//g, "-").replace(/^-/, "")}`}
                 >
-                  <a href={sub.url} className="flex items-center gap-2">
+                  <Link href={sub.url} className="flex items-center gap-2">
                     <sub.icon className="h-3.5 w-3.5" />
                     <span>{sub.title}</span>
-                  </a>
+                  </Link>
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>
             );
@@ -248,10 +248,10 @@ export function AppSidebar() {
                     isActive={location === item.url}
                     data-testid={`link-account-${item.url.replace(/\//g, "-").replace(/^-/, "")}`}
                   >
-                    <a href={item.url} className="flex items-center gap-2">
+                    <Link href={item.url} className="flex items-center gap-2">
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
-                    </a>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
@@ -290,9 +290,9 @@ export function AppSidebar() {
             </div>
             <div className="flex gap-1">
               <Button size="icon" variant="ghost" asChild data-testid="link-profiel">
-                <a href="/bedrijfsprofiel">
+                <Link href="/bedrijfsprofiel">
                   <User className="h-4 w-4" />
-                </a>
+                </Link>
               </Button>
               <Button size="icon" variant="ghost" data-testid="button-logout" onClick={handleLogout}>
                 <LogOut className="h-4 w-4" />

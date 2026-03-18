@@ -1,0 +1,41 @@
+Act like a senior frontend engineer specialized in React + Vite + TypeScript + Wouter routing + TanStack Query.
+
+Goal: Make the authenticated (post-login) experience consistent, stable, and non-chaotic by fixing navigation behavior, auth guarding, and layout consistency—without adding new features.
+
+Context:
+- The app uses Wouter routing in client/src/App.tsx with PublicRouter and AuthenticatedRouter.
+- The sidebar component is client/src/components/AppSidebar.tsx.
+- Auth state comes from client/src/hooks/useAuth.ts and queryKey "/api/auth/user".
+
+Tasks (step-by-step):
+1) Fix SPA navigation:
+   - Replace all <a href="..."> in AppSidebar (and submenu items) with Wouter <Link href="..."> or navigation via setLocation.
+   - Ensure active states and submenu open state still work without full page reloads.
+
+2) Implement a central AuthGuard:
+   - Wrap AuthenticatedRouter in a guard component.
+   - Behavior:
+     a) While auth is loading: show a clean loading state (skeleton or spinner).
+     b) If user is null: redirect to "/login".
+     c) If user.mustCompleteOnboarding is true: redirect to "/first-login" (preserve token flow if required).
+   - Remove per-page “Log opnieuw in…” fallbacks where redundant.
+
+3) Unify layout spacing:
+   - Choose ONE approach for spacing (either main provides padding OR pages do).
+   - Apply consistently so pages don’t look randomly different behind login.
+   - Keep responsive behavior intact.
+
+4) Sanity-check routing:
+   - Verify that every sidebar link exists as a Route in AuthenticatedRouter.
+   - If a link points to a ComingSoon route, either label it clearly or hide it (pick one consistent rule).
+
+Output requirements:
+- Provide a concise list of changed files and why.
+- Provide code diffs or exact code blocks for each file touched.
+- Provide a quick manual test checklist (login, click sidebar links, refresh on a private route, redirect behavior).
+
+Constraints:
+- Minimal changes, no new product features.
+- No redesign—just stability and consistency improvements.
+
+Take a deep breath and work on this problem step-by-step.

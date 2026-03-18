@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { Switch, Route, useRoute } from "wouter";
+import { Switch, Route, useRoute, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -8,6 +8,8 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { useAuth } from "@/hooks/useAuth";
+import { Skeleton } from "@/components/ui/skeleton";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home";
 import LoginPage from "@/pages/login";
@@ -172,6 +174,36 @@ function AuthenticatedRouter() {
   );
 }
 
+// Central guard: shows loading, redirects to /login or /first-login when needed
+function AuthGuard({ children }: { children: React.ReactNode }) {
+  const { user, isLoading } = useAuth();
+  const [, setLocation] = useLocation();
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 p-6 space-y-4">
+        <Skeleton className="h-8 w-48" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    // Not authenticated — redirect to login
+    setLocation("/login");
+    return null;
+  }
+
+  if (user.mustCompleteOnboarding) {
+    setLocation("/first-login");
+    return null;
+  }
+
+  return <>{children}</>;
+}
+
 function AppContent() {
   const [isHomePage] = useRoute("/");
   const [isLoginPage] = useRoute("/login");
@@ -190,7 +222,7 @@ function AppContent() {
   const [isDisclaimerPage] = useRoute("/disclaimer");
   const [isCookiebeleidPage] = useRoute("/cookiebeleid");
   const [isRegioAnalysePage] = useRoute("/regio-analyse");
-  
+
   const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isLidmaatschapPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage || isBlogsPage || isForgotPasswordPage || isResetPasswordPage || isDisclaimerPage || isCookiebeleidPage || isRegioAnalysePage;
 
   if (isPublicRoute) {
@@ -210,8 +242,10 @@ function AppContent() {
             <SidebarTrigger data-testid="button-sidebar-toggle" />
             <ThemeToggle />
           </header>
-          <main className="flex-1 overflow-y-auto p-8">
-            <AuthenticatedRouter />
+          <main className="flex-1 overflow-y-auto p-6">
+            <AuthGuard>
+              <AuthenticatedRouter />
+            </AuthGuard>
           </main>
         </div>
       </div>
