@@ -1,0 +1,209 @@
+Ja. En beter nog: **ja, dit is vrij strak na te bouwen** in je bestaande OpenRegio-app.
+
+Plak dit hele script in Replit:
+
+```text
+Act like a senior TypeScript full-stack engineer working in an existing Vite + React + Express + Drizzle/Postgres codebase.
+
+Your task is to redesign and implement the real logged-in OpenRegio dashboard so it matches the supplied mockup as closely as possible.
+
+Goal:
+Build the real dashboard to visually and structurally match the attached mockup:
+- wide layout
+- horizontal sections
+- entrepreneur-focused radar
+- “Vandaag belangrijk”
+- “Essentiële tools”
+- “Acties voor jou”
+- “Extra / Admin”
+
+Important:
+- Edit the real dashboard already used after login
+- Do not create a second dashboard
+- Keep existing auth/session/role/plan logic intact
+- Reuse existing styling/components where possible
+- Keep the code buildable and type-safe
+- Do not broadly refactor the app
+
+First inspect:
+- `client/src/pages/dashboard.tsx`
+- any dashboard action config used by that page
+- current auth and role visibility patterns
+- sidebar/nav patterns if relevant
+
+Main implementation target
+Rebuild the dashboard so it follows this structure in order:
+
+1. Top section: OpenRegio dashboard header
+- Show the existing app/dashboard context
+- Keep it clean and minimal
+- Use a wider layout (`max-w-6xl` or `max-w-7xl`)
+
+2. Section: “Ondernemersradar voor jouw regio”
+Create a large card section near the top with:
+- title: `Ondernemersradar voor jouw regio`
+- subtitle: `Regels, kansen en signalen die vandaag impact hebben op jouw bedrijf.`
+
+Inside this section add 3 summary cards:
+- `Nieuwe signalen`
+- `Hoge impact`
+- `Directe kans`
+
+Use real data if available.
+If not available, use safe derived or static placeholder values that do not break existing behavior.
+
+The summary cards should visually resemble the mockup:
+- compact
+- horizontal
+- equal height
+- clean borders
+- clear typography
+
+3. Section: “Vandaag belangrijk”
+Add a section below the radar with 4 featured cards.
+
+Cards should visually match the mockup direction:
+- light bordered cards
+- category/signal title
+- short summary line
+- action button
+
+Use entrepreneur-relevant examples if real data is not yet available:
+- `Nieuwe Subsidie` — `Voor verduurzaming MKB`
+- `Lokale Verordening Gewijzigd` — `Nieuwe regels per 1 mei`
+- `Kosten Stijgen` — `Hoger energietarief verwacht`
+- `Inkopen bij het Rijk` — `Nieuwe aanbestedingskans`
+
+Buttons:
+- `Bekijk nu`
+- `Lees meer`
+- `Bekijk impact`
+- `Pak kans`
+
+If there is already real signal/intel data in the app, wire it in cleanly.
+If not, use static mock data for layout completeness.
+
+4. Section: “Essentiële tools”
+Build a horizontal strip like the mockup with 5 compact clickable tool items:
+- Intel Dashboard
+- Wet & Regelgeving
+- Lokale Regels
+- Subsidies
+- Regio Kansen
+
+Subtitles/meaning:
+- Intel Dashboard — Laatste signalen voor ondernemers
+- Wet & Regelgeving — Belangrijke regels en wijzigingen
+- Lokale Regels — Bekijk regels in jouw regio
+- Subsidies — Kansen die je niet wilt missen
+- Regio Kansen — Nieuwe kansen voor lokale ondernemers
+
+Requirements:
+- visually compact
+- equal-height tool items
+- horizontal layout on desktop
+- responsive on mobile
+- use icons only if an icon library already exists in the project
+- Intel Dashboard must link to `/intel`
+- Other items should use existing routes if present
+- If routes do not exist, use safe placeholder links that do not break build
+
+Important:
+Do NOT use “Woo Verzoek” as a primary dashboard label here.
+If Woo functionality exists, keep it deeper in the flow, not as the main dashboard tool label.
+
+5. Section: “Acties voor jou”
+Add 3 larger cards matching the mockup style:
+- `Bekijk kansen`
+- `Check regels`
+- `Ontdek subsidies`
+
+Each card should contain:
+- title
+- short description
+- a visual CTA/button area or clickable footer
+- clean spacing and balanced layout
+
+Use example descriptions:
+- `Ontdek nieuwe zakelijke mogelijkheden.`
+- `Bekijk regels voor jouw sector.`
+- `Zie welke steun jij kunt krijgen.`
+
+6. Section: “Extra / Admin”
+Keep admin/secondary controls lower on the page.
+Preserve admin visibility logic.
+Make this section visually quieter than the core entrepreneur-facing content.
+
+Use the mockup direction:
+- title: `Extra / Admin`
+- compact buttons/cards such as:
+  - Rapporten
+  - Beheer
+
+Only show admin items if the current logic already requires that.
+
+Layout requirements
+- The dashboard must be significantly wider than before
+- Reduce the current “one long vertical stack” feel
+- Use horizontal rhythm and responsive grids
+- Desktop should feel like a business command center
+- Mobile should remain clean and usable
+- Use consistent spacing, borders, and typography
+- Match the mockup as closely as practical within the current design system
+
+Technical rules
+- Use the real logged-in dashboard file already used in the app
+- Preserve:
+  - auth behavior
+  - role visibility
+  - plan badges/pro logic
+  - existing route logic
+  - existing data fetching patterns
+- Remove unused imports if needed
+- Keep TypeScript clean
+- Do not break current routes or sidebar behavior
+
+Implementation guidance
+- Reuse existing UI components if available
+- If no suitable components exist, implement directly in the dashboard file or a small supporting component
+- Keep the implementation readable and minimal
+- Do not create a second parallel dashboard architecture
+
+Verification
+When done:
+1. run `npm run check`
+2. run `npm run build`
+
+Output required
+Provide:
+1. files changed
+2. confirmation that the real logged-in dashboard was edited
+3. what sections were added/restructured
+4. which routes were linked in Essentiële tools
+5. any placeholders/static data used
+6. results of:
+   - `npm run check`
+   - `npm run build`
+
+Definition of done
+This task is only done when:
+- the real logged-in dashboard visually follows the supplied mockup
+- the structure matches the mockup sections
+- the dashboard is wider and more horizontal
+- the entrepreneur radar is at the top
+- Vandaag belangrijk exists
+- Essentiële tools exists and is horizontal
+- Acties voor jou exists
+- Extra / Admin exists lower on the page
+- existing auth/role/plan logic still works
+- `npm run check` passes
+- `npm run build` passes
+```
+
+Extra zin eronder plakken, zodat Replit niet gaat zwerven:
+
+```text
+Use the attached image as the visual reference and match it as closely as possible inside the existing OpenRegio design system.
+```
+
+Wil je, dan maak ik hier ook nog een **kortere brute versie** van voor als Replit op lange prompts slecht reageert.
