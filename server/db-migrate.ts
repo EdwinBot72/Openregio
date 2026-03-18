@@ -191,6 +191,30 @@ export async function runMigrations(): Promise<void> {
     `);
     console.log("[Migration] ✓ user_profiles.avatar_url column ensured");
 
+    // Intel signalen table for Regio Intel feature
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS intel_signalen (
+        id VARCHAR(255) PRIMARY KEY DEFAULT gen_random_uuid()::text,
+        categorie VARCHAR(50) NOT NULL,
+        urgentie VARCHAR(20) NOT NULL DEFAULT 'normaal',
+        titel VARCHAR(512) NOT NULL,
+        samenvatting TEXT NOT NULL,
+        bron VARCHAR(255) NOT NULL,
+        regio VARCHAR(255) NOT NULL DEFAULT 'Nationaal',
+        datum TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        bron_url VARCHAR(1024),
+        is_published BOOLEAN NOT NULL DEFAULT true,
+        external_id VARCHAR(512) UNIQUE,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        updated_at TIMESTAMPTZ DEFAULT NOW(),
+        created_by_user_id VARCHAR(255)
+      );
+    `);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_intel_signalen_categorie ON intel_signalen(categorie);`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_intel_signalen_datum ON intel_signalen(datum DESC);`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_intel_signalen_regio ON intel_signalen(regio);`);
+    console.log("[Migration] ✓ intel_signalen table ensured");
+
     console.log("[Migration] Database schema is up to date");
   } catch (error) {
     console.error("[Migration] Error running migrations:", error);

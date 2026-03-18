@@ -3996,6 +3996,77 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
+  // ─── INTEL SIGNALEN ────────────────────────────────────────────────────────
+
+  // GET /api/intel/signalen — haal signalen op (iedereen die is ingelogd)
+  app.get("/api/intel/signalen", requireAuth, async (req, res) => {
+    try {
+      const { categorie, regio } = req.query as { categorie?: string; regio?: string };
+      const signalen = await storage.getIntelSignalen({
+        categorie: categorie || undefined,
+        regio: regio || undefined,
+        isPublished: true,
+      });
+      res.json(signalen);
+    } catch (err: any) {
+      console.error("Intel signalen ophalen fout:", err);
+      res.status(500).json({ error: "Kon signalen niet ophalen" });
+    }
+  });
+
+  // POST /api/intel/signalen — nieuw signaal aanmaken (admin)
+  app.post("/api/intel/signalen", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { insertIntelSignaalSchema } = await import("@shared/schema");
+      const parsed = insertIntelSignaalSchema.safeParse(req.body);
+      if (!parsed.success) return res.status(400).json({ error: "Ongeldige invoer", details: parsed.error.flatten() });
+      const signaal = await storage.createIntelSignaal({ ...parsed.data, createdByUserId: (req as any).userId });
+      res.status(201).json(signaal);
+    } catch (err: any) {
+      console.error("Intel signaal aanmaken fout:", err);
+      res.status(500).json({ error: "Kon signaal niet aanmaken" });
+    }
+  });
+
+  // PATCH /api/intel/signalen/:id — signaal bijwerken (admin)
+  app.patch("/api/intel/signalen/:id", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const existing = await storage.getIntelSignaalById(id);
+      if (!existing) return res.status(404).json({ error: "Signaal niet gevonden" });
+      const updated = await storage.updateIntelSignaal(id, req.body);
+      res.json(updated);
+    } catch (err: any) {
+      console.error("Intel signaal bijwerken fout:", err);
+      res.status(500).json({ error: "Kon signaal niet bijwerken" });
+    }
+  });
+
+  // DELETE /api/intel/signalen/:id — signaal verwijderen (admin)
+  app.delete("/api/intel/signalen/:id", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const deleted = await storage.deleteIntelSignaal(id);
+      if (!deleted) return res.status(404).json({ error: "Signaal niet gevonden" });
+      res.json({ success: true });
+    } catch (err: any) {
+      console.error("Intel signaal verwijderen fout:", err);
+      res.status(500).json({ error: "Kon signaal niet verwijderen" });
+    }
+  });
+
+  // POST /api/intel/fetch — handmatig een fetch-ronde triggeren (admin)
+  app.post("/api/intel/fetch", requireAuth, requireAdmin, async (_req, res) => {
+    try {
+      const { runIntelFetch } = await import("./services/intelCron");
+      const count = await runIntelFetch();
+      res.json({ success: true, nieuwSignalen: count });
+    } catch (err: any) {
+      console.error("Intel fetch fout:", err);
+      res.status(500).json({ error: "Fetch mislukt", detail: err.message });
+    }
+  });
+
   // ─── ADMIN COCKPIT ─────────────────────────────────────────────────────────
 
   // GET /api/admin/stats — platform overview stats

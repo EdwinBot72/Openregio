@@ -74,6 +74,9 @@ import {
   type RegioDeal,
   type InsertRegioDeal,
   regioDeals,
+  type IntelSignaal,
+  type InsertIntelSignaal,
+  intelSignalen,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
@@ -268,6 +271,14 @@ export interface IStorage {
   createRegioDeal(deal: InsertRegioDeal): Promise<RegioDeal>;
   updateRegioDeal(id: string, updates: Partial<InsertRegioDeal>): Promise<RegioDeal | null>;
   deleteRegioDeal(id: string): Promise<boolean>;
+
+  // Intel Signalen
+  getIntelSignalen(opts?: { categorie?: string; regio?: string; isPublished?: boolean }): Promise<IntelSignaal[]>;
+  getIntelSignaalById(id: string): Promise<IntelSignaal | undefined>;
+  getIntelSignaalByExternalId(externalId: string): Promise<IntelSignaal | undefined>;
+  createIntelSignaal(signaal: InsertIntelSignaal): Promise<IntelSignaal>;
+  updateIntelSignaal(id: string, updates: Partial<InsertIntelSignaal>): Promise<IntelSignaal | undefined>;
+  deleteIntelSignaal(id: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -1703,6 +1714,26 @@ export class MemStorage implements IStorage {
   async deleteRegioDeal(id: string): Promise<boolean> {
     return false;
   }
+
+  // Intel Signalen — MemStorage stubs
+  async getIntelSignalen(_opts?: { categorie?: string; regio?: string; isPublished?: boolean }): Promise<IntelSignaal[]> {
+    return [];
+  }
+  async getIntelSignaalById(_id: string): Promise<IntelSignaal | undefined> {
+    return undefined;
+  }
+  async getIntelSignaalByExternalId(_externalId: string): Promise<IntelSignaal | undefined> {
+    return undefined;
+  }
+  async createIntelSignaal(signaal: InsertIntelSignaal): Promise<IntelSignaal> {
+    return { id: randomUUID(), createdAt: new Date(), updatedAt: new Date(), ...signaal } as IntelSignaal;
+  }
+  async updateIntelSignaal(_id: string, _updates: Partial<InsertIntelSignaal>): Promise<IntelSignaal | undefined> {
+    return undefined;
+  }
+  async deleteIntelSignaal(_id: string): Promise<boolean> {
+    return false;
+  }
 }
 
 class DbStorage implements IStorage {
@@ -2787,6 +2818,48 @@ class DbStorage implements IStorage {
 
   async deleteRegioDeal(id: string): Promise<boolean> {
     const result = await db.delete(regioDeals).where(eq(regioDeals.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // Intel Signalen — DbStorage implementation
+  async getIntelSignalen(opts?: { categorie?: string; regio?: string; isPublished?: boolean }): Promise<IntelSignaal[]> {
+    const conditions: any[] = [];
+    if (opts?.categorie) conditions.push(sql`${intelSignalen.categorie} = ${opts.categorie}`);
+    if (opts?.regio) conditions.push(eq(intelSignalen.regio, opts.regio));
+    if (opts?.isPublished !== undefined) conditions.push(eq(intelSignalen.isPublished, opts.isPublished));
+    const query = db.select().from(intelSignalen).orderBy(desc(intelSignalen.datum));
+    if (conditions.length > 0) {
+      return query.where(and(...conditions));
+    }
+    return query;
+  }
+
+  async getIntelSignaalById(id: string): Promise<IntelSignaal | undefined> {
+    const [signaal] = await db.select().from(intelSignalen).where(eq(intelSignalen.id, id));
+    return signaal;
+  }
+
+  async getIntelSignaalByExternalId(externalId: string): Promise<IntelSignaal | undefined> {
+    const [signaal] = await db.select().from(intelSignalen).where(eq(intelSignalen.externalId, externalId));
+    return signaal;
+  }
+
+  async createIntelSignaal(signaal: InsertIntelSignaal): Promise<IntelSignaal> {
+    const [created] = await db.insert(intelSignalen).values(signaal).returning();
+    return created;
+  }
+
+  async updateIntelSignaal(id: string, updates: Partial<InsertIntelSignaal>): Promise<IntelSignaal | undefined> {
+    const [updated] = await db
+      .update(intelSignalen)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(intelSignalen.id, id))
+      .returning();
+    return updated;
+  }
+
+  async deleteIntelSignaal(id: string): Promise<boolean> {
+    const result = await db.delete(intelSignalen).where(eq(intelSignalen.id, id)).returning();
     return result.length > 0;
   }
 }

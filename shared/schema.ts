@@ -1043,6 +1043,34 @@ export const regioDeals = pgTable("regio_deals", {
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
 
+export const INTEL_CATEGORIES = ["wetgeving", "beleid", "financieel", "subsidies"] as const;
+export const INTEL_URGENTIE = ["hoog", "normaal", "info"] as const;
+
+export const intelSignalen = pgTable("intel_signalen", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  categorie: varchar("categorie", { enum: INTEL_CATEGORIES }).notNull(),
+  urgentie: varchar("urgentie", { enum: INTEL_URGENTIE }).notNull().default("normaal"),
+  titel: varchar("titel", { length: 512 }).notNull(),
+  samenvatting: text("samenvatting").notNull(),
+  bron: varchar("bron", { length: 255 }).notNull(),
+  regio: varchar("regio", { length: 255 }).notNull().default("Nationaal"),
+  datum: timestamp("datum", { withTimezone: true }).notNull().defaultNow(),
+  bronUrl: varchar("bron_url"),
+  isPublished: boolean("is_published").notNull().default(true),
+  externalId: varchar("external_id").unique(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow(),
+  createdByUserId: varchar("created_by_user_id"),
+});
+
+export const insertIntelSignaalSchema = createInsertSchema(intelSignalen).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertIntelSignaal = z.infer<typeof insertIntelSignaalSchema>;
+export type IntelSignaal = typeof intelSignalen.$inferSelect;
+
 export const insertRagDocumentSchema = createInsertSchema(ragDocuments).omit({ id: true, createdAt: true });
 export const insertRagChunkSchema = createInsertSchema(ragChunks).omit({ id: true });
 export const insertLeadSchema = createInsertSchema(leads).omit({ id: true, createdAt: true });

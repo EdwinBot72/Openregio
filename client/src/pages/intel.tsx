@@ -1,7 +1,9 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Gavel,
   Landmark,
@@ -19,87 +21,9 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import type { IntelSignaal } from "@shared/schema";
 
 type FilterKey = "alle" | "wetgeving" | "beleid" | "financieel" | "subsidies";
-
-interface SignaalKaart {
-  id: string;
-  categorie: FilterKey;
-  urgentie: "hoog" | "normaal" | "info";
-  titel: string;
-  samenvatting: string;
-  bron: string;
-  regio: string;
-  datum: string;
-  bronUrl?: string;
-}
-
-const MOCK_SIGNALEN: SignaalKaart[] = [
-  {
-    id: "1",
-    categorie: "wetgeving",
-    urgentie: "hoog",
-    titel: "Nieuwe omgevingswet per 1 januari 2025 van kracht",
-    samenvatting: "De Omgevingswet bundelt tientallen wetten over ruimte, water, milieu en natuur. Ondernemers die bouwen of uitbreiden moeten voortaan met één omgevingsvergunning werken.",
-    bron: "Rijksoverheid",
-    regio: "Nationaal",
-    datum: "2025-01-10",
-    bronUrl: "https://www.rijksoverheid.nl/onderwerpen/omgevingswet",
-  },
-  {
-    id: "2",
-    categorie: "beleid",
-    urgentie: "normaal",
-    titel: "Gemeente Amsterdam versoepelt terrasvergunning zomerseizoen",
-    samenvatting: "Horeca-ondernemers in Amsterdam kunnen vanaf 15 april een snelle terrasvergunning aanvragen via het nieuwe digitale loket. Behandeltijd is teruggebracht naar 5 werkdagen.",
-    bron: "Gemeente Amsterdam",
-    regio: "Noord-Holland",
-    datum: "2025-03-15",
-    bronUrl: "https://www.amsterdam.nl",
-  },
-  {
-    id: "3",
-    categorie: "subsidies",
-    urgentie: "hoog",
-    titel: "ISDE-subsidie voor zonnepanelen MKB verhoogd met 30%",
-    samenvatting: "Het subsidiebedrag voor zonne-energiesystemen bij zakelijke gebruikers is per 1 maart 2025 fors verhoogd. Aanvragen kan via RVO. Budget is beperkt — wees er snel bij.",
-    bron: "RVO.nl",
-    regio: "Nationaal",
-    datum: "2025-03-01",
-    bronUrl: "https://www.rvo.nl",
-  },
-  {
-    id: "4",
-    categorie: "financieel",
-    urgentie: "normaal",
-    titel: "KVK-tariefsverhoging 2025: inschrijving en uittreksels duurder",
-    samenvatting: "Per 1 januari 2025 zijn de KVK-tarieven voor inschrijving, wijzigingen en uittreksels gemiddeld 7% gestegen. Check de actuele tarieven op de KVK-website.",
-    bron: "KVK",
-    regio: "Nationaal",
-    datum: "2025-01-02",
-  },
-  {
-    id: "5",
-    categorie: "beleid",
-    urgentie: "info",
-    titel: "Utrecht lanceert ondernemersloket voor vergunningadvies",
-    samenvatting: "Ondernemers in de gemeente Utrecht kunnen voortaan gratis een intake aanvragen bij het nieuwe ondernemersloket voor advies over vergunningsprocedures en bestemmingsplan.",
-    bron: "Gemeente Utrecht",
-    regio: "Utrecht",
-    datum: "2025-02-20",
-  },
-  {
-    id: "6",
-    categorie: "subsidies",
-    urgentie: "info",
-    titel: "Europees fonds voor regionale innovatie: aanvraagperiode open",
-    samenvatting: "Bedrijven in regio's met een NUTS-2 classificatie kunnen tot 30 juni 2025 een aanvraag indienen bij het EFRO voor innovatieprojecten. Cofinanciering van 40% vereist.",
-    bron: "Europa.eu",
-    regio: "Meerdere regio's",
-    datum: "2025-02-01",
-    bronUrl: "https://ec.europa.eu/regional_policy",
-  },
-];
 
 const BRONNEN = [
   {
@@ -160,17 +84,41 @@ const STAPPEN = [
   },
 ];
 
+function SignaalSkeleton() {
+  return (
+    <Card>
+      <CardContent className="pt-5 pb-5">
+        <div className="flex items-start gap-4">
+          <Skeleton className="w-10 h-10 rounded-lg shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className="flex gap-2">
+              <Skeleton className="h-5 w-16" />
+              <Skeleton className="h-5 w-20" />
+            </div>
+            <Skeleton className="h-5 w-3/4" />
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-4 w-5/6" />
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function IntelPage() {
   const { user } = useAuth();
   const [actieveFilter, setActieveFilter] = useState<FilterKey>("alle");
 
-  const gefilterdeSignalen =
-    actieveFilter === "alle"
-      ? MOCK_SIGNALEN
-      : MOCK_SIGNALEN.filter((s) => s.categorie === actieveFilter);
+  const queryParams = actieveFilter !== "alle" ? `?categorie=${actieveFilter}` : "";
+  const { data: signalen, isLoading, isError } = useQuery<IntelSignaal[]>({
+    queryKey: ["/api/intel/signalen", actieveFilter],
+    queryFn: () => fetch(`/api/intel/signalen${queryParams}`).then((r) => r.json()),
+  });
 
-  const formatDatum = (dateStr: string) =>
-    new Date(dateStr).toLocaleDateString("nl-NL", {
+  const gefilterdeSignalen = signalen ?? [];
+
+  const formatDatum = (dateVal: string | Date) =>
+    new Date(dateVal).toLocaleDateString("nl-NL", {
       day: "numeric",
       month: "long",
       year: "numeric",
@@ -259,14 +207,29 @@ export default function IntelPage() {
           </div>
         </div>
 
-        {gefilterdeSignalen.length === 0 ? (
+        {isLoading && (
+          <div className="space-y-4">
+            {[1, 2, 3].map((n) => <SignaalSkeleton key={n} />)}
+          </div>
+        )}
+
+        {isError && (
+          <Card className="p-8 text-center">
+            <p className="text-muted-foreground">Kon signalen niet laden. Probeer het later opnieuw.</p>
+          </Card>
+        )}
+
+        {!isLoading && !isError && gefilterdeSignalen.length === 0 && (
           <Card className="p-8 text-center">
             <p className="text-muted-foreground">Geen signalen gevonden voor dit filter.</p>
           </Card>
-        ) : (
+        )}
+
+        {!isLoading && !isError && gefilterdeSignalen.length > 0 && (
           <div className="space-y-4">
             {gefilterdeSignalen.map((signaal) => {
-              const urgentieConfig = URGENTIE_CONFIG[signaal.urgentie];
+              const urgentie = (signaal.urgentie ?? "normaal") as keyof typeof URGENTIE_CONFIG;
+              const urgentieConfig = URGENTIE_CONFIG[urgentie] ?? URGENTIE_CONFIG.normaal;
               const UrgentieIcon = urgentieConfig.icon;
               const bronConfig = BRONNEN.find((b) => b.id === signaal.categorie);
 

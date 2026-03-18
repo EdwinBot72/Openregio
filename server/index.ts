@@ -50,6 +50,10 @@ app.use((req, res, next) => {
 (async () => {
   const server = await registerRoutes(app);
 
+  // Start de dagelijkse Intel-cron
+  const { startIntelCron } = await import("./services/intelCron");
+  startIntelCron();
+
   // Global error handler with structured logging
   app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
