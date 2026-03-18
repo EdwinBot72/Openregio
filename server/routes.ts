@@ -2450,30 +2450,29 @@ Maak het verzoek professioneel en juridisch correct.`;
       const user = (req as any).user;
       const userId = user.id as string;
 
-      // Haal actief abonnement op
-      const subscription = await storage.getSubscription(userId);
+      // Haal het laatste actieve abonnement op
+      const subscription = await storage.getActiveSubscription(userId);
 
       if (!subscription) {
         return res.status(404).json({ error: "Geen actief abonnement gevonden" });
       }
 
-      if (subscription.status === "cancelled") {
-        return res.status(400).json({ error: "Abonnement is al opgezegd" });
+      // Fail-closed: Mollie-client is vereist om opzeggen veilig te verwerken
+      if (!mollieClient) {
+        return res.status(503).json({ error: "Betalingssysteem niet beschikbaar. Neem contact op met info@openregio.nl." });
       }
 
-      // Cancel recurring Mollie-abonnement als dat beschikbaar is
-      // Als Mollie cancel mislukt → geef fout terug; doe GEEN lokale downgrade
-      if (
-        mollieClient &&
-        subscription.mollieCustomerId &&
-        subscription.mollieSubscriptionId
-      ) {
-        await mollieClient.customerSubscriptions.cancel(
-          subscription.mollieSubscriptionId,
-          { customerId: subscription.mollieCustomerId }
-        );
-        console.log(`✓ Mollie subscription cancelled: ${subscription.mollieSubscriptionId}`);
+      // Fail-closed: Mollie-abonnementsgegevens zijn vereist
+      if (!subscription.mollieCustomerId || !subscription.mollieSubscriptionId) {
+        return res.status(400).json({ error: "Abonnementsgegevens incompleet. Neem contact op via info@openregio.nl." });
       }
+
+      // Cancel het recurring Mollie-abonnement — gooit een fout als dit mislukt
+      await mollieClient.customerSubscriptions.cancel(
+        subscription.mollieSubscriptionId,
+        { customerId: subscription.mollieCustomerId }
+      );
+      console.log(`✓ Mollie subscription cancelled: ${subscription.mollieSubscriptionId}`);
 
       // Markeer abonnement als gecanceld in de database
       await storage.cancelSubscription(subscription.id);

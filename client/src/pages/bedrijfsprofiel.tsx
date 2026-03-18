@@ -117,9 +117,10 @@ export default function BedrijfsprofielPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/billing/subscription"] });
       toast({
         title: "Abonnement opgezegd",
-        description: "Je Pro-abonnement is opgezegd. Je houdt tot het einde van de periode toegang.",
+        description: "Je Pro-abonnement is per direct beëindigd. Je account is teruggezet naar Basis.",
       });
     },
     onError: (error: Error) => {

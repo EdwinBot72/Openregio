@@ -152,6 +152,7 @@ export interface IStorage {
 
   // Subscriptions
   getSubscription(userId: string): Promise<Subscription | undefined>;
+  getActiveSubscription(userId: string): Promise<Subscription | undefined>;
   getSubscriptionById(id: string): Promise<Subscription | undefined>;
   getSubscriptionByMolliePaymentId(molliePaymentId: string): Promise<Subscription | undefined>;
   createSubscription(subscription: InsertSubscription): Promise<Subscription>;
@@ -1130,6 +1131,13 @@ export class MemStorage implements IStorage {
 
   async getSubscription(userId: string): Promise<Subscription | undefined> {
     return Array.from(this.subscriptions.values()).find(s => s.userId === userId);
+  }
+
+  async getActiveSubscription(userId: string): Promise<Subscription | undefined> {
+    const all = Array.from(this.subscriptions.values())
+      .filter(s => s.userId === userId && s.status === "active")
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return all[0];
   }
 
   async getSubscriptionById(id: string): Promise<Subscription | undefined> {
@@ -2124,6 +2132,15 @@ class DbStorage implements IStorage {
 
   async getSubscription(userId: string): Promise<Subscription | undefined> {
     const results = await db.select().from(subscriptions).where(eq(subscriptions.userId, userId));
+    return results[0];
+  }
+
+  async getActiveSubscription(userId: string): Promise<Subscription | undefined> {
+    const results = await db.select()
+      .from(subscriptions)
+      .where(and(eq(subscriptions.userId, userId), eq(subscriptions.status, "active")))
+      .orderBy(desc(subscriptions.createdAt))
+      .limit(1);
     return results[0];
   }
 
