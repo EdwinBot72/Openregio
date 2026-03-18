@@ -1,0 +1,189 @@
+Ja. Hier is een strak **Replit-script** om de resterende rood/oranje punten aan te pakken.
+
+```text
+Act like a senior TypeScript full-stack engineer working in an existing Vite + React + Express + Drizzle/Postgres codebase.
+
+Your task is to harden the current OpenRegio app so the remaining runtime and functional risk areas are reduced from red/orange to green where possible.
+
+Goal:
+The codebase already typechecks and builds. Now improve runtime robustness, startup safety, and operational reliability with minimal targeted changes. Do not add new features. Do not redesign the app. Do not broadly refactor unrelated code.
+
+Context:
+Current status is roughly:
+- `npm run check` passes
+- `npm run build` passes
+- remaining risks are mainly runtime / infra / functional validation
+- biggest known issue: app startup is too fragile when database or required env vars are missing/unavailable
+- startup currently appears to do DB-dependent work too early, causing hard crashes
+- payment, mail, and other integrations should fail clearly and safely, not unpredictably
+
+Main objectives
+================================================================
+
+1. Make startup fail-safe
+The server must not crash in a messy or unclear way on boot when:
+- `DATABASE_URL` is missing
+- database is unreachable
+- `SESSION_SECRET` is missing
+- optional third-party keys are missing
+
+Requirements:
+- required env vars should be validated clearly at startup
+- if a required env var is missing, fail fast with a clear error message
+- if the database is unreachable, log a clean operational error
+- DB-dependent startup tasks (such as seed/master account creation) must not hard-crash the whole app in an uncontrolled way
+- make startup behavior predictable and explicit
+
+Preferred behavior:
+- required configuration errors => explicit clear startup failure
+- optional integration errors => app can still run if that feature is not used
+- DB seed/bootstrap tasks should be guarded and non-chaotic
+
+2. Make seed/bootstrap logic safe
+Inspect where master account creation / startup seed runs.
+
+Requirements:
+- if seed/bootstrap currently runs automatically on server boot, make it safe
+- do not let one seed failure take down the whole app unexpectedly
+- if needed, wrap seed/bootstrap in guarded try/catch with clear logging
+- preserve current behavior as much as possible, but make it operationally safe
+- avoid duplicate seeds if the app restarts
+- if a better minimal pattern exists, only run seed after DB connectivity is confirmed
+
+3. Add clear environment validation
+Create or improve startup validation for environment variables.
+
+Classify env vars into:
+- required to boot
+- optional / feature-specific
+
+Likely required:
+- `DATABASE_URL`
+- `SESSION_SECRET`
+
+Likely optional / feature-specific:
+- `MOLLIE_API_KEY`
+- `POSTMARK_API_KEY`
+- AI-related keys
+- object storage / upload keys
+- public base URL if only needed for some features
+
+Requirements:
+- missing required vars should produce clear actionable errors
+- missing optional vars should log clear warnings, not crash boot
+- keep the implementation simple and consistent with the existing codebase
+
+4. Harden integrations
+Do not fully rebuild integrations. Just make failure modes cleaner.
+
+Inspect and improve where useful:
+- Mollie
+- Postmark/email
+- AI providers
+- any object storage or external API setup
+
+Requirements:
+- feature-specific integrations should fail gracefully if their keys are missing
+- routes/features using those integrations should return clear errors instead of generic crashes
+- startup should not die because an optional integration is unavailable
+
+5. Improve runtime error handling
+Inspect the Express/server startup path and critical route setup.
+
+Requirements:
+- avoid uncaught startup exceptions where possible
+- log clear reasons for failure
+- preserve existing route registration and behavior
+- do not add a big logging framework unless already present
+- small targeted improvements only
+
+6. Keep build and type safety intact
+After all changes:
+- `npm run check` must still pass
+- `npm run build` must still pass
+
+7. Do not add new product features
+This task is purely about hardening and operational safety.
+
+Constraints
+================================================================
+
+- No broad refactor
+- No UI redesign
+- No new product features
+- No new auth system
+- No major dependency changes unless absolutely necessary
+- Keep diffs targeted and readable
+- Preserve current routes and business logic as much as possible
+- Prefer minimal changes that materially improve safety
+
+Suggested work order
+================================================================
+
+1. Inspect startup entrypoints and identify:
+- where env vars are read
+- where DB is initialized
+- where seed/bootstrap runs
+- where optional integrations initialize
+
+2. Add/clean startup env validation:
+- required vs optional
+- explicit messages
+
+3. Guard DB startup and seed/bootstrap flow:
+- check DB connectivity before seed where appropriate
+- make seed non-chaotic and idempotent where possible
+
+4. Harden optional integrations:
+- do not let missing optional keys break server boot
+- ensure feature calls fail clearly
+
+5. Re-run:
+- `npm run check`
+- `npm run build`
+
+6. If practical, also verify runtime startup behavior in these scenarios:
+- missing `DATABASE_URL`
+- missing `SESSION_SECRET`
+- unreachable DB
+- missing optional keys
+
+Expected deliverables
+================================================================
+
+When done, provide:
+1. Files changed
+2. What was hardened in startup/bootstrap
+3. Which env vars are now treated as required vs optional
+4. How DB seed/bootstrap behavior was made safer
+5. Which optional integrations were made graceful
+6. Verification results for:
+   - `npm run check`
+   - `npm run build`
+7. Brief runtime test outcomes for:
+   - missing required env vars
+   - unreachable database
+   - missing optional integration keys
+
+Definition of done
+================================================================
+
+This task is only done when:
+- required env vars fail clearly and intentionally
+- optional env vars do not break startup
+- DB/bootstrap startup path is safer and less fragile
+- seed logic no longer creates chaotic startup failures
+- runtime failure modes are clearer
+- `npm run check` passes
+- `npm run build` passes
+
+Do not stop after only changing env validation.
+Do not stop after only wrapping one error.
+Finish only when the main red/orange runtime risks are materially reduced with minimal clean changes.
+```
+
+Als je wilt, heb ik ook nog een **kortere hard-mode versie** die Replit vaak sneller snapt:
+
+```text
+Harden the existing OpenRegio app for runtime reliability without adding features. Keep changes minimal. Focus on startup safety, env validation, DB connectivity handling, and seed/bootstrap stability. Required env vars like DATABASE_URL and SESSION_SECRET must fail clearly. Optional integrations like Mollie, Postmark, AI, and uploads must not break startup. Make seed/bootstrap logic safe and non-chaotic. Preserve current routes/business logic. Finish only when npm run check and npm run build both pass, and startup failure modes are clearer and controlled.
+```

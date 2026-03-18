@@ -5,6 +5,27 @@ import { setupVite, serveStatic, log } from "./vite";
 import { securityHeaders } from "./middleware/security";
 import { runMigrations } from "./db-migrate";
 
+// ─── Early environment validation ─────────────────────────────────────────────
+// Fail fast with a clear message if critical variables are missing.
+const REQUIRED_ENV: string[] = ["DATABASE_URL", "SESSION_SECRET"];
+const missingVars = REQUIRED_ENV.filter((v) => !process.env[v]);
+if (missingVars.length > 0) {
+  console.error(
+    `[Startup] FATAL: Missing required environment variables: ${missingVars.join(", ")}\n` +
+    `Set these in the Secrets tab and restart the server.`
+  );
+  process.exit(1);
+}
+
+// Optional variables: warn but continue
+const OPTIONAL_ENV: string[] = ["MOLLIE_API_KEY", "POSTMARK_API_KEY", "PUBLIC_BASE_URL"];
+OPTIONAL_ENV.forEach((v) => {
+  if (!process.env[v]) {
+    console.warn(`[Startup] Optional env var not set: ${v} (some features will be disabled)`);
+  }
+});
+// ──────────────────────────────────────────────────────────────────────────────
+
 // Use Replit-managed OpenAI key if the direct secret is not set
 if (!process.env.OPENAI_API_KEY && process.env.AI_INTEGRATIONS_OPENAI_API_KEY) {
   process.env.OPENAI_API_KEY = process.env.AI_INTEGRATIONS_OPENAI_API_KEY;

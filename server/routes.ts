@@ -107,8 +107,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Initialize JWT auth with rate limiting (production-ready, stateless)
   setupJwtAuth(app);
   
-  // Seed master account (idempotent - only creates if doesn't exist)
-  await seedMasterAccount();
+  // Seed master account (idempotent - non-fatal if DB not yet ready)
+  try {
+    await seedMasterAccount();
+  } catch (err) {
+    console.error("[Startup] Seed skipped — DB may not be ready:", (err as Error).message);
+  }
   
   // Attach user to all requests (makes req.user available)
   app.use(attachUser);

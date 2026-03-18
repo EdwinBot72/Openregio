@@ -32,7 +32,7 @@ export async function seedMasterAccount() {
     
     console.log("✓ Master account created:", masterUser.email, "with role:", masterUser.role);
   } catch (error) {
-    console.error("Failed to seed master account:", error);
-    throw error;
+    // Seed failure is non-fatal: app can still serve requests without master account
+    console.error("[Seed] Master account seed failed (non-fatal):", (error as Error).message || error);
   }
 }
