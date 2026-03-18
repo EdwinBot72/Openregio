@@ -3998,6 +3998,21 @@ Maak het verzoek professioneel en juridisch correct.`;
 
   // ─── INTEL SIGNALEN ────────────────────────────────────────────────────────
 
+  // GET /api/intel/signalen/all — alle signalen inclusief ongepubliceerd (admin)
+  app.get("/api/intel/signalen/all", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { categorie, regio } = req.query as { categorie?: string; regio?: string };
+      const signalen = await storage.getIntelSignalen({
+        categorie: categorie || undefined,
+        regio: regio || undefined,
+      });
+      res.json(signalen);
+    } catch (err: any) {
+      console.error("Intel signalen (admin) ophalen fout:", err);
+      res.status(500).json({ error: "Kon signalen niet ophalen" });
+    }
+  });
+
   // GET /api/intel/signalen — haal signalen op (iedereen die is ingelogd)
   app.get("/api/intel/signalen", requireAuth, async (req, res) => {
     try {

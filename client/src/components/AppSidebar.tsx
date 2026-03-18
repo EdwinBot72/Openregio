@@ -26,6 +26,7 @@ import {
   BarChart2,
   ShieldCheck,
   Building2,
+  Landmark,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ const adminSubItems = [
   { title: "Platform-inzicht", url: "/admin/inzicht", icon: BarChart2 },
   { title: "Gebruikers", url: "/admin/users", icon: Users },
   { title: "Ondernemers", url: "/admin/ondernemers", icon: Building2 },
+  { title: "Regio Intel", url: "/admin/intel", icon: Landmark },
 ];
 
 function AdminNavSection({ currentPath }: { currentPath: string }) {
