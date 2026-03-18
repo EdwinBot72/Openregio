@@ -221,7 +221,7 @@ export default function WooBotPage() {
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2" data-testid="heading-woo-bot">Document-assistent</h1>
+        <h1 className="text-3xl font-bold mb-2" data-testid="heading-woo-bot">Regelgeving-assistent</h1>
         <p className="text-muted-foreground">
           Zoek in overheidsdocumenten of genereer een verzoekbrief.
         </p>
