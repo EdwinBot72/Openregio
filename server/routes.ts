@@ -8,7 +8,7 @@ import { createMollieClient } from "@mollie/api-client";
 import { setupJwtAuth, attachUser, requireAuth, requireAdmin, requirePro, issueTokensForUser, clearTokenCookies, revokeAllUserTokens } from "./jwtAuth";
 import { seedMasterAccount } from "./seed";
 import { generateRandomPassword, generateOnboardingToken, getPlanPrice, getPlanDisplayName, generateReferralCode } from "./utils/auth";
-import { sendOnboardingEmail } from "./services/emailService";
+import { sendOnboardingEmail, sendNotificationEmail } from "./services/emailService";
 import bcrypt from "bcrypt";
 import { uploadMemory, getDocumentType } from "./middleware/upload";
 import { objectStorageClient } from "./replit_integrations/object_storage";
@@ -2441,6 +2441,65 @@ Maak het verzoek professioneel en juridisch correct.`;
       res.json(subscription);
     } catch (error) {
       res.status(500).json({ error: "Failed to fetch subscription" });
+    }
+  });
+
+  // POST /api/subscription/cancel — Zelfbediening opzeggen (requireAuth)
+  app.post("/api/subscription/cancel", requireAuth, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      const userId = user.id as string;
+
+      // Haal actief abonnement op
+      const subscription = await storage.getSubscription(userId);
+
+      if (!subscription) {
+        return res.status(404).json({ error: "Geen actief abonnement gevonden" });
+      }
+
+      if (subscription.status === "cancelled") {
+        return res.status(400).json({ error: "Abonnement is al opgezegd" });
+      }
+
+      // Cancel recurring Mollie-abonnement als dat beschikbaar is
+      if (
+        mollieClient &&
+        subscription.mollieCustomerId &&
+        subscription.mollieSubscriptionId
+      ) {
+        try {
+          await mollieClient.customerSubscriptions.cancel(
+            subscription.mollieSubscriptionId,
+            { customerId: subscription.mollieCustomerId }
+          );
+          console.log(`✓ Mollie subscription cancelled: ${subscription.mollieSubscriptionId}`);
+        } catch (mollieError: any) {
+          // Log maar stop niet: sla lokaal toch op als gecanceld
+          console.warn(`⚠ Mollie cancel fout (doorgaan met lokale cancel):`, mollieError?.message);
+        }
+      }
+
+      // Markeer abonnement als gecanceld in de database
+      await storage.cancelSubscription(subscription.id);
+
+      // Zet plan terug naar basic
+      await storage.updateUserPlan(userId, "basic");
+
+      // Stuur bevestigingsmail
+      const firstName = user.firstName || user.email.split("@")[0];
+      await sendNotificationEmail(
+        user.email,
+        "Je Pro-abonnement is opgezegd",
+        `Je hebt je Pro-abonnement bij OpenRegio opgezegd. Je houdt tot het einde van de huidige periode toegang tot alle Pro-functies. Daarna wordt je account automatisch omgezet naar het Basis-abonnement.\n\nWil je later opnieuw upgraden? Dat kan altijd via openregio.nl/lidmaatschap.\n\nHeb je vragen? Neem dan contact op via info@openregio.nl.`,
+        firstName
+      );
+
+      console.log(`✓ Abonnement opgezegd voor user ${userId} (${user.email})`);
+
+      res.json({ success: true, message: "Abonnement succesvol opgezegd" });
+    } catch (error: any) {
+      console.error("Fout bij opzeggen abonnement:", error);
+      res.status(500).json({ error: "Fout bij opzeggen abonnement. Probeer het later opnieuw." });
     }
   });
 

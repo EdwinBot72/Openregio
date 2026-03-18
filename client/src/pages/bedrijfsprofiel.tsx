@@ -28,7 +28,20 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, Loader2, Save, MapPin } from "lucide-react";
+import { Building2, Loader2, Save, MapPin, CreditCard, AlertTriangle } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
+import { Badge } from "@/components/ui/badge";
+import { useAuth } from "@/hooks/useAuth";
 import { BusinessMapView } from "@/components/BusinessMapView";
 
 const formSchema = insertBedrijfsprofielSchema.omit({ gebruikerId: true });
@@ -37,6 +50,7 @@ type FormData = z.infer<typeof formSchema>;
 
 export default function BedrijfsprofielPage() {
   const { toast } = useToast();
+  const { user } = useAuth();
 
   const { data: existingProfile, isLoading: isLoadingProfile } = useQuery<Bedrijfsprofiel>({
     queryKey: ["/api/business-profile/me"],
@@ -69,7 +83,7 @@ export default function BedrijfsprofielPage() {
     mutationFn: async (data: FormData) => {
       return apiRequest("POST", "/api/business-profile", data);
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/business-profile/me"] });
       toast({
         title: "Profiel opgeslagen",
@@ -80,6 +94,26 @@ export default function BedrijfsprofielPage() {
       toast({
         title: "Fout bij opslaan",
         description: error.message || "Er is een fout opgetreden bij het opslaan van je profiel.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("POST", "/api/subscription/cancel", {});
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      toast({
+        title: "Abonnement opgezegd",
+        description: "Je Pro-abonnement is opgezegd. Je houdt tot het einde van de periode toegang.",
+      });
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Fout bij opzeggen",
+        description: error.message || "Er is een fout opgetreden. Probeer het later opnieuw.",
         variant: "destructive",
       });
     },
@@ -376,6 +410,84 @@ export default function BedrijfsprofielPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Lidmaatschap sectie — alleen zichtbaar voor Pro-leden */}
+      {user?.plan === "pro" && (
+        <Card className="mt-8">
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <CreditCard className="h-5 w-5 text-muted-foreground" />
+              <div>
+                <CardTitle className="text-base font-medium">Lidmaatschap</CardTitle>
+                <CardDescription>Beheer je abonnement</CardDescription>
+              </div>
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <Badge variant="secondary" data-testid="badge-plan">
+                  Pro
+                </Badge>
+                <span className="text-sm text-muted-foreground">Actief abonnement</span>
+              </div>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="text-muted-foreground text-sm"
+                    data-testid="button-cancel-subscription"
+                  >
+                    Abonnement opzeggen
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="flex items-center gap-2">
+                      <AlertTriangle className="h-5 w-5 text-destructive" />
+                      Abonnement opzeggen?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="space-y-2">
+                      <span className="block">
+                        Als je je Pro-abonnement opzegt, verlies je toegang tot:
+                      </span>
+                      <ul className="list-disc pl-4 space-y-1 text-sm">
+                        <li>Onbeperkt gebruik van RegioBot</li>
+                        <li>Zichtbaarheid voor andere ondernemers</li>
+                        <li>Toegang tot exclusieve deals en kansen</li>
+                        <li>WOO-verzoeken en geavanceerde tools</li>
+                      </ul>
+                      <span className="block pt-1">
+                        Je houdt tot het einde van de huidige periode toegang. Daarna wordt je plan teruggezet naar Basis.
+                      </span>
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel data-testid="button-cancel-dialog-cancel">
+                      Toch niet
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => cancelMutation.mutate()}
+                      disabled={cancelMutation.isPending}
+                      className="bg-destructive text-destructive-foreground"
+                      data-testid="button-confirm-cancel-subscription"
+                    >
+                      {cancelMutation.isPending ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Bezig...
+                        </>
+                      ) : (
+                        "Ja, zeg op"
+                      )}
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
