@@ -62,6 +62,7 @@ import KennisbankPage from "@/pages/informatie/kennisbank";
 import BriefAnalysePage from "@/pages/tools/brief-analyse";
 import WebsiteScanPage from "@/pages/tools/website-scan";
 import RegelgevingVerkennerPage from "@/pages/regelgeving-verkenner";
+import IntelPage from "@/pages/intel";
 import { ComingSoon } from "@/components/ComingSoon";
 
 // Routes that should NOT have the sidebar/header layout
@@ -111,6 +112,7 @@ function AuthenticatedRouter() {
       <Route path="/regiocrew" component={RegioCrewPage} />
       <Route path="/affiliate" component={AffiliatePage} />
       <Route path="/beleidsmonitor" component={BeleidsmonitorPage} />
+      <Route path="/intel" component={IntelPage} />
       <Route path="/admin" component={AdminIndexPage} />
       <Route path="/admin/woo" component={AdminWooPage} />
       <Route path="/admin/regios" component={AdminRegiosPage} />

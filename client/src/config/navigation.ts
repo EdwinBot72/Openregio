@@ -16,6 +16,7 @@ import {
   Users,
   Share2,
   ScanText,
+  Signal,
 } from "lucide-react";
 
 export type NavSubItem = {
@@ -39,6 +40,12 @@ export const APP_NAV: NavSection[] = [
     title: "Overzicht",
     icon: LayoutDashboard,
     url: "/dashboard",
+  },
+  {
+    id: "intel",
+    title: "Regio Intel",
+    icon: Signal,
+    url: "/intel",
   },
   {
     id: "regio",
