@@ -9,7 +9,7 @@ import {
   Sparkles, Clock, TrendingDown, Layers
 } from "lucide-react";
 import logoImg from "@assets/optimized/logo.webp";
-import footerLogoImg from "@assets/afbeelding_1771441188699.png";
+import footerLogoImg from "@assets/optimized/footer-logo.webp";
 import streetImg from "@assets/optimized/street.webp";
 import groupImg from "@assets/optimized/group.webp";
 

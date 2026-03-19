@@ -66,7 +66,6 @@ import BriefAnalysePage from "@/pages/tools/brief-analyse";
 import WebsiteScanPage from "@/pages/tools/website-scan";
 import RegelgevingVerkennerPage from "@/pages/regelgeving-verkenner";
 import IntelPage from "@/pages/intel";
-import { ComingSoon } from "@/components/ComingSoon";
 
 // Routes that should NOT have the sidebar/header layout
 const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse"];
@@ -128,7 +127,6 @@ function AuthenticatedRouter() {
       <Route path="/admin/intel" component={AdminIntelPage} />
 
       {/* Kansen / Informatie */}
-      <Route path="/kansen/subsidies">{() => <ComingSoon title="Subsidies" description="Overzicht van subsidies beschikbaar voor ondernemers in jouw regio." />}</Route>
       <Route path="/kansen/aanbestedingen" component={AanbestedingenPage} />
       <Route path="/kansen/gemeente-updates" component={GemeenteUpdatesPage} />
       <Route path="/kansen/regio-deals" component={RegiodealsPage} />
@@ -146,28 +144,6 @@ function AuthenticatedRouter() {
 
       {/* Zichtbaarheid */}
       <Route path="/zichtbaarheid/website-onderhoud" component={WebsiteOnderhoudPage} />
-      <Route path="/zichtbaarheid/vindbaarheid">{() => <ComingSoon title="Lokale vindbaarheid" description="Vergroot je zichtbaarheid in Google voor zoekopdrachten in jouw regio." />}</Route>
-
-      {/* Samenwerken */}
-      <Route path="/samenwerken/project-starten">{() => <ComingSoon title="Project starten" description="Start een nieuw samenwerkingsproject met ondernemers uit jouw regio." />}</Route>
-      <Route path="/samenwerken/initiatieven">{() => <ComingSoon title="Lopende initiatieven" description="Bekijk lopende regionale initiatieven en sluit je aan." />}</Route>
-      <Route path="/samenwerken/pitchbord">{() => <ComingSoon title="Pitchbord" description="Presenteer jouw idee aan de regio en zoek partners of financiering." />}</Route>
-
-      {/* Projecten */}
-      <Route path="/projecten">{() => <ComingSoon title="Mijn projecten" description="Beheer jouw lopende regionale projecten op één plek." />}</Route>
-      <Route path="/projecten/regionaal">{() => <ComingSoon title="Regionale projecten" description="Alle actieve projecten in jouw regio." />}</Route>
-      <Route path="/projecten/documenten">{() => <ComingSoon title="Documenten" description="Gedeelde projectdocumenten en dossiers." />}</Route>
-      <Route path="/projecten/taken">{() => <ComingSoon title="Taken & rollen" description="Taakverdeling en verantwoordelijkheden binnen jouw projecten." />}</Route>
-      <Route path="/projecten/resultaten">{() => <ComingSoon title="Resultaten" description="Meetbare uitkomsten en voortgang van afgeronde projecten." />}</Route>
-
-      {/* Data & Inzicht */}
-      <Route path="/data/marktanalyse">{() => <ComingSoon title="Marktanalyse" description="Inzicht in regionale markttrends en kansen voor jouw sector." />}</Route>
-      <Route path="/data/impact-rapportages">{() => <ComingSoon title="Impact-rapportages" description="Rapportages over de maatschappelijke impact van OpenRegio-leden." />}</Route>
-
-      {/* Coöperatie */}
-      <Route path="/cooperatie/stemmen">{() => <ComingSoon title="Stemmen" description="Breng jouw stem uit over coöperatieve besluiten en voorstellen." />}</Route>
-      <Route path="/cooperatie/besluiten">{() => <ComingSoon title="Besluiten" description="Archief van genomen besluiten binnen de coöperatie." />}</Route>
-      <Route path="/cooperatie/resultaten">{() => <ComingSoon title="Financiële resultaten" description="Transparant overzicht van de financiële resultaten van de coöperatie." />}</Route>
 
       <Route component={NotFound} />
     </Switch>
