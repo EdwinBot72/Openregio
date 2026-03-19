@@ -1,4 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
+import fs from "fs";
+import path from "path";
 import cookieParser from "cookie-parser";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
@@ -104,13 +106,22 @@ app.use((req, res, next) => {
     });
   });
 
-  // importantly only setup vite in development and after
-  // setting up all the other routes so the catch-all route
-  // doesn't interfere with the other routes
-  if (app.get("env") === "development") {
-    await setupVite(app, server);
-  } else {
+  // Determine serving mode:
+  // - Running via `tsx server/index.ts` (dev): import.meta.dirname = "…/server"
+  //   → "…/server/public" does NOT exist → use Vite dev middleware
+  // - Running via `node dist/index.js` (prod): import.meta.dirname = "…/dist"
+  //   → "…/dist/public" EXISTS after build → use static file serving
+  // This is intentionally independent of NODE_ENV so that the built server
+  // always serves the pre-built frontend, even without NODE_ENV=production set.
+  const builtPublicPath = path.resolve(import.meta.dirname, "public");
+  const isBuiltServer = fs.existsSync(builtPublicPath);
+
+  if (isBuiltServer) {
+    log(`[Startup] Production mode — serving built frontend from ${builtPublicPath}`);
     serveStatic(app);
+  } else {
+    log(`[Startup] Development mode — starting Vite dev server`);
+    await setupVite(app, server);
   }
 
   // Start listening FIRST so healthchecks pass immediately
