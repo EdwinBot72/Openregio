@@ -14,7 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
-import heroImg from "@assets/9bfd39e2-10d7-4ef1-99a5-7470a127e2ec_1773678478784.png";
+import heroImg from "@assets/optimized/website-scan-hero.webp";
 
 type Categorie = {
   naam: string;

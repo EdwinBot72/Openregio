@@ -8,10 +8,10 @@ import {
   CheckCircle2, RotateCcw, FileText, ChevronUp,
   Sparkles, Clock, TrendingDown, Layers
 } from "lucide-react";
-import logoImg from "@assets/ChatGPT_Image_15_feb_2026,_15_15_16_1771164937665.png";
+import logoImg from "@assets/optimized/logo.webp";
 import footerLogoImg from "@assets/afbeelding_1771441188699.png";
-import streetImg from "@assets/ChatGPT_Image_16_mrt_2026,_17_09_39_1773677423650.png";
-import groupImg from "@assets/ChatGPT_Image_16_mrt_2026,_14_46_04_1773671702074.png";
+import streetImg from "@assets/optimized/street.webp";
+import groupImg from "@assets/optimized/group.webp";
 
 type WizardStep = "input" | "scanning" | "rapport";
 type WizardMode = "regio" | "regelgeving";

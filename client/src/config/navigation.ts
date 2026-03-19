@@ -11,7 +11,6 @@ import {
   Eye,
   Building2,
   Monitor,
-  MapPin,
   Shield,
   Users,
   Share2,
@@ -77,7 +76,6 @@ export const APP_NAV: NavSection[] = [
     sub: [
       { title: "Bedrijfsprofiel", url: "/bedrijfsprofiel", icon: Building2 },
       { title: "Website Scan", url: "/tools/website-scan", icon: Monitor, proOnly: true },
-      { title: "Lokale vindbaarheid", url: "/zichtbaarheid/vindbaarheid", icon: MapPin },
       { title: "Privacy & zichtbaarheid", url: "/pro/visibility-settings", icon: Shield, proOnly: true },
     ],
   },

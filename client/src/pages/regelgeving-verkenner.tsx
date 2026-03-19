@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import heroImg from "@assets/856951b8-160c-43ab-ae38-c328cb362aa4_1773678418402.png";
+import heroImg from "@assets/optimized/regelgeving-hero.webp";
 
 type RegelgevingItem = {
   id: string;

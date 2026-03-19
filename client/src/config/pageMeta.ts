@@ -64,7 +64,7 @@ export const PAGE_META: Record<string, PageMeta> = {
     title: "RegioCrew",
     description: "Samenwerken met ondernemers in jouw regio.",
   },
-  "/regio-deals": {
+  "/kansen/regio-deals": {
     title: "Regio Deals",
     description: "Lokale deals en samenwerkingen in jouw regio.",
   },

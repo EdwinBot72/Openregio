@@ -1,0 +1,123 @@
+Ik heb de zip functioneel gescreend.
+
+**Eindoordeel:** technisch deels oké, functioneel nog **geen strakke release-ready app**.
+De basis buildt en start, maar er zitten nog duidelijke blockers en rommel in de codebase.
+
+### Wat ik heb getest
+
+* Zip uitgepakt
+* Dependencies geïnstalleerd
+* `npm run check` gedraaid
+* `npm run build` gedraaid
+* Server gestart met dummy env
+* Smoke test gedaan op key endpoints
+
+### Wat goed is
+
+* **Typecheck slaagt**
+* **Build slaagt**
+* **Server boot** gewoon op
+* `/health` werkt netjes
+* Auth-guard lijkt logisch opgezet
+* Structuur is niet compleet kapot; het is wel degelijk een app-basis
+
+### Wat niet goed is / blockers
+
+**1. Codebase is te vervuild**
+Er zit veel ballast in de zip:
+
+* `.git`
+* `dist`
+* `backup`
+* `attached_assets`
+* nested zips / mp4 / prompt dumps
+
+Dat is geen nette test/deploy zip. Dit maakt het rommelig en verhoogt de kans op rare side effects.
+
+**2. Publieke dataflows vallen om zonder database**
+Bij smoke test geven meerdere publieke endpoints meteen 500:
+
+* `/api/woo/categories`
+* `/api/woo/regions`
+* `/api/woo/authorities`
+* `/api/blogs/public`
+* `/api/stats`
+
+Dat betekent: home/public flows zijn afhankelijk van backend-data zonder nette fallback. Voor een live MVP is dat shaky.
+
+**3. Achter de login zit nog te veel schijnfunctionaliteit**
+Er staan **veel routes die alleen `ComingSoon` renderen**. Ik telde er grofweg **15+ directe placeholder-routes** in de ingelogde omgeving.
+Dus de navigatie oogt groter dan wat echt werkt.
+
+**4. Route mismatch = kans op broken clicks**
+Ik vond een harde inconsistentie:
+
+* echte route: `/kansen/regio-deals`
+* elders gebruikt: `/regio-deals`
+
+Dat zit o.a. in dashboard-actions / page meta. Gevolg: klikflows kunnen naar verkeerde pagina of 404/lege state lopen.
+
+**5. Build-waarschuwingen**
+Build is groen, maar niet schoon:
+
+* PostCSS warning
+* grote JS bundle: ongeveer **1.2 MB**
+* meerdere zware images van **2–3.5 MB**
+
+Dus performance en laadtijd zijn nog niet strak.
+
+### Functionele status per onderdeel
+
+**Groen**
+
+* install
+* typecheck
+* production build
+* server boot
+* health endpoint
+
+**Oranje**
+
+* openbare pagina’s die data nodig hebben
+* navigatie achter login
+* dashboard flow
+* performance / assets
+
+**Rood**
+
+* echt end-to-end testen van:
+
+  * login/register
+  * payment
+  * document upload
+  * admin flows
+  * regiobot / woo flows
+
+Waarom rood: daarvoor ontbreken hier een werkende database + echte secrets zoals Mollie/Postmark/OpenAI.
+
+### Mijn eerlijke verdict
+
+Dit is **geen totale puinhoop**, maar ook **nog niet functioneel af**.
+De kern staat, alleen:
+
+* teveel rommel in de repo
+* teveel placeholder-schermen
+* te veel backend-afhankelijkheid zonder fallback
+* minstens één echte routebreuk
+
+### Wat eerst gefixt moet worden
+
+1. repo opschonen
+2. alle route-mismatches rechttrekken
+3. publieke endpoints fallback-safe maken
+4. navigatie snoeien tot alleen werkende modules
+5. zware assets comprimeren
+6. daarna pas echte E2E test op login + betaling + documentflows
+
+### Mijn harde conclusie
+
+**Build-ready = ja**
+**Demo-ready = half**
+**Live-ready = nee**
+
+Als je wilt, maak ik hier nu direct een **strakke Replit prompt van met exact wat er nog mankeert en in welke volgorde het gefixt moet worden**.

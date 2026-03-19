@@ -162,7 +162,7 @@ export const DASHBOARD_ACTIONS: DashboardAction[] = [
     label: "Regio Deals",
     description: () => "Lokale deals en samenwerkingen tussen ondernemers in jouw regio.",
     icon: Landmark,
-    href: () => "/regio-deals",
+    href: () => "/kansen/regio-deals",
     cta: () => "Deals bekijken",
     color: () => "text-emerald-600 dark:text-emerald-400",
     bg: () => "bg-emerald-50 dark:bg-emerald-950/40",

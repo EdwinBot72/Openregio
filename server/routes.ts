@@ -834,7 +834,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const stats = await storage.getStats();
       res.json(stats);
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch stats" });
+      console.warn("Stats endpoint: DB unavailable, returning fallback");
+      res.json({ totalMembers: 0, totalCollaborations: 0, totalRegions: 0, monthlyGrowth: 0 });
     }
   });
 
@@ -1658,8 +1659,8 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
       const regions = await storage.getWooRegions();
       res.json(regions);
     } catch (err: any) {
-      console.error("Error fetching WOO regions:", err);
-      res.status(500).json({ error: "Kon regio's niet ophalen" });
+      console.warn("WOO regions: DB unavailable, returning empty list");
+      res.json([]);
     }
   });
 
@@ -1668,8 +1669,8 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
       const authorities = await storage.getWooAuthorities();
       res.json(authorities);
     } catch (err: any) {
-      console.error("Error fetching WOO authorities:", err);
-      res.status(500).json({ error: "Kon bestuursorganen niet ophalen" });
+      console.warn("WOO authorities: DB unavailable, returning empty list");
+      res.json([]);
     }
   });
 
@@ -1679,8 +1680,8 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
       const categories = await storage.getWooCategories();
       res.json(categories);
     } catch (err: any) {
-      console.error("Error fetching WOO categories:", err);
-      res.status(500).json({ error: "Kon categorieën niet ophalen" });
+      console.warn("WOO categories: DB unavailable, returning empty list");
+      res.json([]);
     }
   });
 
@@ -3263,8 +3264,8 @@ Maak het verzoek professioneel en juridisch correct.`;
       const blogs = await storage.getPublishedBlogs(6);
       res.json(blogs);
     } catch (error: any) {
-      console.error("Error fetching public blogs:", error);
-      res.status(500).json({ error: "Kon blogs niet laden" });
+      console.warn("Public blogs: DB unavailable, returning empty list");
+      res.json([]);
     }
   });
 
