@@ -1,5 +1,34 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
+let refreshPromise: Promise<boolean> | null = null;
+
+async function tryRefreshToken(): Promise<boolean> {
+  if (refreshPromise) return refreshPromise;
+
+  refreshPromise = fetch("/api/auth/refresh", {
+    method: "POST",
+    credentials: "include",
+  })
+    .then((r) => r.ok)
+    .catch(() => false)
+    .finally(() => {
+      refreshPromise = null;
+    });
+
+  return refreshPromise;
+}
+
+async function isTokenExpiredResponse(res: Response): Promise<boolean> {
+  if (res.status !== 401) return false;
+  try {
+    const clone = res.clone();
+    const body = await clone.json();
+    return body?.code === "TOKEN_EXPIRED";
+  } catch {
+    return false;
+  }
+}
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;
@@ -12,12 +41,22 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  const isFormData = data instanceof FormData;
+  const fetchOpts: RequestInit = {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
-    body: data ? JSON.stringify(data) : undefined,
+    headers: data && !isFormData ? { "Content-Type": "application/json" } : {},
+    body: data ? (isFormData ? data : JSON.stringify(data)) : undefined,
     credentials: "include",
-  });
+  };
+
+  let res = await fetch(url, fetchOpts);
+
+  if (await isTokenExpiredResponse(res)) {
+    const refreshed = await tryRefreshToken();
+    if (refreshed) {
+      res = await fetch(url, fetchOpts);
+    }
+  }
 
   await throwIfResNotOk(res);
   return res;
@@ -25,7 +64,6 @@ export async function apiRequest(
 
 type UnauthorizedBehavior = "returnNull" | "throw";
 
-// Helper to check if object is a search params object
 function isSearchParamsObject(obj: unknown): obj is { search: Record<string, string | number | boolean> } {
   return (
     typeof obj === "object" &&
@@ -42,49 +80,44 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    // QueryKey contract:
-    // - Primitives (string/number/boolean) → path segments
-    // - { search: Record<string, primitive> } → query params
-    // - Other objects → ignored (react-query options/signals)
-    //
-    // Examples:
-    //   ['/api/entrepreneurs'] → '/api/entrepreneurs'
-    //   ['/api/entrepreneurs', 'ent-123'] → '/api/entrepreneurs/ent-123'
-    //   ['/api/billing/subscription', { search: { userId: 'user-jan' } }] → '/api/billing/subscription?userId=user-jan'
-    //   ['/api/recipes', 123, { search: { format: 'json' } }] → '/api/recipes/123?format=json'
-    
     const pathSegments: string[] = [];
     const searchParams = new URLSearchParams();
-    
+
     for (const part of queryKey) {
-      // Primitives become path segments
       if (typeof part === "string" || typeof part === "number" || typeof part === "boolean") {
         pathSegments.push(String(part));
-      } 
-      // { search: ... } objects become query params
-      else if (isSearchParamsObject(part)) {
+      } else if (isSearchParamsObject(part)) {
         for (const [key, value] of Object.entries(part.search)) {
           if (value !== undefined && value !== null) {
-            // Only primitive values allowed in search params
             if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
               searchParams.append(key, String(value));
             }
           }
         }
       }
-      // Ignore all other objects (react-query options/signals)
     }
-    
-    // Build fresh URL for each request
+
     let url = pathSegments.join("/");
     const queryString = searchParams.toString();
     if (queryString) {
       url += `?${queryString}`;
     }
-    
-    const res = await fetch(url, {
-      credentials: "include",
-    });
+
+    let res = await fetch(url, { credentials: "include" });
+
+    if (await isTokenExpiredResponse(res)) {
+      const refreshed = await tryRefreshToken();
+      if (refreshed) {
+        res = await fetch(url, { credentials: "include" });
+        if (res.status === 401) {
+          if (unauthorizedBehavior === "returnNull") return null;
+          await throwIfResNotOk(res);
+        }
+      } else {
+        if (unauthorizedBehavior === "returnNull") return null;
+        await throwIfResNotOk(res);
+      }
+    }
 
     if (unauthorizedBehavior === "returnNull" && res.status === 401) {
       return null;

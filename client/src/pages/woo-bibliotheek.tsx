@@ -61,11 +61,7 @@ export default function WooBibliotheekPage() {
       setIsUploading(true);
       setUploadProgress(10);
 
-      const response = await fetch("/api/rag/documents", {
-        method: "POST",
-        body: formData,
-        credentials: "include",
-      });
+      const response = await apiRequest("POST", "/api/rag/documents", formData);
 
       setUploadProgress(90);
 

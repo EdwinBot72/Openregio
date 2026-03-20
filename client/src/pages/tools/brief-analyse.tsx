@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest } from "@/lib/queryClient";
 
 interface AnalyseResultaat {
   afzender: string;
@@ -42,16 +43,7 @@ export default function BriefAnalysePage() {
 
   const tekstMutation = useMutation({
     mutationFn: async (tekst: string) => {
-      const res = await fetch("/api/brief-analyse", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({ tekst }),
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || "Analyse mislukt");
-      }
+      const res = await apiRequest("POST", "/api/brief-analyse", { tekst });
       return res.json() as Promise<AnalyseResultaat>;
     },
     onSuccess: (data) => setResultaat(data),
@@ -64,15 +56,7 @@ export default function BriefAnalysePage() {
     mutationFn: async (file: File) => {
       const form = new FormData();
       form.append("file", file);
-      const res = await fetch("/api/brief-analyse/upload", {
-        method: "POST",
-        credentials: "include",
-        body: form,
-      });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || "Analyse mislukt");
-      }
+      const res = await apiRequest("POST", "/api/brief-analyse/upload", form);
       return res.json() as Promise<AnalyseResultaat>;
     },
     onSuccess: (data) => setResultaat(data),

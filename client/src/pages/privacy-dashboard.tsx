@@ -154,9 +154,7 @@ export default function PrivacyDashboardPage() {
 
   const handleExport = async () => {
     try {
-      const response = await fetch("/api/privacy/export", {
-        credentials: "include",
-      });
+      const response = await apiRequest("GET", "/api/privacy/export");
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");

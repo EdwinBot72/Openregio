@@ -7,6 +7,7 @@ import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { apiRequest } from "@/lib/queryClient";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 type RegioBotMode = "general" | "legal" | "marketing";
@@ -114,14 +115,10 @@ export function RegioBotChat() {
           content: msg.content,
         }));
 
-      const response = await fetch("/api/regiobot/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          message: messageToSend,
-          mode,
-          history: history.length > 0 ? history : undefined,
-        }),
+      const response = await apiRequest("POST", "/api/regiobot/chat", {
+        message: messageToSend,
+        mode,
+        history: history.length > 0 ? history : undefined,
       });
 
       const data = await response.json();
