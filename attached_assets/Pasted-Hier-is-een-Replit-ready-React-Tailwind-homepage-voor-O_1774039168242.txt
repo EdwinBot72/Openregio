@@ -1,0 +1,439 @@
+Hier is een **Replit-ready React/Tailwind homepage** voor OpenRegio.
+Plak dit in `src/App.jsx` van een Vite React project.
+
+```jsx
+export default function App() {
+  return (
+    <div className="min-h-screen bg-white text-slate-900">
+      <header className="sticky top-0 z-50 border-b border-slate-200 bg-white/90 backdrop-blur">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
+          <div className="text-xl font-bold tracking-tight">
+            OpenRegio
+          </div>
+
+          <nav className="hidden gap-8 md:flex text-sm font-medium text-slate-700">
+            <a href="#wat-is-openregio" className="hover:text-slate-900">Wat is OpenRegio</a>
+            <a href="#hoe-het-werkt" className="hover:text-slate-900">Hoe het werkt</a>
+            <a href="#tarieven" className="hover:text-slate-900">Lid worden & tarieven</a>
+            <a href="#voorbeelden" className="hover:text-slate-900">Voorbeelden</a>
+          </nav>
+
+          <a
+            href="#tarieven"
+            className="rounded-xl bg-sky-600 px-4 py-2 text-sm font-semibold text-white hover:bg-sky-700"
+          >
+            Start direct
+          </a>
+        </div>
+      </header>
+
+      <main>
+        <section className="bg-gradient-to-br from-sky-50 via-white to-emerald-50">
+          <div className="mx-auto grid max-w-7xl gap-12 px-6 py-20 md:grid-cols-2 md:items-center">
+            <div>
+              <p className="mb-4 inline-block rounded-full bg-sky-100 px-3 py-1 text-sm font-medium text-sky-800">
+                Lokaal platform voor ondernemers en organisaties
+              </p>
+
+              <h1 className="max-w-xl text-4xl font-bold leading-tight md:text-6xl">
+                Meer klanten. Minder gedoe.
+              </h1>
+
+              <p className="mt-6 max-w-xl text-lg leading-8 text-slate-600">
+                OpenRegio is een platform waar ondernemers en organisaties in jouw regio
+                elkaar direct vinden en samenwerken.
+              </p>
+
+              <p className="mt-3 max-w-xl text-base leading-7 text-slate-500">
+                Voor lokale ondernemers, gemeenten en organisaties die direct zaken willen doen
+                zonder tussenpartijen.
+              </p>
+
+              <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+                <a
+                  href="#ondernemer"
+                  className="rounded-2xl bg-sky-600 px-6 py-4 text-center font-semibold text-white hover:bg-sky-700"
+                >
+                  Ik ben ondernemer
+                </a>
+                <a
+                  href="#organisatie"
+                  className="rounded-2xl border border-slate-300 px-6 py-4 text-center font-semibold text-slate-900 hover:bg-slate-50"
+                >
+                  Ik ben gemeente / organisatie
+                </a>
+                <a
+                  href="#tarieven"
+                  className="rounded-2xl bg-emerald-600 px-6 py-4 text-center font-semibold text-white hover:bg-emerald-700"
+                >
+                  Direct lid worden
+                </a>
+              </div>
+            </div>
+
+            <div>
+              <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/50">
+                <div className="grid gap-4 md:grid-cols-2">
+                  <div className="rounded-2xl bg-slate-50 p-5">
+                    <p className="text-sm font-semibold text-slate-500">Voor ondernemers</p>
+                    <h3 className="mt-2 text-xl font-bold">Meer zichtbaar in je regio</h3>
+                    <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                      <li>• Profiel aanmaken</li>
+                      <li>• Regio en aanbod tonen</li>
+                      <li>• Direct gevonden worden</li>
+                    </ul>
+                  </div>
+
+                  <div className="rounded-2xl bg-slate-50 p-5">
+                    <p className="text-sm font-semibold text-slate-500">Voor organisaties</p>
+                    <h3 className="mt-2 text-xl font-bold">Lokaal aanbod direct vinden</h3>
+                    <ul className="mt-4 space-y-2 text-sm text-slate-600">
+                      <li>• Zoek ondernemers in de regio</li>
+                      <li>• Vind direct contactgegevens</li>
+                      <li>• Werk zonder tussenlagen</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div className="mt-5 rounded-2xl bg-sky-600 p-5 text-white">
+                  <p className="text-sm font-medium text-sky-100">In 3 stappen aan de slag</p>
+                  <div className="mt-3 grid gap-3 md:grid-cols-3">
+                    <div className="rounded-xl bg-white/10 p-3">1. Profiel aanmaken</div>
+                    <div className="rounded-xl bg-white/10 p-3">2. Regio & aanbod invullen</div>
+                    <div className="rounded-xl bg-white/10 p-3">3. Gevonden worden</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="wat-is-openregio" className="mx-auto max-w-7xl px-6 py-20">
+          <div className="grid gap-10 md:grid-cols-2">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-wide text-sky-700">
+                Wat is OpenRegio
+              </p>
+              <h2 className="mt-3 text-3xl font-bold md:text-4xl">
+                Direct contact. Lokale zichtbaarheid. Minder ruis.
+              </h2>
+            </div>
+
+            <div className="space-y-5 text-lg leading-8 text-slate-600">
+              <p>
+                OpenRegio is een platform waar vraag en aanbod in jouw regio samenkomen.
+                Geen tussenpersonen. Geen ingewikkelde systemen. Gewoon lokaal zaken doen.
+              </p>
+              <p>
+                Je maakt een profiel aan, laat zien wat je doet en wordt direct gevonden
+                door ondernemers, gemeenten en organisaties in jouw omgeving.
+              </p>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-slate-50">
+          <div className="mx-auto max-w-7xl px-6 py-20">
+            <div className="mb-12 max-w-2xl">
+              <p className="text-sm font-semibold uppercase tracking-wide text-sky-700">
+                Voor wie
+              </p>
+              <h2 className="mt-3 text-3xl font-bold md:text-4xl">
+                Eén platform. Twee duidelijke ingangen.
+              </h2>
+            </div>
+
+            <div className="grid gap-8 md:grid-cols-2">
+              <div
+                id="ondernemer"
+                className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm"
+              >
+                <p className="text-sm font-semibold text-slate-500">Ik ben ondernemer</p>
+                <h3 className="mt-3 text-2xl font-bold">Word gevonden in jouw regio</h3>
+                <p className="mt-4 leading-7 text-slate-600">
+                  Laat klanten, organisaties en samenwerkingspartners direct zien wat jij doet.
+                </p>
+                <ul className="mt-6 space-y-3 text-slate-700">
+                  <li>• Meer lokale zichtbaarheid</li>
+                  <li>• Duidelijk profiel en aanbod</li>
+                  <li>• Direct contact zonder tussenpartij</li>
+                </ul>
+                <a
+                  href="#tarieven"
+                  className="mt-8 inline-block rounded-xl bg-sky-600 px-5 py-3 font-semibold text-white hover:bg-sky-700"
+                >
+                  Meld je aan als ondernemer
+                </a>
+              </div>
+
+              <div
+                id="organisatie"
+                className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm"
+              >
+                <p className="text-sm font-semibold text-slate-500">Ik ben gemeente / organisatie</p>
+                <h3 className="mt-3 text-2xl font-bold">Vind lokaal aanbod zonder omwegen</h3>
+                <p className="mt-4 leading-7 text-slate-600">
+                  Zoek gericht naar ondernemers in de regio en leg direct contact voor opdrachten,
+                  samenwerking of regionale inkoop.
+                </p>
+                <ul className="mt-6 space-y-3 text-slate-700">
+                  <li>• Lokale partijen sneller vinden</li>
+                  <li>• Direct contact en korte lijnen</li>
+                  <li>• Regionale samenwerking versterken</li>
+                </ul>
+                <a
+                  href="#voorbeelden"
+                  className="mt-8 inline-block rounded-xl border border-slate-300 px-5 py-3 font-semibold text-slate-900 hover:bg-slate-50"
+                >
+                  Bekijk voorbeelden
+                </a>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="hoe-het-werkt" className="mx-auto max-w-7xl px-6 py-20">
+          <div className="mb-12 max-w-2xl">
+            <p className="text-sm font-semibold uppercase tracking-wide text-sky-700">
+              Hoe het werkt
+            </p>
+            <h2 className="mt-3 text-3xl font-bold md:text-4xl">
+              In 3 stappen aan de slag
+            </h2>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-3">
+            {[
+              {
+                step: "1",
+                title: "Profiel aanmaken",
+                text: "Maak een eenvoudig profiel van je bedrijf of organisatie."
+              },
+              {
+                step: "2",
+                title: "Regio en aanbod invullen",
+                text: "Laat zien waar je actief bent en wat je aanbiedt."
+              },
+              {
+                step: "3",
+                title: "Gevonden worden en contacten leggen",
+                text: "Word zichtbaar in jouw regio en leg direct contact."
+              }
+            ].map((item) => (
+              <div
+                key={item.step}
+                className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-600 text-lg font-bold text-white">
+                  {item.step}
+                </div>
+                <h3 className="mt-5 text-xl font-bold">{item.title}</h3>
+                <p className="mt-3 leading-7 text-slate-600">{item.text}</p>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="tarieven" className="bg-slate-900 text-white">
+          <div className="mx-auto max-w-7xl px-6 py-20">
+            <div className="mb-12 max-w-2xl">
+              <p className="text-sm font-semibold uppercase tracking-wide text-sky-300">
+                Lid worden & tarieven
+              </p>
+              <h2 className="mt-3 text-3xl font-bold md:text-4xl">
+                Kies het pakket dat past bij jouw regio-aanpak
+              </h2>
+            </div>
+
+            <div className="grid gap-8 md:grid-cols-3">
+              {[
+                {
+                  name: "Basis",
+                  price: "€12,95 / maand",
+                  features: [
+                    "Bedrijfsprofiel",
+                    "Zichtbaar in jouw regio",
+                    "Direct contact mogelijk"
+                  ],
+                  highlight: false
+                },
+                {
+                  name: "Pro",
+                  price: "€24 / maand",
+                  features: [
+                    "Alles van Basis",
+                    "Meer zichtbaarheid",
+                    "Extra functies en plek op het platform"
+                  ],
+                  highlight: true
+                },
+                {
+                  name: "Regio Groei",
+                  price: "Op aanvraag",
+                  features: [
+                    "Voor organisaties en grotere samenwerkingen",
+                    "Regionale matches",
+                    "Maatwerk ondersteuning"
+                  ],
+                  highlight: false
+                }
+              ].map((plan) => (
+                <div
+                  key={plan.name}
+                  className={`rounded-3xl p-8 ${
+                    plan.highlight
+                      ? "bg-sky-600 text-white shadow-2xl shadow-sky-900/30"
+                      : "border border-white/10 bg-white/5"
+                  }`}
+                >
+                  <h3 className="text-2xl font-bold">{plan.name}</h3>
+                  <p className="mt-3 text-3xl font-extrabold">{plan.price}</p>
+                  <ul className="mt-6 space-y-3 text-sm leading-6">
+                    {plan.features.map((feature) => (
+                      <li key={feature}>• {feature}</li>
+                    ))}
+                  </ul>
+                  <a
+                    href="#contact"
+                    className={`mt-8 inline-block rounded-xl px-5 py-3 font-semibold ${
+                      plan.highlight
+                        ? "bg-white text-sky-700 hover:bg-slate-100"
+                        : "bg-white text-slate-900 hover:bg-slate-100"
+                    }`}
+                  >
+                    Start nu
+                  </a>
+                </div>
+              ))}
+            </div>
+
+            <div className="mt-12 rounded-3xl border border-white/10 bg-white/5 p-8">
+              <h3 className="text-xl font-bold">Veelgestelde vragen</h3>
+              <div className="mt-6 grid gap-6 md:grid-cols-3">
+                <div>
+                  <p className="font-semibold">Kan ik opzeggen?</p>
+                  <p className="mt-2 text-sm text-slate-300">Ja, je kunt maandelijks opzeggen.</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Hoe snel kan ik starten?</p>
+                  <p className="mt-2 text-sm text-slate-300">Direct na aanmelding kun je je profiel vullen.</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Is er maatwerk mogelijk?</p>
+                  <p className="mt-2 text-sm text-slate-300">Ja, voor regio’s en organisaties is maatwerk mogelijk.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="voorbeelden" className="mx-auto max-w-7xl px-6 py-20">
+          <div className="mb-12 max-w-2xl">
+            <p className="text-sm font-semibold uppercase tracking-wide text-sky-700">
+              Voorbeelden
+            </p>
+            <h2 className="mt-3 text-3xl font-bold md:text-4xl">
+              Zo kan OpenRegio eruitzien in de praktijk
+            </h2>
+          </div>
+
+          <div className="grid gap-8 md:grid-cols-3">
+            {[
+              {
+                name: "Jan",
+                company: "Aannemer uit Haarlem",
+                text: "Meer lokale aanvragen zonder afhankelijk te zijn van grote platforms."
+              },
+              {
+                name: "Lisa",
+                company: "Coach uit Amsterdam",
+                text: "Sneller contact met klanten en organisaties in de buurt."
+              },
+              {
+                name: "Mark",
+                company: "Webbouwer uit Utrecht",
+                text: "Nieuwe samenwerkingen via regionale zichtbaarheid."
+              }
+            ].map((item) => (
+              <div key={item.name} className="rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+                <p className="text-lg leading-8 text-slate-700">“{item.text}”</p>
+                <div className="mt-6">
+                  <p className="font-bold">{item.name}</p>
+                  <p className="text-sm text-slate-500">{item.company}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </section>
+
+        <section id="contact" className="bg-emerald-50">
+          <div className="mx-auto max-w-7xl px-6 py-20 text-center">
+            <p className="text-sm font-semibold uppercase tracking-wide text-emerald-700">
+              Start vandaag
+            </p>
+            <h2 className="mt-3 text-3xl font-bold md:text-5xl">
+              Lokaal zichtbaar worden begint met één stap
+            </h2>
+            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-600">
+              Maak je profiel aan en laat zien wat jij in jouw regio te bieden hebt.
+            </p>
+
+            <div className="mt-8 flex flex-col justify-center gap-4 sm:flex-row">
+              <a
+                href="#tarieven"
+                className="rounded-2xl bg-emerald-600 px-6 py-4 font-semibold text-white hover:bg-emerald-700"
+              >
+                Meld je aan als ondernemer
+              </a>
+              <a
+                href="mailto:info@openregio.nl"
+                className="rounded-2xl border border-slate-300 px-6 py-4 font-semibold text-slate-900 hover:bg-white"
+              >
+                Neem contact op
+              </a>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <footer className="border-t border-slate-200 bg-white">
+        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-6 py-8 text-sm text-slate-500 md:flex-row md:items-center md:justify-between">
+          <p>© 2026 OpenRegio</p>
+          <div className="flex gap-6">
+            <a href="#wat-is-openregio" className="hover:text-slate-900">Wat is OpenRegio</a>
+            <a href="#tarieven" className="hover:text-slate-900">Tarieven</a>
+            <a href="#voorbeelden" className="hover:text-slate-900">Voorbeelden</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
+```
+
+Voor Tailwind in Replit/Vite heb je deze stack nodig:
+
+```bash
+npm create vite@latest openregio -- --template react
+cd openregio
+npm install
+npm install -D tailwindcss @tailwindcss/vite
+```
+
+En in `src/index.css`:
+
+```css
+@import "tailwindcss";
+body {
+  margin: 0;
+  font-family: Inter, system-ui, sans-serif;
+}
+* {
+  box-sizing: border-box;
+}
+html {
+  scroll-behavior: smooth;
+}
+```
+
+Als je wilt, maak ik hier direct ook een **na-login dashboardpagina** voor OpenRegio in dezelfde stijl.
