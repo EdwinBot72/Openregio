@@ -213,7 +213,7 @@ export default function DashboardPage() {
             <p className="text-sm text-muted-foreground">voor jouw regio</p>
             <Link href="/intel">
               <div className="mt-4 rounded-2xl bg-emerald-50 dark:bg-emerald-950/40 px-3 py-2 text-sm font-medium text-emerald-700 dark:text-emerald-400 cursor-pointer hover-elevate">
-                {hogeImpact} hoge impact {hogeImpact === 1 ? "signaal" : "signalen"}
+                {hogeImpact === 0 ? "Geen hoge impact" : `${hogeImpact} hoge impact ${hogeImpact === 1 ? "signaal" : "signalen"}`}
               </div>
             </Link>
           </div>
@@ -224,7 +224,7 @@ export default function DashboardPage() {
             <p className="text-sm text-muted-foreground">subsidies & kansen</p>
             <Link href="/kansen/aanbestedingen">
               <div className="mt-4 rounded-2xl bg-orange-50 dark:bg-orange-950/40 px-3 py-2 text-sm font-medium text-orange-700 dark:text-orange-400 cursor-pointer hover-elevate">
-                {hogeImpact} hoge impact {hogeImpact === 1 ? "maatregel" : "maatregelen"}
+                {openTaken === 0 ? "Geen open kansen" : `${openTaken} ${openTaken === 1 ? "kans" : "kansen"} te benutten`}
               </div>
             </Link>
           </div>
