@@ -247,9 +247,29 @@ export default function HomePage() {
                   Grip op regels, zichtbaarheid en kansen{" "}
                   <span style={{ color: "#1f5fae" }}>in je regio.</span>
                 </h1>
-                <p className="text-slate-500 text-lg leading-relaxed mb-8" style={{ maxWidth: "44ch" }} data-testid="text-hero-subtitle">
-                  OpenRegio helpt ondernemers om eerder te zien wat er verandert, beter gevonden te worden en sterker te staan in hun eigen regio.
+                <p className="text-slate-500 text-lg leading-relaxed mb-7" style={{ maxWidth: "44ch" }} data-testid="text-hero-subtitle">
+                  OpenRegio is een platform voor lokale ondernemers. Je volgt wat er verandert in jouw regio, wordt beter gevonden en pakt kansen die anders aan je voorbijgaan.
                 </p>
+
+                {/* ── Drie pijlers — direct zichtbaar ── */}
+                <div className="grid grid-cols-3 gap-3 mb-8" data-testid="strip-pijlers">
+                  <div className="rounded-xl p-3 border border-slate-100" style={{ background: "rgba(31,95,174,.05)" }}>
+                    <Gavel className="w-4 h-4 mb-1.5" style={{ color: "#1f5fae" }} />
+                    <p className="text-xs font-black text-slate-800 leading-snug">Regelgeving volgen</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">Zie eerder wat verandert</p>
+                  </div>
+                  <div className="rounded-xl p-3 border border-slate-100" style={{ background: "rgba(242,138,26,.05)" }}>
+                    <BarChart2 className="w-4 h-4 mb-1.5" style={{ color: "#f28a1a" }} />
+                    <p className="text-xs font-black text-slate-800 leading-snug">Gevonden worden</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">Lokale zichtbaarheid</p>
+                  </div>
+                  <div className="rounded-xl p-3 border border-slate-100" style={{ background: "rgba(5,150,105,.05)" }}>
+                    <Users className="w-4 h-4 mb-1.5" style={{ color: "#059669" }} />
+                    <p className="text-xs font-black text-slate-800 leading-snug">Kansen pakken</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">Regio-netwerk & deals</p>
+                  </div>
+                </div>
+
                 <div className="flex flex-wrap gap-3 mb-7">
                   <a href="#basischeck" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full text-sm font-bold text-white transition-opacity hover:opacity-90" style={{ background: "#f28a1a" }} data-testid="button-hero-basischeck">
                     Start de Basischeck <ArrowRight className="w-4 h-4" />
@@ -258,8 +278,8 @@ export default function HomePage() {
                     Bekijk lidmaatschap
                   </a>
                 </div>
-                <p className="text-sm text-slate-400" data-testid="text-hero-trust">
-                  Voor ondernemers die minder afhankelijk willen zijn van platformregels en gemiste kansen.
+                <p className="text-xs text-slate-400 flex items-center gap-1.5" data-testid="text-hero-trust">
+                  <Check className="w-3.5 h-3.5 text-emerald-500 shrink-0" /> Gratis starten met de Basischeck — geen account nodig
                 </p>
               </div>
               <div className="relative" data-testid="card-hero-photo">

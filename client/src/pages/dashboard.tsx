@@ -17,6 +17,7 @@ import {
   Signal,
   ChevronRight,
   ScanText,
+  TrendingUp,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -237,6 +238,31 @@ export default function DashboardPage() {
               </div>
             </Link>
           </div>
+        </div>
+      </section>
+
+      {/* ── Platform uitleg strip ────────────────────────────────────────────── */}
+      <section className="rounded-[28px] border border-white/10 bg-white/5 dark:bg-white/5 bg-card px-6 py-5" data-testid="section-platform-intro">
+        <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground dark:text-slate-400 mb-4">
+          Wat OpenRegio voor jou doet
+        </p>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[
+            { icon: TrendingUp,  color: "text-blue-400",   bg: "bg-blue-500/10",   label: "Groei",          desc: "Word beter gevonden in jouw regio" },
+            { icon: Signal,      color: "text-emerald-400", bg: "bg-emerald-500/10", label: "Regio Monitor",  desc: "Volg signalen en regelgeving" },
+            { icon: ScanText,    color: "text-violet-400",  bg: "bg-violet-500/10",  label: "Documenten",     desc: "Begrijp brieven en maak verzoeken" },
+            { icon: Users,       color: "text-amber-400",   bg: "bg-amber-500/10",   label: "Samenwerken",    desc: "Vind deals en lokale partners" },
+          ].map(({ icon: Icon, color, bg, label, desc }) => (
+            <div key={label} className="flex items-start gap-3">
+              <div className={`rounded-xl p-2 shrink-0 ${bg}`}>
+                <Icon className={`w-4 h-4 ${color}`} />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-foreground dark:text-white leading-none">{label}</p>
+                <p className="text-[11px] text-muted-foreground dark:text-slate-400 mt-1 leading-tight">{desc}</p>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 

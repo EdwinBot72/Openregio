@@ -1,0 +1,178 @@
+Top, we fixen dit direct zonder gedoe.
+
+👉 Geen downloads → gewoon **copy/paste patches** die je in Replit plakt.
+
+---
+
+# 🔥 DOEL
+
+Zelfde layout:
+
+* vóór login (homepage)
+* na login (dashboard)
+
+👉 Dus: **1 design system / 1 wrapper**
+
+---
+
+# ⚙️ STAP 1 — Maak 1 layout wrapper
+
+Maak bestand:
+
+## `client/src/components/MainLayout.tsx`
+
+```tsx
+export default function MainLayout({ children }) {
+  return (
+    <div className="min-h-screen bg-gray-50 text-gray-900">
+
+      {/* HEADER */}
+      <header className="bg-white border-b px-6 py-4 flex justify-between items-center">
+        <div className="text-xl font-bold">OpenRegio</div>
+
+        <div className="flex gap-3">
+          <button className="bg-blue-600 text-white px-4 py-2 rounded-lg">
+            Dashboard
+          </button>
+          <button className="border px-4 py-2 rounded-lg">
+            Logout
+          </button>
+        </div>
+      </header>
+
+      {/* CONTENT */}
+      <main className="p-6 max-w-7xl mx-auto">
+        {children}
+      </main>
+
+    </div>
+  );
+}
+```
+
+---
+
+# ⚙️ STAP 2 — Gebruik deze overal
+
+## 🔹 In je App.tsx
+
+Zoiets maken:
+
+```tsx
+import MainLayout from "./components/MainLayout";
+
+function App() {
+  return (
+    <MainLayout>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+      </Routes>
+    </MainLayout>
+  );
+}
+```
+
+👉 Nu ALLES dezelfde layout
+
+---
+
+# ⚙️ STAP 3 — Dashboard fixen (zodat het matcht)
+
+## `client/src/pages/dashboard.tsx`
+
+```tsx
+export default function Dashboard() {
+  return (
+    <div>
+
+      <h1 className="text-3xl font-bold mb-6">
+        Dashboard
+      </h1>
+
+      <div className="grid md:grid-cols-3 gap-6">
+
+        <div className="bg-white p-6 rounded-xl border">
+          <h2 className="font-bold mb-2">Zichtbaarheid</h2>
+          <p>Bekijk hoe zichtbaar je bent</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl border">
+          <h2 className="font-bold mb-2">Inzicht</h2>
+          <p>Bekijk je documenten</p>
+        </div>
+
+        <div className="bg-white p-6 rounded-xl border">
+          <h2 className="font-bold mb-2">Acties</h2>
+          <p>Start een nieuwe check</p>
+        </div>
+
+      </div>
+
+    </div>
+  );
+}
+```
+
+---
+
+# ⚙️ STAP 4 — Login pagina zelfde look
+
+## `login.tsx`
+
+```tsx
+export default function Login() {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+
+      <div className="bg-white p-8 rounded-xl border w-full max-w-md">
+
+        <h1 className="text-2xl font-bold mb-6">
+          Inloggen
+        </h1>
+
+        <input className="w-full border p-3 mb-3 rounded" placeholder="Email" />
+        <input className="w-full border p-3 mb-4 rounded" placeholder="Wachtwoord" />
+
+        <button className="w-full bg-blue-600 text-white p-3 rounded-lg">
+          Inloggen
+        </button>
+
+      </div>
+
+    </div>
+  );
+}
+```
+
+---
+
+# 💣 RESULTAAT
+
+👉 Geen verschil meer tussen:
+
+* homepage
+* login
+* dashboard
+
+👉 Alles voelt als 1 platform
+
+---
+
+# 🔥 EXTRA (aanrader)
+
+Als je next level wil:
+
+* sidebar toevoegen (zoals SaaS tools)
+* user naam rechtsboven
+* dashboard met scores (zichtbaarheid / inzicht)
+
+---
+
+## 🚀 Wil je dat ik volgende stap maak?
+
+👉 volledige dashboard UI (zoals echte SaaS)
+👉 Woo + analyse tool integratie
+👉 of jouw huidige project 1-op-1 herschrijven
+
+zeg het — dan fix ik het strak voor je 🔥
