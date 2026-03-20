@@ -89,6 +89,8 @@ const FALLBACK_UPDATES = [
   { id: "u3", titel: "Openbare update verkeersmaatregelen", samenvatting: "Tijdelijke omleidingen in het centrum tot najaar", categorie: "wetgeving" },
 ];
 
+const MAX_UPDATES = 3;
+
 function categorieBadgeVariant(cat: string): "default" | "secondary" | "outline" {
   if (cat === "subsidies" || cat === "financieel") return "default";
   if (cat === "wetgeving") return "secondary";
@@ -138,16 +140,23 @@ export default function DashboardPage() {
   const hogeImpact = intelSignalen.filter(
     (s) => s.categorie === "wetgeving" || s.categorie === "beleid"
   ).length;
+  const openTaken = intelSignalen.filter(
+    (s) => s.categorie === "subsidies" || s.categorie === "financieel"
+  ).length;
 
+  const realUpdates = intelSignalen.slice(0, MAX_UPDATES).map((s) => ({
+    id: String(s.id),
+    titel: s.titel,
+    samenvatting: s.samenvatting || s.titel,
+    categorie: s.categorie,
+  }));
   const updates =
-    intelSignalen.length >= 3
-      ? intelSignalen.slice(0, 3).map((s) => ({
-          id: String(s.id),
-          titel: s.titel,
-          samenvatting: s.samenvatting || s.titel,
-          categorie: s.categorie,
-        }))
-      : FALLBACK_UPDATES;
+    realUpdates.length >= MAX_UPDATES
+      ? realUpdates
+      : [
+          ...realUpdates,
+          ...FALLBACK_UPDATES.slice(0, MAX_UPDATES - realUpdates.length),
+        ];
 
   return (
     <div className="space-y-6 pb-8">
@@ -210,21 +219,14 @@ export default function DashboardPage() {
           </div>
 
           <div className="rounded-3xl bg-card border p-5 shadow-sm" data-testid="card-stat-taken">
-            <p className="text-sm font-medium text-muted-foreground">Snelle toegang</p>
-            <div className="mt-3 space-y-2">
-              <Link href="/tools/brief-analyse">
-                <div className="rounded-2xl bg-muted px-3 py-2.5 text-sm font-medium cursor-pointer hover-elevate flex items-center justify-between gap-2">
-                  Brief begrijpen
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                </div>
-              </Link>
-              <Link href="/beleidsmonitor">
-                <div className="rounded-2xl bg-muted px-3 py-2.5 text-sm font-medium cursor-pointer hover-elevate flex items-center justify-between gap-2">
-                  Lokale besluiten
-                  <ChevronRight className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                </div>
-              </Link>
-            </div>
+            <p className="text-sm font-medium text-muted-foreground">Open taken</p>
+            <p className="mt-3 text-4xl font-black tracking-tight text-foreground">{openTaken}</p>
+            <p className="text-sm text-muted-foreground">subsidies & kansen</p>
+            <Link href="/kansen/aanbestedingen">
+              <div className="mt-4 rounded-2xl bg-orange-50 dark:bg-orange-950/40 px-3 py-2 text-sm font-medium text-orange-700 dark:text-orange-400 cursor-pointer hover-elevate">
+                {hogeImpact} hoge impact {hogeImpact === 1 ? "maatregel" : "maatregelen"}
+              </div>
+            </Link>
           </div>
         </div>
       </section>
