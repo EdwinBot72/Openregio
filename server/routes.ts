@@ -4651,6 +4651,37 @@ Geef een JSON-object terug in exact dit formaat:
   });
 
   // ── Google Bedrijfsprofiel check (geen auth — gebruikt in anonieme Basischeck) ──
+  interface GooglePlacesSearchResult {
+    place_id: string;
+    name: string;
+    rating?: number;
+    user_ratings_total?: number;
+    formatted_address?: string;
+  }
+  interface GooglePlacesSearchResponse {
+    results: GooglePlacesSearchResult[];
+    status: string;
+  }
+  interface GooglePlacesPhoto {
+    photo_reference: string;
+  }
+  interface GooglePlacesOpeningHours {
+    weekday_text?: string[];
+  }
+  interface GooglePlacesDetails {
+    name?: string;
+    rating?: number;
+    user_ratings_total?: number;
+    formatted_address?: string;
+    url?: string;
+    photos?: GooglePlacesPhoto[];
+    opening_hours?: GooglePlacesOpeningHours;
+  }
+  interface GooglePlacesDetailsResponse {
+    result?: GooglePlacesDetails;
+    status: string;
+  }
+
   app.post("/api/tools/google-places-check", async (req, res) => {
     const { bedrijfsnaam, stad } = req.body as { bedrijfsnaam?: string; stad?: string };
     if (!bedrijfsnaam?.trim() || !stad?.trim()) {
@@ -4666,23 +4697,24 @@ Geef een JSON-object terug in exact dit formaat:
       const query = `${bedrijfsnaam.trim()} ${stad.trim()}`;
       const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&language=nl&region=nl&key=${apiKey}`;
       const searchRes = await fetch(searchUrl, { signal: AbortSignal.timeout(8000) });
-      const searchData = await searchRes.json() as any;
+      const searchData = (await searchRes.json()) as GooglePlacesSearchResponse;
 
       if (!searchData.results?.length) {
         return res.json({ gevonden: false, geconfigureerd: true });
       }
 
-      const place = searchData.results[0] as any;
-      const placeId: string = place.place_id;
+      const place = searchData.results[0];
+      const placeId = place.place_id;
 
       const fieldsParam = "name,rating,user_ratings_total,photos,opening_hours,formatted_address,url";
       const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=${fieldsParam}&language=nl&key=${apiKey}`;
       const detailsRes = await fetch(detailsUrl, { signal: AbortSignal.timeout(8000) });
-      const detailsData = await detailsRes.json() as any;
-      const d = detailsData.result ?? {};
+      const detailsData = (await detailsRes.json()) as GooglePlacesDetailsResponse;
+      const d: GooglePlacesDetails = detailsData.result ?? {};
 
       const rating: number | null = d.rating ?? place.rating ?? null;
       const aantalReviews: number = d.user_ratings_total ?? place.user_ratings_total ?? 0;
+      const adres: string | null = d.formatted_address ?? place.formatted_address ?? null;
       const mapsUrl: string =
         d.url ?? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}&query_place_id=${placeId}`;
 
@@ -4692,9 +4724,10 @@ Geef een JSON-object terug in exact dit formaat:
         naam: d.name ?? place.name ?? bedrijfsnaam.trim(),
         rating,
         aantalReviews,
-        adres: d.formatted_address ?? place.formatted_address ?? null,
+        adres,
         heeftFotos: (d.photos?.length ?? 0) > 0,
         heeftOpeningstijden: !!(d.opening_hours?.weekday_text?.length),
+        heeftVolledigAdres: !!adres && adres.length > 0,
         mapsUrl,
       });
     } catch {

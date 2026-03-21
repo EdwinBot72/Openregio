@@ -26,6 +26,7 @@ interface PlacesResult {
   adres?: string | null;
   heeftFotos?: boolean;
   heeftOpeningstijden?: boolean;
+  heeftVolledigAdres?: boolean;
   mapsUrl?: string;
 }
 const SCAN_MESSAGES = [
@@ -489,7 +490,7 @@ export default function HomePage() {
                     placeholder={wizardMode === "regio" ? "Je stad of gemeente" : "Onderwerp (bijv. terrasvergunning, reclame-uiting)"}
                     value={field2}
                     onChange={(e) => setField2(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && !field3 && startWizard()}
+                    onKeyDown={(e) => e.key === "Enter" && (wizardMode !== "regio" || !field3.trim()) && startWizard()}
                     className="w-full px-4 py-4 rounded-xl text-slate-900 font-medium placeholder:text-slate-400 outline-none focus:ring-2 text-sm"
                     style={{ background: "#fff", border: "none", boxShadow: "0 2px 12px rgba(0,0,0,.15)" }}
                     data-testid="input-wizard-field2"
@@ -693,6 +694,14 @@ export default function HomePage() {
                               >
                                 {placesData.heeftOpeningstijden ? <CheckCircle2 className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
                                 {placesData.heeftOpeningstijden ? "Openingstijden ingevuld" : "Openingstijden ontbreken"}
+                              </span>
+                              <span
+                                className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full"
+                                style={placesData.heeftVolledigAdres ? { background: "#dcfce7", color: "#166534" } : { background: "#fee2e2", color: "#991b1b" }}
+                                data-testid="places-adres"
+                              >
+                                {placesData.heeftVolledigAdres ? <CheckCircle2 className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
+                                {placesData.heeftVolledigAdres ? "Volledig adres" : "Adres ontbreekt"}
                               </span>
                             </div>
                           </div>
