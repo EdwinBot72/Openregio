@@ -6,7 +6,8 @@ import {
   BarChart2, Users, ArrowRight, MapPin,
   Lock, Gavel, TrendingUp, AlertTriangle,
   CheckCircle2, RotateCcw, FileText, ChevronUp,
-  Sparkles, Clock, TrendingDown, Layers
+  Sparkles, Clock, TrendingDown, Layers,
+  Star, ExternalLink, Building2,
 } from "lucide-react";
 import logoImg from "@assets/optimized/logo.webp";
 import footerLogoImg from "@assets/optimized/footer-logo.webp";
@@ -15,6 +16,18 @@ import groupImg from "@assets/optimized/group.webp";
 
 type WizardStep = "input" | "scanning" | "rapport";
 type WizardMode = "regio" | "regelgeving";
+
+interface PlacesResult {
+  geconfigureerd: boolean;
+  gevonden: boolean;
+  naam?: string;
+  rating?: number | null;
+  aantalReviews?: number;
+  adres?: string | null;
+  heeftFotos?: boolean;
+  heeftOpeningstijden?: boolean;
+  mapsUrl?: string;
+}
 const SCAN_MESSAGES = [
   "Jouw regio in kaart brengen…",
   "Lokale signalen analyseren…",
@@ -103,12 +116,14 @@ export default function HomePage() {
   const [wizardMode, setWizardMode] = useState<WizardMode>("regio");
   const [field1, setField1] = useState(""); // beroep or branche
   const [field2, setField2] = useState(""); // stad or onderwerp
+  const [field3, setField3] = useState(""); // bedrijfsnaam (optioneel, regio-mode only)
   const [scanProgress, setScanProgress] = useState(0);
   const [scanMsgIdx, setScanMsgIdx] = useState(0);
   const [antwoord, setAntwoord] = useState("");
   const [score, setScore] = useState(0);
   const [sections, setSections] = useState<Section[]>([]);
   const [showFullText, setShowFullText] = useState(false);
+  const [placesData, setPlacesData] = useState<PlacesResult | null>(null);
   const scanIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const msgIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
@@ -134,6 +149,7 @@ export default function HomePage() {
     setWizardStep("scanning");
     setScanProgress(0);
     setScanMsgIdx(0);
+    setPlacesData(null);
 
     // Progress bar animation
     let prog = 0;
@@ -151,19 +167,31 @@ export default function HomePage() {
       setScanMsgIdx(msgIdx);
     }, 700);
 
-    // Call API
+    // Fire AI analysis + optional Google Places lookup in parallel
     try {
       const endpoint = wizardMode === "regio" ? "/api/regiobot/buurman" : "/api/regelgeving/check";
       const body = wizardMode === "regio"
         ? { beroep: field1.trim(), stad: field2.trim() }
         : { branche: field1.trim(), onderwerp: field2.trim() };
 
-      const res = await fetch(endpoint, {
+      const analyseFetch = fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const data = await res.json();
+
+      // Fire Google Places lookup in parallel (only regio-mode, only if bedrijfsnaam provided)
+      const placesFetch = (wizardMode === "regio" && field3.trim())
+        ? fetch("/api/tools/google-places-check", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ bedrijfsnaam: field3.trim(), stad: field2.trim() }),
+          })
+        : null;
+
+      const [analyseRes, placesRes] = await Promise.all([analyseFetch, placesFetch]);
+
+      const data = await analyseRes.json();
       const rawAntwoord = data.antwoord || data.error || "Analyse voltooid.";
       const computedScore = computeScore(rawAntwoord, field2 + field1);
       const computedSections = parseStructuredResponse(rawAntwoord, wizardMode);
@@ -171,6 +199,15 @@ export default function HomePage() {
       setAntwoord(rawAntwoord);
       setScore(computedScore);
       setSections(computedSections);
+
+      if (placesRes) {
+        try {
+          const pd = await placesRes.json() as PlacesResult;
+          setPlacesData(pd);
+        } catch {
+          setPlacesData(null);
+        }
+      }
 
       // Complete progress to 100, then switch step
       if (scanIntervalRef.current) clearInterval(scanIntervalRef.current);
@@ -192,11 +229,13 @@ export default function HomePage() {
     setWizardStep("input");
     setField1("");
     setField2("");
+    setField3("");
     setScanProgress(0);
     setScanMsgIdx(0);
     setAntwoord("");
     setSections([]);
     setShowFullText(false);
+    setPlacesData(null);
   };
 
   const messages = wizardMode === "regio" ? SCAN_MESSAGES : SCAN_MESSAGES_REGELGEVING;
@@ -450,11 +489,30 @@ export default function HomePage() {
                     placeholder={wizardMode === "regio" ? "Je stad of gemeente" : "Onderwerp (bijv. terrasvergunning, reclame-uiting)"}
                     value={field2}
                     onChange={(e) => setField2(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && startWizard()}
+                    onKeyDown={(e) => e.key === "Enter" && !field3 && startWizard()}
                     className="w-full px-4 py-4 rounded-xl text-slate-900 font-medium placeholder:text-slate-400 outline-none focus:ring-2 text-sm"
                     style={{ background: "#fff", border: "none", boxShadow: "0 2px 12px rgba(0,0,0,.15)" }}
                     data-testid="input-wizard-field2"
                   />
+                  {wizardMode === "regio" && (
+                    <div className="relative">
+                      <div className="flex items-center gap-2 mb-2 mt-1">
+                        <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,.18)" }} />
+                        <span className="text-xs font-semibold" style={{ color: "rgba(255,255,255,.5)" }}>Optioneel</span>
+                        <div className="flex-1 h-px" style={{ background: "rgba(255,255,255,.18)" }} />
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Bedrijfsnaam — voor Google-profielcheck (optioneel)"
+                        value={field3}
+                        onChange={(e) => setField3(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && startWizard()}
+                        className="w-full px-4 py-4 rounded-xl text-slate-900 font-medium placeholder:text-slate-400 outline-none focus:ring-2 text-sm"
+                        style={{ background: "rgba(255,255,255,.88)", border: "none", boxShadow: "0 2px 12px rgba(0,0,0,.12)" }}
+                        data-testid="input-wizard-field3"
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <button
@@ -545,6 +603,103 @@ export default function HomePage() {
                       <span className="text-xs mt-1" style={{ color: "rgba(255,255,255,.45)" }} data-testid="text-score-label">Zichtbaarheidsscore</span>
                     </div>
                   </div>
+
+                  {/* Google Bedrijfsprofiel kaart — alleen tonen als er Places-data is */}
+                  {placesData && (
+                    <div className="px-7 py-5 border-t border-slate-100">
+                      <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Google Bedrijfsprofiel</p>
+                      {!placesData.geconfigureerd ? (
+                        <div className="rounded-xl p-4 text-sm text-slate-400" style={{ background: "#f8fafd" }}>
+                          Google Places check is momenteel niet beschikbaar.
+                        </div>
+                      ) : !placesData.gevonden ? (
+                        <div className="flex items-start gap-3 rounded-xl p-4" style={{ background: "#fef9ec", border: "1px solid #fde68a" }} data-testid="places-not-found">
+                          <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color: "#b45309" }} />
+                          <div>
+                            <p className="text-sm font-bold" style={{ color: "#92400e" }}>Niet gevonden op Google</p>
+                            <p className="text-xs mt-0.5" style={{ color: "#b45309" }}>
+                              Geen Google-vermelding gevonden voor <strong>{field3}</strong> in {field2}. Dit is een aandachtspunt voor je online zichtbaarheid.
+                            </p>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="rounded-xl overflow-hidden" style={{ background: "#f0f7ff", border: "1px solid #bfdbfe" }} data-testid="places-found">
+                          {/* Header */}
+                          <div className="flex items-center justify-between gap-3 px-4 py-3" style={{ background: "#1a73e8" }}>
+                            <div className="flex items-center gap-2 min-w-0">
+                              <Building2 className="w-4 h-4 text-white flex-shrink-0" />
+                              <span className="font-bold text-white text-sm truncate" data-testid="places-name">{placesData.naam}</span>
+                            </div>
+                            {placesData.mapsUrl && (
+                              <a
+                                href={placesData.mapsUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="flex items-center gap-1 text-xs font-bold flex-shrink-0 px-2 py-1 rounded-lg"
+                                style={{ background: "rgba(255,255,255,.2)", color: "#fff" }}
+                                data-testid="link-places-maps"
+                              >
+                                <ExternalLink className="w-3 h-3" /> Bekijk
+                              </a>
+                            )}
+                          </div>
+
+                          {/* Body */}
+                          <div className="px-4 py-3 space-y-2">
+                            {/* Rating */}
+                            <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-0.5">
+                                {[1,2,3,4,5].map((n) => {
+                                  const filled = placesData.rating != null && n <= Math.round(placesData.rating);
+                                  return (
+                                    <Star key={n} className="w-3.5 h-3.5" fill={filled ? "#f59e0b" : "none"} style={{ color: filled ? "#f59e0b" : "#d1d5db" }} />
+                                  );
+                                })}
+                              </div>
+                              {placesData.rating != null ? (
+                                <span className="text-sm font-bold" style={{ color: "#1e40af" }} data-testid="places-rating">
+                                  {placesData.rating.toFixed(1)}
+                                </span>
+                              ) : (
+                                <span className="text-xs text-slate-400">Nog geen beoordelingen</span>
+                              )}
+                              {(placesData.aantalReviews ?? 0) > 0 && (
+                                <span className="text-xs text-slate-400" data-testid="places-reviews">({placesData.aantalReviews} reviews)</span>
+                              )}
+                            </div>
+
+                            {/* Adres */}
+                            {placesData.adres && (
+                              <div className="flex items-start gap-2">
+                                <MapPin className="w-3.5 h-3.5 flex-shrink-0 mt-0.5 text-slate-400" />
+                                <span className="text-xs text-slate-600" data-testid="places-address">{placesData.adres}</span>
+                              </div>
+                            )}
+
+                            {/* Kwaliteitsindicatoren */}
+                            <div className="flex flex-wrap gap-2 pt-1">
+                              <span
+                                className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full"
+                                style={placesData.heeftFotos ? { background: "#dcfce7", color: "#166534" } : { background: "#fee2e2", color: "#991b1b" }}
+                                data-testid="places-fotos"
+                              >
+                                {placesData.heeftFotos ? <CheckCircle2 className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
+                                {placesData.heeftFotos ? "Foto's aanwezig" : "Geen foto's"}
+                              </span>
+                              <span
+                                className="flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full"
+                                style={placesData.heeftOpeningstijden ? { background: "#dcfce7", color: "#166534" } : { background: "#fee2e2", color: "#991b1b" }}
+                                data-testid="places-openingstijden"
+                              >
+                                {placesData.heeftOpeningstijden ? <CheckCircle2 className="w-3 h-3" /> : <AlertTriangle className="w-3 h-3" />}
+                                {placesData.heeftOpeningstijden ? "Openingstijden ingevuld" : "Openingstijden ontbreken"}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
 
                   {/* Analyse secties */}
                   <div className="px-7 py-5">
