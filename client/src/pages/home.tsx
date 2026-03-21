@@ -244,29 +244,29 @@ export default function HomePage() {
                   Voor Nederlandse ondernemers
                 </span>
                 <h1 className="font-black leading-tight mb-5 text-slate-900" style={{ fontSize: "clamp(28px, 3.8vw, 52px)", letterSpacing: "-1.5px" }} data-testid="text-hero-title">
-                  Grip op regels, zichtbaarheid en kansen{" "}
-                  <span style={{ color: "#1f5fae" }}>in je regio.</span>
+                  Meer zichtbaarheid. Sneller overzicht.{" "}
+                  <span style={{ color: "#1f5fae" }}>Sterker ondernemen in je regio.</span>
                 </h1>
                 <p className="text-slate-500 text-lg leading-relaxed mb-7" style={{ maxWidth: "44ch" }} data-testid="text-hero-subtitle">
-                  OpenRegio is een platform voor lokale ondernemers. Je volgt wat er verandert in jouw regio, wordt beter gevonden en pakt kansen die anders aan je voorbijgaan.
+                  OpenRegio is een toolkit voor lokale ondernemers die beter gevonden willen worden, sneller overzicht willen en makkelijker willen samenwerken in hun regio.
                 </p>
 
                 {/* ── Drie pijlers — direct zichtbaar ── */}
                 <div className="grid grid-cols-3 gap-3 mb-8" data-testid="strip-pijlers">
                   <div className="rounded-xl p-3 border border-slate-100" style={{ background: "rgba(31,95,174,.05)" }}>
-                    <Gavel className="w-4 h-4 mb-1.5" style={{ color: "#1f5fae" }} />
-                    <p className="text-xs font-black text-slate-800 leading-snug">Regelgeving volgen</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">Zie eerder wat verandert</p>
+                    <BarChart2 className="w-4 h-4 mb-1.5" style={{ color: "#1f5fae" }} />
+                    <p className="text-xs font-black text-slate-800 leading-snug">Zichtbaarheid</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">Beter gevonden worden</p>
                   </div>
                   <div className="rounded-xl p-3 border border-slate-100" style={{ background: "rgba(242,138,26,.05)" }}>
-                    <BarChart2 className="w-4 h-4 mb-1.5" style={{ color: "#f28a1a" }} />
-                    <p className="text-xs font-black text-slate-800 leading-snug">Gevonden worden</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">Lokale zichtbaarheid</p>
+                    <Gavel className="w-4 h-4 mb-1.5" style={{ color: "#f28a1a" }} />
+                    <p className="text-xs font-black text-slate-800 leading-snug">Regels & signalen</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">Zie wat impact heeft</p>
                   </div>
                   <div className="rounded-xl p-3 border border-slate-100" style={{ background: "rgba(5,150,105,.05)" }}>
                     <Users className="w-4 h-4 mb-1.5" style={{ color: "#059669" }} />
-                    <p className="text-xs font-black text-slate-800 leading-snug">Kansen pakken</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">Regio-netwerk & deals</p>
+                    <p className="text-xs font-black text-slate-800 leading-snug">Samenwerking</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">Kansen in de regio</p>
                   </div>
                 </div>
 
@@ -275,7 +275,7 @@ export default function HomePage() {
                     Start de Basischeck <ArrowRight className="w-4 h-4" />
                   </a>
                   <a href="#member" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full text-sm font-bold text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors" data-testid="button-hero-lid">
-                    Bekijk lidmaatschap
+                    Bekijk abonnementen
                   </a>
                 </div>
                 <p className="text-xs text-slate-400 flex items-center gap-1.5" data-testid="text-hero-trust">
@@ -305,12 +305,12 @@ export default function HomePage() {
           <div className="max-w-6xl mx-auto px-6">
             {/* Kop + intro — gecentreerd */}
             <div className="max-w-2xl mx-auto text-center mb-16">
-              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#f28a1a" }}>Het probleem</span>
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#f28a1a" }}>Waarom OpenRegio</span>
               <h2 className="font-black mt-4 mb-6 text-white" style={{ fontSize: "clamp(24px, 2.8vw, 40px)", letterSpacing: "-0.6px", lineHeight: 1.2 }} data-testid="text-probleem-title">
-                Veel ondernemers missen signalen die direct impact hebben op hun bedrijf.
+                Ondernemen is al druk genoeg.
               </h2>
               <p className="leading-relaxed" style={{ fontSize: "16px", color: "rgba(255,255,255,0.65)" }}>
-                Regels veranderen. Besluiten worden genomen. Lokale kansen ontstaan en verdwijnen. Veel daarvan is openbaar, maar verspreid, technisch of te laat zichtbaar. Ondertussen kost lage zichtbaarheid gewoon klanten.
+                Je wilt geen wirwar van losse tools, onduidelijke signalen of onnodig uitzoekwerk. Met OpenRegio krijg je één plek waar zichtbaarheid, regionale ontwikkelingen, openbare regels en ondernemerskansen samenkomen. Zo zie je sneller waar actie nodig is, waar kansen liggen en hoe je verder kunt.
               </p>
             </div>
 
@@ -318,19 +318,19 @@ export default function HomePage() {
             <div className="grid md:grid-cols-3 gap-5 mb-16">
               {[
                 {
-                  Icon: Clock,
-                  label: "Te laat",
-                  text: "Je ziet relevante veranderingen vaak pas als het al speelt",
-                },
-                {
                   Icon: TrendingDown,
-                  label: "Gemiste omzet",
-                  text: "Je online zichtbaarheid laat omzet liggen",
+                  label: "Te weinig zichtbaarheid",
+                  text: "Je laat omzet en kansen liggen die lokaal beschikbaar zijn",
                 },
                 {
                   Icon: Layers,
-                  label: "Versnipperd",
-                  text: "Lokale kansen blijven versnipperd en onbenut",
+                  label: "Te weinig overzicht",
+                  text: "Signalen, regels en kansen zijn verspreid en onduidelijk",
+                },
+                {
+                  Icon: Clock,
+                  label: "Te veel losse informatie",
+                  text: "Lokale ontwikkelingen zijn moeilijk bij te houden",
                 },
               ].map(({ Icon, label, text }, i) => (
                 <div
@@ -367,16 +367,17 @@ export default function HomePage() {
         <section id="oplossingen" className="py-24" style={{ background: "#f8fafd" }} data-testid="section-oplossingen">
           <div className="max-w-6xl mx-auto px-6">
             <div className="text-center mb-14">
-              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#1f5fae" }}>Oplossingen</span>
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#1f5fae" }}>Wat OpenRegio doet</span>
               <h2 className="font-black mt-3 text-slate-900" style={{ fontSize: "clamp(22px, 2.8vw, 36px)", letterSpacing: "-0.6px" }} data-testid="text-oplossingen-title">
-                Eén platform. Drie manieren om sterker te staan.
+                Eén toolkit. Vier manieren om sterker te ondernemen.
               </h2>
             </div>
-            <div className="grid md:grid-cols-3 gap-6" data-testid="grid-pijlers">
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6" data-testid="grid-pijlers">
               {[
-                { accent: "#1f5fae", icon: Gavel,    label: "Inzicht",       title: "Zie eerder wat verandert",       desc: "Volg regelgeving, openbare documenten en signalen die relevant zijn voor jouw onderneming, branche of regio." },
-                { accent: "#f28a1a", icon: BarChart2, label: "Zichtbaarheid", title: "Word beter gevonden in je regio", desc: "Analyseer hoe zichtbaar jouw bedrijf is en ontdek waar je lokale kansen laat liggen." },
-                { accent: "#059669", icon: Users,     label: "RegioVoordeel", title: "Pak meer kansen via je netwerk",  desc: "Kom in beeld binnen een regionaal ondernemersnetwerk — zichtbaarheid, samenwerking en doorverwijzing in één." },
+                { accent: "#1f5fae", icon: BarChart2, label: "Zichtbaarheid",      title: "Word beter gevonden in je regio",          desc: "Zie waar jouw bedrijf online kansen laat liggen en hoe je beter gevonden kunt worden in jouw regio." },
+                { accent: "#f28a1a", icon: Layers,    label: "Overzicht",           title: "Sneller grip op wat relevant is",           desc: "Krijg sneller grip op ontwikkelingen, signalen en informatie die relevant zijn voor jouw onderneming." },
+                { accent: "#7c3aed", icon: Gavel,     label: "Regels en signalen",  title: "Zie wat impact heeft op jouw bedrijf",     desc: "Maak openbare regels, besluiten en signalen inzichtelijker, zodat je sneller ziet wat ertoe doet." },
+                { accent: "#059669", icon: Users,     label: "Samenwerking",        title: "Deel kansen met andere ondernemers",        desc: "Deel kansen, initiatieven, events en lokale acties makkelijker met andere ondernemers in jouw regio." },
               ].map((p, i) => (
                 <div key={i} className="bg-white rounded-2xl p-7 border border-slate-100" style={{ boxShadow: "0 2px 16px rgba(0,0,0,.05)" }} data-testid={`card-pijler-${i}`}>
                   <div className="h-1 mb-6 -mx-7 -mt-7 rounded-t-2xl" style={{ background: p.accent }} />
@@ -650,18 +651,20 @@ export default function HomePage() {
                 <img src={groupImg} alt="Lokale ondernemers in de regio" className="w-full object-cover" loading="lazy" style={{ height: "420px", objectPosition: "center top" }} />
               </div>
               <div>
-                <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#1f5fae" }}>Over OpenRegio</span>
+                <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#1f5fae" }}>Voor wie OpenRegio is</span>
                 <h2 className="font-black mt-3 mb-5 text-slate-900" style={{ fontSize: "clamp(22px, 2.6vw, 34px)", letterSpacing: "-0.6px" }} data-testid="text-over-ons-title">
-                  Gebouwd voor ondernemers die sterker willen staan in hun regio.
+                  Voor lokale ondernemers die vooruit willen zonder onnodig gedoe.
                 </h2>
                 <p className="text-slate-500 leading-relaxed mb-6">
-                  OpenRegio is een coöperatie van en voor lokale ondernemers. Geen zoveelste advertentieplatform, maar een platform dat je helpt om eerder te zien wat er speelt, beter gevonden te worden en minder afhankelijk te zijn van grote tussenlagen.
+                  OpenRegio is er voor ondernemers die sneller willen zien wat relevant is voor hun bedrijf — en daar ook iets mee kunnen doen.
                 </p>
                 <ul className="space-y-3 mb-8">
                   {[
-                    "Niet alleen zichtbaar zijn, maar slimmer positioneren",
-                    "Eerder zien wat eraan komt — niet pas reageren",
-                    "Bouwen aan je eigen positie, niet leunen op Big Tech",
+                    "Beter gevonden willen worden",
+                    "Sneller overzicht willen over wat relevant is",
+                    "Minder tijd kwijt willen zijn aan uitzoekwerk",
+                    "Signalen en kansen in hun regio niet willen missen",
+                    "Makkelijker willen samenwerken met andere ondernemers",
                   ].map((text, i) => (
                     <li key={i} className="flex items-start gap-3">
                       <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: "rgba(31,95,174,.1)", color: "#1f5fae" }}>
@@ -679,11 +682,37 @@ export default function HomePage() {
           </div>
         </section>
 
+        {/* ─── HOE HET WERKT ─── */}
+        <section className="py-24 border-t border-slate-100" style={{ background: "#f8fafd" }} data-testid="section-hoe-werkt">
+          <div className="max-w-4xl mx-auto px-6">
+            <div className="text-center mb-14">
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#1f5fae" }}>Hoe het werkt</span>
+              <h2 className="font-black mt-3 text-slate-900" style={{ fontSize: "clamp(22px, 2.6vw, 34px)", letterSpacing: "-0.6px" }} data-testid="text-hoe-werkt-title">
+                In vier stappen aan de slag
+              </h2>
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[
+                { n: "1", title: "Start met de Basischeck", desc: "Ontdek waar jouw bedrijf online kansen mist en waar sneller winst te behalen is." },
+                { n: "2", title: "Krijg overzicht", desc: "Zie welke signalen, ontwikkelingen, regels en kansen relevant zijn voor jouw onderneming en regio." },
+                { n: "3", title: "Zet vervolgstappen", desc: "Werk verder met analyses, RegioBot, briefinzichten en concrete actiepunten." },
+                { n: "4", title: "Schakel extra hulp in", desc: "Heb je meer nodig dan inzicht alleen? Pak door met aanvullende betaalde hulp voor onderzoek en verbeteringen." },
+              ].map(({ n, title, desc }, i) => (
+                <div key={i} className="bg-white rounded-2xl p-6 border border-slate-100" style={{ boxShadow: "0 2px 12px rgba(0,0,0,.04)" }} data-testid={`stap-${i}`}>
+                  <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-4 font-black text-sm text-white" style={{ background: "#1f5fae" }}>{n}</div>
+                  <h3 className="font-black text-slate-900 mb-2" style={{ fontSize: "15px" }}>{title}</h3>
+                  <p className="text-slate-500 text-sm leading-relaxed">{desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* ─── MEMBERSHIP ─── */}
-        <section id="member" className="py-24" style={{ background: "#f8fafd" }} data-testid="section-member">
+        <section id="member" className="py-24" style={{ background: "#fff" }} data-testid="section-member">
           <div className="max-w-3xl mx-auto px-6">
             <div className="text-center mb-12">
-              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#1f5fae" }}>Lidmaatschap</span>
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#1f5fae" }}>Abonnementen</span>
               <h2 className="font-black mt-3 text-slate-900" style={{ fontSize: "clamp(22px, 2.6vw, 34px)", letterSpacing: "-0.6px" }} data-testid="text-member-title">
                 Kies wat past bij jouw fase
               </h2>
@@ -692,7 +721,7 @@ export default function HomePage() {
             <div className="grid sm:grid-cols-2 gap-5">
               <div className="bg-white rounded-2xl p-7 border border-slate-100" style={{ boxShadow: "0 2px 12px rgba(0,0,0,.05)" }} data-testid="card-plan-basis">
                 <h3 className="font-black text-slate-900 mb-1" style={{ fontSize: "20px" }}>Basis</h3>
-                <p className="text-slate-400 text-xs mb-5">Voor ondernemers die meedoen en zichtbaar worden</p>
+                <p className="text-slate-400 text-xs mb-5">Voor ondernemers die zichtbaar willen zijn en sneller overzicht zoeken</p>
                 <div className="mb-6" style={{ fontSize: "36px", fontWeight: 900, letterSpacing: "-1px", color: "#0f172a" }}>
                   €12,95 <span className="text-slate-400 font-medium" style={{ fontSize: "14px" }}>/maand</span>
                 </div>
@@ -700,7 +729,7 @@ export default function HomePage() {
                   Kies Basis
                 </Link>
                 <ul className="space-y-2.5">
-                  {["Profiel & aanwezigheid op platform", "Basis zichtbaarheid in de regio", "Eerste signalen en updates", "Brief analyse (beperkt)", "RegioBot (beperkt)"].map((f, i) => (
+                  {["Profiel en aanwezigheid op het platform", "Basis zichtbaarheid in de regio", "Eerste signalen en updates", "Korte briefanalyse", "RegioBot basis"].map((f, i) => (
                     <li key={i} className="flex items-center gap-2.5">
                       <Check className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#1f5fae" }} />
                       <span className="text-slate-600 text-sm">{f}</span>
@@ -712,7 +741,7 @@ export default function HomePage() {
               <div className="bg-white rounded-2xl p-7 relative" style={{ border: "1.5px solid #1f5fae", boxShadow: "0 8px 32px rgba(31,95,174,.15)" }} data-testid="card-plan-pro">
                 <div className="absolute -top-3 left-7 px-3 py-1 rounded-full text-xs font-black text-white" style={{ background: "#1f5fae" }}>Aanbevolen</div>
                 <h3 className="font-black text-slate-900 mb-1" style={{ fontSize: "20px" }}>Pro</h3>
-                <p className="text-slate-400 text-xs mb-5">Voor ondernemers die actief informatievoordeel willen</p>
+                <p className="text-slate-400 text-xs mb-5">Voor ondernemers die actief informatievoordeel en meer grip willen</p>
                 <div className="mb-6" style={{ fontSize: "36px", fontWeight: 900, letterSpacing: "-1px", color: "#0f172a" }}>
                   €24 <span className="text-slate-400 font-medium" style={{ fontSize: "14px" }}>/maand</span>
                 </div>
@@ -720,7 +749,7 @@ export default function HomePage() {
                   Kies Pro
                 </Link>
                 <ul className="space-y-2.5">
-                  {["Alles van Basis", "Diepere zichtbaarheidsscans", "Regelgeving en Woo-inzichten", "Brief analyse (volledig)", "RegioBot onbeperkt", "Dossiers bouwen en beheren"].map((f, i) => (
+                  {["Alles van Basis", "Diepere zichtbaarheidsscans", "Regelgeving en Woo-inzichten", "Volledige briefanalyse", "RegioBot onbeperkt", "Dossiers bouwen en beheren"].map((f, i) => (
                     <li key={i} className="flex items-center gap-2.5">
                       <Check className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#1f5fae" }} />
                       <span className="text-slate-600 text-sm">{f}</span>
@@ -728,6 +757,17 @@ export default function HomePage() {
                   ))}
                 </ul>
               </div>
+            </div>
+            {/* Aanvullende betaalde hulp */}
+            <div className="mt-8 rounded-2xl p-7 border border-slate-100 bg-slate-50" data-testid="card-extra-hulp">
+              <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Aanvullende betaalde hulp</p>
+              <p className="font-black text-slate-900 mb-2" style={{ fontSize: "16px" }}>Meer nodig dan een scan of overzicht?</p>
+              <p className="text-slate-500 text-sm leading-relaxed mb-4">
+                OpenRegio is de toolkit en het startpunt. Voor ondernemers die verder willen doorpakken is aanvullende betaalde hulp beschikbaar voor verdiepend website-onderzoek, websiteverbetering, technische reparaties en optimalisatie van online zichtbaarheid.
+              </p>
+              <a href="#contact" className="inline-flex items-center gap-1.5 text-sm font-bold" style={{ color: "#1f5fae" }} data-testid="link-extra-hulp">
+                Meer informatie <ChevronRight className="w-4 h-4" />
+              </a>
             </div>
             <p className="text-center mt-7 text-sm text-slate-400">
               Twijfel je nog?{" "}
@@ -782,10 +822,10 @@ export default function HomePage() {
           <div className="absolute inset-0 opacity-10" style={{ backgroundImage: `url(${streetImg})`, backgroundSize: "cover", backgroundPosition: "center" }} />
           <div className="relative max-w-2xl mx-auto px-6 text-center">
             <h2 className="font-black text-white mb-4" style={{ fontSize: "clamp(24px, 3vw, 40px)", letterSpacing: "-0.8px" }} data-testid="text-cta-title">
-              Start vandaag met de Basischeck.
+              Alles wat speelt rond zichtbaarheid, overzicht en regionale kansen op één plek.
             </h2>
             <p className="mb-8 text-base leading-relaxed" style={{ color: "rgba(255,255,255,.65)" }}>
-              In een paar stappen zie je waar jouw bedrijf staat — en welke kansen je nu laat liggen.
+              OpenRegio helpt lokale ondernemers om sneller te zien wat relevant is, slimmer te handelen en sterker te staan in hun regio. Start vandaag.
             </p>
             <form className="flex flex-col sm:flex-row gap-3 justify-center" onSubmit={(e) => {
               e.preventDefault();
