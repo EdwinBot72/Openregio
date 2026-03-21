@@ -190,9 +190,11 @@ export default function HomePage() {
           })
         : null;
 
-      const [analyseRes, placesRes] = await Promise.all([analyseFetch, placesFetch]);
+      // Use allSettled so a Places network failure can never block the AI analysis
+      const [analyseSettled, placesSettled] = await Promise.allSettled([analyseFetch, placesFetch]);
 
-      const data = await analyseRes.json();
+      if (analyseSettled.status === "rejected") throw analyseSettled.reason;
+      const data = await analyseSettled.value.json();
       const rawAntwoord = data.antwoord || data.error || "Analyse voltooid.";
       const computedScore = computeScore(rawAntwoord, field2 + field1);
       const computedSections = parseStructuredResponse(rawAntwoord, wizardMode);
@@ -201,9 +203,9 @@ export default function HomePage() {
       setScore(computedScore);
       setSections(computedSections);
 
-      if (placesRes) {
+      if (placesSettled.status === "fulfilled" && placesSettled.value) {
         try {
-          const pd = await placesRes.json() as PlacesResult;
+          const pd = await placesSettled.value.json() as PlacesResult;
           setPlacesData(pd);
         } catch {
           setPlacesData(null);
