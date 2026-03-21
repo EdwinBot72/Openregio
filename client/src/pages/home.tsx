@@ -205,8 +205,13 @@ export default function HomePage() {
 
       if (placesSettled.status === "fulfilled" && placesSettled.value) {
         try {
-          const pd = await placesSettled.value.json() as PlacesResult;
-          setPlacesData(pd);
+          const pd = await placesSettled.value.json() as PlacesResult & { error?: string };
+          // Only display card when API responded without a hard error
+          // (error with geconfigureerd:false is shown as "niet beschikbaar")
+          if (!pd.error || pd.geconfigureerd === false) {
+            setPlacesData(pd);
+          }
+          // 502/429 errors with gevonden:false would misleadingly show "not found" — skip those
         } catch {
           setPlacesData(null);
         }

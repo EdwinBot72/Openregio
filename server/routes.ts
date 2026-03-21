@@ -4697,9 +4697,18 @@ Geef een JSON-object terug in exact dit formaat:
       const query = `${bedrijfsnaam.trim()} ${stad.trim()}`;
       const searchUrl = `https://maps.googleapis.com/maps/api/place/textsearch/json?query=${encodeURIComponent(query)}&language=nl&region=nl&key=${apiKey}`;
       const searchRes = await fetch(searchUrl, { signal: AbortSignal.timeout(8000) });
+      if (!searchRes.ok) {
+        return res.status(502).json({ error: "Google Places Text Search niet bereikbaar", geconfigureerd: true, gevonden: false });
+      }
       const searchData = (await searchRes.json()) as GooglePlacesSearchResponse;
 
-      if (!searchData.results?.length) {
+      if (searchData.status === "REQUEST_DENIED" || searchData.status === "INVALID_REQUEST") {
+        return res.status(503).json({ error: `Google Places API afgewezen (${searchData.status})`, geconfigureerd: false });
+      }
+      if (searchData.status === "OVER_QUERY_LIMIT") {
+        return res.status(429).json({ error: "Google Places quotum overschreden", geconfigureerd: true, gevonden: false });
+      }
+      if (!searchData.results?.length || searchData.status === "ZERO_RESULTS") {
         return res.json({ gevonden: false, geconfigureerd: true });
       }
 
@@ -4709,7 +4718,25 @@ Geef een JSON-object terug in exact dit formaat:
       const fieldsParam = "name,rating,user_ratings_total,photos,opening_hours,formatted_address,url";
       const detailsUrl = `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&fields=${fieldsParam}&language=nl&key=${apiKey}`;
       const detailsRes = await fetch(detailsUrl, { signal: AbortSignal.timeout(8000) });
+      if (!detailsRes.ok) {
+        return res.status(502).json({ error: "Google Places Details niet bereikbaar", geconfigureerd: true, gevonden: false });
+      }
       const detailsData = (await detailsRes.json()) as GooglePlacesDetailsResponse;
+      if (detailsData.status !== "OK") {
+        // Fall back to basic search result data when details fail
+        return res.json({
+          geconfigureerd: true,
+          gevonden: true,
+          naam: place.name,
+          rating: place.rating ?? null,
+          aantalReviews: place.user_ratings_total ?? 0,
+          adres: place.formatted_address ?? null,
+          heeftFotos: false,
+          heeftOpeningstijden: false,
+          heeftVolledigAdres: !!(place.formatted_address),
+          mapsUrl: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(query)}&query_place_id=${placeId}`,
+        });
+      }
       const d: GooglePlacesDetails = detailsData.result ?? {};
 
       const rating: number | null = d.rating ?? place.rating ?? null;
