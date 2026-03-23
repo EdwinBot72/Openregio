@@ -11,6 +11,7 @@ import {
   Lightbulb, CheckCircle2, Circle, ArrowRight, Bot, FileText,
   Globe, Users, Zap, Landmark, Shield, Star, Clock, MapPin,
   BookOpen, TrendingUp, ChevronRight, Sparkles, Target,
+  Scale, Network,
 } from "lucide-react";
 import type { IntelSignaal } from "@shared/schema";
 
@@ -214,6 +215,46 @@ export default function AanDeSlagPage() {
               Actuele signalen <TrendingUp className="ml-2 h-4 w-4" />
             </Button>
           </Link>
+        </div>
+      </div>
+
+      {/* Wat is OpenRegio? */}
+      <div data-testid="section-wat-is-openregio">
+        <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-3">Wat is OpenRegio?</h2>
+        <div className="grid sm:grid-cols-3 gap-4">
+          <div className="rounded-xl border p-5 space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center">
+              <Scale className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+            </div>
+            <div>
+              <p className="font-semibold text-sm mb-1">Grip op regelgeving</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                OpenRegio maakt gemeentelijke verordeningen, WOO-documenten en lokaal beleid inzichtelijk. Je hoeft geen jurist te zijn — wij vertalen de regels naar wat ze voor jouw bedrijf betekenen.
+              </p>
+            </div>
+          </div>
+          <div className="rounded-xl border p-5 space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-green-50 dark:bg-green-950/40 flex items-center justify-center">
+              <Network className="h-5 w-5 text-green-600 dark:text-green-400" />
+            </div>
+            <div>
+              <p className="font-semibold text-sm mb-1">Coöperatief netwerk</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Als lid ben je mede-eigenaar van de coöperatie. Je hebt stemrecht, toegang tot het ondernemersnetwerk in jouw regio en kunt samenwerken met andere lokale ondernemers.
+              </p>
+            </div>
+          </div>
+          <div className="rounded-xl border p-5 space-y-3">
+            <div className="w-10 h-10 rounded-xl bg-purple-50 dark:bg-purple-950/40 flex items-center justify-center">
+              <Bot className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+            </div>
+            <div>
+              <p className="font-semibold text-sm mb-1">AI die werkt voor jou</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                RegioBot analyseert WOO-documenten, gemeentebesluiten en correspondentie. Stel een vraag en krijg altijd een antwoord met bronverwijzing — zodat je weet waar je aan toe bent.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
 
