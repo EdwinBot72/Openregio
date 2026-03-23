@@ -22,6 +22,7 @@ import {
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import type { IntelSignaal } from "@shared/schema";
 
 const MODULE_CARDS = [
@@ -101,6 +102,7 @@ const CATEGORIE_KLEUREN: Record<string, string> = {
 };
 
 export default function DashboardPage() {
+  usePageTitle("Dashboard");
   const { user, isLoading: authLoading } = useAuth();
 
   const { data: bedrijfsprofiel } = useQuery<{ naam: string } | null>({

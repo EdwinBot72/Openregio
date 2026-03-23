@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -49,6 +50,7 @@ const SNELLE_ZOEKOPDRACHTEN = [
 ];
 
 export default function RegelgevingVerkennerPage() {
+  usePageTitle("Wetgeving & Regelgeving");
   const { user } = useAuth();
   const { toast } = useToast();
   const isPro = (user as any)?.plan === "pro" || (user as any)?.role === "admin" || (user as any)?.role === "master";

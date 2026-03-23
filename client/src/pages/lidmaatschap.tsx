@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Check, ExternalLink } from "lucide-react";
@@ -60,6 +61,7 @@ const plans: Plan[] = [
 ];
 
 export default function LidmaatschapPage() {
+  usePageTitle("Lidmaatschap");
   const searchParams = useSearch();
   const params = new URLSearchParams(searchParams);
   const urlPlan = params.get("plan");

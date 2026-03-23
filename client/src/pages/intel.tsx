@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -114,6 +115,7 @@ function SignaalSkeleton() {
 }
 
 export default function IntelPage() {
+  usePageTitle("Regio Intel");
   const { user } = useAuth();
   const [actieveFilter, setActieveFilter] = useState<FilterKey>("alle");
 

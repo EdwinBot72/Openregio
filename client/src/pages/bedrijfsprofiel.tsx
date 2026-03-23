@@ -1,4 +1,5 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { insertBedrijfsprofielSchema, type InsertBedrijfsprofiel, type Bedrijfsprofiel, PROVINCES_GEMEENTEN, PROVINCES } from "@shared/schema";
@@ -49,6 +50,7 @@ const formSchema = insertBedrijfsprofielSchema.omit({ gebruikerId: true });
 type FormData = z.infer<typeof formSchema>;
 
 export default function BedrijfsprofielPage() {
+  usePageTitle("Bedrijfsprofiel");
   const { toast } = useToast();
   const { user } = useAuth();
 

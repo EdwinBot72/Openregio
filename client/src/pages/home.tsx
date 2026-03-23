@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
 import {
@@ -109,6 +110,7 @@ function computeScore(antwoord: string, seed: string): number {
 }
 
 export default function HomePage() {
+  usePageTitle("Lokale samenwerking voor ondernemers");
   const [showCookieBanner, setShowCookieBanner] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 

@@ -1,3 +1,4 @@
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Link, useLocation, useSearch } from "wouter";
@@ -48,6 +49,7 @@ const PLAN_FEATURES = {
 };
 
 export default function RegisterPage() {
+  usePageTitle("Registreren");
   const searchParams = useSearch();
   const urlParams = new URLSearchParams(searchParams);
   const planParam = urlParams.get("plan");

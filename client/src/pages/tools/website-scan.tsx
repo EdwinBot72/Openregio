@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { usePageTitle } from "@/hooks/usePageTitle";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,6 +61,7 @@ function prioriteitStyle(p: string): string {
 }
 
 export default function WebsiteScanPage() {
+  usePageTitle("Website Scan");
   const { user } = useAuth();
   const { toast } = useToast();
   const isPro = (user as any)?.plan === "pro" || (user as any)?.role === "admin" || (user as any)?.role === "master";
