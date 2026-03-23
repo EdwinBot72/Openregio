@@ -17,6 +17,8 @@ import {
   ScanText,
   Signal,
   Sparkles,
+  Store,
+  ArrowLeftRight,
 } from "lucide-react";
 
 export type NavSubItem = {
@@ -94,6 +96,15 @@ export const APP_NAV: NavSection[] = [
       { title: "Regio Deals", url: "/kansen/regio-deals", icon: Landmark },
       { title: "Community", url: "/community", icon: Share2 },
       { title: "Privacy & zichtbaarheid", url: "/pro/visibility-settings", icon: Shield, proOnly: true },
+    ],
+  },
+  {
+    id: "marktplaats",
+    title: "Lokale markt",
+    icon: Store,
+    sub: [
+      { title: "Koop Lokaal", url: "/koop-lokaal", icon: Store },
+      { title: "Lokale Marktplaats", url: "/lokaal-marktplaats", icon: ArrowLeftRight },
     ],
   },
 ];

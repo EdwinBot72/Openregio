@@ -4768,25 +4768,27 @@ Geef een JSON-object terug in exact dit formaat:
   let nieuwsTipCacheData: { tip: string; bronnen: string[]; bronUrl?: string; datum: string; fallback?: boolean } | null = null;
 
   async function fetchNieuwsTipVandaag(): Promise<{ tip: string; bronnen: string[]; bronUrl?: string }> {
-    // Haal RSS-feeds op van NOS (algemeen + economie)
+    // Haal RSS-feeds op: NOS algemeen, economie, binnenland + NU.nl
     const feedUrls = [
-      "https://feeds.nos.nl/nosnieuwsalgemeen",
-      "https://feeds.nos.nl/nosnieuwseconomie",
+      { url: "https://feeds.nos.nl/nosnieuwsalgemeen", bron: "NOS.nl" },
+      { url: "https://feeds.nos.nl/nosnieuwseconomie", bron: "NOS.nl" },
+      { url: "https://feeds.nos.nl/nosnieuwsbinnenland", bron: "NOS.nl" },
+      { url: "https://www.nu.nl/rss/Economie", bron: "NU.nl" },
+      { url: "https://www.nu.nl/rss/Algemeen", bron: "NU.nl" },
     ];
 
-    const items: { titel: string; url?: string }[] = [];
-    const bronnen: string[] = [];
+    const items: { titel: string; url?: string; bron: string }[] = [];
+    const bronnenSet = new Set<string>();
     let eersteArtikelUrl: string | undefined;
 
-    for (const url of feedUrls) {
+    for (const feed of feedUrls) {
       try {
-        const resp = await fetch(url, { signal: AbortSignal.timeout(6000) });
+        const resp = await fetch(feed.url, { signal: AbortSignal.timeout(6000) });
         if (!resp.ok) continue;
         const xml = await resp.text();
-        // Extract title + link from each <item> block
         const itemRegex = /<item>([\s\S]*?)<\/item>/g;
         let itemMatch: RegExpExecArray | null;
-        while ((itemMatch = itemRegex.exec(xml)) !== null && items.length < 12) {
+        while ((itemMatch = itemRegex.exec(xml)) !== null && items.length < 18) {
           const itemBlock = itemMatch[1];
           const titleMatch = /<title>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/i.exec(itemBlock);
           const linkMatch = /<link>(?:<!\[CDATA\[)?(https?:\/\/[^\s<]+?)(?:\]\]>)?<\/link>/i.exec(itemBlock);
@@ -4794,8 +4796,8 @@ Geef een JSON-object terug in exact dit formaat:
             const titel = titleMatch[1].trim();
             const artikelUrl = linkMatch?.[1]?.trim();
             if (titel && titel.length > 5) {
-              items.push({ titel, url: artikelUrl });
-              if (!bronnen.includes("NOS.nl")) bronnen.push("NOS.nl");
+              items.push({ titel, url: artikelUrl, bron: feed.bron });
+              bronnenSet.add(feed.bron);
               if (!eersteArtikelUrl && artikelUrl) eersteArtikelUrl = artikelUrl;
             }
           }
@@ -4814,22 +4816,32 @@ Geef een JSON-object terug in exact dit formaat:
       apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
     });
 
-    const headlineText = items.slice(0, 10).map((it, i) => `${i + 1}. ${it.titel}`).join("\n");
+    const headlineText = items.slice(0, 15).map((it, i) => `${i + 1}. [${it.bron}] ${it.titel}`).join("\n");
 
-    const prompt = `Je bent een objectieve nieuwsanalist voor Nederlandse lokale ondernemers.
+    const prompt = `Je bent een kansen-scout voor Nederlandse lokale ondernemers (zzp, mkb, horeca, detailhandel, bouw, agrarisch).
 
-Hier zijn de actuele nieuwskoppen van vandaag (NOS.nl):
+Hier zijn de actuele nieuwskoppen van vandaag uit Nederland:
 ${headlineText}
 
-Analyseer deze koppen objectief. Kies het meest relevante nieuwsitem of thema voor een lokale Nederlandse ondernemer (zzp, mkb, horeca, detailhandel, bouw of soortgelijk).
+Jouw taak: zoek in deze koppen het nieuwsitem dat VANDAAG een concrete kans of opening biedt voor een lokale ondernemer.
 
-Schrijf één concrete, objectieve tip van PRECIES 2 zinnen. Niet meer, niet minder. De tip:
-- Zin 1: wat er speelt (feitelijk, zonder overdrijving), met verwijzing naar het nieuwsitem
-- Zin 2: een concrete vraag of actie die de ondernemer vandaag kan nemen
-- Is zakelijk en nuchter van toon, geen hype of alarm
-- Voorbeeld toon: "De benzineprijs is vandaag gestegen naar €2,18. Controleer of je zakelijke kilometervergoeding nog klopt en pas aan indien nodig."
+Denk in kansen, niet in bedreigingen:
+- Dure brandstof → kans voor lokale bezorging, fietskoeriers, thuisbezorging
+- Lege schappen of tekort aan grondstoffen → kans voor lokale alternatieven of import-vervanging
+- Staking of storing → kans voor wie wél levert
+- Stijgende energieprijzen → kans voor energiebesparing-dienstverleners of zonnepanelen-installateurs
+- Hittegolf → kans voor koeling, horeca-terrassen, ijsverkoop
+- Bouwstop ergens → kans voor renovatie of verbouwing
+- Consumentenvertrouwen verandert → kans om nu te acquireren of juist te investeren
 
-Geef ALLEEN de tip-tekst terug, zonder extra opmaak, nummers of uitleg. Maximaal 300 tekens.`;
+Schrijf PRECIES 2 zakelijke zinnen in nuchter Nederlands:
+- Zin 1: wat er speelt vandaag in Nederland (feitelijk, 1 zin, geen emotie)
+- Zin 2: welke concrete kans of actie dit biedt voor een lokale ondernemer (specifiek, actief)
+
+Toon: zakelijk, nuchter, positief-realistisch. Geen alarm, geen hype, geen bangmakerij.
+Voorbeeldtoon: "Benzineprijzen stegen vandaag opnieuw tot boven de €2,30 per liter. Lokale bezorgdiensten en fietskoeriersbedrijven kunnen dit vandaag als verkoopargument inzetten bij klanten die afhankelijk zijn van duurdere transportopties."
+
+Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320 tekens.`;
 
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
@@ -4845,7 +4857,7 @@ Geef ALLEEN de tip-tekst terug, zonder extra opmaak, nummers of uitleg. Maximaal
       tip = lastDot > 50 ? truncated.slice(0, lastDot + 1) : truncated;
     }
 
-    return { tip, bronnen, bronUrl: eersteArtikelUrl };
+    return { tip, bronnen: Array.from(bronnenSet), bronUrl: eersteArtikelUrl };
   }
 
   app.get("/api/tools/nieuws-tip", requireAuth, async (_req, res) => {
@@ -4864,7 +4876,7 @@ Geef ALLEEN de tip-tekst terug, zonder extra opmaak, nummers of uitleg. Maximaal
     } catch (err) {
       console.error("[NieuwsTip] Fout bij genereren tip:", (err as Error).message);
       // Fallback — cachen voor de dag zodat er niet elke request opnieuw geprobeerd wordt
-      const fallbackTip = "Controleer vandaag of de lokale regelgeving in jouw gemeente recent is bijgewerkt. Via Regio Intel zie je direct welke verordeningen en subsidies actueel zijn voor jouw sector.";
+      const fallbackTip = "Nederlandse gemeenten investeren dit jaar meer in lokale infrastructuur en verduurzaming. Vraag vandaag bij jouw gemeente na welke aanbestedingen of subsidies open staan voor jouw sector — die kansen zijn tijdgebonden.";
       nieuwsTipCacheDatum = today;
       nieuwsTipCacheData = { tip: fallbackTip, bronnen: [], datum: today, fallback: true };
       return res.json({

@@ -39,7 +39,11 @@ The system implements JWT authentication with short-lived access tokens and rota
 -   **Gemeente-updates**: Displays official publications per municipality from the KOOP SRU API (overheid.nl), with in-memory caching and search functionality.
 -   **Regio Deals**: Manages exclusive member deals and collective agreements via a `regio_deals` database table, with admin management and a dedicated member interface.
 -   **Admin Cockpit**: Central admin dashboard at `/admin` with platform stats and navigation to all admin sections. Sub-pages: Woo-monitoring (`/admin/woo`), Regio-beheer (`/admin/regios`), Platform-inzicht (`/admin/inzicht`), Gebruikers (`/admin/users`), Ondernemers (`/admin/ondernemers`), Blogs, Commissies, Regio Deals. All require `requireAdmin` middleware. The Ondernemers page is GDPR-compliant, showing businessName, region, plan, memberSince (month/year), and isRecentlyActive (based on refresh tokens).
--   **Navigation Config**: Data-driven navigation via `client/src/config/navigation.ts` (APP_NAV + ACCOUNT_NAV), page metadata via `client/src/config/pageMeta.ts`, and dashboard actions via `client/src/config/dashboardActions.ts`. AppSidebar consumes APP_NAV for the 5 main nav groups: Overzicht, Regio volgen, Documenten & verzoeken, Zichtbaarheid, Netwerk.
+-   **Navigation Config**: Data-driven navigation via `client/src/config/navigation.ts` (APP_NAV + ACCOUNT_NAV), page metadata via `client/src/config/pageMeta.ts`, and dashboard actions via `client/src/config/dashboardActions.ts`. AppSidebar consumes APP_NAV for 6 main nav groups: Aan de slag, Overzicht, Regio Intel, Regio volgen, Documenten & verzoeken, Zichtbaarheid, Netwerk, Lokale markt.
+-   **Kansen-radar (Aan de slag)**: AI-generated daily opportunity tip based on Dutch national news (NOS, NU.nl RSS feeds via Gemini 2.5-flash). Card renamed "Kansen van vandaag", 24h in-memory cache, opportunity-focused prompt.
+-   **Lokaal Ondernemen Check (/basischeck)**: Public 8-question self-assessment about local business orientation, scoring 0–8, with tailored improvement tips per "nee" answer.
+-   **Koop Lokaal (/koop-lokaal)**: Public business discovery directory listing `lokaal_aanbod` entries categorized by type.
+-   **Lokale Marktplaats (/lokaal-marktplaats)**: Authenticated B2B marketplace for "ik zoek / ik bied" listings; uses `lokaal_aanbod` table with enum types (zoek/bied) and categories.
 
 ### Security and Observability
 

@@ -67,9 +67,11 @@ import WebsiteScanPage from "@/pages/tools/website-scan";
 import RegelgevingVerkennerPage from "@/pages/regelgeving-verkenner";
 import IntelPage from "@/pages/intel";
 import AanDeSlagPage from "@/pages/aan-de-slag";
+import KoopLokaalPage from "@/pages/koop-lokaal";
+import LokaalMarktplaatsPage from "@/pages/lokaal-marktplaats";
 
 // Routes that should NOT have the sidebar/header layout
-const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse"];
+const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse", "/koop-lokaal"];
 
 function PublicRouter() {
   return (
@@ -91,6 +93,7 @@ function PublicRouter() {
       <Route path="/disclaimer" component={DisclaimerPage} />
       <Route path="/cookiebeleid" component={CookiebeleidPage} />
       <Route path="/regio-analyse" component={RegioAnalysePage} />
+      <Route path="/koop-lokaal" component={KoopLokaalPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -146,6 +149,9 @@ function AuthenticatedRouter() {
 
       {/* Zichtbaarheid */}
       <Route path="/zichtbaarheid/website-onderhoud" component={WebsiteOnderhoudPage} />
+
+      {/* Lokale marktplaats */}
+      <Route path="/lokaal-marktplaats" component={LokaalMarktplaatsPage} />
 
       <Route component={NotFound} />
     </Switch>

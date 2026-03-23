@@ -223,7 +223,7 @@ export default function AanDeSlagPage() {
 
       <div className="grid md:grid-cols-2 gap-6">
 
-        {/* Tip van vandaag — AI-gegenereerd op basis van actueel nieuws */}
+        {/* Kansen van vandaag — AI-kansen-radar op basis van actueel Nederlands nieuws */}
         <Card data-testid="card-tip-van-vandaag">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between gap-2 flex-wrap">
@@ -232,8 +232,8 @@ export default function AanDeSlagPage() {
                   <Lightbulb className="h-4 w-4 text-amber-500" />
                 </div>
                 <div>
-                  <CardTitle className="text-sm font-semibold">Tip van vandaag</CardTitle>
-                  <p className="text-xs text-muted-foreground">Gebaseerd op het nieuws van vandaag</p>
+                  <CardTitle className="text-sm font-semibold">Kansen van vandaag</CardTitle>
+                  <p className="text-xs text-muted-foreground">Wat speelt er nu in Nederland — en waar spring jij op in?</p>
                 </div>
               </div>
               {!nieuwsTip?.fallback && (
