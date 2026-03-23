@@ -16,6 +16,7 @@ import {
   Share2,
   ScanText,
   Signal,
+  Sparkles,
 } from "lucide-react";
 
 export type NavSubItem = {
@@ -34,6 +35,12 @@ export type NavSection = {
 };
 
 export const APP_NAV: NavSection[] = [
+  {
+    id: "aan-de-slag",
+    title: "Aan de slag",
+    icon: Sparkles,
+    url: "/aan-de-slag",
+  },
   {
     id: "overzicht",
     title: "Overzicht",

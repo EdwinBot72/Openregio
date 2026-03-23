@@ -66,6 +66,7 @@ import BriefAnalysePage from "@/pages/tools/brief-analyse";
 import WebsiteScanPage from "@/pages/tools/website-scan";
 import RegelgevingVerkennerPage from "@/pages/regelgeving-verkenner";
 import IntelPage from "@/pages/intel";
+import AanDeSlagPage from "@/pages/aan-de-slag";
 
 // Routes that should NOT have the sidebar/header layout
 const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse"];
@@ -99,6 +100,7 @@ function AuthenticatedRouter() {
   return (
     <Switch>
       <Route path="/onboarding" component={OnboardingPage} />
+      <Route path="/aan-de-slag" component={AanDeSlagPage} />
       <Route path="/dashboard" component={DashboardPage} />
       <Route path="/bedrijfsprofiel" component={BedrijfsprofielPage} />
       <Route path="/network" component={NetworkPage} />
