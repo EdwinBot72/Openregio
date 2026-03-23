@@ -215,6 +215,27 @@ export async function runMigrations(): Promise<void> {
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_intel_signalen_regio ON intel_signalen(regio);`);
     console.log("[Migration] ✓ intel_signalen table ensured");
 
+    // Lokale Marktplaats table
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS lokaal_aanbod (
+        id VARCHAR(255) PRIMARY KEY DEFAULT gen_random_uuid()::text,
+        user_id VARCHAR(255) NOT NULL REFERENCES users(id),
+        type VARCHAR(10) NOT NULL CHECK (type IN ('zoek', 'bied')),
+        titel VARCHAR(255) NOT NULL,
+        beschrijving TEXT NOT NULL,
+        categorie VARCHAR(50) NOT NULL,
+        regio VARCHAR(255) NOT NULL,
+        contact_info TEXT,
+        bedrijfsnaam VARCHAR(255),
+        is_active BOOLEAN NOT NULL DEFAULT true,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      );
+    `);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lokaal_aanbod_regio ON lokaal_aanbod(regio);`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lokaal_aanbod_type ON lokaal_aanbod(type);`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lokaal_aanbod_user ON lokaal_aanbod(user_id);`);
+    console.log("[Migration] ✓ lokaal_aanbod table ensured");
+
     console.log("[Migration] Database schema is up to date");
   } catch (error) {
     console.error("[Migration] Error running migrations:", error);

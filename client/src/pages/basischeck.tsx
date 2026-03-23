@@ -3,411 +3,264 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { CheckCircle2, XCircle, ArrowRight, ArrowLeft, Banknote, FileText, Phone, Battery, Users, Shield, AlertTriangle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import {
+  CheckCircle2, XCircle, ArrowRight, ArrowLeft,
+  ShoppingBag, Users, CalendarDays, HandshakeIcon,
+  Megaphone, Landmark, HeartHandshake, MapPin,
+} from "lucide-react";
 import { Link } from "wouter";
 
-interface Question {
+interface Vraag {
   id: string;
-  icon: typeof Banknote;
-  title: string;
-  description: string;
-  badge: string;
+  icon: typeof ShoppingBag;
+  titel: string;
+  toelichting: string;
+  tip: string;
 }
 
-const questions: Question[] = [
+const VRAGEN: Vraag[] = [
   {
-    id: "cash",
-    icon: Banknote,
-    title: "Kun je klanten laten betalen met cash?",
-    description: "Heb je wisselgeld klaarliggen en weet je hoe je een handmatige bon maakt?",
-    badge: "Accepteert cash",
+    id: "lokaal_inkopen",
+    icon: ShoppingBag,
+    titel: "Koop jij bewust in bij leveranciers in jouw regio?",
+    toelichting: "Denk aan groente, verpakkingsmateriaal, drukwerk, schoonmaak — worden die lokaal ingekocht?",
+    tip: "Zoek op OpenRegio actieve aanbieders in jouw gemeente en vraag een offerte. Lokaal inkopen versterkt de hele regionale economie.",
   },
   {
-    id: "bonnenblok",
-    icon: FileText,
-    title: "Heb je een bonnenblok of papieren facturen?",
-    description: "Kun je een factuur schrijven zonder computer of printer?",
-    badge: "Bonnenblok",
-  },
-  {
-    id: "telefoonlijst",
-    icon: Phone,
-    title: "Heb je een papieren telefoonlijst?",
-    description: "Ken je de nummers van je belangrijkste klanten, leveranciers en collega's uit je hoofd of op papier?",
-    badge: "Telefoonlijst",
-  },
-  {
-    id: "noodstroom",
-    icon: Battery,
-    title: "Heb je noodstroom of een powerbank?",
-    description: "Kun je je telefoon opladen en bereikbaar blijven als de stroom uitvalt?",
-    badge: "Noodstroom",
-  },
-  {
-    id: "offline",
+    id: "doorverwijzen",
     icon: Users,
-    title: "Kun je een deel van je werk zonder computer doen?",
-    description: "Kun je klanten helpen, afspraken maken of je werk doen zonder internet?",
-    badge: "Offline werk",
+    titel: "Verwijs je klanten actief door naar andere lokale ondernemers?",
+    toelichting: "Als jij iets niet kunt leveren, stuur je dan klanten naar een collega in de buurt?",
+    tip: "Maak een korte 'aanbevolen lokaal' lijst voor je klanten. Via RegioCrew vind je collega-ondernemers in jouw sector.",
+  },
+  {
+    id: "netwerken",
+    icon: CalendarDays,
+    titel: "Neem je deel aan lokale evenementen, markten of ondernemersnetwerken?",
+    toelichting: "Denk aan een lokale ondernemersvereniging, weekmarkt, beurzen of gemeente-evenementen.",
+    tip: "Bekijk de Gemeente-updates sectie voor aankomende evenementen en aanbestedingen in jouw gemeente.",
+  },
+  {
+    id: "kennis",
+    icon: MapPin,
+    titel: "Ken je de meeste ondernemers in jouw directe omgeving persoonlijk?",
+    toelichting: "Weet je wie er op jouw straat of in jouw wijk ondernemen en wat zij doen?",
+    tip: "Maak een rondje in je buurt en stel jezelf voor. Of plaats een bericht op de Lokale Marktplaats zodat collega's jou vinden.",
+  },
+  {
+    id: "marketing",
+    icon: Megaphone,
+    titel: "Promoot je jouw bedrijf actief via lokale media of lokale online groepen?",
+    toelichting: "Denk aan lokale krant, buurtapp, Facebook-groepen van je gemeente, of een sticker op je raam.",
+    tip: "Meld je aan bij lokale Facebook-groepen en deel je aanbod. Gebruik het Google Bedrijfsprofiel voor zichtbaarheid in de buurt.",
+  },
+  {
+    id: "samenwerken",
+    icon: HandshakeIcon,
+    titel: "Heb je actieve samenwerkingen met andere lokale bedrijven?",
+    toelichting: "Lever je samen met anderen, of heb je een formele of informele samenwerking?",
+    tip: "Gebruik de Lokale Marktplaats om een 'ik zoek samenwerking' oproep te plaatsen. Kleine samenwerkingen beginnen vaak simpel.",
+  },
+  {
+    id: "lokale_diensten",
+    icon: Landmark,
+    titel: "Maak je gebruik van lokale banken, accountants of adviseurs?",
+    toelichting: "Zijn jouw financiële en zakelijke dienstverleners ook lokaal actief?",
+    tip: "Raiffeisen, regionale Rabobank-kantoren en lokale boekhoudkantoren investeren hun winst terug in de regio. Dat maakt verschil.",
+  },
+  {
+    id: "bijdragen",
+    icon: HeartHandshake,
+    titel: "Draag je bij aan lokale initiatieven, sponsoring of community-activiteiten?",
+    toelichting: "Denk aan een plaatselijk sportteam sponsoren, een buurtfeest ondersteunen of lokale schoolactiviteiten.",
+    tip: "Sponsoring hoeft niet duur te zijn — een product, een dienst, of gewoon aanwezig zijn bij lokale activiteiten telt ook.",
   },
 ];
 
+const SCORE_LABELS = [
+  { min: 0, max: 2, label: "Nog veel te winnen", kleur: "text-red-600 dark:text-red-400", bg: "bg-red-50 dark:bg-red-950/40" },
+  { min: 3, max: 5, label: "Op weg lokaal", kleur: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-950/40" },
+  { min: 6, max: 7, label: "Sterk lokaal", kleur: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-950/40" },
+  { min: 8, max: 8, label: "Volledig lokaal!", kleur: "text-green-600 dark:text-green-400", bg: "bg-green-50 dark:bg-green-950/40" },
+];
+
 export default function BasischeckPage() {
-  usePageTitle("Basischeck");
+  usePageTitle("Lokaal Ondernemen Check");
   const [started, setStarted] = useState(false);
-  const [currentQuestion, setCurrentQuestion] = useState(0);
-  const [answers, setAnswers] = useState<Record<string, boolean>>({});
-  const [finished, setFinished] = useState(false);
+  const [huidigVraag, setHuidigVraag] = useState(0);
+  const [antwoorden, setAntwoorden] = useState<Record<string, boolean>>({});
+  const [klaar, setKlaar] = useState(false);
 
-  const handleAnswer = (answer: boolean) => {
-    const question = questions[currentQuestion];
-    setAnswers((prev) => ({ ...prev, [question.id]: answer }));
-
-    if (currentQuestion < questions.length - 1) {
-      setCurrentQuestion((prev) => prev + 1);
+  const beantwoord = (ja: boolean) => {
+    const vraag = VRAGEN[huidigVraag];
+    setAntwoorden((prev) => ({ ...prev, [vraag.id]: ja }));
+    if (huidigVraag < VRAGEN.length - 1) {
+      setHuidigVraag((prev) => prev + 1);
     } else {
-      setFinished(true);
+      setKlaar(true);
     }
   };
 
-  const handleBack = () => {
-    if (currentQuestion > 0) {
-      setCurrentQuestion((prev) => prev - 1);
-    }
+  const terug = () => {
+    if (huidigVraag > 0) setHuidigVraag((prev) => prev - 1);
   };
 
-  const handleRestart = () => {
+  const opnieuw = () => {
     setStarted(false);
-    setCurrentQuestion(0);
-    setAnswers({});
-    setFinished(false);
+    setHuidigVraag(0);
+    setAntwoorden({});
+    setKlaar(false);
   };
 
-  const score = Object.values(answers).filter(Boolean).length;
-  const percentage = Math.round((score / questions.length) * 100);
+  const score = Object.values(antwoorden).filter(Boolean).length;
+  const scoreLabel = SCORE_LABELS.find((s) => score >= s.min && score <= s.max) ?? SCORE_LABELS[0];
+  const verbetertips = VRAGEN.filter((v) => antwoorden[v.id] === false);
+  const voortgang = ((huidigVraag + (klaar ? 1 : 0)) / VRAGEN.length) * 100;
 
-  const getScoreMessage = () => {
-    if (percentage >= 80) {
-      return {
-        title: "Uitstekend! Je bedrijf is goed voorbereid.",
-        description: "Je hebt de basis op orde. Je kunt doorwerken als systemen haperen.",
-        color: "text-green-600",
-        icon: Shield,
-      };
-    } else if (percentage >= 60) {
-      return {
-        title: "Goed bezig! Maar er is ruimte voor verbetering.",
-        description: "Je hebt een aantal basics op orde, maar een paar simpele stappen kunnen je nog weerbaarder maken.",
-        color: "text-yellow-600",
-        icon: AlertTriangle,
-      };
-    } else if (percentage >= 40) {
-      return {
-        title: "Let op! Je bedrijf is kwetsbaar.",
-        description: "Als systemen uitvallen, heb je een probleem. Tijd om de basis op orde te brengen.",
-        color: "text-orange-600",
-        icon: AlertTriangle,
-      };
-    } else {
-      return {
-        title: "Waarschuwing! Je bedrijf is te afhankelijk.",
-        description: "Je bent volledig afhankelijk van digitale systemen. Een stroomstoring of storing kan je bedrijf stilleggen.",
-        color: "text-red-600",
-        icon: XCircle,
-      };
-    }
-  };
-
-  // Intro page
   if (!started) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-background">
-        {/* Navigation */}
-        <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-          <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-            <Link href="/" className="font-accent text-2xl font-bold text-primary" data-testid="link-home-logo">
-              OpenRegio
-            </Link>
-            <Link href="/start?plan=basic">
-              <Button size="sm" data-testid="button-nav-join">
-                Word lid
-              </Button>
-            </Link>
+      <div className="max-w-xl mx-auto py-12 px-4 space-y-6">
+        <div className="text-center space-y-3">
+          <div className="w-14 h-14 rounded-2xl bg-green-50 dark:bg-green-950/40 flex items-center justify-center mx-auto">
+            <MapPin className="h-7 w-7 text-green-600 dark:text-green-400" />
           </div>
-        </nav>
-
-        <div className="max-w-4xl mx-auto px-4 py-16">
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-6">
-              <Shield className="h-10 w-10 text-primary" />
-            </div>
-            <h1 className="font-accent text-4xl md:text-5xl font-bold mb-4" data-testid="text-basischeck-title">
-              De Basischeck
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-              Hoe stevig is jouw bedrijf als systemen haperen? Ontdek in 5 simpele vragen 
-              hoe weerbaar je bent – en wat je kunt doen om sterker te staan.
-            </p>
-          </div>
-
-          <Card className="mb-8 overflow-hidden">
-            <CardContent className="p-0">
-              <div className="relative w-full aspect-video">
-                <iframe
-                  src="https://www.youtube.com/embed/pwqUR9bG6kE"
-                  title="Veerkrachtige Lokale Economieën"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                  className="absolute inset-0 w-full h-full"
-                  data-testid="video-intro"
-                />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="mb-8">
-            <CardContent className="p-8">
-              <h2 className="font-accent text-2xl font-bold mb-6 text-center">
-                Wat gebeurt er als...
-              </h2>
-              <div className="grid md:grid-cols-3 gap-6 text-center">
-                <div className="p-4">
-                  <div className="text-4xl mb-2">💳</div>
-                  <p className="font-semibold">De pin uitvalt?</p>
-                  <p className="text-sm text-muted-foreground">Kun je nog afrekenen?</p>
-                </div>
-                <div className="p-4">
-                  <div className="text-4xl mb-2">🔌</div>
-                  <p className="font-semibold">De stroom uitvalt?</p>
-                  <p className="text-sm text-muted-foreground">Blijf je bereikbaar?</p>
-                </div>
-                <div className="p-4">
-                  <div className="text-4xl mb-2">📱</div>
-                  <p className="font-semibold">Het internet eruit ligt?</p>
-                  <p className="text-sm text-muted-foreground">Kun je nog werken?</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          <div className="text-center">
-            <Button size="lg" onClick={() => setStarted(true)} data-testid="button-start-check">
-              Start de Basischeck
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
-            <p className="text-sm text-muted-foreground mt-4">
-              5 vragen • 2 minuten • Gratis
-            </p>
-          </div>
-
-          <div className="mt-16 grid md:grid-cols-5 gap-4">
-            {questions.map((q, idx) => (
-              <div key={idx} className="text-center p-4">
-                <q.icon className="h-8 w-8 text-muted-foreground mx-auto mb-2" />
-                <p className="text-sm font-medium">{q.badge}</p>
-              </div>
-            ))}
-          </div>
+          <h1 className="text-2xl font-bold">Lokaal Ondernemen Check</h1>
+          <p className="text-muted-foreground leading-relaxed">
+            Hoe lokaal is jouw bedrijf eigenlijk? Met 8 vragen meten we je lokale score en geven we concrete tips om jouw bijdrage aan de regionale economie te vergroten.
+          </p>
         </div>
-      </div>
-    );
-  }
-
-  // Results page
-  if (finished) {
-    const scoreMessage = getScoreMessage();
-    const ScoreIcon = scoreMessage.icon;
-
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-background">
-        {/* Navigation */}
-        <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-          <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-            <Link href="/" className="font-accent text-2xl font-bold text-primary" data-testid="link-home-logo">
-              OpenRegio
-            </Link>
-            <Link href="/start?plan=basic">
-              <Button size="sm" data-testid="button-nav-join">
-                Word lid
-              </Button>
-            </Link>
-          </div>
-        </nav>
-
-        <div className="max-w-4xl mx-auto px-4 py-16">
-          <div className="text-center mb-12">
-            <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full bg-primary/10 mb-6`}>
-              <ScoreIcon className={`h-10 w-10 ${scoreMessage.color}`} />
-            </div>
-            <h1 className="font-accent text-3xl md:text-4xl font-bold mb-4" data-testid="text-result-title">
-              Jouw score: {score} van de {questions.length}
-            </h1>
-            <div className="w-full max-w-md mx-auto mb-6">
-              <Progress value={percentage} className="h-4" />
-              <p className="text-lg font-semibold mt-2">{percentage}% weerbaar</p>
-            </div>
-            <h2 className={`text-xl font-semibold ${scoreMessage.color} mb-2`}>
-              {scoreMessage.title}
-            </h2>
-            <p className="text-muted-foreground max-w-xl mx-auto">
-              {scoreMessage.description}
-            </p>
-          </div>
-
-          <Card className="mb-8">
-            <CardContent className="p-6">
-              <h3 className="font-accent text-xl font-bold mb-4">Jouw badges</h3>
-              <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-                {questions.map((q) => {
-                  const hasIt = answers[q.id];
-                  return (
-                    <div
-                      key={q.id}
-                      className={`text-center p-4 rounded-lg ${
-                        hasIt ? "bg-green-50 dark:bg-green-950" : "bg-red-50 dark:bg-red-950"
-                      }`}
-                      data-testid={`badge-result-${q.id}`}
-                    >
-                      {hasIt ? (
-                        <CheckCircle2 className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                      ) : (
-                        <XCircle className="h-8 w-8 text-red-500 mx-auto mb-2" />
-                      )}
-                      <p className="text-sm font-medium">{q.badge}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </CardContent>
-          </Card>
-
-          {score < questions.length && (
-            <Card className="mb-8 border-primary">
-              <CardContent className="p-6">
-                <h3 className="font-accent text-xl font-bold mb-4">Wat kun je doen?</h3>
-                <ul className="space-y-3">
-                  {questions
-                    .filter((q) => !answers[q.id])
-                    .map((q) => (
-                      <li key={q.id} className="flex items-start gap-3">
-                        <q.icon className="h-5 w-5 text-primary mt-0.5" />
-                        <div>
-                          <p className="font-semibold">{q.badge}</p>
-                          <p className="text-sm text-muted-foreground">{q.description}</p>
-                        </div>
-                      </li>
-                    ))}
-                </ul>
-              </CardContent>
-            </Card>
-          )}
-
-          <Card className="bg-primary/5 border-primary">
-            <CardContent className="p-8 text-center">
-              <h3 className="font-accent text-2xl font-bold mb-4">
-                Klaar om je bedrijf weerbaarder te maken?
-              </h3>
-              <p className="text-muted-foreground mb-6 max-w-xl mx-auto">
-                Word lid van OpenRegio en krijg toegang tot het lokale netwerk, 
-                printbare templates, en je eigen weerbaarheidsprofiel met badges.
-              </p>
-              <div className="flex flex-wrap gap-4 justify-center">
-                <Link href="/start?plan=basic">
-                  <Button size="lg" data-testid="button-result-join">
-                    Word lid – €12,95 p/m excl. BTW
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </Button>
-                </Link>
-                <Button variant="outline" size="lg" onClick={handleRestart} data-testid="button-restart">
-                  Opnieuw doen
-                </Button>
-              </div>
-              <p className="text-sm text-muted-foreground mt-4">
-                Maandelijks opzegbaar, geen contracten
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-    );
-  }
-
-  // Question page
-  const question = questions[currentQuestion];
-  const QuestionIcon = question.icon;
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-background">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="font-accent text-2xl font-bold text-primary" data-testid="link-home-logo">
-            OpenRegio
-          </Link>
-          <div className="text-sm text-muted-foreground">
-            Vraag {currentQuestion + 1} van {questions.length}
-          </div>
-        </div>
-      </nav>
-
-      <div className="max-w-2xl mx-auto px-4 py-16">
-        {/* Progress */}
-        <div className="mb-8">
-          <Progress value={((currentQuestion + 1) / questions.length) * 100} className="h-2" />
-        </div>
-
         <Card>
-          <CardContent className="p-8 text-center">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-6">
-              <QuestionIcon className="h-8 w-8 text-primary" />
+          <CardContent className="p-5 space-y-4">
+            <div className="grid grid-cols-2 gap-3 text-sm">
+              {[
+                { icon: ShoppingBag, text: "Lokaal inkopen" },
+                { icon: Users, text: "Doorverwijzen" },
+                { icon: CalendarDays, text: "Netwerken" },
+                { icon: HandshakeIcon, text: "Samenwerken" },
+                { icon: Megaphone, text: "Lokale marketing" },
+                { icon: HeartHandshake, text: "Bijdragen" },
+              ].map((item) => (
+                <div key={item.text} className="flex items-center gap-2 text-muted-foreground">
+                  <item.icon className="h-4 w-4 text-green-600 dark:text-green-400 shrink-0" />
+                  {item.text}
+                </div>
+              ))}
             </div>
-            <h2 className="font-accent text-2xl md:text-3xl font-bold mb-4" data-testid="text-question-title">
-              {question.title}
-            </h2>
-            <p className="text-muted-foreground mb-8" data-testid="text-question-description">
-              {question.description}
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button
-                size="lg"
-                onClick={() => handleAnswer(true)}
-                className="min-w-32"
-                data-testid="button-answer-yes"
-              >
-                <CheckCircle2 className="mr-2 h-5 w-5" />
-                Ja
-              </Button>
-              <Button
-                size="lg"
-                variant="outline"
-                onClick={() => handleAnswer(false)}
-                className="min-w-32"
-                data-testid="button-answer-no"
-              >
-                <XCircle className="mr-2 h-5 w-5" />
-                Nee
-              </Button>
-            </div>
-
-            {currentQuestion > 0 && (
-              <Button
-                variant="ghost"
-                onClick={handleBack}
-                className="mt-6"
-                data-testid="button-back"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Vorige vraag
-              </Button>
-            )}
+            <Button className="w-full" onClick={() => setStarted(true)} data-testid="button-start-check">
+              Start de check <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
           </CardContent>
         </Card>
-
-        <p className="text-center text-sm text-muted-foreground mt-8">
-          Badge: <span className="font-medium">{question.badge}</span>
-        </p>
       </div>
+    );
+  }
+
+  if (klaar) {
+    return (
+      <div className="max-w-xl mx-auto py-12 px-4 space-y-6">
+        <div className="text-center space-y-3">
+          <div className={`w-14 h-14 rounded-2xl ${scoreLabel.bg} flex items-center justify-center mx-auto`}>
+            <MapPin className={`h-7 w-7 ${scoreLabel.kleur}`} />
+          </div>
+          <h1 className="text-2xl font-bold">Jouw lokale score</h1>
+          <div className={`text-4xl font-bold ${scoreLabel.kleur}`}>{score} / {VRAGEN.length}</div>
+          <Badge className={`${scoreLabel.bg} ${scoreLabel.kleur} border-0`} data-testid="badge-score-label">
+            {scoreLabel.label}
+          </Badge>
+        </div>
+
+        {verbetertips.length > 0 && (
+          <Card data-testid="section-verbetertips">
+            <CardContent className="p-5 space-y-4">
+              <h2 className="font-semibold text-sm">Verbeterpunten voor jou</h2>
+              <div className="space-y-4">
+                {verbetertips.map((v) => (
+                  <div key={v.id} className="flex gap-3 border-b last:border-0 pb-4 last:pb-0">
+                    <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
+                      <v.icon className="h-3.5 w-3.5 text-muted-foreground" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold mb-1">{v.titel}</p>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{v.tip}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {score === VRAGEN.length && (
+          <Card className="bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900/40">
+            <CardContent className="p-5 text-center space-y-2">
+              <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400 mx-auto" />
+              <p className="font-semibold text-sm">Je scoort volledig lokaal!</p>
+              <p className="text-xs text-muted-foreground">Je bent een voorbeeld voor andere ondernemers in jouw regio. Deel jouw aanpak via de Community.</p>
+            </CardContent>
+          </Card>
+        )}
+
+        <div className="flex gap-3">
+          <Button variant="outline" className="flex-1" onClick={opnieuw} data-testid="button-opnieuw">
+            Opnieuw doen
+          </Button>
+          <Link href="/lokaal-marktplaats" asChild>
+            <Button className="flex-1" data-testid="button-naar-marktplaats">
+              Lokale Marktplaats <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const vraag = VRAGEN[huidigVraag];
+
+  return (
+    <div className="max-w-xl mx-auto py-12 px-4 space-y-6">
+      <div className="space-y-2">
+        <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <span>Vraag {huidigVraag + 1} van {VRAGEN.length}</span>
+          <span>{Math.round(voortgang)}%</span>
+        </div>
+        <Progress value={voortgang} className="h-1.5" data-testid="progress-vraag" />
+      </div>
+
+      <Card data-testid={`vraag-${vraag.id}`}>
+        <CardContent className="p-6 space-y-5">
+          <div className="w-12 h-12 rounded-xl bg-green-50 dark:bg-green-950/40 flex items-center justify-center">
+            <vraag.icon className="h-6 w-6 text-green-600 dark:text-green-400" />
+          </div>
+          <div>
+            <h2 className="font-semibold text-base leading-snug mb-2">{vraag.titel}</h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">{vraag.toelichting}</p>
+          </div>
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            <Button
+              variant="outline"
+              className="h-12 text-base border-red-200 dark:border-red-900/40 text-red-600 dark:text-red-400"
+              onClick={() => beantwoord(false)}
+              data-testid="button-nee"
+            >
+              <XCircle className="mr-2 h-4 w-4" /> Nee
+            </Button>
+            <Button
+              className="h-12 text-base bg-green-600 hover:bg-green-700"
+              onClick={() => beantwoord(true)}
+              data-testid="button-ja"
+            >
+              <CheckCircle2 className="mr-2 h-4 w-4" /> Ja
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+
+      {huidigVraag > 0 && (
+        <Button variant="ghost" size="sm" onClick={terug} data-testid="button-terug">
+          <ArrowLeft className="mr-2 h-4 w-4" /> Vorige vraag
+        </Button>
+      )}
     </div>
   );
 }

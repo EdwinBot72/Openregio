@@ -77,6 +77,9 @@ import {
   type IntelSignaal,
   type InsertIntelSignaal,
   intelSignalen,
+  type LokaalAanbod,
+  type InsertLokaalAanbod,
+  lokaalAanbod,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
@@ -279,6 +282,13 @@ export interface IStorage {
   createIntelSignaal(signaal: InsertIntelSignaal): Promise<IntelSignaal>;
   updateIntelSignaal(id: string, updates: Partial<InsertIntelSignaal>): Promise<IntelSignaal | undefined>;
   deleteIntelSignaal(id: string): Promise<boolean>;
+
+  // Lokale Marktplaats
+  getLokaalAanbod(opts?: { regio?: string; type?: string; categorie?: string }): Promise<LokaalAanbod[]>;
+  getLokaalAanbodById(id: string): Promise<LokaalAanbod | undefined>;
+  getLokaalAanbodByUser(userId: string): Promise<LokaalAanbod[]>;
+  createLokaalAanbod(item: InsertLokaalAanbod): Promise<LokaalAanbod>;
+  deleteLokaalAanbod(id: string, userId: string): Promise<boolean>;
 }
 
 export class MemStorage implements IStorage {
@@ -1734,6 +1744,23 @@ export class MemStorage implements IStorage {
   async deleteIntelSignaal(_id: string): Promise<boolean> {
     return false;
   }
+
+  // Lokale Marktplaats (stub for MemStorage)
+  async getLokaalAanbod(_opts?: { regio?: string; type?: string; categorie?: string }): Promise<LokaalAanbod[]> {
+    return [];
+  }
+  async getLokaalAanbodById(_id: string): Promise<LokaalAanbod | undefined> {
+    return undefined;
+  }
+  async getLokaalAanbodByUser(_userId: string): Promise<LokaalAanbod[]> {
+    return [];
+  }
+  async createLokaalAanbod(item: InsertLokaalAanbod): Promise<LokaalAanbod> {
+    return { id: randomUUID(), createdAt: new Date(), ...item } as LokaalAanbod;
+  }
+  async deleteLokaalAanbod(_id: string, _userId: string): Promise<boolean> {
+    return false;
+  }
 }
 
 class DbStorage implements IStorage {
@@ -2860,6 +2887,36 @@ class DbStorage implements IStorage {
 
   async deleteIntelSignaal(id: string): Promise<boolean> {
     const result = await db.delete(intelSignalen).where(eq(intelSignalen.id, id)).returning();
+    return result.length > 0;
+  }
+
+  // ─── Lokale Marktplaats ────────────────────────────────────────────────
+  async getLokaalAanbod(opts?: { regio?: string; type?: string; categorie?: string }): Promise<LokaalAanbod[]> {
+    const conditions = [eq(lokaalAanbod.isActive, true)];
+    if (opts?.regio) conditions.push(eq(lokaalAanbod.regio, opts.regio));
+    if (opts?.type) conditions.push(eq(lokaalAanbod.type, opts.type as "zoek" | "bied"));
+    if (opts?.categorie) conditions.push(eq(lokaalAanbod.categorie, opts.categorie as typeof lokaalAanbod.categorie._.data));
+    return db.select().from(lokaalAanbod).where(and(...conditions)).orderBy(desc(lokaalAanbod.createdAt));
+  }
+
+  async getLokaalAanbodById(id: string): Promise<LokaalAanbod | undefined> {
+    const [item] = await db.select().from(lokaalAanbod).where(eq(lokaalAanbod.id, id));
+    return item;
+  }
+
+  async getLokaalAanbodByUser(userId: string): Promise<LokaalAanbod[]> {
+    return db.select().from(lokaalAanbod).where(eq(lokaalAanbod.userId, userId)).orderBy(desc(lokaalAanbod.createdAt));
+  }
+
+  async createLokaalAanbod(item: InsertLokaalAanbod): Promise<LokaalAanbod> {
+    const [created] = await db.insert(lokaalAanbod).values(item).returning();
+    return created;
+  }
+
+  async deleteLokaalAanbod(id: string, userId: string): Promise<boolean> {
+    const result = await db.delete(lokaalAanbod)
+      .where(and(eq(lokaalAanbod.id, id), eq(lokaalAanbod.userId, userId)))
+      .returning();
     return result.length > 0;
   }
 }

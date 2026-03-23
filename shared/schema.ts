@@ -1088,4 +1088,31 @@ export type MonitorItem = typeof monitorItems.$inferSelect;
 export type InsertRegioDeal = z.infer<typeof insertRegioDealSchema>;
 export type RegioDeal = typeof regioDeals.$inferSelect;
 
+// ─── Lokale Marktplaats (ik zoek / ik bied) ───────────────────────────────
+export const LOKAAL_AANBOD_TYPE = ["zoek", "bied"] as const;
+export const LOKAAL_AANBOD_CATEGORIEEN = [
+  "diensten", "producten", "ruimte", "materieel", "kennis", "samenwerking", "overig",
+] as const;
+
+export const lokaalAanbod = pgTable("lokaal_aanbod", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  type: varchar("type", { enum: LOKAAL_AANBOD_TYPE }).notNull(),
+  titel: varchar("titel", { length: 255 }).notNull(),
+  beschrijving: text("beschrijving").notNull(),
+  categorie: varchar("categorie", { enum: LOKAAL_AANBOD_CATEGORIEEN }).notNull(),
+  regio: varchar("regio", { length: 255 }).notNull(),
+  contactInfo: text("contact_info"),
+  bedrijfsnaam: varchar("bedrijfsnaam", { length: 255 }),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+});
+
+export const insertLokaalAanbodSchema = createInsertSchema(lokaalAanbod).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertLokaalAanbod = z.infer<typeof insertLokaalAanbodSchema>;
+export type LokaalAanbod = typeof lokaalAanbod.$inferSelect;
+
 export * from "./models/chat";

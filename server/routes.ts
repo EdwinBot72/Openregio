@@ -4876,6 +4876,66 @@ Geef ALLEEN de tip-tekst terug, zonder extra opmaak, nummers of uitleg. Maximaal
       });
     }
   });
+  // ─── Lokale Marktplaats (ik zoek / ik bied) ──────────────────────────
+
+  // GET /api/lokaal-marktplaats — public listing (all active items)
+  app.get("/api/lokaal-marktplaats", async (req, res) => {
+    try {
+      const { regio, type, categorie } = req.query as Record<string, string>;
+      const items = await storage.getLokaalAanbod({
+        regio: regio || undefined,
+        type: type || undefined,
+        categorie: categorie || undefined,
+      });
+      return res.json(items);
+    } catch (err) {
+      console.error("[LokaalMarktplaats] fout bij ophalen:", err);
+      return res.status(500).json({ error: "Fout bij ophalen aanbod" });
+    }
+  });
+
+  // GET /api/lokaal-marktplaats/me — own items (auth required)
+  app.get("/api/lokaal-marktplaats/me", requireAuth, async (req, res) => {
+    try {
+      const items = await storage.getLokaalAanbodByUser(req.user!.id);
+      return res.json(items);
+    } catch (err) {
+      console.error("[LokaalMarktplaats] fout bij ophalen eigen items:", err);
+      return res.status(500).json({ error: "Fout bij ophalen eigen aanbod" });
+    }
+  });
+
+  // POST /api/lokaal-marktplaats — place a new listing (auth required)
+  app.post("/api/lokaal-marktplaats", requireAuth, async (req, res) => {
+    try {
+      const { insertLokaalAanbodSchema } = await import("@shared/schema");
+      const parsed = insertLokaalAanbodSchema.safeParse({
+        ...req.body,
+        userId: req.user!.id,
+      });
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Ongeldige invoer" });
+      }
+      const item = await storage.createLokaalAanbod(parsed.data);
+      return res.status(201).json(item);
+    } catch (err) {
+      console.error("[LokaalMarktplaats] fout bij aanmaken:", err);
+      return res.status(500).json({ error: "Fout bij plaatsen aanbod" });
+    }
+  });
+
+  // DELETE /api/lokaal-marktplaats/:id — delete own listing (auth required)
+  app.delete("/api/lokaal-marktplaats/:id", requireAuth, async (req, res) => {
+    try {
+      const deleted = await storage.deleteLokaalAanbod(req.params.id, req.user!.id);
+      if (!deleted) return res.status(404).json({ error: "Niet gevonden of geen toegang" });
+      return res.json({ success: true });
+    } catch (err) {
+      console.error("[LokaalMarktplaats] fout bij verwijderen:", err);
+      return res.status(500).json({ error: "Fout bij verwijderen" });
+    }
+  });
+
   // ─────────────────────────────────────────────────────────────────────
 
   const httpServer = createServer(app);
