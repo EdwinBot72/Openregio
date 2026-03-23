@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Link } from "wouter";
@@ -11,54 +12,17 @@ import {
   Lightbulb, CheckCircle2, Circle, ArrowRight, Bot, FileText,
   Globe, Users, Zap, Landmark, Shield, Star, Clock, MapPin,
   BookOpen, TrendingUp, ChevronRight, Sparkles, Target,
-  Scale, Network,
+  Scale, Network, Newspaper,
 } from "lucide-react";
 import type { IntelSignaal } from "@shared/schema";
 
-const DAGELIJKSE_TIPS = [
-  {
-    dag: "Maandag",
-    tip: "Begin de week met een Basischeck. Controleer of je voldoet aan de regels in jouw gemeente — duurt maar 3 minuten.",
-    actie: "Basischeck starten",
-    url: "/basischeck",
-  },
-  {
-    dag: "Dinsdag",
-    tip: "Wist je dat je via een WOO-verzoek gemeentelijke documenten kunt opvragen die jouw bedrijf raken? RegioBot helpt je het verzoek op te stellen.",
-    actie: "WOO-verzoek opstellen",
-    url: "/woo-wizard",
-  },
-  {
-    dag: "Woensdag",
-    tip: "Bekijk vandaag de actuele signalen in Regio Intel. Zijn er nieuwe verordeningen, subsidies of beleid dat jouw sector raakt?",
-    actie: "Regio Intel bekijken",
-    url: "/intel",
-  },
-  {
-    dag: "Donderdag",
-    tip: "Zorg dat andere ondernemers je kunnen vinden. Controleer of je bedrijfsprofiel volledig is ingevuld — naam, beschrijving en gemeente.",
-    actie: "Profiel bekijken",
-    url: "/bedrijfsprofiel",
-  },
-  {
-    dag: "Vrijdag",
-    tip: "Stel een vraag aan RegioBot over een besluit of verordening die je deze week tegenkwam. Je krijgt altijd een antwoord met bronverwijzing.",
-    actie: "RegioBot openen",
-    url: "/regiobot",
-  },
-  {
-    dag: "Zaterdag",
-    tip: "Hoe staat je website er online voor? De Website Scan geeft je in één klik inzicht in vindbaarheid, lokale aanwezigheid en verbeterpunten.",
-    actie: "Website scannen",
-    url: "/tools/website-scan",
-  },
-  {
-    dag: "Zondag",
-    tip: "Verbind je met andere lokale ondernemers via RegioCrew. Samen sta je sterker dan alleen — deel kennis, ervaringen en kansen.",
-    actie: "RegioCrew bekijken",
-    url: "/regiocrew",
-  },
-];
+type NieuwsTip = {
+  tip: string;
+  bronnen: string[];
+  datum: string;
+  cached?: boolean;
+  fallback?: boolean;
+};
 
 const STAPPEN = [
   {
@@ -93,8 +57,8 @@ const STAPPEN = [
   },
   {
     nr: 4,
-    titel: "Upload je eerste dossier",
-    omschrijving: "Voeg een WOO-brief, gemeentebesluit of correspondentie toe aan de bibliotheek.",
+    titel: "Stuur een overheidsbrief in",
+    omschrijving: "Upload een beschikking, gemeentebesluit of officiële correspondentie en laat OpenRegio het voor jou lezen.",
     icon: FileText,
     url: "/woo-bibliotheek",
     kleur: "text-amber-600 dark:text-amber-400",
@@ -120,19 +84,10 @@ const SNELLE_ACTIES = [
   { label: "RegioBot", icon: Bot, url: "/regiobot", kleur: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-950/40", proOnly: true },
   { label: "Brief begrijpen", icon: FileText, url: "/tools/brief-analyse", kleur: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-950/40" },
   { label: "Netwerk", icon: Users, url: "/regiocrew", kleur: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-950/40" },
-  { label: "WOO-verzoek", icon: Landmark, url: "/woo-wizard", kleur: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-950/40" },
+  { label: "Mijn dossiers", icon: Landmark, url: "/woo-bibliotheek", kleur: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-950/40" },
   { label: "Website Scan", icon: Globe, url: "/tools/website-scan", kleur: "text-teal-600 dark:text-teal-400", bg: "bg-teal-50 dark:bg-teal-950/40", proOnly: true },
   { label: "Regelgeving", icon: BookOpen, url: "/regelgeving-verkenner", kleur: "text-orange-600 dark:text-orange-400", bg: "bg-orange-50 dark:bg-orange-950/40" },
 ];
-
-function dagVanDeWeek() {
-  return new Date().getDay(); // 0=zondag, 1=maandag, ...
-}
-
-function getTipVanVandaag() {
-  const dag = dagVanDeWeek();
-  return DAGELIJKSE_TIPS[dag] ?? DAGELIJKSE_TIPS[0];
-}
 
 function getGreeting() {
   const uur = new Date().getHours();
@@ -162,8 +117,14 @@ export default function AanDeSlagPage() {
   const isPro = user?.plan === "pro" || (user as any)?.role === "admin" || (user as any)?.role === "master";
 
   const [checklist, setChecklist] = useState<Record<string, boolean>>(loadChecklist);
-  const tip = getTipVanVandaag();
   const greeting = getGreeting();
+
+  const { data: nieuwsTip, isLoading: tipLoading } = useQuery<NieuwsTip>({
+    queryKey: ["/api/tools/nieuws-tip"],
+    queryFn: () => fetch("/api/tools/nieuws-tip").then((r) => r.json()),
+    staleTime: 1000 * 60 * 60, // 1 uur client-side cache
+    retry: 1,
+  });
 
   const { data: signalen = [] } = useQuery<IntelSignaal[]>({
     queryKey: ["/api/intel/signalen", "alle"],
@@ -227,9 +188,9 @@ export default function AanDeSlagPage() {
               <Scale className="h-5 w-5 text-blue-600 dark:text-blue-400" />
             </div>
             <div>
-              <p className="font-semibold text-sm mb-1">Grip op regelgeving</p>
+              <p className="font-semibold text-sm mb-1">Juridische post begrijpen</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                OpenRegio maakt gemeentelijke verordeningen, WOO-documenten en lokaal beleid inzichtelijk. Je hoeft geen jurist te zijn — wij vertalen de regels naar wat ze voor jouw bedrijf betekenen.
+                Beschikkingen, bezwaarschriften en officiële gemeentebrieven zijn vaak onduidelijk geschreven. OpenRegio leest en vertaalt overheidsdocumentatie naar plain-language zodat jij weet wat er van je verwacht wordt — zonder advocaat.
               </p>
             </div>
           </div>
@@ -251,7 +212,7 @@ export default function AanDeSlagPage() {
             <div>
               <p className="font-semibold text-sm mb-1">AI die werkt voor jou</p>
               <p className="text-xs text-muted-foreground leading-relaxed">
-                RegioBot analyseert WOO-documenten, gemeentebesluiten en correspondentie. Stel een vraag en krijg altijd een antwoord met bronverwijzing — zodat je weet waar je aan toe bent.
+                RegioBot analyseert beschikkingen, gemeentebesluiten en correspondentie die jij uploadt. Stel een vraag en krijg altijd een antwoord met bronverwijzing — zodat je weet waar je aan toe bent.
               </p>
             </div>
           </div>
@@ -260,24 +221,42 @@ export default function AanDeSlagPage() {
 
       <div className="grid md:grid-cols-2 gap-6">
 
-        {/* Tip van vandaag */}
+        {/* Tip van vandaag — AI-gegenereerd op basis van actueel nieuws */}
         <Card data-testid="card-tip-van-vandaag">
           <CardHeader className="pb-3">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/40 flex items-center justify-center">
-                <Lightbulb className="h-4 w-4 text-amber-500" />
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/40 flex items-center justify-center">
+                  <Lightbulb className="h-4 w-4 text-amber-500" />
+                </div>
+                <div>
+                  <CardTitle className="text-sm font-semibold">Tip van vandaag</CardTitle>
+                  <p className="text-xs text-muted-foreground">Gebaseerd op het nieuws van vandaag</p>
+                </div>
               </div>
-              <div>
-                <CardTitle className="text-sm font-semibold">Tip van vandaag</CardTitle>
-                <p className="text-xs text-muted-foreground">{tip.dag}</p>
-              </div>
+              {!nieuwsTip?.fallback && (
+                <Badge variant="outline" className="text-[10px] gap-1 text-muted-foreground">
+                  <Newspaper className="h-2.5 w-2.5" />
+                  {nieuwsTip?.bronnen?.[0] ?? "Actueel nieuws"}
+                </Badge>
+              )}
             </div>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm text-muted-foreground leading-relaxed">{tip.tip}</p>
-            <Link href={tip.url}>
-              <Button size="sm" className="w-full" data-testid="button-tip-actie">
-                {tip.actie} <ArrowRight className="ml-2 h-4 w-4" />
+            {tipLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-full" />
+                <Skeleton className="h-4 w-5/6" />
+                <Skeleton className="h-4 w-4/6" />
+              </div>
+            ) : (
+              <p className="text-sm text-muted-foreground leading-relaxed" data-testid="text-nieuws-tip">
+                {nieuwsTip?.tip ?? "Controleer vandaag of de lokale regelgeving in jouw gemeente is bijgewerkt via Regio Intel."}
+              </p>
+            )}
+            <Link href="/intel">
+              <Button size="sm" className="w-full" data-testid="button-tip-actie" disabled={tipLoading}>
+                Bekijk Regio Intel <ArrowRight className="ml-2 h-4 w-4" />
               </Button>
             </Link>
           </CardContent>
@@ -443,7 +422,7 @@ export default function AanDeSlagPage() {
               <div>
                 <p className="font-semibold text-sm">Meer doen met Pro</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Krijg toegang tot RegioBot, de WOO-bibliotheek en de Website Scan voor €24,95/mnd.
+                  Krijg toegang tot RegioBot, de dossierbibliotheek en de Website Scan voor €24,95/mnd.
                 </p>
               </div>
             </div>

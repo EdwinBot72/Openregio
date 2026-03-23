@@ -4762,6 +4762,110 @@ Geef een JSON-object terug in exact dit formaat:
     }
   });
 
+  // ─── Dagelijkse nieuws-tip via AI ────────────────────────────────────
+  // In-memory cache: opnieuw genereren zodra de datum verandert
+  let nieuwsTipCacheDatum = "";
+  let nieuwsTipCacheData: { tip: string; bronnen: string[]; datum: string } | null = null;
+
+  async function fetchNieuwsTipVandaag(): Promise<{ tip: string; bronnen: string[] }> {
+    // Haal RSS-feeds op van NOS (algemeen + economie)
+    const feedUrls = [
+      "https://feeds.nos.nl/nosnieuwsalgemeen",
+      "https://feeds.nos.nl/nosnieuwseconomie",
+    ];
+
+    const headlines: string[] = [];
+    const bronnen: string[] = [];
+
+    for (const url of feedUrls) {
+      try {
+        const resp = await fetch(url, { signal: AbortSignal.timeout(6000) });
+        if (!resp.ok) continue;
+        const xml = await resp.text();
+        // Extract CDATA or plain titles from <item> blocks
+        const itemRegex = /<item>([\s\S]*?)<\/item>/g;
+        let itemMatch: RegExpExecArray | null;
+        while ((itemMatch = itemRegex.exec(xml)) !== null && headlines.length < 12) {
+          const itemBlock = itemMatch[1];
+          const titleMatch = /<title>(?:<!\[CDATA\[)?([\s\S]*?)(?:\]\]>)?<\/title>/i.exec(itemBlock);
+          if (titleMatch?.[1]) {
+            const title = titleMatch[1].trim();
+            if (title && title.length > 5) {
+              headlines.push(title);
+              if (!bronnen.includes("NOS.nl")) bronnen.push("NOS.nl");
+            }
+          }
+        }
+      } catch {
+        // Continue met andere feed
+      }
+    }
+
+    if (headlines.length < 3) {
+      throw new Error("Onvoldoende nieuwsitems opgehaald");
+    }
+
+    const { GoogleGenAI } = await import("@google/genai");
+    const ai = new GoogleGenAI({
+      apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
+    });
+
+    const headlineText = headlines.slice(0, 10).map((h, i) => `${i + 1}. ${h}`).join("\n");
+
+    const prompt = `Je bent een objectieve nieuwsanalist voor Nederlandse lokale ondernemers.
+
+Hier zijn de actuele nieuwskoppen van vandaag (NOS.nl):
+${headlineText}
+
+Analyseer deze koppen objectief. Kies het meest relevante nieuwsitem of thema voor een lokale Nederlandse ondernemer (zzp, mkb, horeca, detailhandel, bouw of soortgelijk).
+
+Schrijf één concrete, objectieve tip van maximaal 2-3 zinnen. De tip:
+- Begint met wat er speelt (feitelijk, zonder overdrijving)
+- Geeft een concrete vraag of actie die de ondernemer vandaag kan nemen
+- Is zakelijk en nuchter van toon, geen hype of alarm
+- Voorbeeld toon: "De benzineprijs is vandaag gestegen naar €2,18. Controleer of je zakelijke kilometervergoeding nog klopt en pas aan indien nodig."
+
+Geef ALLEEN de tip-tekst terug, zonder extra opmaak, nummers of uitleg.`;
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+    });
+
+    const tip = response.text?.trim() ?? "";
+    if (!tip) throw new Error("Lege AI-respons");
+
+    return { tip, bronnen };
+  }
+
+  app.get("/api/tools/nieuws-tip", requireAuth, async (_req, res) => {
+    const today = new Date().toISOString().split("T")[0];
+
+    // Geef cached versie terug als datum overeenkomt
+    if (nieuwsTipCacheDatum === today && nieuwsTipCacheData) {
+      return res.json({ ...nieuwsTipCacheData, cached: true });
+    }
+
+    try {
+      const { tip, bronnen } = await fetchNieuwsTipVandaag();
+      nieuwsTipCacheDatum = today;
+      nieuwsTipCacheData = { tip, bronnen, datum: today };
+      return res.json({ tip, bronnen, datum: today, cached: false });
+    } catch (err) {
+      console.error("[NieuwsTip] Fout bij genereren tip:", (err as Error).message);
+      // Fallback zodat de pagina altijd iets bruikbaars toont
+      const fallbackTip = "Controleer vandaag of de lokale regelgeving in jouw gemeente recent is bijgewerkt. Via Regio Intel zie je direct welke verordeningen en subsidies actueel zijn voor jouw sector.";
+      return res.json({
+        tip: fallbackTip,
+        bronnen: [],
+        datum: today,
+        cached: false,
+        fallback: true,
+      });
+    }
+  });
+  // ─────────────────────────────────────────────────────────────────────
+
   const httpServer = createServer(app);
   return httpServer;
 }
