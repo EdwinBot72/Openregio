@@ -76,7 +76,6 @@ export const APP_NAV: NavSection[] = [
     sub: [
       { title: "Bedrijfsprofiel", url: "/bedrijfsprofiel", icon: Building2 },
       { title: "Website Scan", url: "/tools/website-scan", icon: Monitor, proOnly: true },
-      { title: "Privacy & zichtbaarheid", url: "/pro/visibility-settings", icon: Shield, proOnly: true },
     ],
   },
   {
@@ -87,6 +86,7 @@ export const APP_NAV: NavSection[] = [
       { title: "RegioCrew", url: "/regiocrew", icon: Users },
       { title: "Regio Deals", url: "/kansen/regio-deals", icon: Landmark },
       { title: "Community", url: "/community", icon: Share2 },
+      { title: "Privacy & zichtbaarheid", url: "/pro/visibility-settings", icon: Shield, proOnly: true },
     ],
   },
 ];
