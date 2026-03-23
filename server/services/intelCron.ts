@@ -2,9 +2,79 @@ import cron from "node-cron";
 import { storage } from "../storage";
 import type { InsertIntelSignaal } from "@shared/schema";
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
+const RSS_FEEDS = [
+  {
+    url: "https://feeds.nos.nl/nosnieuwseconomie",
+    bron: "NOS Economie",
+    defaultCategorie: "financieel" as const,
+    defaultUrgentie: "normaal" as const,
+  },
+  {
+    url: "https://feeds.nos.nl/nosnieuwsbinnenland",
+    bron: "NOS Binnenland",
+    defaultCategorie: "beleid" as const,
+    defaultUrgentie: "normaal" as const,
+  },
+  {
+    url: "https://www.nu.nl/rss/Economie",
+    bron: "NU.nl Economie",
+    defaultCategorie: "financieel" as const,
+    defaultUrgentie: "normaal" as const,
+  },
+  {
+    url: "https://www.nu.nl/rss/Politiek",
+    bron: "NU.nl Politiek",
+    defaultCategorie: "beleid" as const,
+    defaultUrgentie: "normaal" as const,
+  },
+];
 
-async function fetchWithTimeout(url: string, ms = 10_000): Promise<Response> {
+const SUBSIDIE_KEYWORDS = [
+  "subsidie", "subsidies", "fonds", "financiering", "steunmaatregel",
+  "regeling", "voucher", "mkb-fonds", "stimulerings",
+];
+const WETGEVING_KEYWORDS = [
+  "wet ", "wetsvoorstel", "wetgeving", "besluit", "verordening",
+  "amvb", "richtlijn", "regeling", "aanpassing wet", "kamer stemt",
+];
+const BELEID_KEYWORDS = [
+  "beleid", "maatregel", "gemeente", "overheid", "kabinet", "minister",
+  "akkoord", "afspraken", "coalitie", "plan van aanpak",
+];
+
+type IntelCategorie = "wetgeving" | "beleid" | "financieel" | "subsidies";
+type IntelUrgentie = "hoog" | "normaal" | "info";
+
+function bepaalCategorie(
+  titel: string,
+  desc: string,
+  defaultCat: IntelCategorie
+): IntelCategorie {
+  const haystack = (titel + " " + desc).toLowerCase();
+  if (SUBSIDIE_KEYWORDS.some((k) => haystack.includes(k))) return "subsidies";
+  if (WETGEVING_KEYWORDS.some((k) => haystack.includes(k))) return "wetgeving";
+  if (BELEID_KEYWORDS.some((k) => haystack.includes(k))) return "beleid";
+  return defaultCat;
+}
+
+const HOOG_KEYWORDS = [
+  "per direct", "direct ingegaan", "spoedwet", "noodmaatregel",
+  "urgent", "crisis", "alarm", "waarschuwing",
+];
+
+function bepaalUrgentie(titel: string, desc: string): IntelUrgentie {
+  const haystack = (titel + " " + desc).toLowerCase();
+  if (HOOG_KEYWORDS.some((k) => haystack.includes(k))) return "hoog";
+  return "normaal";
+}
+
+function parseRssDate(pubDate?: string): Date {
+  if (!pubDate) return new Date();
+  const d = new Date(pubDate);
+  return isNaN(d.getTime()) ? new Date() : d;
+}
+
+async function fetchWithTimeout(url: string, ms = 12_000): Promise<Response> {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), ms);
   try {
@@ -14,82 +84,80 @@ async function fetchWithTimeout(url: string, ms = 10_000): Promise<Response> {
   }
 }
 
-// ─── Rijksoverheid Open Data ─────────────────────────────────────────────────
-// Haalt de 10 meest recente documenten op via de Rijksoverheid API
-async function fetchRijksoverheidDocs(): Promise<InsertIntelSignaal[]> {
-  const url =
-    "https://opendata.rijksoverheid.nl/v1/infotypes/document?output=json&rows=10&offset=0";
-  try {
-    const res = await fetchWithTimeout(url);
-    if (!res.ok) return [];
-    const json = await res.json();
-    const docs: any[] = json.results ?? json.items ?? json ?? [];
-    return docs.map((doc: any) => {
-      const id = String(doc.id ?? doc.documentnummer ?? doc.identifier ?? "");
-      return {
-        categorie: "wetgeving" as const,
-        urgentie: "normaal" as const,
-        titel: String(doc.title ?? doc.naam ?? "Onbekend document").slice(0, 512),
-        samenvatting: String(doc.description ?? doc.omschrijving ?? "Geen samenvatting beschikbaar."),
-        bron: "Rijksoverheid",
-        regio: "Nationaal",
-        datum: doc.publicationdate ? new Date(doc.publicationdate) : new Date(),
-        bronUrl: doc.url ?? doc.link ?? undefined,
-        isPublished: true,
-        externalId: id ? `rijksoverheid-${id}` : undefined,
-      } satisfies InsertIntelSignaal;
-    });
-  } catch (err) {
-    console.error("[IntelCron] Rijksoverheid fetch fout:", err);
-    return [];
-  }
+function extractCdataOrPlain(xml: string, tag: string): string {
+  const cdataMatch = new RegExp(
+    `<${tag}><\\!\\[CDATA\\[(.*?)\\]\\]><\\/${tag}>`,
+    "s"
+  ).exec(xml);
+  if (cdataMatch) return cdataMatch[1].trim();
+  const plainMatch = new RegExp(`<${tag}>(.*?)<\\/${tag}>`, "s").exec(xml);
+  return plainMatch ? plainMatch[1].replace(/<[^>]+>/g, "").trim() : "";
 }
 
-// ─── RVO.nl subsidie-nieuws (RSS) ───────────────────────────────────────────
-async function fetchRvoSubsidies(): Promise<InsertIntelSignaal[]> {
-  const url = "https://www.rvo.nl/rss.xml";
+async function fetchRssFeed(
+  url: string,
+  bron: string,
+  defaultCategorie: IntelCategorie,
+  defaultUrgentie: IntelUrgentie,
+  maxItems = 8
+): Promise<InsertIntelSignaal[]> {
   try {
     const res = await fetchWithTimeout(url);
-    if (!res.ok) return [];
+    if (!res.ok) {
+      console.error(`[IntelCron] ${bron}: HTTP ${res.status}`);
+      return [];
+    }
     const text = await res.text();
-    const items = [...text.matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(0, 8);
-    return items
-      .map((m) => {
-        const item = m[1];
-        const titel = (item.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/) ?? item.match(/<title>(.*?)<\/title>/))?.[1] ?? "";
-        const desc = (item.match(/<description><!\[CDATA\[(.*?)\]\]><\/description>/) ?? item.match(/<description>(.*?)<\/description>/))?.[1]?.replace(/<[^>]+>/g, "") ?? "";
-        const link = item.match(/<link>(.*?)<\/link>/)?.[1] ?? "";
-        const pubDate = item.match(/<pubDate>(.*?)<\/pubDate>/)?.[1];
-        if (!titel) return null;
-        return {
-          categorie: "subsidies" as const,
-          urgentie: "normaal" as const,
-          titel: titel.slice(0, 512),
-          samenvatting: desc.slice(0, 2000) || "Geen samenvatting.",
-          bron: "RVO.nl",
-          regio: "Nationaal",
-          datum: pubDate ? new Date(pubDate) : new Date(),
-          bronUrl: link || undefined,
-          isPublished: true,
-          externalId: link ? `rvo-${Buffer.from(link).toString("base64").slice(0, 60)}` : undefined,
-        } satisfies InsertIntelSignaal;
-      })
-      .filter(Boolean) as InsertIntelSignaal[];
+    const items = [...text.matchAll(/<item>([\s\S]*?)<\/item>/g)].slice(
+      0,
+      maxItems
+    );
+    const results: InsertIntelSignaal[] = [];
+    for (const m of items) {
+      const item = m[1];
+      const titel = extractCdataOrPlain(item, "title");
+      if (!titel) continue;
+      const desc = extractCdataOrPlain(item, "description").slice(0, 2000);
+      const link = (item.match(/<link>(.*?)<\/link>/) ?? item.match(/<guid[^>]*>(https?:\/\/[^<]+)<\/guid>/))?.[1]?.trim() ?? "";
+      const pubDate = (item.match(/<pubDate>(.*?)<\/pubDate>/) )?.[1];
+
+      const categorie = bepaalCategorie(titel, desc, defaultCategorie);
+      const urgentie = bepaalUrgentie(titel, desc);
+      const externalId = link
+        ? `rss-${Buffer.from(link).toString("base64").slice(0, 60)}`
+        : undefined;
+
+      results.push({
+        categorie,
+        urgentie,
+        titel: titel.slice(0, 512),
+        samenvatting: desc || "Geen samenvatting beschikbaar.",
+        bron,
+        regio: "Nationaal",
+        datum: parseRssDate(pubDate),
+        bronUrl: link || undefined,
+        isPublished: true,
+        externalId,
+      });
+    }
+    console.log(`[IntelCron] ${bron}: ${results.length} items gevonden`);
+    return results;
   } catch (err) {
-    console.error("[IntelCron] RVO RSS fetch fout:", err);
+    console.error(`[IntelCron] ${bron} fetch fout:`, (err as Error).message);
     return [];
   }
 }
 
-// ─── Hoofdfunctie ─────────────────────────────────────────────────────────
 export async function runIntelFetch(): Promise<number> {
   console.log("[IntelCron] Fetch-ronde gestart");
-  const [rijksoverheidDocs, rvoSubsidies] = await Promise.all([
-    fetchRijksoverheidDocs(),
-    fetchRvoSubsidies(),
-  ]);
 
-  const candidates = [...rijksoverheidDocs, ...rvoSubsidies];
+  const allResults = await Promise.all(
+    RSS_FEEDS.map((f) =>
+      fetchRssFeed(f.url, f.bron, f.defaultCategorie, f.defaultUrgentie)
+    )
+  );
+
+  const candidates = allResults.flat();
   let nieuw = 0;
 
   for (const kandidaat of candidates) {
@@ -98,19 +166,21 @@ export async function runIntelFetch(): Promise<number> {
       nieuw++;
       continue;
     }
-    const bestaand = await storage.getIntelSignaalByExternalId(kandidaat.externalId);
+    const bestaand = await storage.getIntelSignaalByExternalId(
+      kandidaat.externalId
+    );
     if (!bestaand) {
       await storage.createIntelSignaal(kandidaat);
       nieuw++;
     }
   }
 
-  console.log(`[IntelCron] Fetch-ronde klaar — ${nieuw} nieuwe signalen opgeslagen`);
+  console.log(
+    `[IntelCron] Fetch-ronde klaar — ${nieuw} nieuwe signalen opgeslagen`
+  );
   return nieuw;
 }
 
-// ─── Dagelijkse cron-taak ────────────────────────────────────────────────────
-// Elke dag om 06:00 Nederlandse tijd
 export function startIntelCron() {
   cron.schedule(
     "0 6 * * *",
