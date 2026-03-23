@@ -19,6 +19,7 @@ import type { IntelSignaal } from "@shared/schema";
 type NieuwsTip = {
   tip: string;
   bronnen: string[];
+  bronUrl?: string;
   datum: string;
   cached?: boolean;
   fallback?: boolean;
@@ -254,11 +255,19 @@ export default function AanDeSlagPage() {
                 {nieuwsTip?.tip ?? "Controleer vandaag of de lokale regelgeving in jouw gemeente is bijgewerkt via Regio Intel."}
               </p>
             )}
-            <Link href="/intel">
-              <Button size="sm" className="w-full" data-testid="button-tip-actie" disabled={tipLoading}>
-                Bekijk Regio Intel <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
+            {nieuwsTip?.bronUrl ? (
+              <a href={nieuwsTip.bronUrl} target="_blank" rel="noopener noreferrer">
+                <Button size="sm" className="w-full" data-testid="button-tip-actie" disabled={tipLoading}>
+                  Lees het nieuwsartikel <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </a>
+            ) : (
+              <Link href="/intel">
+                <Button size="sm" className="w-full" data-testid="button-tip-actie" disabled={tipLoading}>
+                  Bekijk Regio Intel <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </Link>
+            )}
           </CardContent>
         </Card>
 
