@@ -18,15 +18,11 @@ async function tryRefreshToken(): Promise<boolean> {
   return refreshPromise;
 }
 
-async function isTokenExpiredResponse(res: Response): Promise<boolean> {
-  if (res.status !== 401) return false;
-  try {
-    const clone = res.clone();
-    const body = await clone.json();
-    return body?.code === "TOKEN_EXPIRED";
-  } catch {
-    return false;
-  }
+function isTokenExpiredResponse(res: Response): boolean {
+  // Treat every 401 as a potential expired/missing token and attempt a silent refresh.
+  // The refresh endpoint itself will reject if no valid refresh token is present,
+  // which covers the case of a genuinely unauthenticated user.
+  return res.status === 401;
 }
 
 async function throwIfResNotOk(res: Response) {
@@ -51,7 +47,7 @@ export async function apiRequest(
 
   let res = await fetch(url, fetchOpts);
 
-  if (await isTokenExpiredResponse(res)) {
+  if (isTokenExpiredResponse(res)) {
     const refreshed = await tryRefreshToken();
     if (refreshed) {
       res = await fetch(url, fetchOpts);
@@ -105,7 +101,7 @@ export const getQueryFn: <T>(options: {
 
     let res = await fetch(url, { credentials: "include" });
 
-    if (await isTokenExpiredResponse(res)) {
+    if (isTokenExpiredResponse(res)) {
       const refreshed = await tryRefreshToken();
       if (refreshed) {
         res = await fetch(url, { credentials: "include" });
