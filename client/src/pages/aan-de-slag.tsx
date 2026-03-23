@@ -12,7 +12,8 @@ import {
   Lightbulb, CheckCircle2, Circle, ArrowRight, Bot, FileText,
   Globe, Users, Zap, Landmark, Shield, Star, Clock, MapPin,
   BookOpen, TrendingUp, ChevronRight, Sparkles, Target,
-  Scale, Network, Newspaper,
+  Scale, Network, Newspaper, RefreshCw, Leaf, Building2,
+  Cpu, HandCoins, BarChart3, CircleDot,
 } from "lucide-react";
 import type { IntelSignaal } from "@shared/schema";
 
@@ -419,6 +420,100 @@ export default function AanDeSlagPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Great Reset & Agenda 2030 */}
+      <Card data-testid="card-globale-agenda">
+        <CardHeader className="pb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center shrink-0">
+              <Globe className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <div>
+              <CardTitle className="text-base">Globale agenda's die jouw bedrijf raken</CardTitle>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                De Great Reset en Agenda 2030 zijn internationale beleidsprogramma's die via EU-regelgeving al doorwerken in de dagelijkse praktijk van lokale ondernemers.
+              </p>
+            </div>
+          </div>
+        </CardHeader>
+        <CardContent className="space-y-6">
+
+          {/* De Great Reset */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <RefreshCw className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0" />
+              <h3 className="font-semibold text-sm">De Great Reset (WEF, 2020)</h3>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Het Wereld Economisch Forum lanceerde De Great Reset als respons op de coronacrisis: een wereldwijd hervormingsplan om economieën "beter, veerkrachtiger en rechtvaardiger" te herbouwen. Concreet betekent dit een versnelde transitie naar duurzame en digitale bedrijfsmodellen.
+            </p>
+            <div className="grid sm:grid-cols-2 gap-3">
+              {[
+                { icon: Leaf, label: "Groene economie", tekst: "Strengere eisen aan energie, CO₂-uitstoot en circulaire inkoop. Lokale aanbestedingen vragen al om duurzaamheidsverklaringen.", kleur: "text-green-600 dark:text-green-400", bg: "bg-green-50 dark:bg-green-950/40" },
+                { icon: Cpu, label: "Digitale transformatie", tekst: "Verplichte digitale processen: e-facturering (Peppol), digitale kassabonnen, UBO-registratie. Analoog werken wordt steeds lastiger.", kleur: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-950/40" },
+                { icon: Users, label: "Stakeholderkapitalisme", tekst: "Bedrijven worden aangestuurd om niet alleen winst te maken, maar ook waarde te leveren voor werknemers, gemeenschap en milieu.", kleur: "text-purple-600 dark:text-purple-400", bg: "bg-purple-50 dark:bg-purple-950/40" },
+                { icon: Building2, label: "Lokale impact", tekst: "Gemeenten vertalen WEF-doelstellingen in lokale verordeningen: parkeerbeleid, reclameregels, terrassenvergunningen en duurzame bouwvereisten.", kleur: "text-orange-600 dark:text-orange-400", bg: "bg-orange-50 dark:bg-orange-950/40" },
+              ].map((punt) => (
+                <div key={punt.label} className="flex gap-3 rounded-xl border p-3">
+                  <div className={`w-8 h-8 rounded-lg ${punt.bg} flex items-center justify-center shrink-0`}>
+                    <punt.icon className={`h-3.5 w-3.5 ${punt.kleur}`} />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold mb-0.5">{punt.label}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{punt.tekst}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t" />
+
+          {/* Agenda 2030 */}
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <BarChart3 className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <h3 className="font-semibold text-sm">Agenda 2030 — de 17 SDG's (VN, 2015)</h3>
+            </div>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              De VN-Agenda 2030 bevat 17 Duurzame Ontwikkelingsdoelen (SDG's) die landen — en daarmee bedrijven — moeten realiseren vóór 2030. Voor het mkb en zzp werken deze door via EU-richtlijnen, gemeentelijk subsidiebeleid en inkoopvereisten van grotere opdrachtgevers.
+            </p>
+            <div className="grid sm:grid-cols-3 gap-3">
+              {[
+                { nr: "SDG 8", label: "Waardig werk", tekst: "Eerlijke lonen, veilige werkplek, geen schijnzelfstandigheid. DBA-wetgeving handhaving en minimumuurloon voor zzp zijn hieruit voortgekomen.", kleur: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-950/40", icon: HandCoins },
+                { nr: "SDG 11", label: "Duurzame steden", tekst: "Gemeenten sturen op leefbaarheid: venstertijden voor belevering, emissievrije zones, terrasbeleid en verkeersluwe winkelgebieden.", kleur: "text-sky-600 dark:text-sky-400", bg: "bg-sky-50 dark:bg-sky-950/40", icon: Building2 },
+                { nr: "SDG 12", label: "Verantwoorde consumptie", tekst: "Circulaire inkoop, productpaspoort (ESPR), verbod op wegwerpplastic. Toeleveranciers van grote bedrijven moeten al aantonen hoe duurzaam zij inkopen.", kleur: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-950/40", icon: Leaf },
+                { nr: "SDG 13", label: "Klimaatactie", tekst: "CSRD-rapportage, energiebesparingsplicht boven €400k omzet, zakelijk reisbeleid. Kleine bedrijven worden via de keten meegetrokken.", kleur: "text-teal-600 dark:text-teal-400", bg: "bg-teal-50 dark:bg-teal-950/40", icon: TrendingUp },
+                { nr: "SDG 16", label: "Vrede & instituties", tekst: "UBO-register, Wwft-verplichtingen voor bepaalde beroepen (makelaars, taxateurs, handelaren). Meer transparantie-eisen bij overheidscontracten.", kleur: "text-violet-600 dark:text-violet-400", bg: "bg-violet-50 dark:bg-violet-950/40", icon: Scale },
+                { nr: "SDG 17", label: "Samenwerking", tekst: "Coöperaties, brancheorganisaties en regionale samenwerkingsverbanden worden gestimuleerd. OpenRegio is een directe invulling van dit doel.", kleur: "text-indigo-600 dark:text-indigo-400", bg: "bg-indigo-50 dark:bg-indigo-950/40", icon: Network },
+              ].map((sdg) => (
+                <div key={sdg.nr} className="flex gap-3 rounded-xl border p-3">
+                  <div className={`w-8 h-8 rounded-lg ${sdg.bg} flex items-center justify-center shrink-0`}>
+                    <sdg.icon className={`h-3.5 w-3.5 ${sdg.kleur}`} />
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-1.5 mb-0.5">
+                      <span className={`text-[10px] font-bold ${sdg.kleur}`}>{sdg.nr}</span>
+                      <span className="text-xs font-semibold">{sdg.label}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{sdg.tekst}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t pt-4">
+            <div className="flex items-start gap-3 bg-muted/40 rounded-xl p-4">
+              <CircleDot className="h-4 w-4 text-muted-foreground shrink-0 mt-0.5" />
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                <span className="font-semibold text-foreground">Wat verandert er voor jou?</span> Wet- en regelgeving die uit deze agenda's voortkomt, verschijnt als lokale signalen in <Link href="/intel" className="underline underline-offset-2 hover:text-foreground transition-colors">Regio Intel</Link> en als juridische duiding in de <Link href="/wetgeving" className="underline underline-offset-2 hover:text-foreground transition-colors">Wetgeving & Regelgeving</Link> sectie. OpenRegio houdt bij welke verplichtingen al gelden en wanneer nieuwe ingaan — zodat jij niet achter de feiten aan loopt.
+              </p>
+            </div>
+          </div>
+
+        </CardContent>
+      </Card>
 
       {/* Pro-upgrade CTA voor basis-leden */}
       {user?.plan === "basic" && (
