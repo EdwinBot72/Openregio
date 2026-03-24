@@ -170,7 +170,7 @@ export function startIntelCron() {
   // Populeer de DB bij opstarten als de tabel leeg is (bijv. productie-deploy)
   setImmediate(async () => {
     try {
-      const bestaand = await storage.getIntelSignalen({ isPublished: true });
+      const bestaand = await storage.getIntelSignalen();
       if (bestaand.length === 0) {
         console.log("[IntelCron] Geen signalen in DB — directe opstartfetch gestart");
         await runIntelFetch();
