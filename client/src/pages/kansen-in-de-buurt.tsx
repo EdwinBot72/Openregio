@@ -184,18 +184,18 @@ export default function KansenInDeBuurtPage() {
           {REGIO_S.map((regio) => {
             const actief = geselecteerdeRegio === regio;
             return (
-              <button
+              <Button
                 key={regio}
                 onClick={() => setGeselecteerdeRegio(regio)}
                 data-testid={`button-regio-${regio.split(" ")[0].toLowerCase()}`}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition-all ${
+                className={
                   actief
-                    ? "bg-white text-slate-900"
-                    : "bg-white/10 text-white hover:bg-white/20"
-                }`}
+                    ? "toggle-elevate toggle-elevated bg-white text-slate-900 border-white rounded-full"
+                    : "toggle-elevate bg-white/10 text-white border-white/25 rounded-full"
+                }
               >
                 {regio}
-              </button>
+              </Button>
             );
           })}
         </div>
