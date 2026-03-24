@@ -4948,6 +4948,123 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
     }
   });
 
+  // ─── Kansen per gemeente (AI-gegenereerd) ────────────────────────────
+  // In-memory cache per gemeente, geldig voor de huidige dag
+  const kansenCache = new Map<string, { datum: string; kansen: KansKaartAI[] }>();
+
+  type KansKaartAI = {
+    titel: string;
+    waarom: string;
+    voorWie: string[];
+    kans: string;
+    urgentie: "Hoog" | "Gemiddeld" | "Laag";
+  };
+
+  app.get("/api/kansen/gemeente", requireAuth, async (req, res) => {
+    const gemeente = (req.query.gemeente as string | undefined)?.trim();
+    if (!gemeente) {
+      return res.status(400).json({ error: "Gemeente is verplicht" });
+    }
+
+    const today = new Date().toISOString().split("T")[0];
+    const cached = kansenCache.get(gemeente);
+    if (cached && cached.datum === today) {
+      return res.json({ gemeente, kansen: cached.kansen, cached: true });
+    }
+
+    try {
+      const { GoogleGenAI } = await import("@google/genai");
+      const ai = new GoogleGenAI({ apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY! });
+
+      const prompt = `Je bent een lokale kansen-analist voor Nederlandse ondernemers (zzp, mkb, horeca, detailhandel, bouw, agrarisch).
+
+Genereer precies 4 actuele kansen voor ondernemers in de gemeente: **${gemeente}**.
+
+Denk aan typische kenmerken van deze gemeente of regio in Nederland. Wees specifiek en praktisch.
+
+Elke kans moet bevatten:
+- titel: korte, pakkende omschrijving (max 8 woorden)
+- waarom: waarom deze kans opvalt of relevant is in deze gemeente (1-2 zinnen, feitelijk)
+- voorWie: 2-3 type ondernemers voor wie dit relevant is (bijv. "Webbouwers", "Horecaondernemers", "Bouwbedrijven")
+- kans: wat de ondernemer concreet kan doen (1 actieve zin, begint met een werkwoord)
+- urgentie: één van "Hoog", "Gemiddeld" of "Laag"
+
+Zorg voor variatie: gebruik minimaal 2 verschillende urgentieniveaus en spreidt de doelgroepen.
+
+Geef ALLEEN geldige JSON terug (geen markdown, geen uitleg), in dit exacte formaat:
+[
+  {
+    "titel": "...",
+    "waarom": "...",
+    "voorWie": ["...", "..."],
+    "kans": "...",
+    "urgentie": "Hoog"
+  }
+]`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+      });
+
+      let rawText = response.text?.trim() ?? "";
+      // Strip markdown code fences if present
+      rawText = rawText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+
+      const parsed: KansKaartAI[] = JSON.parse(rawText);
+      if (!Array.isArray(parsed) || parsed.length === 0) {
+        throw new Error("Ongeldig AI-formaat");
+      }
+
+      const kansen = parsed.slice(0, 5).map((k) => ({
+        titel: String(k.titel ?? "").slice(0, 120),
+        waarom: String(k.waarom ?? "").slice(0, 500),
+        voorWie: Array.isArray(k.voorWie) ? k.voorWie.slice(0, 4).map(String) : [],
+        kans: String(k.kans ?? "").slice(0, 300),
+        urgentie: (["Hoog", "Gemiddeld", "Laag"].includes(k.urgentie) ? k.urgentie : "Gemiddeld") as KansKaartAI["urgentie"],
+      }));
+
+      kansenCache.set(gemeente, { datum: today, kansen });
+      console.log(`[Kansen] ${kansen.length} kansen gegenereerd voor ${gemeente}`);
+      return res.json({ gemeente, kansen, cached: false });
+    } catch (err) {
+      console.error("[Kansen] AI-fout:", (err as Error).message);
+      // Fallback: generieke kansen
+      const fallback: KansKaartAI[] = [
+        {
+          titel: "Digitale zichtbaarheid verbeteren",
+          waarom: "Veel lokale ondernemers zijn online moeilijk vindbaar terwijl de vraag naar lokale diensten groeit.",
+          voorWie: ["Webdesigners", "Marketeers", "Fotografen"],
+          kans: "Bied een lokale websitescan of zichtbaarheidspakket aan voor ondernemers in de buurt.",
+          urgentie: "Hoog",
+        },
+        {
+          titel: "Hulp bij administratie en brieven",
+          waarom: "Overheidsformulieren en officiële brieven kosten ondernemers veel tijd en zorgen voor onnodige stress.",
+          voorWie: ["Administrateurs", "Adviseurs", "Boekhouders"],
+          kans: "Bied een laagdrempelige vraag-en-antwoord sessie of documentenhulp aan voor lokale ondernemers.",
+          urgentie: "Gemiddeld",
+        },
+        {
+          titel: "Lokale samenwerking faciliteren",
+          waarom: "Ondernemers willen samenwerken maar concrete matches komen niet vanzelf tot stand.",
+          voorWie: ["Verbinders", "Lokale netwerken", "Ondernemersverenigingen"],
+          kans: "Organiseer een laagdrempelige lokale kennismaking of bundel complementaire diensten.",
+          urgentie: "Gemiddeld",
+        },
+        {
+          titel: "Subsidies en regelingen benutten",
+          waarom: "Gemeenten en provincies hebben regelmatig subsidies beschikbaar die onbenut blijven bij kleine ondernemers.",
+          voorWie: ["Adviseurs", "Duurzaamheidsspecialisten", "Bouwbedrijven"],
+          kans: "Zoek actief naar openstaande subsidies voor verduurzaming of digitalisering via jouw gemeente.",
+          urgentie: "Laag",
+        },
+      ];
+      kansenCache.set(gemeente, { datum: today, kansen: fallback });
+      return res.json({ gemeente, kansen: fallback, cached: false, fallback: true });
+    }
+  });
+
   // ─────────────────────────────────────────────────────────────────────
 
   const httpServer = createServer(app);

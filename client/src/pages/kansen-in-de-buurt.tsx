@@ -1,9 +1,12 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { RegionSelect } from "@/components/region-select";
 import { Link } from "wouter";
 import {
   TrendingUp,
@@ -12,13 +15,12 @@ import {
   ArrowRight,
   MapPin,
   Star,
+  Lightbulb,
 } from "lucide-react";
 
 type Urgentie = "Hoog" | "Gemiddeld" | "Laag";
 
 type KansKaart = {
-  id: number;
-  regio: string;
   titel: string;
   waarom: string;
   voorWie: string[];
@@ -26,88 +28,19 @@ type KansKaart = {
   urgentie: Urgentie;
 };
 
-const KANSEN: KansKaart[] = [
-  {
-    id: 1,
-    regio: "Haarlem & omgeving",
-    titel: "Veel vraag naar websitehulp",
-    waarom:
-      "Steeds meer ondernemers willen beter gevonden worden, maar sterk lokaal aanbod is nog beperkt zichtbaar.",
-    voorWie: ["Webbouwers", "Marketeers", "Fotografen"],
-    kans: "Bied een snelle websitescan of opfrisbeurt aan voor lokale ondernemers.",
-    urgentie: "Hoog",
-  },
-  {
-    id: 2,
-    regio: "Haarlem & omgeving",
-    titel: "Ondernemers zoeken hulp met brieven",
-    waarom:
-      "Veel ondernemers lopen vast op officiële brieven, formulieren en onduidelijke communicatie.",
-    voorWie: ["Ondersteuners", "Schrijvers", "Adviseurs"],
-    kans: "Bied praktische uitleg of hulp bij documenten zonder juridisch gedoe.",
-    urgentie: "Gemiddeld",
-  },
-  {
-    id: 3,
-    regio: "Haarlem & omgeving",
-    titel: "Lokale samenwerking blijft liggen",
-    waarom:
-      "Er is behoefte aan samenwerking, maar concrete matches en acties komen niet vanzelf op gang.",
-    voorWie: ["Lokale ondernemers", "Organisatoren", "Verbinders"],
-    kans: "Start een lokale actie, bundel of samenwerkingsaanbod.",
-    urgentie: "Gemiddeld",
-  },
-  {
-    id: 4,
-    regio: "Alkmaar & omgeving",
-    titel: "Vraag naar digitale hulp groeit",
-    waarom:
-      "Kleine ondernemers zoeken vaker hulp bij websites, reviews en online zichtbaarheid.",
-    voorWie: ["Freelancers", "Bureaus", "VA's"],
-    kans: "Bied maandelijkse hulp of een laagdrempelige instapservice aan.",
-    urgentie: "Hoog",
-  },
-  {
-    id: 5,
-    regio: "Alkmaar & omgeving",
-    titel: "Meer behoefte aan lokale promotie",
-    waarom:
-      "Ondernemers willen beter zichtbaar zijn, maar missen vaak een simpele regionale aanpak.",
-    voorWie: ["Marketeers", "Contentmakers", "Ontwerpers"],
-    kans: "Bied lokale zichtbaarheidspakketten of reviewhulp aan.",
-    urgentie: "Gemiddeld",
-  },
-  {
-    id: 6,
-    regio: "Wormer & omgeving",
-    titel: "Praktische ondernemershulp blijft schaars",
-    waarom:
-      "Voor kleine ondernemers is directe hulp bij websites, formulieren en zichtbaarheid niet altijd makkelijk te vinden.",
-    voorWie: ["Allround ondersteuners", "Webhelpers", "Freelancers"],
-    kans: "Positioneer jezelf als snelle, duidelijke hulp in de buurt.",
-    urgentie: "Hoog",
-  },
-  {
-    id: 7,
-    regio: "Wormer & omgeving",
-    titel: "Vraag & aanbod komt niet goed samen",
-    waarom:
-      "Ondernemers zoeken lokaal contact, maar veel kansen blijven versnipperd en onzichtbaar.",
-    voorWie: ["Verbinders", "Lokale initiatieven", "Ondernemersnetwerken"],
-    kans: "Breng vraag en aanbod lokaal samen met een simpele regionale actie.",
-    urgentie: "Gemiddeld",
-  },
-];
-
-const REGIO_S = ["Haarlem & omgeving", "Alkmaar & omgeving", "Wormer & omgeving"];
+type KansenResponse = {
+  gemeente: string;
+  kansen: KansKaart[];
+  cached?: boolean;
+  fallback?: boolean;
+};
 
 const UITLEG = [
   {
     icon: TrendingUp,
     label: "Wat je hier ziet",
     titel: "Kansen die opvallen",
-    tekst:
-      "Geen ruis, maar signalen waar je als ondernemer direct iets mee kunt.",
+    tekst: "Geen ruis, maar signalen waar je als ondernemer direct iets mee kunt.",
   },
   {
     icon: Users,
@@ -127,23 +60,35 @@ const UITLEG = [
 
 function UrgentieBadge({ urgentie }: { urgentie: Urgentie }) {
   if (urgentie === "Hoog") {
-    return (
-      <Badge variant="destructive" className="text-xs shrink-0">
-        Hoog
-      </Badge>
-    );
+    return <Badge variant="destructive" className="text-xs shrink-0">Hoog</Badge>;
   }
   if (urgentie === "Gemiddeld") {
-    return (
-      <Badge variant="secondary" className="text-xs shrink-0">
-        Gemiddeld
-      </Badge>
-    );
+    return <Badge variant="secondary" className="text-xs shrink-0">Gemiddeld</Badge>;
   }
+  return <Badge variant="outline" className="text-xs shrink-0">Laag</Badge>;
+}
+
+function KansKaartSkeleton() {
   return (
-    <Badge variant="outline" className="text-xs shrink-0">
-      Laag
-    </Badge>
+    <Card>
+      <CardContent className="pt-5 pb-5 space-y-4">
+        <div className="flex items-start justify-between gap-3">
+          <Skeleton className="h-5 w-3/4" />
+          <Skeleton className="h-5 w-16 shrink-0" />
+        </div>
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-5/6" />
+        <div className="flex gap-1.5">
+          <Skeleton className="h-5 w-20" />
+          <Skeleton className="h-5 w-24" />
+        </div>
+        <Skeleton className="h-16 w-full rounded-xl" />
+        <div className="flex gap-2">
+          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-8 w-28" />
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -152,12 +97,35 @@ export default function KansenInDeBuurtPage() {
   const { user } = useAuth();
   const isPro = user?.plan === "pro" || user?.plan === "master";
 
-  const [geselecteerdeRegio, setGeselecteerdeRegio] = useState(REGIO_S[0]);
+  // Auto-fill vanuit bedrijfsprofiel
+  const { data: profiel } = useQuery<{ regio?: string } | null>({
+    queryKey: ["/api/business-profile/me"],
+    enabled: !!user,
+  });
 
-  const kansen = useMemo(
-    () => KANSEN.filter((k) => k.regio === geselecteerdeRegio),
-    [geselecteerdeRegio]
-  );
+  const [gemeente, setGemeente] = useState("");
+  const actieveGemeente = gemeente || profiel?.regio || "";
+
+  const {
+    data,
+    isLoading,
+    isError,
+    isFetching,
+  } = useQuery<KansenResponse>({
+    queryKey: ["/api/kansen/gemeente", actieveGemeente],
+    queryFn: () =>
+      fetch(`/api/kansen/gemeente?gemeente=${encodeURIComponent(actieveGemeente)}`, {
+        credentials: "include",
+      }).then((r) => {
+        if (!r.ok) throw new Error("Fout bij ophalen");
+        return r.json();
+      }),
+    enabled: !!actieveGemeente,
+    staleTime: 10 * 60 * 1000,
+  });
+
+  const kansen = data?.kansen ?? [];
+  const laden = isLoading || isFetching;
 
   return (
     <div className="space-y-6 pb-8">
@@ -176,28 +144,36 @@ export default function KansenInDeBuurtPage() {
           Hier liggen nu kansen
         </h1>
         <p className="mt-3 max-w-2xl text-sm text-white/75 md:text-base">
-          Zie in één oogopslag waar in jouw regio vraag groeit, waar ondernemers
-          hulp zoeken en waar jij op kunt inspelen.
+          Zie in één oogopslag waar in jouw gemeente vraag groeit, waar
+          ondernemers hulp zoeken en waar jij op kunt inspelen — voor alle 342
+          gemeenten in Nederland.
         </p>
 
-        <div className="mt-6 flex flex-wrap gap-3" data-testid="regio-selector">
-          {REGIO_S.map((regio) => {
-            const actief = geselecteerdeRegio === regio;
-            return (
-              <Button
-                key={regio}
-                onClick={() => setGeselecteerdeRegio(regio)}
-                data-testid={`button-regio-${regio.split(" ")[0].toLowerCase()}`}
-                className={
-                  actief
-                    ? "toggle-elevate toggle-elevated bg-white text-slate-900 border-white rounded-full"
-                    : "toggle-elevate bg-white/10 text-white border-white/25 rounded-full"
-                }
-              >
-                {regio}
-              </Button>
-            );
-          })}
+        {/* Gemeente-selectie */}
+        <div className="mt-6 flex flex-col sm:flex-row gap-3 items-start sm:items-end">
+          <div className="w-full sm:w-80">
+            <label className="text-xs font-medium text-white/70 mb-1.5 block">
+              Kies een gemeente
+            </label>
+            <RegionSelect
+              value={actieveGemeente}
+              onValueChange={setGemeente}
+              placeholder="Selecteer gemeente"
+              data-testid="select-gemeente"
+              className="bg-white/10 border-white/20 text-white [&_svg]:text-white/70 [&_[data-placeholder]]:text-white/60"
+            />
+          </div>
+          {actieveGemeente && (
+            <div className="flex items-center gap-2 text-white/80 text-sm pb-0.5">
+              <MapPin className="h-4 w-4" />
+              <span data-testid="text-actieve-gemeente">{actieveGemeente}</span>
+              {data?.cached && (
+                <Badge variant="outline" className="text-white/60 border-white/20 text-xs">
+                  vandaag
+                </Badge>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -215,110 +191,161 @@ export default function KansenInDeBuurtPage() {
                   <p className="text-xs text-muted-foreground">{blok.label}</p>
                 </div>
                 <p className="font-semibold text-sm">{blok.titel}</p>
-                <p className="text-sm text-muted-foreground leading-relaxed">
-                  {blok.tekst}
-                </p>
+                <p className="text-sm text-muted-foreground leading-relaxed">{blok.tekst}</p>
               </CardContent>
             </Card>
           );
         })}
       </div>
 
-      {/* ── Kansen-kaarten ───────────────────────────────────────────────────── */}
-      <section data-testid="section-kansen">
-        <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
-          <div>
-            <h2 className="text-xl font-bold" data-testid="text-regio-naam">
-              {geselecteerdeRegio}
-            </h2>
-            <p className="text-sm text-muted-foreground mt-0.5">
-              Dit valt nu op in jouw buurt.
-            </p>
-          </div>
-          <Link href="/intel">
-            <Button variant="outline" size="sm" data-testid="button-alle-signalen">
-              Alle signalen bekijken
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+      {/* ── Geen gemeente geselecteerd ────────────────────────────────────────── */}
+      {!actieveGemeente && (
+        <div
+          className="rounded-2xl border border-dashed p-10 text-center text-muted-foreground"
+          data-testid="state-geen-gemeente"
+        >
+          <MapPin className="h-10 w-10 mx-auto mb-3 opacity-30" />
+          <p className="text-sm font-medium mb-1">Kies een gemeente</p>
+          <p className="text-xs">
+            Selecteer hierboven een gemeente om kansen te zien — uit alle 342 gemeenten in
+            Nederland.
+          </p>
         </div>
+      )}
 
-        <div className="grid gap-4 lg:grid-cols-2">
-          {kansen.map((kaart) => (
-            <Card key={kaart.id} data-testid={`card-kans-${kaart.id}`}>
-              <CardContent className="pt-5 pb-5 space-y-4">
-                {/* Koptekst */}
-                <div className="flex items-start justify-between gap-3">
-                  <h3 className="font-semibold text-base leading-snug" data-testid={`text-kans-titel-${kaart.id}`}>
-                    {kaart.titel}
-                  </h3>
-                  <UrgentieBadge urgentie={kaart.urgentie} />
-                </div>
+      {/* ── Kansen-kaarten ───────────────────────────────────────────────────── */}
+      {actieveGemeente && (
+        <section data-testid="section-kansen">
+          <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+            <div>
+              <h2 className="text-xl font-bold" data-testid="text-gemeente-naam">
+                {actieveGemeente}
+              </h2>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                {laden
+                  ? "Kansen worden samengesteld…"
+                  : `${kansen.length} kansen gevonden in jouw buurt.`}
+              </p>
+            </div>
+            <Link href="/intel">
+              <Button variant="outline" size="sm" data-testid="button-alle-signalen">
+                Alle signalen bekijken
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </div>
 
-                {/* Waarom */}
-                <p className="text-sm text-muted-foreground leading-relaxed" data-testid={`text-kans-waarom-${kaart.id}`}>
-                  <span className="font-medium text-foreground">Waarom dit opvalt: </span>
-                  {kaart.waarom}
+          {/* Laadstatus */}
+          {laden && (
+            <div className="grid gap-4 lg:grid-cols-2">
+              {[1, 2, 3, 4].map((n) => <KansKaartSkeleton key={n} />)}
+            </div>
+          )}
+
+          {/* Fout */}
+          {isError && !laden && (
+            <Card data-testid="state-error">
+              <CardContent className="pt-5 pb-5 text-center">
+                <p className="text-muted-foreground text-sm">
+                  Kon kansen niet laden. Probeer het over een moment opnieuw.
                 </p>
-
-                {/* Voor wie */}
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
-                    Voor wie
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {kaart.voorWie.map((tag) => (
-                      <Badge key={tag} variant="secondary" className="text-xs font-normal">
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Wat jij kunt doen */}
-                <div className="rounded-xl bg-muted/50 p-4 space-y-1">
-                  <div className="flex items-center gap-1.5">
-                    <Star className="h-3.5 w-3.5 text-primary" />
-                    <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Wat jij kunt doen
-                    </p>
-                  </div>
-                  <p className="text-sm leading-relaxed" data-testid={`text-kans-actie-${kaart.id}`}>
-                    {kaart.kans}
-                  </p>
-                </div>
-
-                {/* Acties */}
-                <div className="flex flex-wrap gap-2 pt-1">
-                  <Link href="/lokaal-marktplaats">
-                    <Button size="sm" data-testid={`button-kans-bekijk-${kaart.id}`}>
-                      Inspelen op kans
-                    </Button>
-                  </Link>
-                  <Link href="/regiocrew">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      data-testid={`button-kans-samenwerken-${kaart.id}`}
-                    >
-                      Samenwerken
-                    </Button>
-                  </Link>
-                </div>
               </CardContent>
             </Card>
-          ))}
-        </div>
-      </section>
+          )}
+
+          {/* Fallback-melding */}
+          {!laden && !isError && data?.fallback && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3 px-1">
+              <Lightbulb className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+              <span>Generieke kansen getoond — gemeente-specifieke kansen worden morgen opnieuw geprobeerd.</span>
+            </div>
+          )}
+
+          {/* Kaarten */}
+          {!laden && !isError && kansen.length > 0 && (
+            <div className="grid gap-4 lg:grid-cols-2">
+              {kansen.map((kaart, idx) => (
+                <Card key={idx} data-testid={`card-kans-${idx}`}>
+                  <CardContent className="pt-5 pb-5 space-y-4">
+                    {/* Koptekst */}
+                    <div className="flex items-start justify-between gap-3">
+                      <h3
+                        className="font-semibold text-base leading-snug"
+                        data-testid={`text-kans-titel-${idx}`}
+                      >
+                        {kaart.titel}
+                      </h3>
+                      <UrgentieBadge urgentie={kaart.urgentie} />
+                    </div>
+
+                    {/* Waarom */}
+                    <p
+                      className="text-sm text-muted-foreground leading-relaxed"
+                      data-testid={`text-kans-waarom-${idx}`}
+                    >
+                      <span className="font-medium text-foreground">Waarom dit opvalt: </span>
+                      {kaart.waarom}
+                    </p>
+
+                    {/* Voor wie */}
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+                        Voor wie
+                      </p>
+                      <div className="flex flex-wrap gap-1.5">
+                        {kaart.voorWie.map((tag) => (
+                          <Badge key={tag} variant="secondary" className="text-xs font-normal">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Wat jij kunt doen */}
+                    <div className="rounded-xl bg-muted/50 p-4 space-y-1">
+                      <div className="flex items-center gap-1.5">
+                        <Star className="h-3.5 w-3.5 text-primary" />
+                        <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                          Wat jij kunt doen
+                        </p>
+                      </div>
+                      <p
+                        className="text-sm leading-relaxed"
+                        data-testid={`text-kans-actie-${idx}`}
+                      >
+                        {kaart.kans}
+                      </p>
+                    </div>
+
+                    {/* Acties */}
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      <Link href="/lokaal-marktplaats">
+                        <Button size="sm" data-testid={`button-kans-inspelen-${idx}`}>
+                          Inspelen op kans
+                        </Button>
+                      </Link>
+                      <Link href="/regiocrew">
+                        <Button size="sm" variant="outline" data-testid={`button-kans-samenwerken-${idx}`}>
+                          Samenwerken
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
 
       {/* ── Afsluittekst ─────────────────────────────────────────────────────── */}
       <Card data-testid="section-info">
         <CardContent className="pt-5 pb-5">
           <h3 className="font-semibold mb-2">Snel gezien, snel gebruikt</h3>
           <p className="text-sm text-muted-foreground leading-relaxed max-w-2xl">
-            Deze pagina laat je zien waar beweging zit in jouw regio. Geen
-            eindeloze rapporten, maar kansen die je in één oogopslag kunt lezen
-            en meteen kunt gebruiken.
+            De kansen worden dagelijks samengesteld op basis van lokale context. Geen eindeloze
+            rapporten, maar concrete signalen die je in één oogopslag kunt lezen en meteen kunt
+            gebruiken. Kansen worden gecached — dezelfde gemeente laadt de volgende keer direct.
           </p>
         </CardContent>
       </Card>
@@ -334,8 +361,8 @@ export default function KansenInDeBuurtPage() {
               <div className="flex-1">
                 <p className="font-semibold mb-1">Meer kansen en diepere signalen zien?</p>
                 <p className="text-sm text-muted-foreground mb-3">
-                  Met Pro zie je uitgebreidere kansen, meer regionale signalen en
-                  slimme hulp om sneller in te spelen op wat er speelt in jouw buurt.
+                  Met Pro zie je uitgebreidere kansen, meer regionale signalen en slimme hulp om
+                  sneller in te spelen op wat er speelt in jouw buurt.
                 </p>
                 <Link href="/lidmaatschap">
                   <Button size="sm" data-testid="button-upgrade-pro">
