@@ -100,6 +100,7 @@ export const APP_NAV: NavSection[] = [
 ];
 
 export const ACCOUNT_NAV = [
+  { title: "Mijn gegevens", url: "/bedrijfsprofiel", icon: Building2 },
   { title: "Lidmaatschap", url: "/lidmaatschap", icon: CreditCard },
   { title: "Privacy & Gegevens", url: "/privacy-dashboard", icon: Shield },
   { title: "Affiliate", url: "/affiliate", icon: Share2 },
