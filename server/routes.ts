@@ -5005,15 +5005,23 @@ Geef ALLEEN geldige JSON terug (geen markdown, geen uitleg), in dit exacte forma
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: [{ role: "user", parts: [{ text: prompt }] }],
+        config: { responseMimeType: "application/json" },
       });
 
       let rawText = response.text?.trim() ?? "";
-      // Strip markdown code fences if present
-      rawText = rawText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/i, "").trim();
+      console.log(`[Kansen] AI-respons voor ${gemeente} (${rawText.length} tekens):`, rawText.slice(0, 200));
 
-      const parsed: KansKaartAI[] = JSON.parse(rawText);
+      // Robuste JSON-extractie: zoek eerste JSON-array in de respons
+      if (!rawText) throw new Error("Lege AI-respons");
+      // Strip markdown code fences
+      rawText = rawText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
+      // Zoek JSON array ([ ... ]) als Gemini toch extra tekst geeft
+      const jsonMatch = rawText.match(/\[[\s\S]*\]/);
+      if (!jsonMatch) throw new Error(`Geen JSON-array gevonden in respons: ${rawText.slice(0, 100)}`);
+
+      const parsed: KansKaartAI[] = JSON.parse(jsonMatch[0]);
       if (!Array.isArray(parsed) || parsed.length === 0) {
-        throw new Error("Ongeldig AI-formaat");
+        throw new Error("Ongeldig AI-formaat: lege array");
       }
 
       const kansen = parsed.slice(0, 5).map((k) => ({
@@ -5028,8 +5036,8 @@ Geef ALLEEN geldige JSON terug (geen markdown, geen uitleg), in dit exacte forma
       console.log(`[Kansen] ${kansen.length} kansen gegenereerd voor ${gemeente}`);
       return res.json({ gemeente, kansen, cached: false });
     } catch (err) {
-      console.error("[Kansen] AI-fout:", (err as Error).message);
-      // Fallback: generieke kansen
+      console.error("[Kansen] AI-fout voor", gemeente, ":", (err as Error).message);
+      // Generieke fallback — NIET cachen zodat volgende request opnieuw de AI probeert
       const fallback: KansKaartAI[] = [
         {
           titel: "Digitale zichtbaarheid verbeteren",
@@ -5060,7 +5068,6 @@ Geef ALLEEN geldige JSON terug (geen markdown, geen uitleg), in dit exacte forma
           urgentie: "Laag",
         },
       ];
-      kansenCache.set(gemeente, { datum: today, kansen: fallback });
       return res.json({ gemeente, kansen: fallback, cached: false, fallback: true });
     }
   });
