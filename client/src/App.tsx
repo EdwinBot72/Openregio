@@ -69,6 +69,7 @@ import IntelPage from "@/pages/intel";
 import AanDeSlagPage from "@/pages/aan-de-slag";
 import KoopLokaalPage from "@/pages/koop-lokaal";
 import LokaalMarktplaatsPage from "@/pages/lokaal-marktplaats";
+import KansenInDeBuurtPage from "@/pages/kansen-in-de-buurt";
 
 // Routes that should NOT have the sidebar/header layout
 const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse", "/koop-lokaal"];
@@ -132,6 +133,7 @@ function AuthenticatedRouter() {
       <Route path="/admin/intel" component={AdminIntelPage} />
 
       {/* Kansen / Informatie */}
+      <Route path="/kansen-in-de-buurt" component={KansenInDeBuurtPage} />
       <Route path="/kansen/aanbestedingen" component={AanbestedingenPage} />
       <Route path="/kansen/gemeente-updates" component={GemeenteUpdatesPage} />
       <Route path="/kansen/regio-deals" component={RegiodealsPage} />

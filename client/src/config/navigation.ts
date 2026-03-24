@@ -21,6 +21,7 @@ import {
   CreditCard,
   Share2,
   Shield,
+  LayoutGrid,
 } from "lucide-react";
 
 export type NavSubItem = {
@@ -61,6 +62,7 @@ export const APP_NAV: NavSection[] = [
     title: "Kansen in de buurt",
     icon: Signal,
     sub: [
+      { title: "Kansen overzicht", url: "/kansen-in-de-buurt", icon: LayoutGrid },
       { title: "Wat speelt er?", url: "/intel", icon: Signal },
       { title: "Aanbestedingen", url: "/kansen/aanbestedingen", icon: Landmark },
       { title: "Gemeente-updates", url: "/kansen/gemeente-updates", icon: Megaphone },
