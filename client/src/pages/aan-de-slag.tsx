@@ -516,21 +516,21 @@ export default function AanDeSlagPage() {
       </Card>
 
       {/* Pro-upgrade CTA voor basis-leden */}
-      {user?.plan === "basic" && (
+      {!isPro && (
         <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border-blue-100 dark:border-blue-900/40" data-testid="card-pro-cta">
           <CardContent className="p-5 flex items-center gap-4 flex-wrap justify-between">
             <div className="flex items-start gap-3">
               <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center shrink-0">
-                <Bot className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                <FileText className="h-4 w-4 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <p className="font-semibold text-sm">Meer doen met Pro</p>
+                <p className="font-semibold text-sm">Meer grip op brieven en documenten?</p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  Krijg toegang tot RegioBot, de dossierbibliotheek en de Website Scan voor €24,95/mnd.
+                  Met Pro bekijk je brieven, maak je verzoeken en bewaar je documenten slim. Vanaf €49/mnd.
                 </p>
               </div>
             </div>
-            <Link href="/lidmaatschap?plan=pro">
+            <Link href="/lidmaatschap">
               <Button size="sm" data-testid="button-upgrade-pro">
                 Bekijk Pro <ArrowRight className="ml-2 h-4 w-4" />
               </Button>

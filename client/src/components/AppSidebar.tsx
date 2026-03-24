@@ -215,17 +215,17 @@ export function AppSidebar() {
           </div>
           <div>
             <h2 className="font-accent font-bold text-lg">OpenRegio</h2>
-            <p className="text-xs text-muted-foreground">Regelgeving transparant</p>
+            <p className="text-xs text-muted-foreground">Voor lokale ondernemers</p>
           </div>
         </div>
       </SidebarHeader>
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigatie</SidebarGroupLabel>
+          <SidebarGroupLabel>Menu</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {APP_NAV.map((section) => (
+              {APP_NAV.filter((s) => !s.proOnly || isPro).map((section) => (
                 <NavSectionItem
                   key={section.id}
                   section={section}
