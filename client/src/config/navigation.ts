@@ -27,6 +27,7 @@ export type NavSubItem = {
   title: string;
   url: string;
   icon: React.ElementType;
+  proOnly?: boolean;
 };
 
 export type NavSection = {
@@ -74,7 +75,7 @@ export const APP_NAV: NavSection[] = [
       { title: "Ondernemers in de buurt", url: "/regiocrew", icon: Users },
       { title: "Vraag & aanbod", url: "/lokaal-marktplaats", icon: ArrowLeftRight },
       { title: "Koop Lokaal", url: "/koop-lokaal", icon: Store },
-      { title: "Lokale acties", url: "/kansen/regio-deals", icon: Handshake },
+      { title: "Regio Deals", url: "/kansen/regio-deals", icon: Handshake },
     ],
   },
   {
