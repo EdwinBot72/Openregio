@@ -156,12 +156,12 @@ export default function AanDeSlagPage() {
     <div className="max-w-5xl mx-auto space-y-6 pb-10">
 
       {/* Hero greeting */}
-      <div className="rounded-2xl bg-gradient-to-br from-[#111b3a] via-[#122347] to-[#0a6a5e] p-7 text-white">
+      <div className="rounded-2xl bg-gradient-to-br from-primary via-primary/90 to-primary/70 p-7 text-white">
         <div className="flex items-center gap-2 mb-3">
           <Sparkles className="h-4 w-4 text-white/60" />
           <span className="text-xs font-semibold uppercase tracking-widest text-white/60">Aan de slag</span>
         </div>
-        <h1 className="text-2xl md:text-3xl font-black leading-tight mb-1">
+        <h1 className="text-2xl md:text-3xl font-black leading-tight mb-1 text-white">
           {greeting}, {voornaam}!
         </h1>
         <p className="text-white/70 text-sm md:text-base max-w-xl">

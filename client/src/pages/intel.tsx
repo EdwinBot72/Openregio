@@ -143,7 +143,7 @@ export default function IntelPage() {
 
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
       <div
-        className="rounded-3xl bg-gradient-to-br from-slate-900 via-slate-800 to-blue-800 p-7 text-white shadow-lg md:p-9"
+        className="rounded-3xl bg-gradient-to-br from-primary via-primary/90 to-primary/70 p-7 text-white shadow-lg md:p-9"
         data-testid="section-intel-hero"
       >
         <div className="flex items-center gap-2 mb-4">
@@ -152,7 +152,7 @@ export default function IntelPage() {
             OpenRegio Intel
           </span>
         </div>
-        <h1 className="text-2xl font-black leading-tight tracking-tight md:text-4xl">
+        <h1 className="text-2xl font-black leading-tight tracking-tight md:text-4xl text-white">
           Altijd op de hoogte van wat telt
         </h1>
         <p className="mt-3 max-w-2xl text-sm text-white/75 md:text-base">
