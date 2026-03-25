@@ -9,6 +9,7 @@ import {
   Megaphone,
   Euro,
   Users,
+  Network,
   ArrowLeftRight,
   Store,
   Handshake,
@@ -74,6 +75,7 @@ export const APP_NAV: NavSection[] = [
     title: "Samenwerken",
     icon: Users,
     sub: [
+      { title: "Netwerk & Leden", url: "/network", icon: Network },
       { title: "Ondernemers in de buurt", url: "/regiocrew", icon: Users },
       { title: "Vraag & aanbod", url: "/lokaal-marktplaats", icon: ArrowLeftRight },
       { title: "Koop Lokaal", url: "/koop-lokaal", icon: Store },

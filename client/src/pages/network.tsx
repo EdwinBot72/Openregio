@@ -33,6 +33,19 @@ import {
 import { PROVINCES_REGIONS, PROVINCES, POST_TYPES } from "@shared/schema";
 import type { Post, Bedrijfsprofiel } from "@shared/schema";
 
+const CATEGORIE_LABELS: Record<string, string> = {
+  retail: "Retail & Winkels",
+  food: "Horeca & Catering",
+  services: "Zakelijke Diensten",
+  tech: "Technologie & ICT",
+  health: "Gezondheid & Welzijn",
+  education: "Onderwijs & Training",
+  creative: "Creatief & Media",
+  construction: "Bouw & Renovatie",
+  agriculture: "Landbouw & Tuinbouw",
+  transport: "Transport & Logistiek",
+};
+
 type PostType = "vraag" | "aanbod" | "lead" | "event" | "alles";
 
 const postFormSchema = z.object({
@@ -200,43 +213,60 @@ function NewPostDialog() {
 }
 
 function MemberCard({ member }: { member: Bedrijfsprofiel }) {
+  const categorieLabel = CATEGORIE_LABELS[member.categorieId] ?? member.categorieId;
+  const heeftRegio = member.regio && member.regio !== "-";
+
   return (
     <Card data-testid={`card-member-${member.id}`}>
-      <CardContent className="p-4">
+      <CardContent className="p-5 space-y-3">
+        {/* Header */}
         <div className="flex items-start gap-3">
-          <div className="p-2 rounded-full bg-primary/10">
+          <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
             <Building2 className="w-5 h-5 text-primary" />
           </div>
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 flex-wrap">
-              <h3 className="font-semibold" data-testid={`text-member-name-${member.id}`}>
-                {member.naam}
-              </h3>
-              <Badge variant="outline" className="text-xs">
-                <MapPin className="w-3 h-3 mr-1" />
-                {member.regio}
-              </Badge>
-            </div>
+            <h3 className="font-semibold text-base leading-snug" data-testid={`text-member-name-${member.id}`}>
+              {member.naam}
+            </h3>
             <p className="text-sm text-muted-foreground">{member.eigenaarnaam}</p>
-            {member.beschrijving && (
-              <p className="text-sm text-muted-foreground mt-2 line-clamp-2">
-                {member.beschrijving}
-              </p>
-            )}
-            {member.websiteUrl && (
-              <a 
-                href={member.websiteUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs text-primary mt-2 hover:underline"
-                data-testid={`link-website-${member.id}`}
-              >
-                <Globe className="w-3 h-3" />
-                Website bezoeken
-              </a>
-            )}
           </div>
         </div>
+
+        {/* Badges: sector + regio */}
+        <div className="flex flex-wrap gap-1.5">
+          {categorieLabel && (
+            <Badge variant="secondary" className="text-xs font-normal" data-testid={`badge-categorie-${member.id}`}>
+              {categorieLabel}
+            </Badge>
+          )}
+          {heeftRegio && (
+            <Badge variant="outline" className="text-xs font-normal" data-testid={`badge-regio-${member.id}`}>
+              <MapPin className="w-3 h-3 mr-1" />
+              {member.regio}
+            </Badge>
+          )}
+        </div>
+
+        {/* Beschrijving */}
+        {member.beschrijving && (
+          <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3" data-testid={`text-member-desc-${member.id}`}>
+            {member.beschrijving}
+          </p>
+        )}
+
+        {/* Website */}
+        {member.websiteUrl && (
+          <a
+            href={member.websiteUrl.startsWith("http") ? member.websiteUrl : `https://${member.websiteUrl}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs text-primary hover:underline"
+            data-testid={`link-website-${member.id}`}
+          >
+            <Globe className="w-3 h-3" />
+            {member.websiteUrl.replace(/^https?:\/\//, "")}
+          </a>
+        )}
       </CardContent>
     </Card>
   );
