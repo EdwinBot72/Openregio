@@ -3,6 +3,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { useQuery } from "@tanstack/react-query";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Gavel,
@@ -18,6 +19,12 @@ import {
   Lightbulb,
   MapPin,
   ChevronRight,
+  Zap,
+  Globe,
+  Users,
+  Leaf,
+  Bot,
+  Building2,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -95,6 +102,157 @@ const FILTER_LABELS: Record<FilterKey, string> = {
   subsidies: "Subsidies",
 };
 
+const ONDERNEMER_THEMAS = [
+  {
+    id: "energie",
+    icon: Zap,
+    titel: "Energietransitie & kosten",
+    tag: "Hoog impact",
+    tagVariant: "destructive" as const,
+    kleur: "text-amber-600 dark:text-amber-400",
+    bg: "bg-amber-50 dark:bg-amber-950/40",
+    samenvatting:
+      "De energieprijzen blijven volatiel en de EU-doelstellingen uit Agenda 2030 verplichten ondernemers stapsgewijs te verduurzamen. Energiekosten zijn voor veel mkb-bedrijven nu de grootste kostenpost na personeel.",
+    acties: [
+      "Vraag een energie-audit aan via RVO — gratis voor mkb",
+      "Dien vóór de deadline subsidie aan voor zonnepanelen of isolatie (ISDE-regeling)",
+      "Check of jouw pand voldoet aan energielabel C-verplichting voor kantoren (2023+)",
+    ],
+  },
+  {
+    id: "regelgeving",
+    icon: Globe,
+    titel: "EU-regelgeving & duurzaamheidsrapportage",
+    tag: "Nieuwe verplichtingen",
+    tagVariant: "secondary" as const,
+    kleur: "text-blue-600 dark:text-blue-400",
+    bg: "bg-blue-50 dark:bg-blue-950/40",
+    samenvatting:
+      "De Corporate Sustainability Reporting Directive (CSRD) en andere EU-wetgeving uit het Fit for 55-pakket raken steeds meer bedrijven. Ketenverantwoordelijkheid (CSDDD) verplicht je ook te rapporteren over leveranciers.",
+    acties: [
+      "Controleer of jouw bedrijf al onder CSRD-rapportageplicht valt (>250 medewerkers of mkb-keten)",
+      "Inventariseer je CO₂-uitstoot in scope 1, 2 en 3",
+      "Stel een duurzaamheidsplan op als onderdeel van je bedrijfsstrategie",
+    ],
+  },
+  {
+    id: "arbeidsmarkt",
+    icon: Users,
+    titel: "Arbeidsmarkt & personeel",
+    tag: "Actueel",
+    tagVariant: "secondary" as const,
+    kleur: "text-purple-600 dark:text-purple-400",
+    bg: "bg-purple-50 dark:bg-purple-950/40",
+    samenvatting:
+      "Personeelstekorten zijn structureel. De Wet toelating terbeschikkingstelling van arbeidskrachten (WTTA) verandert de spelregels voor uitzendkrachten. Tegelijk verhogen gemeenten het minimumloon en groeien de cao-loonstijgingen.",
+    acties: [
+      "Bereken de impact van WTTA op jouw inleenconstructies (start 2025)",
+      "Verken samenwerkingen met regionale onderwijsinstellingen voor stagiairs en BBL-ers",
+      "Bekijk of je in aanmerking komt voor SLIM-subsidie voor personeel­sontwikkeling",
+    ],
+  },
+  {
+    id: "ai",
+    icon: Bot,
+    titel: "AI & digitalisering",
+    tag: "Kans",
+    tagVariant: "outline" as const,
+    kleur: "text-green-600 dark:text-green-400",
+    bg: "bg-green-50 dark:bg-green-950/40",
+    samenvatting:
+      "De EU AI Act treedt gefaseerd in werking tot 2026. Voor mkb biedt AI concrete kansen in klantenservice, planning en marketing. Tegelijk zijn er verplichtingen rondom transparantie en menselijk toezicht bij AI-systemen.",
+    acties: [
+      "Identificeer 1-3 processen in je bedrijf waarbij AI direct tijd bespaart",
+      "Check of jouw AI-toepassingen onder de 'hoog-risico' categorie van de AI Act vallen",
+      "Volg de gratis AI-cursussen via Digitaliseringshulp.nl (KVK-initiatief)",
+    ],
+  },
+  {
+    id: "circulair",
+    icon: Leaf,
+    titel: "Circulaire economie & lokaal inkopen",
+    tag: "Kans",
+    tagVariant: "outline" as const,
+    kleur: "text-teal-600 dark:text-teal-400",
+    bg: "bg-teal-50 dark:bg-teal-950/40",
+    samenvatting:
+      "Gemeenten zijn wettelijk verplicht een groeiend deel van hun inkopen circulair te doen. Dit creëert concrete opdrachten voor lokale ondernemers. De nationale Circulaire Economie-strategie 2050 stuurt op halvering van grondstoffengebruik.",
+    acties: [
+      "Registreer je bedrijf bij lokale circulaire samenwerkingsverbanden",
+      "Bekijk aanbestedingen.nl op circulaire opdrachten in jouw regio",
+      "Verken productleasen of terugname­regelingen als nieuw businessmodel",
+    ],
+  },
+  {
+    id: "financiering",
+    icon: Building2,
+    titel: "Financiering & inflatie",
+    tag: "Let op",
+    tagVariant: "secondary" as const,
+    kleur: "text-rose-600 dark:text-rose-400",
+    bg: "bg-rose-50 dark:bg-rose-950/40",
+    samenvatting:
+      "Hogere rentes maken bancaire financiering duurder. Tegelijk zijn er gerichte fondsen voor verduurzaming en innovatie. Inflatie heeft de kostprijs van veel bedrijven structureel verhoogd — doorberekening aan klanten is een strategisch vraagstuk.",
+    acties: [
+      "Vraag een groeigesprek aan bij jouw bank of Qredits (mkb-financier)",
+      "Verken BMKB-Groen voor gegarandeerde leningen voor duurzame investeringen",
+      "Analyseer je marges opnieuw — inflatieprik in kosten vereist prijsherziening",
+    ],
+  },
+];
+
+function ThemaCard({ thema }: { thema: typeof ONDERNEMER_THEMAS[number] }) {
+  const [open, setOpen] = useState(false);
+  const Icon = thema.icon;
+
+  return (
+    <Card
+      data-testid={`card-thema-${thema.id}`}
+      className="cursor-pointer"
+      onClick={() => setOpen(!open)}
+    >
+      <CardContent className="p-5 space-y-3">
+        <div className="flex items-start gap-3">
+          <div className={`w-10 h-10 rounded-xl ${thema.bg} flex items-center justify-center shrink-0`}>
+            <Icon className={`h-5 w-5 ${thema.kleur}`} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center gap-2 flex-wrap mb-1">
+              <Badge variant={thema.tagVariant} className="text-xs">{thema.tag}</Badge>
+            </div>
+            <h3 className="font-semibold text-sm leading-snug">{thema.titel}</h3>
+          </div>
+          <ChevronRight
+            className={`h-4 w-4 text-muted-foreground shrink-0 mt-1 transition-transform ${open ? "rotate-90" : ""}`}
+          />
+        </div>
+        <p className="text-sm text-muted-foreground leading-relaxed">{thema.samenvatting}</p>
+        {open && (
+          <div className="pt-2 border-t space-y-3">
+            <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Wat kun jij nu doen?</p>
+            <ul className="space-y-2">
+              {thema.acties.map((actie, i) => (
+                <li key={i} className="flex items-start gap-2 text-sm text-foreground">
+                  <div className={`w-5 h-5 rounded-full ${thema.bg} flex items-center justify-center shrink-0 mt-0.5 text-xs font-bold ${thema.kleur}`}>
+                    {i + 1}
+                  </div>
+                  {actie}
+                </li>
+              ))}
+            </ul>
+            <Link href="/regiobot" onClick={(e) => e.stopPropagation()}>
+              <Button size="sm" variant="outline" className="mt-1" data-testid={`button-thema-regiobot-${thema.id}`}>
+                Stel een vraag via RegioBot
+                <ArrowRight className="ml-2 h-3.5 w-3.5" />
+              </Button>
+            </Link>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 function SignaalSkeleton() {
   return (
     <div className="rounded-3xl bg-card border p-5">
@@ -153,10 +311,10 @@ export default function IntelPage() {
           </span>
         </div>
         <h1 className="text-2xl font-black leading-tight tracking-tight md:text-4xl text-white">
-          Altijd op de hoogte van wat telt
+          Wat speelt er voor ondernemers?
         </h1>
         <p className="mt-3 max-w-2xl text-sm text-white/75 md:text-base">
-          Regelgeving, lokaal beleid, subsidies en financiële wijzigingen — gefilterd op jouw regio en direct toepasbaar.
+          Grote trends en beleidswijzigingen vertaald naar concrete impact voor jouw bedrijf — van energietransitie en EU-regelgeving tot arbeidsmarkt en digitalisering.
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Link href="/regiobot">
@@ -178,6 +336,22 @@ export default function IntelPage() {
           </Link>
         </div>
       </div>
+
+      {/* ── Thema's voor ondernemers ─────────────────────────────────────────── */}
+      <section data-testid="section-themas">
+        <div className="flex items-center gap-2 mb-4">
+          <Lightbulb className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-bold tracking-tight">Thema's die spelen voor ondernemers</h2>
+        </div>
+        <p className="text-sm text-muted-foreground mb-5 max-w-2xl">
+          Grote economische en beleidsmatige ontwikkelingen, vertaald naar concrete impact voor jouw bedrijf. Klik een thema aan voor praktische actiepunten.
+        </p>
+        <div className="grid md:grid-cols-2 gap-4">
+          {ONDERNEMER_THEMAS.map((thema) => (
+            <ThemaCard key={thema.id} thema={thema} />
+          ))}
+        </div>
+      </section>
 
       {/* ── Bronblokken ──────────────────────────────────────────────────────── */}
       <section data-testid="section-bronnen">
