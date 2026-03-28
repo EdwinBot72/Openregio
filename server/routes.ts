@@ -4527,7 +4527,12 @@ Wees kritisch maar opbouwend. Focus op lokale vindbaarheid voor Nederlandse onde
 
     try {
       const { GoogleGenAI } = await import("@google/genai");
-      const genAI = new GoogleGenAI({ apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY! });
+      const genAI = new GoogleGenAI({
+        apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
+        ...(process.env.AI_INTEGRATIONS_GEMINI_BASE_URL
+          ? { httpOptions: { apiVersion: "", baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL! } }
+          : {}),
+      });
       const result = await genAI.models.generateContent({
         model: "gemini-2.5-flash",
         contents: [{ role: "user", parts: [{ text: prompt }] }],
@@ -4634,7 +4639,12 @@ Geef een JSON-object terug in exact dit formaat:
 
     try {
       const { GoogleGenAI } = await import("@google/genai");
-      const genAI = new GoogleGenAI({ apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY! });
+      const genAI = new GoogleGenAI({
+        apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
+        ...(process.env.AI_INTEGRATIONS_GEMINI_BASE_URL
+          ? { httpOptions: { apiVersion: "", baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL! } }
+          : {}),
+      });
       const result = await genAI.models.generateContent({
         model: "gemini-2.5-flash",
         contents: [{ role: "user", parts: [{ text: prompt }] }],
@@ -4826,6 +4836,9 @@ Geef een JSON-object terug in exact dit formaat:
     const { GoogleGenAI } = await import("@google/genai");
     const ai = new GoogleGenAI({
       apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
+      ...(process.env.AI_INTEGRATIONS_GEMINI_BASE_URL
+        ? { httpOptions: { apiVersion: "", baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL! } }
+        : {}),
     });
 
     const headlineText = items.slice(0, 15).map((it, i) => `${i + 1}. [${it.bron}] ${it.titel}`).join("\n");
@@ -4986,17 +4999,35 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
 
     try {
       const { GoogleGenAI } = await import("@google/genai");
-      const ai = new GoogleGenAI({ apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY! });
+      const ai = new GoogleGenAI({
+        apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
+        ...(process.env.AI_INTEGRATIONS_GEMINI_BASE_URL
+          ? { httpOptions: { apiVersion: "", baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL! } }
+          : {}),
+      });
+
+      // Haal recente nieuwssignalen op als actuele context
+      const alleSignalen = await storage.getIntelSignalen();
+      const contextSignalen = alleSignalen.slice(0, 12);
+      const nieuwsContext = contextSignalen.length > 0
+        ? contextSignalen.map((s, i) => `${i + 1}. [${s.bron}] ${s.titel}: ${s.samenvatting.slice(0, 150)}`).join("\n")
+        : "(geen recente signalen beschikbaar)";
 
       const prompt = `Je bent een lokale kansen-analist voor Nederlandse ondernemers (zzp, mkb, horeca, detailhandel, bouw, agrarisch).
 
 Genereer precies 4 actuele kansen voor ondernemers in de gemeente: **${gemeente}**.
 
-Denk aan typische kenmerken van deze gemeente of regio in Nederland. Wees specifiek en praktisch.
+Gebruik de onderstaande actuele nieuwssignalen als inspiratie — koppel elke kans zo mogelijk aan een actuele ontwikkeling:
+
+--- RECENTE NIEUWSSIGNALEN ---
+${nieuwsContext}
+--- EINDE NIEUWS ---
+
+Denk ook aan typische kenmerken van de gemeente ${gemeente} of haar regio. Wees specifiek en praktisch.
 
 Elke kans moet bevatten:
 - titel: korte, pakkende omschrijving (max 8 woorden)
-- waarom: waarom deze kans opvalt of relevant is in deze gemeente (1-2 zinnen, feitelijk)
+- waarom: waarom deze kans opvalt nu (1-2 zinnen, koppel aan actueel nieuws of lokale kenmerken)
 - voorWie: 2-3 type ondernemers voor wie dit relevant is (bijv. "Webbouwers", "Horecaondernemers", "Bouwbedrijven")
 - kans: wat de ondernemer concreet kan doen (1 actieve zin, begint met een werkwoord)
 - urgentie: één van "Hoog", "Gemiddeld" of "Laag"
