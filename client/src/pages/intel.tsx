@@ -39,15 +39,15 @@ const BRONNEN = [
     id: "wetgeving",
     label: "Wetgeving",
     icon: Gavel,
-    omschrijving: "Rijkswetgeving, AMvB's en ministeriële regelingen die jouw sector raken",
+    omschrijving: "Rijkswetgeving en officieel nieuws van Rijksoverheid.nl, AMvB's en ministeriële regelingen die jouw sector raken",
     kleur: "text-blue-600 dark:text-blue-400",
     bg: "bg-blue-50 dark:bg-blue-950/40",
   },
   {
     id: "beleid",
-    label: "Lokaal beleid",
+    label: "Beleid & overheid",
     icon: MapPin,
-    omschrijving: "Gemeentelijk en provinciaal beleid, verordeningen en raadsbesluiten",
+    omschrijving: "Persberichten van de Rijksoverheid, gemeentelijk en provinciaal beleid en raadsbesluiten",
     kleur: "text-purple-600 dark:text-purple-400",
     bg: "bg-purple-50 dark:bg-purple-950/40",
   },
@@ -99,7 +99,7 @@ const STAPPEN = [
 const FILTER_LABELS: Record<FilterKey, string> = {
   alle: "Alle",
   wetgeving: "Wetgeving",
-  beleid: "Beleid",
+  beleid: "Beleid & overheid",
   financieel: "Financieel",
   subsidies: "Subsidies",
 };

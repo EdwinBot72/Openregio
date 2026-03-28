@@ -83,6 +83,14 @@ const FEEDS: FeedDef[] = [
     prefix: "nu-economie",
     maxItems: 8,
   },
+  {
+    url: "https://feeds.rijksoverheid.nl/nieuws.rss",
+    bron: "Rijksoverheid",
+    categorie: "wetgeving",
+    urgentie: "normaal",
+    prefix: "rvo-nieuws",
+    maxItems: 12,
+  },
 ];
 
 // ─── Generieke RSS-fetcher ───────────────────────────────────────────────────
