@@ -23,7 +23,7 @@ const THEMA_DEFS = [
   {
     themaId: "ai",
     titel: "AI & digitalisering",
-    trefwoorden: ["AI", "kunstmatige intelligentie", "digitalisering", "technologie", "automatisering", "chatbot", "softwar"],
+    trefwoorden: ["AI", "kunstmatige intelligentie", "digitalisering", "technologie", "automatisering", "chatbot", "software"],
   },
   {
     themaId: "circulair",

@@ -297,6 +297,9 @@ function ThemaCard({ thema }: { thema: MergedThema }) {
               )}
             </div>
             <h3 className="font-semibold text-sm leading-snug">{thema.titel}</h3>
+            {bijgewerktLabel && (
+              <p className="text-xs text-muted-foreground mt-0.5">Bijgewerkt op {bijgewerktLabel}</p>
+            )}
           </div>
           <ChevronRight
             className={`h-4 w-4 text-muted-foreground shrink-0 mt-1 transition-transform ${open ? "rotate-90" : ""}`}
@@ -323,11 +326,6 @@ function ThemaCard({ thema }: { thema: MergedThema }) {
                   <ArrowRight className="ml-2 h-3.5 w-3.5" />
                 </Button>
               </Link>
-              {bijgewerktLabel && (
-                <span className="text-xs text-muted-foreground">
-                  Bijgewerkt {bijgewerktLabel}
-                </span>
-              )}
             </div>
           </div>
         )}
