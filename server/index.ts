@@ -77,8 +77,8 @@ app.use((req, res, next) => {
   const { startIntelCron } = await import("./services/intelCron");
   startIntelCron();
 
-  // Start de wekelijkse Thema-refresh cron
-  const { startThemaRefreshCron } = await import("./services/themaRefresh");
+  // Start de wekelijkse Thema-refresh cron (alleen schedule, geen DB-aanroep)
+  const { startThemaRefreshCron, runThemaRefreshIfEmpty } = await import("./services/themaRefresh");
   startThemaRefreshCron();
 
   // Global error handler with structured logging
@@ -139,8 +139,13 @@ app.use((req, res, next) => {
   });
 
   // Run migrations in the background — schema already exists in production,
-  // these are just safety checks and won't block serving requests
-  runMigrations().catch((err) => {
-    console.error("[Startup] Migration warning (non-fatal):", (err as Error).message);
-  });
+  // these are just safety checks and won't block serving requests.
+  // After migrations complete, trigger the thema startup-check (DB table must exist first).
+  runMigrations()
+    .then(() => runThemaRefreshIfEmpty())
+    .catch((err) => {
+      console.error("[Startup] Migration warning (non-fatal):", (err as Error).message);
+      // Still attempt startup refresh — table may already exist from previous run
+      runThemaRefreshIfEmpty().catch(() => {});
+    });
 })();

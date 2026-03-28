@@ -168,19 +168,20 @@ export function startThemaRefreshCron(): void {
     { timezone: "Europe/Amsterdam" }
   );
   console.log("[ThemaRefresh] Wekelijkse cron-taak geregistreerd (maandag 07:00 AMS)");
+}
 
-  // Bij opstarten: refresh als tabel leeg is
-  setImmediate(async () => {
-    try {
-      const bestaand = await storage.getOndernemerThemas();
-      if (bestaand.length === 0) {
-        console.log("[ThemaRefresh] Geen thema's in DB — directe refresh gestart");
-        await runThemaRefresh();
-      } else {
-        console.log(`[ThemaRefresh] DB bevat al ${bestaand.length} thema's — geen opstartrefresh nodig`);
-      }
-    } catch (err) {
-      console.error("[ThemaRefresh] Opstartfout:", (err as Error).message);
+// ─── Startup-check (na migraties aan te roepen) ────────────────────────────
+
+export async function runThemaRefreshIfEmpty(): Promise<void> {
+  try {
+    const bestaand = await storage.getOndernemerThemas();
+    if (bestaand.length === 0) {
+      console.log("[ThemaRefresh] Geen thema's in DB — directe refresh gestart");
+      await runThemaRefresh();
+    } else {
+      console.log(`[ThemaRefresh] DB bevat al ${bestaand.length} thema's — geen opstartrefresh nodig`);
     }
-  });
+  } catch (err) {
+    console.error("[ThemaRefresh] Opstartfout:", (err as Error).message);
+  }
 }

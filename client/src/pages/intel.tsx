@@ -26,7 +26,7 @@ import {
   Bot,
   Building2,
   RefreshCw,
-  type LucideProps,
+  type LucideIcon,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -108,7 +108,7 @@ const FILTER_LABELS: Record<FilterKey, string> = {
 type TagVariant = "destructive" | "secondary" | "outline";
 
 type ThemaStijl = {
-  icon: (props: LucideProps) => JSX.Element;
+  icon: LucideIcon;
   kleur: string;
   bg: string;
   tagVariant: TagVariant;
@@ -213,7 +213,7 @@ type MergedThema = {
   tagVariant: TagVariant;
   samenvatting: string;
   acties: string[];
-  icon: (props: LucideProps) => JSX.Element;
+  icon: LucideIcon;
   kleur: string;
   bg: string;
   bijgewerktOp?: Date | string | null;
