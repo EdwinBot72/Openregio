@@ -629,6 +629,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // ── Ondernemer Thema's ───────────────────────────────────────────────────
+  // Public endpoint — no auth required
+  app.get("/api/intel/themas", async (_req, res) => {
+    try {
+      const themas = await storage.getOndernemerThemas();
+      res.json(themas);
+    } catch (error) {
+      console.error("[API] /api/intel/themas fout:", error);
+      res.status(500).json({ error: "Fout bij ophalen thema's" });
+    }
+  });
+
   // Business Profile routes
   
   // Public endpoint for all business profiles (for map display)

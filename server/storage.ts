@@ -80,6 +80,9 @@ import {
   type LokaalAanbod,
   type InsertLokaalAanbod,
   lokaalAanbod,
+  type OndernemerThema,
+  type InsertOndernemerThema,
+  ondernemerThemas,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
@@ -289,6 +292,10 @@ export interface IStorage {
   getLokaalAanbodByUser(userId: string): Promise<LokaalAanbod[]>;
   createLokaalAanbod(item: InsertLokaalAanbod): Promise<LokaalAanbod>;
   deleteLokaalAanbod(id: string, userId: string): Promise<boolean>;
+
+  // Ondernemer Thema's
+  getOndernemerThemas(): Promise<OndernemerThema[]>;
+  upsertOndernemerThema(data: InsertOndernemerThema): Promise<OndernemerThema>;
 }
 
 export class MemStorage implements IStorage {
@@ -1761,6 +1768,14 @@ export class MemStorage implements IStorage {
   async deleteLokaalAanbod(_id: string, _userId: string): Promise<boolean> {
     return false;
   }
+
+  // Ondernemer Thema's (stubs for MemStorage)
+  async getOndernemerThemas(): Promise<OndernemerThema[]> {
+    return [];
+  }
+  async upsertOndernemerThema(data: InsertOndernemerThema): Promise<OndernemerThema> {
+    return { id: 1, ...data } as OndernemerThema;
+  }
 }
 
 class DbStorage implements IStorage {
@@ -2918,6 +2933,29 @@ class DbStorage implements IStorage {
       .where(and(eq(lokaalAanbod.id, id), eq(lokaalAanbod.userId, userId)))
       .returning();
     return result.length > 0;
+  }
+
+  // Ondernemer Thema's
+  async getOndernemerThemas(): Promise<OndernemerThema[]> {
+    return db.select().from(ondernemerThemas).orderBy(ondernemerThemas.themaId);
+  }
+
+  async upsertOndernemerThema(data: InsertOndernemerThema): Promise<OndernemerThema> {
+    const [result] = await db
+      .insert(ondernemerThemas)
+      .values(data)
+      .onConflictDoUpdate({
+        target: ondernemerThemas.themaId,
+        set: {
+          titel: data.titel,
+          tag: data.tag,
+          samenvatting: data.samenvatting,
+          acties: data.acties,
+          bijgewerktOp: new Date(),
+        },
+      })
+      .returning();
+    return result;
   }
 }
 

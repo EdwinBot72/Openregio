@@ -236,6 +236,21 @@ export async function runMigrations(): Promise<void> {
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lokaal_aanbod_user ON lokaal_aanbod(user_id);`);
     console.log("[Migration] ✓ lokaal_aanbod table ensured");
 
+    // Ondernemer Thema's table for AI-generated weekly entrepreneur insights
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS ondernemer_themas (
+        id SERIAL PRIMARY KEY,
+        thema_id VARCHAR(50) NOT NULL UNIQUE,
+        titel VARCHAR(255) NOT NULL,
+        tag VARCHAR(50) NOT NULL,
+        samenvatting TEXT NOT NULL,
+        acties TEXT[] NOT NULL DEFAULT '{}',
+        bijgewerkt_op TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_ondernemer_themas_thema_id ON ondernemer_themas(thema_id);`);
+    console.log("[Migration] ✓ ondernemer_themas table ensured");
+
     console.log("[Migration] Database schema is up to date");
   } catch (error) {
     console.error("[Migration] Error running migrations:", error);

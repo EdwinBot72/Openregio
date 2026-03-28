@@ -77,6 +77,10 @@ app.use((req, res, next) => {
   const { startIntelCron } = await import("./services/intelCron");
   startIntelCron();
 
+  // Start de wekelijkse Thema-refresh cron
+  const { startThemaRefreshCron } = await import("./services/themaRefresh");
+  startThemaRefreshCron();
+
   // Global error handler with structured logging
   app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

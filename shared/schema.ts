@@ -1115,4 +1115,21 @@ export const insertLokaalAanbodSchema = createInsertSchema(lokaalAanbod).omit({
 export type InsertLokaalAanbod = z.infer<typeof insertLokaalAanbodSchema>;
 export type LokaalAanbod = typeof lokaalAanbod.$inferSelect;
 
+// ── Ondernemer Thema's (AI-gegenereerde wekelijkse updates) ──────────────────
+export const ondernemerThemas = pgTable("ondernemer_themas", {
+  id: serial("id").primaryKey(),
+  themaId: varchar("thema_id", { length: 50 }).notNull().unique(),
+  titel: varchar("titel", { length: 255 }).notNull(),
+  tag: varchar("tag", { length: 50 }).notNull(),
+  samenvatting: text("samenvatting").notNull(),
+  acties: text("acties").array().notNull().default(sql`'{}'::text[]`),
+  bijgewerktOp: timestamp("bijgewerkt_op", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const insertOndernemerThemaSchema = createInsertSchema(ondernemerThemas).omit({
+  id: true,
+});
+export type InsertOndernemerThema = z.infer<typeof insertOndernemerThemaSchema>;
+export type OndernemerThema = typeof ondernemerThemas.$inferSelect;
+
 export * from "./models/chat";

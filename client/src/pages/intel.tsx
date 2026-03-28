@@ -25,10 +25,12 @@ import {
   Leaf,
   Bot,
   Building2,
+  RefreshCw,
+  type LucideProps,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-import type { IntelSignaal } from "@shared/schema";
+import type { IntelSignaal, OndernemerThema } from "@shared/schema";
 
 type FilterKey = "alle" | "wetgeving" | "beleid" | "financieel" | "subsidies";
 
@@ -102,112 +104,180 @@ const FILTER_LABELS: Record<FilterKey, string> = {
   subsidies: "Subsidies",
 };
 
-const ONDERNEMER_THEMAS = [
-  {
-    id: "energie",
+// ── Stijl-configuratie per thema (frontend-only) ─────────────────────────────
+type TagVariant = "destructive" | "secondary" | "outline";
+
+type ThemaStijl = {
+  icon: (props: LucideProps) => JSX.Element;
+  kleur: string;
+  bg: string;
+  tagVariant: TagVariant;
+  fallbackTag: string;
+  fallbackSamenvatting: string;
+  fallbackActies: string[];
+};
+
+const THEMA_STIJL: Record<string, ThemaStijl> = {
+  energie: {
     icon: Zap,
-    titel: "Energietransitie & kosten",
-    tag: "Hoog impact",
-    tagVariant: "destructive" as const,
     kleur: "text-amber-600 dark:text-amber-400",
     bg: "bg-amber-50 dark:bg-amber-950/40",
-    samenvatting:
+    tagVariant: "destructive",
+    fallbackTag: "Hoog impact",
+    fallbackSamenvatting:
       "De energieprijzen blijven volatiel en de EU-doelstellingen uit Agenda 2030 verplichten ondernemers stapsgewijs te verduurzamen. Energiekosten zijn voor veel mkb-bedrijven nu de grootste kostenpost na personeel.",
-    acties: [
+    fallbackActies: [
       "Vraag een energie-audit aan via RVO — gratis voor mkb",
       "Dien vóór de deadline subsidie aan voor zonnepanelen of isolatie (ISDE-regeling)",
       "Check of jouw pand voldoet aan energielabel C-verplichting voor kantoren (2023+)",
     ],
   },
-  {
-    id: "regelgeving",
+  regelgeving: {
     icon: Globe,
-    titel: "EU-regelgeving & duurzaamheidsrapportage",
-    tag: "Nieuwe verplichtingen",
-    tagVariant: "secondary" as const,
     kleur: "text-blue-600 dark:text-blue-400",
     bg: "bg-blue-50 dark:bg-blue-950/40",
-    samenvatting:
+    tagVariant: "secondary",
+    fallbackTag: "Nieuwe verplichtingen",
+    fallbackSamenvatting:
       "De Corporate Sustainability Reporting Directive (CSRD) en andere EU-wetgeving uit het Fit for 55-pakket raken steeds meer bedrijven. Ketenverantwoordelijkheid (CSDDD) verplicht je ook te rapporteren over leveranciers.",
-    acties: [
+    fallbackActies: [
       "Controleer of jouw bedrijf al onder CSRD-rapportageplicht valt (>250 medewerkers of mkb-keten)",
       "Inventariseer je CO₂-uitstoot in scope 1, 2 en 3",
       "Stel een duurzaamheidsplan op als onderdeel van je bedrijfsstrategie",
     ],
   },
-  {
-    id: "arbeidsmarkt",
+  arbeidsmarkt: {
     icon: Users,
-    titel: "Arbeidsmarkt & personeel",
-    tag: "Actueel",
-    tagVariant: "secondary" as const,
     kleur: "text-purple-600 dark:text-purple-400",
     bg: "bg-purple-50 dark:bg-purple-950/40",
-    samenvatting:
-      "Personeelstekorten zijn structureel. De Wet toelating terbeschikkingstelling van arbeidskrachten (WTTA) verandert de spelregels voor uitzendkrachten. Tegelijk verhogen gemeenten het minimumloon en groeien de cao-loonstijgingen.",
-    acties: [
+    tagVariant: "secondary",
+    fallbackTag: "Actueel",
+    fallbackSamenvatting:
+      "Personeelstekorten zijn structureel. De WTTA verandert de spelregels voor uitzendkrachten. Tegelijk verhogen gemeenten het minimumloon en groeien de cao-loonstijgingen.",
+    fallbackActies: [
       "Bereken de impact van WTTA op jouw inleenconstructies (start 2025)",
       "Verken samenwerkingen met regionale onderwijsinstellingen voor stagiairs en BBL-ers",
-      "Bekijk of je in aanmerking komt voor SLIM-subsidie voor personeel­sontwikkeling",
+      "Bekijk of je in aanmerking komt voor SLIM-subsidie voor personeelsontwikkeling",
     ],
   },
-  {
-    id: "ai",
+  ai: {
     icon: Bot,
-    titel: "AI & digitalisering",
-    tag: "Kans",
-    tagVariant: "outline" as const,
     kleur: "text-green-600 dark:text-green-400",
     bg: "bg-green-50 dark:bg-green-950/40",
-    samenvatting:
-      "De EU AI Act treedt gefaseerd in werking tot 2026. Voor mkb biedt AI concrete kansen in klantenservice, planning en marketing. Tegelijk zijn er verplichtingen rondom transparantie en menselijk toezicht bij AI-systemen.",
-    acties: [
+    tagVariant: "outline",
+    fallbackTag: "Kans",
+    fallbackSamenvatting:
+      "De EU AI Act treedt gefaseerd in werking tot 2026. Voor mkb biedt AI concrete kansen in klantenservice, planning en marketing. Tegelijk zijn er verplichtingen rondom transparantie en menselijk toezicht.",
+    fallbackActies: [
       "Identificeer 1-3 processen in je bedrijf waarbij AI direct tijd bespaart",
       "Check of jouw AI-toepassingen onder de 'hoog-risico' categorie van de AI Act vallen",
       "Volg de gratis AI-cursussen via Digitaliseringshulp.nl (KVK-initiatief)",
     ],
   },
-  {
-    id: "circulair",
+  circulair: {
     icon: Leaf,
-    titel: "Circulaire economie & lokaal inkopen",
-    tag: "Kans",
-    tagVariant: "outline" as const,
     kleur: "text-teal-600 dark:text-teal-400",
     bg: "bg-teal-50 dark:bg-teal-950/40",
-    samenvatting:
+    tagVariant: "outline",
+    fallbackTag: "Kans",
+    fallbackSamenvatting:
       "Gemeenten zijn wettelijk verplicht een groeiend deel van hun inkopen circulair te doen. Dit creëert concrete opdrachten voor lokale ondernemers. De nationale Circulaire Economie-strategie 2050 stuurt op halvering van grondstoffengebruik.",
-    acties: [
+    fallbackActies: [
       "Registreer je bedrijf bij lokale circulaire samenwerkingsverbanden",
       "Bekijk aanbestedingen.nl op circulaire opdrachten in jouw regio",
-      "Verken productleasen of terugname­regelingen als nieuw businessmodel",
+      "Verken productleasen of terugnameregelingen als nieuw businessmodel",
     ],
   },
-  {
-    id: "financiering",
+  financiering: {
     icon: Building2,
-    titel: "Financiering & inflatie",
-    tag: "Let op",
-    tagVariant: "secondary" as const,
     kleur: "text-rose-600 dark:text-rose-400",
     bg: "bg-rose-50 dark:bg-rose-950/40",
-    samenvatting:
-      "Hogere rentes maken bancaire financiering duurder. Tegelijk zijn er gerichte fondsen voor verduurzaming en innovatie. Inflatie heeft de kostprijs van veel bedrijven structureel verhoogd — doorberekening aan klanten is een strategisch vraagstuk.",
-    acties: [
+    tagVariant: "secondary",
+    fallbackTag: "Let op",
+    fallbackSamenvatting:
+      "Hogere rentes maken bancaire financiering duurder. Tegelijk zijn er gerichte fondsen voor verduurzaming en innovatie. Inflatie heeft de kostprijs van veel bedrijven structureel verhoogd.",
+    fallbackActies: [
       "Vraag een groeigesprek aan bij jouw bank of Qredits (mkb-financier)",
       "Verken BMKB-Groen voor gegarandeerde leningen voor duurzame investeringen",
       "Analyseer je marges opnieuw — inflatieprik in kosten vereist prijsherziening",
     ],
   },
-];
+};
 
-function ThemaCard({ thema }: { thema: typeof ONDERNEMER_THEMAS[number] }) {
+const THEMA_VOLGORDE = ["energie", "regelgeving", "arbeidsmarkt", "ai", "circulair", "financiering"];
+
+type MergedThema = {
+  themaId: string;
+  titel: string;
+  tag: string;
+  tagVariant: TagVariant;
+  samenvatting: string;
+  acties: string[];
+  icon: (props: LucideProps) => JSX.Element;
+  kleur: string;
+  bg: string;
+  bijgewerktOp?: Date | string | null;
+  isAI: boolean;
+};
+
+function tagVariantForLabel(tag: string): TagVariant {
+  if (tag.toLowerCase().includes("hoog") || tag.toLowerCase().includes("urgent")) return "destructive";
+  if (tag.toLowerCase().includes("kans")) return "outline";
+  return "secondary";
+}
+
+function mergeThemas(dbThemas: OndernemerThema[]): MergedThema[] {
+  const dbMap = new Map(dbThemas.map((t) => [t.themaId, t]));
+  return THEMA_VOLGORDE.map((id) => {
+    const stijl = THEMA_STIJL[id];
+    const db = dbMap.get(id);
+    if (db) {
+      return {
+        themaId: id,
+        titel: db.titel,
+        tag: db.tag,
+        tagVariant: tagVariantForLabel(db.tag),
+        samenvatting: db.samenvatting,
+        acties: db.acties,
+        icon: stijl.icon,
+        kleur: stijl.kleur,
+        bg: stijl.bg,
+        bijgewerktOp: db.bijgewerktOp,
+        isAI: true,
+      };
+    }
+    return {
+      themaId: id,
+      titel: id === "energie" ? "Energietransitie & kosten"
+        : id === "regelgeving" ? "EU-regelgeving & duurzaamheidsrapportage"
+        : id === "arbeidsmarkt" ? "Arbeidsmarkt & personeel"
+        : id === "ai" ? "AI & digitalisering"
+        : id === "circulair" ? "Circulaire economie & lokaal inkopen"
+        : "Financiering & inflatie",
+      tag: stijl.fallbackTag,
+      tagVariant: stijl.tagVariant,
+      samenvatting: stijl.fallbackSamenvatting,
+      acties: stijl.fallbackActies,
+      icon: stijl.icon,
+      kleur: stijl.kleur,
+      bg: stijl.bg,
+      bijgewerktOp: null,
+      isAI: false,
+    };
+  });
+}
+
+function ThemaCard({ thema }: { thema: MergedThema }) {
   const [open, setOpen] = useState(false);
   const Icon = thema.icon;
 
+  const bijgewerktLabel = thema.bijgewerktOp
+    ? new Date(thema.bijgewerktOp).toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" })
+    : null;
+
   return (
     <Card
-      data-testid={`card-thema-${thema.id}`}
+      data-testid={`card-thema-${thema.themaId}`}
       className="cursor-pointer"
       onClick={() => setOpen(!open)}
     >
@@ -219,6 +289,12 @@ function ThemaCard({ thema }: { thema: typeof ONDERNEMER_THEMAS[number] }) {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 flex-wrap mb-1">
               <Badge variant={thema.tagVariant} className="text-xs">{thema.tag}</Badge>
+              {thema.isAI && (
+                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                  <RefreshCw className="h-2.5 w-2.5" />
+                  AI
+                </span>
+              )}
             </div>
             <h3 className="font-semibold text-sm leading-snug">{thema.titel}</h3>
           </div>
@@ -240,12 +316,19 @@ function ThemaCard({ thema }: { thema: typeof ONDERNEMER_THEMAS[number] }) {
                 </li>
               ))}
             </ul>
-            <Link href="/regiobot" onClick={(e) => e.stopPropagation()}>
-              <Button size="sm" variant="outline" className="mt-1" data-testid={`button-thema-regiobot-${thema.id}`}>
-                Stel een vraag via RegioBot
-                <ArrowRight className="ml-2 h-3.5 w-3.5" />
-              </Button>
-            </Link>
+            <div className="flex items-center justify-between flex-wrap gap-2 mt-1">
+              <Link href="/regiobot" onClick={(e) => e.stopPropagation()}>
+                <Button size="sm" variant="outline" data-testid={`button-thema-regiobot-${thema.themaId}`}>
+                  Stel een vraag via RegioBot
+                  <ArrowRight className="ml-2 h-3.5 w-3.5" />
+                </Button>
+              </Link>
+              {bijgewerktLabel && (
+                <span className="text-xs text-muted-foreground">
+                  Bijgewerkt {bijgewerktLabel}
+                </span>
+              )}
+            </div>
           </div>
         )}
       </CardContent>
@@ -287,7 +370,13 @@ export default function IntelPage() {
     queryFn: () => fetch(`/api/intel/signalen${queryParams}`).then((r) => r.json()),
   });
 
+  const { data: dbThemas } = useQuery<OndernemerThema[]>({
+    queryKey: ["/api/intel/themas"],
+    staleTime: 1000 * 60 * 60, // 1 uur cache
+  });
+
   const gefilterdeSignalen = signalen ?? [];
+  const themaLijst = mergeThemas(dbThemas ?? []);
 
   const formatDatum = (dateVal: string | Date) =>
     new Date(dateVal).toLocaleDateString("nl-NL", {
@@ -347,8 +436,8 @@ export default function IntelPage() {
           Grote economische en beleidsmatige ontwikkelingen, vertaald naar concrete impact voor jouw bedrijf. Klik een thema aan voor praktische actiepunten.
         </p>
         <div className="grid md:grid-cols-2 gap-4">
-          {ONDERNEMER_THEMAS.map((thema) => (
-            <ThemaCard key={thema.id} thema={thema} />
+          {themaLijst.map((thema) => (
+            <ThemaCard key={thema.themaId} thema={thema} />
           ))}
         </div>
       </section>
