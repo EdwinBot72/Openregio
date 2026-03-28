@@ -4790,13 +4790,10 @@ Geef een JSON-object terug in exact dit formaat:
   let nieuwsTipCacheData: { tip: string; bronnen: string[]; bronUrl?: string; datum: string; fallback?: boolean } | null = null;
 
   async function fetchNieuwsTipVandaag(): Promise<{ tip: string; bronnen: string[]; bronUrl?: string }> {
-    // Haal RSS-feeds op: NOS algemeen, economie, binnenland + NU.nl
+    // Rijksoverheid als primaire bron (feitelijk, niet-opgeblazen) + NOS economie als aanvulling
     const feedUrls = [
-      { url: "https://feeds.nos.nl/nosnieuwsalgemeen", bron: "NOS.nl" },
+      { url: "https://feeds.rijksoverheid.nl/nieuws.rss", bron: "Rijksoverheid.nl" },
       { url: "https://feeds.nos.nl/nosnieuwseconomie", bron: "NOS.nl" },
-      { url: "https://feeds.nos.nl/nosnieuwsbinnenland", bron: "NOS.nl" },
-      { url: "https://www.nu.nl/rss/Economie", bron: "NU.nl" },
-      { url: "https://www.nu.nl/rss/Algemeen", bron: "NU.nl" },
     ];
 
     const items: { titel: string; url?: string; bron: string }[] = [];
