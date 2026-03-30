@@ -30,6 +30,32 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
+    chunkSizeWarningLimit: 800,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          const nm = (pkg: string) => id.includes(`/node_modules/${pkg}/`) || id.includes(`\\node_modules\\${pkg}\\`);
+          if (nm("react") || nm("react-dom") || nm("scheduler")) {
+            return "react-vendor";
+          }
+          if (nm("recharts") || nm("d3-array") || nm("d3-scale") || nm("d3-shape") || nm("d3-color") || nm("d3-format") || nm("d3-interpolate") || nm("d3-time") || nm("d3-path") || nm("victory-vendor")) {
+            return "charts";
+          }
+          if (nm("framer-motion")) {
+            return "motion";
+          }
+          if (nm("leaflet") || nm("react-leaflet") || nm("@react-leaflet")) {
+            return "maps";
+          }
+          if (nm("@radix-ui") || id.includes("/node_modules/@radix-ui/") || nm("lucide-react") || nm("class-variance-authority") || nm("clsx") || nm("tailwind-merge") || nm("cmdk") || nm("vaul") || nm("embla-carousel-react")) {
+            return "ui-vendor";
+          }
+          if (nm("@tanstack") || nm("react-hook-form") || nm("@hookform") || nm("zod") || nm("zod-validation-error")) {
+            return "data-layer";
+          }
+        },
+      },
+    },
   },
   server: {
     fs: {
