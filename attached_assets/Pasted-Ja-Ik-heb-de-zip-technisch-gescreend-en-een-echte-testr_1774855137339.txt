@@ -1,0 +1,172 @@
+Ja. Ik heb de zip technisch gescreend en een echte testronde gedaan.
+
+**Wat ik getest heb**
+
+* project uitgepakt en structuur gecheckt
+* `npm ci`
+* `npm run check`
+* `npm run build`
+* app lokaal opgestart met dummy env
+* publieke homepage + auth/intel endpoints aangeroepen
+* package-/security-/deploy-risico’s bekeken
+
+## Eindoordeel
+
+**Technisch: bijna livebaar, maar nog geen harde go-live.**
+De app **buildt wel**, maar **faalt op typecheck**. Dat is rood. Daarnaast zit de zip vol ballast en zijn er dependency/security issues.
+
+## Wat goed is
+
+* `npm ci` draait gewoon
+* `npm run build` slaagt
+* server start op met alleen:
+
+  * `DATABASE_URL`
+  * `SESSION_SECRET`
+* homepage geeft `200 OK`
+* auth endpoint geeft netjes `{"error":"Niet ingelogd"}`
+* intel endpoint blokt netjes met `401` als je niet ingelogd bent
+* startup is redelijk hardened: ontbrekende kritieke env vars stoppen de boot meteen
+
+## Harde issues
+
+### 1) TypeScript faalt
+
+`npm run check` geeft 2 errors:
+
+**A. user.name bestaat niet**
+Bestand:
+
+* `client/src/pages/aan-de-slag.tsx`
+
+Probleem:
+
+* code gebruikt `user?.name`
+* maar `AuthUser.user` heeft alleen:
+
+  * `firstName`
+  * `lastName`
+  * geen `name`
+
+**Fix**
+Vervang:
+
+```ts
+const voornaam = user?.name?.split(" ")[0] ?? user?.email?.split("@")[0] ?? "ondernemer";
+```
+
+Door bijvoorbeeld:
+
+```ts
+const voornaam =
+  user?.firstName?.trim() ||
+  user?.businessName?.trim() ||
+  user?.email?.split("@")[0] ||
+  "ondernemer";
+```
+
+**B. urgentie type mismatch**
+Bestand:
+
+* `server/services/intelCron.ts`
+
+Probleem:
+
+* feed type laat `"urgent"` toe
+* schema verwacht `"hoog" | "normaal" | "info"`
+
+**Fix**
+Maak alles consistent naar:
+
+```ts
+urgentie: "hoog" | "normaal" | "info";
+```
+
+en vervang eventuele `"urgent"` door `"hoog"`.
+
+---
+
+### 2) Security/dependency issues
+
+`npm audit` geeft kwetsbaarheden, o.a.:
+
+* `express` high
+* `path-to-regexp` high
+* `picomatch` high
+* `vite/esbuild` moderate
+
+**Impact**
+Niet meteen game over voor MVP, maar voor productie wil je dit opschonen.
+
+**Fix**
+
+* update `express`
+* refresh lockfile
+* check of `vite` upgrade iets breekt
+* audit fix waar safe
+
+---
+
+### 3) Zip/package is veel te zwaar en rommelig
+
+De upload is absurd groot door o.a.:
+
+* `.git` ~145 MB
+* `attached_assets` ~169 MB
+* `.local` ~112 MB
+
+Dat is geen nette deploy/package.
+
+**Fix**
+Niet meesturen in distributie/deploy:
+
+* `.git`
+* `.local`
+* `attached_assets`
+* editor/replit noise
+* oude zips/backups
+
+Kort: maak een schone production bundle of repo-export.
+
+---
+
+## Belangrijke nuance
+
+Ik kon **geen volledige end-to-end functionele flows** testen zoals:
+
+* registreren
+* inloggen
+* betaling
+* briefanalyse
+* RegioBot
+* dossiers
+* admin flows
+
+Waarom niet:
+
+* geen werkende database
+* geen echte API keys/secrets
+* geen seeded runtime data
+
+Dus: **ik heb nu vooral build-, boot-, route- en codekwaliteit getest**.
+Dat is nuttig, maar nog niet hetzelfde als echte gebruikersacceptatie.
+
+## Go / no-go
+
+**Nu: no-go voor productie**
+**Na 2 kleine codefixes + dependency cleanup: bijna go voor staging**
+
+## Mijn praktische advies
+
+Eerst deze volgorde:
+
+1. fix `user.name`
+2. fix `urgent` → `hoog`
+3. run opnieuw:
+
+   * `npm run check`
+   * `npm run build`
+4. schone deploy-zip maken
+5. dan pas functionele test op staging met echte DB
+
+Als je wilt, kan ik nu direct een **strakke QA-checklist per scherm/flow** voor OpenRegio maken, zodat je de app systematisch kunt doortesten.

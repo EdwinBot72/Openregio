@@ -45,7 +45,7 @@ type FeedDef = {
   url: string;
   bron: string;
   categorie: "wetgeving" | "beleid" | "financieel" | "subsidies";
-  urgentie: "urgent" | "normaal" | "info";
+  urgentie: "hoog" | "normaal" | "info";
   prefix: string;
   maxItems: number;
 };

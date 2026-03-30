@@ -150,7 +150,11 @@ export default function AanDeSlagPage() {
   const formatDatum = (d: string | Date) =>
     new Date(d).toLocaleDateString("nl-NL", { day: "numeric", month: "long" });
 
-  const voornaam = user?.name?.split(" ")[0] ?? user?.email?.split("@")[0] ?? "ondernemer";
+  const voornaam =
+    user?.firstName?.trim() ||
+    user?.businessName?.trim() ||
+    user?.email?.split("@")[0] ||
+    "ondernemer";
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-10">
