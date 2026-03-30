@@ -28,7 +28,7 @@ const plans: Plan[] = [
   {
     id: "basic",
     name: "Basis-lid",
-    price: "€12,95",
+    price: "€19",
     priceNote: "excl. BTW / maand",
     description: "Volwaardig lid van de coöperatie",
     paymentLink: MOLLIE_BASIC_LINK,
@@ -44,7 +44,7 @@ const plans: Plan[] = [
   {
     id: "pro",
     name: "Pro-bijdrager",
-    price: "€24,95",
+    price: "€49",
     priceNote: "excl. BTW / maand",
     description: "Draag extra bij en krijg krachtige tools",
     paymentLink: MOLLIE_PRO_LINK,

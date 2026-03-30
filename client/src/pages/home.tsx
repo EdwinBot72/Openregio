@@ -896,7 +896,7 @@ export default function HomePage() {
                 <h3 className="font-black text-slate-900 mb-1" style={{ fontSize: "20px" }}>Basis</h3>
                 <p className="text-slate-400 text-xs mb-5">Voor ondernemers die zichtbaar willen zijn en sneller overzicht zoeken</p>
                 <div className="mb-6" style={{ fontSize: "36px", fontWeight: 900, letterSpacing: "-1px", color: "#0f172a" }}>
-                  €12,95 <span className="text-slate-400 font-medium" style={{ fontSize: "14px" }}>/maand</span>
+                  €19 <span className="text-slate-400 font-medium" style={{ fontSize: "14px" }}>/maand</span>
                 </div>
                 <Link href="/lidmaatschap?plan=basic" className="block w-full py-3 rounded-xl text-center text-sm font-bold mb-6 transition-colors hover:bg-slate-100 border border-slate-200" style={{ color: "#1f5fae" }} data-testid="button-plan-basic-select">
                   Kies Basis
@@ -916,7 +916,7 @@ export default function HomePage() {
                 <h3 className="font-black text-slate-900 mb-1" style={{ fontSize: "20px" }}>Pro</h3>
                 <p className="text-slate-400 text-xs mb-5">Voor ondernemers die actief informatievoordeel en meer grip willen</p>
                 <div className="mb-6" style={{ fontSize: "36px", fontWeight: 900, letterSpacing: "-1px", color: "#0f172a" }}>
-                  €24 <span className="text-slate-400 font-medium" style={{ fontSize: "14px" }}>/maand</span>
+                  €49 <span className="text-slate-400 font-medium" style={{ fontSize: "14px" }}>/maand</span>
                 </div>
                 <Link href="/lidmaatschap?plan=pro" className="block w-full py-3 rounded-xl text-center text-sm font-bold mb-6 text-white transition-opacity hover:opacity-90" style={{ background: "#1f5fae" }} data-testid="button-plan-pro-select">
                   Kies Pro

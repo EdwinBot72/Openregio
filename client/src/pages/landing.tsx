@@ -146,7 +146,7 @@ const PLANS = [
   {
     id: "basis",
     name: "Basis-lid",
-    price: "12,95",
+    price: "19",
     period: "/ maand excl. BTW",
     desc: "Volwaardig lid: netwerk, stem mee, word weerbaar.",
     bullets: [
@@ -161,7 +161,7 @@ const PLANS = [
   {
     id: "pro",
     name: "Pro-bijdrager",
-    price: "24",
+    price: "49",
     period: "/ maand excl. BTW",
     highlight: true,
     desc: "Draag extra bij en krijg krachtige tools erbij.",
@@ -386,8 +386,8 @@ function PricingSignup() {
           </div>
 
           <div className="mt-3 sm:mt-0 flex gap-2">
-            <Badge>€12,95 Basis-lid excl. BTW</Badge>
-            <Badge>€24 Pro-bijdrager excl. BTW</Badge>
+            <Badge>€19 Basis-lid excl. BTW</Badge>
+            <Badge>€49 Pro-bijdrager excl. BTW</Badge>
           </div>
         </div>
 

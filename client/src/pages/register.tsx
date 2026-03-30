@@ -246,7 +246,7 @@ export default function RegisterPage() {
                       data-testid="button-register"
                     >
                       {form.formState.isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      Account aanmaken (€{selectedPlan === "pro" ? "24" : "12,95"}/maand excl. BTW)
+                      Account aanmaken (€{selectedPlan === "pro" ? "49" : "19"}/maand excl. BTW)
                     </Button>
                     <div className="text-sm text-center text-muted-foreground">
                       Al een account?{" "}
@@ -270,7 +270,7 @@ export default function RegisterPage() {
                   <CardTitle className="text-2xl capitalize">{selectedPlan} Plan</CardTitle>
                   <CardDescription>
                     <span className="text-3xl font-bold text-foreground">
-                      €{selectedPlan === "pro" ? "24" : "12,95"}
+                      €{selectedPlan === "pro" ? "49" : "19"}
                     </span>
                     <span className="text-muted-foreground">/maand excl. BTW</span>
                   </CardDescription>
@@ -304,7 +304,7 @@ export default function RegisterPage() {
               <Card className="bg-muted/50" data-testid="card-info">
                 <CardContent className="pt-6 space-y-2 text-sm text-muted-foreground">
                   <p>
-                    <strong className="text-foreground">Let op:</strong> Door je account aan te maken, ga je akkoord met een maandelijks lidmaatschap van €{selectedPlan === "pro" ? "24" : "12,95"} excl. BTW.
+                    <strong className="text-foreground">Let op:</strong> Door je account aan te maken, ga je akkoord met een maandelijks lidmaatschap van €{selectedPlan === "pro" ? "49" : "19"} excl. BTW.
                   </p>
                   <p>
                     Je kunt op elk moment opzeggen via je dashboard.

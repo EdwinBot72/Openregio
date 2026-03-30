@@ -189,7 +189,7 @@ export default function AdminUsersPage() {
                   <SelectValue placeholder="Kies een plan" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="basic">Basis (€12,95/maand)</SelectItem>
+                  <SelectItem value="basic">Basis (€19/maand)</SelectItem>
                   <SelectItem value="pro">Pro (alle functies)</SelectItem>
                 </SelectContent>
               </Select>

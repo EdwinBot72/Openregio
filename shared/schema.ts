@@ -356,7 +356,7 @@ export const commissions = pgTable("commissions", {
   subscriptionId: varchar("subscription_id").notNull().references(() => subscriptions.id),
   molliePaymentId: text("mollie_payment_id").notNull(), // Original payment that triggered commission
   plan: text("plan", { enum: SUBSCRIPTION_PLANS }).notNull(), // basic or pro
-  amount: doublePrecision("amount").notNull(), // Commission amount in EUR (2.95 for basic, 4.00 for pro)
+  amount: doublePrecision("amount").notNull(), // Commission amount in EUR (14.25 for basis, 51.45 for pro — 3 maanden % commissie)
   status: text("status", { enum: COMMISSION_STATUS }).notNull().default("pending"),
   paidAt: timestamp("paid_at"), // When commission was paid out
   createdAt: timestamp("created_at").defaultNow().notNull(),
