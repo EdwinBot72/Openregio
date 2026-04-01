@@ -4,9 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { BookOpen, Calendar, MapPin, Building2, Gavel, Plus } from "lucide-react";
+import { BookOpen, Calendar, MapPin, Building2, Gavel, Plus, Filter } from "lucide-react";
 import { Link } from "wouter";
-import { useAuth } from "@/hooks/useAuth";
 
 type Publicatie = {
   id: number;
@@ -14,6 +13,11 @@ type Publicatie = {
   onderwerp: string;
   regio: string;
   ingediend_op: string;
+};
+
+type PublicatiesResponse = {
+  items: Publicatie[];
+  filteredByRegio: boolean;
 };
 
 function PublicatieCard({ item }: { item: Publicatie }) {
@@ -56,11 +60,13 @@ function PublicatieCard({ item }: { item: Publicatie }) {
 
 export default function WetgevingPublicatiesPage() {
   usePageTitle("Wet & Regelgeving — Publicaties");
-  const { user } = useAuth();
 
-  const { data: publicaties, isLoading } = useQuery<Publicatie[]>({
+  const { data, isLoading } = useQuery<PublicatiesResponse>({
     queryKey: ["/api/wetgeving/publicaties"],
   });
+
+  const publicaties = data?.items ?? [];
+  const filteredByRegio = data?.filteredByRegio ?? false;
 
   return (
     <div className="max-w-2xl mx-auto py-8 px-4 space-y-6">
@@ -84,6 +90,17 @@ export default function WetgevingPublicatiesPage() {
         </Link>
       </div>
 
+      {filteredByRegio && (
+        <Card data-testid="card-regio-filter">
+          <CardContent className="pt-3 pb-3">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Filter className="h-3.5 w-3.5" />
+              Gefilterd op jouw regio. Andere gemeenten kunnen ook relevante regelgeving hebben.
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {isLoading ? (
         <div className="space-y-3" data-testid="section-loading">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -95,7 +112,7 @@ export default function WetgevingPublicatiesPage() {
             </Card>
           ))}
         </div>
-      ) : publicaties && publicaties.length > 0 ? (
+      ) : publicaties.length > 0 ? (
         <div className="space-y-3" data-testid="list-publicaties">
           {publicaties.map((item) => (
             <PublicatieCard key={item.id} item={item} />

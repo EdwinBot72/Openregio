@@ -5192,16 +5192,36 @@ Geef ALLEEN geldige JSON terug (geen markdown, geen uitleg), in dit exacte forma
     }
   });
 
-  // GET /api/wetgeving/publicaties — alle ingelogde leden: gepubliceerde items
+  // GET /api/wetgeving/publicaties — alle ingelogde leden: gepubliceerde items (gefilterd op regio als beschikbaar)
   app.get("/api/wetgeving/publicaties", requireAuth, async (req, res) => {
     try {
-      const result = await db.execute(sql`
-        SELECT id, afzender, onderwerp, regio, ingediend_op
-        FROM wetgeving_inzendingen
-        WHERE status = 'gepubliceerd'
-        ORDER BY ingediend_op DESC
-      `);
-      return res.json(result.rows);
+      const userRegion = req.user!.region;
+      let result;
+      if (userRegion) {
+        result = await db.execute(sql`
+          SELECT id, afzender, onderwerp, regio, ingediend_op
+          FROM wetgeving_inzendingen
+          WHERE status = 'gepubliceerd' AND (regio = ${userRegion} OR regio IS NULL)
+          ORDER BY ingediend_op DESC
+        `);
+        // If no results for this region, fall back to all published items
+        if (result.rows.length === 0) {
+          result = await db.execute(sql`
+            SELECT id, afzender, onderwerp, regio, ingediend_op
+            FROM wetgeving_inzendingen
+            WHERE status = 'gepubliceerd'
+            ORDER BY ingediend_op DESC
+          `);
+        }
+      } else {
+        result = await db.execute(sql`
+          SELECT id, afzender, onderwerp, regio, ingediend_op
+          FROM wetgeving_inzendingen
+          WHERE status = 'gepubliceerd'
+          ORDER BY ingediend_op DESC
+        `);
+      }
+      return res.json({ items: result.rows, filteredByRegio: !!userRegion && result.rows.length > 0 });
     } catch (error) {
       console.error("[Wetgeving] Fout bij ophalen publicaties:", error);
       return res.status(500).json({ error: "Kon publicaties niet ophalen" });
