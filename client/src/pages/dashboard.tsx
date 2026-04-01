@@ -323,7 +323,7 @@ function WooDossierPanel({ isPro }: { isPro: boolean }) {
               <p className="font-semibold">Dwangsom-verdeling (art. 4:17 Awb)</p>
               <ul className="space-y-1 text-muted-foreground text-xs">
                 <li>• De overheid verbeurt bij niet-tijdige beslissing een dwangsom.</li>
-                <li>• Het wettelijk maximum bedraagt <strong>€1.260</strong> per verzoek.</li>
+                <li>• Het wettelijk maximum bedraagt <strong>€1.400</strong> per verzoek.</li>
                 <li>• OpenRegio verdeelt eventuele opbrengsten <strong>50/50</strong> met jou als verzoeker.</li>
                 <li>• OpenRegio verzorgt de verdere juridische afhandeling voor jou.</li>
               </ul>

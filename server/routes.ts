@@ -1979,6 +1979,22 @@ Maak een complete, direct bruikbare WOO-brief.`;
         return res.status(409).json({ error: "Dit dossier is al in gebreke gesteld." });
       }
 
+      if (["response_received", "closed"].includes(dossier.status ?? "")) {
+        return res.status(409).json({ error: "Dit dossier is al afgerond." });
+      }
+
+      // Enforce 28-day wait — wettelijke beslistermijn must have passed
+      if (dossier.createdAt) {
+        const cutoff = new Date(dossier.createdAt);
+        cutoff.setDate(cutoff.getDate() + 28);
+        if (new Date() < cutoff) {
+          const daysLeft = Math.ceil((cutoff.getTime() - Date.now()) / 86400000);
+          return res.status(422).json({
+            error: `De wettelijke beslistermijn van 28 dagen is nog niet verstreken. Nog ${daysLeft} dag${daysLeft !== 1 ? "en" : ""} te gaan.`,
+          });
+        }
+      }
+
       const { decryptField } = await import("./utils/woo-crypto");
       const senderName = decryptField(dossier.senderNameEncrypted) || "[Naam afzender]";
       const senderAddress = decryptField(dossier.senderAddressEncrypted) || "";
@@ -2011,7 +2027,7 @@ Tot op heden heb ik geen beslissing ontvangen. Hiermee bent u in verzuim.
 
 Op grond van artikel 4:17 Awb stel ik u hierbij formeel in gebreke. U heeft twee weken de tijd om alsnog een beslissing te nemen. Dit betekent dat u uiterlijk op ${uiterlijkStr} een besluit dient te nemen.
 
-Indien u niet tijdig beslist, verbeurt u een dwangsom van €100 per dag voor de eerste 14 dagen, €200 per dag voor de volgende 14 dagen, en €300 per dag daarna, met een maximum van €1.260,-- (art. 4:17 lid 3 Awb).
+Indien u niet tijdig beslist, verbeurt u een dwangsom van €100 per dag voor de eerste 14 dagen, €200 per dag voor de volgende 14 dagen, en €300 per dag daarna, met een maximum van €1.400,-- (art. 4:17 lid 3 Awb).
 
 Ik verzoek u deze ingebrekestelling schriftelijk te bevestigen.
 
@@ -5127,8 +5143,9 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
     }
 
     const today = new Date().toISOString().split("T")[0];
+    const forceRefresh = req.query.refresh === "true";
     const cached = kansenCache.get(gemeente);
-    if (cached && cached.datum === today) {
+    if (!forceRefresh && cached && cached.datum === today) {
       return res.json({ gemeente, kansen: cached.kansen, cached: true });
     }
 
@@ -5148,6 +5165,8 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
         ? contextSignalen.map((s, i) => `${i + 1}. [${s.bron}] ${s.titel}: ${s.samenvatting.slice(0, 150)}`).join("\n")
         : "(geen recente signalen beschikbaar)";
 
+      const variationSeed = forceRefresh ? `\n\nVARIATIEINSTRUCTIE: Genereer volledig andere kansen dan eerder — andere sectoren, andere invalshoeken, andere urgentieniveaus. Vermijd herhaling van eerder genoemde kansen. (seed: ${Date.now()})` : "";
+
       const prompt = `Je bent een lokale kansen-analist voor Nederlandse ondernemers (zzp, mkb, horeca, detailhandel, bouw, agrarisch).
 
 Genereer precies 4 actuele kansen voor ondernemers in de gemeente: **${gemeente}**.
@@ -5158,7 +5177,7 @@ Gebruik de onderstaande actuele nieuwssignalen als inspiratie — koppel elke ka
 ${nieuwsContext}
 --- EINDE NIEUWS ---
 
-Denk ook aan typische kenmerken van de gemeente ${gemeente} of haar regio. Wees specifiek en praktisch.
+Denk ook aan typische kenmerken van de gemeente ${gemeente} of haar regio. Wees specifiek en praktisch.${variationSeed}
 
 Elke kans moet bevatten:
 - titel: korte, pakkende omschrijving (max 8 woorden)

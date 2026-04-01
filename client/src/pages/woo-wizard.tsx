@@ -755,7 +755,7 @@ export default function WooWizardPage() {
                     <p className="text-sm font-medium mb-2">Strategische inzet</p>
                     <div className="flex flex-wrap gap-1.5">
                       <Badge variant="secondary">Voorafgaand aan Woo</Badge>
-                      <Badge variant="secondary">Voorafgaand aan bezwaar</Badge>
+                      <Badge variant="secondary">Voorafgaand aan controleslag</Badge>
                       <Badge variant="secondary">Als dossieropbouw</Badge>
                       <Badge variant="secondary">Signaal naar meerdere bestuursorganen</Badge>
                     </div>

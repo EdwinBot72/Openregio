@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
@@ -16,6 +16,7 @@ import {
   MapPin,
   Star,
   Lightbulb,
+  RefreshCw,
 } from "lucide-react";
 
 type Urgentie = "Hoog" | "Gemiddeld" | "Laag";
@@ -104,6 +105,7 @@ export default function KansenInDeBuurtPage() {
   });
 
   const [gemeente, setGemeente] = useState("");
+  const [refreshCount, setRefreshCount] = useState(0);
   const actieveGemeente = gemeente || profiel?.regio || "";
 
   const {
@@ -112,9 +114,9 @@ export default function KansenInDeBuurtPage() {
     isError,
     isFetching,
   } = useQuery<KansenResponse>({
-    queryKey: ["/api/kansen/gemeente", actieveGemeente],
+    queryKey: ["/api/kansen/gemeente", actieveGemeente, refreshCount],
     queryFn: () =>
-      fetch(`/api/kansen/gemeente?gemeente=${encodeURIComponent(actieveGemeente)}`, {
+      fetch(`/api/kansen/gemeente?gemeente=${encodeURIComponent(actieveGemeente)}${refreshCount > 0 ? "&refresh=true" : ""}`, {
         credentials: "include",
       }).then((r) => {
         if (!r.ok) throw new Error("Fout bij ophalen");
@@ -123,6 +125,10 @@ export default function KansenInDeBuurtPage() {
     enabled: !!actieveGemeente,
     staleTime: 10 * 60 * 1000,
   });
+
+  const handleRefresh = useCallback(() => {
+    setRefreshCount((c) => c + 1);
+  }, []);
 
   const kansen = data?.kansen ?? [];
   const laden = isLoading || isFetching;
@@ -165,13 +171,30 @@ export default function KansenInDeBuurtPage() {
             />
           </div>
           {actieveGemeente && (
-            <div className="flex items-center gap-2 text-white/80 text-sm pb-0.5">
+            <div className="flex items-center gap-2 text-white/80 text-sm pb-0.5 flex-wrap">
               <MapPin className="h-4 w-4" />
               <span data-testid="text-actieve-gemeente">{actieveGemeente}</span>
-              {data?.cached && (
+              {data?.cached && !laden && (
                 <Badge variant="outline" className="text-white/60 border-white/20 text-xs">
                   vandaag
                 </Badge>
+              )}
+              {!laden && (
+                <button
+                  onClick={handleRefresh}
+                  className="flex items-center gap-1 text-white/70 hover:text-white text-xs transition-colors"
+                  data-testid="button-refresh-kansen"
+                  title="Andere kansen genereren"
+                >
+                  <RefreshCw className="h-3 w-3" />
+                  Andere kansen
+                </button>
+              )}
+              {laden && refreshCount > 0 && (
+                <span className="text-xs text-white/60 flex items-center gap-1">
+                  <RefreshCw className="h-3 w-3 animate-spin" />
+                  Nieuwe kansen laden...
+                </span>
               )}
             </div>
           )}

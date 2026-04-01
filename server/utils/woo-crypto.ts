@@ -7,25 +7,19 @@ const AUTH_TAG_LEN = 16;
 function getKey(): Buffer {
   const raw = process.env.WOO_ENCRYPTION_KEY;
   if (!raw) {
-    console.warn("[woo-crypto] WOO_ENCRYPTION_KEY is not set — using fallback key. Set this env var in production!");
+    throw new Error("[woo-crypto] WOO_ENCRYPTION_KEY is not set. This env var is required to encrypt personal data.");
   }
-  const secret = raw || "openregio-woo-dev-fallback-key-32c";
-  return scryptSync(secret, "woo-salt-2025", 32);
+  return scryptSync(raw, "woo-salt-2025", 32);
 }
 
 export function encryptField(plaintext: string | null | undefined): string | null {
   if (!plaintext) return null;
-  try {
-    const key = getKey();
-    const iv = randomBytes(IV_LEN);
-    const cipher = createCipheriv(ALGO, key, iv, { authTagLength: AUTH_TAG_LEN });
-    const encrypted = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
-    const authTag = cipher.getAuthTag();
-    return Buffer.concat([iv, authTag, encrypted]).toString("base64");
-  } catch (err) {
-    console.error("[woo-crypto] Encryption error:", err);
-    return null;
-  }
+  const key = getKey();
+  const iv = randomBytes(IV_LEN);
+  const cipher = createCipheriv(ALGO, key, iv, { authTagLength: AUTH_TAG_LEN });
+  const encrypted = Buffer.concat([cipher.update(plaintext, "utf8"), cipher.final()]);
+  const authTag = cipher.getAuthTag();
+  return Buffer.concat([iv, authTag, encrypted]).toString("base64");
 }
 
 export function decryptField(ciphertext: string | null | undefined): string | null {

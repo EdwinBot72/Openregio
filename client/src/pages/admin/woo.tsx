@@ -182,11 +182,21 @@ export default function AdminWooPage() {
                       </p>
                       <p className="text-[10px] text-muted-foreground mt-0.5">{d.user_email}</p>
                     </div>
-                    <div className="flex flex-col items-end gap-1">
+                    <div className="flex flex-col items-end gap-1 shrink-0 text-right">
                       {d.ingebreke_sent_at ? (
-                        <Badge variant="secondary" className="text-[10px]">In gebreke gesteld</Badge>
+                        <>
+                          <Badge variant="secondary" className="text-[10px]">In gebreke gesteld</Badge>
+                          <span className="text-[10px] text-muted-foreground">
+                            {new Date(d.ingebreke_sent_at).toLocaleDateString("nl-NL")}
+                          </span>
+                        </>
                       ) : (
                         <Badge variant="outline" className="text-[10px] border-destructive/40 text-destructive">Actie vereist</Badge>
+                      )}
+                      {d.dwangsom_contract_accepted_at && (
+                        <span className="text-[10px] text-muted-foreground">
+                          Contract: {new Date(d.dwangsom_contract_accepted_at).toLocaleDateString("nl-NL")}
+                        </span>
                       )}
                     </div>
                   </div>
