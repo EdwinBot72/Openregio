@@ -842,11 +842,11 @@ export const wooDossiers = pgTable("woo_dossiers", {
   requestedDocuments: text("requested_documents"),
   generatedLetter: text("generated_letter"),
   checklist: text("checklist"),
-  status: text("status").default("intake"), // intake, extracted, questions, generated, sent, response_received, closed
+  status: text("status").default("intake"), // intake, extracted, questions, generated, sent, response_received, closed, ingebreke_gesteld
   // Workflow step 1: Intake
   uploadedDocument: text("uploaded_document"), // Beschikking text/content
   location: text("location"), // Gemeente/locatie
-  purpose: text("purpose"), // bezwaar, onderzoek, journalistiek
+  purpose: text("purpose"), // controleslag, onderzoek, journalistiek
   userQuestion: text("user_question"), // "Wat wil je weten?"
   // Workflow step 2: Extracted data
   extractedData: jsonb("extracted_data"), // {datum, zaaknr, onderwerp, afdeling, kernfeiten, beleidsbotsing}
@@ -855,6 +855,13 @@ export const wooDossiers = pgTable("woo_dossiers", {
   // Workflow step 5: Tracking
   deadline: timestamp("deadline", { withTimezone: true }),
   reminderSent: boolean("reminder_sent").default(false),
+  // Afzendergegevens (AES-GCM versleuteld)
+  senderNameEncrypted: text("sender_name_encrypted"),
+  senderAddressEncrypted: text("sender_address_encrypted"),
+  senderPostcodeEncrypted: text("sender_postcode_encrypted"),
+  // Ingebrekestelling & dwangsom
+  ingebrekeSentAt: timestamp("ingebreke_sent_at", { withTimezone: true }),
+  dwangsomContractAcceptedAt: timestamp("dwangsom_contract_accepted_at", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 }, (table) => [
   index("idx_woo_dossiers_user").on(table.userId),

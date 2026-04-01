@@ -268,6 +268,14 @@ export async function runMigrations(): Promise<void> {
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_wetgeving_inzendingen_user ON wetgeving_inzendingen(user_id);`);
     console.log("[Migration] ✓ wetgeving_inzendingen table ensured");
 
+    // WOO dossiers — afzendergegevens (versleuteld) + ingebrekestelling tracking
+    await db.execute(sql`ALTER TABLE woo_dossiers ADD COLUMN IF NOT EXISTS sender_name_encrypted TEXT`);
+    await db.execute(sql`ALTER TABLE woo_dossiers ADD COLUMN IF NOT EXISTS sender_address_encrypted TEXT`);
+    await db.execute(sql`ALTER TABLE woo_dossiers ADD COLUMN IF NOT EXISTS sender_postcode_encrypted TEXT`);
+    await db.execute(sql`ALTER TABLE woo_dossiers ADD COLUMN IF NOT EXISTS ingebreke_sent_at TIMESTAMPTZ`);
+    await db.execute(sql`ALTER TABLE woo_dossiers ADD COLUMN IF NOT EXISTS dwangsom_contract_accepted_at TIMESTAMPTZ`);
+    console.log("[Migration] ✓ woo_dossiers afzender + ingebrekestelling columns ensured");
+
     console.log("[Migration] Database schema is up to date");
   } catch (error) {
     console.error("[Migration] Error running migrations:", error);

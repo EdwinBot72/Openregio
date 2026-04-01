@@ -1872,7 +1872,8 @@ Maak een complete, direct bruikbare WOO-brief.`;
   // WOO Dossiers - save and retrieve generated WOO letters
   app.post("/api/woo/dossiers", requireAuth, async (req, res) => {
     try {
-      const { authority, subject, context, requestedDocuments, generatedLetter, checklist, status } = req.body;
+      const { authority, subject, context, requestedDocuments, generatedLetter, checklist, status,
+              senderName, senderAddress, senderPostcode } = req.body;
 
       if (!authority || !subject || !generatedLetter) {
         return res.status(400).json({
@@ -1880,6 +1881,11 @@ Maak een complete, direct bruikbare WOO-brief.`;
           details: "Bestuursorgaan, onderwerp en gegenereerde brief zijn verplicht."
         });
       }
+
+      const { encryptField } = await import("./utils/woo-crypto");
+
+      const deadline = new Date();
+      deadline.setDate(deadline.getDate() + 28);
 
       const dossier = await storage.createWooDossier({
         userId: req.user!.id,
@@ -1889,7 +1895,11 @@ Maak een complete, direct bruikbare WOO-brief.`;
         requestedDocuments: requestedDocuments || null,
         generatedLetter,
         checklist: checklist || null,
-        status: status || "draft",
+        status: status || "sent",
+        senderNameEncrypted: encryptField(senderName),
+        senderAddressEncrypted: encryptField(senderAddress),
+        senderPostcodeEncrypted: encryptField(senderPostcode),
+        deadline,
       });
 
       res.status(201).json(dossier);
@@ -1901,8 +1911,18 @@ Maak een complete, direct bruikbare WOO-brief.`;
 
   app.get("/api/woo/dossiers", requireAuth, async (req, res) => {
     try {
+      const { decryptField } = await import("./utils/woo-crypto");
       const dossiers = await storage.getWooDossiers(req.user!.id);
-      res.json(dossiers);
+      const decrypted = dossiers.map((d) => ({
+        ...d,
+        senderName: decryptField(d.senderNameEncrypted),
+        senderAddress: decryptField(d.senderAddressEncrypted),
+        senderPostcode: decryptField(d.senderPostcodeEncrypted),
+        senderNameEncrypted: undefined,
+        senderAddressEncrypted: undefined,
+        senderPostcodeEncrypted: undefined,
+      }));
+      res.json(decrypted);
     } catch (err: any) {
       console.error("Get dossiers error:", err);
       res.status(500).json({ error: "Dossiers ophalen mislukt" });
@@ -1921,10 +1941,97 @@ Maak een complete, direct bruikbare WOO-brief.`;
         return res.status(404).json({ error: "Dossier niet gevonden" });
       }
 
-      res.json(dossier);
+      const { decryptField } = await import("./utils/woo-crypto");
+      res.json({
+        ...dossier,
+        senderName: decryptField(dossier.senderNameEncrypted),
+        senderAddress: decryptField(dossier.senderAddressEncrypted),
+        senderPostcode: decryptField(dossier.senderPostcodeEncrypted),
+        senderNameEncrypted: undefined,
+        senderAddressEncrypted: undefined,
+        senderPostcodeEncrypted: undefined,
+      });
     } catch (err: any) {
       console.error("Get dossier error:", err);
       res.status(500).json({ error: "Dossier ophalen mislukt" });
+    }
+  });
+
+  // POST /api/woo/dossiers/:id/ingebreke — dwangsom contract accepteren + ingebrekestelling brief genereren
+  app.post("/api/woo/dossiers/:id/ingebreke", requireAuth, async (req, res) => {
+    try {
+      const id = parseInt(req.params.id);
+      if (isNaN(id)) {
+        return res.status(400).json({ error: "Ongeldig dossier ID" });
+      }
+
+      const { contractAccepted } = req.body;
+      if (!contractAccepted) {
+        return res.status(400).json({ error: "Je moet akkoord gaan met de voorwaarden om door te gaan." });
+      }
+
+      const dossier = await storage.getWooDossier(id, req.user!.id);
+      if (!dossier) {
+        return res.status(404).json({ error: "Dossier niet gevonden" });
+      }
+
+      if (dossier.status === "ingebreke_gesteld") {
+        return res.status(409).json({ error: "Dit dossier is al in gebreke gesteld." });
+      }
+
+      const { decryptField } = await import("./utils/woo-crypto");
+      const senderName = decryptField(dossier.senderNameEncrypted) || "[Naam afzender]";
+      const senderAddress = decryptField(dossier.senderAddressEncrypted) || "";
+      const senderPostcode = decryptField(dossier.senderPostcodeEncrypted) || "";
+
+      const vandaag = new Date().toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" });
+      const uiterlijk = new Date();
+      uiterlijk.setDate(uiterlijk.getDate() + 14);
+      const uiterlijkStr = uiterlijk.toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" });
+
+      const ingebrekeletter = `INGEBREKESTELLING
+
+Afzender:
+${senderName}
+${senderAddress}
+${senderPostcode}
+
+Aan:
+${dossier.authority}
+
+Betreft: Ingebrekestelling ex art. 4:17 Awb — Woo-verzoek inzake ${dossier.subject}
+
+${vandaag}
+
+Geacht bestuur,
+
+Op grond van mijn Woo-verzoek d.d. ${dossier.createdAt ? new Date(dossier.createdAt).toLocaleDateString("nl-NL") : "[datum verzoek]"} inzake ${dossier.subject} had u conform art. 4.4 Wet open overheid uiterlijk binnen vier weken te beslissen.
+
+Tot op heden heb ik geen beslissing ontvangen. Hiermee bent u in verzuim.
+
+Op grond van artikel 4:17 Awb stel ik u hierbij formeel in gebreke. U heeft twee weken de tijd om alsnog een beslissing te nemen. Dit betekent dat u uiterlijk op ${uiterlijkStr} een besluit dient te nemen.
+
+Indien u niet tijdig beslist, verbeurt u een dwangsom van €100 per dag voor de eerste 14 dagen, €200 per dag voor de volgende 14 dagen, en €300 per dag daarna, met een maximum van €1.260,-- (art. 4:17 lid 3 Awb).
+
+Ik verzoek u deze ingebrekestelling schriftelijk te bevestigen.
+
+Hoogachtend,
+
+
+[Handtekening]
+${senderName}`;
+
+      const now = new Date();
+      await storage.updateWooDossier(id, req.user!.id, {
+        status: "ingebreke_gesteld",
+        ingebrekeSentAt: now,
+        dwangsomContractAcceptedAt: now,
+      });
+
+      res.json({ ingebrekeletter });
+    } catch (err: any) {
+      console.error("Ingebrekestelling error:", err);
+      res.status(500).json({ error: "Ingebrekestelling aanmaken mislukt" });
     }
   });
 
@@ -4292,6 +4399,31 @@ Maak het verzoek professioneel en juridisch correct.`;
     } catch (err: any) {
       console.error("Admin woo requests error:", err);
       res.status(500).json({ error: "Kon Woo-verzoeken niet ophalen" });
+    }
+  });
+
+  // GET /api/admin/woo/dossiers/overdue — dossiers past 28-day deadline
+  app.get("/api/admin/woo/dossiers/overdue", requireAuth, requireAdmin, async (_req, res) => {
+    try {
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - 28);
+
+      const rows = await db.execute(sql`
+        SELECT wd.id, wd.user_id, wd.authority, wd.subject, wd.status,
+               wd.created_at, wd.deadline, wd.ingebreke_sent_at,
+               wd.dwangsom_contract_accepted_at,
+               u.email AS user_email
+        FROM woo_dossiers wd
+        JOIN users u ON u.id = wd.user_id
+        WHERE wd.created_at <= ${cutoff.toISOString()}
+          AND wd.status NOT IN ('response_received', 'closed', 'ingebreke_gesteld')
+        ORDER BY wd.created_at ASC
+      `);
+
+      res.json({ overdue: rows.rows });
+    } catch (err: any) {
+      console.error("Admin overdue woo error:", err);
+      res.status(500).json({ error: "Kon vervallen dossiers niet ophalen" });
     }
   });
 

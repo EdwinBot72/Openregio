@@ -4,11 +4,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { FileText, Mail, Download, Check, Copy, ChevronRight, ChevronLeft, Shield, AlertTriangle, Target, Scale, Gavel, Info, Lightbulb } from "lucide-react";
+import { FileText, Mail, Download, Check, Copy, ChevronRight, ChevronLeft, Shield, AlertTriangle, Target, Scale, Gavel, Info, Lightbulb, Lock, Calendar } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 import { Link } from "wouter";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
 
 type InstrumentType = "signaal" | "bevoegdheidsscan";
 
@@ -147,6 +149,30 @@ export default function WooWizardPage() {
   const [periode, setPeriode] = useState("");
 
   const [generatedLetter, setGeneratedLetter] = useState("");
+  const [savedDossierId, setSavedDossierId] = useState<number | null>(null);
+  const [savedDeadline, setSavedDeadline] = useState<Date | null>(null);
+
+  const saveDossierMutation = useMutation({
+    mutationFn: async (payload: {
+      authority: string;
+      subject: string;
+      generatedLetter: string;
+      senderName: string;
+      senderAddress: string;
+      senderPostcode: string;
+    }) => {
+      const res = await apiRequest("POST", "/api/woo/dossiers", payload);
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setSavedDossierId(data.id);
+      if (data.deadline) setSavedDeadline(new Date(data.deadline));
+      toast({ title: "Dossier opgeslagen", description: "Je Woo-verzoek is opgeslagen in je dossier met een termijn van 28 dagen." });
+    },
+    onError: () => {
+      toast({ title: "Opslaan mislukt", description: "Het dossier kon niet worden opgeslagen. Probeer het opnieuw.", variant: "destructive" });
+    },
+  });
 
   const resetForm = () => {
     setCurrentStep(1);
@@ -158,6 +184,8 @@ export default function WooWizardPage() {
     setAdresBestuursorgaan("");
     setOnderwerp("");
     setPeriode("");
+    setSavedDossierId(null);
+    setSavedDeadline(null);
   };
 
   const handleGenerate = () => {
@@ -183,6 +211,18 @@ export default function WooWizardPage() {
       : generateSignaalLetter({ naam, adres, postcodeWoonplaats, bestuursorgaan, adresBestuursorgaan, onderwerp });
 
     setGeneratedLetter(letter);
+
+    if (selectedType === "bevoegdheidsscan") {
+      saveDossierMutation.mutate({
+        authority: bestuursorgaan,
+        subject: onderwerp,
+        generatedLetter: letter,
+        senderName: naam,
+        senderAddress: adres,
+        senderPostcode: postcodeWoonplaats,
+      });
+    }
+
     setCurrentStep(2);
   };
 
@@ -409,6 +449,15 @@ export default function WooWizardPage() {
           <CardContent className="space-y-6">
             <div>
               <h3 className="text-sm font-semibold mb-3 text-muted-foreground uppercase tracking-wide">Afzender</h3>
+              {selectedType === "bevoegdheidsscan" && (
+                <div className="flex items-start gap-2 mb-3 p-3 bg-muted/40 rounded-md text-xs text-muted-foreground">
+                  <Lock className="h-3.5 w-3.5 mt-0.5 shrink-0 text-primary" />
+                  <span>
+                    Je persoonsgegevens worden <strong>versleuteld opgeslagen</strong> (AES-256) en zijn alleen door jou zichtbaar.
+                    Ze worden uitsluitend gebruikt om de ingebrekestelling te genereren.
+                  </span>
+                </div>
+              )}
               <div className="space-y-3">
                 <div className="space-y-1.5">
                   <label className="text-sm font-medium">Naam *</label>
@@ -586,6 +635,59 @@ export default function WooWizardPage() {
               </div>
             </CardContent>
           </Card>
+
+          {selectedType === "bevoegdheidsscan" && (
+            <Card className="mb-6 border-primary/20">
+              <CardContent className="pt-4 pb-4">
+                {saveDossierMutation.isPending && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Dossier opslaan...
+                  </div>
+                )}
+                {savedDossierId && (
+                  <div className="space-y-3">
+                    <div className="flex items-start gap-3">
+                      <div className="p-1.5 rounded-full bg-primary/10">
+                        <Check className="h-4 w-4 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium">Controleslag gestart — dossier aangemaakt</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          Je Woo-verzoek is opgeslagen als dossier #{savedDossierId}.
+                          Je persoonsgegevens zijn versleuteld.
+                        </p>
+                      </div>
+                    </div>
+                    {savedDeadline && (
+                      <div className="flex items-center gap-2 text-xs text-muted-foreground pl-10">
+                        <Calendar className="h-3.5 w-3.5 text-primary" />
+                        <span>
+                          Wettelijke termijn verstrijkt op{" "}
+                          <strong>{savedDeadline.toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" })}</strong>.
+                          Bij geen reactie kun je een ingebrekestelling indienen.
+                        </span>
+                      </div>
+                    )}
+                    <div className="pl-10">
+                      <Link href="/dashboard">
+                        <Button size="sm" variant="outline" data-testid="button-goto-dashboard">
+                          Bekijk dossier in dashboard
+                          <ChevronRight className="h-3.5 w-3.5 ml-1" />
+                        </Button>
+                      </Link>
+                    </div>
+                  </div>
+                )}
+                {saveDossierMutation.isError && (
+                  <div className="flex items-start gap-2 text-sm text-destructive">
+                    <AlertTriangle className="h-4 w-4 mt-0.5" />
+                    Dossier opslaan mislukt. Je brief is wel gegenereerd — sla hem op via download.
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {selectedType === "signaal" && (
             <div className="grid gap-4 md:grid-cols-2">

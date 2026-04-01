@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Gavel, AlertCircle } from "lucide-react";
+import { ArrowLeft, Gavel, AlertCircle, AlertTriangle } from "lucide-react";
 import { Link } from "wouter";
 
 type WooStats = {
@@ -46,6 +46,17 @@ function BarRow({ label, value, max }: { label: string; value: number; max: numb
   );
 }
 
+type OverdueDossier = {
+  id: number;
+  authority: string;
+  subject: string;
+  status: string;
+  created_at: string;
+  user_email: string;
+  ingebreke_sent_at: string | null;
+  dwangsom_contract_accepted_at: string | null;
+};
+
 export default function AdminWooPage() {
   const { data: stats, isLoading: statsLoading } = useQuery<WooStats>({
     queryKey: ["/api/admin/woo/stats"],
@@ -53,6 +64,10 @@ export default function AdminWooPage() {
 
   const { data: reqData, isLoading: reqLoading } = useQuery<{ requests: WooRequest[]; total: number }>({
     queryKey: ["/api/admin/woo/requests"],
+  });
+
+  const { data: overdueData, isLoading: overdueLoading } = useQuery<{ overdue: OverdueDossier[] }>({
+    queryKey: ["/api/admin/woo/dossiers/overdue"],
   });
 
   const maxRegion = Math.max(...(stats?.byRegion.map((r) => r.cnt) || [1]));
@@ -129,6 +144,51 @@ export default function AdminWooPage() {
                     <span className="text-xs font-semibold">{m.cnt}</span>
                     <div className="w-full rounded-t-sm bg-primary/80" style={{ height: `${Math.max(pct, 4)}%` }} />
                     <span className="text-[10px] text-muted-foreground text-center leading-tight">{m.month}</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Overdue controleslag dossiers */}
+      <Card data-testid="card-woo-overdue">
+        <CardHeader className="pb-3 pt-4">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="h-4 w-4 text-destructive" />
+            <CardTitle className="text-sm font-semibold">Vervallen controleslag-termijnen</CardTitle>
+          </div>
+        </CardHeader>
+        <CardContent className="pb-4">
+          {overdueLoading ? (
+            Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-10 w-full mb-2" />)
+          ) : (overdueData?.overdue.length ?? 0) === 0 ? (
+            <p className="text-xs text-muted-foreground">Geen vervallen dossiers.</p>
+          ) : (
+            <div className="space-y-2">
+              {overdueData!.overdue.map((d) => {
+                const daysOver = Math.ceil((Date.now() - new Date(d.created_at).getTime()) / 86400000) - 28;
+                return (
+                  <div
+                    key={d.id}
+                    className="flex items-start gap-3 p-3 rounded-md bg-destructive/5 border border-destructive/20"
+                    data-testid={`row-overdue-${d.id}`}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{d.subject}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        {d.authority} · <span className="text-destructive font-medium">{daysOver} dag{daysOver !== 1 ? "en" : ""} te laat</span>
+                      </p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">{d.user_email}</p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1">
+                      {d.ingebreke_sent_at ? (
+                        <Badge variant="secondary" className="text-[10px]">In gebreke gesteld</Badge>
+                      ) : (
+                        <Badge variant="outline" className="text-[10px] border-destructive/40 text-destructive">Actie vereist</Badge>
+                      )}
+                    </div>
                   </div>
                 );
               })}
