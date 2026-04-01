@@ -5196,22 +5196,31 @@ Geef ALLEEN geldige JSON terug (geen markdown, geen uitleg), in dit exacte forma
   app.get("/api/wetgeving/publicaties", requireAuth, async (req, res) => {
     try {
       const userRegion = req.user!.region;
+      let filteredByRegio = false;
       let result;
+
       if (userRegion) {
-        result = await db.execute(sql`
+        // Try regional filter first
+        const regionalResult = await db.execute(sql`
           SELECT id, afzender, onderwerp, regio, ingediend_op
           FROM wetgeving_inzendingen
-          WHERE status = 'gepubliceerd' AND (regio = ${userRegion} OR regio IS NULL)
+          WHERE status = 'gepubliceerd' AND regio = ${userRegion}
           ORDER BY ingediend_op DESC
         `);
-        // If no results for this region, fall back to all published items
-        if (result.rows.length === 0) {
+
+        if (regionalResult.rows.length > 0) {
+          // Regional results found — use them and mark as filtered
+          result = regionalResult;
+          filteredByRegio = true;
+        } else {
+          // No regional results — fall back to all published items
           result = await db.execute(sql`
             SELECT id, afzender, onderwerp, regio, ingediend_op
             FROM wetgeving_inzendingen
             WHERE status = 'gepubliceerd'
             ORDER BY ingediend_op DESC
           `);
+          filteredByRegio = false;
         }
       } else {
         result = await db.execute(sql`
@@ -5220,8 +5229,10 @@ Geef ALLEEN geldige JSON terug (geen markdown, geen uitleg), in dit exacte forma
           WHERE status = 'gepubliceerd'
           ORDER BY ingediend_op DESC
         `);
+        filteredByRegio = false;
       }
-      return res.json({ items: result.rows, filteredByRegio: !!userRegion && result.rows.length > 0 });
+
+      return res.json({ items: result.rows, filteredByRegio });
     } catch (error) {
       console.error("[Wetgeving] Fout bij ophalen publicaties:", error);
       return res.status(500).json({ error: "Kon publicaties niet ophalen" });
