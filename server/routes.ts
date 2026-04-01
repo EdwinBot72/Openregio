@@ -1893,7 +1893,7 @@ Maak een complete, direct bruikbare WOO-brief.`;
         subject,
         context: context || null,
         requestedDocuments: requestedDocuments || null,
-        generatedLetter,
+        generatedLetter: encryptField(generatedLetter),
         checklist: checklist || null,
         status: status || "sent",
         senderNameEncrypted: encryptField(senderName),
@@ -1915,6 +1915,7 @@ Maak een complete, direct bruikbare WOO-brief.`;
       const dossiers = await storage.getWooDossiers(req.user!.id);
       const decrypted = dossiers.map((d) => ({
         ...d,
+        generatedLetter: decryptField(d.generatedLetter),
         senderName: decryptField(d.senderNameEncrypted),
         senderAddress: decryptField(d.senderAddressEncrypted),
         senderPostcode: decryptField(d.senderPostcodeEncrypted),
@@ -1944,6 +1945,7 @@ Maak een complete, direct bruikbare WOO-brief.`;
       const { decryptField } = await import("./utils/woo-crypto");
       res.json({
         ...dossier,
+        generatedLetter: decryptField(dossier.generatedLetter),
         senderName: decryptField(dossier.senderNameEncrypted),
         senderAddress: decryptField(dossier.senderAddressEncrypted),
         senderPostcode: decryptField(dossier.senderPostcodeEncrypted),
@@ -2247,9 +2249,11 @@ Maak het verzoek professioneel en juridisch correct.`;
         "Zet een herinnering voor 4 weken (reactietermijn)"
       ];
 
-      // Update dossier with generated letter
+      const { encryptField: encryptWizardLetter } = await import("./utils/woo-crypto");
+
+      // Update dossier with generated letter (encrypted at rest)
       await storage.updateWooDossier(dossierId, req.user!.id, {
-        generatedLetter,
+        generatedLetter: encryptWizardLetter(generatedLetter),
         checklist: JSON.stringify(checklist),
         requestedDocuments: JSON.stringify(documentList),
         status: "generated",
@@ -4419,6 +4423,7 @@ Maak het verzoek professioneel en juridisch correct.`;
   });
 
   // GET /api/admin/woo/dossiers/overdue — dossiers past 28-day deadline
+  // Returns two groups: pending (action needed) and ingebreke_gesteld (handled)
   app.get("/api/admin/woo/dossiers/overdue", requireAuth, requireAdmin, async (_req, res) => {
     try {
       const cutoff = new Date();
@@ -4432,11 +4437,15 @@ Maak het verzoek professioneel en juridisch correct.`;
         FROM woo_dossiers wd
         JOIN users u ON u.id = wd.user_id
         WHERE wd.created_at <= ${cutoff.toISOString()}
-          AND wd.status NOT IN ('response_received', 'closed', 'ingebreke_gesteld')
-        ORDER BY wd.created_at ASC
+          AND wd.status NOT IN ('response_received', 'closed')
+        ORDER BY wd.status ASC, wd.created_at ASC
       `);
 
-      res.json({ overdue: rows.rows });
+      const all = rows.rows as any[];
+      const overdue = all.filter((d) => d.status !== "ingebreke_gesteld");
+      const handled = all.filter((d) => d.status === "ingebreke_gesteld");
+
+      res.json({ overdue, handled });
     } catch (err: any) {
       console.error("Admin overdue woo error:", err);
       res.status(500).json({ error: "Kon vervallen dossiers niet ophalen" });

@@ -66,7 +66,7 @@ export default function AdminWooPage() {
     queryKey: ["/api/admin/woo/requests"],
   });
 
-  const { data: overdueData, isLoading: overdueLoading } = useQuery<{ overdue: OverdueDossier[] }>({
+  const { data: overdueData, isLoading: overdueLoading } = useQuery<{ overdue: OverdueDossier[]; handled: OverdueDossier[] }>({
     queryKey: ["/api/admin/woo/dossiers/overdue"],
   });
 
@@ -152,7 +152,7 @@ export default function AdminWooPage() {
         </CardContent>
       </Card>
 
-      {/* Overdue controleslag dossiers */}
+      {/* Overdue controleslag dossiers — pending action */}
       <Card data-testid="card-woo-overdue">
         <CardHeader className="pb-3 pt-4">
           <div className="flex items-center gap-2">
@@ -164,7 +164,7 @@ export default function AdminWooPage() {
           {overdueLoading ? (
             Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-10 w-full mb-2" />)
           ) : (overdueData?.overdue.length ?? 0) === 0 ? (
-            <p className="text-xs text-muted-foreground">Geen vervallen dossiers.</p>
+            <p className="text-xs text-muted-foreground">Geen openstaande vervallen dossiers.</p>
           ) : (
             <div className="space-y-2">
               {overdueData!.overdue.map((d) => {
@@ -183,21 +183,7 @@ export default function AdminWooPage() {
                       <p className="text-[10px] text-muted-foreground mt-0.5">{d.user_email}</p>
                     </div>
                     <div className="flex flex-col items-end gap-1 shrink-0 text-right">
-                      {d.ingebreke_sent_at ? (
-                        <>
-                          <Badge variant="secondary" className="text-[10px]">In gebreke gesteld</Badge>
-                          <span className="text-[10px] text-muted-foreground">
-                            {new Date(d.ingebreke_sent_at).toLocaleDateString("nl-NL")}
-                          </span>
-                        </>
-                      ) : (
-                        <Badge variant="outline" className="text-[10px] border-destructive/40 text-destructive">Actie vereist</Badge>
-                      )}
-                      {d.dwangsom_contract_accepted_at && (
-                        <span className="text-[10px] text-muted-foreground">
-                          Contract: {new Date(d.dwangsom_contract_accepted_at).toLocaleDateString("nl-NL")}
-                        </span>
-                      )}
+                      <Badge variant="outline" className="text-[10px] border-destructive/40 text-destructive">Actie vereist</Badge>
                     </div>
                   </div>
                 );
@@ -206,6 +192,51 @@ export default function AdminWooPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Handled controleslag dossiers — ingebreke gesteld with contract timestamps */}
+      {((overdueData?.handled.length ?? 0) > 0 || overdueLoading) && (
+        <Card data-testid="card-woo-handled">
+          <CardHeader className="pb-3 pt-4">
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-semibold">In gebreke gesteld — contractregistratie</CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="pb-4">
+            {overdueLoading ? (
+              Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-10 w-full mb-2" />)
+            ) : (
+              <div className="space-y-2">
+                {overdueData!.handled.map((d) => (
+                  <div
+                    key={d.id}
+                    className="flex items-start gap-3 p-3 rounded-md bg-muted/40 border"
+                    data-testid={`row-handled-${d.id}`}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{d.subject}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">{d.authority} · {d.user_email}</p>
+                    </div>
+                    <div className="flex flex-col items-end gap-1 shrink-0 text-right">
+                      <Badge variant="secondary" className="text-[10px]">In gebreke gesteld</Badge>
+                      {d.ingebreke_sent_at && (
+                        <span className="text-[10px] text-muted-foreground">
+                          Gesteld: {new Date(d.ingebreke_sent_at).toLocaleDateString("nl-NL")}
+                        </span>
+                      )}
+                      {d.dwangsom_contract_accepted_at && (
+                        <span className="text-[10px] text-muted-foreground">
+                          Contract: {new Date(d.dwangsom_contract_accepted_at).toLocaleDateString("nl-NL")}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       {/* Requests list */}
       <Card data-testid="card-woo-requests">
