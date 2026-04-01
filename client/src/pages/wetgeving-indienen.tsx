@@ -1,18 +1,20 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { RegionSelect } from "@/components/region-select";
 import { useToast } from "@/hooks/use-toast";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { useAuth } from "@/hooks/useAuth";
 import { apiRequest } from "@/lib/queryClient";
-import { CheckCircle, FileText, Gavel, Info } from "lucide-react";
+import { CheckCircle, FileText, Gavel, Info, UserCheck } from "lucide-react";
 
 const indienSchema = z.object({
   afzender: z.string().min(2, "Vul de naam van de afzender in").max(255),
@@ -23,10 +25,23 @@ const indienSchema = z.object({
 
 type IndienFormValues = z.infer<typeof indienSchema>;
 
+type BedrijfsProfiel = {
+  naam: string;
+  eigenaarnaam: string;
+  regio?: string;
+};
+
 export default function WetgevingIndienenPage() {
   usePageTitle("Wet & Regelgeving indienen");
   const { toast } = useToast();
+  const { user } = useAuth();
   const [ingediend, setIngediend] = useState(false);
+  const [akkoord, setAkkoord] = useState(false);
+
+  const { data: profiel } = useQuery<BedrijfsProfiel | null>({
+    queryKey: ["/api/business-profile/me"],
+    enabled: !!user,
+  });
 
   const form = useForm<IndienFormValues>({
     resolver: zodResolver(indienSchema),
@@ -37,6 +52,17 @@ export default function WetgevingIndienenPage() {
       briefTekst: "",
     },
   });
+
+  useEffect(() => {
+    if (!profiel) return;
+    const huidig = form.getValues();
+    if (!huidig.afzender && profiel.eigenaarnaam) {
+      form.setValue("afzender", profiel.eigenaarnaam, { shouldValidate: false });
+    }
+    if (!huidig.regio && profiel.regio) {
+      form.setValue("regio", profiel.regio, { shouldValidate: false });
+    }
+  }, [profiel, form]);
 
   const mutation = useMutation({
     mutationFn: async (data: IndienFormValues) => {
@@ -60,6 +86,14 @@ export default function WetgevingIndienenPage() {
   });
 
   function onSubmit(data: IndienFormValues) {
+    if (!akkoord) {
+      toast({
+        title: "Akkoord vereist",
+        description: "Bevestig dat de ingediende informatie juist en volledig is.",
+        variant: "destructive",
+      });
+      return;
+    }
     mutation.mutate(data);
   }
 
@@ -81,6 +115,7 @@ export default function WetgevingIndienenPage() {
             variant="outline"
             onClick={() => {
               setIngediend(false);
+              setAkkoord(false);
               form.reset();
             }}
             data-testid="button-nieuwe-inzending"
@@ -113,6 +148,16 @@ export default function WetgevingIndienenPage() {
         </p>
       </div>
 
+      {profiel && (
+        <div className="flex items-center gap-2 rounded-md border bg-muted/30 px-3 py-2" data-testid="banner-profiel">
+          <UserCheck className="h-4 w-4 text-muted-foreground shrink-0" />
+          <p className="text-sm text-muted-foreground">
+            Je dient in als <span className="font-medium text-foreground">{profiel.eigenaarnaam}</span>
+            {profiel.naam ? <> van <span className="font-medium text-foreground">{profiel.naam}</span></> : null}.
+          </p>
+        </div>
+      )}
+
       <Card data-testid="card-info">
         <CardContent className="pt-4 pb-4">
           <div className="flex gap-3 items-start">
@@ -140,10 +185,10 @@ export default function WetgevingIndienenPage() {
                 name="afzender"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Afzender / overheidsinstantie</FormLabel>
+                    <FormLabel>Ingediend namens</FormLabel>
                     <FormControl>
                       <Input
-                        placeholder="Bijv. Gemeente Amsterdam, Ministerie van EZK, Waterschap..."
+                        placeholder="Jouw naam of bedrijfsnaam"
                         data-testid="input-afzender"
                         {...field}
                       />
@@ -212,9 +257,28 @@ export default function WetgevingIndienenPage() {
                 )}
               />
 
+              {/* Akkoordverklaring */}
+              <div className="rounded-md border bg-muted/30 p-4 space-y-3">
+                <p className="text-sm font-medium">Verklaring</p>
+                <div className="flex items-start gap-3">
+                  <Checkbox
+                    id="akkoord"
+                    checked={akkoord}
+                    onCheckedChange={(v) => setAkkoord(!!v)}
+                    data-testid="checkbox-akkoord"
+                    className="mt-0.5"
+                  />
+                  <label htmlFor="akkoord" className="text-sm text-muted-foreground leading-relaxed cursor-pointer">
+                    Ik verklaar hierbij dat de ingediende informatie naar beste weten juist en volledig is.
+                    Ik ga akkoord dat OpenRegio deze brief — na beoordeling — geanonimiseerd kan publiceren
+                    ten behoeve van andere leden van de coöperatie.
+                  </label>
+                </div>
+              </div>
+
               <Button
                 type="submit"
-                disabled={mutation.isPending}
+                disabled={mutation.isPending || !akkoord}
                 className="w-full"
                 data-testid="button-indienen"
               >
