@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Users, Gavel, MapPin, Users2, TrendingUp, ArrowRight,
-  FileText, BarChart2, ShieldCheck, Landmark, Building2,
+  FileText, BarChart2, ShieldCheck, Landmark, Building2, BookOpen,
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -107,6 +107,14 @@ const sections = [
     title: "Ondernemers",
     description: "Overzicht van geregistreerde leden met activiteits- en planstatus.",
     color: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400",
+  },
+  {
+    id: "wetgeving",
+    href: "/admin/wetgeving",
+    icon: BookOpen,
+    title: "Wetgeving Inzendingen",
+    description: "Brieven ingediend door leden — verwerk en publiceer ze voor het platform.",
+    color: "bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400",
   },
 ];
 

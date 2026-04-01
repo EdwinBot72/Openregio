@@ -251,6 +251,23 @@ export async function runMigrations(): Promise<void> {
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_ondernemer_themas_thema_id ON ondernemer_themas(thema_id);`);
     console.log("[Migration] ✓ ondernemer_themas table ensured");
 
+    // Wetgeving Inzendingen table for Wet & Regelgeving submission flow
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS wetgeving_inzendingen (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        afzender VARCHAR(255) NOT NULL,
+        onderwerp VARCHAR(500) NOT NULL,
+        regio VARCHAR(255) NOT NULL,
+        brief_tekst TEXT,
+        status VARCHAR(20) NOT NULL DEFAULT 'ingediend' CHECK (status IN ('ingediend', 'verwerkt', 'gepubliceerd')),
+        ingediend_op TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_wetgeving_inzendingen_status ON wetgeving_inzendingen(status);`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_wetgeving_inzendingen_user ON wetgeving_inzendingen(user_id);`);
+    console.log("[Migration] ✓ wetgeving_inzendingen table ensured");
+
     console.log("[Migration] Database schema is up to date");
   } catch (error) {
     console.error("[Migration] Error running migrations:", error);

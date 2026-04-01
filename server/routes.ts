@@ -5118,6 +5118,96 @@ Geef ALLEEN geldige JSON terug (geen markdown, geen uitleg), in dit exacte forma
     }
   });
 
+  // ─── Wetgeving Inzendingen ─────────────────────────────────────────────────
+
+  // POST /api/wetgeving/indienen — ondernemer dient een wet/regelgeving inzending in
+  app.post("/api/wetgeving/indienen", requireAuth, async (req, res) => {
+    try {
+      const user = req.user!;
+      const { afzender, onderwerp, regio, briefTekst } = req.body;
+
+      if (!afzender || !onderwerp || !regio) {
+        return res.status(400).json({ error: "Afzender, onderwerp en regio zijn verplicht" });
+      }
+
+      const result = await db.execute(sql`
+        INSERT INTO wetgeving_inzendingen (user_id, afzender, onderwerp, regio, brief_tekst, status)
+        VALUES (${user.id}, ${afzender.trim()}, ${onderwerp.trim()}, ${regio.trim()}, ${briefTekst?.trim() ?? null}, 'ingediend')
+        RETURNING id, afzender, onderwerp, regio, status, ingediend_op
+      `);
+
+      return res.status(201).json({ success: true, inzending: result.rows[0] });
+    } catch (error) {
+      console.error("[Wetgeving] Fout bij indienen:", error);
+      return res.status(500).json({ error: "Inzending kon niet worden opgeslagen" });
+    }
+  });
+
+  // GET /api/wetgeving/inzendingen — admin: alle inzendingen
+  app.get("/api/wetgeving/inzendingen", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const result = await db.execute(sql`
+        SELECT
+          wi.id,
+          wi.afzender,
+          wi.onderwerp,
+          wi.regio,
+          wi.brief_tekst,
+          wi.status,
+          wi.ingediend_op,
+          u.first_name,
+          u.last_name,
+          u.email,
+          u.business_name
+        FROM wetgeving_inzendingen wi
+        LEFT JOIN users u ON wi.user_id = u.id
+        ORDER BY wi.ingediend_op DESC
+      `);
+      return res.json(result.rows);
+    } catch (error) {
+      console.error("[Wetgeving] Fout bij ophalen inzendingen:", error);
+      return res.status(500).json({ error: "Kon inzendingen niet ophalen" });
+    }
+  });
+
+  // PATCH /api/wetgeving/inzendingen/:id/status — admin: status bijwerken
+  app.patch("/api/wetgeving/inzendingen/:id/status", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+      const VALID_STATUS = ["ingediend", "verwerkt", "gepubliceerd"];
+      if (!status || !VALID_STATUS.includes(status)) {
+        return res.status(400).json({ error: "Ongeldige status. Kies: ingediend, verwerkt of gepubliceerd" });
+      }
+      const result = await db.execute(sql`
+        UPDATE wetgeving_inzendingen SET status = ${status} WHERE id = ${parseInt(id)} RETURNING id, status
+      `);
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: "Inzending niet gevonden" });
+      }
+      return res.json({ success: true, inzending: result.rows[0] });
+    } catch (error) {
+      console.error("[Wetgeving] Fout bij status-update:", error);
+      return res.status(500).json({ error: "Status kon niet worden bijgewerkt" });
+    }
+  });
+
+  // GET /api/wetgeving/publicaties — alle ingelogde leden: gepubliceerde items
+  app.get("/api/wetgeving/publicaties", requireAuth, async (req, res) => {
+    try {
+      const result = await db.execute(sql`
+        SELECT id, afzender, onderwerp, regio, ingediend_op
+        FROM wetgeving_inzendingen
+        WHERE status = 'gepubliceerd'
+        ORDER BY ingediend_op DESC
+      `);
+      return res.json(result.rows);
+    } catch (error) {
+      console.error("[Wetgeving] Fout bij ophalen publicaties:", error);
+      return res.status(500).json({ error: "Kon publicaties niet ophalen" });
+    }
+  });
+
   // ─────────────────────────────────────────────────────────────────────
 
   const httpServer = createServer(app);

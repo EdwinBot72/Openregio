@@ -1133,3 +1133,25 @@ export type InsertOndernemerThema = z.infer<typeof insertOndernemerThemaSchema>;
 export type OndernemerThema = typeof ondernemerThemas.$inferSelect;
 
 export * from "./models/chat";
+
+// ─── Wetgeving Inzendingen (Wet & Regelgeving indienen) ───────────────────────
+export const WETGEVING_STATUS = ["ingediend", "verwerkt", "gepubliceerd"] as const;
+
+export const wetgevingInzendingen = pgTable("wetgeving_inzendingen", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  afzender: varchar("afzender", { length: 255 }).notNull(),
+  onderwerp: varchar("onderwerp", { length: 500 }).notNull(),
+  regio: varchar("regio", { length: 255 }).notNull(),
+  briefTekst: text("brief_tekst"),
+  status: varchar("status", { enum: WETGEVING_STATUS }).notNull().default("ingediend"),
+  ingediendOp: timestamp("ingediend_op", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const insertWetgevingInzendingSchema = createInsertSchema(wetgevingInzendingen).omit({
+  id: true,
+  ingediendOp: true,
+  status: true,
+});
+export type InsertWetgevingInzending = z.infer<typeof insertWetgevingInzendingSchema>;
+export type WetgevingInzending = typeof wetgevingInzendingen.$inferSelect;

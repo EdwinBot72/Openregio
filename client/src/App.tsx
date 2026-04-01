@@ -70,6 +70,9 @@ import AanDeSlagPage from "@/pages/aan-de-slag";
 import KoopLokaalPage from "@/pages/koop-lokaal";
 import LokaalMarktplaatsPage from "@/pages/lokaal-marktplaats";
 import KansenInDeBuurtPage from "@/pages/kansen-in-de-buurt";
+import WetgevingIndienenPage from "@/pages/wetgeving-indienen";
+import WetgevingPublicatiesPage from "@/pages/wetgeving/publicaties";
+import AdminWetgevingPage from "@/pages/admin/wetgeving";
 
 // Routes that should NOT have the sidebar/header layout
 const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse", "/koop-lokaal"];
@@ -154,6 +157,11 @@ function AuthenticatedRouter() {
 
       {/* Lokale marktplaats */}
       <Route path="/lokaal-marktplaats" component={LokaalMarktplaatsPage} />
+
+      {/* Wetgeving indienen & publicaties */}
+      <Route path="/wetgeving-indienen" component={WetgevingIndienenPage} />
+      <Route path="/wetgeving/publicaties" component={WetgevingPublicatiesPage} />
+      <Route path="/admin/wetgeving" component={AdminWetgevingPage} />
 
       <Route component={NotFound} />
     </Switch>

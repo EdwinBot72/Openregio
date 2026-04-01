@@ -26,6 +26,7 @@ import {
   CheckCircle,
   MessageSquare,
   MessageCircle,
+  BookOpen,
 } from "lucide-react";
 
 export type NavSubItem = {
@@ -66,10 +67,16 @@ export const KERN_NAV: NavSection[] = [
   },
   {
     id: "regiobot",
-    title: "RegioBot AI",
+    title: "RegioBot",
     icon: Bot,
     url: "/regiobot",
     proOnly: true,
+  },
+  {
+    id: "wet-indienen",
+    title: "Wet indienen",
+    icon: BookOpen,
+    url: "/wetgeving-indienen",
   },
   {
     id: "bedrijf",
