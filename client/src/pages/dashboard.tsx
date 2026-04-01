@@ -191,9 +191,10 @@ export default function DashboardPage() {
   );
 
   // Profile completeness: each field = 1/6 ≈ 17%
-  const profielVelden = ["naam", "beschrijving", "website", "telefoon", "adres", "kvkNummer"] as const;
+  type ProfielVeld = "naam" | "beschrijving" | "website" | "telefoon" | "adres" | "kvkNummer";
+  const profielVelden: ProfielVeld[] = ["naam", "beschrijving", "website", "telefoon", "adres", "kvkNummer"];
   const ingevuld = bedrijfsprofiel
-    ? profielVelden.filter((v) => !!(bedrijfsprofiel as any)[v]).length
+    ? profielVelden.filter((v) => !!bedrijfsprofiel[v]).length
     : 0;
   const profielPct = Math.round((ingevuld / profielVelden.length) * 100);
 
