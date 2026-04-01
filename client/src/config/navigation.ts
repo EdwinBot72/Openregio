@@ -108,7 +108,7 @@ export const GROEI_NAV: NavSection[] = [
   },
   {
     id: "documenten",
-    title: "Documenten & WOO",
+    title: "Documenten",
     icon: FileText,
     proOnly: true,
     sub: [

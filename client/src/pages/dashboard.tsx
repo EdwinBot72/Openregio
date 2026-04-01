@@ -136,7 +136,15 @@ export default function DashboardPage() {
   usePageTitle("Dashboard");
   const { user, isLoading: authLoading } = useAuth();
 
-  const { data: bedrijfsprofiel } = useQuery<{ naam: string } | null>({
+  const { data: bedrijfsprofiel } = useQuery<{
+    naam?: string;
+    beschrijving?: string;
+    website?: string;
+    telefoon?: string;
+    adres?: string;
+    kvkNummer?: string;
+    logo?: string;
+  } | null>({
     queryKey: ["/api/business-profile/me"],
     enabled: !!user,
   });
@@ -178,9 +186,16 @@ export default function DashboardPage() {
   const hogeImpactCount = intelSignalen.filter(
     (s) => s.urgentie === "hoog" || s.categorie === "wetgeving" || s.categorie === "beleid"
   ).length;
-  const nieuweKansen = intelSignalen.filter(
+  const kansSignalen = intelSignalen.filter(
     (s) => s.categorie === "subsidies" || s.categorie === "financieel"
-  ).length;
+  );
+
+  // Profile completeness: each field = 1/6 ≈ 17%
+  const profielVelden = ["naam", "beschrijving", "website", "telefoon", "adres", "kvkNummer"] as const;
+  const ingevuld = bedrijfsprofiel
+    ? profielVelden.filter((v) => !!(bedrijfsprofiel as any)[v]).length
+    : 0;
+  const profielPct = Math.round((ingevuld / profielVelden.length) * 100);
 
   const volgendeStap = getVolgendeStap(heeftProfiel, isPro, signaalCount);
 
@@ -246,9 +261,10 @@ export default function DashboardPage() {
       {/* ── Status: 3 compacte kaarten ──────────────────────────────────────── */}
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4" data-testid="section-status">
 
+        {/* 1. Zichtbaarheid — profiel compleetheid % */}
         <Link href="/bedrijfsprofiel">
           <div
-            className="rounded-2xl border bg-card p-5 hover-elevate cursor-pointer h-full"
+            className="rounded-2xl border bg-card p-5 hover-elevate cursor-pointer h-full flex flex-col"
             data-testid="card-stat-profiel"
           >
             <div className="flex items-center gap-2 mb-3">
@@ -257,58 +273,97 @@ export default function DashboardPage() {
               </div>
               <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Zichtbaarheid</p>
             </div>
-            <p className="text-2xl font-black text-foreground">
-              {heeftProfiel ? "Online" : "Aanmaken"}
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {heeftProfiel ? "Bedrijfsprofiel actief" : "Profiel nog niet ingevuld"}
-            </p>
-            <div className={`mt-3 flex items-center gap-1.5 text-xs font-medium ${heeftProfiel ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}`}>
+            <p className="text-2xl font-black text-foreground" data-testid="text-profiel-pct">{profielPct}%</p>
+            <p className="text-xs text-muted-foreground mt-1">profiel ingevuld</p>
+            <div className="mt-2 h-1.5 w-full rounded-full bg-muted overflow-hidden">
+              <div
+                className={`h-full rounded-full transition-all ${profielPct === 100 ? "bg-emerald-500" : profielPct >= 50 ? "bg-blue-500" : "bg-amber-500"}`}
+                style={{ width: `${profielPct}%` }}
+              />
+            </div>
+            <div className={`mt-3 flex items-center gap-1.5 text-xs font-medium ${profielPct === 100 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}`}>
               <CheckCircle className="w-3.5 h-3.5" />
-              {heeftProfiel ? "Profiel gevonden" : "Vul je profiel in"}
+              {profielPct === 100 ? "Profiel compleet" : `${ingevuld} van ${profielVelden.length} velden`}
             </div>
           </div>
         </Link>
 
-        <Link href="/intel">
-          <div
-            className="rounded-2xl border bg-card p-5 hover-elevate cursor-pointer h-full"
-            data-testid="card-stat-signalen"
-          >
-            <div className="flex items-center gap-2 mb-3">
-              <div className="rounded-lg bg-emerald-500/10 p-1.5">
-                <Signal className="w-4 h-4 text-emerald-500" />
-              </div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Regio-updates</p>
-            </div>
-            <p className="text-2xl font-black text-foreground">{signaalCount}</p>
-            <p className="text-xs text-muted-foreground mt-1">actuele signalen</p>
-            <div className={`mt-3 flex items-center gap-1.5 text-xs font-medium ${hogeImpactCount > 0 ? "text-rose-600 dark:text-rose-400" : "text-muted-foreground"}`}>
-              <Zap className="w-3.5 h-3.5" />
-              {hogeImpactCount > 0 ? `${hogeImpactCount} met hoge impact` : "Geen urgente signalen"}
-            </div>
-          </div>
-        </Link>
-
+        {/* 2. Nieuwste kansen — 3 recente signalen */}
         <Link href="/kansen-in-de-buurt">
           <div
-            className="rounded-2xl border bg-card p-5 hover-elevate cursor-pointer h-full"
+            className="rounded-2xl border bg-card p-5 hover-elevate cursor-pointer h-full flex flex-col"
             data-testid="card-stat-kansen"
           >
             <div className="flex items-center gap-2 mb-3">
-              <div className="rounded-lg bg-amber-500/10 p-1.5">
-                <TrendingUp className="w-4 h-4 text-amber-500" />
+              <div className="rounded-lg bg-emerald-500/10 p-1.5">
+                <TrendingUp className="w-4 h-4 text-emerald-500" />
               </div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Kansen</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Nieuwste kansen</p>
             </div>
-            <p className="text-2xl font-black text-foreground">{nieuweKansen}</p>
-            <p className="text-xs text-muted-foreground mt-1">subsidies & financiering</p>
-            <div className="mt-3 flex items-center gap-1.5 text-xs font-medium text-amber-600 dark:text-amber-400">
+            {kansSignalen.length === 0 ? (
+              <>
+                <p className="text-2xl font-black text-foreground">{signaalCount}</p>
+                <p className="text-xs text-muted-foreground mt-1">regio-updates</p>
+              </>
+            ) : (
+              <div className="space-y-1.5 flex-1">
+                {kansSignalen.slice(0, 3).map((s) => (
+                  <p key={s.id} className="text-xs text-foreground line-clamp-1 leading-snug">{s.titel}</p>
+                ))}
+              </div>
+            )}
+            <div className="mt-3 flex items-center gap-1.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
               <TrendingUp className="w-3.5 h-3.5" />
-              {nieuweKansen === 0 ? "Bekijk aanbestedingen" : `${nieuweKansen} ${nieuweKansen === 1 ? "kans" : "kansen"} open`}
+              {kansSignalen.length > 0 ? `${kansSignalen.length} kansen open` : "Bekijk alle kansen"}
             </div>
           </div>
         </Link>
+
+        {/* 3. Open acties — basischeck + briefanalyse */}
+        <div
+          className="rounded-2xl border bg-card p-5 flex flex-col"
+          data-testid="card-stat-open-acties"
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <div className="rounded-lg bg-violet-500/10 p-1.5">
+              <Zap className="w-4 h-4 text-violet-500" />
+            </div>
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Open acties</p>
+          </div>
+          <div className="space-y-2 flex-1">
+            <Link href="/basischeck">
+              <div className="flex items-center gap-2 rounded-lg border bg-background px-3 py-2 hover-elevate cursor-pointer" data-testid="actie-basischeck-card">
+                <Globe className="w-3.5 h-3.5 text-blue-500 shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-foreground leading-tight">Lokale Basischeck</p>
+                  <p className="text-[11px] text-muted-foreground">Controleer je compliance</p>
+                </div>
+                <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0 ml-auto" />
+              </div>
+            </Link>
+            <Link href="/tools/brief-analyse">
+              <div className="flex items-center gap-2 rounded-lg border bg-background px-3 py-2 hover-elevate cursor-pointer" data-testid="actie-brief-card">
+                <ScanText className="w-3.5 h-3.5 text-violet-500 shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-foreground leading-tight">Brief begrijpen</p>
+                  <p className="text-[11px] text-muted-foreground">Upload een overheidsbrief</p>
+                </div>
+                <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0 ml-auto" />
+              </div>
+            </Link>
+            <Link href="/regiobot">
+              <div className={`flex items-center gap-2 rounded-lg border bg-background px-3 py-2 hover-elevate cursor-pointer ${!isPro ? "opacity-60" : ""}`} data-testid="actie-regiobot-card">
+                <Bot className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                <div className="min-w-0">
+                  <p className="text-xs font-medium text-foreground leading-tight">RegioBot AI</p>
+                  <p className="text-[11px] text-muted-foreground">{isPro ? "Stel een vraag" : "Pro-abonnement vereist"}</p>
+                </div>
+                {!isPro && <Shield className="w-3 h-3 text-muted-foreground shrink-0 ml-auto" />}
+                {isPro && <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0 ml-auto" />}
+              </div>
+            </Link>
+          </div>
+        </div>
       </section>
 
       {/* ── Snelle acties + Regio-updates ───────────────────────────────────── */}

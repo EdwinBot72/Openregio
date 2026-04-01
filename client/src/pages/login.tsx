@@ -48,11 +48,11 @@ export default function LoginPage() {
 
       toast({
         title: "Ingelogd!",
-        description: "Je wordt doorgestuurd naar het dashboard...",
+        description: "Je wordt doorgestuurd naar Vandaag...",
       });
 
       setTimeout(() => {
-        setLocation("/dashboard");
+        setLocation("/aan-de-slag");
       }, 500);
     } catch (error: any) {
       console.error("Login error:", error);
