@@ -43,21 +43,18 @@ function looksEncrypted(value: string): boolean {
 export function decryptField(ciphertext: string | null | undefined): string | null {
   if (!ciphertext) return null;
 
-  // Backward-compat: if the stored value is plaintext (legacy row), return it as-is.
+  // Backward-compat: if the stored value is plaintext (legacy row before encryption was added),
+  // return it as-is. This prevents data loss for rows created before this feature.
   if (!looksEncrypted(ciphertext)) return ciphertext;
 
-  try {
-    const key = getKey();
-    const buf = Buffer.from(ciphertext, "base64");
-    const iv = buf.subarray(0, IV_LEN);
-    const authTag = buf.subarray(IV_LEN, IV_LEN + AUTH_TAG_LEN);
-    const encrypted = buf.subarray(IV_LEN + AUTH_TAG_LEN);
-    const decipher = createDecipheriv(ALGO, key, iv, { authTagLength: AUTH_TAG_LEN });
-    decipher.setAuthTag(authTag);
-    return decipher.update(encrypted) + decipher.final("utf8");
-  } catch (err) {
-    // Fallback: if decryption fails (e.g. very long base64 plaintext), return raw value.
-    console.warn("[woo-crypto] Decryption failed, returning raw value:", (err as Error).message);
-    return ciphertext;
-  }
+  // Value looks like a ciphertext blob — attempt decryption. Fail closed on error.
+  const key = getKey();
+  const buf = Buffer.from(ciphertext, "base64");
+  const iv = buf.subarray(0, IV_LEN);
+  const authTag = buf.subarray(IV_LEN, IV_LEN + AUTH_TAG_LEN);
+  const encrypted = buf.subarray(IV_LEN + AUTH_TAG_LEN);
+  const decipher = createDecipheriv(ALGO, key, iv, { authTagLength: AUTH_TAG_LEN });
+  decipher.setAuthTag(authTag);
+  // Let this throw if auth-tag verification fails — returning garbled ciphertext would be worse.
+  return decipher.update(encrypted) + decipher.final("utf8");
 }

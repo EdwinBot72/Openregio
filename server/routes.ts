@@ -1882,10 +1882,13 @@ Maak een complete, direct bruikbare WOO-brief.`;
         });
       }
 
-      if (!senderName?.trim() || !senderAddress?.trim() || !senderPostcode?.trim()) {
+      // Sender fields are required when any field is provided (wizard flow).
+      // Bot/draft saves may omit sender fields entirely and encrypt null.
+      const hasSenderData = senderName || senderAddress || senderPostcode;
+      if (hasSenderData && (!senderName?.trim() || !senderAddress?.trim() || !senderPostcode?.trim())) {
         return res.status(400).json({
           error: "Afzendergegevens onvolledig",
-          details: "Naam, adres en postcode/woonplaats zijn verplicht voor een geldige ingebrekestelling.",
+          details: "Als je afzendergegevens invult, zijn naam, adres én postcode/woonplaats allemaal verplicht.",
         });
       }
 
