@@ -28,7 +28,7 @@ function generateSignaalLetter(data: {
   adresBestuursorgaan: string;
   onderwerp: string;
 }): string {
-  return `OPENREGIO \u2013 SIGNAALINSTRUMENT
+  return `WOO-SIGNAALINSTRUMENT
 (Juridische Positionering & Herleidbaarheid)
 
 Afzender:
@@ -73,7 +73,7 @@ function generateBevoegdheidsScanLetter(data: {
   onderwerp: string;
   periode: string;
 }): string {
-  return `OPENREGIO \u2013 AFDWINGBAAR CONTROLEMIDDEL (WOO)
+  return `WOO-VERZOEK EX ART. 3.1 WET OPEN OVERHEID
 
 Afzender:
 ${data.naam}

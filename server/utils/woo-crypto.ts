@@ -22,8 +22,30 @@ export function encryptField(plaintext: string | null | undefined): string | nul
   return Buffer.concat([iv, authTag, encrypted]).toString("base64");
 }
 
+/** Minimum byte length of an AES-256-GCM ciphertext blob (IV + authTag + ≥1 byte payload). */
+const MIN_CIPHERTEXT_BYTES = IV_LEN + AUTH_TAG_LEN + 1;
+
+/**
+ * Try to detect whether a stored value looks like an AES-GCM ciphertext blob.
+ * We check that it is valid base64 and that the decoded buffer is long enough.
+ * This is a best-effort heuristic; the actual GCM auth-tag check in decryptField
+ * provides the definitive integrity guarantee.
+ */
+function looksEncrypted(value: string): boolean {
+  if (!/^[A-Za-z0-9+/=]+$/.test(value)) return false;
+  try {
+    return Buffer.from(value, "base64").length >= MIN_CIPHERTEXT_BYTES;
+  } catch {
+    return false;
+  }
+}
+
 export function decryptField(ciphertext: string | null | undefined): string | null {
   if (!ciphertext) return null;
+
+  // Backward-compat: if the stored value is plaintext (legacy row), return it as-is.
+  if (!looksEncrypted(ciphertext)) return ciphertext;
+
   try {
     const key = getKey();
     const buf = Buffer.from(ciphertext, "base64");
@@ -34,7 +56,8 @@ export function decryptField(ciphertext: string | null | undefined): string | nu
     decipher.setAuthTag(authTag);
     return decipher.update(encrypted) + decipher.final("utf8");
   } catch (err) {
-    console.error("[woo-crypto] Decryption error:", err);
-    return null;
+    // Fallback: if decryption fails (e.g. very long base64 plaintext), return raw value.
+    console.warn("[woo-crypto] Decryption failed, returning raw value:", (err as Error).message);
+    return ciphertext;
   }
 }

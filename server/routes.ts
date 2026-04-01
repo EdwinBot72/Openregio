@@ -4436,6 +4436,19 @@ Maak het verzoek professioneel en juridisch correct.`;
       const cutoff = new Date();
       cutoff.setDate(cutoff.getDate() - 28);
 
+      type OverdueRow = {
+        id: number;
+        user_id: number;
+        authority: string;
+        subject: string;
+        status: string;
+        created_at: string;
+        deadline: string | null;
+        ingebreke_sent_at: string | null;
+        dwangsom_contract_accepted_at: string | null;
+        user_email: string;
+      };
+
       const rows = await db.execute(sql`
         SELECT wd.id, wd.user_id, wd.authority, wd.subject, wd.status,
                wd.created_at, wd.deadline, wd.ingebreke_sent_at,
@@ -4448,7 +4461,7 @@ Maak het verzoek professioneel en juridisch correct.`;
         ORDER BY wd.status ASC, wd.created_at ASC
       `);
 
-      const all = rows.rows as any[];
+      const all = rows.rows as OverdueRow[];
       const overdue = all.filter((d) => d.status !== "ingebreke_gesteld");
       const handled = all.filter((d) => d.status === "ingebreke_gesteld");
 
