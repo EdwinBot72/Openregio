@@ -1882,6 +1882,13 @@ Maak een complete, direct bruikbare WOO-brief.`;
         });
       }
 
+      if (!senderName?.trim() || !senderAddress?.trim() || !senderPostcode?.trim()) {
+        return res.status(400).json({
+          error: "Afzendergegevens onvolledig",
+          details: "Naam, adres en postcode/woonplaats zijn verplicht voor een geldige ingebrekestelling.",
+        });
+      }
+
       const { encryptField } = await import("./utils/woo-crypto");
 
       const deadline = new Date();

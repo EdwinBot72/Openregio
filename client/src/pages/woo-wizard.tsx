@@ -197,6 +197,14 @@ export default function WooWizardPage() {
       });
       return;
     }
+    if (!adres.trim() || !postcodeWoonplaats.trim()) {
+      toast({
+        title: "Verplichte velden",
+        description: "Vul je adres en postcode/woonplaats in. Deze zijn vereist voor een geldige ingebrekestelling.",
+        variant: "destructive",
+      });
+      return;
+    }
     if (selectedType === "bevoegdheidsscan" && !periode.trim()) {
       toast({
         title: "Verplicht veld",
