@@ -1,5 +1,6 @@
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 import {
   ArrowRight,
   Download,
@@ -7,17 +8,19 @@ import {
   Shield,
   BarChart3,
   Building2,
-  Monitor,
-  FolderOpen,
-  Gavel,
-  Users,
-  Share2,
-  Landmark,
-  Activity,
   Signal,
   ChevronRight,
   ScanText,
+  CheckCircle,
   TrendingUp,
+  Eye,
+  Zap,
+  Globe,
+  Users,
+  Landmark,
+  FolderOpen,
+  Gavel,
+  Bot,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -25,81 +28,109 @@ import { useQuery } from "@tanstack/react-query";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import type { IntelSignaal } from "@shared/schema";
 
-const MODULE_CARDS = [
+const SNELLE_ACTIES = [
   {
-    id: "groei",
-    title: "Groei",
-    subtitle: "Maak je bedrijf beter vindbaar en zichtbaarder in jouw regio.",
-    href: "/tools/website-scan",
-    cta: "Open Groei",
-    accent: "from-blue-500/20 to-cyan-400/10",
-    items: [
-      { label: "Website Scan", href: "/tools/website-scan", icon: Monitor },
-      { label: "Bedrijfsprofiel", href: "/bedrijfsprofiel", icon: Building2 },
-      { label: "Zichtbaarheid", href: "/pro/visibility-settings", icon: Shield },
-    ],
-  },
-  {
-    id: "monitor",
-    title: "Regio Monitor",
-    subtitle: "Volg openbare veranderingen die impact hebben op jouw bedrijf.",
-    href: "/intel",
-    cta: "Open Monitor",
-    accent: "from-emerald-500/20 to-teal-400/10",
-    items: [
-      { label: "Regio Intel", href: "/intel", icon: Signal },
-      { label: "Regels & besluiten", href: "/beleidsmonitor", icon: Activity },
-      { label: "Aanbestedingen", href: "/kansen/aanbestedingen", icon: Landmark },
-    ],
-  },
-  {
-    id: "actie",
-    title: "Documenten",
-    subtitle: "Maak brieven en documenten sneller duidelijk en bruikbaar.",
+    icon: ScanText,
+    label: "Brief begrijpen",
+    sub: "Upload een overheidsbrief",
     href: "/tools/brief-analyse",
-    cta: "Open Documenten",
-    accent: "from-violet-500/20 to-fuchsia-400/10",
-    items: [
-      { label: "Brief begrijpen", href: "/tools/brief-analyse", icon: ScanText },
-      { label: "Mijn documenten", href: "/woo-bibliotheek", icon: FolderOpen },
-      { label: "Verzoek indienen", href: "/woo-wizard", icon: Gavel },
-    ],
+    color: "text-violet-500",
+    bg: "bg-violet-500/10",
+    testid: "actie-brief",
   },
   {
-    id: "netwerk",
-    title: "Samenwerken",
-    subtitle: "Vind deals, partners en lokale kansen om samen te groeien.",
-    href: "/kansen/regio-deals",
-    cta: "Open Samenwerken",
-    accent: "from-amber-500/20 to-orange-400/10",
-    items: [
-      { label: "Regio Deals", href: "/kansen/regio-deals", icon: Landmark },
-      { label: "Community", href: "/community", icon: Share2 },
-      { label: "RegioCrew", href: "/regiocrew", icon: Users },
-    ],
+    icon: Globe,
+    label: "Website check",
+    sub: "Hoe vindbaar ben jij?",
+    href: "/tools/website-scan",
+    color: "text-blue-500",
+    bg: "bg-blue-500/10",
+    testid: "actie-website",
   },
-] as const;
-
-const RECENTE_ACTIES = [
-  { label: "Brief begrijpen", sub: "Upload of plak een overheidsbrief", href: "/tools/brief-analyse", icon: ScanText },
-  { label: "Verzoek indienen", sub: "Maak een WOO-verzoek aan", href: "/woo-wizard", icon: Gavel },
-  { label: "Mijn documenten", sub: "Bekijk jouw documentenbibliotheek", href: "/woo-bibliotheek", icon: FolderOpen },
+  {
+    icon: Landmark,
+    label: "Aanbestedingen",
+    sub: "Nieuwe opdrachten van gemeenten",
+    href: "/kansen/aanbestedingen",
+    color: "text-amber-500",
+    bg: "bg-amber-500/10",
+    testid: "actie-aanbestedingen",
+  },
+  {
+    icon: Users,
+    label: "Netwerk",
+    sub: "Ondernemers in jouw regio",
+    href: "/network",
+    color: "text-emerald-500",
+    bg: "bg-emerald-500/10",
+    testid: "actie-netwerk",
+  },
+  {
+    icon: Gavel,
+    label: "Verzoek indienen",
+    sub: "WOO-verzoek aanmaken",
+    href: "/woo-wizard",
+    color: "text-rose-500",
+    bg: "bg-rose-500/10",
+    testid: "actie-verzoek",
+    proOnly: true,
+  },
+  {
+    icon: FolderOpen,
+    label: "Mijn documenten",
+    sub: "Jouw documentenbibliotheek",
+    href: "/woo-bibliotheek",
+    color: "text-orange-500",
+    bg: "bg-orange-500/10",
+    testid: "actie-documenten",
+    proOnly: true,
+  },
 ];
-
-const FALLBACK_UPDATES = [
-  { id: "u1", titel: "Nieuwe aanbesteding gepubliceerd", samenvatting: "Gemeente zoekt lokale leveranciers voor groenonderhoud", categorie: "subsidies" },
-  { id: "u2", titel: "Gemeentelijke verordening aangepast", samenvatting: "Horeca- en terraspermits vereisen aanpassing per juli", categorie: "beleid" },
-  { id: "u3", titel: "Openbare update verkeersmaatregelen", samenvatting: "Tijdelijke omleidingen in het centrum tot najaar", categorie: "wetgeving" },
-];
-
-const MAX_UPDATES = 3;
 
 const CATEGORIE_KLEUREN: Record<string, string> = {
   subsidies: "text-emerald-400 bg-emerald-500/10",
   financieel: "text-amber-400 bg-amber-500/10",
   wetgeving: "text-blue-400 bg-blue-500/10",
   beleid: "text-purple-400 bg-purple-500/10",
+  hoog: "text-rose-400 bg-rose-500/10",
 };
+
+function getVolgendeStap(
+  heeftProfiel: boolean,
+  isPro: boolean,
+  signaalCount: number
+): { titel: string; sub: string; href: string; ctaTekst: string } {
+  if (!heeftProfiel) {
+    return {
+      titel: "Maak je bedrijfsprofiel compleet",
+      sub: "Zorg dat andere ondernemers en klanten je kunnen vinden in het netwerk.",
+      href: "/bedrijfsprofiel",
+      ctaTekst: "Profiel invullen",
+    };
+  }
+  if (signaalCount > 5) {
+    return {
+      titel: `${signaalCount} actuele signalen in jouw regio`,
+      sub: "Er zijn nieuwe updates die impact kunnen hebben op jouw bedrijf.",
+      href: "/intel",
+      ctaTekst: "Bekijk de updates",
+    };
+  }
+  if (!isPro) {
+    return {
+      titel: "Meer grip op regels en kansen?",
+      sub: "Met Pro analyseer je brieven, volg je aanbestedingen en gebruik je RegioBot AI.",
+      href: "/lidmaatschap",
+      ctaTekst: "Bekijk Pro-abonnement",
+    };
+  }
+  return {
+    titel: "Wat speelt er vandaag in jouw regio?",
+    sub: "Bekijk de nieuwste kansen, signalen en aanbestedingen.",
+    href: "/kansen-in-de-buurt",
+    ctaTekst: "Kansen bekijken",
+  };
+}
 
 export default function DashboardPage() {
   usePageTitle("Dashboard");
@@ -118,13 +149,13 @@ export default function DashboardPage() {
   if (authLoading) {
     return (
       <div className="space-y-5 pb-8">
-        <Skeleton className="h-56 w-full rounded-[32px]" />
-        <div className="grid grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-64 rounded-[30px]" />)}
+        <Skeleton className="h-48 w-full rounded-2xl" />
+        <div className="grid grid-cols-3 gap-4">
+          {[1, 2, 3].map((i) => <Skeleton key={i} className="h-28 rounded-2xl" />)}
         </div>
         <div className="grid grid-cols-2 gap-4">
-          <Skeleton className="h-52 rounded-[30px]" />
-          <Skeleton className="h-52 rounded-[30px]" />
+          <Skeleton className="h-52 rounded-2xl" />
+          <Skeleton className="h-52 rounded-2xl" />
         </div>
       </div>
     );
@@ -140,316 +171,283 @@ export default function DashboardPage() {
 
   const isPro = user.plan === "pro";
   const isAdmin = user.isAdmin || false;
-  const displayName = bedrijfsprofiel?.naam || user.firstName || "ondernemer";
+  const displayName = user.firstName || bedrijfsprofiel?.naam || "ondernemer";
+  const heeftProfiel = !!(bedrijfsprofiel?.naam);
+
   const signaalCount = intelSignalen.length;
-  const hogeImpact = intelSignalen.filter(
-    (s) => s.categorie === "wetgeving" || s.categorie === "beleid"
+  const hogeImpactCount = intelSignalen.filter(
+    (s) => s.urgentie === "hoog" || s.categorie === "wetgeving" || s.categorie === "beleid"
   ).length;
-  const openTaken = intelSignalen.filter(
+  const nieuweKansen = intelSignalen.filter(
     (s) => s.categorie === "subsidies" || s.categorie === "financieel"
   ).length;
 
-  const realUpdates = intelSignalen.slice(0, MAX_UPDATES).map((s) => ({
+  const volgendeStap = getVolgendeStap(heeftProfiel, isPro, signaalCount);
+
+  const recenteUpdates = intelSignalen.slice(0, 4).map((s) => ({
     id: String(s.id),
     titel: s.titel,
     samenvatting: s.samenvatting || s.titel,
     categorie: s.categorie,
   }));
-  const updates =
-    realUpdates.length >= MAX_UPDATES
-      ? realUpdates
-      : [...realUpdates, ...FALLBACK_UPDATES.slice(0, MAX_UPDATES - realUpdates.length)];
+
+  const visibleActies = SNELLE_ACTIES.filter((a) => !a.proOnly || isPro);
 
   return (
-    <div className="space-y-6 pb-8">
+    <div className="space-y-5 pb-8">
 
-      {/* ── Hero ─────────────────────────────────────────────────────────────── */}
-      <section className="grid gap-4 lg:grid-cols-[1.55fr_0.8fr]" data-testid="section-hero">
-
-        <div
-          className="overflow-hidden rounded-[32px] border border-white/10 bg-gradient-to-br from-[#111b3a] via-[#122347] to-[#0a6a5e] p-7 text-white shadow-2xl shadow-black/20 md:p-10"
-        >
-          <div className="flex flex-wrap items-center gap-3">
-            <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] text-slate-200">
-              Vandaag starten
-            </span>
+      {/* ── Persoonlijke actiekaart ─────────────────────────────────────────── */}
+      <section data-testid="section-volgende-stap">
+        <div className="overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#111b3a] via-[#122347] to-[#0a6a5e] p-7 text-white shadow-2xl shadow-black/20">
+          <div className="flex items-center gap-3 flex-wrap mb-5">
             <Badge
               variant={isPro ? "default" : "outline"}
-              className="text-xs rounded-full border-white/15 bg-white/5 text-slate-200"
+              className="text-xs rounded-full border-white/15 bg-white/10 text-slate-200"
               data-testid="badge-plan"
             >
-              {isPro ? "Pro" : "Basis"}
+              {isPro ? "Pro-lid" : "Basis-lid"}
             </Badge>
+            {hogeImpactCount > 0 && (
+              <span className="text-xs text-rose-300 font-medium">
+                {hogeImpactCount} hoge-impact {hogeImpactCount === 1 ? "signaal" : "signalen"}
+              </span>
+            )}
           </div>
 
-          <h1
-            className="mt-5 text-3xl font-black leading-tight tracking-tight text-white md:text-5xl"
-            data-testid="text-welcome"
-          >
-            Welkom terug, {displayName}. Pak direct groei, inzicht en lokale kansen.
+          <p className="text-sm text-slate-300 mb-1">Goedendag, {displayName}</p>
+          <h1 className="text-2xl md:text-3xl font-black leading-tight text-white mb-2" data-testid="text-welcome">
+            {volgendeStap.titel}
           </h1>
-          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-200/80 md:text-base">
-            Maak je bedrijf zichtbaarder, volg wat er openbaar verandert in jouw regio en zet documenten sneller om in actie.
+          <p className="text-slate-300 text-sm max-w-xl mb-6">
+            {volgendeStap.sub}
           </p>
 
-          <div className="mt-7 flex flex-wrap gap-3">
-            <Link href="/tools/website-scan">
+          <div className="flex gap-3 flex-wrap">
+            <Link href={volgendeStap.href}>
               <button
-                className="rounded-2xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-lg transition hover:opacity-90 active:scale-95"
-                data-testid="button-hero-websitescan"
+                className="rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-lg transition hover:opacity-90 active:scale-95"
+                data-testid="button-volgende-stap"
               >
-                Website analyse starten
+                {volgendeStap.ctaTekst} <ArrowRight className="inline w-4 h-4 ml-1.5 -mt-0.5" />
               </button>
             </Link>
-            <Link href="/intel">
+            <Link href="/kansen-in-de-buurt">
               <button
-                className="rounded-2xl border border-white/15 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/20 active:scale-95"
-                data-testid="button-hero-updates"
+                className="rounded-xl border border-white/20 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/20 active:scale-95"
+                data-testid="button-kansen"
               >
-                Regio-updates bekijken
+                Alle kansen bekijken
               </button>
             </Link>
           </div>
         </div>
+      </section>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
+      {/* ── Status: 3 compacte kaarten ──────────────────────────────────────── */}
+      <section className="grid grid-cols-1 sm:grid-cols-3 gap-4" data-testid="section-status">
+
+        <Link href="/bedrijfsprofiel">
           <div
-            className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-sm dark:bg-white/5 bg-card"
+            className="rounded-2xl border bg-card p-5 hover-elevate cursor-pointer h-full"
+            data-testid="card-stat-profiel"
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <div className="rounded-lg bg-blue-500/10 p-1.5">
+                <Eye className="w-4 h-4 text-blue-500" />
+              </div>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Zichtbaarheid</p>
+            </div>
+            <p className="text-2xl font-black text-foreground">
+              {heeftProfiel ? "Online" : "Aanmaken"}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {heeftProfiel ? "Bedrijfsprofiel actief" : "Profiel nog niet ingevuld"}
+            </p>
+            <div className={`mt-3 flex items-center gap-1.5 text-xs font-medium ${heeftProfiel ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}`}>
+              <CheckCircle className="w-3.5 h-3.5" />
+              {heeftProfiel ? "Profiel gevonden" : "Vul je profiel in"}
+            </div>
+          </div>
+        </Link>
+
+        <Link href="/intel">
+          <div
+            className="rounded-2xl border bg-card p-5 hover-elevate cursor-pointer h-full"
             data-testid="card-stat-signalen"
           >
-            <p className="text-sm font-semibold text-muted-foreground dark:text-slate-300">Actuele signalen</p>
-            <p className="mt-4 text-4xl font-black tracking-tight text-foreground dark:text-white">{signaalCount}</p>
-            <p className="text-sm text-muted-foreground dark:text-slate-400">voor jouw regio</p>
-            <Link href="/intel">
-              <div className="mt-5 rounded-2xl bg-emerald-500/10 px-3 py-2 text-sm font-medium text-emerald-700 dark:text-emerald-300 cursor-pointer ring-1 ring-emerald-400/15 hover-elevate">
-                {hogeImpact === 0 ? "Geen hoge impact" : `${hogeImpact} hoge impact ${hogeImpact === 1 ? "signaal" : "signalen"}`}
+            <div className="flex items-center gap-2 mb-3">
+              <div className="rounded-lg bg-emerald-500/10 p-1.5">
+                <Signal className="w-4 h-4 text-emerald-500" />
               </div>
-            </Link>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Regio-updates</p>
+            </div>
+            <p className="text-2xl font-black text-foreground">{signaalCount}</p>
+            <p className="text-xs text-muted-foreground mt-1">actuele signalen</p>
+            <div className={`mt-3 flex items-center gap-1.5 text-xs font-medium ${hogeImpactCount > 0 ? "text-rose-600 dark:text-rose-400" : "text-muted-foreground"}`}>
+              <Zap className="w-3.5 h-3.5" />
+              {hogeImpactCount > 0 ? `${hogeImpactCount} met hoge impact` : "Geen urgente signalen"}
+            </div>
           </div>
+        </Link>
 
+        <Link href="/kansen-in-de-buurt">
           <div
-            className="rounded-[28px] border border-white/10 bg-white/5 p-5 backdrop-blur-sm dark:bg-white/5 bg-card"
-            data-testid="card-stat-taken"
+            className="rounded-2xl border bg-card p-5 hover-elevate cursor-pointer h-full"
+            data-testid="card-stat-kansen"
           >
-            <p className="text-sm font-semibold text-muted-foreground dark:text-slate-300">Open taken</p>
-            <p className="mt-4 text-4xl font-black tracking-tight text-foreground dark:text-white">{openTaken}</p>
-            <p className="text-sm text-muted-foreground dark:text-slate-400">subsidies & kansen</p>
-            <Link href="/kansen/aanbestedingen">
-              <div className="mt-5 rounded-2xl bg-orange-500/10 px-3 py-2 text-sm font-medium text-orange-700 dark:text-orange-300 cursor-pointer ring-1 ring-orange-400/15 hover-elevate">
-                {openTaken === 0 ? "Geen open kansen" : `${openTaken} ${openTaken === 1 ? "kans" : "kansen"} te benutten`}
+            <div className="flex items-center gap-2 mb-3">
+              <div className="rounded-lg bg-amber-500/10 p-1.5">
+                <TrendingUp className="w-4 h-4 text-amber-500" />
               </div>
-            </Link>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Kansen</p>
+            </div>
+            <p className="text-2xl font-black text-foreground">{nieuweKansen}</p>
+            <p className="text-xs text-muted-foreground mt-1">subsidies & financiering</p>
+            <div className="mt-3 flex items-center gap-1.5 text-xs font-medium text-amber-600 dark:text-amber-400">
+              <TrendingUp className="w-3.5 h-3.5" />
+              {nieuweKansen === 0 ? "Bekijk aanbestedingen" : `${nieuweKansen} ${nieuweKansen === 1 ? "kans" : "kansen"} open`}
+            </div>
           </div>
-        </div>
+        </Link>
       </section>
 
-      {/* ── Platform uitleg strip ────────────────────────────────────────────── */}
-      <section className="rounded-[28px] border border-white/10 bg-white/5 dark:bg-white/5 bg-card px-6 py-5" data-testid="section-platform-intro">
-        <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted-foreground dark:text-slate-400 mb-4">
-          Wat OpenRegio voor jou doet
-        </p>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {[
-            { icon: TrendingUp,  color: "text-blue-400",   bg: "bg-blue-500/10",   label: "Groei",          desc: "Word beter gevonden in jouw regio" },
-            { icon: Signal,      color: "text-emerald-400", bg: "bg-emerald-500/10", label: "Regio Monitor",  desc: "Volg signalen en regelgeving" },
-            { icon: ScanText,    color: "text-violet-400",  bg: "bg-violet-500/10",  label: "Documenten",     desc: "Begrijp brieven en maak verzoeken" },
-            { icon: Users,       color: "text-amber-400",   bg: "bg-amber-500/10",   label: "Samenwerken",    desc: "Vind deals en lokale partners" },
-          ].map(({ icon: Icon, color, bg, label, desc }) => (
-            <div key={label} className="flex items-start gap-3">
-              <div className={`rounded-xl p-2 shrink-0 ${bg}`}>
-                <Icon className={`w-4 h-4 ${color}`} />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-foreground dark:text-white leading-none">{label}</p>
-                <p className="text-[11px] text-muted-foreground dark:text-slate-400 mt-1 leading-tight">{desc}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
+      {/* ── Snelle acties + Regio-updates ───────────────────────────────────── */}
+      <section className="grid gap-5 lg:grid-cols-2" data-testid="section-acties-updates">
 
-      {/* ── Vier modulekaarten ───────────────────────────────────────────────── */}
-      <section className="grid gap-4 md:grid-cols-2 2xl:grid-cols-4" data-testid="section-modules">
-        {MODULE_CARDS.map((card) => (
-          <div
-            key={card.id}
-            className="rounded-[30px] border border-white/10 bg-white/5 dark:bg-white/5 bg-card p-6 backdrop-blur-sm shadow-xl shadow-black/10 flex flex-col"
-            data-testid={`card-module-${card.id}`}
-          >
-            <div className={`mb-5 rounded-2xl bg-gradient-to-br ${card.accent} p-4 ring-1 ring-white/10`}>
-              <p className="text-base font-bold tracking-tight text-foreground dark:text-white">{card.title}</p>
-              <p className="mt-2 min-h-[48px] text-sm leading-snug text-muted-foreground dark:text-slate-300">{card.subtitle}</p>
-            </div>
-
-            <div className="space-y-2 flex-1">
-              {card.items.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link href={item.href} key={item.label}>
-                    <div
-                      className="flex items-center gap-2.5 rounded-2xl border border-white/[0.08] bg-black/5 dark:bg-black/20 px-4 py-3 text-sm font-medium text-foreground dark:text-slate-200 cursor-pointer hover-elevate"
-                      data-testid={`link-module-${card.id}-${item.label.toLowerCase().replace(/\s/g, "-")}`}
-                    >
-                      <Icon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
-                      {item.label}
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-
-            <Link href={card.href}>
-              <button
-                className="mt-6 w-full rounded-2xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-500 active:scale-95"
-                data-testid={`button-module-${card.id}`}
-              >
-                {card.cta}
-              </button>
-            </Link>
+        {/* Snelle acties */}
+        <div className="rounded-2xl border bg-card p-5">
+          <div className="flex items-center justify-between gap-2 mb-4">
+            <h2 className="text-base font-bold text-foreground">Snelle acties</h2>
           </div>
-        ))}
-      </section>
-
-      {/* ── Updates + Acties ─────────────────────────────────────────────────── */}
-      <section className="grid gap-4 lg:grid-cols-2" data-testid="section-updates-acties">
-
-        <div className="rounded-[30px] border border-white/10 bg-white/5 dark:bg-white/5 bg-card p-6 backdrop-blur-sm">
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <h2 className="text-lg font-bold tracking-tight text-foreground dark:text-white">Laatste regio-updates</h2>
-            <Link href="/intel">
-              <button
-                className="text-sm font-semibold text-cyan-600 dark:text-cyan-300 hover:underline"
-                data-testid="button-alles-updates"
-              >
-                Alles bekijken
-              </button>
-            </Link>
-          </div>
-          <div className="mt-5 space-y-3">
-            {updates.map((item) => (
-              <Link href="/intel" key={item.id}>
-                <div
-                  className="rounded-2xl border border-white/10 bg-black/5 dark:bg-black/20 px-4 py-4 cursor-pointer hover-elevate"
-                  data-testid={`card-update-${item.id}`}
-                >
-                  <div className="flex items-start gap-2 flex-wrap">
-                    <p className="text-sm font-medium text-foreground dark:text-white flex-1 min-w-0">{item.titel}</p>
-                    <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${CATEGORIE_KLEUREN[item.categorie] ?? "text-muted-foreground bg-muted"}`}>
-                      {item.categorie}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-xs text-muted-foreground dark:text-slate-400 line-clamp-1">{item.samenvatting}</p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-
-        <div className="rounded-[30px] border border-white/10 bg-white/5 dark:bg-white/5 bg-card p-6 backdrop-blur-sm">
-          <div className="flex items-center justify-between gap-2 flex-wrap">
-            <h2 className="text-lg font-bold tracking-tight text-foreground dark:text-white">Recente acties</h2>
-            <Link href="/woo-bibliotheek">
-              <button
-                className="text-sm font-semibold text-cyan-600 dark:text-cyan-300 hover:underline"
-                data-testid="button-meer-acties"
-              >
-                Meer acties
-              </button>
-            </Link>
-          </div>
-          <div className="mt-5 space-y-3">
-            {RECENTE_ACTIES.map((actie) => {
+          <div className="grid grid-cols-2 gap-3">
+            {visibleActies.map((actie) => {
               const Icon = actie.icon;
               return (
-                <Link href={actie.href} key={actie.label}>
+                <Link href={actie.href} key={actie.testid}>
                   <div
-                    className="flex items-center gap-3 rounded-2xl border border-white/10 bg-black/5 dark:bg-black/20 px-4 py-4 cursor-pointer hover-elevate"
-                    data-testid={`card-actie-${actie.label.toLowerCase().replace(/\s/g, "-")}`}
+                    className="flex items-center gap-3 rounded-xl border bg-background p-3 hover-elevate cursor-pointer"
+                    data-testid={actie.testid}
                   >
-                    <div className="rounded-xl bg-white/5 dark:bg-white/10 p-2 shrink-0">
-                      <Icon className="h-4 w-4 text-muted-foreground dark:text-slate-300" />
+                    <div className={`rounded-lg p-2 shrink-0 ${actie.bg}`}>
+                      <Icon className={`w-3.5 h-3.5 ${actie.color}`} />
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-foreground dark:text-white">{actie.label}</p>
-                      <p className="text-xs text-muted-foreground dark:text-slate-400 truncate">{actie.sub}</p>
+                    <div className="min-w-0">
+                      <p className="text-xs font-semibold text-foreground leading-tight">{actie.label}</p>
+                      <p className="text-[11px] text-muted-foreground leading-tight mt-0.5 truncate">{actie.sub}</p>
                     </div>
-                    <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0" />
                   </div>
                 </Link>
               );
             })}
           </div>
+          {!isPro && (
+            <Link href="/lidmaatschap">
+              <div className="mt-3 rounded-xl border border-dashed border-muted-foreground/30 p-3 flex items-center justify-between hover-elevate cursor-pointer" data-testid="banner-upgrade">
+                <div>
+                  <p className="text-xs font-semibold text-foreground">Documenten & AI — Pro</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">RegioBot, WOO-verzoeken, bibliotheek</p>
+                </div>
+                <Bot className="w-5 h-5 text-muted-foreground shrink-0" />
+              </div>
+            </Link>
+          )}
+        </div>
+
+        {/* Regio-updates */}
+        <div className="rounded-2xl border bg-card p-5">
+          <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
+            <h2 className="text-base font-bold text-foreground">Laatste regio-updates</h2>
+            <Link href="/intel">
+              <Button variant="ghost" size="sm" className="text-xs h-7 px-2" data-testid="button-alles-updates">
+                Alles bekijken <ChevronRight className="h-3 w-3 ml-1" />
+              </Button>
+            </Link>
+          </div>
+
+          {recenteUpdates.length === 0 ? (
+            <div className="py-6 text-center">
+              <Signal className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">Signalen worden geladen...</p>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {recenteUpdates.map((item) => (
+                <Link href="/intel" key={item.id}>
+                  <div
+                    className="rounded-xl border bg-background px-3 py-3 cursor-pointer hover-elevate"
+                    data-testid={`card-update-${item.id}`}
+                  >
+                    <div className="flex items-start gap-2">
+                      <p className="text-sm font-medium text-foreground flex-1 min-w-0 leading-snug line-clamp-1">{item.titel}</p>
+                      <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 whitespace-nowrap ${CATEGORIE_KLEUREN[item.categorie] ?? "text-muted-foreground bg-muted"}`}>
+                        {item.categorie}
+                      </span>
+                    </div>
+                    <p className="mt-0.5 text-xs text-muted-foreground line-clamp-1">{item.samenvatting}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
       {/* ── Admin ────────────────────────────────────────────────────────────── */}
       {isAdmin && (
-        <section className="space-y-3 pt-2 border-t border-white/10" data-testid="section-admin">
+        <section className="space-y-3 pt-2 border-t" data-testid="section-admin">
           <div className="flex items-center gap-2">
             <Shield className="w-4 h-4 text-muted-foreground" />
-            <h2 className="text-sm font-medium text-muted-foreground dark:text-slate-400">Extra / Admin</h2>
+            <h2 className="text-sm font-medium text-muted-foreground">Beheer & Admin</h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
-            {[
-              {
-                testid: "card-admin-export",
-                icon: Download,
-                label: "Leden export",
-                content: (
-                  <div className="flex flex-wrap gap-2">
-                    <a href="/api/export/nieuwe-leden?days=7&format=csv">
-                      <button className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-foreground dark:text-white hover-elevate" data-testid="button-export-csv-7">CSV 7d</button>
-                    </a>
-                    <a href="/api/export/nieuwe-leden?days=30&format=csv">
-                      <button className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-foreground dark:text-white hover-elevate" data-testid="button-export-csv-30">CSV 30d</button>
-                    </a>
-                  </div>
-                ),
-              },
-            ].map((item) => (
-              <div key={item.testid} className="rounded-2xl border border-white/10 bg-white/5 dark:bg-white/5 bg-card p-4 space-y-3" data-testid={item.testid}>
-                <div className="flex items-center gap-2">
-                  <item.icon className="w-4 h-4 text-muted-foreground" />
-                  <p className="text-sm font-medium text-foreground dark:text-white">{item.label}</p>
-                </div>
-                {item.content}
+            <div className="rounded-xl border bg-card p-4 space-y-3" data-testid="card-admin-export">
+              <div className="flex items-center gap-2">
+                <Download className="w-4 h-4 text-muted-foreground" />
+                <p className="text-sm font-medium">Leden export</p>
               </div>
-            ))}
+              <div className="flex flex-wrap gap-2">
+                <a href="/api/export/nieuwe-leden?days=7&format=csv">
+                  <button className="rounded-lg border bg-background px-3 py-1.5 text-xs font-medium hover-elevate" data-testid="button-export-csv-7">CSV 7d</button>
+                </a>
+                <a href="/api/export/nieuwe-leden?days=30&format=csv">
+                  <button className="rounded-lg border bg-background px-3 py-1.5 text-xs font-medium hover-elevate" data-testid="button-export-csv-30">CSV 30d</button>
+                </a>
+              </div>
+            </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/5 dark:bg-white/5 bg-card p-4 space-y-3" data-testid="card-admin-create-user">
+            <div className="rounded-xl border bg-card p-4 space-y-3" data-testid="card-admin-create-user">
               <div className="flex items-center gap-2">
                 <UserPlus className="w-4 h-4 text-muted-foreground" />
-                <p className="text-sm font-medium text-foreground dark:text-white">Gebruiker aanmaken</p>
+                <p className="text-sm font-medium">Gebruiker aanmaken</p>
               </div>
               <Link href="/admin/users">
-                <button className="rounded-xl bg-blue-600 px-3 py-1.5 text-xs font-semibold text-white hover:bg-blue-500 transition" data-testid="button-admin-create-user">
-                  Nieuw account
-                  <ArrowRight className="inline w-3 h-3 ml-1" />
-                </button>
+                <Button size="sm" className="w-full" data-testid="button-admin-create-user">
+                  Nieuw account <ArrowRight className="inline w-3 h-3 ml-1" />
+                </Button>
               </Link>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/5 dark:bg-white/5 bg-card p-4 space-y-3" data-testid="card-admin-cockpit">
+            <div className="rounded-xl border bg-card p-4 space-y-3" data-testid="card-admin-cockpit">
               <div className="flex items-center gap-2">
                 <BarChart3 className="w-4 h-4 text-muted-foreground" />
-                <p className="text-sm font-medium text-foreground dark:text-white">Rapporten</p>
+                <p className="text-sm font-medium">Rapporten</p>
               </div>
               <Link href="/admin/inzicht">
-                <button className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-foreground dark:text-white hover-elevate" data-testid="button-admin-rapporten">
-                  Bekijk <ArrowRight className="inline w-3 h-3 ml-1" />
-                </button>
+                <Button variant="outline" size="sm" className="w-full" data-testid="button-admin-rapporten">
+                  Bekijk rapporten
+                </Button>
               </Link>
             </div>
 
-            <div className="rounded-2xl border border-white/10 bg-white/5 dark:bg-white/5 bg-card p-4 space-y-3" data-testid="card-admin-beheer">
+            <div className="rounded-xl border bg-card p-4 space-y-3" data-testid="card-admin-beheer">
               <div className="flex items-center gap-2">
                 <Building2 className="w-4 h-4 text-muted-foreground" />
-                <p className="text-sm font-medium text-foreground dark:text-white">Beheer</p>
+                <p className="text-sm font-medium">Admin cockpit</p>
               </div>
               <Link href="/admin">
-                <button className="rounded-xl border border-white/10 bg-white/5 px-3 py-1.5 text-xs font-medium text-foreground dark:text-white hover-elevate" data-testid="button-admin-beheer">
-                  Naar beheer <ArrowRight className="inline w-3 h-3 ml-1" />
-                </button>
+                <Button variant="outline" size="sm" className="w-full" data-testid="button-admin-beheer">
+                  Naar beheer
+                </Button>
               </Link>
             </div>
           </div>

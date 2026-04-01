@@ -27,14 +27,16 @@ import {
   ShieldCheck,
   Building2,
   Landmark,
+  CreditCard,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "wouter";
 import { queryClient } from "@/lib/queryClient";
-import { APP_NAV, ACCOUNT_NAV, type NavSection } from "@/config/navigation";
+import { KERN_NAV, GROEI_NAV, EXTRA_NAV, ACCOUNT_NAV, type NavSection } from "@/config/navigation";
 
 const adminSubItems = [
   { title: "Admin Cockpit", url: "/admin", icon: ShieldCheck },
@@ -206,26 +208,33 @@ export function AppSidebar() {
     "Gebruiker";
   const displayEmail = profile?.email || user?.email || "";
 
+  const visibleKern = KERN_NAV.filter((s) => !s.proOnly || isPro);
+  const visibleGroei = GROEI_NAV.filter((s) => !s.proOnly || isPro);
+
   return (
     <Sidebar>
       <SidebarHeader className="p-4 border-b border-sidebar-border">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center">
+          <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center shrink-0">
             <span className="text-primary-foreground font-accent font-bold text-xl">OR</span>
           </div>
-          <div>
-            <h2 className="font-accent font-bold text-lg">OpenRegio</h2>
-            <p className="text-xs text-muted-foreground">Voor lokale ondernemers</p>
+          <div className="min-w-0">
+            <h2 className="font-accent font-bold text-lg leading-none">OpenRegio</h2>
+            <p className="text-xs text-muted-foreground mt-0.5">Voor lokale ondernemers</p>
           </div>
+          {isPro && (
+            <Badge variant="secondary" className="ml-auto text-[10px] shrink-0">Pro</Badge>
+          )}
         </div>
       </SidebarHeader>
 
       <SidebarContent>
+        {/* ── KERN ─────────────────────────────────────────── */}
         <SidebarGroup>
-          <SidebarGroupLabel>Menu</SidebarGroupLabel>
+          <SidebarGroupLabel>Kern</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {APP_NAV.filter((s) => !s.proOnly || isPro).map((section) => (
+              {visibleKern.map((section) => (
                 <NavSectionItem
                   key={section.id}
                   section={section}
@@ -237,6 +246,34 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
+        {/* ── GROEIEN ──────────────────────────────────────── */}
+        <SidebarGroup>
+          <SidebarGroupLabel>Groeien</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {visibleGroei.map((section) => (
+                <NavSectionItem
+                  key={section.id}
+                  section={section}
+                  currentPath={location}
+                  isPro={isPro}
+                />
+              ))}
+              {!isPro && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton asChild data-testid="link-nav-upgrade">
+                    <Link href="/lidmaatschap" className="flex items-center gap-2 text-muted-foreground">
+                      <Shield className="h-4 w-4" />
+                      <span className="text-xs">Documenten & AI — Pro</span>
+                    </Link>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+
+        {/* ── ACCOUNT ──────────────────────────────────────── */}
         <SidebarGroup>
           <SidebarGroupLabel>Account</SidebarGroupLabel>
           <SidebarGroupContent>
@@ -261,9 +298,28 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {/* ── EXTRA ────────────────────────────────────────── */}
+        <SidebarGroup className="mt-auto">
+          <SidebarGroupLabel className="text-[10px] text-muted-foreground/60 uppercase tracking-widest">
+            Extra
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {EXTRA_NAV.map((section) => (
+                <NavSectionItem
+                  key={section.id}
+                  section={section}
+                  currentPath={location}
+                  isPro={isPro}
+                />
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter className="p-4 border-t border-sidebar-border">
+      <SidebarFooter className="p-3 border-t border-sidebar-border">
         {isLoading ? (
           <div className="flex items-center gap-3">
             <Skeleton className="h-9 w-9 rounded-full" />
@@ -273,22 +329,22 @@ export function AppSidebar() {
             </div>
           </div>
         ) : user ? (
-          <div className="flex items-center gap-3">
-            <Avatar className="h-9 w-9">
+          <div className="flex items-center gap-2">
+            <Avatar className="h-8 w-8 shrink-0">
               <AvatarImage src={profile?.avatarUrl || undefined} alt={displayName} />
-              <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
+              <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
                 {getInitials()}
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate" data-testid="text-sidebar-name">
+              <p className="text-sm font-medium truncate leading-none" data-testid="text-sidebar-name">
                 {displayName}
               </p>
-              <p className="text-xs text-muted-foreground truncate" data-testid="text-sidebar-email">
+              <p className="text-xs text-muted-foreground truncate mt-0.5" data-testid="text-sidebar-email">
                 {displayEmail}
               </p>
             </div>
-            <div className="flex gap-1">
+            <div className="flex gap-1 shrink-0">
               <Button size="icon" variant="ghost" asChild data-testid="link-profiel">
                 <Link href="/bedrijfsprofiel">
                   <User className="h-4 w-4" />
