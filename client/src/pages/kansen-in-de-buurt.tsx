@@ -160,7 +160,8 @@ export default function KansenInDeBuurtPage() {
               onValueChange={setGemeente}
               placeholder="Selecteer gemeente"
               data-testid="select-gemeente"
-              className="bg-white/10 border-white/20 text-white [&_svg]:text-white/70 [&_[data-placeholder]]:text-white/60"
+              className="bg-white/10 border-white/20 text-white data-[placeholder]:text-white/60 [&_svg]:text-white/70 [&>span]:text-white"
+              dark
             />
           </div>
           {actieveGemeente && (
