@@ -1,0 +1,561 @@
+Ja — hieronder staat alles **verwerkt tot 1 overzichtelijke lijst** die je **in één oogopslag** snapt.
+
+# OpenRegio — marketing & app-strategie in 1 overzicht
+
+## 1. Wat OpenRegio moet zijn
+
+**Niet:** platform, community of AI-tool
+**Wel:** **de regionale ondernemers-toolkit voor meer werk, meer grip en minder ruis**
+
+### Kernzin
+
+**OpenRegio helpt lokale ondernemers aan 3 dingen:**
+
+* beter gevonden worden
+* sneller snappen wat regels en brieven betekenen
+* makkelijker zakendoen in hun eigen regio
+
+---
+
+## 2. Het echte probleem nu
+
+OpenRegio verkoopt nu tegelijk:
+
+* zichtbaarheid
+* grip op regels / brieven / overheid
+* regionaal netwerk / samenwerking
+
+Dat is sterk, maar te breed in de eerste indruk.
+Daardoor snapt een ondernemer niet direct:
+**waarom moet ik hier nu voor betalen?**
+
+---
+
+## 3. Wat er dus moet veranderen
+
+OpenRegio moet niet voelen als:
+
+* een app met veel modules
+* een slim systeem
+* een mooi concept
+
+OpenRegio moet voelen als:
+
+* **meer werk uit je regio**
+* **minder gedoe met regels en brieven**
+* **meer overzicht**
+* **sneller kunnen handelen**
+
+Dus:
+**benefit eerst, systeem later**
+
+---
+
+# 4. De hoofdroute van het hele product
+
+## Positionering
+
+**Hook:**
+**Meer werk uit je regio. Minder ruis van regels en systemen.**
+
+## Entry
+
+**Gratis Basischeck / Regio-scan**
+
+## Core offer
+
+**Basis-lid**
+voor ondernemers die zichtbaar en aangesloten willen zijn
+
+## Upsell
+
+**Pro-lid**
+voor ondernemers die actief willen sturen op regels, dossiers, zichtbaarheid en regionale kansen
+
+## Groeimotor
+
+* lokale SEO
+* LinkedIn authority
+* regionale pilots
+* partners
+
+---
+
+# 5. Doelgroep: niet te breed
+
+## Eerst focussen op:
+
+**zzp + mkb-dienstverleners in 1 regio**
+
+### Beste sectoren om mee te starten
+
+* bouw
+* installatie
+* onderhoud
+* zorgpraktijken
+* lokale dienstverlening
+* retail met regionale focus
+
+### Waarom juist deze groep
+
+Omdat zij direct voelen:
+
+* ik wil lokaal beter gevonden worden
+* ik wil geen vaag gedoe met regels
+* ik wil leads uit mijn regio
+* ik wil minder afhankelijk zijn van losse tools
+
+---
+
+# 6. Aanbodstructuur die logisch verkoopt
+
+## 6.1 Gratis instap
+
+### Basischeck / Regio-scan
+
+**Doel:** lead binnenhalen zonder drempel
+
+### Inhoud
+
+* score op lokale zichtbaarheid
+* basisdata-check
+* reviews
+* vindbaarheid
+* continuïteit / basisweerbaarheid
+
+### Output
+
+* rapport
+* 3 verbeterpunten
+* CTA naar Basis of demo
+
+---
+
+## 6.2 Basis-lid
+
+**Voor wie:** ondernemers die willen meekijken en meedoen
+
+### Belofte
+
+* lokale zichtbaarheid op orde
+* regio-updates
+* basisprofiel
+* beperkte briefanalyse
+* beperkte RegioBot
+
+### Simpele pitch
+
+**Basis = zichtbaar en aangesloten**
+
+---
+
+## 6.3 Pro-lid
+
+**Voor wie:** ondernemers die echt willen sturen
+
+### Belofte
+
+* volledige briefanalyse
+* onbeperkte RegioBot
+* WOO / dossierwerk
+* uitgebreid profiel
+* projecten en initiatieven starten
+
+### Simpele pitch
+
+**Pro = grip, dossiers, kansen en actievermogen**
+
+---
+
+# 7. Wat er in de app moet veranderen
+
+## Prioriteit A — direct fixen
+
+### 7.1 Eén duidelijke kernbelofte overal
+
+Overal dezelfde lijn:
+
+* homepage
+* dashboard
+* pricing
+* mails
+* onboarding
+
+### 7.2 Eén logische instapflow
+
+De app moet lopen als:
+
+**bezoeker → gratis scan / briefcheck → resultaat → account → plan → eerste actie**
+
+Niet:
+bezoeker → 12 menu-items → twijfel → weg
+
+### 7.3 Homepage versimpelen
+
+Homepage moet alleen nog dit doen:
+
+* uitleggen wat OpenRegio is
+* zeggen voor wie het is
+* laten zien wat het oplevert
+* gratis instap tonen
+* Basis vs Pro tonen
+* duidelijke CTA geven
+
+### 7.4 Navigatie opdelen
+
+#### Kern
+
+* Dashboard
+* Basischeck
+* Briefanalyse / RegioBot
+* Bedrijfsprofiel
+
+#### Groei
+
+* Kansen
+* Zichtbaarheid
+* Regio-deals
+* Koop lokaal
+
+#### Extra
+
+* Community
+* Chat
+* Affiliate
+* Coöperatie
+* Admin
+
+### 7.5 Dashboard actiegericht maken
+
+Bovenaan alleen:
+
+* jouw eerstvolgende stap
+* jouw zichtbaarheid / status
+* nieuwe kansen in je regio
+* open acties of signalen
+
+### 7.6 Onboarding korter maken
+
+Laat nieuwe gebruiker kiezen:
+
+* ik wil beter gevonden worden
+* ik wil een brief laten checken
+* ik wil kansen in mijn regio zien
+* ik wil mijn profiel live zetten
+
+### 7.7 Public/private routes opschonen
+
+Technisch strak maken zodat publieke pagina’s niet per ongeluk achter login vallen.
+
+---
+
+## Prioriteit B — daarna
+
+### 7.8 Pricing scherper verkopen
+
+Niet alleen features.
+Wel:
+
+* wat krijg ik
+* voor wie is dit
+* wanneer kies ik Basis
+* wanneer kies ik Pro
+
+### 7.9 Planvergelijking simpeler maken
+
+Eén tabel met:
+
+* voor wie
+* resultaat
+* wat zit erin
+* CTA
+
+### 7.10 E-mailflows herschrijven
+
+Mails moeten niet praten als systeem.
+Mails moeten direct zeggen:
+
+* wat levert dit op
+* wat is je volgende stap
+* welk resultaat kun je nu pakken
+
+### 7.11 CTA’s gelijk trekken
+
+Gebruik vaste CTA’s:
+
+* Doe de Basischeck
+* Start met Basis
+* Ga Pro
+* Laat een brief analyseren
+* Bekijk kansen in jouw regio
+
+### 7.12 Foutmeldingen en lege schermen verbeteren
+
+Maak nette states voor:
+
+* nog geen profiel
+* nog geen kansen
+* nog geen scans
+* upload mislukt
+* betaling niet afgerond
+
+---
+
+## Prioriteit C — later
+
+Deze modules hoeven niet weg, maar ook niet vooraan:
+
+* community
+* chat
+* affiliate
+* crew
+* coöperatie
+* experimentele functies
+
+---
+
+# 8. De beste acquisitiekanalen
+
+## Kanaal 1 — SEO + lokale landingspagina’s
+
+Maak pagina’s zoals:
+
+* OpenRegio Haarlem
+* OpenRegio Zaanstreek
+* OpenRegio IJmond
+* beter gevonden worden als ondernemer in [regio]
+* gemeentelijke brieven begrijpen als ondernemer
+* lokale samenwerking voor ondernemers in [regio]
+
+**Waarom dit werkt:**
+lokale intent + zakelijke zoekvraag + weinig ruis
+
+---
+
+## Kanaal 2 — outbound naar lokale ondernemers
+
+Strak en direct.
+
+### Format
+
+* mail of DM
+* gratis regio-check of pilot
+* focus op 1 regio tegelijk
+
+---
+
+## Kanaal 3 — partners
+
+Denk aan:
+
+* boekhouders
+* webbouwers
+* businessclubs
+* ondernemersverenigingen
+* coworking spaces
+
+### Wat partners moeten promoten
+
+Niet “OpenRegio” als abstract platform, maar:
+
+* gratis Basischeck
+* quickscan zichtbaarheid
+* uitleg van een overheidsbrief
+
+---
+
+## Kanaal 4 — LinkedIn authority
+
+Geen fluffy posts.
+Wel:
+
+* scherpe observaties
+* lokale casussen
+* wat ondernemers verkeerd doen
+* voor/na voorbeelden
+* screenshots van scans en analyses
+
+---
+
+# 9. Contentstrategie die omzet ondersteunt
+
+## 4 contentpilaren
+
+### 1. Zichtbaarheid
+
+* Google Bedrijfsprofiel
+* lokale SEO
+* reviews
+* categorieën
+* regionale landingspagina’s
+
+### 2. Grip op regels
+
+* hoe lees je een brief
+* wat moet je checken
+* wat ontbreekt vaak
+* hoe voorkom je tijdverlies
+
+### 3. Regio-kansen
+
+* aanbestedingen
+* samenwerkingen
+* regionale kansen
+* regioupdates
+
+### 4. Anti-ruis ondernemen
+
+* minder tools
+* meer overzicht
+* minder afhankelijkheid
+* regionaal sterker staan
+
+## Contentformats
+
+* 1 pillar page per thema
+* 4 korte artikelen per maand
+* 2 LinkedIn-posts per week
+* 1 case / teardown per week
+* 1 e-mail per week
+
+---
+
+# 10. Funnels die OpenRegio echt moet hebben
+
+## Funnel A — gratis scan
+
+SEO / post / ad
+→ Basischeck
+→ e-mail capture
+→ uitslag + verbeterpunten
+→ CTA naar Basis of demo
+
+## Funnel B — briefanalyse
+
+SEO / content / LinkedIn
+→ landingspagina “brief ontvangen?”
+→ upload / intake
+→ beperkte analyse
+→ upsell naar Pro
+
+## Funnel C — regio-pilot
+
+direct outreach
+→ gratis intake in 1 regio
+→ 10 founding members
+→ testimonials
+→ casepagina
+→ uitrollen naar regio 2
+
+---
+
+# 11. Grootste commerciële fout die je moet vermijden
+
+Niet te veel praten over:
+
+* coöperatie
+* governance
+* AI
+* democratisch model
+* platformstructuur
+
+Dat is niet waarom iemand koopt.
+
+## Mensen kopen omdat ze willen:
+
+* meer werk
+* minder gedoe
+* sneller snappen
+* regionaal sterker staan
+
+---
+
+# 12. 90-dagen aanpak
+
+## Fase 1 — scherpzetten
+
+### Week 1–2
+
+* homepage herschrijven op 1 kernbelofte
+* 3 doelgroeppagina’s maken
+* Basischeck als leadmotor neerzetten
+* Basis vs Pro helder maken
+
+## Fase 2 — traffic
+
+### Week 3–6
+
+* 10 SEO-landingspagina’s maken
+* Google Bedrijfsprofiel strak zetten
+* 2 LinkedIn-posts per week
+* 1 mailflow voor nieuwe leads bouwen
+
+## Fase 3 — conversie
+
+### Week 7–10
+
+* onboarding aanscherpen
+* demo/proefflow toevoegen
+* cases verzamelen
+* partners benaderen
+
+## Fase 4 — schaalbaar maken
+
+### Week 11–12
+
+* best converterende pagina’s uitbreiden
+* partner/affiliate systeem activeren
+* regio-campagne kopiëren naar regio 2
+
+---
+
+# 13. KPI’s waar je echt op moet sturen
+
+Geen vanity metrics.
+
+## Belangrijk
+
+* bezoekers → basischeck start %
+* basischeck start → mail capture %
+* mail capture → lidmaatschap %
+* Basis → Pro upgrade %
+* cost per qualified lead
+* actieve ondernemers per regio
+* aantal cases / testimonials per kwartaal
+
+---
+
+# 14. Alles samengevat in 10 regels
+
+1. OpenRegio moet geen breed platform lijken
+2. OpenRegio moet 1 heldere kernbelofte hebben
+3. Gratis Basischeck moet de hoofdingang worden
+4. Basis = zichtbaar en aangesloten
+5. Pro = grip, dossiers, kansen en actievermogen
+6. Homepage moet veel simpeler
+7. Dashboard moet actiegericht zijn
+8. Focus eerst op 1 regio + 1 doelgroep
+9. Groei vooral via lokale SEO, LinkedIn, pilots en partners
+10. Verkoop resultaat, niet systeemstructuur
+
+---
+
+# 15. De kortste versie
+
+## OpenRegio moet worden:
+
+**de regionale ondernemers-toolkit voor meer werk, meer grip en minder ruis**
+
+## De route moet worden:
+
+**gratis scan → inzicht → account → Basis of Pro → actie**
+
+## De groei moet komen uit:
+
+**lokale SEO + LinkedIn + pilots + partners**
+
+## De fout die je moet vermijden:
+
+**te veel tegelijk willen vertellen**
+
+Als je wilt, maak ik hier nu direct een **superscherpe 1-pagina versie voor intern gebruik** of een **bouwlijst met checkboxen per week**.
