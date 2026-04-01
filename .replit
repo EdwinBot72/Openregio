@@ -69,7 +69,6 @@ SMTP_USER = "info@openregio.nl"
 SMTP_FROM = "OpenRegio <info@openregio.nl>"
 VITE_MOLLIE_BASIC_PAYMENT_LINK = "https://payment-links.mollie.com/payment/FNnWr8uofpfEd6PJQMWHk"
 VITE_MOLLIE_PRO_PAYMENT_LINK = "https://payment-links.mollie.com/payment/nEdtEni7GkJG7rHHetyBs"
-WOO_ENCRYPTION_KEY = "522c6e4cc70d4c563eda873d01eef1e05d7d603f6862dd8b080365bed5189924"
 
 [postMerge]
 path = "scripts/post-merge.sh"
