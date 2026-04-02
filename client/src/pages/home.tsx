@@ -336,7 +336,7 @@ export default function HomePage() {
               </div>
               <div className="relative" data-testid="card-hero-photo">
                 <div className="rounded-2xl overflow-hidden" style={{ boxShadow: "0 20px 60px rgba(0,0,0,.12)" }}>
-                  <img src={streetImg} alt="Nederlandse winkelstraat" className="w-full object-cover" loading="eager" style={{ height: "340px" }} />
+                  <img src={groupImg} alt="Ondernemers in de regio" className="w-full object-cover" loading="eager" style={{ height: "340px", objectPosition: "center top" }} />
                 </div>
                 <div className="absolute -bottom-4 -left-4 rounded-2xl px-5 py-4 flex items-center gap-3" style={{ background: "#fff", boxShadow: "0 8px 32px rgba(0,0,0,.12)", maxWidth: "220px" }}>
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "rgba(31,95,174,.10)", color: "#1f5fae" }}>
@@ -407,10 +407,10 @@ export default function HomePage() {
             {/* Foto — brede strip */}
             <div className="rounded-2xl overflow-hidden" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
               <img
-                src={groupImg}
-                alt="Ondernemers bespreken OpenRegio"
+                src={streetImg}
+                alt="Nederlandse winkelstraat"
                 className="w-full object-cover"
-                style={{ height: "300px", objectPosition: "center 35%" }}
+                style={{ height: "300px", objectPosition: "center center" }}
               />
             </div>
           </div>
