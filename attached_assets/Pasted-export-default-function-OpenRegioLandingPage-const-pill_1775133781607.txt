@@ -1,110 +1,99 @@
-import { Link } from "wouter";
-import { usePageTitle } from "@/hooks/usePageTitle";
-import logoImg from "@assets/optimized/logo.webp";
-import footerLogoImg from "@assets/optimized/footer-logo.webp";
-import streetImg from "@assets/optimized/street.webp";
-import groupImg from "@assets/optimized/group.webp";
+export default function OpenRegioLandingPage() {
+  const pillars = [
+    {
+      title: 'Zichtbaarheid',
+      subtitle: 'Beter gevonden worden',
+      color: 'bg-blue-50 text-blue-800 border-blue-100',
+      icon: '↗',
+    },
+    {
+      title: 'Regels & signalen',
+      subtitle: 'Zie wat impact heeft',
+      color: 'bg-orange-50 text-orange-800 border-orange-100',
+      icon: '⚖',
+    },
+    {
+      title: 'Samenwerking',
+      subtitle: 'Kansen in de regio',
+      color: 'bg-emerald-50 text-emerald-800 border-emerald-100',
+      icon: '◎',
+    },
+  ];
 
-const MOLLIE_BASIC_LINK = (import.meta.env.VITE_MOLLIE_BASIC_PAYMENT_LINK as string) || "https://payment-links.mollie.com/payment/FNnWr8uofpfEd6PJQMWHk";
-const MOLLIE_PRO_LINK = (import.meta.env.VITE_MOLLIE_PRO_PAYMENT_LINK as string) || "https://payment-links.mollie.com/payment/nEdtEni7GkJG7rHHetyBs";
+  const painPoints = [
+    {
+      title: 'Te weinig zichtbaarheid',
+      text: 'Je laat omzet en lokale aanvragen liggen terwijl klanten wel zoeken.',
+    },
+    {
+      title: 'Te weinig overzicht',
+      text: 'Regels, signalen en kansen zitten versnipperd in losse systemen en sites.',
+    },
+    {
+      title: 'Te veel losse informatie',
+      text: 'Je bent tijd kwijt aan uitzoekwerk terwijl je gewoon wilt ondernemen.',
+    },
+  ];
 
-const pillars = [
-  {
-    title: "Zichtbaarheid",
-    subtitle: "Beter gevonden worden",
-    color: "bg-blue-50 text-blue-800 border-blue-100",
-    symbol: "↗",
-  },
-  {
-    title: "Regels & signalen",
-    subtitle: "Zie wat impact heeft",
-    color: "bg-orange-50 text-orange-800 border-orange-100",
-    symbol: "⚖",
-  },
-  {
-    title: "Samenwerking",
-    subtitle: "Kansen in de regio",
-    color: "bg-emerald-50 text-emerald-800 border-emerald-100",
-    symbol: "◎",
-  },
-];
+  const solutions = [
+    {
+      label: 'Zichtbaarheid',
+      title: 'Word beter gevonden in je regio',
+      text: 'Zie waar jouw bedrijf online kansen laat liggen en pak die gericht terug.',
+      accent: 'text-blue-700 border-blue-200 bg-blue-50/60',
+    },
+    {
+      label: 'Overzicht',
+      title: 'Sneller grip op wat relevant is',
+      text: 'Krijg sneller zicht op lokale ontwikkelingen, signalen en kansen.',
+      accent: 'text-orange-700 border-orange-200 bg-orange-50/60',
+    },
+    {
+      label: 'Regels en signalen',
+      title: 'Zie wat impact heeft op jouw bedrijf',
+      text: 'Maak openbare regels, besluiten en signalen sneller inzichtelijk.',
+      accent: 'text-violet-700 border-violet-200 bg-violet-50/60',
+    },
+    {
+      label: 'Samenwerking',
+      title: 'Deel kansen en versterk elkaar',
+      text: 'Werk slimmer samen met ondernemers in je regio en houd werk lokaal.',
+      accent: 'text-emerald-700 border-emerald-200 bg-emerald-50/60',
+    },
+  ];
 
-const painPoints = [
-  {
-    title: "Te weinig zichtbaarheid",
-    text: "Je laat omzet en lokale aanvragen liggen terwijl klanten wel zoeken.",
-  },
-  {
-    title: "Te weinig overzicht",
-    text: "Regels, signalen en kansen zitten versnipperd in losse systemen en sites.",
-  },
-  {
-    title: "Te veel losse informatie",
-    text: "Je bent tijd kwijt aan uitzoekwerk terwijl je gewoon wilt ondernemen.",
-  },
-];
+  const steps = [
+    'Start met de Basischeck',
+    'Krijg overzicht over signalen en kansen',
+    'Pak vervolgstappen met RegioBot en analyses',
+    'Schakel extra hulp in als je wilt doorpakken',
+  ];
 
-const solutions = [
-  {
-    label: "Zichtbaarheid",
-    title: "Word beter gevonden in je regio",
-    text: "Zie waar jouw bedrijf online kansen laat liggen en pak die gericht terug.",
-    accent: "text-blue-700 border-blue-200 bg-blue-50/60",
-  },
-  {
-    label: "Overzicht",
-    title: "Sneller grip op wat relevant is",
-    text: "Krijg sneller zicht op lokale ontwikkelingen, signalen en kansen.",
-    accent: "text-orange-700 border-orange-200 bg-orange-50/60",
-  },
-  {
-    label: "Regels en signalen",
-    title: "Zie wat impact heeft op jouw bedrijf",
-    text: "Maak openbare regels, besluiten en signalen sneller inzichtelijk.",
-    accent: "text-violet-700 border-violet-200 bg-violet-50/60",
-  },
-  {
-    label: "Samenwerking",
-    title: "Deel kansen en versterk elkaar",
-    text: "Werk slimmer samen met ondernemers in je regio en houd werk lokaal.",
-    accent: "text-emerald-700 border-emerald-200 bg-emerald-50/60",
-  },
-];
+  const basis = [
+    'Profiel en aanwezigheid op het platform',
+    'Basis zichtbaarheid in de regio',
+    'Eerste signalen en updates',
+    'Korte briefanalyse',
+    'RegioBot basis',
+  ];
 
-const steps = [
-  "Start met de Basischeck",
-  "Krijg overzicht over signalen en kansen",
-  "Pak vervolgstappen met RegioBot en analyses",
-  "Schakel extra hulp in als je wilt doorpakken",
-];
-
-const basisFeatures = [
-  "Profiel en aanwezigheid op het platform",
-  "Basis zichtbaarheid in de regio",
-  "Eerste signalen en updates",
-  "Korte briefanalyse",
-  "RegioBot basis",
-];
-
-const proFeatures = [
-  "Alles van Basis",
-  "Diepere zichtbaarheidsscans",
-  "Regelgeving en WOO-inzichten",
-  "Volledige briefanalyse",
-  "RegioBot onbeperkt",
-  "Dossiers bouwen en beheren",
-];
-
-export default function HomePage() {
-  usePageTitle("OpenRegio – Lokale toolkit voor ondernemers");
+  const pro = [
+    'Alles van Basis',
+    'Diepere zichtbaarheidsscans',
+    'Regelgeving en Woo-inzichten',
+    'Volledige briefanalyse',
+    'RegioBot onbeperkt',
+    'Dossiers bouwen en beheren',
+  ];
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
-      {/* ── Header ── */}
       <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/95 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
           <div className="flex items-center gap-3">
-            <img src={logoImg} alt="OpenRegio logo" className="h-8 w-auto" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-[#1f5fae] text-lg font-black text-white">
+              OR
+            </div>
             <div>
               <div className="text-sm font-black tracking-tight">OpenRegio</div>
               <div className="text-xs text-slate-400">Lokale toolkit voor ondernemers</div>
@@ -112,24 +101,21 @@ export default function HomePage() {
           </div>
 
           <nav className="hidden items-center gap-6 text-sm text-slate-500 md:flex">
-            <a href="#oplossingen" className="hover:text-slate-900 transition-colors">Oplossingen</a>
-            <a href="#hoe-werkt-het" className="hover:text-slate-900 transition-colors">Hoe het werkt</a>
-            <a href="#lidmaatschap" className="hover:text-slate-900 transition-colors">Lidmaatschap</a>
-            <Link href="/login" className="hover:text-slate-900 transition-colors">Inloggen</Link>
+            <a href="#oplossingen" className="hover:text-slate-900">Oplossingen</a>
+            <a href="#hoe-werkt-het" className="hover:text-slate-900">Hoe het werkt</a>
+            <a href="#lidmaatschap" className="hover:text-slate-900">Lidmaatschap</a>
           </nav>
 
-          <Link
-            href="/basischeck"
-            className="rounded-full bg-[#f28a1a] px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
-            data-testid="link-basischeck-header"
+          <a
+            href="#basischeck"
+            className="rounded-full bg-[#f28a1a] px-5 py-3 text-sm font-bold text-white transition hover:opacity-90"
           >
             Start de Basischeck
-          </Link>
+          </a>
         </div>
       </header>
 
       <main>
-        {/* ── Hero ── */}
         <section className="bg-white py-20 md:py-28">
           <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 md:grid-cols-2">
             <div>
@@ -138,7 +124,7 @@ export default function HomePage() {
               </span>
 
               <h1 className="mt-5 text-4xl font-black leading-tight tracking-tight text-slate-900 md:text-6xl">
-                Meer zichtbaarheid. Sneller overzicht.{" "}
+                Meer zichtbaarheid. Sneller overzicht.{' '}
                 <span className="text-[#1f5fae]">Sterker ondernemen in je regio.</span>
               </h1>
 
@@ -150,7 +136,7 @@ export default function HomePage() {
               <div className="mt-8 grid grid-cols-1 gap-3 sm:grid-cols-3">
                 {pillars.map((item) => (
                   <div key={item.title} className={`rounded-2xl border p-4 ${item.color}`}>
-                    <div className="mb-2 text-lg font-black">{item.symbol}</div>
+                    <div className="mb-2 text-lg font-black">{item.icon}</div>
                     <div className="text-xs font-black uppercase tracking-wide">{item.title}</div>
                     <div className="mt-1 text-xs opacity-80">{item.subtitle}</div>
                   </div>
@@ -158,13 +144,12 @@ export default function HomePage() {
               </div>
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link
-                  href="/basischeck"
+                <a
+                  href="#basischeck"
                   className="rounded-full bg-[#f28a1a] px-6 py-4 text-center text-sm font-bold text-white transition hover:opacity-90"
-                  data-testid="link-basischeck-hero"
                 >
                   Start de Basischeck
-                </Link>
+                </a>
                 <a
                   href="#lidmaatschap"
                   className="rounded-full border border-slate-200 px-6 py-4 text-center text-sm font-bold text-slate-700 transition hover:bg-slate-50"
@@ -180,11 +165,11 @@ export default function HomePage() {
 
             <div className="relative">
               <img
-                src={groupImg}
+                src="/images/hero-openregio.jpg"
                 alt="Lokale ondernemers samenwerking"
                 className="h-[360px] w-full rounded-[28px] object-cover shadow-2xl"
-                data-testid="img-hero-group"
               />
+
               <div className="absolute bottom-6 left-6 max-w-[240px] rounded-2xl bg-white/90 p-5 backdrop-blur">
                 <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#1f5fae]">Lokale focus</div>
                 <div className="mt-2 text-xl font-black text-slate-900">Meer grip</div>
@@ -194,9 +179,12 @@ export default function HomePage() {
               </div>
             </div>
           </div>
+                </div>
+              </div>
+            </div>
+          </div>
         </section>
 
-        {/* ── Waarom OpenRegio (dark) ── */}
         <section className="bg-[#0b2240] py-24 text-white">
           <div className="mx-auto max-w-6xl px-6">
             <div className="mx-auto mb-16 max-w-2xl text-center">
@@ -214,7 +202,7 @@ export default function HomePage() {
             <div className="grid gap-5 md:grid-cols-3">
               {painPoints.map((item) => (
                 <div key={item.title} className="rounded-3xl border border-white/10 bg-white/5 p-7">
-                  <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-2xl bg-red-500/20 text-red-300 font-black">
+                  <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-2xl bg-red-500/20 text-red-300">
                     !
                   </div>
                   <div className="text-xs font-bold uppercase tracking-[0.2em] text-red-300">
@@ -225,18 +213,16 @@ export default function HomePage() {
               ))}
             </div>
 
-            <div className="mt-14 overflow-hidden rounded-[28px] border border-white/10 shadow-2xl">
-              <img
-                src={streetImg}
-                alt="Lokale ondernemers in de regio"
-                className="h-[320px] w-full object-cover opacity-70"
-                data-testid="img-waarom-street"
-              />
+            <div className="mt-14 overflow-hidden rounded-[28px] border border-white/10 bg-white/5 shadow-2xl">
+              <div className="flex min-h-[320px] items-end bg-[radial-gradient(circle_at_center,_rgba(255,255,255,0.08),_transparent_45%)] p-8">
+                <div className="rounded-2xl bg-black/20 px-4 py-3 text-xs text-white/60">
+                  Ondernemers bespreken OpenRegio
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ── Oplossingen ── */}
         <section id="oplossingen" className="bg-[#f8fafd] py-24">
           <div className="mx-auto max-w-6xl px-6">
             <div className="mb-14 text-center">
@@ -248,7 +234,7 @@ export default function HomePage() {
 
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
               {solutions.map((item) => (
-                <div key={item.label} className={`rounded-3xl border p-6 shadow-sm ${item.accent}`}>
+                <div key={item.title} className={`rounded-3xl border p-6 shadow-sm ${item.accent}`}>
                   <div className="text-xs font-black uppercase tracking-[0.2em]">{item.label}</div>
                   <h3 className="mt-4 text-2xl font-black leading-tight text-slate-900">{item.title}</h3>
                   <p className="mt-4 text-sm leading-7 text-slate-600">{item.text}</p>
@@ -258,7 +244,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── Basischeck ── */}
         <section id="basischeck" className="bg-white py-24">
           <div className="mx-auto max-w-4xl px-6 text-center">
             <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#1f5fae]">Basischeck</span>
@@ -266,34 +251,33 @@ export default function HomePage() {
               Start met een snelle eerste check.
             </h2>
             <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-500">
-              Geen lang verhaal vooraf — ervaar direct waar kansen blijven liggen en waar je
-              sneller grip nodig hebt in je regio.
+              Laat ondernemers eerst direct iets ervaren. Niet eerst een lang verhaal, maar meteen laten zien
+              waar kansen blijven liggen en waar sneller grip nodig is.
             </p>
 
             <div className="mt-10 rounded-[28px] border border-slate-200 bg-[#f8fafd] p-8 text-left shadow-sm">
               <div className="grid gap-5 md:grid-cols-2">
                 <div>
-                  <div className="mb-2 block text-sm font-bold text-slate-700">Wat voor bedrijf heb je?</div>
+                  <label className="mb-2 block text-sm font-bold text-slate-700">Wat voor bedrijf heb je?</label>
                   <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-400">
-                    Bijv. schilder, winkel, kapper, installateur
+                    Bijvoorbeeld: schilder, winkel, kapper, installateur
                   </div>
                 </div>
                 <div>
-                  <div className="mb-2 block text-sm font-bold text-slate-700">In welke plaats of regio?</div>
+                  <label className="mb-2 block text-sm font-bold text-slate-700">In welke plaats of regio?</label>
                   <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-400">
-                    Bijv. Haarlem, Zaanstreek, Kennemerland
+                    Bijvoorbeeld: Haarlem, Zaanstreek, Kennemerland
                   </div>
                 </div>
               </div>
 
               <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                <Link
-                  href="/basischeck"
+                <a
+                  href="#"
                   className="rounded-full bg-[#f28a1a] px-6 py-4 text-center text-sm font-bold text-white transition hover:opacity-90"
-                  data-testid="link-basischeck-section"
                 >
                   Start gratis check
-                </Link>
+                </a>
                 <a
                   href="#lidmaatschap"
                   className="rounded-full border border-slate-200 px-6 py-4 text-center text-sm font-bold text-slate-700 transition hover:bg-white"
@@ -305,7 +289,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── Hoe het werkt ── */}
         <section id="hoe-werkt-het" className="border-t border-slate-100 bg-[#f8fafd] py-24">
           <div className="mx-auto max-w-5xl px-6">
             <div className="mb-14 text-center">
@@ -328,7 +311,6 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ── Lidmaatschap / Pricing ── */}
         <section id="lidmaatschap" className="bg-white py-24">
           <div className="mx-auto max-w-5xl px-6">
             <div className="mb-12 text-center">
@@ -340,7 +322,6 @@ export default function HomePage() {
             </div>
 
             <div className="grid gap-5 sm:grid-cols-2">
-              {/* Basis */}
               <div className="rounded-[28px] border border-slate-100 bg-white p-7 shadow-sm">
                 <h3 className="text-2xl font-black text-slate-900">Basis</h3>
                 <p className="mt-2 text-xs text-slate-400">
@@ -350,16 +331,13 @@ export default function HomePage() {
                   €19 <span className="text-sm font-medium text-slate-400">/maand</span>
                 </div>
                 <a
-                  href={MOLLIE_BASIC_LINK}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="#"
                   className="mt-6 block rounded-2xl border border-slate-200 py-3 text-center text-sm font-bold text-[#1f5fae] transition hover:bg-slate-50"
-                  data-testid="link-basis-lid"
                 >
                   Kies Basis
                 </a>
                 <ul className="mt-6 space-y-3">
-                  {basisFeatures.map((item) => (
+                  {basis.map((item) => (
                     <li key={item} className="flex gap-3 text-sm text-slate-600">
                       <span className="font-black text-[#1f5fae]">✓</span>
                       <span>{item}</span>
@@ -368,7 +346,6 @@ export default function HomePage() {
                 </ul>
               </div>
 
-              {/* Pro */}
               <div className="relative rounded-[28px] border-[1.5px] border-[#1f5fae] bg-white p-7 shadow-[0_8px_32px_rgba(31,95,174,.15)]">
                 <div className="absolute -top-3 left-7 rounded-full bg-[#1f5fae] px-3 py-1 text-xs font-black text-white">
                   Aanbevolen
@@ -381,16 +358,13 @@ export default function HomePage() {
                   €49 <span className="text-sm font-medium text-slate-400">/maand</span>
                 </div>
                 <a
-                  href={MOLLIE_PRO_LINK}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                  href="#"
                   className="mt-6 block rounded-2xl bg-[#1f5fae] py-3 text-center text-sm font-bold text-white transition hover:opacity-90"
-                  data-testid="link-pro-lid"
                 >
                   Kies Pro
                 </a>
                 <ul className="mt-6 space-y-3">
-                  {proFeatures.map((item) => (
+                  {pro.map((item) => (
                     <li key={item} className="flex gap-3 text-sm text-slate-600">
                       <span className="font-black text-[#1f5fae]">✓</span>
                       <span>{item}</span>
@@ -407,14 +381,12 @@ export default function HomePage() {
               <h3 className="text-lg font-black text-slate-900">Meer nodig dan een scan of overzicht?</h3>
               <p className="mt-3 text-sm leading-7 text-slate-500">
                 OpenRegio is het startpunt. Voor ondernemers die willen doorpakken kan aanvullende betaalde hulp
-                worden ingezet voor website-onderzoek, verbeteringen, technische reparaties en optimalisatie van
-                online zichtbaarheid.
+                worden ingezet voor website-onderzoek, verbeteringen, technische reparaties en optimalisatie van online zichtbaarheid.
               </p>
             </div>
           </div>
         </section>
 
-        {/* ── Footer CTA ── */}
         <section className="bg-slate-900 py-20 text-white">
           <div className="mx-auto max-w-5xl px-6 text-center">
             <h2 className="text-3xl font-black tracking-tight md:text-5xl">
@@ -424,13 +396,12 @@ export default function HomePage() {
               OpenRegio helpt lokale ondernemers om slimmer te handelen en sterker te staan in hun regio.
             </p>
             <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
-              <Link
-                href="/basischeck"
+              <a
+                href="#basischeck"
                 className="rounded-full bg-[#f28a1a] px-6 py-4 text-sm font-bold text-white transition hover:opacity-90"
-                data-testid="link-basischeck-footer"
               >
                 Start de Basischeck
-              </Link>
+              </a>
               <a
                 href="#lidmaatschap"
                 className="rounded-full border border-white/20 px-6 py-4 text-sm font-bold text-white transition hover:bg-white/10"
@@ -440,25 +411,6 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-
-        {/* ── Footer ── */}
-        <footer className="border-t border-slate-100 bg-white py-10">
-          <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-6 text-center sm:flex-row sm:justify-between sm:text-left">
-            <div className="flex items-center gap-3">
-              <img src={footerLogoImg} alt="OpenRegio" className="h-6 w-auto" />
-              <span className="text-sm text-slate-400">
-                &copy; {new Date().getFullYear()} OpenRegio
-              </span>
-            </div>
-            <div className="flex flex-wrap justify-center gap-4 text-xs text-slate-400 sm:justify-end">
-              <Link href="/privacy" className="hover:text-slate-700 transition-colors">Privacy</Link>
-              <Link href="/voorwaarden" className="hover:text-slate-700 transition-colors">Voorwaarden</Link>
-              <Link href="/disclaimer" className="hover:text-slate-700 transition-colors">Disclaimer</Link>
-              <Link href="/cookiebeleid" className="hover:text-slate-700 transition-colors">Cookiebeleid</Link>
-              <Link href="/login" className="hover:text-slate-700 transition-colors">Inloggen</Link>
-            </div>
-          </div>
-        </footer>
       </main>
     </div>
   );
