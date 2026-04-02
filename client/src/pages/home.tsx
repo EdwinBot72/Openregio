@@ -72,8 +72,8 @@ export default function HomePage() {
               </span>
 
               <h1 className="mt-5 text-4xl font-black leading-tight tracking-tight text-slate-900 md:text-6xl">
-                Meer zichtbaarheid. Sneller overzicht.{" "}
-                <span className="text-[#1f5fae]">Sterker ondernemen in je regio.</span>
+                Sterker ondernemen{" "}
+                <span className="text-[#1f5fae]">in je regio.</span>
               </h1>
 
               <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-500">
