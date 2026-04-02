@@ -1,81 +1,16 @@
 import { Link } from "wouter";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import logoImg from "@assets/optimized/logo.webp";
-import footerLogoImg from "@assets/optimized/footer-logo.webp";
-import streetImg from "@assets/optimized/street.webp";
 import groupImg from "@assets/optimized/group.webp";
+import streetImg from "@assets/optimized/street.webp";
 
 const MOLLIE_BASIC_LINK = (import.meta.env.VITE_MOLLIE_BASIC_PAYMENT_LINK as string) || "https://payment-links.mollie.com/payment/FNnWr8uofpfEd6PJQMWHk";
 const MOLLIE_PRO_LINK = (import.meta.env.VITE_MOLLIE_PRO_PAYMENT_LINK as string) || "https://payment-links.mollie.com/payment/nEdtEni7GkJG7rHHetyBs";
 
 const pillars = [
-  {
-    title: "Zichtbaarheid",
-    subtitle: "Beter gevonden worden",
-    color: "bg-blue-50 text-blue-800 border-blue-100",
-    symbol: "↗",
-  },
-  {
-    title: "Regels & signalen",
-    subtitle: "Zie wat impact heeft",
-    color: "bg-orange-50 text-orange-800 border-orange-100",
-    symbol: "⚖",
-  },
-  {
-    title: "Samenwerking",
-    subtitle: "Kansen in de regio",
-    color: "bg-emerald-50 text-emerald-800 border-emerald-100",
-    symbol: "◎",
-  },
-];
-
-const painPoints = [
-  {
-    title: "Te weinig zichtbaarheid",
-    text: "Je laat omzet en lokale aanvragen liggen terwijl klanten wel zoeken.",
-  },
-  {
-    title: "Te weinig overzicht",
-    text: "Regels, signalen en kansen zitten versnipperd in losse systemen en sites.",
-  },
-  {
-    title: "Te veel losse informatie",
-    text: "Je bent tijd kwijt aan uitzoekwerk terwijl je gewoon wilt ondernemen.",
-  },
-];
-
-const solutions = [
-  {
-    label: "Zichtbaarheid",
-    title: "Word beter gevonden in je regio",
-    text: "Zie waar jouw bedrijf online kansen laat liggen en pak die gericht terug.",
-    accent: "text-blue-700 border-blue-200 bg-blue-50/60",
-  },
-  {
-    label: "Overzicht",
-    title: "Sneller grip op wat relevant is",
-    text: "Krijg sneller zicht op lokale ontwikkelingen, signalen en kansen.",
-    accent: "text-orange-700 border-orange-200 bg-orange-50/60",
-  },
-  {
-    label: "Regels en signalen",
-    title: "Zie wat impact heeft op jouw bedrijf",
-    text: "Maak openbare regels, besluiten en signalen sneller inzichtelijk.",
-    accent: "text-violet-700 border-violet-200 bg-violet-50/60",
-  },
-  {
-    label: "Samenwerking",
-    title: "Deel kansen en versterk elkaar",
-    text: "Werk slimmer samen met ondernemers in je regio en houd werk lokaal.",
-    accent: "text-emerald-700 border-emerald-200 bg-emerald-50/60",
-  },
-];
-
-const steps = [
-  "Start met de Basischeck",
-  "Krijg overzicht over signalen en kansen",
-  "Pak vervolgstappen met RegioBot en analyses",
-  "Schakel extra hulp in als je wilt doorpakken",
+  { title: "Zichtbaarheid", subtitle: "Beter gevonden worden", color: "bg-blue-50 text-blue-800 border-blue-100", symbol: "↗" },
+  { title: "Regels & signalen", subtitle: "Zie wat impact heeft", color: "bg-orange-50 text-orange-800 border-orange-100", symbol: "⚖" },
+  { title: "Samenwerking", subtitle: "Kansen in de regio", color: "bg-emerald-50 text-emerald-800 border-emerald-100", symbol: "◎" },
 ];
 
 const basisFeatures = [
@@ -100,11 +35,12 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen bg-white text-slate-900">
+
       {/* ── Header ── */}
       <header className="sticky top-0 z-50 border-b border-slate-100 bg-white/95 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
           <div className="flex items-center gap-3">
-            <img src={logoImg} alt="OpenRegio logo" className="h-8 w-auto" />
+            <img src={logoImg} alt="OpenRegio" className="h-8 w-auto" />
             <div>
               <div className="text-sm font-black tracking-tight">OpenRegio</div>
               <div className="text-xs text-slate-400">Lokale toolkit voor ondernemers</div>
@@ -112,18 +48,16 @@ export default function HomePage() {
           </div>
 
           <nav className="hidden items-center gap-6 text-sm text-slate-500 md:flex">
-            <a href="#oplossingen" className="hover:text-slate-900 transition-colors">Oplossingen</a>
-            <a href="#hoe-werkt-het" className="hover:text-slate-900 transition-colors">Hoe het werkt</a>
             <a href="#lidmaatschap" className="hover:text-slate-900 transition-colors">Lidmaatschap</a>
             <Link href="/login" className="hover:text-slate-900 transition-colors">Inloggen</Link>
           </nav>
 
           <Link
-            href="/basischeck"
+            href="/register"
             className="rounded-full bg-[#f28a1a] px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-90"
-            data-testid="link-basischeck-header"
+            data-testid="link-aanmelden-header"
           >
-            Start de Basischeck
+            Aanmelden
           </Link>
         </div>
       </header>
@@ -159,11 +93,11 @@ export default function HomePage() {
 
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link
-                  href="/basischeck"
+                  href="/register"
                   className="rounded-full bg-[#f28a1a] px-6 py-4 text-center text-sm font-bold text-white transition hover:opacity-90"
-                  data-testid="link-basischeck-hero"
+                  data-testid="link-aanmelden-hero"
                 >
-                  Start de Basischeck
+                  Aanmelden en starten
                 </Link>
                 <a
                   href="#lidmaatschap"
@@ -174,7 +108,7 @@ export default function HomePage() {
               </div>
 
               <p className="mt-5 text-xs text-slate-400">
-                Gratis starten met de Basischeck — geen account nodig
+                Na aanmelden direct toegang tot de Basischeck en RegioBot
               </p>
             </div>
 
@@ -183,147 +117,47 @@ export default function HomePage() {
                 src={groupImg}
                 alt="Lokale ondernemers samenwerking"
                 className="h-[360px] w-full rounded-[28px] object-cover shadow-2xl"
-                data-testid="img-hero-group"
+                data-testid="img-hero"
               />
               <div className="absolute bottom-6 left-6 max-w-[240px] rounded-2xl bg-white/90 p-5 backdrop-blur">
                 <div className="text-xs font-bold uppercase tracking-[0.2em] text-[#1f5fae]">Lokale focus</div>
                 <div className="mt-2 text-xl font-black text-slate-900">Meer grip</div>
-                <p className="mt-2 text-sm text-slate-500">
-                  Eén plek voor zichtbaarheid en overzicht.
+                <p className="mt-2 text-sm text-slate-500">Eén plek voor zichtbaarheid en overzicht.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Waarom (donker, met foto) ── */}
+        <section className="bg-[#0b2240] py-20 text-white">
+          <div className="mx-auto max-w-6xl px-6">
+            <div className="grid gap-12 md:grid-cols-2 md:items-center">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#f28a1a]">Waarom OpenRegio</span>
+                <h2 className="mt-4 text-3xl font-black tracking-tight md:text-4xl">
+                  Ondernemen is al druk genoeg.
+                </h2>
+                <p className="mt-5 text-base leading-8 text-white/65">
+                  Regels, signalen en kansen zitten versnipperd in losse systemen en sites.
+                  Met OpenRegio krijg je één plek waar zichtbaarheid, regionale ontwikkelingen,
+                  openbare regels en ondernemerskansen samenkomen — zonder uitzoekwerk.
                 </p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Waarom OpenRegio (dark) ── */}
-        <section className="bg-[#0b2240] py-24 text-white">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="mx-auto mb-16 max-w-2xl text-center">
-              <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#f28a1a]">Waarom OpenRegio</span>
-              <h2 className="mt-4 text-3xl font-black tracking-tight md:text-5xl">
-                Ondernemen is al druk genoeg.
-              </h2>
-              <p className="mt-6 text-base leading-8 text-white/65">
-                Je wilt geen wirwar van losse tools, onduidelijke signalen of onnodig uitzoekwerk.
-                Met OpenRegio krijg je één plek waar zichtbaarheid, regionale ontwikkelingen,
-                openbare regels en ondernemerskansen samenkomen.
-              </p>
-            </div>
-
-            <div className="grid gap-5 md:grid-cols-3">
-              {painPoints.map((item) => (
-                <div key={item.title} className="rounded-3xl border border-white/10 bg-white/5 p-7">
-                  <div className="mb-5 flex h-10 w-10 items-center justify-center rounded-2xl bg-red-500/20 text-red-300 font-black">
-                    !
-                  </div>
-                  <div className="text-xs font-bold uppercase tracking-[0.2em] text-red-300">
-                    {item.title}
-                  </div>
-                  <p className="mt-3 text-sm leading-7 text-white/75">{item.text}</p>
-                </div>
-              ))}
-            </div>
-
-            <div className="mt-14 overflow-hidden rounded-[28px] border border-white/10 shadow-2xl">
-              <img
-                src={streetImg}
-                alt="Lokale ondernemers in de regio"
-                className="h-[320px] w-full object-cover opacity-70"
-                data-testid="img-waarom-street"
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* ── Oplossingen ── */}
-        <section id="oplossingen" className="bg-[#f8fafd] py-24">
-          <div className="mx-auto max-w-6xl px-6">
-            <div className="mb-14 text-center">
-              <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#1f5fae]">Wat OpenRegio doet</span>
-              <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-900 md:text-5xl">
-                Eén toolkit. Vier manieren om sterker te ondernemen.
-              </h2>
-            </div>
-
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-              {solutions.map((item) => (
-                <div key={item.label} className={`rounded-3xl border p-6 shadow-sm ${item.accent}`}>
-                  <div className="text-xs font-black uppercase tracking-[0.2em]">{item.label}</div>
-                  <h3 className="mt-4 text-2xl font-black leading-tight text-slate-900">{item.title}</h3>
-                  <p className="mt-4 text-sm leading-7 text-slate-600">{item.text}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {/* ── Basischeck ── */}
-        <section id="basischeck" className="bg-white py-24">
-          <div className="mx-auto max-w-4xl px-6 text-center">
-            <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#1f5fae]">Basischeck</span>
-            <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-900 md:text-5xl">
-              Start met een snelle eerste check.
-            </h2>
-            <p className="mx-auto mt-6 max-w-2xl text-lg leading-8 text-slate-500">
-              Geen lang verhaal vooraf — ervaar direct waar kansen blijven liggen en waar je
-              sneller grip nodig hebt in je regio.
-            </p>
-
-            <div className="mt-10 rounded-[28px] border border-slate-200 bg-[#f8fafd] p-8 text-left shadow-sm">
-              <div className="grid gap-5 md:grid-cols-2">
-                <div>
-                  <div className="mb-2 block text-sm font-bold text-slate-700">Wat voor bedrijf heb je?</div>
-                  <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-400">
-                    Bijv. schilder, winkel, kapper, installateur
-                  </div>
-                </div>
-                <div>
-                  <div className="mb-2 block text-sm font-bold text-slate-700">In welke plaats of regio?</div>
-                  <div className="rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-400">
-                    Bijv. Haarlem, Zaanstreek, Kennemerland
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                 <Link
-                  href="/basischeck"
-                  className="rounded-full bg-[#f28a1a] px-6 py-4 text-center text-sm font-bold text-white transition hover:opacity-90"
-                  data-testid="link-basischeck-section"
+                  href="/register"
+                  className="mt-8 inline-block rounded-full bg-[#f28a1a] px-6 py-3.5 text-sm font-bold text-white transition hover:opacity-90"
+                  data-testid="link-aanmelden-waarom"
                 >
-                  Start gratis check
+                  Aanmelden en starten
                 </Link>
-                <a
-                  href="#lidmaatschap"
-                  className="rounded-full border border-slate-200 px-6 py-4 text-center text-sm font-bold text-slate-700 transition hover:bg-white"
-                >
-                  Eerst lidmaatschap bekijken
-                </a>
               </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── Hoe het werkt ── */}
-        <section id="hoe-werkt-het" className="border-t border-slate-100 bg-[#f8fafd] py-24">
-          <div className="mx-auto max-w-5xl px-6">
-            <div className="mb-14 text-center">
-              <span className="text-xs font-bold uppercase tracking-[0.2em] text-[#1f5fae]">Hoe het werkt</span>
-              <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-900 md:text-5xl">
-                In vier stappen aan de slag
-              </h2>
-            </div>
-
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-              {steps.map((step, index) => (
-                <div key={step} className="rounded-3xl border border-slate-100 bg-white p-6 shadow-sm">
-                  <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-[#1f5fae] text-sm font-black text-white">
-                    {index + 1}
-                  </div>
-                  <p className="text-sm font-bold leading-7 text-slate-800">{step}</p>
-                </div>
-              ))}
+              <div className="overflow-hidden rounded-[28px] border border-white/10">
+                <img
+                  src={streetImg}
+                  alt="Lokale ondernemers in de regio"
+                  className="h-[280px] w-full object-cover opacity-75"
+                  data-testid="img-street"
+                />
+              </div>
             </div>
           </div>
         </section>
@@ -399,63 +233,48 @@ export default function HomePage() {
                 </ul>
               </div>
             </div>
-
-            <div className="mt-8 rounded-[28px] border border-slate-100 bg-slate-50 p-7">
-              <p className="mb-3 text-xs font-bold uppercase tracking-[0.2em] text-slate-400">
-                Aanvullende betaalde hulp
-              </p>
-              <h3 className="text-lg font-black text-slate-900">Meer nodig dan een scan of overzicht?</h3>
-              <p className="mt-3 text-sm leading-7 text-slate-500">
-                OpenRegio is het startpunt. Voor ondernemers die willen doorpakken kan aanvullende betaalde hulp
-                worden ingezet voor website-onderzoek, verbeteringen, technische reparaties en optimalisatie van
-                online zichtbaarheid.
-              </p>
-            </div>
           </div>
         </section>
 
         {/* ── Footer CTA ── */}
-        <section className="bg-slate-900 py-20 text-white">
-          <div className="mx-auto max-w-5xl px-6 text-center">
-            <h2 className="text-3xl font-black tracking-tight md:text-5xl">
+        <section className="bg-slate-900 py-16 text-white">
+          <div className="mx-auto max-w-4xl px-6 text-center">
+            <h2 className="text-3xl font-black tracking-tight md:text-4xl">
               Start vandaag. Zie sneller wat relevant is.
             </h2>
-            <p className="mx-auto mt-5 max-w-2xl text-lg leading-8 text-white/70">
+            <p className="mx-auto mt-4 max-w-xl text-base leading-8 text-white/70">
               OpenRegio helpt lokale ondernemers om slimmer te handelen en sterker te staan in hun regio.
             </p>
-            <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
+            <div className="mt-7 flex flex-col justify-center gap-3 sm:flex-row">
               <Link
-                href="/basischeck"
+                href="/register"
                 className="rounded-full bg-[#f28a1a] px-6 py-4 text-sm font-bold text-white transition hover:opacity-90"
-                data-testid="link-basischeck-footer"
+                data-testid="link-aanmelden-footer"
               >
-                Start de Basischeck
+                Aanmelden en starten
               </Link>
-              <a
-                href="#lidmaatschap"
+              <Link
+                href="/login"
                 className="rounded-full border border-white/20 px-6 py-4 text-sm font-bold text-white transition hover:bg-white/10"
+                data-testid="link-inloggen-footer"
               >
-                Bekijk abonnementen
-              </a>
+                Al lid? Inloggen
+              </Link>
             </div>
           </div>
         </section>
 
         {/* ── Footer ── */}
-        <footer className="border-t border-slate-100 bg-white py-10">
+        <footer className="border-t border-slate-100 bg-white py-8">
           <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-6 text-center sm:flex-row sm:justify-between sm:text-left">
-            <div className="flex items-center gap-3">
-              <img src={footerLogoImg} alt="OpenRegio" className="h-6 w-auto" />
-              <span className="text-sm text-slate-400">
-                &copy; {new Date().getFullYear()} OpenRegio
-              </span>
-            </div>
+            <span className="text-sm text-slate-400">
+              &copy; {new Date().getFullYear()} OpenRegio
+            </span>
             <div className="flex flex-wrap justify-center gap-4 text-xs text-slate-400 sm:justify-end">
               <Link href="/privacy" className="hover:text-slate-700 transition-colors">Privacy</Link>
               <Link href="/voorwaarden" className="hover:text-slate-700 transition-colors">Voorwaarden</Link>
               <Link href="/disclaimer" className="hover:text-slate-700 transition-colors">Disclaimer</Link>
               <Link href="/cookiebeleid" className="hover:text-slate-700 transition-colors">Cookiebeleid</Link>
-              <Link href="/login" className="hover:text-slate-700 transition-colors">Inloggen</Link>
             </div>
           </div>
         </footer>
