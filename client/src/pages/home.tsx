@@ -919,14 +919,16 @@ export default function HomePage() {
                 </a>
                 <ul className="space-y-2.5">
                   {[
-                    "Bedrijfsprofiel in lokaal netwerk",
-                    "Ontdek en ontmoet ondernemers",
-                    "Volledig stemrecht in de coöperatie",
-                    "Basischeck & weerbaarheidsbadges",
+                    { text: "Bedrijfsprofiel in lokaal netwerk", included: true },
+                    { text: "Ontdek en ontmoet ondernemers", included: true },
+                    { text: "Volledig stemrecht in de coöperatie", included: true },
+                    { text: "Basischeck & weerbaarheidsbadges", included: true },
+                    { text: "RegioBot & WOO-bibliotheek", included: false },
+                    { text: "Printbare overzichten", included: false },
                   ].map((f, i) => (
                     <li key={i} className="flex items-center gap-2.5">
-                      <Check className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#1f5fae" }} />
-                      <span className="text-slate-600 text-sm">{f}</span>
+                      <Check className={`w-3.5 h-3.5 flex-shrink-0 ${f.included ? "" : "opacity-20"}`} style={{ color: f.included ? "#1f5fae" : "#94a3b8" }} />
+                      <span className={`text-sm ${f.included ? "text-slate-600" : "text-slate-400 line-through"}`}>{f.text}</span>
                     </li>
                   ))}
                 </ul>
