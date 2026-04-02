@@ -327,7 +327,7 @@ export default function HomePage() {
                     Aanmelden en starten <ArrowRight className="w-4 h-4" />
                   </Link>
                   <a href="#lidmaatschap" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full text-sm font-bold text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors" data-testid="button-hero-lid">
-                    Bekijk abonnementen
+                    Bekijk lidmaatschap
                   </a>
                 </div>
                 <p className="text-xs text-slate-400 flex items-center gap-1.5" data-testid="text-hero-trust">
@@ -1071,6 +1071,8 @@ export default function HomePage() {
             <a href="#lidmaatschap" className="hover:text-slate-700 transition-colors" data-testid="link-footer-lid">Lidmaatschap</a>
             <a href="#contact" className="hover:text-slate-700 transition-colors" data-testid="link-footer-contact">Contact</a>
             <Link href="/privacy" className="hover:text-slate-700 transition-colors" data-testid="link-footer-privacy">Privacy</Link>
+            <Link href="/voorwaarden" className="hover:text-slate-700 transition-colors" data-testid="link-footer-voorwaarden">Voorwaarden</Link>
+            <Link href="/cookiebeleid" className="hover:text-slate-700 transition-colors" data-testid="link-footer-cookies">Cookiebeleid</Link>
           </nav>
           <div className="text-xs text-slate-300">© {new Date().getFullYear()} OpenRegio</div>
         </div>
