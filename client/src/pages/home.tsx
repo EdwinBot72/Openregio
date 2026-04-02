@@ -15,6 +15,9 @@ import footerLogoImg from "@assets/optimized/footer-logo.webp";
 import streetImg from "@assets/optimized/street.webp";
 import groupImg from "@assets/optimized/group.webp";
 
+const MOLLIE_BASIC_LINK = (import.meta.env.VITE_MOLLIE_BASIC_PAYMENT_LINK as string) || "https://payment-links.mollie.com/payment/FNnWr8uofpfEd6PJQMWHk";
+const MOLLIE_PRO_LINK = (import.meta.env.VITE_MOLLIE_PRO_PAYMENT_LINK as string) || "https://payment-links.mollie.com/payment/nEdtEni7GkJG7rHHetyBs";
+
 type WizardStep = "input" | "scanning" | "rapport";
 type WizardMode = "regio" | "regelgeving";
 
@@ -267,7 +270,7 @@ export default function HomePage() {
               <a href="#home" className="px-3 py-2 rounded-lg hover:text-slate-900 hover:bg-slate-50 transition-colors" data-testid="link-nav-home">Home</a>
               <a href="#oplossingen" className="px-3 py-2 rounded-lg hover:text-slate-900 hover:bg-slate-50 transition-colors" data-testid="link-nav-oplossingen">Oplossingen</a>
               <a href="#basischeck" className="px-3 py-2 rounded-lg hover:text-slate-900 hover:bg-slate-50 transition-colors" data-testid="link-nav-basischeck">Basischeck</a>
-              <a href="#member" className="px-3 py-2 rounded-lg hover:text-slate-900 hover:bg-slate-50 transition-colors" data-testid="link-nav-lid">Lidmaatschap</a>
+              <a href="#lidmaatschap" className="px-3 py-2 rounded-lg hover:text-slate-900 hover:bg-slate-50 transition-colors" data-testid="link-nav-lid">Lidmaatschap</a>
               <a href="#contact" className="px-3 py-2 rounded-lg hover:text-slate-900 hover:bg-slate-50 transition-colors" data-testid="link-nav-contact">Contact</a>
             </nav>
             <div className="flex items-center gap-2">
@@ -323,7 +326,7 @@ export default function HomePage() {
                   <Link href="/register" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full text-sm font-bold text-white transition-opacity hover:opacity-90" style={{ background: "#f28a1a" }} data-testid="button-hero-aanmelden">
                     Aanmelden en starten <ArrowRight className="w-4 h-4" />
                   </Link>
-                  <a href="#member" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full text-sm font-bold text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors" data-testid="button-hero-lid">
+                  <a href="#lidmaatschap" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full text-sm font-bold text-slate-700 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors" data-testid="button-hero-lid">
                     Bekijk abonnementen
                   </a>
                 </div>
@@ -895,7 +898,7 @@ export default function HomePage() {
         </section>
 
         {/* ─── MEMBERSHIP ─── */}
-        <section id="member" className="py-24" style={{ background: "#fff" }} data-testid="section-member">
+        <section id="lidmaatschap" className="py-24" style={{ background: "#fff" }} data-testid="section-member">
           <div className="max-w-3xl mx-auto px-6">
             <div className="text-center mb-12">
               <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#1f5fae" }}>Abonnementen</span>
@@ -911,9 +914,9 @@ export default function HomePage() {
                 <div className="mb-6" style={{ fontSize: "36px", fontWeight: 900, letterSpacing: "-1px", color: "#0f172a" }}>
                   €19 <span className="text-slate-400 font-medium" style={{ fontSize: "14px" }}>excl. BTW / maand</span>
                 </div>
-                <Link href="/lidmaatschap?plan=basic" className="block w-full py-3 rounded-xl text-center text-sm font-bold mb-6 transition-colors hover:bg-slate-100 border border-slate-200" style={{ color: "#1f5fae" }} data-testid="button-plan-basic-select">
-                  Kies Basis-lid
-                </Link>
+                <a href={MOLLIE_BASIC_LINK} target="_blank" rel="noopener noreferrer" className="block w-full py-3 rounded-xl text-center text-sm font-bold mb-6 transition-colors hover:bg-slate-100 border border-slate-200" style={{ color: "#1f5fae" }} data-testid="button-plan-basic-select">
+                  Kies Basis-lid — €19/mnd
+                </a>
                 <ul className="space-y-2.5">
                   {[
                     "Bedrijfsprofiel in lokaal netwerk",
@@ -936,9 +939,9 @@ export default function HomePage() {
                 <div className="mb-6" style={{ fontSize: "36px", fontWeight: 900, letterSpacing: "-1px", color: "#0f172a" }}>
                   €49 <span className="text-slate-400 font-medium" style={{ fontSize: "14px" }}>excl. BTW / maand</span>
                 </div>
-                <Link href="/lidmaatschap?plan=pro" className="block w-full py-3 rounded-xl text-center text-sm font-bold mb-6 text-white transition-opacity hover:opacity-90" style={{ background: "#1f5fae" }} data-testid="button-plan-pro-select">
-                  Kies Pro-bijdrager
-                </Link>
+                <a href={MOLLIE_PRO_LINK} target="_blank" rel="noopener noreferrer" className="block w-full py-3 rounded-xl text-center text-sm font-bold mb-6 text-white transition-opacity hover:opacity-90" style={{ background: "#1f5fae" }} data-testid="button-plan-pro-select">
+                  Kies Pro-bijdrager — €49/mnd
+                </a>
                 <ul className="space-y-2.5">
                   {[
                     "Alles van Basis-lid",
@@ -1063,7 +1066,7 @@ export default function HomePage() {
             <a href="#home" className="hover:text-slate-700 transition-colors" data-testid="link-footer-home">Home</a>
             <a href="#oplossingen" className="hover:text-slate-700 transition-colors" data-testid="link-footer-oplossingen">Oplossingen</a>
             <a href="#basischeck" className="hover:text-slate-700 transition-colors" data-testid="link-footer-basischeck">Basischeck</a>
-            <a href="#member" className="hover:text-slate-700 transition-colors" data-testid="link-footer-lid">Lidmaatschap</a>
+            <a href="#lidmaatschap" className="hover:text-slate-700 transition-colors" data-testid="link-footer-lid">Lidmaatschap</a>
             <a href="#contact" className="hover:text-slate-700 transition-colors" data-testid="link-footer-contact">Contact</a>
             <Link href="/privacy" className="hover:text-slate-700 transition-colors" data-testid="link-footer-privacy">Privacy</Link>
           </nav>
