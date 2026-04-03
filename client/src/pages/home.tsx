@@ -14,6 +14,7 @@ import logoImg from "@assets/optimized/logo.webp";
 import footerLogoImg from "@assets/optimized/footer-logo.webp";
 import streetImg from "@assets/optimized/street.webp";
 import groupImg from "@assets/optimized/group.webp";
+import luchtfotoImg from "@assets/afbeelding_1775223584339.png";
 import regelgevingImg from "@assets/optimized/regelgeving-hero.webp";
 import websiteScanImg from "@assets/optimized/website-scan-hero.webp";
 import sectorDetailhandelImg from "@assets/optimized/sector-detailhandel.png";
@@ -859,10 +860,7 @@ export default function HomePage() {
         {/* ─── OVER ONS ─── */}
         <section className="py-24 bg-white border-t border-slate-100" data-testid="section-over-ons">
           <div className="max-w-6xl mx-auto px-6">
-            <div className="grid md:grid-cols-2 gap-16 items-center">
-              <div className="rounded-2xl overflow-hidden" style={{ boxShadow: "0 16px 48px rgba(0,0,0,.1)" }} data-testid="img-over-ons">
-                <img src={groupImg} alt="Lokale ondernemers in de regio" className="w-full object-cover" loading="lazy" style={{ height: "420px", objectPosition: "center top" }} />
-              </div>
+            <div className="grid md:grid-cols-2 gap-16 items-start mb-12">
               <div>
                 <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#1f5fae" }}>Voor wie OpenRegio is</span>
                 <h2 className="font-black mt-3 mb-5 text-slate-900" style={{ fontSize: "clamp(22px, 2.6vw, 34px)", letterSpacing: "-0.6px" }} data-testid="text-over-ons-title">
@@ -871,26 +869,30 @@ export default function HomePage() {
                 <p className="text-slate-500 leading-relaxed mb-6">
                   Overheidsbesluiten, regelgeving en aanbestedingen zijn openbaar — maar nooit makkelijk te vinden. OpenRegio maakt die informatie toegankelijk, zodat jij tijdig kunt handelen.
                 </p>
-                <ul className="space-y-3 mb-8">
-                  {[
-                    "Je krijgt gemeentebrieven en weet niet wat je rechten zijn",
-                    "Je wil een vergunning aanvragen maar de regels zijn onduidelijk",
-                    "Je mist subsidies of aanbestedingen in je eigen regio",
-                    "Je wil andere ondernemers vinden die hetzelfde meemaken",
-                    "Je wil de overheid ter verantwoording kunnen roepen",
-                  ].map((text, i) => (
-                    <li key={i} className="flex items-start gap-3">
-                      <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: "rgba(31,95,174,.1)", color: "#1f5fae" }}>
-                        <Check className="w-3 h-3" />
-                      </div>
-                      <span className="text-slate-600 text-sm leading-relaxed">{text}</span>
-                    </li>
-                  ))}
-                </ul>
                 <Link href="/register" className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full text-sm font-bold text-white transition-opacity hover:opacity-90" style={{ background: "#f28a1a" }} data-testid="button-over-ons-cta">
                   Aanmelden en starten <ArrowRight className="w-4 h-4" />
                 </Link>
               </div>
+              <ul className="space-y-3">
+                {[
+                  "Je krijgt gemeentebrieven en weet niet wat je rechten zijn",
+                  "Je wil een vergunning aanvragen maar de regels zijn onduidelijk",
+                  "Je mist subsidies of aanbestedingen in je eigen regio",
+                  "Je wil andere ondernemers vinden die hetzelfde meemaken",
+                  "Je wil de overheid ter verantwoording kunnen roepen",
+                ].map((text, i) => (
+                  <li key={i} className="flex items-start gap-3">
+                    <div className="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style={{ background: "rgba(31,95,174,.1)", color: "#1f5fae" }}>
+                      <Check className="w-3 h-3" />
+                    </div>
+                    <span className="text-slate-600 text-sm leading-relaxed">{text}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* Luchtfoto Nederland — brede banner */}
+            <div className="rounded-2xl overflow-hidden" style={{ boxShadow: "0 16px 48px rgba(0,0,0,.1)" }} data-testid="img-over-ons">
+              <img src={luchtfotoImg} alt="Nederlandse regio vanuit de lucht" className="w-full object-cover" loading="lazy" style={{ height: "420px", objectPosition: "center center" }} />
             </div>
           </div>
         </section>
