@@ -24,6 +24,15 @@ import {
   AlertTriangle,
   Calendar,
   FileText,
+  Store,
+  Utensils,
+  Wrench,
+  Tractor,
+  BookOpen,
+  Handshake,
+  Banknote,
+  Leaf,
+  Loader2,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -42,65 +51,67 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Loader2 } from "lucide-react";
 
-const SNELLE_ACTIES = [
-  {
-    icon: ScanText,
-    label: "Brief begrijpen",
-    sub: "Upload een overheidsbrief",
-    href: "/tools/brief-analyse",
-    color: "text-violet-500",
-    bg: "bg-violet-500/10",
-    testid: "actie-brief",
-  },
-  {
-    icon: Globe,
-    label: "Website check",
-    sub: "Hoe vindbaar ben jij?",
-    href: "/tools/website-scan",
-    color: "text-blue-500",
+// ─── Sector configuratie ───────────────────────────────────────────────────
+
+const SECTOR_CONFIG = {
+  detailhandel: {
+    label: "Detailhandel",
+    icon: Store,
+    kleur: "text-blue-600 dark:text-blue-400",
     bg: "bg-blue-500/10",
-    testid: "actie-website",
+    kansen: [
+      { icon: Banknote, label: "Subsidies detailhandel", sub: "Gemeente- en provinciesubsidies", href: "/intel", color: "text-emerald-500", bg: "bg-emerald-500/10" },
+      { icon: Landmark, label: "Aanbestedingen gemeente", sub: "Opdrachten in jouw regio", href: "/kansen/aanbestedingen", color: "text-amber-500", bg: "bg-amber-500/10" },
+      { icon: Globe, label: "Winkelgebied beleid", sub: "Bestemmingsplannen & beleid", href: "/intel", color: "text-blue-500", bg: "bg-blue-500/10" },
+      { icon: Users, label: "Ondernemersnetwerk", sub: "Winkeliersverenigingen", href: "/network", color: "text-violet-500", bg: "bg-violet-500/10" },
+    ],
   },
-  {
-    icon: Landmark,
-    label: "Aanbestedingen",
-    sub: "Nieuwe opdrachten van gemeenten",
-    href: "/kansen/aanbestedingen",
-    color: "text-amber-500",
-    bg: "bg-amber-500/10",
-    testid: "actie-aanbestedingen",
-  },
-  {
-    icon: Users,
-    label: "Netwerk",
-    sub: "Ondernemers in jouw regio",
-    href: "/network",
-    color: "text-emerald-500",
-    bg: "bg-emerald-500/10",
-    testid: "actie-netwerk",
-  },
-  {
-    icon: Gavel,
-    label: "Verzoek indienen",
-    sub: "WOO-verzoek aanmaken",
-    href: "/woo-wizard",
-    color: "text-rose-500",
-    bg: "bg-rose-500/10",
-    testid: "actie-verzoek",
-    proOnly: true,
-  },
-  {
-    icon: FolderOpen,
-    label: "Mijn documenten",
-    sub: "Jouw documentenbibliotheek",
-    href: "/woo-bibliotheek",
-    color: "text-orange-500",
+  horeca: {
+    label: "Horeca",
+    icon: Utensils,
+    kleur: "text-orange-600 dark:text-orange-400",
     bg: "bg-orange-500/10",
-    testid: "actie-documenten",
-    proOnly: true,
+    kansen: [
+      { icon: Banknote, label: "Horeca subsidies", sub: "Duurzaamheid & innovatie", href: "/intel", color: "text-emerald-500", bg: "bg-emerald-500/10" },
+      { icon: FileText, label: "Terrasvergunning", sub: "Aanvragen en verlengen", href: "/tools/brief-analyse", color: "text-amber-500", bg: "bg-amber-500/10" },
+      { icon: Shield, label: "Hygiene & regelgeving", sub: "NVWA en lokale eisen", href: "/intel", color: "text-blue-500", bg: "bg-blue-500/10" },
+      { icon: Users, label: "Horecanetwerk", sub: "Samenwerken met collega's", href: "/network", color: "text-violet-500", bg: "bg-violet-500/10" },
+    ],
   },
+  techniek: {
+    label: "Techniek",
+    icon: Wrench,
+    kleur: "text-slate-600 dark:text-slate-400",
+    bg: "bg-slate-500/10",
+    kansen: [
+      { icon: Landmark, label: "Technische aanbestedingen", sub: "Gemeenteopdrachten", href: "/kansen/aanbestedingen", color: "text-amber-500", bg: "bg-amber-500/10" },
+      { icon: Banknote, label: "Innovatiesubsidies", sub: "RVO, WBSO en meer", href: "/intel", color: "text-emerald-500", bg: "bg-emerald-500/10" },
+      { icon: BookOpen, label: "Vakbekwaamheid", sub: "Certificeringen en eisen", href: "/intel", color: "text-blue-500", bg: "bg-blue-500/10" },
+      { icon: Users, label: "Technisch netwerk", sub: "Leveranciers & partners", href: "/network", color: "text-violet-500", bg: "bg-violet-500/10" },
+    ],
+  },
+  agrarisch: {
+    label: "Agrarisch",
+    icon: Tractor,
+    kleur: "text-green-600 dark:text-green-400",
+    bg: "bg-green-500/10",
+    kansen: [
+      { icon: Leaf, label: "GLB-subsidies", sub: "Europese landbouwsteun", href: "/intel", color: "text-emerald-500", bg: "bg-emerald-500/10" },
+      { icon: FileText, label: "Omgevingsvergunning", sub: "Stikstof en bouwen", href: "/tools/brief-analyse", color: "text-amber-500", bg: "bg-amber-500/10" },
+      { icon: Globe, label: "Regio-beleid", sub: "Provinciale regelgeving", href: "/intel", color: "text-blue-500", bg: "bg-blue-500/10" },
+      { icon: Handshake, label: "Agrarisch netwerk", sub: "ZLTO, LTO & coöperaties", href: "/network", color: "text-violet-500", bg: "bg-violet-500/10" },
+    ],
+  },
+} as const;
+
+type SectorKey = keyof typeof SECTOR_CONFIG;
+
+const SECTOR_TILES = [
+  { key: "detailhandel" as SectorKey, label: "Detailhandel", sub: "Winkels en retail", icon: Store, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-950/40", border: "border-blue-200 dark:border-blue-900/60" },
+  { key: "horeca" as SectorKey, label: "Horeca", sub: "Restaurants en cafés", icon: Utensils, color: "text-orange-600 dark:text-orange-400", bg: "bg-orange-50 dark:bg-orange-950/40", border: "border-orange-200 dark:border-orange-900/60" },
+  { key: "techniek" as SectorKey, label: "Techniek", sub: "Installatie en ambacht", icon: Wrench, color: "text-slate-600 dark:text-slate-400", bg: "bg-slate-50 dark:bg-slate-900/40", border: "border-slate-200 dark:border-slate-700/60" },
+  { key: "agrarisch" as SectorKey, label: "Agrarisch", sub: "Landbouw en natuur", icon: Tractor, color: "text-green-600 dark:text-green-400", bg: "bg-green-50 dark:bg-green-950/40", border: "border-green-200 dark:border-green-900/60" },
 ];
 
 const CATEGORIE_KLEUREN: Record<string, string> = {
@@ -111,42 +122,65 @@ const CATEGORIE_KLEUREN: Record<string, string> = {
   hoog: "text-rose-400 bg-rose-500/10",
 };
 
-function getVolgendeStap(
-  heeftProfiel: boolean,
-  isPro: boolean,
-  signaalCount: number
-): { titel: string; sub: string; href: string; ctaTekst: string } {
-  if (!heeftProfiel) {
-    return {
-      titel: "Maak je bedrijfsprofiel compleet",
-      sub: "Zorg dat andere ondernemers en klanten je kunnen vinden in het netwerk.",
-      href: "/bedrijfsprofiel",
-      ctaTekst: "Profiel invullen",
-    };
-  }
-  if (signaalCount > 5) {
-    return {
-      titel: `${signaalCount} actuele signalen in jouw regio`,
-      sub: "Er zijn nieuwe updates die impact kunnen hebben op jouw bedrijf.",
-      href: "/intel",
-      ctaTekst: "Bekijk de updates",
-    };
-  }
-  if (!isPro) {
-    return {
-      titel: "Meer grip op regels en kansen?",
-      sub: "Met Pro analyseer je brieven, volg je aanbestedingen en gebruik je de Bibliotheek.",
-      href: "/lidmaatschap",
-      ctaTekst: "Bekijk Pro-abonnement",
-    };
-  }
-  return {
-    titel: "Wat speelt er vandaag in jouw regio?",
-    sub: "Bekijk de nieuwste kansen, signalen en aanbestedingen.",
-    href: "/kansen-in-de-buurt",
-    ctaTekst: "Kansen bekijken",
+// ─── Sector onboarding prompt ──────────────────────────────────────────────
+
+function SectorOnboarding() {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  const [saving, setSaving] = useState<SectorKey | null>(null);
+
+  const handleKiesSector = async (sectorKey: SectorKey) => {
+    setSaving(sectorKey);
+    try {
+      await apiRequest("PATCH", "/api/user/sector", { sector: sectorKey });
+      await qc.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      await qc.invalidateQueries({ queryKey: ["/api/intel/signalen"] });
+      toast({ title: "Sector opgeslagen", description: `Je ziet nu content voor ${SECTOR_CONFIG[sectorKey].label}.` });
+    } catch {
+      toast({ title: "Fout", description: "Sector kon niet worden opgeslagen.", variant: "destructive" });
+    } finally {
+      setSaving(null);
+    }
   };
+
+  return (
+    <section className="rounded-2xl border bg-card p-6" data-testid="section-sector-onboarding">
+      <div className="mb-4">
+        <h2 className="text-base font-bold text-foreground">In welke sector ben je actief?</h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          Zo zien we je de meest relevante signalen, kansen en regelgeving voor jouw branche.
+        </p>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {SECTOR_TILES.map((tile) => {
+          const Icon = tile.icon;
+          const isSaving = saving === tile.key;
+          return (
+            <button
+              key={tile.key}
+              onClick={() => handleKiesSector(tile.key)}
+              disabled={!!saving}
+              className={`flex flex-col items-center gap-2 rounded-xl border p-4 text-center hover-elevate transition-all ${tile.bg} ${tile.border}`}
+              data-testid={`sector-tile-${tile.key}`}
+            >
+              <div className={`w-10 h-10 rounded-xl ${tile.bg} border ${tile.border} flex items-center justify-center`}>
+                {isSaving ? (
+                  <Loader2 className={`h-5 w-5 animate-spin ${tile.color}`} />
+                ) : (
+                  <Icon className={`h-5 w-5 ${tile.color}`} />
+                )}
+              </div>
+              <span className={`text-sm font-semibold ${tile.color}`}>{tile.label}</span>
+              <span className="text-[11px] text-muted-foreground">{tile.sub}</span>
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
 }
+
+// ─── WOO dossier panel ────────────────────────────────────────────────────
 
 type WooDossier = {
   id: number;
@@ -304,7 +338,6 @@ function WooDossierPanel({ isPro }: { isPro: boolean }) {
         )}
       </section>
 
-      {/* Ingebrekestelling contract dialog */}
       <Dialog open={!!selectedDossier} onOpenChange={(open) => { if (!open) setSelectedDossier(null); }}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
@@ -357,7 +390,6 @@ function WooDossierPanel({ isPro }: { isPro: boolean }) {
         </DialogContent>
       </Dialog>
 
-      {/* Gegenereerde ingebrekestelling */}
       <Dialog open={ingrebrekeLetterOpen} onOpenChange={setIngebrekelLetterOpen}>
         <DialogContent className="max-w-2xl max-h-[80vh] flex flex-col">
           <DialogHeader>
@@ -390,6 +422,20 @@ function WooDossierPanel({ isPro }: { isPro: boolean }) {
   );
 }
 
+// ─── Blog type ────────────────────────────────────────────────────────────
+
+type BlogPost = {
+  id: number | string;
+  title: string;
+  slug: string;
+  excerpt?: string;
+  publishedAt?: string;
+  createdAt?: string;
+  category?: string;
+};
+
+// ─── Main dashboard ───────────────────────────────────────────────────────
+
 export default function DashboardPage() {
   usePageTitle("Vandaag");
   const { user, isLoading: authLoading } = useAuth();
@@ -402,6 +448,7 @@ export default function DashboardPage() {
     adres?: string;
     kvkNummer?: string;
     logo?: string;
+    regio?: string;
   } | null>({
     queryKey: ["/api/business-profile/me"],
     enabled: !!user,
@@ -409,6 +456,11 @@ export default function DashboardPage() {
 
   const { data: intelSignalen = [] } = useQuery<IntelSignaal[]>({
     queryKey: ["/api/intel/signalen"],
+    enabled: !!user,
+  });
+
+  const { data: blogs = [] } = useQuery<BlogPost[]>({
+    queryKey: ["/api/blogs/public"],
     enabled: !!user,
   });
 
@@ -437,18 +489,22 @@ export default function DashboardPage() {
 
   const isPro = user.plan === "pro";
   const isAdmin = user.isAdmin || false;
-  const displayName = user.firstName || bedrijfsprofiel?.naam || "ondernemer";
+  const hasSector = !!user.sector;
+  const sectorKey = (hasSector && user.sector && user.sector in SECTOR_CONFIG) ? user.sector as SectorKey : null;
+  const sectorConfig = sectorKey ? SECTOR_CONFIG[sectorKey] : null;
+
+  const displayName = user.firstName || bedrijfsprofiel?.naam || user.businessName || "ondernemer";
   const heeftProfiel = !!(bedrijfsprofiel?.naam);
 
   const signaalCount = intelSignalen.length;
   const hogeImpactCount = intelSignalen.filter(
-    (s) => s.urgentie === "hoog" || s.categorie === "wetgeving" || s.categorie === "beleid"
+    (s) => s.urgentie === "hoog" || s.categorie === "wetgeving"
   ).length;
   const kansSignalen = intelSignalen.filter(
     (s) => s.categorie === "subsidies" || s.categorie === "financieel"
   );
 
-  // Profile completeness: each field = 1/6 ≈ 17%
+  // Profile completeness
   type ProfielVeld = "naam" | "beschrijving" | "website" | "telefoon" | "adres" | "kvkNummer";
   const profielVelden: ProfielVeld[] = ["naam", "beschrijving", "website", "telefoon", "adres", "kvkNummer"];
   const ingevuld = bedrijfsprofiel
@@ -456,31 +512,49 @@ export default function DashboardPage() {
     : 0;
   const profielPct = Math.round((ingevuld / profielVelden.length) * 100);
 
-  const volgendeStap = getVolgendeStap(heeftProfiel, isPro, signaalCount);
-
   const recenteUpdates = intelSignalen.slice(0, 4).map((s) => ({
     id: String(s.id),
     titel: s.titel,
     samenvatting: s.samenvatting || s.titel,
     categorie: s.categorie,
+    urgentie: s.urgentie,
   }));
 
-  const visibleActies = SNELLE_ACTIES.filter((a) => !a.proOnly || isPro);
+  const recenteBlogs = blogs.slice(0, 3);
+
+  function getGreeting() {
+    const uur = new Date().getHours();
+    if (uur < 12) return "Goedemorgen";
+    if (uur < 18) return "Goedemiddag";
+    return "Goedenavond";
+  }
 
   return (
     <div className="space-y-5 pb-8">
 
-      {/* ── Persoonlijke actiekaart ─────────────────────────────────────────── */}
-      <section data-testid="section-volgende-stap">
+      {/* ── Sector onboarding (indien geen sector) ───────────────────────── */}
+      {!hasSector && <SectorOnboarding />}
+
+      {/* ── Hero greeting ────────────────────────────────────────────────── */}
+      <section data-testid="section-greeting">
         <div className="overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-[#111b3a] via-[#122347] to-[#0a6a5e] p-7 text-white shadow-2xl shadow-black/20">
-          <div className="flex items-center gap-3 flex-wrap mb-5">
+          <div className="flex items-center gap-3 flex-wrap mb-4">
             <Badge
-              variant={isPro ? "default" : "outline"}
+              variant="outline"
               className="text-xs rounded-full border-white/15 bg-white/10 text-slate-200"
               data-testid="badge-plan"
             >
               {isPro ? "Pro-lid" : "Basis-lid"}
             </Badge>
+            {sectorConfig && (
+              <Badge
+                variant="outline"
+                className="text-xs rounded-full border-white/15 bg-white/10 text-slate-200"
+                data-testid="badge-sector"
+              >
+                {sectorConfig.label}
+              </Badge>
+            )}
             {hogeImpactCount > 0 && (
               <span className="text-xs text-rose-300 font-medium">
                 {hogeImpactCount} hoge-impact {hogeImpactCount === 1 ? "signaal" : "signalen"}
@@ -488,21 +562,25 @@ export default function DashboardPage() {
             )}
           </div>
 
-          <p className="text-sm text-slate-300 mb-1">Goedendag, {displayName}</p>
+          <p className="text-sm text-slate-300 mb-1">{getGreeting()}, {displayName}</p>
           <h1 className="text-2xl md:text-3xl font-black leading-tight text-white mb-2" data-testid="text-welcome">
-            {volgendeStap.titel}
+            {hasSector && sectorConfig
+              ? `Wat speelt er vandaag in ${sectorConfig.label.toLowerCase()}?`
+              : "Wat speelt er vandaag in jouw regio?"}
           </h1>
           <p className="text-slate-300 text-sm max-w-xl mb-6">
-            {volgendeStap.sub}
+            {signaalCount > 0
+              ? `${signaalCount} actuele ${signaalCount === 1 ? "update" : "updates"} voor jou klaar — bekijk ze hieronder.`
+              : "Regio-updates, subsidies en kansen op één plek."}
           </p>
 
           <div className="flex gap-3 flex-wrap">
-            <Link href={volgendeStap.href}>
+            <Link href="/intel">
               <button
                 className="rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-lg transition hover:opacity-90 active:scale-95"
                 data-testid="button-volgende-stap"
               >
-                {volgendeStap.ctaTekst} <ArrowRight className="inline w-4 h-4 ml-1.5 -mt-0.5" />
+                Regio-updates <ArrowRight className="inline w-4 h-4 ml-1.5 -mt-0.5" />
               </button>
             </Link>
             <Link href="/kansen-in-de-buurt">
@@ -517,37 +595,48 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* ── Status: 3 compacte kaarten ──────────────────────────────────────── */}
+      {/* ── 3 status kaarten ─────────────────────────────────────────────── */}
       <section className="grid grid-cols-1 sm:grid-cols-3 gap-4" data-testid="section-status">
 
-        {/* 1. Zichtbaarheid — profiel compleetheid % */}
+        {/* Mijn bedrijf */}
         <Link href="/bedrijfsprofiel">
           <div
             className="rounded-2xl border bg-card p-5 hover-elevate cursor-pointer h-full flex flex-col"
-            data-testid="card-stat-profiel"
+            data-testid="card-stat-bedrijf"
           >
             <div className="flex items-center gap-2 mb-3">
               <div className="rounded-lg bg-blue-500/10 p-1.5">
-                <Eye className="w-4 h-4 text-blue-500" />
+                <Building2 className="w-4 h-4 text-blue-500" />
               </div>
-              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Zichtbaarheid</p>
+              <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Mijn bedrijf</p>
             </div>
-            <p className="text-2xl font-black text-foreground" data-testid="text-profiel-pct">{profielPct}%</p>
-            <p className="text-xs text-muted-foreground mt-1">profiel ingevuld</p>
-            <div className="mt-2 h-1.5 w-full rounded-full bg-muted overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all ${profielPct === 100 ? "bg-emerald-500" : profielPct >= 50 ? "bg-blue-500" : "bg-amber-500"}`}
-                style={{ width: `${profielPct}%` }}
-              />
-            </div>
-            <div className={`mt-3 flex items-center gap-1.5 text-xs font-medium ${profielPct === 100 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}`}>
-              <CheckCircle className="w-3.5 h-3.5" />
-              {profielPct === 100 ? "Profiel compleet" : `${ingevuld} van ${profielVelden.length} velden`}
+            <p className="text-sm font-bold text-foreground truncate" data-testid="text-bedrijfsnaam">
+              {bedrijfsprofiel?.naam || user.businessName || "Profiel invullen"}
+            </p>
+            {sectorConfig && (
+              <p className={`text-xs mt-1 font-medium ${sectorConfig.kleur}`} data-testid="text-sector-label">
+                {sectorConfig.label}
+              </p>
+            )}
+            {(bedrijfsprofiel?.regio || user.region) && (
+              <p className="text-xs text-muted-foreground mt-0.5">{bedrijfsprofiel?.regio || user.region}</p>
+            )}
+            <div className="mt-auto pt-3">
+              <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                <div
+                  className={`h-full rounded-full transition-all ${profielPct === 100 ? "bg-emerald-500" : profielPct >= 50 ? "bg-blue-500" : "bg-amber-500"}`}
+                  style={{ width: `${profielPct}%` }}
+                />
+              </div>
+              <div className={`mt-2 flex items-center gap-1.5 text-xs font-medium ${profielPct === 100 ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400"}`}>
+                <Eye className="w-3.5 h-3.5" />
+                {profielPct === 100 ? "Profiel compleet" : `${ingevuld} van ${profielVelden.length} velden ingevuld`}
+              </div>
             </div>
           </div>
         </Link>
 
-        {/* 2. Nieuwste kansen — 3 recente signalen */}
+        {/* Nieuwste kansen */}
         <Link href="/kansen-in-de-buurt">
           <div
             className="rounded-2xl border bg-card p-5 hover-elevate cursor-pointer h-full flex flex-col"
@@ -561,7 +650,7 @@ export default function DashboardPage() {
             </div>
             {kansSignalen.length === 0 ? (
               <>
-                <p className="text-2xl font-black text-foreground">{signaalCount}</p>
+                <p className="text-2xl font-black text-foreground" data-testid="text-signaal-count">{signaalCount}</p>
                 <p className="text-xs text-muted-foreground mt-1">regio-updates</p>
               </>
             ) : (
@@ -578,7 +667,7 @@ export default function DashboardPage() {
           </div>
         </Link>
 
-        {/* 3. Open acties — basischeck + briefanalyse */}
+        {/* Open acties */}
         <div
           className="rounded-2xl border bg-card p-5 flex flex-col"
           data-testid="card-stat-open-acties"
@@ -617,37 +706,56 @@ export default function DashboardPage() {
                   <p className="text-xs font-medium text-foreground leading-tight">Bibliotheek</p>
                   <p className="text-[11px] text-muted-foreground">{isPro ? "Stel een vraag" : "Pro-abonnement vereist"}</p>
                 </div>
-                {!isPro && <Shield className="w-3 h-3 text-muted-foreground shrink-0 ml-auto" />}
-                {isPro && <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0 ml-auto" />}
+                {!isPro ? <Shield className="w-3 h-3 text-muted-foreground shrink-0 ml-auto" /> : <ChevronRight className="w-3 h-3 text-muted-foreground shrink-0 ml-auto" />}
               </div>
             </Link>
           </div>
         </div>
       </section>
 
-      {/* ── Snelle acties + Regio-updates ───────────────────────────────────── */}
-      <section className="grid gap-5 lg:grid-cols-2" data-testid="section-acties-updates">
+      {/* ── Kansen per sector + Regio-updates ───────────────────────────── */}
+      <section className="grid gap-5 lg:grid-cols-2" data-testid="section-kansen-updates">
 
-        {/* Snelle acties */}
+        {/* Kansen per sector */}
         <div className="rounded-2xl border bg-card p-5">
-          <div className="flex items-center justify-between gap-2 mb-4">
-            <h2 className="text-base font-bold text-foreground">Snelle acties</h2>
+          <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              {sectorConfig ? (
+                <>
+                  <sectorConfig.icon className={`w-4 h-4 ${sectorConfig.kleur}`} />
+                  <h2 className="text-base font-bold text-foreground">Kansen in {sectorConfig.label.toLowerCase()}</h2>
+                </>
+              ) : (
+                <>
+                  <Landmark className="w-4 h-4 text-muted-foreground" />
+                  <h2 className="text-base font-bold text-foreground">Kansen &amp; acties</h2>
+                </>
+              )}
+            </div>
+            {!hasSector && (
+              <Badge variant="outline" className="text-[10px]">Kies een sector</Badge>
+            )}
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            {visibleActies.map((actie) => {
-              const Icon = actie.icon;
+          <div className="grid grid-cols-2 gap-3" data-testid="grid-kansen-sector">
+            {(sectorConfig ? sectorConfig.kansen : [
+              { icon: ScanText, label: "Brief begrijpen", sub: "Upload een overheidsbrief", href: "/tools/brief-analyse", color: "text-violet-500", bg: "bg-violet-500/10" },
+              { icon: Globe, label: "Website check", sub: "Hoe vindbaar ben jij?", href: "/tools/website-scan", color: "text-blue-500", bg: "bg-blue-500/10" },
+              { icon: Landmark, label: "Aanbestedingen", sub: "Gemeenteopdrachten", href: "/kansen/aanbestedingen", color: "text-amber-500", bg: "bg-amber-500/10" },
+              { icon: Users, label: "Netwerk", sub: "Ondernemers in jouw regio", href: "/network", color: "text-emerald-500", bg: "bg-emerald-500/10" },
+            ]).map((kans, idx) => {
+              const Icon = kans.icon;
               return (
-                <Link href={actie.href} key={actie.testid}>
+                <Link href={kans.href} key={idx}>
                   <div
                     className="flex items-center gap-3 rounded-xl border bg-background p-3 hover-elevate cursor-pointer"
-                    data-testid={actie.testid}
+                    data-testid={`kans-tile-${idx}`}
                   >
-                    <div className={`rounded-lg p-2 shrink-0 ${actie.bg}`}>
-                      <Icon className={`w-3.5 h-3.5 ${actie.color}`} />
+                    <div className={`rounded-lg p-2 shrink-0 ${kans.bg}`}>
+                      <Icon className={`w-3.5 h-3.5 ${kans.color}`} />
                     </div>
                     <div className="min-w-0">
-                      <p className="text-xs font-semibold text-foreground leading-tight">{actie.label}</p>
-                      <p className="text-[11px] text-muted-foreground leading-tight mt-0.5 truncate">{actie.sub}</p>
+                      <p className="text-xs font-semibold text-foreground leading-tight">{kans.label}</p>
+                      <p className="text-[11px] text-muted-foreground leading-tight mt-0.5 truncate">{kans.sub}</p>
                     </div>
                   </div>
                 </Link>
@@ -658,7 +766,7 @@ export default function DashboardPage() {
             <Link href="/lidmaatschap">
               <div className="mt-3 rounded-xl border border-dashed border-muted-foreground/30 p-3 flex items-center justify-between hover-elevate cursor-pointer" data-testid="banner-upgrade">
                 <div>
-                  <p className="text-xs font-semibold text-foreground">Documenten & AI — Pro</p>
+                  <p className="text-xs font-semibold text-foreground">Documenten &amp; AI — Pro</p>
                   <p className="text-[11px] text-muted-foreground mt-0.5">Bibliotheek, WOO-verzoeken, regelgeving</p>
                 </div>
                 <Bot className="w-5 h-5 text-muted-foreground shrink-0" />
@@ -706,15 +814,94 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* ── WOO Controleslag ─────────────────────────────────────────────────── */}
+      {/* ── Snelle acties ────────────────────────────────────────────────── */}
+      <section data-testid="section-snelle-acties">
+        <div className="rounded-2xl border bg-card p-5">
+          <div className="flex items-center justify-between gap-2 mb-4">
+            <h2 className="text-base font-bold text-foreground">Snelle acties</h2>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {[
+              { icon: ScanText, label: "Brief begrijpen", sub: "Upload een brief", href: "/tools/brief-analyse", color: "text-violet-500", bg: "bg-violet-500/10", testid: "actie-brief" },
+              { icon: Globe, label: "Website check", sub: "Check je vindbaarheid", href: "/tools/website-scan", color: "text-blue-500", bg: "bg-blue-500/10", testid: "actie-website" },
+              { icon: Landmark, label: "Aanbestedingen", sub: "Gemeenteopdrachten", href: "/kansen/aanbestedingen", color: "text-amber-500", bg: "bg-amber-500/10", testid: "actie-aanbestedingen" },
+              { icon: Users, label: "Netwerk", sub: "Ondernemers in regio", href: "/network", color: "text-emerald-500", bg: "bg-emerald-500/10", testid: "actie-netwerk" },
+              ...(isPro ? [
+                { icon: Gavel, label: "WOO-verzoek", sub: "Verzoek indienen", href: "/woo-wizard", color: "text-rose-500", bg: "bg-rose-500/10", testid: "actie-verzoek" },
+                { icon: FolderOpen, label: "Documenten", sub: "Jouw bibliotheek", href: "/woo-bibliotheek", color: "text-orange-500", bg: "bg-orange-500/10", testid: "actie-documenten" },
+              ] : []),
+            ].map((actie) => {
+              const Icon = actie.icon;
+              return (
+                <Link href={actie.href} key={actie.testid}>
+                  <div
+                    className="flex flex-col items-center gap-2 rounded-xl border bg-background p-3 hover-elevate cursor-pointer text-center"
+                    data-testid={actie.testid}
+                  >
+                    <div className={`rounded-lg p-2 ${actie.bg}`}>
+                      <Icon className={`w-4 h-4 ${actie.color}`} />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-foreground leading-tight">{actie.label}</p>
+                      <p className="text-[11px] text-muted-foreground leading-tight mt-0.5">{actie.sub}</p>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Laatste uit Bibliotheek ──────────────────────────────────────── */}
+      {recenteBlogs.length > 0 && (
+        <section data-testid="section-blogs">
+          <div className="rounded-2xl border bg-card p-5">
+            <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
+              <div className="flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-muted-foreground" />
+                <h2 className="text-base font-bold text-foreground">Laatste uit Bibliotheek</h2>
+              </div>
+              <Link href="/bibliotheek">
+                <Button variant="ghost" size="sm" className="text-xs h-7 px-2" data-testid="button-alle-blogs">
+                  Alles lezen <ChevronRight className="h-3 w-3 ml-1" />
+                </Button>
+              </Link>
+            </div>
+            <div className="grid sm:grid-cols-3 gap-3">
+              {recenteBlogs.map((blog) => (
+                <Link href={`/bibliotheek/${blog.slug}`} key={blog.id}>
+                  <div
+                    className="rounded-xl border bg-background p-4 hover-elevate cursor-pointer h-full flex flex-col gap-2"
+                    data-testid={`card-blog-${blog.id}`}
+                  >
+                    {blog.category && (
+                      <Badge variant="secondary" className="text-[10px] self-start">{blog.category}</Badge>
+                    )}
+                    <p className="text-sm font-semibold text-foreground leading-snug line-clamp-2">{blog.title}</p>
+                    {blog.excerpt && (
+                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">{blog.excerpt}</p>
+                    )}
+                    <div className="mt-auto flex items-center gap-1 text-xs font-medium text-primary">
+                      Lees meer <ArrowRight className="w-3 h-3 ml-0.5" />
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── WOO Controleslag ──────────────────────────────────────────────── */}
       {isPro && <WooDossierPanel isPro={isPro} />}
 
-      {/* ── Admin ────────────────────────────────────────────────────────────── */}
+      {/* ── Admin ─────────────────────────────────────────────────────────── */}
       {isAdmin && (
         <section className="space-y-3 pt-2 border-t" data-testid="section-admin">
           <div className="flex items-center gap-2">
             <Shield className="w-4 h-4 text-muted-foreground" />
-            <h2 className="text-sm font-medium text-muted-foreground">Beheer & Admin</h2>
+            <h2 className="text-sm font-medium text-muted-foreground">Beheer &amp; Admin</h2>
           </div>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div className="rounded-xl border bg-card p-4 space-y-3" data-testid="card-admin-export">

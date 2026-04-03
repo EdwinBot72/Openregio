@@ -276,6 +276,17 @@ export async function runMigrations(): Promise<void> {
     await db.execute(sql`ALTER TABLE woo_dossiers ADD COLUMN IF NOT EXISTS dwangsom_contract_accepted_at TIMESTAMPTZ`);
     console.log("[Migration] ✓ woo_dossiers afzender + ingebrekestelling columns ensured");
 
+    // Sector-systeem: sector kolom op users en intel_signalen
+    await db.execute(sql`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS sector VARCHAR(50);
+    `);
+    console.log("[Migration] ✓ users.sector column ensured");
+
+    await db.execute(sql`
+      ALTER TABLE intel_signalen ADD COLUMN IF NOT EXISTS sector VARCHAR(50);
+    `);
+    console.log("[Migration] ✓ intel_signalen.sector column ensured");
+
     console.log("[Migration] Database schema is up to date");
   } catch (error) {
     console.error("[Migration] Error running migrations:", error);

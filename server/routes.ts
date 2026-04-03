@@ -4177,15 +4177,36 @@ Maak het verzoek professioneel en juridisch correct.`;
   app.get("/api/intel/signalen", requireAuth, async (req, res) => {
     try {
       const { categorie, regio } = req.query as { categorie?: string; regio?: string };
+      const user = (req as any).user;
       const signalen = await storage.getIntelSignalen({
         categorie: categorie || undefined,
         regio: regio || undefined,
+        sector: user?.sector || undefined,
         isPublished: true,
       });
       res.json(signalen);
     } catch (err: any) {
       console.error("Intel signalen ophalen fout:", err);
       res.status(500).json({ error: "Kon signalen niet ophalen" });
+    }
+  });
+
+  // PATCH /api/user/sector — sla sector op voor ingelogde gebruiker
+  app.patch("/api/user/sector", requireAuth, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      if (!user?.id) return res.status(401).json({ error: "Niet ingelogd" });
+      const { sector } = req.body;
+      const VALID_SECTORS = ["detailhandel", "horeca", "techniek", "agrarisch"];
+      if (!sector || !VALID_SECTORS.includes(sector)) {
+        return res.status(400).json({ error: "Ongeldige sector" });
+      }
+      const updated = await storage.updateUser(user.id, { sector });
+      if (!updated) return res.status(404).json({ error: "Gebruiker niet gevonden" });
+      res.json({ ok: true, sector: updated.sector });
+    } catch (err: any) {
+      console.error("Sector updaten fout:", err);
+      res.status(500).json({ error: "Kon sector niet opslaan" });
     }
   });
 

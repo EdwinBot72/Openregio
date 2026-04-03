@@ -12,6 +12,8 @@ export interface AuthUser {
     businessName: string | null;
     bio: string | null;
     category: string | null;
+    sector: string | null;
+    region: string | null;
     mustCompleteOnboarding: boolean;
     isAdmin: boolean;
   };

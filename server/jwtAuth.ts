@@ -13,6 +13,8 @@ declare global {
         businessName: string | null;
         bio: string | null;
         category: string | null;
+        sector: string | null;
+        region: string | null;
         mustCompleteOnboarding: boolean;
         isAdmin: boolean;
       };
@@ -163,6 +165,8 @@ function formatUserResponse(user: User) {
     businessName: user.businessName,
     bio: user.bio,
     category: user.category,
+    sector: (user as any).sector ?? null,
+    region: user.region ?? null,
     mustCompleteOnboarding: user.mustCompleteOnboarding,
     isAdmin: user.role === "admin" || user.role === "master",
   };
@@ -578,6 +582,8 @@ function toAuthUser(user: User) {
     businessName: user.businessName,
     bio: user.bio,
     category: user.category,
+    sector: (user as any).sector ?? null,
+    region: user.region ?? null,
     mustCompleteOnboarding: user.mustCompleteOnboarding,
     isAdmin: user.role === "admin" || user.role === "master",
   };

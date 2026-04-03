@@ -279,7 +279,7 @@ export interface IStorage {
   deleteRegioDeal(id: string): Promise<boolean>;
 
   // Intel Signalen
-  getIntelSignalen(opts?: { categorie?: string; regio?: string; isPublished?: boolean }): Promise<IntelSignaal[]>;
+  getIntelSignalen(opts?: { categorie?: string; regio?: string; sector?: string; isPublished?: boolean }): Promise<IntelSignaal[]>;
   getIntelSignaalById(id: string): Promise<IntelSignaal | undefined>;
   getIntelSignaalByExternalId(externalId: string): Promise<IntelSignaal | undefined>;
   createIntelSignaal(signaal: InsertIntelSignaal): Promise<IntelSignaal>;
@@ -361,6 +361,7 @@ export class MemStorage implements IStorage {
       businessName: null,
       bio: null,
       category: null,
+      sector: null,
       region: null,
       visibilitySettings: null,
       mustCompleteOnboarding: userData.mustCompleteOnboarding ?? true,
@@ -391,6 +392,7 @@ export class MemStorage implements IStorage {
       businessName: userData.businessName || null,
       bio: userData.bio || null,
       category: userData.category || null,
+      sector: existing?.sector || null,
       region: existing?.region || null,
       visibilitySettings: existing?.visibilitySettings || null,
       mustCompleteOnboarding: userData.mustCompleteOnboarding ?? true,
@@ -1733,7 +1735,7 @@ export class MemStorage implements IStorage {
   }
 
   // Intel Signalen — MemStorage stubs
-  async getIntelSignalen(_opts?: { categorie?: string; regio?: string; isPublished?: boolean }): Promise<IntelSignaal[]> {
+  async getIntelSignalen(_opts?: { categorie?: string; regio?: string; sector?: string; isPublished?: boolean }): Promise<IntelSignaal[]> {
     return [];
   }
   async getIntelSignaalById(_id: string): Promise<IntelSignaal | undefined> {
@@ -2864,11 +2866,15 @@ class DbStorage implements IStorage {
   }
 
   // Intel Signalen — DbStorage implementation
-  async getIntelSignalen(opts?: { categorie?: string; regio?: string; isPublished?: boolean }): Promise<IntelSignaal[]> {
+  async getIntelSignalen(opts?: { categorie?: string; regio?: string; sector?: string; isPublished?: boolean }): Promise<IntelSignaal[]> {
     const conditions: any[] = [];
     if (opts?.categorie) conditions.push(sql`${intelSignalen.categorie} = ${opts.categorie}`);
     if (opts?.regio) conditions.push(eq(intelSignalen.regio, opts.regio));
     if (opts?.isPublished !== undefined) conditions.push(eq(intelSignalen.isPublished, opts.isPublished));
+    // Sector filter: toon signalen zonder sector (voor iedereen) of met overeenkomende sector
+    if (opts?.sector) {
+      conditions.push(sql`(${intelSignalen.sector} IS NULL OR ${intelSignalen.sector} = ${opts.sector})`);
+    }
     const query = db.select().from(intelSignalen).orderBy(desc(intelSignalen.datum));
     if (conditions.length > 0) {
       return query.where(and(...conditions));

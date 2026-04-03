@@ -21,6 +21,9 @@ export const SUBSCRIPTION_PLANS = ["basic", "pro"] as const;
 export const USER_ROLES = ["member", "master", "admin"] as const;
 
 // Users table - supports both Replit Auth and email/password auth
+export const SECTOR_TYPES = ["detailhandel", "horeca", "techniek", "agrarisch"] as const;
+export type SectorType = typeof SECTOR_TYPES[number];
+
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email").unique().notNull(),
@@ -33,6 +36,7 @@ export const users = pgTable("users", {
   businessName: varchar("business_name"),
   bio: text("bio"),
   category: varchar("category"),
+  sector: varchar("sector", { enum: SECTOR_TYPES }), // Sector for personalized content
   region: varchar("region"), // User's region for REGION_ONLY visibility
   visibilitySettings: text("visibility_settings"), // JSON string with visibility per field
   mustCompleteOnboarding: boolean("must_complete_onboarding").default(true).notNull(),
@@ -1061,6 +1065,7 @@ export const intelSignalen = pgTable("intel_signalen", {
   samenvatting: text("samenvatting").notNull(),
   bron: varchar("bron", { length: 255 }).notNull(),
   regio: varchar("regio", { length: 255 }).notNull().default("Nationaal"),
+  sector: varchar("sector", { enum: SECTOR_TYPES }), // null = geldt voor alle sectoren
   datum: timestamp("datum", { withTimezone: true }).notNull().defaultNow(),
   bronUrl: varchar("bron_url"),
   isPublished: boolean("is_published").notNull().default(true),
