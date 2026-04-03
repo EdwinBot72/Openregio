@@ -206,8 +206,6 @@ export function AppSidebar() {
     "Gebruiker";
   const displayEmail = profile?.email || user?.email || "";
 
-  const visibleNav = MAIN_NAV.filter((s) => !s.proOnly || isPro);
-
   return (
     <Sidebar>
       <SidebarHeader className="p-4 border-b border-sidebar-border">
@@ -230,25 +228,28 @@ export function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
-              {visibleNav.map((section) => (
-                <NavSectionItem
-                  key={section.id}
-                  section={section}
-                  currentPath={location}
-                  isPro={isPro}
-                />
-              ))}
-
-              {!isPro && (
-                <SidebarMenuItem>
-                  <SidebarMenuButton asChild data-testid="link-nav-bibliotheek-upgrade">
-                    <Link href="/lidmaatschap" className="flex items-center gap-2 text-muted-foreground">
-                      <Shield className="h-4 w-4" />
-                      <span className="text-xs">Bibliotheek — Pro</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              )}
+              {MAIN_NAV.map((section) => {
+                if (section.proOnly && !isPro) {
+                  return (
+                    <SidebarMenuItem key={section.id}>
+                      <SidebarMenuButton asChild data-testid={`link-nav-${section.id}-upgrade`}>
+                        <Link href="/lidmaatschap" className="flex items-center gap-2 text-muted-foreground">
+                          <section.icon className="h-4 w-4" />
+                          <span>{section.title} — Pro</span>
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  );
+                }
+                return (
+                  <NavSectionItem
+                    key={section.id}
+                    section={section}
+                    currentPath={location}
+                    isPro={isPro}
+                  />
+                );
+              })}
 
               {user?.isAdmin && (
                 <AdminNavSection currentPath={location} />
