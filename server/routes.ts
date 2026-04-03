@@ -4177,14 +4177,19 @@ Maak het verzoek professioneel en juridisch correct.`;
   app.get("/api/intel/signalen", requireAuth, async (req, res) => {
     try {
       const { categorie, regio } = req.query as { categorie?: string; regio?: string };
-      const user = (req as any).user;
+      const user = req.user!;
+      // Use query param regio if provided, otherwise fall back to user's saved region
+      const effectieveRegio = regio || user.region || undefined;
       const signalen = await storage.getIntelSignalen({
         categorie: categorie || undefined,
-        regio: regio || undefined,
-        sector: user?.sector || undefined,
+        regio: effectieveRegio,
+        sector: user.sector || undefined,
         isPublished: true,
       });
-      res.json(signalen);
+      // Plan-based visibility: basic users see max 10 most recent signals
+      const isPro = user.plan === "pro";
+      const result = isPro ? signalen : signalen.slice(0, 10);
+      res.json(result);
     } catch (err: any) {
       console.error("Intel signalen ophalen fout:", err);
       res.status(500).json({ error: "Kon signalen niet ophalen" });
@@ -4194,7 +4199,7 @@ Maak het verzoek professioneel en juridisch correct.`;
   // PATCH /api/user/sector — sla sector op voor ingelogde gebruiker
   app.patch("/api/user/sector", requireAuth, async (req, res) => {
     try {
-      const user = (req as any).user;
+      const user = req.user!;
       if (!user?.id) return res.status(401).json({ error: "Niet ingelogd" });
       const { sector } = req.body;
       const VALID_SECTORS = ["detailhandel", "horeca", "techniek", "agrarisch"];
@@ -4207,6 +4212,29 @@ Maak het verzoek professioneel en juridisch correct.`;
     } catch (err: any) {
       console.error("Sector updaten fout:", err);
       res.status(500).json({ error: "Kon sector niet opslaan" });
+    }
+  });
+
+  // PATCH /api/user/region — sla regio op voor ingelogde gebruiker
+  app.patch("/api/user/region", requireAuth, async (req, res) => {
+    try {
+      const user = req.user!;
+      if (!user?.id) return res.status(401).json({ error: "Niet ingelogd" });
+      const { region } = req.body;
+      const VALID_REGIONS = [
+        "Groningen", "Friesland", "Drenthe", "Overijssel", "Flevoland",
+        "Gelderland", "Utrecht", "Noord-Holland", "Zuid-Holland",
+        "Zeeland", "Noord-Brabant", "Limburg",
+      ];
+      if (!region || !VALID_REGIONS.includes(region)) {
+        return res.status(400).json({ error: "Ongeldige regio" });
+      }
+      const updated = await storage.updateUser(user.id, { region });
+      if (!updated) return res.status(404).json({ error: "Gebruiker niet gevonden" });
+      res.json({ ok: true, region: updated.region });
+    } catch (err: any) {
+      console.error("Regio updaten fout:", err);
+      res.status(500).json({ error: "Kon regio niet opslaan" });
     }
   });
 

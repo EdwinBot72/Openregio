@@ -119,6 +119,66 @@ function SectorOnboarding() {
   );
 }
 
+// ─── Regio onboarding prompt ───────────────────────────────────────────────
+
+const REGIO_TILES = [
+  "Groningen", "Friesland", "Drenthe", "Overijssel", "Flevoland",
+  "Gelderland", "Utrecht", "Noord-Holland", "Zuid-Holland",
+  "Zeeland", "Noord-Brabant", "Limburg",
+];
+
+function RegioOnboarding() {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+  const [saving, setSaving] = useState<string | null>(null);
+
+  const handleKiesRegio = async (regio: string) => {
+    setSaving(regio);
+    try {
+      await apiRequest("PATCH", "/api/user/region", { region: regio });
+      await qc.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      await qc.invalidateQueries({ queryKey: ["/api/intel/signalen"] });
+      toast({ title: "Regio opgeslagen", description: `Je ziet nu updates voor ${regio}.` });
+    } catch {
+      toast({ title: "Fout", description: "Regio kon niet worden opgeslagen.", variant: "destructive" });
+    } finally {
+      setSaving(null);
+    }
+  };
+
+  return (
+    <section className="rounded-2xl border bg-card p-6" data-testid="section-regio-onboarding">
+      <div className="mb-4">
+        <h2 className="text-base font-bold text-foreground">In welke provincie ben je actief?</h2>
+        <p className="text-sm text-muted-foreground mt-1">
+          Zo filteren we regio-updates, beleid en kansen op jouw werkgebied.
+        </p>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        {REGIO_TILES.map((regio) => {
+          const isSaving = saving === regio;
+          return (
+            <button
+              key={regio}
+              onClick={() => handleKiesRegio(regio)}
+              disabled={!!saving}
+              className="flex items-center gap-1.5 rounded-lg border bg-background px-3 py-2 text-sm font-medium text-foreground hover-elevate transition-all disabled:opacity-60"
+              data-testid={`regio-tile-${regio.toLowerCase().replace(/[^a-z]/g, "-")}`}
+            >
+              {isSaving ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />
+              ) : (
+                <Globe className="h-3.5 w-3.5 text-muted-foreground" />
+              )}
+              {regio}
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
 // ─── WOO dossier panel ────────────────────────────────────────────────────
 
 type WooDossier = {
@@ -429,6 +489,7 @@ export default function DashboardPage() {
   const isPro = user.plan === "pro";
   const isAdmin = user.isAdmin || false;
   const hasSector = !!user.sector;
+  const hasRegio = !!user.region;
   const sectorKey = (hasSector && user.sector && user.sector in SECTOR_CONFIG) ? user.sector as SectorKey : null;
   const sectorConfig = sectorKey ? SECTOR_CONFIG[sectorKey] : null;
 
@@ -471,8 +532,9 @@ export default function DashboardPage() {
   return (
     <div className="space-y-5 pb-8">
 
-      {/* ── Sector onboarding (indien geen sector) ───────────────────────── */}
+      {/* ── Onboarding prompts (sector en/of regio ontbreekt) ───────────── */}
       {!hasSector && <SectorOnboarding />}
+      {!hasRegio && <RegioOnboarding />}
 
       {/* ── Hero greeting ────────────────────────────────────────────────── */}
       <section data-testid="section-greeting">
