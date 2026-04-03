@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import {
   Sidebar,
   SidebarContent,
@@ -35,6 +36,13 @@ import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "wouter";
 import { queryClient } from "@/lib/queryClient";
 import { MAIN_NAV, type NavSection } from "@/config/navigation";
+import {
+  SECTOR_CONFIG,
+  CATEGORIE_META,
+  CATEGORIE_KEYS,
+  getSectorConfig,
+  type SectorKey,
+} from "@/config/sectors";
 
 const adminSubItems = [
   { title: "Admin Cockpit", url: "/admin", icon: ShieldCheck },
@@ -70,7 +78,9 @@ function AdminNavSection({ currentPath }: { currentPath: string }) {
       {open && (
         <SidebarMenuSub>
           {adminSubItems.map((item) => {
-            const subActive = currentPath === item.url || (item.url !== "/admin" && currentPath.startsWith(item.url + "/"));
+            const subActive =
+              currentPath === item.url ||
+              (item.url !== "/admin" && currentPath.startsWith(item.url + "/"));
             return (
               <SidebarMenuSubItem key={item.url}>
                 <SidebarMenuSubButton
@@ -92,20 +102,97 @@ function AdminNavSection({ currentPath }: { currentPath: string }) {
   );
 }
 
+// ── Sector-specifieke kansen-items in de "Ik wil beter worden" sectie ─────────
+
+function SectorKansenItems({
+  sectorKey,
+  currentPath,
+}: {
+  sectorKey: SectorKey;
+  currentPath: string;
+}) {
+  const sectorConf = getSectorConfig(sectorKey);
+  if (!sectorConf) return null;
+
+  const SectorIcon = sectorConf.icon;
+
+  return (
+    <>
+      {/* Groepslabel */}
+      <SidebarMenuSubItem>
+        <div
+          className="flex items-center gap-1.5 px-2 pt-3 pb-1"
+          data-testid="label-kansen-in-de-markt"
+        >
+          <SectorIcon className="h-3 w-3 text-muted-foreground shrink-0" />
+          <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
+            Kansen in de markt
+          </span>
+        </div>
+      </SidebarMenuSubItem>
+
+      {/* 4 sector-categorieën */}
+      {CATEGORIE_KEYS.map((catKey) => {
+        const catMeta = CATEGORIE_META[catKey];
+        const catContent = sectorConf.categorieen[catKey];
+        const CatIcon = catMeta.icon;
+        const subActive =
+          currentPath === catContent.href ||
+          currentPath.startsWith(catContent.href + "/");
+
+        return (
+          <SidebarMenuSubItem key={catKey}>
+            <SidebarMenuSubButton
+              asChild
+              isActive={subActive}
+              data-testid={`link-sector-${catKey}`}
+            >
+              <Link href={catContent.href} className="flex items-center gap-2">
+                <CatIcon className="h-3.5 w-3.5 shrink-0" />
+                <span className="truncate">{catMeta.label}</span>
+              </Link>
+            </SidebarMenuSubButton>
+          </SidebarMenuSubItem>
+        );
+      })}
+    </>
+  );
+}
+
+// ── Generieke nav-sectie ──────────────────────────────────────────────────────
+
 function NavSectionItem({
   section,
   currentPath,
   isPro,
   isMaster,
+  userSector,
 }: {
   section: NavSection;
   currentPath: string;
   isPro: boolean;
   isMaster: boolean;
+  userSector?: SectorKey | null;
 }) {
-  const isActive = section.url
-    ? currentPath === section.url
-    : section.sub?.some((s) => currentPath === s.url || currentPath.startsWith(s.url + "/"));
+  const isBeterWorden = section.id === "beter-worden";
+
+  const sectorActive =
+    isBeterWorden &&
+    userSector &&
+    SECTOR_CONFIG[userSector]
+      ? CATEGORIE_KEYS.some((k) => {
+          const href = SECTOR_CONFIG[userSector].categorieen[k].href;
+          return currentPath === href || currentPath.startsWith(href + "/");
+        })
+      : false;
+
+  const isActive =
+    sectorActive ||
+    (section.url
+      ? currentPath === section.url
+      : section.sub?.some(
+          (s) => currentPath === s.url || currentPath.startsWith(s.url + "/")
+        ));
 
   const [open, setOpen] = useState(isActive ?? false);
 
@@ -149,9 +236,10 @@ function NavSectionItem({
         )}
       </SidebarMenuButton>
 
-      {open && visibleSub && (
+      {open && (
         <SidebarMenuSub>
-          {visibleSub.map((sub) => {
+          {/* Vaste sub-items */}
+          {visibleSub?.map((sub) => {
             const subActive =
               currentPath === sub.url || currentPath.startsWith(sub.url + "/");
             return (
@@ -169,15 +257,30 @@ function NavSectionItem({
               </SidebarMenuSubItem>
             );
           })}
+
+          {/* Sector-specifieke kansen-items voor "Ik wil beter worden" */}
+          {isBeterWorden && userSector && (
+            <SectorKansenItems
+              sectorKey={userSector}
+              currentPath={currentPath}
+            />
+          )}
         </SidebarMenuSub>
       )}
     </SidebarMenuItem>
   );
 }
 
+// ── AppSidebar ────────────────────────────────────────────────────────────────
+
 export function AppSidebar() {
   const { user, profile, isLoading } = useAuth();
   const [location, setLocation] = useLocation();
+
+  const { data: businessProfile } = useQuery<{ sector?: string } | null>({
+    queryKey: ["/api/business-profile/me"],
+    enabled: !!user,
+  });
 
   const handleLogout = async () => {
     try {
@@ -191,6 +294,7 @@ export function AppSidebar() {
 
   const isPro = user?.plan === "pro";
   const isMaster = user?.role === "master" || user?.role === "admin";
+  const userSector = (businessProfile?.sector as SectorKey) || null;
 
   const getInitials = () => {
     if (user?.firstName || user?.lastName) {
@@ -223,13 +327,14 @@ export function AppSidebar() {
             <p className="text-xs text-muted-foreground mt-0.5">Voor lokale ondernemers</p>
           </div>
           {isPro && (
-            <Badge variant="secondary" className="ml-auto text-[10px] shrink-0">Pro</Badge>
+            <Badge variant="secondary" className="ml-auto text-[10px] shrink-0">
+              Pro
+            </Badge>
           )}
         </div>
       </SidebarHeader>
 
       <SidebarContent>
-        {/* ── HOOFDNAVIGATIE ─────────────────────────────────────────── */}
         <SidebarGroup>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -237,8 +342,14 @@ export function AppSidebar() {
                 if (section.proOnly && !isPro) {
                   return (
                     <SidebarMenuItem key={section.id}>
-                      <SidebarMenuButton asChild data-testid={`link-nav-${section.id}-upgrade`}>
-                        <Link href="/lidmaatschap" className="flex items-center gap-2 text-muted-foreground">
+                      <SidebarMenuButton
+                        asChild
+                        data-testid={`link-nav-${section.id}-upgrade`}
+                      >
+                        <Link
+                          href="/lidmaatschap"
+                          className="flex items-center gap-2 text-muted-foreground"
+                        >
                           <section.icon className="h-4 w-4" />
                           <span>{section.title} — Pro</span>
                         </Link>
@@ -253,13 +364,12 @@ export function AppSidebar() {
                     currentPath={location}
                     isPro={isPro}
                     isMaster={isMaster}
+                    userSector={userSector}
                   />
                 );
               })}
 
-              {user?.isAdmin && (
-                <AdminNavSection currentPath={location} />
-              )}
+              {user?.isAdmin && <AdminNavSection currentPath={location} />}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
@@ -283,10 +393,16 @@ export function AppSidebar() {
               </AvatarFallback>
             </Avatar>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate leading-none" data-testid="text-sidebar-name">
+              <p
+                className="text-sm font-medium truncate leading-none"
+                data-testid="text-sidebar-name"
+              >
                 {displayName}
               </p>
-              <p className="text-xs text-muted-foreground truncate mt-0.5" data-testid="text-sidebar-email">
+              <p
+                className="text-xs text-muted-foreground truncate mt-0.5"
+                data-testid="text-sidebar-email"
+              >
                 {displayEmail}
               </p>
             </div>
@@ -296,7 +412,12 @@ export function AppSidebar() {
                   <User className="h-4 w-4" />
                 </Link>
               </Button>
-              <Button size="icon" variant="ghost" data-testid="button-logout" onClick={handleLogout}>
+              <Button
+                size="icon"
+                variant="ghost"
+                data-testid="button-logout"
+                onClick={handleLogout}
+              >
                 <LogOut className="h-4 w-4" />
               </Button>
             </div>
