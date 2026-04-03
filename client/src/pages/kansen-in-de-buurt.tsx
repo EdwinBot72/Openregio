@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { RegionSelect } from "@/components/region-select";
+import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
 import {
   TrendingUp,
@@ -17,7 +17,16 @@ import {
   Star,
   Lightbulb,
   RefreshCw,
+  Search,
+  ChevronDown,
+  X,
 } from "lucide-react";
+import { GEMEENTEN } from "@shared/schema";
+
+// Alle gemeenten gesorteerd op alfabet (eenmalig)
+const GEMEENTEN_GESORTEERD = [...GEMEENTEN].sort((a, b) =>
+  a.localeCompare(b, "nl", { sensitivity: "base" })
+);
 
 type Urgentie = "Hoog" | "Gemiddeld" | "Laag";
 
@@ -93,12 +102,148 @@ function KansKaartSkeleton() {
   );
 }
 
+// ── Searchable gemeente combobox ────────────────────────────────────────────
+
+interface GemeenteComboboxProps {
+  value: string;
+  onChange: (value: string) => void;
+  dark?: boolean;
+}
+
+function GemeenteCombobox({ value, onChange, dark = false }: GemeenteComboboxProps) {
+  const [open, setOpen] = useState(false);
+  const [zoekterm, setZoekterm] = useState("");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const gefilterd = zoekterm.trim().length >= 1
+    ? GEMEENTEN_GESORTEERD.filter((g) =>
+        g.toLowerCase().includes(zoekterm.trim().toLowerCase())
+      )
+    : GEMEENTEN_GESORTEERD;
+
+  const selecteer = (gemeente: string) => {
+    onChange(gemeente);
+    setOpen(false);
+    setZoekterm("");
+  };
+
+  const wis = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onChange("");
+    setZoekterm("");
+  };
+
+  const triggerCls = dark
+    ? "flex items-center justify-between gap-2 w-full rounded-md border border-white/20 bg-white/10 px-3 py-2 text-sm text-white placeholder:text-white/50 cursor-pointer hover-elevate"
+    : "flex items-center justify-between gap-2 w-full rounded-md border bg-background px-3 py-2 text-sm cursor-pointer hover-elevate";
+
+  return (
+    <div className="relative w-full sm:w-80" data-testid="combobox-gemeente">
+      {/* Trigger */}
+      <button
+        type="button"
+        onClick={() => { setOpen((v) => !v); setTimeout(() => inputRef.current?.focus(), 50); }}
+        className={triggerCls}
+        data-testid="button-gemeente-open"
+      >
+        <span className={value ? "" : dark ? "text-white/50" : "text-muted-foreground"}>
+          {value || "Zoek gemeente…"}
+        </span>
+        <span className="flex items-center gap-1 shrink-0">
+          {value && (
+            <span
+              onClick={wis}
+              className={`rounded-full p-0.5 ${dark ? "hover:bg-white/20 text-white/70" : "hover:bg-muted"} cursor-pointer`}
+              data-testid="button-gemeente-wis"
+            >
+              <X className="h-3 w-3" />
+            </span>
+          )}
+          <ChevronDown className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""} ${dark ? "text-white/60" : "text-muted-foreground"}`} />
+        </span>
+      </button>
+
+      {/* Dropdown */}
+      {open && (
+        <div
+          className="absolute z-50 top-full mt-1 left-0 w-full min-w-[280px] rounded-md border bg-popover shadow-md overflow-hidden"
+          data-testid="dropdown-gemeenten"
+        >
+          {/* Zoekbalk */}
+          <div className="flex items-center gap-2 px-3 py-2 border-b">
+            <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+            <Input
+              ref={inputRef}
+              value={zoekterm}
+              onChange={(e) => setZoekterm(e.target.value)}
+              placeholder="Zoek gemeente…"
+              className="h-7 border-0 p-0 text-sm shadow-none focus-visible:ring-0"
+              data-testid="input-gemeente-zoek"
+              onKeyDown={(e) => {
+                if (e.key === "Escape") { setOpen(false); setZoekterm(""); }
+                if (e.key === "Enter" && gefilterd.length === 1) selecteer(gefilterd[0]);
+              }}
+            />
+            {zoekterm && (
+              <button onClick={() => setZoekterm("")} className="shrink-0 text-muted-foreground hover:text-foreground">
+                <X className="h-3.5 w-3.5" />
+              </button>
+            )}
+          </div>
+
+          {/* Lijstresultaten */}
+          <div className="max-h-64 overflow-y-auto" role="listbox">
+            {gefilterd.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                Geen gemeenten gevonden
+              </p>
+            ) : (
+              gefilterd.map((gemeente) => (
+                <button
+                  key={gemeente}
+                  type="button"
+                  role="option"
+                  aria-selected={gemeente === value}
+                  onClick={() => selecteer(gemeente)}
+                  className={`w-full text-left px-4 py-2 text-sm hover-elevate cursor-pointer transition-colors ${
+                    gemeente === value
+                      ? "bg-primary/10 text-primary font-medium"
+                      : "text-foreground"
+                  }`}
+                  data-testid={`option-gemeente-${gemeente.toLowerCase().replace(/\s+/g, "-")}`}
+                >
+                  {gemeente}
+                </button>
+              ))
+            )}
+          </div>
+
+          {/* Footer teller */}
+          <div className="px-3 py-1.5 border-t text-[11px] text-muted-foreground">
+            {gefilterd.length} {gefilterd.length === 1 ? "gemeente" : "gemeenten"}
+            {zoekterm && ` gevonden voor "${zoekterm}"`}
+          </div>
+        </div>
+      )}
+
+      {/* Klik buiten sluit dropdown */}
+      {open && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => { setOpen(false); setZoekterm(""); }}
+        />
+      )}
+    </div>
+  );
+}
+
+// ── Hoofdpagina ─────────────────────────────────────────────────────────────
+
 export default function KansenInDeBuurtPage() {
   usePageTitle("Kansen in de buurt");
   const { user } = useAuth();
   const isPro = user?.plan === "pro" || user?.plan === "master";
 
-  // Auto-fill vanuit bedrijfsprofiel
   const { data: profiel } = useQuery<{ regio?: string } | null>({
     queryKey: ["/api/business-profile/me"],
     enabled: !!user,
@@ -108,17 +253,13 @@ export default function KansenInDeBuurtPage() {
   const [refreshCount, setRefreshCount] = useState(0);
   const actieveGemeente = gemeente || profiel?.regio || "";
 
-  const {
-    data,
-    isLoading,
-    isError,
-    isFetching,
-  } = useQuery<KansenResponse>({
+  const { data, isLoading, isError, isFetching } = useQuery<KansenResponse>({
     queryKey: ["/api/kansen/gemeente", actieveGemeente, refreshCount],
     queryFn: () =>
-      fetch(`/api/kansen/gemeente?gemeente=${encodeURIComponent(actieveGemeente)}${refreshCount > 0 ? "&refresh=true" : ""}`, {
-        credentials: "include",
-      }).then((r) => {
+      fetch(
+        `/api/kansen/gemeente?gemeente=${encodeURIComponent(actieveGemeente)}${refreshCount > 0 ? "&refresh=true" : ""}`,
+        { credentials: "include" }
+      ).then((r) => {
         if (!r.ok) throw new Error("Fout bij ophalen");
         return r.json();
       }),
@@ -135,7 +276,7 @@ export default function KansenInDeBuurtPage() {
 
   return (
     <div className="space-y-6 pb-8">
-      {/* ── Hero ─────────────────────────────────────────────────────────────── */}
+      {/* ── Hero ──────────────────────────────────────────────────────────────── */}
       <div
         className="rounded-3xl bg-gradient-to-br from-primary via-primary/90 to-primary/70 p-7 text-white shadow-lg md:p-9"
         data-testid="section-hero"
@@ -157,22 +298,20 @@ export default function KansenInDeBuurtPage() {
 
         {/* Gemeente-selectie */}
         <div className="mt-6 flex flex-col sm:flex-row gap-3 items-start sm:items-end">
-          <div className="w-full sm:w-80">
+          <div>
             <label className="text-xs font-medium text-white/70 mb-1.5 block">
               Kies een gemeente
             </label>
-            <RegionSelect
+            <GemeenteCombobox
               value={actieveGemeente}
-              onValueChange={setGemeente}
-              placeholder="Selecteer gemeente"
-              data-testid="select-gemeente"
-              className="bg-white/10 border-white/20 text-white data-[placeholder]:text-white/60 [&_svg]:text-white/70 [&>span]:text-white"
+              onChange={setGemeente}
               dark
             />
           </div>
+
           {actieveGemeente && (
             <div className="flex items-center gap-2 text-white/80 text-sm pb-0.5 flex-wrap">
-              <MapPin className="h-4 w-4" />
+              <MapPin className="h-4 w-4 shrink-0" />
               <span data-testid="text-actieve-gemeente">{actieveGemeente}</span>
               {data?.cached && !laden && (
                 <Badge variant="outline" className="text-white/60 border-white/20 text-xs">
@@ -193,7 +332,7 @@ export default function KansenInDeBuurtPage() {
               {laden && refreshCount > 0 && (
                 <span className="text-xs text-white/60 flex items-center gap-1">
                   <RefreshCw className="h-3 w-3 animate-spin" />
-                  Nieuwe kansen laden...
+                  Nieuwe kansen laden…
                 </span>
               )}
             </div>
@@ -201,7 +340,7 @@ export default function KansenInDeBuurtPage() {
         </div>
       </div>
 
-      {/* ── Uitlegblokken ────────────────────────────────────────────────────── */}
+      {/* ── Uitlegblokken ─────────────────────────────────────────────────────── */}
       <div className="grid gap-4 md:grid-cols-3" data-testid="section-uitleg">
         {UITLEG.map((blok) => {
           const Icon = blok.icon;
@@ -222,7 +361,7 @@ export default function KansenInDeBuurtPage() {
         })}
       </div>
 
-      {/* ── Geen gemeente geselecteerd ────────────────────────────────────────── */}
+      {/* ── Geen gemeente geselecteerd ─────────────────────────────────────────── */}
       {!actieveGemeente && (
         <div
           className="rounded-2xl border border-dashed p-10 text-center text-muted-foreground"
@@ -231,13 +370,12 @@ export default function KansenInDeBuurtPage() {
           <MapPin className="h-10 w-10 mx-auto mb-3 opacity-30" />
           <p className="text-sm font-medium mb-1">Kies een gemeente</p>
           <p className="text-xs">
-            Selecteer hierboven een gemeente om kansen te zien — uit alle 342 gemeenten in
-            Nederland.
+            Zoek hierboven een gemeente om kansen te zien — uit alle 342 gemeenten in Nederland.
           </p>
         </div>
       )}
 
-      {/* ── Kansen-kaarten ───────────────────────────────────────────────────── */}
+      {/* ── Kansen-kaarten ────────────────────────────────────────────────────── */}
       {actieveGemeente && (
         <section data-testid="section-kansen">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
@@ -259,14 +397,12 @@ export default function KansenInDeBuurtPage() {
             </Link>
           </div>
 
-          {/* Laadstatus */}
           {laden && (
             <div className="grid gap-4 lg:grid-cols-2">
               {[1, 2, 3, 4].map((n) => <KansKaartSkeleton key={n} />)}
             </div>
           )}
 
-          {/* Fout */}
           {isError && !laden && (
             <Card data-testid="state-error">
               <CardContent className="pt-5 pb-5 text-center">
@@ -277,7 +413,6 @@ export default function KansenInDeBuurtPage() {
             </Card>
           )}
 
-          {/* Fallback-melding */}
           {!laden && !isError && data?.fallback && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3 px-1">
               <Lightbulb className="h-3.5 w-3.5 text-amber-500 shrink-0" />
@@ -285,13 +420,11 @@ export default function KansenInDeBuurtPage() {
             </div>
           )}
 
-          {/* Kaarten */}
           {!laden && !isError && kansen.length > 0 && (
             <div className="grid gap-4 lg:grid-cols-2">
               {kansen.map((kaart, idx) => (
                 <Card key={idx} data-testid={`card-kans-${idx}`}>
                   <CardContent className="pt-5 pb-5 space-y-4">
-                    {/* Koptekst */}
                     <div className="flex items-start justify-between gap-3">
                       <h3
                         className="font-semibold text-base leading-snug"
@@ -302,7 +435,6 @@ export default function KansenInDeBuurtPage() {
                       <UrgentieBadge urgentie={kaart.urgentie} />
                     </div>
 
-                    {/* Waarom */}
                     <p
                       className="text-sm text-muted-foreground leading-relaxed"
                       data-testid={`text-kans-waarom-${idx}`}
@@ -311,7 +443,6 @@ export default function KansenInDeBuurtPage() {
                       {kaart.waarom}
                     </p>
 
-                    {/* Voor wie */}
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
                         Voor wie
@@ -325,7 +456,6 @@ export default function KansenInDeBuurtPage() {
                       </div>
                     </div>
 
-                    {/* Wat jij kunt doen */}
                     <div className="rounded-xl bg-muted/50 p-4 space-y-1">
                       <div className="flex items-center gap-1.5">
                         <Star className="h-3.5 w-3.5 text-primary" />
@@ -341,7 +471,6 @@ export default function KansenInDeBuurtPage() {
                       </p>
                     </div>
 
-                    {/* Acties */}
                     <div className="flex flex-wrap gap-2 pt-1">
                       <Link href="/lokaal-marktplaats">
                         <Button size="sm" data-testid={`button-kans-inspelen-${idx}`}>
@@ -362,7 +491,7 @@ export default function KansenInDeBuurtPage() {
         </section>
       )}
 
-      {/* ── Afsluittekst ─────────────────────────────────────────────────────── */}
+      {/* ── Afsluittekst ──────────────────────────────────────────────────────── */}
       <Card data-testid="section-info">
         <CardContent className="pt-5 pb-5">
           <h3 className="font-semibold mb-2">Snel gezien, snel gebruikt</h3>
@@ -374,7 +503,7 @@ export default function KansenInDeBuurtPage() {
         </CardContent>
       </Card>
 
-      {/* ── Pro upgrade ───────────────────────────────────────────────────────── */}
+      {/* ── Pro upgrade ────────────────────────────────────────────────────────── */}
       {!isPro && (
         <Card data-testid="section-upgrade-cta">
           <CardContent className="pt-5 pb-5">
