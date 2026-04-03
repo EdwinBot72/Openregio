@@ -295,30 +295,35 @@ export default function HomePage() {
                 <span className="inline-block text-xs font-bold uppercase tracking-widest mb-5 px-3 py-1.5 rounded-full" style={{ background: "rgba(31,95,174,.08)", color: "#1f5fae" }}>
                   Voor Nederlandse ondernemers
                 </span>
-                <h1 className="font-black leading-tight mb-5 text-slate-900" style={{ fontSize: "clamp(26px, 3.4vw, 48px)", letterSpacing: "-1.5px", lineHeight: 1.12 }} data-testid="text-hero-title">
-                  De brandstofprijs stijgt. De vergunning kost meer.{" "}
-                  <span style={{ color: "#1f5fae" }}>En de gemeente weet het al — maar hoeft het jou niet te vertellen.</span>
+                <h1 className="font-black leading-tight mb-4 text-slate-900" style={{ fontSize: "clamp(26px, 3.4vw, 48px)", letterSpacing: "-1.5px", lineHeight: 1.12 }} data-testid="text-hero-title">
+                  Waar kun je OpenRegio{" "}
+                  <span style={{ color: "#1f5fae" }}>voor inzetten?</span>
                 </h1>
                 <p className="text-slate-500 text-lg leading-relaxed mb-7" style={{ maxWidth: "44ch" }} data-testid="text-hero-subtitle">
-                  OpenRegio geeft je de informatie, tools en het netwerk om als ondernemer sterker te staan in je regio.
+                  Voor <strong className="text-slate-700">detailhandel, restaurants, techniek en agrarisch</strong> die sneller zichtbaar, beter geïnformeerd en regionaal sterker willen staan.
                 </p>
 
-                {/* ── Drie pijlers — direct zichtbaar ── */}
-                <div className="grid grid-cols-3 gap-3 mb-8" data-testid="strip-pijlers">
+                {/* ── 4 ingangen ── */}
+                <div className="grid grid-cols-2 gap-3 mb-8" data-testid="strip-pijlers">
                   <div className="rounded-xl p-3 border border-slate-100" style={{ background: "rgba(31,95,174,.05)" }}>
                     <BarChart2 className="w-4 h-4 mb-1.5" style={{ color: "#1f5fae" }} />
-                    <p className="text-xs font-black text-slate-800 leading-snug">Zichtbaarheid</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">Beter gevonden worden</p>
+                    <p className="text-xs font-black text-slate-800 leading-snug">Beter gevonden worden</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">Websites & lokale zichtbaarheid</p>
                   </div>
                   <div className="rounded-xl p-3 border border-slate-100" style={{ background: "rgba(242,138,26,.05)" }}>
                     <Gavel className="w-4 h-4 mb-1.5" style={{ color: "#f28a1a" }} />
-                    <p className="text-xs font-black text-slate-800 leading-snug">Regels & signalen</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">Zie wat impact heeft</p>
+                    <p className="text-xs font-black text-slate-800 leading-snug">Grip op wet- en regelgeving</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">Sneller zien wat jou raakt</p>
+                  </div>
+                  <div className="rounded-xl p-3 border border-slate-100" style={{ background: "rgba(124,58,237,.05)" }}>
+                    <TrendingUp className="w-4 h-4 mb-1.5" style={{ color: "#7c3aed" }} />
+                    <p className="text-xs font-black text-slate-800 leading-snug">Regionale kansen zien</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">Signalen & aanbestedingen</p>
                   </div>
                   <div className="rounded-xl p-3 border border-slate-100" style={{ background: "rgba(5,150,105,.05)" }}>
                     <Users className="w-4 h-4 mb-1.5" style={{ color: "#059669" }} />
-                    <p className="text-xs font-black text-slate-800 leading-snug">Samenwerking</p>
-                    <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">Kansen in de regio</p>
+                    <p className="text-xs font-black text-slate-800 leading-snug">Slimmer samenwerken</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5 leading-tight">Community & documenten</p>
                   </div>
                 </div>
 
@@ -352,48 +357,48 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ─── HERKEN JE DIT? ─── */}
-        <section className="py-24" style={{ background: "#0b2240" }} data-testid="section-herken">
+        {/* ─── SECTOREN ─── */}
+        <section className="py-24" style={{ background: "#0b2240" }} data-testid="section-sectoren">
           <div className="max-w-6xl mx-auto px-6">
             <div className="max-w-2xl mx-auto text-center mb-16">
-              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#f28a1a" }}>Herken je dit?</span>
-              <h2 className="font-black mt-4 mb-6 text-white" style={{ fontSize: "clamp(24px, 2.8vw, 40px)", letterSpacing: "-0.6px", lineHeight: 1.2 }} data-testid="text-herken-title">
-                Elke week missen ondernemers kansen die gewoon openbaar zijn.
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#f28a1a" }}>Kies jouw sector</span>
+              <h2 className="font-black mt-4 mb-6 text-white" style={{ fontSize: "clamp(24px, 2.8vw, 40px)", letterSpacing: "-0.6px", lineHeight: 1.2 }} data-testid="text-sectoren-title">
+                OpenRegio werkt voor jouw branche.
               </h2>
               <p className="leading-relaxed" style={{ fontSize: "16px", color: "rgba(255,255,255,0.65)" }}>
-                Niet omdat ze niet willen — maar omdat niemand ze erop wijst. Dat is precies wat OpenRegio verandert.
+                Elke sector heeft zijn eigen uitdagingen. OpenRegio geeft je de tools, informatie en het netwerk die daarbij passen.
               </p>
             </div>
 
-            {/* 4 concrete herkenningspunten */}
+            {/* 4 sectoren */}
             <div className="grid md:grid-cols-2 gap-5 mb-16">
               {[
                 {
-                  Icon: FileText,
-                  label: "Brief van de gemeente",
-                  text: "Je krijgt een aanslag of brief die je niet begrijpt. Je weet niet of je bezwaar kunt maken — of hoe.",
+                  Icon: BarChart2,
+                  label: "Detailhandel",
+                  text: "Voor winkels en concepten die zichtbaarheid, overzicht en lokale slagkracht willen.",
                 },
                 {
-                  Icon: TrendingDown,
-                  label: "Brandstof en kosten stijgen",
-                  text: "De kosten gaan omhoog, maar of er subsidie of compensatie beschikbaar is? Niemand wijst je erop.",
+                  Icon: FileText,
+                  label: "Restaurants & horeca",
+                  text: "Voor zaken die online sterker willen staan en sneller willen snappen wat praktisch en juridisch speelt.",
                 },
                 {
                   Icon: Gavel,
-                  label: "Vergunning aanvragen",
-                  text: "Je wil iets uitbreiden of veranderen, maar de regels zijn onduidelijk en het kost je weken om het uit te zoeken.",
+                  label: "Techniek",
+                  text: "Voor technische bedrijven die professioneel zichtbaar willen zijn en sneller overzicht willen in relevante regels en kansen.",
                 },
                 {
-                  Icon: AlertTriangle,
-                  label: "Aanbesteding gemist",
-                  text: "Een collega vertelt dat er een gemeenteopdracht is gegund. Je wist er niks van.",
+                  Icon: TrendingDown,
+                  label: "Agrarisch",
+                  text: "Voor agrarische ondernemers die beter gevonden willen worden en grip willen houden op ontwikkelingen en regelgeving.",
                 },
               ].map(({ Icon, label, text }, i) => (
                 <div
                   key={i}
                   className="rounded-2xl p-7"
                   style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
-                  data-testid={`herken-item-${i}`}
+                  data-testid={`sector-item-${i}`}
                 >
                   <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(242,138,26,0.2)" }}>
                     <Icon className="w-5 h-5" style={{ color: "#fdba74" }} />
@@ -416,41 +421,32 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ─── WAT OPENREGIO DOET ─── */}
+        {/* ─── GEBRUIK ─── */}
         <section id="oplossingen" className="py-24" style={{ background: "#f8fafd" }} data-testid="section-oplossingen">
           <div className="max-w-5xl mx-auto px-6">
             <div className="text-center mb-14">
-              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#1f5fae" }}>Wat je kunt doen</span>
+              <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#1f5fae" }}>Waar zet je het voor in?</span>
               <h2 className="font-black mt-3 text-slate-900" style={{ fontSize: "clamp(22px, 2.8vw, 36px)", letterSpacing: "-0.6px" }} data-testid="text-oplossingen-title">
-                De gemeente heeft informatie die jij nodig hebt. Wij helpen je die te krijgen.
+                Waar zetten ondernemers OpenRegio voor in?
               </h2>
+              <p className="text-slate-500 mt-3 text-base max-w-xl mx-auto">
+                Niet feature-first, maar op basis van wat je wil bereiken.
+              </p>
             </div>
-            <div className="grid md:grid-cols-3 gap-8" data-testid="grid-pijlers">
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" data-testid="grid-pijlers">
               {[
-                {
-                  accent: "#1f5fae",
-                  icon: Gavel,
-                  title: "Informatie die de gemeente verplicht is te geven",
-                  desc: "Via een WOO-verzoek kun je alle relevante overheidsinformatie opvragen. Besluiten, vergunningen, contracten — ook die over jouw straat of branche. Wij helpen je dat te doen, stap voor stap.",
-                },
-                {
-                  accent: "#f28a1a",
-                  icon: AlertTriangle,
-                  title: "Signalen die jou raken, voordat het te laat is",
-                  desc: "Regelgeving, aanbestedingen en gemeentebesluiten in jouw regio — gefilterd op wat relevant is voor jouw bedrijf. Zodat je niet te laat reageert op iets dat al weken geleden besloten is.",
-                },
-                {
-                  accent: "#059669",
-                  icon: Users,
-                  title: "Een netwerk van ondernemers die hetzelfde meemaken",
-                  desc: "Je staat er niet alleen voor. Andere ondernemers in jouw regio hebben dezelfde vragen, dezelfde frustraties en dezelfde kansen. Samen sta je sterker tegenover de overheid.",
-                },
+                { accent: "#1f5fae", icon: BarChart2,    title: "Ik wil een betere website",                     desc: "Zichtbaarheid en uitstraling verbeteren voor jouw lokale onderneming." },
+                { accent: "#1f5fae", icon: MapPin,        title: "Ik wil beter gevonden worden in mijn regio",    desc: "Online aanwezigheid opbouwen zodat klanten jou vinden, niet de concurrent." },
+                { accent: "#f28a1a", icon: Gavel,         title: "Ik wil snappen welke regels mijn bedrijf raken", desc: "Wet- en regelgeving begrijpen zonder uren uitzoekwerk." },
+                { accent: "#f28a1a", icon: FileText,      title: "Ik wil documenten en informatie op één plek",    desc: "WOO-dossiers, vergunningen en overheidsinformatie overzichtelijk bijhouden." },
+                { accent: "#7c3aed", icon: TrendingUp,    title: "Ik wil kansen en ontwikkelingen sneller zien",   desc: "Signalen, aanbestedingen en subsidies in jouw regio niet meer missen." },
+                { accent: "#059669", icon: Users,         title: "Ik wil regionaal samenwerken",                   desc: "Andere ondernemers vinden die dezelfde uitdagingen en kansen ervaren." },
               ].map((p, i) => (
-                <div key={i} className="bg-white rounded-2xl p-7 border border-slate-100" style={{ boxShadow: "0 2px 16px rgba(0,0,0,.05)" }} data-testid={`card-pijler-${i}`}>
-                  <div className="w-12 h-12 rounded-xl flex items-center justify-center mb-5" style={{ background: `${p.accent}14`, color: p.accent }}>
-                    <p.icon className="w-6 h-6" />
+                <div key={i} className="bg-white rounded-2xl p-6 border border-slate-100" style={{ boxShadow: "0 2px 12px rgba(0,0,0,.04)" }} data-testid={`card-pijler-${i}`}>
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-4" style={{ background: `${p.accent}14`, color: p.accent }}>
+                    <p.icon className="w-5 h-5" />
                   </div>
-                  <h3 className="font-black text-slate-900 mb-3" style={{ fontSize: "17px", lineHeight: 1.3 }}>{p.title}</h3>
+                  <h3 className="font-black text-slate-900 mb-2" style={{ fontSize: "15px", lineHeight: 1.35 }}>{p.title}</h3>
                   <p className="text-slate-500 text-sm leading-relaxed">{p.desc}</p>
                 </div>
               ))}

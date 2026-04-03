@@ -1,0 +1,197 @@
+Ja, dit is een slimme richting.
+
+De kracht van die opzet is niet de stijl zelf, maar de **logica**:
+je komt binnen op **“waarvoor kun je ons gebruiken?”**, daarna kies je je route, en pas daarna ga je dieper. Op Notaris.nl zie je ook die combinatie van een duidelijke hoofdboodschap, thematische ingangen en directe actieblokken. Daarnaast werken ze met hoofdthema’s die meteen scanbaar zijn en met snelle routes naar concrete acties. ([Notaris.nl][1])
+
+Voor OpenRegio zou ik die logica zo vertalen:
+
+# Homepage-opbouw
+
+## 1. Bovenaan: duidelijke hoofdbelofte
+
+**Waar kun je OpenRegio voor inzetten?**
+
+Sub:
+Voor **detailhandel, restaurants, techniek en agrarisch** die beter gevonden willen worden, sneller grip willen op wet- en regelgeving en sterker willen ondernemen in hun regio.
+
+Daaronder 3 tot 4 grote ingangen, geen lange lap tekst.
+
+### Grote ingangen
+
+* **Beter gevonden worden**
+* **Grip op wet- en regelgeving**
+* **Regionale kansen zien**
+* **Slimmer samenwerken**
+
+Dat is je eerste scanlaag.
+
+---
+
+## 2. Daarna: sectoren
+
+Net als bij Notaris.nl moet de bezoeker daarna makkelijk door naar een herkenbare categorie. Hun homepage gebruikt duidelijke onderwerp-ingangen zoals “Wonen”, “Ondernemen” en “Bij overlijden”, wat die scanbaarheid sterk maakt. ([Notaris.nl][1])
+
+Bij jullie wordt dat:
+
+## Sectoren
+
+* **Detailhandel**
+* **Restaurants**
+* **Techniek**
+* **Agrarisch**
+
+Met onder elke kaart 1 regel:
+
+**Detailhandel**
+Voor winkels en concepten die zichtbaarheid, overzicht en lokale slagkracht willen.
+
+**Restaurants**
+Voor zaken die online sterker willen staan en sneller willen snappen wat praktisch en juridisch speelt.
+
+**Techniek**
+Voor technische bedrijven die professioneel zichtbaar willen zijn en sneller overzicht willen in relevante regels en kansen.
+
+**Agrarisch**
+Voor agrarische ondernemers die beter gevonden willen worden en grip willen houden op ontwikkelingen en regelgeving.
+
+---
+
+## 3. Daarna: directe gebruikssituaties
+
+Dit is het stuk “waar kun je ons voor inzetten?” in gewone taal.
+
+## Waar zetten ondernemers ons voor in?
+
+* **Ik wil een betere website**
+* **Ik wil beter gevonden worden in mijn regio**
+* **Ik wil snappen welke regels mijn bedrijf raken**
+* **Ik wil documenten en informatie op één plek**
+* **Ik wil kansen en ontwikkelingen sneller zien**
+* **Ik wil regionaal samenwerken**
+
+Dus niet feature-first, maar vraag-first.
+
+---
+
+## 4. Daarna: hoe we dat mogelijk maken
+
+Hier noem je pas de motor.
+
+## Hoe OpenRegio dat mogelijk maakt
+
+* Websites
+* Wet- en regelgeving
+* Community
+* Chat
+* Documenten
+* Kansen
+* Marktplaats
+* Affiliate
+* Coöperatie
+
+Op Notaris.nl zie je ook dat ze naast onderwerp-ingangen werken met directe hulpmiddelen zoals “Zoek een notaris”, “Is er een testament?” en “Notaristelefoon”. Dat principe kun je bij OpenRegio vertalen naar praktische hulpmiddelen onder je kernverhaal. ([Notaris.nl][1])
+
+Dus bijvoorbeeld:
+
+## Direct naar
+
+* Start de Basischeck
+* Bekijk sectoren
+* Bekijk websites
+* Bekijk regelgeving
+* Bekijk kansen
+* Meld je aan
+
+---
+
+# Beste layout-volgorde voor jullie
+
+## Blok 1
+
+**Waar kun je OpenRegio voor inzetten?**
+
+4 grote kaarten:
+
+* Beter gevonden worden
+* Grip op regels
+* Kansen zien
+* Slimmer samenwerken
+
+## Blok 2
+
+**Sectoren**
+
+* Detailhandel
+* Restaurants
+* Techniek
+* Agrarisch
+
+## Blok 3
+
+**Direct regelen / direct starten**
+
+* Basischeck
+* Website verbeteren
+* Regelgeving bekijken
+* Documenten
+* Aanmelden
+
+## Blok 4
+
+**Hoe we werken**
+
+Korte uitleg + ecosysteemblokken
+
+## Blok 5
+
+**Lidmaatschap / volgende stap**
+
+---
+
+# Wat dit fixt
+
+Hiermee wordt de site in één oogopslag duidelijk:
+
+1. **Wat doen jullie?**
+2. **Voor wie doen jullie dat?**
+3. **Waar kan ik direct beginnen?**
+
+Dat is precies waarom die andere site logisch voelt: eerst onderwerp, dan route, dan actie. ([Notaris.nl][1])
+
+# Mijn scherpste versie van de bovenkant
+
+## Kop
+
+**Waar kun je OpenRegio voor inzetten?**
+
+## Sub
+
+Voor **detailhandel, restaurants, techniek en agrarisch** die sneller zichtbaar, beter geïnformeerd en regionaal sterker willen staan.
+
+## 4 hoofdkaarten
+
+**Beter gevonden worden**
+Websites, online uitstraling en lokale zichtbaarheid.
+
+**Grip op wet- en regelgeving**
+Sneller zien wat jouw bedrijf raakt.
+
+**Regionale kansen**
+Ontwikkelingen, signalen en mogelijkheden in je regio.
+
+**Slimmer samenwerken**
+Community, documenten, chat en marktplaats.
+
+## Daarna meteen:
+
+**Kies jouw sector**
+
+* Detailhandel
+* Restaurants
+* Techniek
+* Agrarisch
+
+Als je wilt, zet ik dit nu om naar een complete homepage-wireframe met exacte koppen en korte teksten per blok.
+
+[1]: https://www.notaris.nl/ "                Je regelt het bij de notaris | Notaris.nl
+                "
