@@ -2871,9 +2871,12 @@ class DbStorage implements IStorage {
     if (opts?.categorie) conditions.push(sql`${intelSignalen.categorie} = ${opts.categorie}`);
     if (opts?.regio) conditions.push(eq(intelSignalen.regio, opts.regio));
     if (opts?.isPublished !== undefined) conditions.push(eq(intelSignalen.isPublished, opts.isPublished));
-    // Sector filter: toon signalen zonder sector (voor iedereen) of met overeenkomende sector
+    // Sector filter:
+    // - NULL   = zichtbaar voor iedereen (ook zonder sector)
+    // - "alle" = zichtbaar voor alle sectored users
+    // - specifieke sector = alleen voor die sector
     if (opts?.sector) {
-      conditions.push(sql`(${intelSignalen.sector} IS NULL OR ${intelSignalen.sector} = ${opts.sector})`);
+      conditions.push(sql`(${intelSignalen.sector} IS NULL OR ${intelSignalen.sector} = 'alle' OR ${intelSignalen.sector} = ${opts.sector})`);
     }
     const query = db.select().from(intelSignalen).orderBy(desc(intelSignalen.datum));
     if (conditions.length > 0) {

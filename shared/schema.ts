@@ -24,6 +24,12 @@ export const USER_ROLES = ["member", "master", "admin"] as const;
 export const SECTOR_TYPES = ["detailhandel", "horeca", "techniek", "agrarisch"] as const;
 export type SectorType = typeof SECTOR_TYPES[number];
 
+// Extended enum for intel_signalen.sector — includes "alle" to mark signals visible to all sectored users.
+// NULL = zichtbaar voor iedereen (ook niet-geselecteerde sector); "alle" = zichtbaar voor alle sector-gebruikers;
+// sector-waarde = alleen voor die sector.
+export const SIGNAAL_SECTOR_TYPES = [...SECTOR_TYPES, "alle"] as const;
+export type SignaalSectorType = typeof SIGNAAL_SECTOR_TYPES[number];
+
 export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email").unique().notNull(),
@@ -1065,7 +1071,7 @@ export const intelSignalen = pgTable("intel_signalen", {
   samenvatting: text("samenvatting").notNull(),
   bron: varchar("bron", { length: 255 }).notNull(),
   regio: varchar("regio", { length: 255 }).notNull().default("Nationaal"),
-  sector: varchar("sector", { enum: SECTOR_TYPES }), // null = geldt voor alle sectoren
+  sector: varchar("sector", { enum: SIGNAAL_SECTOR_TYPES }), // null = iedereen; "alle" = alle sectored users; specifieke sector = alleen die sector
   datum: timestamp("datum", { withTimezone: true }).notNull().defaultNow(),
   bronUrl: varchar("bron_url"),
   isPublished: boolean("is_published").notNull().default(true),
