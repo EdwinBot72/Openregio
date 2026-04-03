@@ -56,16 +56,6 @@ const KEUZE_BLOKKEN = [
     ring: "ring-emerald-200 dark:ring-emerald-900/60",
     testid: "keuze-kansen",
   },
-  {
-    icon: Building2,
-    label: "Ik wil mijn profiel live zetten",
-    sub: "Zichtbaar worden voor andere ondernemers",
-    href: "/bedrijfsprofiel",
-    color: "text-amber-600 dark:text-amber-400",
-    bg: "bg-amber-50 dark:bg-amber-950/40",
-    ring: "ring-amber-200 dark:ring-amber-900/60",
-    testid: "keuze-profiel",
-  },
 ];
 
 const STAPPEN = [
