@@ -117,17 +117,18 @@ function SectorKansenItems({
 
   return (
     <>
-      {/* Groepslabel */}
+      {/* Groepslabel — klikbaar naar /kansen-markt */}
       <SidebarMenuSubItem>
-        <div
-          className="flex items-center gap-1.5 px-2 pt-3 pb-1"
+        <SidebarMenuSubButton
+          asChild
+          isActive={currentPath === "/kansen-markt"}
           data-testid="label-kansen-in-de-markt"
         >
-          <SectorIcon className="h-3 w-3 text-muted-foreground shrink-0" />
-          <span className="text-[10px] font-semibold uppercase tracking-widest text-muted-foreground">
-            Kansen in de markt
-          </span>
-        </div>
+          <Link href="/kansen-markt" className="flex items-center gap-1.5">
+            <SectorIcon className="h-3.5 w-3.5 shrink-0" />
+            <span className="font-semibold">Kansen in de markt</span>
+          </Link>
+        </SidebarMenuSubButton>
       </SidebarMenuSubItem>
 
       {/* 4 sector-categorieën */}
