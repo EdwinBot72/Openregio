@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { useAuth } from "@/hooks/useAuth";
 import { Input } from "@/components/ui/input";
 import { Link } from "wouter";
 import {
@@ -121,6 +122,7 @@ function computeScore(antwoord: string, seed: string): number {
 
 export default function HomePage() {
   usePageTitle("Lokale samenwerking voor ondernemers");
+  const { isAuthenticated } = useAuth();
   const [showCookieBanner, setShowCookieBanner] = useState(false);
   const [openFaq, setOpenFaq] = useState<number | null>(null);
 
@@ -646,8 +648,33 @@ export default function HomePage() {
                     </div>
                   </div>
 
+                  {/* ── Alles hieronder alleen zichtbaar als ingelogd ── */}
+                  {!isAuthenticated && (
+                    <div className="px-7 py-10 text-center border-t border-slate-100">
+                      <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "rgba(31,95,174,.08)", color: "#1f5fae" }}>
+                        <Lock className="w-6 h-6" />
+                      </div>
+                      <p className="font-black text-slate-900 text-lg mb-1">Volledig rapport beschikbaar na inloggen</p>
+                      <p className="text-slate-400 text-sm mb-6 max-w-xs mx-auto">
+                        Je regio-analyse staat klaar. Log in of maak een gratis account aan om het volledige rapport te lezen.
+                      </p>
+                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        <Link href="/register">
+                          <button className="px-6 py-3 rounded-xl text-sm font-black text-white w-full sm:w-auto" style={{ background: "#f28a1a" }} data-testid="button-rapport-register">
+                            Gratis account aanmaken
+                          </button>
+                        </Link>
+                        <Link href="/login">
+                          <button className="px-6 py-3 rounded-xl text-sm font-bold text-slate-600 border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors w-full sm:w-auto" data-testid="button-rapport-login">
+                            Al lid? Inloggen
+                          </button>
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+
                   {/* Google Bedrijfsprofiel kaart — alleen tonen als er Places-data is */}
-                  {placesData && (
+                  {isAuthenticated && placesData && (
                     <div className="px-7 py-5 border-t border-slate-100">
                       <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Google Bedrijfsprofiel</p>
                       {!placesData.geconfigureerd ? (
@@ -751,96 +778,112 @@ export default function HomePage() {
                     </div>
                   )}
 
-                  {/* Analyse secties */}
-                  <div className="px-7 py-5">
-                    <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">
-                      {wizardMode === "regio" ? "Regio-analyse" : "Regelgeving-analyse"}
-                    </p>
-                    <div className="space-y-3" data-testid="grid-findings">
-                      {sections.length > 0 ? sections.map((s, i) => {
-                        const Icon = s.icon;
-                        return (
-                          <div key={i} className="rounded-xl p-4" style={{ background: s.bg }} data-testid={`finding-${i}`}>
-                            <div className="flex items-center gap-2 mb-1.5">
-                              <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: s.color }} />
-                              <span className="text-xs font-black uppercase tracking-widest" style={{ color: s.color }}>{s.tag}</span>
+                  {/* Analyse secties — alleen voor ingelogde gebruikers */}
+                  {isAuthenticated && (
+                    <>
+                      <div className="px-7 py-5 border-t border-slate-100">
+                        <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">
+                          {wizardMode === "regio" ? "Regio-analyse" : "Regelgeving-analyse"}
+                        </p>
+                        <div className="space-y-3" data-testid="grid-findings">
+                          {sections.length > 0 ? sections.map((s, i) => {
+                            const Icon = s.icon;
+                            return (
+                              <div key={i} className="rounded-xl p-4" style={{ background: s.bg }} data-testid={`finding-${i}`}>
+                                <div className="flex items-center gap-2 mb-1.5">
+                                  <Icon className="w-3.5 h-3.5 flex-shrink-0" style={{ color: s.color }} />
+                                  <span className="text-xs font-black uppercase tracking-widest" style={{ color: s.color }}>{s.tag}</span>
+                                </div>
+                                <p className="text-sm text-slate-700 leading-relaxed">{s.content}</p>
+                              </div>
+                            );
+                          }) : (
+                            <div className="rounded-xl p-4 text-sm text-slate-500 leading-relaxed" style={{ background: "#f8fafd" }}>
+                              {antwoord}
                             </div>
-                            <p className="text-sm text-slate-700 leading-relaxed">{s.content}</p>
-                          </div>
-                        );
-                      }) : (
-                        <div className="rounded-xl p-4 text-sm text-slate-500 leading-relaxed" style={{ background: "#f8fafd" }}>
-                          {antwoord}
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Vergrendelde Pro-inzichten */}
+                      <div className="px-7 pb-5">
+                        <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Pro-inzichten</p>
+                        <div className="space-y-2.5">
+                          {(wizardMode === "regio" ? [
+                            `Concurrentieanalyse: wie zijn de 3 sterkste spelers als ${field1} in ${field2} en wat doen zij beter?`,
+                            `Subsidie- en fondsencheck: welke gemeentelijke regelingen zijn beschikbaar voor ${field1} in ${field2}?`,
+                          ] : [
+                            `Historisch handhavingsoverzicht: hoe heeft de gemeente dit onderwerp de afgelopen 2 jaar gehandhaafd?`,
+                            `Bezwaar- en beroepsmogelijkheden: welke stappen kun je zetten als je het niet eens bent met een beslissing?`,
+                          ]).map((text, i) => (
+                            <div
+                              key={i}
+                              className="relative flex items-center gap-3 p-3.5 rounded-xl overflow-hidden cursor-pointer group"
+                              style={{ border: "1.5px dashed #e2e8f0", background: "#f8fafd" }}
+                              onClick={() => window.location.href = "/lidmaatschap"}
+                              data-testid={`locked-insight-${i}`}
+                            >
+                              <Lock className="w-4 h-4 flex-shrink-0 text-slate-400" />
+                              <span className="text-sm text-slate-400 select-none" style={{ filter: "blur(3.5px)" }}>{text}</span>
+                              <span className="ml-auto text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: "rgba(31,95,174,.1)", color: "#1f5fae" }}>
+                                Pro
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Volledige tekst toggle */}
+                      {antwoord && (
+                        <div className="border-t border-slate-100">
+                          <button
+                            className="w-full flex items-center justify-between px-7 py-3.5 text-sm font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-colors"
+                            onClick={() => setShowFullText(!showFullText)}
+                            data-testid="button-toggle-full-text"
+                          >
+                            <span>Volledige analyse bekijken</span>
+                            {showFullText ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                          </button>
+                          {showFullText && (
+                            <div className="px-7 pb-6 text-sm text-slate-500 leading-relaxed border-t border-slate-50" data-testid="text-full-antwoord">
+                              {antwoord}
+                            </div>
+                          )}
                         </div>
                       )}
-                    </div>
-                  </div>
-
-                  {/* Vergrendelde Pro-inzichten */}
-                  <div className="px-7 pb-5">
-                    <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-3">Pro-inzichten</p>
-                    <div className="space-y-2.5">
-                      {(wizardMode === "regio" ? [
-                        `Concurrentieanalyse: wie zijn de 3 sterkste spelers als ${field1} in ${field2} en wat doen zij beter?`,
-                        `Subsidie- en fondsencheck: welke gemeentelijke regelingen zijn beschikbaar voor ${field1} in ${field2}?`,
-                      ] : [
-                        `Historisch handhavingsoverzicht: hoe heeft de gemeente dit onderwerp de afgelopen 2 jaar gehandhaafd?`,
-                        `Bezwaar- en beroepsmogelijkheden: welke stappen kun je zetten als je het niet eens bent met een beslissing?`,
-                      ]).map((text, i) => (
-                        <div
-                          key={i}
-                          className="relative flex items-center gap-3 p-3.5 rounded-xl overflow-hidden cursor-pointer group"
-                          style={{ border: "1.5px dashed #e2e8f0", background: "#f8fafd" }}
-                          onClick={() => window.location.href = "/lidmaatschap"}
-                          data-testid={`locked-insight-${i}`}
-                        >
-                          <Lock className="w-4 h-4 flex-shrink-0 text-slate-400" />
-                          <span className="text-sm text-slate-400 select-none" style={{ filter: "blur(3.5px)" }}>{text}</span>
-                          <span className="ml-auto text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: "rgba(31,95,174,.1)", color: "#1f5fae" }}>
-                            Pro
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Volledige tekst toggle */}
-                  {antwoord && (
-                    <div className="border-t border-slate-100">
-                      <button
-                        className="w-full flex items-center justify-between px-7 py-3.5 text-sm font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-colors"
-                        onClick={() => setShowFullText(!showFullText)}
-                        data-testid="button-toggle-full-text"
-                      >
-                        <span>Volledige analyse bekijken</span>
-                        {showFullText ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                      </button>
-                      {showFullText && (
-                        <div className="px-7 pb-6 text-sm text-slate-500 leading-relaxed border-t border-slate-50" data-testid="text-full-antwoord">
-                          {antwoord}
-                        </div>
-                      )}
-                    </div>
+                    </>
                   )}
                 </div>
 
                 {/* CTA */}
-                <div className="bg-white rounded-2xl p-6 text-center" style={{ boxShadow: "0 4px 24px rgba(0,0,0,.07)", border: "1.5px solid rgba(31,95,174,.12)" }} data-testid="card-rapport-cta">
-                  <p className="font-black text-slate-900 mb-1" style={{ fontSize: "18px" }}>Ontgrendel het volledige rapport</p>
-                  <p className="text-slate-400 text-sm mb-5">Krijg toegang tot alle Pro-inzichten, persoonlijke signalen en je volledige regionaal profiel.</p>
-                  <Link href="/lidmaatschap">
-                    <button className="w-full py-4 rounded-xl text-base font-black text-white transition-opacity hover:opacity-90 mb-3" style={{ background: "#f28a1a" }} data-testid="button-rapport-cta">
-                      Bekijk lidmaatschap <ChevronRight className="w-4 h-4 inline" />
+                {isAuthenticated ? (
+                  <div className="bg-white rounded-2xl p-6 text-center" style={{ boxShadow: "0 4px 24px rgba(0,0,0,.07)", border: "1.5px solid rgba(31,95,174,.12)" }} data-testid="card-rapport-cta">
+                    <p className="font-black text-slate-900 mb-1" style={{ fontSize: "18px" }}>Ontgrendel het volledige rapport</p>
+                    <p className="text-slate-400 text-sm mb-5">Krijg toegang tot alle Pro-inzichten, persoonlijke signalen en je volledige regionaal profiel.</p>
+                    <Link href="/lidmaatschap">
+                      <button className="w-full py-4 rounded-xl text-base font-black text-white transition-opacity hover:opacity-90 mb-3" style={{ background: "#f28a1a" }} data-testid="button-rapport-cta">
+                        Bekijk lidmaatschap <ChevronRight className="w-4 h-4 inline" />
+                      </button>
+                    </Link>
+                    <button
+                      onClick={resetWizard}
+                      className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-600 transition-colors mx-auto"
+                      data-testid="button-rapport-reset"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" /> Doe de check opnieuw
                     </button>
-                  </Link>
-                  <button
-                    onClick={resetWizard}
-                    className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-600 transition-colors mx-auto"
-                    data-testid="button-rapport-reset"
-                  >
-                    <RotateCcw className="w-3.5 h-3.5" /> Doe de check opnieuw
-                  </button>
-                </div>
+                  </div>
+                ) : (
+                  <div className="text-center">
+                    <button
+                      onClick={resetWizard}
+                      className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-600 transition-colors mx-auto"
+                      data-testid="button-rapport-reset"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" /> Doe de check opnieuw
+                    </button>
+                  </div>
+                )}
 
               </div>
             </div>
