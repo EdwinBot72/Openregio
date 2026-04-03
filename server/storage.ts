@@ -279,7 +279,8 @@ export interface IStorage {
   deleteRegioDeal(id: string): Promise<boolean>;
 
   // Intel Signalen
-  getIntelSignalen(opts?: { categorie?: string; regio?: string; sector?: string; isPublished?: boolean }): Promise<IntelSignaal[]>;
+  // sector: string = filter to this sector + globals; null = only global signals; undefined = no sector filter (admin)
+  getIntelSignalen(opts?: { categorie?: string; regio?: string; sector?: string | null; isPublished?: boolean }): Promise<IntelSignaal[]>;
   getIntelSignaalById(id: string): Promise<IntelSignaal | undefined>;
   getIntelSignaalByExternalId(externalId: string): Promise<IntelSignaal | undefined>;
   createIntelSignaal(signaal: InsertIntelSignaal): Promise<IntelSignaal>;
@@ -1735,7 +1736,7 @@ export class MemStorage implements IStorage {
   }
 
   // Intel Signalen — MemStorage stubs
-  async getIntelSignalen(_opts?: { categorie?: string; regio?: string; sector?: string; isPublished?: boolean }): Promise<IntelSignaal[]> {
+  async getIntelSignalen(_opts?: { categorie?: string; regio?: string; sector?: string | null; isPublished?: boolean }): Promise<IntelSignaal[]> {
     return [];
   }
   async getIntelSignaalById(_id: string): Promise<IntelSignaal | undefined> {
@@ -2866,17 +2867,23 @@ class DbStorage implements IStorage {
   }
 
   // Intel Signalen — DbStorage implementation
-  async getIntelSignalen(opts?: { categorie?: string; regio?: string; sector?: string; isPublished?: boolean }): Promise<IntelSignaal[]> {
+  async getIntelSignalen(opts?: { categorie?: string; regio?: string; sector?: string | null; isPublished?: boolean }): Promise<IntelSignaal[]> {
     const conditions: any[] = [];
     if (opts?.categorie) conditions.push(sql`${intelSignalen.categorie} = ${opts.categorie}`);
     if (opts?.regio) conditions.push(eq(intelSignalen.regio, opts.regio));
     if (opts?.isPublished !== undefined) conditions.push(eq(intelSignalen.isPublished, opts.isPublished));
-    // Sector filter:
-    // - NULL   = zichtbaar voor iedereen (ook zonder sector)
-    // - "alle" = zichtbaar voor alle sectored users
-    // - specifieke sector = alleen voor die sector
-    if (opts?.sector) {
-      conditions.push(sql`(${intelSignalen.sector} IS NULL OR ${intelSignalen.sector} = 'alle' OR ${intelSignalen.sector} = ${opts.sector})`);
+    // Sector filter (3-tier semantics):
+    // - undefined: geen sector filter (bijv. admin overview) — toon alles
+    // - null:   user heeft geen sector gekozen — toon alleen globale signalen (IS NULL of 'alle')
+    // - string: user heeft sector X — toon globals + 'alle' + sector X specifiek
+    if (opts && "sector" in opts) {
+      if (opts.sector === null) {
+        // No sector selected: only show truly global signals
+        conditions.push(sql`(${intelSignalen.sector} IS NULL OR ${intelSignalen.sector} = 'alle')`);
+      } else if (opts.sector) {
+        // Sector selected: show globals + 'alle' + matching sector
+        conditions.push(sql`(${intelSignalen.sector} IS NULL OR ${intelSignalen.sector} = 'alle' OR ${intelSignalen.sector} = ${opts.sector})`);
+      }
     }
     const query = db.select().from(intelSignalen).orderBy(desc(intelSignalen.datum));
     if (conditions.length > 0) {

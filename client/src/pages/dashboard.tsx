@@ -737,55 +737,37 @@ export default function DashboardPage() {
               <Badge variant="outline" className="text-[10px]">Kies een sector</Badge>
             )}
           </div>
-          <div className="grid grid-cols-2 gap-3" data-testid="grid-kansen-sector">
-            {sectorConfig
-              ? CATEGORIE_KEYS.map((catKey) => {
-                  const meta = CATEGORIE_META[catKey];
-                  const content = sectorConfig.categorieen[catKey];
-                  const Icon = meta.icon;
-                  return (
-                    <Link href={content.href} key={catKey}>
-                      <div
-                        className="flex items-center gap-3 rounded-xl border bg-background p-3 hover-elevate cursor-pointer"
-                        data-testid={`kans-tile-${catKey}`}
-                      >
-                        <div className={`rounded-lg p-2 shrink-0 ${meta.bg}`}>
-                          <Icon className={`w-3.5 h-3.5 ${meta.color}`} />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-semibold text-foreground leading-tight">{meta.label}</p>
-                          <p className="text-[11px] text-muted-foreground leading-tight mt-0.5 line-clamp-2">{content.sub}</p>
-                        </div>
+          {sectorConfig ? (
+            <div className="grid grid-cols-2 gap-3" data-testid="grid-kansen-sector">
+              {CATEGORIE_KEYS.map((catKey) => {
+                const meta = CATEGORIE_META[catKey];
+                const content = sectorConfig.categorieen[catKey];
+                const Icon = meta.icon;
+                return (
+                  <Link href={content.href} key={catKey}>
+                    <div
+                      className="flex items-center gap-3 rounded-xl border bg-background p-3 hover-elevate cursor-pointer"
+                      data-testid={`kans-tile-${catKey}`}
+                    >
+                      <div className={`rounded-lg p-2 shrink-0 ${meta.bg}`}>
+                        <Icon className={`w-3.5 h-3.5 ${meta.color}`} />
                       </div>
-                    </Link>
-                  );
-                })
-              : [
-                  { icon: ScanText, label: "Brief begrijpen", sub: "Upload een overheidsbrief", href: "/tools/brief-analyse", color: "text-violet-500", bg: "bg-violet-500/10" },
-                  { icon: Globe, label: "Website check", sub: "Hoe vindbaar ben jij?", href: "/tools/website-scan", color: "text-blue-500", bg: "bg-blue-500/10" },
-                  { icon: Landmark, label: "Aanbestedingen", sub: "Gemeenteopdrachten", href: "/kansen/aanbestedingen", color: "text-amber-500", bg: "bg-amber-500/10" },
-                  { icon: Users, label: "Netwerk", sub: "Ondernemers in jouw regio", href: "/network", color: "text-emerald-500", bg: "bg-emerald-500/10" },
-                ].map((kans, idx) => {
-                  const Icon = kans.icon;
-                  return (
-                    <Link href={kans.href} key={idx}>
-                      <div
-                        className="flex items-center gap-3 rounded-xl border bg-background p-3 hover-elevate cursor-pointer"
-                        data-testid={`kans-tile-${idx}`}
-                      >
-                        <div className={`rounded-lg p-2 shrink-0 ${kans.bg}`}>
-                          <Icon className={`w-3.5 h-3.5 ${kans.color}`} />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-xs font-semibold text-foreground leading-tight">{kans.label}</p>
-                          <p className="text-[11px] text-muted-foreground leading-tight mt-0.5 truncate">{kans.sub}</p>
-                        </div>
+                      <div className="min-w-0">
+                        <p className="text-xs font-semibold text-foreground leading-tight">{meta.label}</p>
+                        <p className="text-[11px] text-muted-foreground leading-tight mt-0.5 line-clamp-2">{content.sub}</p>
                       </div>
-                    </Link>
-                  );
-                })
-            }
-          </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="py-6 text-center" data-testid="kansen-onboarding-gate">
+              <Landmark className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+              <p className="text-sm font-medium text-foreground mb-1">Kies je sector hierboven</p>
+              <p className="text-xs text-muted-foreground">Dan zie je hier de kansen en acties die relevant zijn voor jouw branche.</p>
+            </div>
+          )}
           {!isPro && (
             <Link href="/lidmaatschap">
               <div className="mt-3 rounded-xl border border-dashed border-muted-foreground/30 p-3 flex items-center justify-between hover-elevate cursor-pointer" data-testid="banner-upgrade">
@@ -802,7 +784,9 @@ export default function DashboardPage() {
         {/* Regio-updates */}
         <div className="rounded-2xl border bg-card p-5">
           <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
-            <h2 className="text-base font-bold text-foreground">Laatste regio-updates</h2>
+            <h2 className="text-base font-bold text-foreground">
+              {hasRegio ? `Updates in ${user.region}` : "Regio-updates"}
+            </h2>
             <Link href="/intel">
               <Button variant="ghost" size="sm" className="text-xs h-7 px-2" data-testid="button-alles-updates">
                 Alles bekijken <ChevronRight className="h-3 w-3 ml-1" />
@@ -810,10 +794,16 @@ export default function DashboardPage() {
             </Link>
           </div>
 
-          {recenteUpdates.length === 0 ? (
+          {!hasRegio ? (
+            <div className="py-6 text-center" data-testid="regio-onboarding-gate">
+              <Globe className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
+              <p className="text-sm font-medium text-foreground mb-1">Kies je regio hierboven</p>
+              <p className="text-xs text-muted-foreground">Dan zie je hier de laatste updates uit jouw werkgebied.</p>
+            </div>
+          ) : recenteUpdates.length === 0 ? (
             <div className="py-6 text-center">
               <Signal className="w-8 h-8 text-muted-foreground/30 mx-auto mb-2" />
-              <p className="text-sm text-muted-foreground">Signalen worden geladen...</p>
+              <p className="text-sm text-muted-foreground">Geen recente updates voor {user.region}.</p>
             </div>
           ) : (
             <div className="space-y-2">

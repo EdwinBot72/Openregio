@@ -4183,7 +4183,8 @@ Maak het verzoek professioneel en juridisch correct.`;
       const signalen = await storage.getIntelSignalen({
         categorie: categorie || undefined,
         regio: effectieveRegio,
-        sector: user.sector || undefined,
+        // null = no sector selected (only global signals); string = filter to globals + this sector
+        sector: user.sector ?? null,
         isPublished: true,
       });
       // Plan-based visibility: basic users see max 10 most recent signals
