@@ -1,6 +1,5 @@
 import {
   Sparkles,
-  Eye,
   Building2,
   Monitor,
   Signal,
@@ -71,12 +70,6 @@ export const MAIN_NAV: NavSection[] = [
     title: "Brief laten checken",
     icon: ScanText,
     url: "/tools/brief-analyse",
-  },
-  {
-    id: "profiel-live",
-    title: "Profiel live zetten",
-    icon: Eye,
-    url: "/bedrijfsprofiel",
   },
   {
     id: "bibliotheek",
