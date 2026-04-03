@@ -5206,10 +5206,7 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
     }
   });
 
-  // ─── Kansen per gemeente (AI-gegenereerd) ────────────────────────────
-  // In-memory cache per gemeente, geldig voor de huidige dag
-  const kansenCache = new Map<string, { datum: string; kansen: KansKaartAI[] }>();
-
+  // ─── Kansen (gedeelde types + caches) ────────────────────────────────
   type KansKaartAI = {
     titel: string;
     waarom: string;
@@ -5217,6 +5214,162 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
     kans: string;
     urgentie: "Hoog" | "Gemiddeld" | "Laag";
   };
+
+  // In-memory cache per gemeente, geldig voor de huidige dag
+  const kansenCache = new Map<string, { datum: string; kansen: KansKaartAI[] }>();
+
+  // In-memory cache per sector+categorie, geldig voor de huidige dag
+  const marktCategorieCache = new Map<string, { datum: string; items: MarktCategorieItem[] }>();
+
+  type MarktCategorieItem = {
+    titel: string;
+    toelichting: string;
+    actie: string;
+    urgentie: "Hoog" | "Gemiddeld" | "Laag";
+  };
+
+  // Omschrijving per categorie voor de AI-prompt
+  const CATEGORIE_PROMPTS: Record<string, string> = {
+    kansen: "marktkansen, actuele vraag in de markt, groeimogelijkheden, lokale en regionale kansen",
+    zichtbaarheid: "online vindbaarheid, profielverbetering, reputatiebeheer, website en digitale uitstraling",
+    regels: "actuele regelgeving, vergunningen, beleidsontwikkelingen, gemeentelijke en landelijke regels",
+    samenwerking: "samenwerkingsmogelijkheden, lokale netwerken, partnerships, gezamenlijke initiatieven",
+  };
+
+  // GET /api/kansen/markt-categorie?sector=detailhandel&categorie=kansen
+  app.get("/api/kansen/markt-categorie", requireAuth, async (req, res) => {
+    const sector = (req.query.sector as string | undefined)?.trim();
+    const categorie = (req.query.categorie as string | undefined)?.trim();
+    const GELDIGE_SECTOREN = ["detailhandel", "horeca", "techniek", "agrarisch"];
+    const GELDIGE_CATEGORIEEN = ["kansen", "zichtbaarheid", "regels", "samenwerking"];
+
+    if (!sector || !GELDIGE_SECTOREN.includes(sector)) {
+      return res.status(400).json({ error: "Ongeldige sector" });
+    }
+    if (!categorie || !GELDIGE_CATEGORIEEN.includes(categorie)) {
+      return res.status(400).json({ error: "Ongeldige categorie" });
+    }
+
+    const today = new Date().toISOString().split("T")[0];
+    const cacheKey = `${sector}__${categorie}`;
+    const forceRefresh = req.query.refresh === "true";
+    const cached = marktCategorieCache.get(cacheKey);
+    if (!forceRefresh && cached && cached.datum === today) {
+      return res.json({ sector, categorie, items: cached.items, cached: true });
+    }
+
+    const SECTOR_LABELS: Record<string, string> = {
+      detailhandel: "Detailhandel (winkels, retail, lokale handel)",
+      horeca: "Restaurants & horeca (restaurants, cafés, catering)",
+      techniek: "Techniek (installatie, ambacht, bouw, technische diensten)",
+      agrarisch: "Agrarisch (landbouw, tuinbouw, veeteelt, natuur)",
+    };
+
+    const categoriePrompt = CATEGORIE_PROMPTS[categorie] ?? categorie;
+    const sectorLabel = SECTOR_LABELS[sector] ?? sector;
+
+    try {
+      const { GoogleGenAI } = await import("@google/genai");
+      const ai = new GoogleGenAI({
+        apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
+        ...(process.env.AI_INTEGRATIONS_GEMINI_BASE_URL
+          ? { httpOptions: { apiVersion: "", baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL! } }
+          : {}),
+      });
+
+      // Recente nieuwssignalen als context
+      const alleSignalen = await storage.getIntelSignalen();
+      const contextSignalen = alleSignalen.slice(0, 10);
+      const nieuwsContext = contextSignalen.length > 0
+        ? contextSignalen.map((s, i) => `${i + 1}. [${s.bron}] ${s.titel}: ${s.samenvatting.slice(0, 120)}`).join("\n")
+        : "(geen recente signalen beschikbaar)";
+
+      const prompt = `Je bent een specialist in Nederlandse ondernemersomgevingen.
+
+Genereer precies 4 actuele, concrete signalen of inzichten voor de categorie **${categoriePrompt}** voor ondernemers in de sector **${sectorLabel}**.
+
+Gebruik onderstaande actuele nieuwssignalen als inspiratie:
+--- RECENTE SIGNALEN ---
+${nieuwsContext}
+--- EINDE SIGNALEN ---
+
+Elk item bevat:
+- titel: korte, pakkende omschrijving (max 8 woorden)
+- toelichting: waarom dit nu relevant is voor deze sector (1-2 zinnen, concreet)
+- actie: wat de ondernemer nu concreet kan doen (1 actieve zin, begint met een werkwoord)
+- urgentie: één van "Hoog", "Gemiddeld" of "Laag"
+
+Zorg voor variatie in urgentieniveaus. Wees praktisch en sector-specifiek.
+
+Geef ALLEEN geldige JSON terug (geen markdown, geen uitleg):
+[
+  {
+    "titel": "...",
+    "toelichting": "...",
+    "actie": "...",
+    "urgentie": "Hoog"
+  }
+]`;
+
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        config: { responseMimeType: "application/json" },
+      });
+
+      let rawText = response.text?.trim() ?? "";
+      if (!rawText) throw new Error("Lege AI-respons");
+      rawText = rawText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```\s*$/i, "").trim();
+      const jsonMatch = rawText.match(/\[[\s\S]*\]/);
+      if (!jsonMatch) throw new Error(`Geen JSON-array: ${rawText.slice(0, 100)}`);
+
+      const parsed: MarktCategorieItem[] = JSON.parse(jsonMatch[0]);
+      if (!Array.isArray(parsed) || parsed.length === 0) throw new Error("Lege array");
+
+      const items = parsed.slice(0, 4).map((item) => ({
+        titel: String(item.titel ?? "").slice(0, 120),
+        toelichting: String(item.toelichting ?? "").slice(0, 400),
+        actie: String(item.actie ?? "").slice(0, 300),
+        urgentie: (["Hoog", "Gemiddeld", "Laag"].includes(item.urgentie) ? item.urgentie : "Gemiddeld") as MarktCategorieItem["urgentie"],
+      }));
+
+      marktCategorieCache.set(cacheKey, { datum: today, items });
+      console.log(`[MarktCategorie] ${items.length} items voor ${sector}/${categorie}`);
+      return res.json({ sector, categorie, items, cached: false });
+    } catch (err) {
+      console.error("[MarktCategorie] Fout:", (err as Error).message);
+      // Generieke fallback
+      const fallback: MarktCategorieItem[] = [
+        {
+          titel: "Bekijk actuele sector-signalen",
+          toelichting: `Er zijn momenteel relevante ontwikkelingen in de ${sectorLabel} die jouw aanpak kunnen beïnvloeden.`,
+          actie: "Bekijk de regio-updates voor de laatste ontwikkelingen in jouw sector.",
+          urgentie: "Gemiddeld",
+        },
+        {
+          titel: "Digitale aanwezigheid versterken",
+          toelichting: "Online zichtbaarheid is voor elke ondernemer een aandachtspunt dat direct klanten oplevert.",
+          actie: "Doe de website-scan om te zien hoe jij scoort op lokale vindbaarheid.",
+          urgentie: "Hoog",
+        },
+        {
+          titel: "Subsidies en financiering benutten",
+          toelichting: "Er zijn regelmatig openstaande subsidies beschikbaar voor ondernemers die onbenut blijven.",
+          actie: "Controleer via Subsidies & financiering welke regelingen nu openstaan.",
+          urgentie: "Gemiddeld",
+        },
+        {
+          titel: "Samenwerking zoeken in jouw regio",
+          toelichting: "Lokale samenwerking versterkt je positie en opent nieuwe klantgroepen.",
+          actie: "Maak een profiel aan zodat andere ondernemers jou kunnen vinden via het netwerk.",
+          urgentie: "Laag",
+        },
+      ];
+      return res.json({ sector, categorie, items: fallback, cached: false, fallback: true });
+    }
+  });
+
+  // ─── Kansen per gemeente (AI-gegenereerd) ────────────────────────────
 
   app.get("/api/kansen/gemeente", requireAuth, async (req, res) => {
     const gemeente = (req.query.gemeente as string | undefined)?.trim();
