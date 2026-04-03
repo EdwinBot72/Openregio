@@ -1,0 +1,558 @@
+Ja. Dit moet strakker achter de login.
+
+Je wil eigenlijk 3 dingen fixen:
+
+1. **dezelfde duidelijkheid als homepage**
+2. **een dashboard dat blijft leven**
+3. **strakke rechten per account**
+
+Hier is de beste indeling.
+
+# Nieuwe structuur achter de login
+
+## Hoofdidee
+
+Niet meer een rommelig dashboard met losse modules.
+
+Maar een **app-achtige omgeving** met:
+
+* **linker zijbalk**
+* **Vandaag** als eerste pagina
+* duidelijke taken
+* kansen per sector
+* bibliotheek i.p.v. RegioBot
+* rollen: Basis / Pro / Beheerder
+
+---
+
+# 1. Linker zijbalk
+
+Deze moet op alle interne pagina’s staan zodat je altijd weg kunt.
+
+## Volgorde menu links
+
+1. **Vandaag**
+2. **Ik wil beter worden**
+3. **Ik wil kansen zien**
+4. **Brief laten checken**
+5. **Profiel live zetten**
+6. **Bibliotheek**
+7. **Mijn bedrijf**
+8. **Instellingen**
+
+Dat is veel logischer dan feature-first.
+
+## Waarom dit werkt
+
+Dit menu praat in uitkomsttaal:
+
+* wat wil ik nu doen
+* waar moet ik vandaag zijn
+* wat levert dit mij op
+
+Niet:
+
+* tools
+* modules
+* systeemtaal
+
+---
+
+# 2. Vandaag als eerste pagina
+
+Deze moet de nieuwe hoofd-dashboardpagina worden.
+
+## Blok bovenaan
+
+### Kop
+
+**Vandaag**
+
+### Sub
+
+In één oogopslag wat relevant is voor jouw bedrijf, jouw sector en jouw regio.
+
+---
+
+## Opbouw van de pagina Vandaag
+
+### Blok 1 — Mijn bedrijf
+
+Deze moet **helemaal bovenaan** staan.
+
+Inhoud:
+
+* bedrijfsnaam
+* sector
+* regio
+* profielstatus
+* pakket: Basis / Pro / Beheerder
+* laatste activiteit
+* snelle actieknop
+
+### CTA’s
+
+* Profiel bewerken
+* Website bekijken
+* Profiel live zetten
+
+---
+
+### Blok 2 — Actuele signalen in jouw regio
+
+Deze moet echt hard gefilterd worden op:
+
+* **Detailhandel**
+* **Techniek**
+* **Agrarisch**
+* **Restaurants & horeca**
+
+Dus niet meer generiek.
+
+## Belangrijk
+
+Gebruiker ziet alleen signalen die matchen op:
+
+* gekozen sector
+* regio
+* eventueel subcategorie
+
+### Voorbeelden signalen
+
+* nieuwe gemeentelijke ontwikkeling
+* vergunning of beleidswijziging
+* lokale economische beweging
+* subsidie / regeling
+* branchegerichte waarschuwing
+* kans in de regio
+
+---
+
+### Blok 3 — Hier liggen nu kansen
+
+Dit moet een apart blok worden en mag veel prominenter.
+
+Niet vaag. Gewoon concreet.
+
+## Per sector kansen tonen
+
+### Detailhandel
+
+* lokale acties of samenwerkingen
+* verbeterpunten voor zichtbaarheid
+* winkelgebied-kansen
+* online vindbaarheid
+
+### Techniek
+
+* opdrachten / regionale vraag
+* regelgeving die kansen opent
+* samenwerking met andere bedrijven
+* profieloptimalisatie voor vertrouwen
+
+### Restaurants & horeca
+
+* zichtbaarheid rond lokaal zoeken
+* arrangementen / events / seizoenskansen
+* samenwerkingen in de regio
+* actuele regels die impact hebben
+
+### Agrarisch
+
+* regionale ontwikkelingen
+* beleid / ruimte / sector-signalen
+* samenwerking en afzet
+* zichtbaarheid en positionering
+
+---
+
+### Blok 4 — Snelle acties
+
+Hier wil je de gebruiker trekken.
+
+## Layout
+
+Twee kolommen.
+
+### Links
+
+* **Brief laten checken**
+* **Ik wil beter gevonden worden**
+
+### Rechts
+
+* **Ik wil kansen zien**
+* **Profiel live zetten**
+
+Dat is exact hoe jij hem wil hebben.
+
+---
+
+# 3. Verplichte Lokale Basischeck
+
+Ja, dit is slim. Die moet verplicht af.
+
+## Hoe het moet werken
+
+Als iemand voor het eerst inlogt:
+
+* eerst onboarding
+* daarna **Lokale Basischeck verplicht**
+* pas daarna volledige toegang tot dashboard
+
+## Basischeck moet ophalen
+
+* sector
+* regio
+* type bedrijf
+* huidige website ja/nee
+* zichtbaarheidsstatus
+* belangrijkste hulpvraag
+* profielstatus
+
+## Waarom verplicht
+
+Want anders blijft het dashboard te generiek.
+
+Die check moet de motor zijn achter:
+
+* actuele signalen
+* kansen
+* advies
+* profielsuggesties
+* bibliotheek-relevantie
+
+---
+
+# 4. RegioBot wordt Bibliotheek
+
+Goede move. RegioBot klinkt te tech en te intern.
+
+## Nieuwe naam
+
+**Bibliotheek**
+
+## Wat staat daarin
+
+* voorbeeldbrieven
+* artikelen
+* blogs
+* sectordocumenten
+* uitleg over wet- en regelgeving
+* regionale documenten
+* kennisstukken
+
+## Rechten
+
+### Alleen beheerder:
+
+**[edwin@stroombox.nl](mailto:edwin@stroombox.nl)**
+mag:
+
+* items toevoegen
+* items aanpassen
+* items verwijderen
+* blogs plaatsen
+* categorieën beheren
+
+Gebruikers mogen alleen lezen wat hun account toestaat.
+
+---
+
+# 5. Accountstructuur
+
+Je wil drie rollen. Prima.
+
+## Rollen
+
+### Basis
+
+Mag:
+
+* dashboard bekijken
+* profiel beheren
+* basischeck doen
+* beperkte signalen zien
+* beperkte kansen zien
+* beperkt bibliotheek lezen
+
+### Pro
+
+Mag alles van Basis plus:
+
+* diepere signalen
+* meer kansen
+* briefcheck
+* uitgebreidere bibliotheek
+* slimmere inzichten
+* sectorgerichte verdieping
+
+### Beheerder
+
+Alleen handmatig aan te maken.
+
+Mag:
+
+* gebruikers aanmaken
+* rollen toekennen
+* blogs schrijven
+* bibliotheek beheren
+* content publiceren
+* signalen beheren
+* kansen beheren
+* sectorcontent beheren
+
+## Belangrijke regel
+
+**Alleen beheerder kan accounts aanmaken.**
+
+Dus geen openbare self-signup meer als jij dit zo wilt trekken.
+
+---
+
+# 6. Nieuwe pagina’s intern
+
+## Vandaag
+
+De hoofd-dash.
+
+## Ik wil beter worden
+
+Voor zichtbaarheid, website, profiel, verbeterpunten.
+
+### Inhoud
+
+* je website-status
+* verbeterkansen
+* wat staat al goed
+* wat ontbreekt
+* lokale zichtbaarheid
+* vervolgstappen
+
+Belangrijk punt van jou:
+
+> als je website een keer bekeken is, is het wel klaar
+
+Klopt. Dus deze pagina moet **niet een eenmalige scan** zijn.
+
+Er moeten doorlopende onderdelen bij zoals:
+
+* nieuwe verbeterkansen
+* profiel-aanvulling
+* lokale SEO-tips
+* reviews / zichtbaarheid
+* contentkansen
+* technische verbeterpunten
+* concurrentie-signalen in regio
+
+Dus: geen eindpunt, maar groeipagina.
+
+---
+
+## Ik wil kansen zien
+
+Volledig sectorgericht.
+
+### Inhoud
+
+* kansen in jouw regio
+* kansen in jouw sector
+* nieuwe ontwikkelingen
+* relevante signalen
+* samenwerkingskansen
+* marktkansen
+* beleidskansen
+* lokale bewegingen
+
+Hier moet je echt sorteren op:
+
+* Detailhandel
+* Restaurants & horeca
+* Techniek
+* Agrarisch
+
+---
+
+## Brief laten checken
+
+Duidelijke taakpagina.
+
+### Inhoud
+
+* brief uploaden
+* sector kiezen
+* type brief
+* snelle analyse
+* vervolgactie
+
+---
+
+## Profiel live zetten
+
+Deze moet veel zichtbaarder.
+
+### Inhoud
+
+* profielstatus
+* wat mist nog
+* profielfoto / logo
+* bedrijfsomschrijving
+* sector
+* regio
+* website
+* live/ niet live
+
+---
+
+## Bibliotheek
+
+Nieuwe naam voor RegioBot.
+
+### Structuur
+
+* Blogs
+* Voorbeeldbrieven
+* Wet- en regelgeving
+* Sectorkennis
+* Regionale documenten
+
+---
+
+## Mijn bedrijf
+
+Deze pagina moet een vast anker worden.
+
+### Inhoud
+
+* bedrijfsgegevens
+* sector
+* regio
+* website
+* accounttype
+* profielstatus
+* live status
+* laatste updates
+
+En op Vandaag moet hier een samenvatting van staan.
+
+---
+
+# 7. Beste homepage-logica ook intern doorzetten
+
+Intern moet dezelfde taal blijven.
+
+Dus niet:
+
+* dashboard
+* modules
+* bot
+* analyses
+
+Maar:
+
+* Vandaag
+* Ik wil beter worden
+* Ik wil kansen zien
+* Brief laten checken
+* Profiel live zetten
+* Bibliotheek
+
+Dat maakt alles rustiger.
+
+---
+
+# 8. Beste wireframe voor Vandaag
+
+## Pagina: Vandaag
+
+### Boven
+
+**Mijn bedrijf**
+compact kaartje met status
+
+### Midden links
+
+**Actuele signalen in jouw regio**
+
+### Midden rechts
+
+**Hier liggen nu kansen**
+
+### Onder links
+
+**Brief laten checken**
+daaronder
+**Ik wil beter gevonden worden**
+
+### Onder rechts
+
+**Ik wil kansen zien**
+daaronder
+**Profiel live zetten**
+
+### Onderaan
+
+**Laatste items uit de Bibliotheek**
+
+---
+
+# 9. Wat technisch direct aangepast moet worden
+
+## Naamwijzigingen
+
+* RegioBot → **Bibliotheek**
+* Dashboard → **Vandaag**
+
+## Nieuwe verplichte flow
+
+* login
+* onboarding
+* lokale basischeck verplicht
+* daarna toegang
+
+## Rollen
+
+* basis
+* pro
+* beheerder
+
+## Beheerder hardcoded / beheerd
+
+* `edwin@stroombox.nl`
+
+## Toegangsrechten
+
+* alleen beheerder kan accounts maken
+* alleen beheerder kan blogs plaatsen
+* alleen beheerder kan bibliotheek aanpassen
+
+## Contentfiltering
+
+Signalen en kansen filteren op:
+
+* sector
+* regio
+* accounttype
+
+---
+
+# 10. Mijn strakke advies
+
+Als je dit goed wil neerzetten, moet je het interne systeem gaan zien als:
+
+**een dagelijkse werkplek voor ondernemers**
+niet als
+**een verzameling tools**
+
+Dus de kern wordt:
+
+* **Vandaag**
+* **Beter worden**
+* **Kansen zien**
+* **Actie nemen**
+* **Profiel live**
+* **Bibliotheek**
+
+Dat klopt veel harder.
+
+Als je wilt, zet ik dit in de volgende stap om naar een **concrete sidebar + dashboard wireframe + exacte koppen/kaartteksten voor je developer in Replit-stijl**.

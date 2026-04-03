@@ -1,0 +1,383 @@
+Top. Ik trek dit strak samen tot één systeem dat je direct kunt bouwen + aan je dev kunt geven.
+
+Geen ruis. Gewoon hoe het moet werken.
+
+---
+
+# 🔥 KERN: ÉÉN SYSTEEM
+
+## Structuur (overal hetzelfde)
+
+Elke sector = dezelfde 4 blokken:
+
+1. **Kansen in de markt**
+2. **Zichtbaarheid & groei**
+3. **Regels & ontwikkelingen**
+4. **Samenwerking & netwerk**
+
+➡️ Alleen de **inhoud verschilt per sector**, niet de structuur.
+➡️ Dit maakt alles schaalbaar + logisch + filterbaar.
+
+---
+
+# 🧠 PLATFORM-LOGICA
+
+## Wat is OpenRegio intern?
+
+Geen dashboard.
+Maar:
+
+👉 **Dagelijkse werkplek voor ondernemers**
+
+Gebruiker komt binnen en denkt:
+
+* wat speelt er vandaag
+* waar liggen kansen
+* wat moet ik doen
+
+---
+
+# 🧭 LINKER SIDEBAR (vast op elke pagina)
+
+Volgorde (definitief):
+
+1. **Vandaag**
+2. **Ik wil beter worden**
+3. **Ik wil kansen zien**
+4. **Brief laten checken**
+5. **Profiel live zetten**
+6. **Bibliotheek**
+7. **Mijn bedrijf**
+8. **Instellingen**
+
+➡️ Dit is outcome-based
+➡️ Geen tool-namen, alleen acties
+
+---
+
+# 🏠 PAGINA: VANDAAG (HOOFDDASH)
+
+## Boven
+
+### 🔹 Mijn bedrijf (kaart)
+
+* bedrijfsnaam
+* sector
+* regio
+* profielstatus
+* pakket (Basis / Pro / Beheerder)
+
+CTA:
+
+* Profiel bewerken
+* Website bekijken
+* Profiel live zetten
+
+---
+
+## Midden links
+
+### 🔹 Actuele signalen in jouw regio
+
+⚠️ HARD FILTEREN op:
+
+* sector (Detailhandel / Horeca / Techniek / Agrarisch)
+* regio
+
+Voorbeelden:
+
+* beleidswijziging
+* subsidie
+* lokale ontwikkeling
+* branche-signaal
+
+---
+
+## Midden rechts
+
+### 🔹 Hier liggen nu kansen
+
+➡️ Gebaseerd op sector + basischeck
+
+#### Detailhandel
+
+* lokale acties / winkelgebied
+* zichtbaarheid verbeteren
+* online vindbaarheid
+
+#### Horeca
+
+* events / arrangementen
+* lokaal zoeken
+* samenwerkingen
+
+#### Techniek
+
+* opdrachten
+* regelgeving die kansen opent
+* vertrouwen / profiel
+
+#### Agrarisch
+
+* afzet / vraag
+* beleid / ruimte
+* sectorontwikkelingen
+
+---
+
+## Onder (2 kolommen EXACT zoals jij wil)
+
+### Links
+
+* Brief laten checken
+* Ik wil beter gevonden worden
+
+### Rechts
+
+* Ik wil kansen zien
+* Profiel live zetten
+
+---
+
+## Onderaan
+
+### 🔹 Laatste uit Bibliotheek
+
+* recente blogs
+* voorbeeldbrieven
+* sectorartikelen
+
+---
+
+# ⚙️ VERPLICHTE BASISCHECK (CRUCIAAL)
+
+Flow:
+
+1. Login
+2. Onboarding
+3. **Lokale Basischeck (verplicht)**
+4. Dashboard
+
+### Wat ophalen:
+
+* sector
+* regio
+* type bedrijf
+* website ja/nee
+* zichtbaarheid
+* hulpvraag
+
+➡️ Dit voedt ALLES:
+
+* signalen
+* kansen
+* advies
+* bibliotheek
+
+---
+
+# 📚 REGIOBOT → BIBLIOTHEEK
+
+## Nieuwe structuur
+
+* Blogs
+* Voorbeeldbrieven
+* Wet- en regelgeving
+* Sectorkennis
+* Regionale documenten
+
+## Rechten
+
+### Alleen beheerder (jij)
+
+📧 [edwin@stroombox.nl](mailto:edwin@stroombox.nl)
+
+Mag:
+
+* toevoegen
+* aanpassen
+* verwijderen
+* bloggen
+* categorieën beheren
+
+Gebruiker:
+
+* alleen lezen (afhankelijk van pakket)
+
+---
+
+# 👥 ACCOUNTSTRUCTUUR
+
+## Basis
+
+* dashboard
+* beperkte signalen
+* beperkte kansen
+* basis bibliotheek
+
+## Pro
+
+* alles van Basis +
+* diepere signalen
+* meer kansen
+* briefcheck
+* uitgebreide bibliotheek
+
+## Beheerder
+
+* users aanmaken
+* rollen toekennen
+* blogs schrijven
+* bibliotheek beheren
+* signalen/kansen beheren
+
+⚠️ Regel:
+👉 Alleen beheerder maakt accounts
+👉 Geen open signup
+
+---
+
+# 📄 PAGINA’S INTERN
+
+## 1. Vandaag
+
+= hoofdscherm (zoals hierboven)
+
+---
+
+## 2. Ik wil beter worden
+
+➡️ geen eenmalige scan
+
+Moet leven met:
+
+* website verbeterpunten
+* lokale SEO
+* profielstatus
+* contentkansen
+* concurrentie in regio
+
+---
+
+## 3. Ik wil kansen zien
+
+➡️ volledig sector gestuurd
+
+Filters:
+
+* sector
+* regio
+
+Content:
+
+* marktkansen
+* samenwerking
+* beleid
+* ontwikkelingen
+
+---
+
+## 4. Brief laten checken
+
+* upload
+* type brief
+* analyse
+* vervolgactie
+
+---
+
+## 5. Profiel live zetten
+
+* checklist
+* status
+* ontbrekende info
+* live toggle
+
+---
+
+## 6. Bibliotheek
+
+(= kennis + documenten)
+
+---
+
+## 7. Mijn bedrijf
+
+* alle gegevens
+* sector
+* regio
+* status
+* pakket
+
+---
+
+# 🧩 TECHNISCHE KERN
+
+## Naamwijzigingen
+
+* Dashboard → Vandaag
+* RegioBot → Bibliotheek
+
+---
+
+## Content filtering
+
+ALLES filteren op:
+
+* sector
+* regio
+* accounttype
+
+---
+
+## Datastructuur (belangrijk)
+
+Elke content-item (signaal/kans/blog):
+
+```
+{
+  sector: "detailhandel | horeca | techniek | agrarisch",
+  categorie: "kansen | zichtbaarheid | regels | samenwerking",
+  regio: "string",
+  type: "signaal | kans | artikel | brief",
+  pro_only: true/false
+}
+```
+
+---
+
+# 💡 WAAROM DIT HARD WERKT
+
+Omdat je:
+
+❌ geen tool-platform bouwt
+✅ maar een **beslis- en actieplatform**
+
+Gebruiker denkt niet:
+
+> waar moet ik klikken
+
+Maar:
+
+> wat kan ik vandaag doen
+
+---
+
+# 🎯 EINDCONCLUSIE
+
+Je hebt nu:
+
+* één structuur (4 blokken)
+* één taal (actiegericht)
+* één flow (Vandaag → actie → groei)
+* één systeem (filterbaar + schaalbaar)
+
+---
+
+Als je wilt, maak ik nu de volgende stap:
+
+👉 **Exacte UI (React / Tailwind / Replit ready)**
+👉 Sidebar + Vandaag pagina in code
+👉 Direct plug & play
+
+Dat is de move nu.
