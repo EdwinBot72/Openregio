@@ -633,6 +633,14 @@ export default function DashboardPage() {
                 <Eye className="w-3.5 h-3.5" />
                 {profielPct === 100 ? "Profiel compleet" : `${ingevuld} van ${profielVelden.length} velden ingevuld`}
               </div>
+              <div className="mt-3 flex gap-2">
+                <span className="flex-1 text-center rounded-lg border bg-background px-2 py-1.5 text-[11px] font-medium text-foreground hover-elevate cursor-pointer" data-testid="cta-profiel-bewerken">
+                  Profiel bewerken
+                </span>
+                <span className={`flex-1 text-center rounded-lg border px-2 py-1.5 text-[11px] font-medium hover-elevate cursor-pointer ${profielPct === 100 ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20" : "bg-background text-muted-foreground"}`} data-testid="cta-profiel-live">
+                  Profiel live zetten
+                </span>
+              </div>
             </div>
           </div>
         </Link>
@@ -836,10 +844,10 @@ export default function DashboardPage() {
           </div>
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
             {[
-              { icon: ScanText, label: "Brief begrijpen", sub: "Upload een brief", href: "/tools/brief-analyse", color: "text-violet-500", bg: "bg-violet-500/10", testid: "actie-brief" },
-              { icon: Globe, label: "Website check", sub: "Check je vindbaarheid", href: "/tools/website-scan", color: "text-blue-500", bg: "bg-blue-500/10", testid: "actie-website" },
-              { icon: Landmark, label: "Aanbestedingen", sub: "Gemeenteopdrachten", href: "/kansen/aanbestedingen", color: "text-amber-500", bg: "bg-amber-500/10", testid: "actie-aanbestedingen" },
-              { icon: Users, label: "Netwerk", sub: "Ondernemers in regio", href: "/network", color: "text-emerald-500", bg: "bg-emerald-500/10", testid: "actie-netwerk" },
+              { icon: ScanText, label: "Brief laten checken", sub: "Upload een overheidsbrief", href: "/tools/brief-analyse", color: "text-violet-500", bg: "bg-violet-500/10", testid: "actie-brief" },
+              { icon: Globe, label: "Beter gevonden worden", sub: "Check je online zichtbaarheid", href: "/tools/website-scan", color: "text-blue-500", bg: "bg-blue-500/10", testid: "actie-website" },
+              { icon: TrendingUp, label: "Kansen zien", sub: "Subsidies en lokale opdrachten", href: "/intel", color: "text-emerald-500", bg: "bg-emerald-500/10", testid: "actie-kansen" },
+              { icon: UserPlus, label: "Profiel live zetten", sub: "Zichtbaar voor de regio", href: "/bedrijfsprofiel", color: "text-amber-500", bg: "bg-amber-500/10", testid: "actie-profiel-live" },
               ...(isPro ? [
                 { icon: Gavel, label: "WOO-verzoek", sub: "Verzoek indienen", href: "/woo-wizard", color: "text-rose-500", bg: "bg-rose-500/10", testid: "actie-verzoek" },
                 { icon: FolderOpen, label: "Documenten", sub: "Jouw bibliotheek", href: "/woo-bibliotheek", color: "text-orange-500", bg: "bg-orange-500/10", testid: "actie-documenten" },
@@ -876,7 +884,7 @@ export default function DashboardPage() {
                 <BookOpen className="w-4 h-4 text-muted-foreground" />
                 <h2 className="text-base font-bold text-foreground">Laatste uit Bibliotheek</h2>
               </div>
-              <Link href="/bibliotheek">
+              <Link href="/blogs">
                 <Button variant="ghost" size="sm" className="text-xs h-7 px-2" data-testid="button-alle-blogs">
                   Alles lezen <ChevronRight className="h-3 w-3 ml-1" />
                 </Button>
@@ -884,7 +892,7 @@ export default function DashboardPage() {
             </div>
             <div className="grid sm:grid-cols-3 gap-3">
               {recenteBlogs.map((blog) => (
-                <Link href={`/bibliotheek/${blog.slug}`} key={blog.id}>
+                <Link href={`/blog/${blog.slug}`} key={blog.id}>
                   <div
                     className="rounded-xl border bg-background p-4 hover-elevate cursor-pointer h-full flex flex-col gap-2"
                     data-testid={`card-blog-${blog.id}`}
