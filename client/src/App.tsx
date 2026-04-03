@@ -70,6 +70,7 @@ import AanDeSlagPage from "@/pages/aan-de-slag";
 import KoopLokaalPage from "@/pages/koop-lokaal";
 import LokaalMarktplaatsPage from "@/pages/lokaal-marktplaats";
 import KansenInDeBuurtPage from "@/pages/kansen-in-de-buurt";
+import KansenMarktPage from "@/pages/kansen-markt";
 import WetgevingIndienenPage from "@/pages/wetgeving-indienen";
 import WetgevingPublicatiesPage from "@/pages/wetgeving/publicaties";
 import AdminWetgevingPage from "@/pages/admin/wetgeving";
@@ -136,6 +137,7 @@ function AuthenticatedRouter() {
       <Route path="/admin/intel" component={AdminIntelPage} />
 
       {/* Kansen / Informatie */}
+      <Route path="/kansen-markt" component={KansenMarktPage} />
       <Route path="/kansen-in-de-buurt" component={KansenInDeBuurtPage} />
       <Route path="/kansen/aanbestedingen" component={AanbestedingenPage} />
       <Route path="/kansen/gemeente-updates" component={GemeenteUpdatesPage} />
