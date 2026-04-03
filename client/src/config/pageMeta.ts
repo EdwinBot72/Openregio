@@ -41,8 +41,8 @@ export const PAGE_META: Record<string, PageMeta> = {
     description: "Zoek in WOO-documenten of genereer een WOO-verzoekbrief.",
   },
   "/regiobot": {
-    title: "RegioBot",
-    description: "Regionale WOO & juridische AI-assistent.",
+    title: "Bibliotheek",
+    description: "Regelgeving-assistent en WOO-bibliotheek voor ondernemers.",
   },
   "/bedrijfsprofiel": {
     title: "Bedrijfsprofiel",

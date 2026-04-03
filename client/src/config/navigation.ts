@@ -3,30 +3,20 @@ import {
   Eye,
   Building2,
   Monitor,
-  Globe,
   Signal,
   Landmark,
-  Megaphone,
   Euro,
-  Users,
-  Network,
-  ArrowLeftRight,
-  Store,
-  Handshake,
-  HeartHandshake,
-  FileText,
   ScanText,
   Gavel,
   FolderOpen,
   Bot,
   CreditCard,
-  Share2,
   Shield,
   LayoutGrid,
-  CheckCircle,
-  MessageSquare,
-  MessageCircle,
   BookOpen,
+  TrendingUp,
+  Settings,
+  CheckCircle,
 } from "lucide-react";
 
 export type NavSubItem = {
@@ -45,93 +35,73 @@ export type NavSection = {
   proOnly?: boolean;
 };
 
-/** Dagelijkse kernacties — altijd zichtbaar, geen submenu */
-export const KERN_NAV: NavSection[] = [
+/** Hoofdnavigatie — outcome-based, geen tool-namen */
+export const MAIN_NAV: NavSection[] = [
   {
     id: "vandaag",
     title: "Vandaag",
     icon: Sparkles,
-    url: "/aan-de-slag",
+    url: "/dashboard",
   },
   {
-    id: "basischeck",
-    title: "Lokale Basischeck",
-    icon: CheckCircle,
-    url: "/basischeck",
+    id: "beter-worden",
+    title: "Ik wil beter worden",
+    icon: TrendingUp,
+    sub: [
+      { title: "Website check", url: "/tools/website-scan", icon: Monitor },
+      { title: "Lokale Basischeck", url: "/basischeck", icon: CheckCircle },
+      { title: "Regelgeving verkenner", url: "/regelgeving-verkenner", icon: BookOpen },
+    ],
   },
   {
-    id: "brief",
-    title: "Brief begrijpen",
+    id: "kansen-zien",
+    title: "Ik wil kansen zien",
+    icon: Signal,
+    sub: [
+      { title: "Kansen overzicht", url: "/kansen-in-de-buurt", icon: LayoutGrid },
+      { title: "Aanbestedingen", url: "/kansen/aanbestedingen", icon: Landmark },
+      { title: "Subsidies & financiering", url: "/kansen/financiering", icon: Euro },
+      { title: "Regio-updates", url: "/intel", icon: Signal },
+    ],
+  },
+  {
+    id: "brief-checken",
+    title: "Brief laten checken",
     icon: ScanText,
     url: "/tools/brief-analyse",
   },
   {
-    id: "regiobot",
-    title: "RegioBot",
-    icon: Bot,
-    url: "/regiobot",
-    proOnly: true,
+    id: "profiel-live",
+    title: "Profiel live zetten",
+    icon: Eye,
+    url: "/bedrijfsprofiel",
   },
   {
-    id: "wet-indienen",
-    title: "Wet indienen",
+    id: "bibliotheek",
+    title: "Bibliotheek",
     icon: BookOpen,
-    url: "/wetgeving-indienen",
+    proOnly: true,
+    sub: [
+      { title: "Regelgeving-assistent", url: "/regiobot", icon: Bot },
+      { title: "WOO-documenten", url: "/woo-bibliotheek", icon: FolderOpen },
+      { title: "Verzoek indienen", url: "/woo-wizard", icon: Gavel },
+    ],
   },
   {
-    id: "bedrijf",
+    id: "mijn-bedrijf",
     title: "Mijn bedrijf",
     icon: Building2,
     url: "/bedrijfsprofiel",
   },
-];
-
-/** Groeien, kansen en netwerk — uitklapbare secties */
-export const GROEI_NAV: NavSection[] = [
   {
-    id: "kansen",
-    title: "Kansen in de regio",
-    icon: Signal,
+    id: "instellingen",
+    title: "Instellingen",
+    icon: Settings,
     sub: [
-      { title: "Kansen overzicht", url: "/kansen-in-de-buurt", icon: LayoutGrid },
-      { title: "Regio-updates", url: "/intel", icon: Signal },
-      { title: "Aanbestedingen", url: "/kansen/aanbestedingen", icon: Landmark },
-      { title: "Gemeente-updates", url: "/kansen/gemeente-updates", icon: Megaphone },
-      { title: "Subsidies & financiering", url: "/kansen/financiering", icon: Euro },
-      { title: "Regio Deals", url: "/kansen/regio-deals", icon: Handshake },
+      { title: "Lidmaatschap", url: "/lidmaatschap", icon: CreditCard },
+      { title: "Privacy & Gegevens", url: "/privacy-dashboard", icon: Shield },
     ],
   },
-  {
-    id: "netwerk",
-    title: "Netwerk & marktplaats",
-    icon: Users,
-    sub: [
-      { title: "Leden & netwerk", url: "/network", icon: Network },
-      { title: "Ondernemers bij mij", url: "/regiocrew", icon: Users },
-      { title: "Vraag & aanbod", url: "/lokaal-marktplaats", icon: ArrowLeftRight },
-      { title: "Koop Lokaal", url: "/koop-lokaal", icon: Store },
-      { title: "Website check", url: "/tools/website-scan", icon: Monitor },
-    ],
-  },
-  {
-    id: "documenten",
-    title: "Documenten",
-    icon: FileText,
-    proOnly: true,
-    sub: [
-      { title: "Regelgeving-assistent", url: "/woo-bot", icon: FileText },
-      { title: "Verzoek indienen", url: "/woo-wizard", icon: Gavel },
-      { title: "Mijn documenten", url: "/woo-bibliotheek", icon: FolderOpen },
-    ],
-  },
-];
-
-/** Minder gebruikte functies — ingeklapt tenzij actief */
-export const EXTRA_NAV: NavSection[] = [
-  { id: "community", title: "Community", icon: MessageSquare, url: "/community" },
-  { id: "chat", title: "Chat", icon: MessageCircle, url: "/chat" },
-  { id: "cooperatie", title: "Coöperatie", icon: HeartHandshake, url: "/cooperative" },
-  { id: "affiliate", title: "Affiliate & doorverwijzen", icon: Share2, url: "/affiliate" },
 ];
 
 export const ACCOUNT_NAV = [
@@ -140,4 +110,7 @@ export const ACCOUNT_NAV = [
 ];
 
 /** Legacy — backward compat for any remaining references */
-export const APP_NAV: NavSection[] = [...KERN_NAV, ...GROEI_NAV];
+export const KERN_NAV = MAIN_NAV;
+export const GROEI_NAV: NavSection[] = [];
+export const EXTRA_NAV: NavSection[] = [];
+export const APP_NAV: NavSection[] = MAIN_NAV;

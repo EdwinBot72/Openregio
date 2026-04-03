@@ -105,7 +105,7 @@ function taskTemplate(t: Task) {
 }
 
 export default function RegioBotPage() {
-  usePageTitle("RegioBot");
+  usePageTitle("Bibliotheek");
   const { user, isLoading } = useAuth();
   const isPro = user?.plan === "pro";
   const searchString = useSearch();
@@ -220,9 +220,9 @@ export default function RegioBotPage() {
                 <Scale className="h-10 w-10 text-primary" />
               </div>
             </div>
-            <h1 className="text-2xl font-bold" data-testid="heading-regiobot">RegioBot</h1>
+            <h1 className="text-2xl font-bold" data-testid="heading-bibliotheek">Bibliotheek</h1>
             <p className="text-muted-foreground">
-              RegioBot werkt met WOO-bronnen en regionale dossiers. Deze tool is beschikbaar voor leden met uitgebreide toegang.
+              De Bibliotheek werkt met WOO-bronnen en regionale dossiers. Dit is beschikbaar voor leden met uitgebreide toegang.
             </p>
             <Link href="/lidmaatschap" asChild>
               <Button size="lg" variant="outline" data-testid="button-meer-informatie">
@@ -238,10 +238,10 @@ export default function RegioBotPage() {
   return (
     <div className="max-w-6xl mx-auto px-4 py-8 space-y-6">
       <header className="space-y-2">
-        <h1 className="text-2xl md:text-3xl font-bold" data-testid="heading-regiobot">RegioBot</h1>
+        <h1 className="text-2xl md:text-3xl font-bold" data-testid="heading-bibliotheek">Bibliotheek</h1>
         <p className="text-sm md:text-base text-muted-foreground">
-          Samen bouwen we een WOO-bibliotheek om wet- en regelgeving die ondernemers raakt inzichtelijk te maken.
-          RegioBot antwoordt document-gedreven (met bronnen), niet op gevoel.
+          Samen bouwen we een bibliotheek om wet- en regelgeving die ondernemers raakt inzichtelijk te maken.
+          De Regelgeving-assistent antwoordt document-gedreven (met bronnen), niet op gevoel.
         </p>
         <p className="text-[11px] text-muted-foreground">{outOfScopeHint}</p>
       </header>
@@ -252,9 +252,9 @@ export default function RegioBotPage() {
           <div className="flex items-start gap-3">
             <Info className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
             <div className="space-y-2">
-              <p className="text-sm font-medium">Hoe werkt RegioBot?</p>
+              <p className="text-sm font-medium">Hoe werkt de Regelgeving-assistent?</p>
               <p className="text-sm text-muted-foreground">
-                RegioBot is een AI-assistent die antwoorden geeft op basis van jouw eigen geüploade documenten: WOO-brieven,
+                De Regelgeving-assistent is een AI-tool die antwoorden geeft op basis van jouw eigen geüploade documenten: WOO-brieven,
                 gemeentebesluiten, mandaatregisters en meer. Zo krijg je altijd een antwoord mét bronverwijzing — geen giswerk.
               </p>
               <div className="text-sm text-muted-foreground space-y-1">
@@ -280,7 +280,7 @@ export default function RegioBotPage() {
           <div className="flex items-center gap-1.5 pl-8">
             <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
             <span className="text-xs text-muted-foreground">
-              RegioBot is exclusief voor Pro-leden en weigert vragen over verkeersboetes en niet-zakelijke zaken.
+              De Regelgeving-assistent is exclusief voor Pro-leden en weigert vragen over verkeersboetes en niet-zakelijke zaken.
             </span>
           </div>
         </CardContent>
@@ -418,7 +418,7 @@ export default function RegioBotPage() {
 
             <div className="flex items-center justify-between gap-2">
               <Button onClick={handleSubmit} disabled={askMutation.isPending || (question.trim().length < 3 && selectedDossierId === "none")} data-testid="button-submit-regiobot">
-                {askMutation.isPending ? "RegioBot werkt..." : "Verwerk"}
+                {askMutation.isPending ? "Bezig..." : "Verwerk"}
               </Button>
               <p className="text-[10px] text-muted-foreground max-w-xs text-right">
                 Document-gedreven analyse. Geen persoonlijke boetes/traffic cases.

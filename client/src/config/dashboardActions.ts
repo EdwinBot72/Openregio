@@ -71,14 +71,14 @@ export const DASHBOARD_ACTIONS: DashboardAction[] = [
   },
   {
     id: "regiobot",
-    label: "RegioBot",
+    label: "Bibliotheek",
     description: (isPro) =>
       isPro
         ? "Analyseer besluiten, voer mandaat-checks uit en genereer vervolgvragen op basis van jouw eigen dossiers."
-        : "AI-assistent voor regelgevingsanalyse en juridische vragen. Beschikbaar voor Pro-bijdragers.",
+        : "Regelgeving-assistent voor WOO-analyse en juridische vragen. Beschikbaar voor Pro-bijdragers.",
     icon: Bot,
     href: (isPro) => (isPro ? "/regiobot" : "/lidmaatschap?plan=pro"),
-    cta: (isPro) => (isPro ? "RegioBot openen" : "Ontgrendelen"),
+    cta: (isPro) => (isPro ? "Bibliotheek openen" : "Ontgrendelen"),
     color: (isPro) =>
       isPro ? "text-indigo-600 dark:text-indigo-400" : "text-muted-foreground",
     bg: (isPro) => (isPro ? "bg-indigo-50 dark:bg-indigo-950/40" : "bg-muted/40"),

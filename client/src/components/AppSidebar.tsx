@@ -4,7 +4,6 @@ import {
   SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -27,7 +26,6 @@ import {
   ShieldCheck,
   Building2,
   Landmark,
-  CreditCard,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -36,7 +34,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "wouter";
 import { queryClient } from "@/lib/queryClient";
-import { KERN_NAV, GROEI_NAV, EXTRA_NAV, ACCOUNT_NAV, type NavSection } from "@/config/navigation";
+import { MAIN_NAV, type NavSection } from "@/config/navigation";
 
 const adminSubItems = [
   { title: "Admin Cockpit", url: "/admin", icon: ShieldCheck },
@@ -208,8 +206,7 @@ export function AppSidebar() {
     "Gebruiker";
   const displayEmail = profile?.email || user?.email || "";
 
-  const visibleKern = KERN_NAV.filter((s) => !s.proOnly || isPro);
-  const visibleGroei = GROEI_NAV.filter((s) => !s.proOnly || isPro);
+  const visibleNav = MAIN_NAV.filter((s) => !s.proOnly || isPro);
 
   return (
     <Sidebar>
@@ -229,12 +226,11 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {/* ── KERN ─────────────────────────────────────────── */}
+        {/* ── HOOFDNAVIGATIE ─────────────────────────────────────────── */}
         <SidebarGroup>
-          <SidebarGroupLabel>Kern</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {visibleKern.map((section) => (
+              {visibleNav.map((section) => (
                 <NavSectionItem
                   key={section.id}
                   section={section}
@@ -242,78 +238,21 @@ export function AppSidebar() {
                   isPro={isPro}
                 />
               ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
 
-        {/* ── GROEIEN ──────────────────────────────────────── */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Groeien</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {visibleGroei.map((section) => (
-                <NavSectionItem
-                  key={section.id}
-                  section={section}
-                  currentPath={location}
-                  isPro={isPro}
-                />
-              ))}
               {!isPro && (
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild data-testid="link-nav-upgrade">
+                  <SidebarMenuButton asChild data-testid="link-nav-bibliotheek-upgrade">
                     <Link href="/lidmaatschap" className="flex items-center gap-2 text-muted-foreground">
                       <Shield className="h-4 w-4" />
-                      <span className="text-xs">Documenten & AI — Pro</span>
+                      <span className="text-xs">Bibliotheek — Pro</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               )}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
 
-        {/* ── ACCOUNT ──────────────────────────────────────── */}
-        <SidebarGroup>
-          <SidebarGroupLabel>Account</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {ACCOUNT_NAV.map((item) => (
-                <SidebarMenuItem key={item.url}>
-                  <SidebarMenuButton
-                    asChild
-                    isActive={location === item.url}
-                    data-testid={`link-account-${item.url.replace(/\//g, "-").replace(/^-/, "")}`}
-                  >
-                    <Link href={item.url} className="flex items-center gap-2">
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </Link>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
               {user?.isAdmin && (
                 <AdminNavSection currentPath={location} />
               )}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
-
-        {/* ── EXTRA ────────────────────────────────────────── */}
-        <SidebarGroup className="mt-auto">
-          <SidebarGroupLabel className="text-[10px] text-muted-foreground/60 uppercase tracking-widest">
-            Extra
-          </SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {EXTRA_NAV.map((section) => (
-                <NavSectionItem
-                  key={section.id}
-                  section={section}
-                  currentPath={location}
-                  isPro={isPro}
-                />
-              ))}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
