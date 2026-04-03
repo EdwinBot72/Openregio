@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
 import {
   Sidebar,
   SidebarContent,
@@ -277,11 +276,6 @@ export function AppSidebar() {
   const { user, profile, isLoading } = useAuth();
   const [location, setLocation] = useLocation();
 
-  const { data: businessProfile } = useQuery<{ sector?: string } | null>({
-    queryKey: ["/api/business-profile/me"],
-    enabled: !!user,
-  });
-
   const handleLogout = async () => {
     try {
       await fetch("/api/auth/logout", { method: "POST", credentials: "include" });
@@ -294,7 +288,7 @@ export function AppSidebar() {
 
   const isPro = user?.plan === "pro";
   const isMaster = user?.role === "master" || user?.role === "admin";
-  const userSector = (businessProfile?.sector as SectorKey) || null;
+  const userSector = (user?.sector as SectorKey) || null;
 
   const getInitials = () => {
     if (user?.firstName || user?.lastName) {
