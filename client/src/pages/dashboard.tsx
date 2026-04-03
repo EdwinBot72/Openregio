@@ -24,14 +24,7 @@ import {
   AlertTriangle,
   Calendar,
   FileText,
-  Store,
-  Utensils,
-  Wrench,
-  Tractor,
   BookOpen,
-  Handshake,
-  Banknote,
-  Leaf,
   Loader2,
 } from "lucide-react";
 import { Link } from "wouter";
@@ -51,68 +44,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
-
-// ─── Sector configuratie ───────────────────────────────────────────────────
-
-const SECTOR_CONFIG = {
-  detailhandel: {
-    label: "Detailhandel",
-    icon: Store,
-    kleur: "text-blue-600 dark:text-blue-400",
-    bg: "bg-blue-500/10",
-    kansen: [
-      { icon: Banknote, label: "Subsidies detailhandel", sub: "Gemeente- en provinciesubsidies", href: "/intel", color: "text-emerald-500", bg: "bg-emerald-500/10" },
-      { icon: Landmark, label: "Aanbestedingen gemeente", sub: "Opdrachten in jouw regio", href: "/kansen/aanbestedingen", color: "text-amber-500", bg: "bg-amber-500/10" },
-      { icon: Globe, label: "Winkelgebied beleid", sub: "Bestemmingsplannen & beleid", href: "/intel", color: "text-blue-500", bg: "bg-blue-500/10" },
-      { icon: Users, label: "Ondernemersnetwerk", sub: "Winkeliersverenigingen", href: "/network", color: "text-violet-500", bg: "bg-violet-500/10" },
-    ],
-  },
-  horeca: {
-    label: "Horeca",
-    icon: Utensils,
-    kleur: "text-orange-600 dark:text-orange-400",
-    bg: "bg-orange-500/10",
-    kansen: [
-      { icon: Banknote, label: "Horeca subsidies", sub: "Duurzaamheid & innovatie", href: "/intel", color: "text-emerald-500", bg: "bg-emerald-500/10" },
-      { icon: FileText, label: "Terrasvergunning", sub: "Aanvragen en verlengen", href: "/tools/brief-analyse", color: "text-amber-500", bg: "bg-amber-500/10" },
-      { icon: Shield, label: "Hygiene & regelgeving", sub: "NVWA en lokale eisen", href: "/intel", color: "text-blue-500", bg: "bg-blue-500/10" },
-      { icon: Users, label: "Horecanetwerk", sub: "Samenwerken met collega's", href: "/network", color: "text-violet-500", bg: "bg-violet-500/10" },
-    ],
-  },
-  techniek: {
-    label: "Techniek",
-    icon: Wrench,
-    kleur: "text-slate-600 dark:text-slate-400",
-    bg: "bg-slate-500/10",
-    kansen: [
-      { icon: Landmark, label: "Technische aanbestedingen", sub: "Gemeenteopdrachten", href: "/kansen/aanbestedingen", color: "text-amber-500", bg: "bg-amber-500/10" },
-      { icon: Banknote, label: "Innovatiesubsidies", sub: "RVO, WBSO en meer", href: "/intel", color: "text-emerald-500", bg: "bg-emerald-500/10" },
-      { icon: BookOpen, label: "Vakbekwaamheid", sub: "Certificeringen en eisen", href: "/intel", color: "text-blue-500", bg: "bg-blue-500/10" },
-      { icon: Users, label: "Technisch netwerk", sub: "Leveranciers & partners", href: "/network", color: "text-violet-500", bg: "bg-violet-500/10" },
-    ],
-  },
-  agrarisch: {
-    label: "Agrarisch",
-    icon: Tractor,
-    kleur: "text-green-600 dark:text-green-400",
-    bg: "bg-green-500/10",
-    kansen: [
-      { icon: Leaf, label: "GLB-subsidies", sub: "Europese landbouwsteun", href: "/intel", color: "text-emerald-500", bg: "bg-emerald-500/10" },
-      { icon: FileText, label: "Omgevingsvergunning", sub: "Stikstof en bouwen", href: "/tools/brief-analyse", color: "text-amber-500", bg: "bg-amber-500/10" },
-      { icon: Globe, label: "Regio-beleid", sub: "Provinciale regelgeving", href: "/intel", color: "text-blue-500", bg: "bg-blue-500/10" },
-      { icon: Handshake, label: "Agrarisch netwerk", sub: "ZLTO, LTO & coöperaties", href: "/network", color: "text-violet-500", bg: "bg-violet-500/10" },
-    ],
-  },
-} as const;
-
-type SectorKey = keyof typeof SECTOR_CONFIG;
-
-const SECTOR_TILES = [
-  { key: "detailhandel" as SectorKey, label: "Detailhandel", sub: "Winkels en retail", icon: Store, color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-950/40", border: "border-blue-200 dark:border-blue-900/60" },
-  { key: "horeca" as SectorKey, label: "Horeca", sub: "Restaurants en cafés", icon: Utensils, color: "text-orange-600 dark:text-orange-400", bg: "bg-orange-50 dark:bg-orange-950/40", border: "border-orange-200 dark:border-orange-900/60" },
-  { key: "techniek" as SectorKey, label: "Techniek", sub: "Installatie en ambacht", icon: Wrench, color: "text-slate-600 dark:text-slate-400", bg: "bg-slate-50 dark:bg-slate-900/40", border: "border-slate-200 dark:border-slate-700/60" },
-  { key: "agrarisch" as SectorKey, label: "Agrarisch", sub: "Landbouw en natuur", icon: Tractor, color: "text-green-600 dark:text-green-400", bg: "bg-green-50 dark:bg-green-950/40", border: "border-green-200 dark:border-green-900/60" },
-];
+import {
+  SECTOR_CONFIG,
+  SECTOR_TILES,
+  CATEGORIE_META,
+  CATEGORIE_KEYS,
+  getSectorConfig,
+  type SectorKey,
+} from "@/config/sectors";
 
 const CATEGORIE_KLEUREN: Record<string, string> = {
   subsidies: "text-emerald-400 bg-emerald-500/10",
@@ -737,30 +676,53 @@ export default function DashboardPage() {
             )}
           </div>
           <div className="grid grid-cols-2 gap-3" data-testid="grid-kansen-sector">
-            {(sectorConfig ? sectorConfig.kansen : [
-              { icon: ScanText, label: "Brief begrijpen", sub: "Upload een overheidsbrief", href: "/tools/brief-analyse", color: "text-violet-500", bg: "bg-violet-500/10" },
-              { icon: Globe, label: "Website check", sub: "Hoe vindbaar ben jij?", href: "/tools/website-scan", color: "text-blue-500", bg: "bg-blue-500/10" },
-              { icon: Landmark, label: "Aanbestedingen", sub: "Gemeenteopdrachten", href: "/kansen/aanbestedingen", color: "text-amber-500", bg: "bg-amber-500/10" },
-              { icon: Users, label: "Netwerk", sub: "Ondernemers in jouw regio", href: "/network", color: "text-emerald-500", bg: "bg-emerald-500/10" },
-            ]).map((kans, idx) => {
-              const Icon = kans.icon;
-              return (
-                <Link href={kans.href} key={idx}>
-                  <div
-                    className="flex items-center gap-3 rounded-xl border bg-background p-3 hover-elevate cursor-pointer"
-                    data-testid={`kans-tile-${idx}`}
-                  >
-                    <div className={`rounded-lg p-2 shrink-0 ${kans.bg}`}>
-                      <Icon className={`w-3.5 h-3.5 ${kans.color}`} />
-                    </div>
-                    <div className="min-w-0">
-                      <p className="text-xs font-semibold text-foreground leading-tight">{kans.label}</p>
-                      <p className="text-[11px] text-muted-foreground leading-tight mt-0.5 truncate">{kans.sub}</p>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
+            {sectorConfig
+              ? CATEGORIE_KEYS.map((catKey) => {
+                  const meta = CATEGORIE_META[catKey];
+                  const content = sectorConfig.categorieen[catKey];
+                  const Icon = meta.icon;
+                  return (
+                    <Link href={content.href} key={catKey}>
+                      <div
+                        className="flex items-center gap-3 rounded-xl border bg-background p-3 hover-elevate cursor-pointer"
+                        data-testid={`kans-tile-${catKey}`}
+                      >
+                        <div className={`rounded-lg p-2 shrink-0 ${meta.bg}`}>
+                          <Icon className={`w-3.5 h-3.5 ${meta.color}`} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold text-foreground leading-tight">{meta.label}</p>
+                          <p className="text-[11px] text-muted-foreground leading-tight mt-0.5 line-clamp-2">{content.sub}</p>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })
+              : [
+                  { icon: ScanText, label: "Brief begrijpen", sub: "Upload een overheidsbrief", href: "/tools/brief-analyse", color: "text-violet-500", bg: "bg-violet-500/10" },
+                  { icon: Globe, label: "Website check", sub: "Hoe vindbaar ben jij?", href: "/tools/website-scan", color: "text-blue-500", bg: "bg-blue-500/10" },
+                  { icon: Landmark, label: "Aanbestedingen", sub: "Gemeenteopdrachten", href: "/kansen/aanbestedingen", color: "text-amber-500", bg: "bg-amber-500/10" },
+                  { icon: Users, label: "Netwerk", sub: "Ondernemers in jouw regio", href: "/network", color: "text-emerald-500", bg: "bg-emerald-500/10" },
+                ].map((kans, idx) => {
+                  const Icon = kans.icon;
+                  return (
+                    <Link href={kans.href} key={idx}>
+                      <div
+                        className="flex items-center gap-3 rounded-xl border bg-background p-3 hover-elevate cursor-pointer"
+                        data-testid={`kans-tile-${idx}`}
+                      >
+                        <div className={`rounded-lg p-2 shrink-0 ${kans.bg}`}>
+                          <Icon className={`w-3.5 h-3.5 ${kans.color}`} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-xs font-semibold text-foreground leading-tight">{kans.label}</p>
+                          <p className="text-[11px] text-muted-foreground leading-tight mt-0.5 truncate">{kans.sub}</p>
+                        </div>
+                      </div>
+                    </Link>
+                  );
+                })
+            }
           </div>
           {!isPro && (
             <Link href="/lidmaatschap">
