@@ -14,6 +14,12 @@ import logoImg from "@assets/optimized/logo.webp";
 import footerLogoImg from "@assets/optimized/footer-logo.webp";
 import streetImg from "@assets/optimized/street.webp";
 import groupImg from "@assets/optimized/group.webp";
+import regelgevingImg from "@assets/optimized/regelgeving-hero.webp";
+import websiteScanImg from "@assets/optimized/website-scan-hero.webp";
+import sectorDetailhandelImg from "@assets/optimized/sector-detailhandel.png";
+import sectorHorecaImg from "@assets/optimized/sector-horeca.png";
+import sectorTechniekImg from "@assets/optimized/sector-techniek.png";
+import sectorAgrarischImg from "@assets/optimized/sector-agrarisch.png";
 
 const MOLLIE_BASIC_LINK = (import.meta.env.VITE_MOLLIE_BASIC_PAYMENT_LINK as string) || "https://payment-links.mollie.com/payment/FNnWr8uofpfEd6PJQMWHk";
 const MOLLIE_PRO_LINK = (import.meta.env.VITE_MOLLIE_PRO_PAYMENT_LINK as string) || "https://payment-links.mollie.com/payment/nEdtEni7GkJG7rHHetyBs";
@@ -374,37 +380,42 @@ export default function HomePage() {
             <div className="grid md:grid-cols-2 gap-5 mb-16">
               {[
                 {
-                  Icon: BarChart2,
+                  img: sectorDetailhandelImg,
                   label: "Detailhandel",
                   text: "Voor winkels en concepten die zichtbaarheid, overzicht en lokale slagkracht willen.",
                 },
                 {
-                  Icon: FileText,
+                  img: sectorHorecaImg,
                   label: "Restaurants & horeca",
                   text: "Voor zaken die online sterker willen staan en sneller willen snappen wat praktisch en juridisch speelt.",
                 },
                 {
-                  Icon: Gavel,
+                  img: sectorTechniekImg,
                   label: "Techniek",
                   text: "Voor technische bedrijven die professioneel zichtbaar willen zijn en sneller overzicht willen in relevante regels en kansen.",
                 },
                 {
-                  Icon: TrendingDown,
+                  img: sectorAgrarischImg,
                   label: "Agrarisch",
                   text: "Voor agrarische ondernemers die beter gevonden willen worden en grip willen houden op ontwikkelingen en regelgeving.",
                 },
-              ].map(({ Icon, label, text }, i) => (
+              ].map(({ img, label, text }, i) => (
                 <div
                   key={i}
-                  className="rounded-2xl p-7"
+                  className="rounded-2xl overflow-hidden"
                   style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)" }}
                   data-testid={`sector-item-${i}`}
                 >
-                  <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-5" style={{ background: "rgba(242,138,26,0.2)" }}>
-                    <Icon className="w-5 h-5" style={{ color: "#fdba74" }} />
+                  <div className="relative">
+                    <img src={img} alt={label} className="w-full object-cover" style={{ height: "180px" }} loading="lazy" />
+                    <div className="absolute inset-0" style={{ background: "linear-gradient(to bottom, rgba(11,34,64,0) 40%, rgba(11,34,64,0.85) 100%)" }} />
+                    <div className="absolute bottom-0 left-0 px-6 pb-4">
+                      <div className="text-xs font-bold uppercase tracking-widest" style={{ color: "#fdba74" }}>{label}</div>
+                    </div>
                   </div>
-                  <div className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: "#fdba74" }}>{label}</div>
-                  <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>{text}</p>
+                  <div className="p-6">
+                    <p className="text-sm leading-relaxed" style={{ color: "rgba(255,255,255,0.75)" }}>{text}</p>
+                  </div>
                 </div>
               ))}
             </div>
@@ -424,7 +435,7 @@ export default function HomePage() {
         {/* ─── GEBRUIK ─── */}
         <section id="oplossingen" className="py-24" style={{ background: "#f8fafd" }} data-testid="section-oplossingen">
           <div className="max-w-5xl mx-auto px-6">
-            <div className="text-center mb-14">
+            <div className="text-center mb-10">
               <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#1f5fae" }}>Waar zet je het voor in?</span>
               <h2 className="font-black mt-3 text-slate-900" style={{ fontSize: "clamp(22px, 2.8vw, 36px)", letterSpacing: "-0.6px" }} data-testid="text-oplossingen-title">
                 Waar zetten ondernemers OpenRegio voor in?
@@ -433,6 +444,23 @@ export default function HomePage() {
                 Niet feature-first, maar op basis van wat je wil bereiken.
               </p>
             </div>
+
+            {/* Visuele context: twee sfeerbeelden */}
+            <div className="grid md:grid-cols-2 gap-4 mb-10">
+              <div className="rounded-2xl overflow-hidden relative" style={{ height: "200px" }}>
+                <img src={websiteScanImg} alt="Website en online zichtbaarheid" className="w-full h-full object-cover" loading="lazy" />
+                <div className="absolute inset-0 flex items-end px-6 pb-5" style={{ background: "linear-gradient(to top, rgba(14,58,112,0.75) 0%, transparent 60%)" }}>
+                  <span className="text-sm font-bold text-white">Online zichtbaarheid & website</span>
+                </div>
+              </div>
+              <div className="rounded-2xl overflow-hidden relative" style={{ height: "200px" }}>
+                <img src={regelgevingImg} alt="Wet- en regelgeving inzicht" className="w-full h-full object-cover" loading="lazy" />
+                <div className="absolute inset-0 flex items-end px-6 pb-5" style={{ background: "linear-gradient(to top, rgba(14,58,112,0.75) 0%, transparent 60%)" }}>
+                  <span className="text-sm font-bold text-white">Wet- en regelgeving & signalen</span>
+                </div>
+              </div>
+            </div>
+
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5" data-testid="grid-pijlers">
               {[
                 { accent: "#1f5fae", icon: BarChart2,    title: "Ik wil een betere website",                     desc: "Zichtbaarheid en uitstraling verbeteren voor jouw lokale onderneming." },

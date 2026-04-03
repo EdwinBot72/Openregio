@@ -1,0 +1,26 @@
+uploads = []
+outputs = []
+
+[[generated]]
+id = "tkCbLYiYQM0YkTd3geyIp"
+uri = "file://client/src/assets/optimized/sector-detailhandel.png"
+type = "image"
+title = "sector detailhandel"
+
+[[generated]]
+id = "8yq5iUaZemE7urGFRe0Jt"
+uri = "file://client/src/assets/optimized/sector-horeca.png"
+type = "image"
+title = "sector horeca restaurant"
+
+[[generated]]
+id = "KT8Q-yRClch-LGHXZW1m_"
+uri = "file://client/src/assets/optimized/sector-techniek.png"
+type = "image"
+title = "sector techniek"
+
+[[generated]]
+id = "M31_XC1mE8Dbu0I6ycH5S"
+uri = "file://client/src/assets/optimized/sector-agrarisch.png"
+type = "image"
+title = "sector agrarisch"
