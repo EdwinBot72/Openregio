@@ -117,7 +117,7 @@ function SectorKansenItems({
 
   return (
     <>
-      {/* Groepslabel — klikbaar naar /kansen-markt */}
+      {/* Sector-groepslabel — klikbaar naar /kansen-markt */}
       <SidebarMenuSubItem>
         <SidebarMenuSubButton
           asChild
@@ -126,7 +126,7 @@ function SectorKansenItems({
         >
           <Link href="/kansen-markt" className="flex items-center gap-1.5">
             <SectorIcon className="h-3.5 w-3.5 shrink-0" />
-            <span className="font-semibold">Kansen in de markt</span>
+            <span className="font-semibold">{sectorConf.label}</span>
           </Link>
         </SidebarMenuSubButton>
       </SidebarMenuSubItem>
