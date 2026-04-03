@@ -136,6 +136,8 @@ ${data.naam}`;
 export default function WooWizardPage() {
   const { toast } = useToast();
   const { user, isLoading: authLoading } = useAuth();
+
+  const isMaster = user?.role === "master" || user?.role === "admin";
   const [selectedType, setSelectedType] = useState<InstrumentType | null>(null);
   const [currentStep, setCurrentStep] = useState(1);
   const [copied, setCopied] = useState(false);
@@ -277,6 +279,31 @@ export default function WooWizardPage() {
           <CardContent className="text-center">
             <Link href="/login">
               <Button data-testid="button-login">Inloggen</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (!isMaster) {
+    return (
+      <div className="container mx-auto py-8 px-4 max-w-4xl">
+        <Card>
+          <CardHeader className="text-center py-10">
+            <div className="flex justify-center mb-4">
+              <div className="rounded-full bg-muted p-4">
+                <Lock className="h-8 w-8 text-muted-foreground" />
+              </div>
+            </div>
+            <CardTitle data-testid="text-geen-toegang">Alleen voor beheerders</CardTitle>
+            <CardDescription className="mt-2">
+              Het opstellen van WOO-verzoeken is voorbehouden aan het beheerteam van OpenRegio.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="text-center pb-8">
+            <Link href="/vandaag">
+              <Button variant="outline" data-testid="button-terug-dashboard">Terug naar dashboard</Button>
             </Link>
           </CardContent>
         </Card>

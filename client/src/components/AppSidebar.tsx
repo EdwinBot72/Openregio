@@ -96,10 +96,12 @@ function NavSectionItem({
   section,
   currentPath,
   isPro,
+  isMaster,
 }: {
   section: NavSection;
   currentPath: string;
   isPro: boolean;
+  isMaster: boolean;
 }) {
   const isActive = section.url
     ? currentPath === section.url
@@ -124,7 +126,9 @@ function NavSectionItem({
     );
   }
 
-  const visibleSub = section.sub?.filter((s) => !s.proOnly || isPro);
+  const visibleSub = section.sub?.filter(
+    (s) => (!s.proOnly || isPro) && (!s.masterOnly || isMaster)
+  );
 
   return (
     <SidebarMenuItem>
@@ -186,6 +190,7 @@ export function AppSidebar() {
   };
 
   const isPro = user?.plan === "pro";
+  const isMaster = user?.role === "master" || user?.role === "admin";
 
   const getInitials = () => {
     if (user?.firstName || user?.lastName) {
@@ -247,6 +252,7 @@ export function AppSidebar() {
                     section={section}
                     currentPath={location}
                     isPro={isPro}
+                    isMaster={isMaster}
                   />
                 );
               })}

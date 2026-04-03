@@ -24,6 +24,7 @@ export type NavSubItem = {
   url: string;
   icon: React.ElementType;
   proOnly?: boolean;
+  masterOnly?: boolean;
 };
 
 export type NavSection = {
@@ -84,7 +85,7 @@ export const MAIN_NAV: NavSection[] = [
     sub: [
       { title: "Regelgeving-assistent", url: "/regiobot", icon: Bot },
       { title: "WOO-documenten", url: "/woo-bibliotheek", icon: FolderOpen },
-      { title: "Verzoek indienen", url: "/woo-wizard", icon: Gavel },
+      { title: "Verzoek opstellen", url: "/woo-wizard", icon: Gavel, masterOnly: true },
     ],
   },
   {

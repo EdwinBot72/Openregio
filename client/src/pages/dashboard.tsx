@@ -488,6 +488,7 @@ export default function DashboardPage() {
 
   const isPro = user.plan === "pro";
   const isAdmin = user.isAdmin || false;
+  const isMaster = user.role === "master" || user.role === "admin";
   const hasSector = !!user.sector;
   const hasRegio = !!user.region;
   const sectorKey = (hasSector && user.sector && user.sector in SECTOR_CONFIG) ? user.sector as SectorKey : null;
@@ -872,8 +873,10 @@ export default function DashboardPage() {
               { icon: TrendingUp, label: "Kansen zien", sub: "Subsidies en lokale opdrachten", href: "/intel", color: "text-emerald-500", bg: "bg-emerald-500/10", testid: "actie-kansen" },
               { icon: UserPlus, label: "Profiel live zetten", sub: "Zichtbaar voor de regio", href: "/bedrijfsprofiel", color: "text-amber-500", bg: "bg-amber-500/10", testid: "actie-profiel-live" },
               ...(isPro ? [
-                { icon: Gavel, label: "WOO-verzoek", sub: "Verzoek indienen", href: "/woo-wizard", color: "text-rose-500", bg: "bg-rose-500/10", testid: "actie-verzoek" },
                 { icon: FolderOpen, label: "Documenten", sub: "Jouw bibliotheek", href: "/woo-bibliotheek", color: "text-orange-500", bg: "bg-orange-500/10", testid: "actie-documenten" },
+              ] : []),
+              ...(isMaster ? [
+                { icon: Gavel, label: "WOO opstellen", sub: "Verzoek aanmaken", href: "/woo-wizard", color: "text-rose-500", bg: "bg-rose-500/10", testid: "actie-verzoek" },
               ] : []),
             ].map((actie) => {
               const Icon = actie.icon;
