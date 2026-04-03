@@ -26,6 +26,7 @@ import {
   FileText,
   BookOpen,
   Loader2,
+  Sparkles,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -49,7 +50,6 @@ import {
   SECTOR_TILES,
   CATEGORIE_META,
   CATEGORIE_KEYS,
-  getSectorConfig,
   type SectorKey,
 } from "@/config/sectors";
 
@@ -614,11 +614,16 @@ export default function DashboardPage() {
             <p className="text-sm font-bold text-foreground truncate" data-testid="text-bedrijfsnaam">
               {bedrijfsprofiel?.naam || user.businessName || "Profiel invullen"}
             </p>
-            {sectorConfig && (
-              <p className={`text-xs mt-1 font-medium ${sectorConfig.kleur}`} data-testid="text-sector-label">
-                {sectorConfig.label}
-              </p>
-            )}
+            <div className="flex flex-wrap items-center gap-1.5 mt-1">
+              {sectorConfig && (
+                <span className={`text-xs font-medium ${sectorConfig.kleur}`} data-testid="text-sector-label">
+                  {sectorConfig.label}
+                </span>
+              )}
+              <Badge variant="secondary" className="text-[10px]" data-testid="badge-pakket">
+                {isPro ? "Pro" : "Basis"}
+              </Badge>
+            </div>
             {(bedrijfsprofiel?.regio || user.region) && (
               <p className="text-xs text-muted-foreground mt-0.5">{bedrijfsprofiel?.regio || user.region}</p>
             )}
@@ -722,7 +727,24 @@ export default function DashboardPage() {
         </div>
       </section>
 
+      {/* ── Onboarding wall — shown when BOTH sector and regio are missing ── */}
+      {(!hasSector && !hasRegio) && (
+        <section data-testid="section-onboarding-wall">
+          <div className="rounded-2xl border-2 border-dashed bg-card p-8 text-center space-y-4">
+            <Sparkles className="w-10 h-10 text-muted-foreground/40 mx-auto" />
+            <div>
+              <h2 className="text-lg font-bold text-foreground">Stel je profiel in om te beginnen</h2>
+              <p className="text-sm text-muted-foreground mt-1.5 max-w-xs mx-auto">
+                Kies je sector en regio hierboven om je gepersonaliseerde dashboard te activeren.
+              </p>
+            </div>
+            <p className="text-xs text-muted-foreground">Je ziet dan kansen, regio-updates en signalen die passen bij jouw bedrijf.</p>
+          </div>
+        </section>
+      )}
+
       {/* ── Kansen per sector + Regio-updates ───────────────────────────── */}
+      {(hasSector || hasRegio) && (
       <section className="grid gap-5 lg:grid-cols-2" data-testid="section-kansen-updates">
 
         {/* Kansen per sector */}
@@ -835,6 +857,7 @@ export default function DashboardPage() {
           )}
         </div>
       </section>
+      )}
 
       {/* ── Snelle acties ────────────────────────────────────────────────── */}
       <section data-testid="section-snelle-acties">
