@@ -421,15 +421,6 @@ export default function HomePage() {
               ))}
             </div>
 
-            {/* Foto — brede strip */}
-            <div className="rounded-2xl overflow-hidden" style={{ boxShadow: "0 20px 60px rgba(0,0,0,0.4)" }}>
-              <img
-                src={streetImg}
-                alt="Nederlandse winkelstraat"
-                className="w-full object-cover"
-                style={{ height: "300px", objectPosition: "center center" }}
-              />
-            </div>
           </div>
         </section>
 
