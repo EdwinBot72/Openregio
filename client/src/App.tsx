@@ -218,8 +218,9 @@ function AppContent() {
   const [isDisclaimerPage] = useRoute("/disclaimer");
   const [isCookiebeleidPage] = useRoute("/cookiebeleid");
   const [isRegioAnalysePage] = useRoute("/regio-analyse");
+  const [isKoopLokaalPage] = useRoute("/koop-lokaal");
 
-  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isLidmaatschapPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage || isBlogsPage || isForgotPasswordPage || isResetPasswordPage || isDisclaimerPage || isCookiebeleidPage || isRegioAnalysePage;
+  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isLidmaatschapPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage || isBlogsPage || isForgotPasswordPage || isResetPasswordPage || isDisclaimerPage || isCookiebeleidPage || isRegioAnalysePage || isKoopLokaalPage;
 
   if (isPublicRoute) {
     return <PublicRouter />;

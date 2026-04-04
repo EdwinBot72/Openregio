@@ -302,7 +302,7 @@ export default function WooWizardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="text-center pb-8">
-            <Link href="/vandaag">
+            <Link href="/dashboard">
               <Button variant="outline" data-testid="button-terug-dashboard">Terug naar dashboard</Button>
             </Link>
           </CardContent>
