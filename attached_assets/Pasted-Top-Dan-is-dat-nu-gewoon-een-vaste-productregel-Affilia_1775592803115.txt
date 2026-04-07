@@ -1,0 +1,227 @@
+Top. Dan is dat nu gewoon een **vaste productregel**:
+
+# Affiliate geldt voor alle gebruikers
+
+Dus:
+
+* **basis** ziet affiliate
+* **pro** ziet affiliate
+* **admin** ziet affiliate ook, maar admin gebruikt het daarnaast eventueel ook beheermatig
+
+Dat betekent dat affiliate **geen Pro-feature** is en ook **geen beheer-feature**.
+
+---
+
+# Dan wordt de structuur definitief zo
+
+## 1. Dashboard
+
+* overzicht
+* wat speelt nu
+* snelle acties
+
+## 2. Mijn bedrijf
+
+* bedrijfsprofiel
+* lokale basischeck
+* website scan *(alleen pro/admin)*
+
+## 3. Kansen
+
+* kansen overzicht
+* aanbestedingen
+* subsidies & financiering
+* regio-updates
+
+## 4. Analyse
+
+* brief laten checken
+* regelgeving verkenner
+* RegioBot *(alleen pro/admin)*
+* WOO-documenten *(alleen pro/admin)*
+* Mijn documenten *(alleen pro/admin)*
+* WOO-verzoek opstellen *(alleen pro/admin)*
+
+## 5. Affiliate
+
+* mijn affiliate-link
+* commissie / beloningen
+* referrals / aanmeldingen
+
+## 6. Account
+
+* lidmaatschap
+* privacy & gegevens
+
+## 7. Beheer *(alleen admin)*
+
+* beheer dashboard
+* gebruikers
+* ondernemers
+* content
+* regio & WOO
+* systeem
+
+---
+
+# Exact per rol
+
+## Basis
+
+```txt
+Dashboard
+Mijn bedrijf
+  - Bedrijfsprofiel
+  - Lokale Basischeck
+
+Kansen
+  - Kansen overzicht
+  - Aanbestedingen
+  - Subsidies & financiering
+  - Regio-updates
+
+Analyse
+  - Brief laten checken
+  - Regelgeving verkenner
+
+Affiliate
+  - Mijn affiliate-link
+  - Commissie & beloningen
+  - Mijn referrals
+
+Account
+  - Lidmaatschap
+  - Privacy & Gegevens
+```
+
+---
+
+## Pro
+
+```txt
+Dashboard
+Mijn bedrijf
+  - Bedrijfsprofiel
+  - Lokale Basischeck
+  - Website scan
+
+Kansen
+  - Kansen overzicht
+  - Aanbestedingen
+  - Subsidies & financiering
+  - Regio-updates
+
+Analyse
+  - Brief laten checken
+  - Regelgeving verkenner
+  - RegioBot
+  - WOO-documenten
+  - Mijn documenten
+  - WOO-verzoek opstellen
+
+Affiliate
+  - Mijn affiliate-link
+  - Commissie & beloningen
+  - Mijn referrals
+
+Account
+  - Lidmaatschap
+  - Privacy & Gegevens
+```
+
+---
+
+## Admin
+
+```txt
+Dashboard
+Mijn bedrijf
+  - Bedrijfsprofiel
+  - Lokale Basischeck
+  - Website scan
+
+Kansen
+  - Kansen overzicht
+  - Aanbestedingen
+  - Subsidies & financiering
+  - Regio-updates
+
+Analyse
+  - Brief laten checken
+  - Regelgeving verkenner
+  - RegioBot
+  - WOO-documenten
+  - Mijn documenten
+  - WOO-verzoek opstellen
+
+Affiliate
+  - Mijn affiliate-link
+  - Commissie & beloningen
+  - Mijn referrals
+
+Account
+  - Lidmaatschap
+  - Privacy & Gegevens
+
+Beheer
+  - Beheer dashboard
+  - Gebruikers
+  - Ondernemers
+  - Content
+  - Regio & WOO
+  - Systeem
+```
+
+---
+
+# Belangrijk productbesluit
+
+Affiliate moet dus in de sidebar als **eigen hoofditem**.
+
+Niet wegstoppen onder:
+
+* account
+* kansen
+* beheer
+
+Waarom niet?
+Omdat affiliate een **verdienroute** is. Dat is hoofdwaarde. Dus hoofdmenu.
+
+---
+
+# Definitieve regelset
+
+## Voor iedereen zichtbaar
+
+* Dashboard
+* Mijn bedrijf
+* Kansen
+* Analyse
+* Affiliate
+* Account
+
+## Alleen pro/admin extra binnen modules
+
+* website scan
+* RegioBot
+* WOO-documenten
+* Mijn documenten
+* WOO-verzoek opstellen
+
+## Alleen admin
+
+* Beheer
+
+---
+
+# Strakste versie
+
+Dus vanaf nu:
+
+**Basis = ook affiliate**
+**Pro = ook affiliate**
+**Admin = ook affiliate + beheer**
+
+Dat is nu helder en stabiel.
+
+Ik kan nu direct de definitieve `navigation.ts` structuur voor je uitschrijven met role-based items zonder twijfelzones.

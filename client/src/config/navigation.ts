@@ -22,7 +22,7 @@ import {
   BarChart2,
   ShieldCheck,
   MapPin,
-  FlaskConical,
+  Files,
 } from "lucide-react";
 
 export type NavSubItem = {
@@ -87,7 +87,7 @@ export const MAIN_NAV: NavSection[] = [
       { title: "Regelgeving verkenner", url: "/regelgeving-verkenner", icon: BookOpen },
       { title: "RegioBot", url: "/regiobot", icon: Bot, proOnly: true },
       { title: "WOO-documenten", url: "/woo-bibliotheek", icon: FolderOpen, proOnly: true },
-      { title: "Mijn documenten", url: "/mijn-documenten", icon: FlaskConical, proOnly: true },
+      { title: "Mijn documenten", url: "/mijn-documenten", icon: Files, proOnly: true },
       { title: "WOO-verzoek opstellen", url: "/woo-wizard", icon: Gavel, proOnly: true },
     ],
   },
