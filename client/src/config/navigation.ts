@@ -13,9 +13,16 @@ import {
   Shield,
   LayoutGrid,
   BookOpen,
-  TrendingUp,
   Settings,
   CheckCircle,
+  Link2,
+  Coins,
+  Users,
+  FileText,
+  BarChart2,
+  ShieldCheck,
+  MapPin,
+  FlaskConical,
 } from "lucide-react";
 
 export type NavSubItem = {
@@ -23,7 +30,7 @@ export type NavSubItem = {
   url: string;
   icon: React.ElementType;
   proOnly?: boolean;
-  masterOnly?: boolean;
+  adminOnly?: boolean;
 };
 
 export type NavSection = {
@@ -32,30 +39,35 @@ export type NavSection = {
   icon: React.ElementType;
   url?: string;
   sub?: NavSubItem[];
-  proOnly?: boolean;
+  adminOnly?: boolean;
 };
 
-/** Hoofdnavigatie — outcome-based, geen tool-namen */
+/** Definitieve hoofdnavigatie — alle rollen */
 export const MAIN_NAV: NavSection[] = [
+  // 1 ── Dashboard
   {
-    id: "vandaag",
-    title: "Vandaag",
+    id: "dashboard",
+    title: "Dashboard",
     icon: Sparkles,
     url: "/dashboard",
   },
+
+  // 2 ── Mijn bedrijf
   {
-    id: "beter-worden",
-    title: "Ik wil beter worden",
-    icon: TrendingUp,
+    id: "mijn-bedrijf",
+    title: "Mijn bedrijf",
+    icon: Building2,
     sub: [
-      { title: "Website check", url: "/tools/website-scan", icon: Monitor },
+      { title: "Bedrijfsprofiel", url: "/bedrijfsprofiel", icon: Building2 },
       { title: "Lokale Basischeck", url: "/lokale-basischeck", icon: CheckCircle },
-      { title: "Regelgeving verkenner", url: "/regelgeving-verkenner", icon: BookOpen },
+      { title: "Website scan", url: "/tools/website-scan", icon: Monitor, proOnly: true },
     ],
   },
+
+  // 3 ── Kansen
   {
-    id: "kansen-zien",
-    title: "Ik wil kansen zien",
+    id: "kansen",
+    title: "Kansen",
     icon: Signal,
     sub: [
       { title: "Kansen overzicht", url: "/kansen-in-de-buurt", icon: LayoutGrid },
@@ -64,36 +76,58 @@ export const MAIN_NAV: NavSection[] = [
       { title: "Regio-updates", url: "/intel", icon: Signal },
     ],
   },
+
+  // 4 ── Analyse
   {
-    id: "brief-checken",
-    title: "Brief laten checken",
+    id: "analyse",
+    title: "Analyse",
     icon: ScanText,
-    url: "/tools/brief-analyse",
-  },
-  {
-    id: "bibliotheek",
-    title: "Bibliotheek",
-    icon: BookOpen,
-    proOnly: true,
     sub: [
-      { title: "Regelgeving-assistent", url: "/regiobot", icon: Bot },
-      { title: "WOO-documenten", url: "/woo-bibliotheek", icon: FolderOpen },
-      { title: "Verzoek opstellen", url: "/woo-wizard", icon: Gavel, masterOnly: true },
+      { title: "Brief laten checken", url: "/tools/brief-analyse", icon: FileText },
+      { title: "Regelgeving verkenner", url: "/regelgeving-verkenner", icon: BookOpen },
+      { title: "RegioBot", url: "/regiobot", icon: Bot, proOnly: true },
+      { title: "WOO-documenten", url: "/woo-bibliotheek", icon: FolderOpen, proOnly: true },
+      { title: "Mijn documenten", url: "/mijn-documenten", icon: FlaskConical, proOnly: true },
+      { title: "WOO-verzoek opstellen", url: "/woo-wizard", icon: Gavel, proOnly: true },
     ],
   },
+
+  // 5 ── Affiliate (iedereen)
   {
-    id: "mijn-bedrijf",
-    title: "Mijn bedrijf",
-    icon: Building2,
-    url: "/bedrijfsprofiel",
+    id: "affiliate",
+    title: "Affiliate",
+    icon: Link2,
+    sub: [
+      { title: "Mijn affiliate-link", url: "/affiliate", icon: Link2 },
+      { title: "Commissie & beloningen", url: "/affiliate", icon: Coins },
+      { title: "Mijn referrals", url: "/affiliate", icon: Users },
+    ],
   },
+
+  // 6 ── Account
   {
-    id: "instellingen",
-    title: "Instellingen",
+    id: "account",
+    title: "Account",
     icon: Settings,
     sub: [
       { title: "Lidmaatschap", url: "/lidmaatschap", icon: CreditCard },
       { title: "Privacy & Gegevens", url: "/privacy-dashboard", icon: Shield },
+    ],
+  },
+
+  // 7 ── Beheer (alleen admin)
+  {
+    id: "beheer",
+    title: "Beheer",
+    icon: ShieldCheck,
+    adminOnly: true,
+    sub: [
+      { title: "Beheer dashboard", url: "/admin", icon: BarChart2 },
+      { title: "Gebruikers", url: "/admin/users", icon: Users },
+      { title: "Ondernemers", url: "/admin/ondernemers", icon: Building2 },
+      { title: "Content", url: "/admin/blogs", icon: FileText },
+      { title: "Regio & WOO", url: "/admin/woo", icon: MapPin },
+      { title: "Systeem", url: "/admin/inzicht", icon: Settings },
     ],
   },
 ];
@@ -103,7 +137,7 @@ export const ACCOUNT_NAV = [
   { title: "Privacy & Gegevens", url: "/privacy-dashboard", icon: Shield },
 ];
 
-/** Legacy — backward compat for any remaining references */
+/** Legacy — backward compat */
 export const KERN_NAV = MAIN_NAV;
 export const GROEI_NAV: NavSection[] = [];
 export const EXTRA_NAV: NavSection[] = [];

@@ -16,16 +16,8 @@ import {
 import {
   User,
   LogOut,
-  Shield,
   ChevronDown,
   ChevronRight,
-  MapPin,
-  Gavel,
-  Users,
-  BarChart2,
-  ShieldCheck,
-  Building2,
-  Landmark,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -43,65 +35,7 @@ import {
   type SectorKey,
 } from "@/config/sectors";
 
-const adminSubItems = [
-  { title: "Admin Cockpit", url: "/admin", icon: ShieldCheck },
-  { title: "Woo-monitoring", url: "/admin/woo", icon: Gavel },
-  { title: "Regio-beheer", url: "/admin/regios", icon: MapPin },
-  { title: "Platform-inzicht", url: "/admin/inzicht", icon: BarChart2 },
-  { title: "Gebruikers", url: "/admin/users", icon: Users },
-  { title: "Ondernemers", url: "/admin/ondernemers", icon: Building2 },
-  { title: "Regio Intel", url: "/admin/intel", icon: Landmark },
-];
-
-function AdminNavSection({ currentPath }: { currentPath: string }) {
-  const isActive = currentPath.startsWith("/admin");
-  const [open, setOpen] = useState(isActive);
-  return (
-    <SidebarMenuItem>
-      <SidebarMenuButton
-        isActive={isActive && !open}
-        onClick={() => setOpen((v) => !v)}
-        data-testid="toggle-nav-admin"
-        className="w-full justify-between"
-      >
-        <span className="flex items-center gap-2">
-          <Shield className="h-4 w-4" />
-          <span>Beheer</span>
-        </span>
-        {open ? (
-          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-        ) : (
-          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
-        )}
-      </SidebarMenuButton>
-      {open && (
-        <SidebarMenuSub>
-          {adminSubItems.map((item) => {
-            const subActive =
-              currentPath === item.url ||
-              (item.url !== "/admin" && currentPath.startsWith(item.url + "/"));
-            return (
-              <SidebarMenuSubItem key={item.url}>
-                <SidebarMenuSubButton
-                  asChild
-                  isActive={subActive}
-                  data-testid={`link-admin-${item.url.replace(/\//g, "-").replace(/^-/, "")}`}
-                >
-                  <Link href={item.url} className="flex items-center gap-2">
-                    <item.icon className="h-3.5 w-3.5" />
-                    <span>{item.title}</span>
-                  </Link>
-                </SidebarMenuSubButton>
-              </SidebarMenuSubItem>
-            );
-          })}
-        </SidebarMenuSub>
-      )}
-    </SidebarMenuItem>
-  );
-}
-
-// ── Sector-specifieke kansen-items in de "Ik wil beter worden" sectie ─────────
+// ── Sector-specifieke kansen-items (onder de "Kansen" sectie) ─────────────────
 
 function SectorKansenItems({
   sectorKey,
@@ -117,7 +51,6 @@ function SectorKansenItems({
 
   return (
     <>
-      {/* Sector-groepslabel — klikbaar naar /kansen-markt */}
       <SidebarMenuSubItem>
         <SidebarMenuSubButton
           asChild
@@ -131,7 +64,6 @@ function SectorKansenItems({
         </SidebarMenuSubButton>
       </SidebarMenuSubItem>
 
-      {/* 4 sector-categorieën */}
       {CATEGORIE_KEYS.map((catKey) => {
         const catMeta = CATEGORIE_META[catKey];
         const catContent = sectorConf.categorieen[catKey];
@@ -165,21 +97,19 @@ function NavSectionItem({
   section,
   currentPath,
   isPro,
-  isMaster,
+  isAdmin,
   userSector,
 }: {
   section: NavSection;
   currentPath: string;
   isPro: boolean;
-  isMaster: boolean;
+  isAdmin: boolean;
   userSector?: SectorKey | null;
 }) {
-  const isBeterWorden = section.id === "beter-worden";
+  const isKansen = section.id === "kansen";
 
   const sectorActive =
-    isBeterWorden &&
-    userSector &&
-    SECTOR_CONFIG[userSector]
+    isKansen && userSector && SECTOR_CONFIG[userSector]
       ? CATEGORIE_KEYS.some((k) => {
           const href = SECTOR_CONFIG[userSector].categorieen[k].href;
           return currentPath === href || currentPath.startsWith(href + "/");
@@ -196,6 +126,7 @@ function NavSectionItem({
 
   const [open, setOpen] = useState(isActive ?? false);
 
+  // Direct-link (geen sub-items)
   if (section.url && !section.sub) {
     return (
       <SidebarMenuItem>
@@ -213,8 +144,9 @@ function NavSectionItem({
     );
   }
 
+  // Alleen zichtbare sub-items op basis van rol
   const visibleSub = section.sub?.filter(
-    (s) => (!s.proOnly || isPro) && (!s.masterOnly || isMaster)
+    (s) => (!s.proOnly || isPro || isAdmin) && (!s.adminOnly || isAdmin)
   );
 
   return (
@@ -238,16 +170,15 @@ function NavSectionItem({
 
       {open && (
         <SidebarMenuSub>
-          {/* Vaste sub-items */}
           {visibleSub?.map((sub) => {
             const subActive =
               currentPath === sub.url || currentPath.startsWith(sub.url + "/");
             return (
-              <SidebarMenuSubItem key={sub.url}>
+              <SidebarMenuSubItem key={`${sub.url}-${sub.title}`}>
                 <SidebarMenuSubButton
                   asChild
                   isActive={subActive}
-                  data-testid={`link-sub-${sub.url.replace(/\//g, "-").replace(/^-/, "")}`}
+                  data-testid={`link-sub-${sub.url.replace(/\//g, "-").replace(/^-/, "")}-${sub.title.replace(/\s+/g, "-").toLowerCase()}`}
                 >
                   <Link href={sub.url} className="flex items-center gap-2">
                     <sub.icon className="h-3.5 w-3.5" />
@@ -258,8 +189,8 @@ function NavSectionItem({
             );
           })}
 
-          {/* Sector-specifieke kansen-items voor "Ik wil beter worden" */}
-          {isBeterWorden && userSector && (
+          {/* Sector-specifieke kansen-items onder de "Kansen" sectie */}
+          {isKansen && userSector && (
             <SectorKansenItems
               sectorKey={userSector}
               currentPath={currentPath}
@@ -288,7 +219,7 @@ export function AppSidebar() {
   };
 
   const isPro = user?.plan === "pro";
-  const isMaster = user?.role === "master" || user?.role === "admin";
+  const isAdmin = user?.role === "master" || user?.role === "admin" || !!user?.isAdmin;
   const userSector = (user?.sector as SectorKey) || null;
 
   const getInitials = () => {
@@ -334,37 +265,20 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {MAIN_NAV.map((section) => {
-                if (section.proOnly && !isPro) {
-                  return (
-                    <SidebarMenuItem key={section.id}>
-                      <SidebarMenuButton
-                        asChild
-                        data-testid={`link-nav-${section.id}-upgrade`}
-                      >
-                        <Link
-                          href="/lidmaatschap"
-                          className="flex items-center gap-2 text-muted-foreground"
-                        >
-                          <section.icon className="h-4 w-4" />
-                          <span>{section.title} — Pro</span>
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                }
+                // Beheer alleen tonen voor admins
+                if (section.adminOnly && !isAdmin) return null;
+
                 return (
                   <NavSectionItem
                     key={section.id}
                     section={section}
                     currentPath={location}
                     isPro={isPro}
-                    isMaster={isMaster}
+                    isAdmin={isAdmin}
                     userSector={userSector}
                   />
                 );
               })}
-
-              {user?.isAdmin && <AdminNavSection currentPath={location} />}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
