@@ -1,266 +1,550 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import {
-  CheckCircle2, XCircle, ArrowRight, ArrowLeft,
-  ShoppingBag, Users, CalendarDays, HandshakeIcon,
-  Megaphone, Landmark, HeartHandshake, MapPin,
-} from "lucide-react";
 import { Link } from "wouter";
+import {
+  ArrowRight, Loader2, Sparkles, TrendingUp, AlertTriangle,
+  Lightbulb, CheckCircle2, Shield, FileText, RefreshCw,
+  ChevronRight, Star, Lock, RotateCcw, Building2,
+} from "lucide-react";
 
-interface Vraag {
-  id: string;
-  icon: typeof ShoppingBag;
-  titel: string;
-  toelichting: string;
-  tip: string;
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+type AnalyseType = "regio-analyse" | "regelgeving";
+
+type RegioResultaat = {
+  kansen: { titel: string; beschrijving: string }[];
+  risicos: { titel: string; beschrijving: string }[];
+  tips: { actie: string; uitleg: string }[];
+  samenvatting: string;
+};
+
+type RegelgevingResultaat = {
+  vergunningen: { naam: string; beschrijving: string; urgentie: "hoog" | "middel" | "laag" }[];
+  aandachtspunten: { punt: string; toelichting: string }[];
+  recente_wijzigingen: { onderwerp: string; impact: string }[];
+  samenvatting: string;
+};
+
+type Resultaat = RegioResultaat | RegelgevingResultaat;
+
+function isRegio(r: Resultaat): r is RegioResultaat {
+  return "kansen" in r;
 }
 
-const VRAGEN: Vraag[] = [
-  {
-    id: "lokaal_inkopen",
-    icon: ShoppingBag,
-    titel: "Koop jij bewust in bij leveranciers in jouw regio?",
-    toelichting: "Denk aan groente, verpakkingsmateriaal, drukwerk, schoonmaak — worden die lokaal ingekocht?",
-    tip: "Zoek op OpenRegio actieve aanbieders in jouw gemeente en vraag een offerte. Lokaal inkopen versterkt de hele regionale economie.",
-  },
-  {
-    id: "doorverwijzen",
-    icon: Users,
-    titel: "Verwijs je klanten actief door naar andere lokale ondernemers?",
-    toelichting: "Als jij iets niet kunt leveren, stuur je dan klanten naar een collega in de buurt?",
-    tip: "Maak een korte 'aanbevolen lokaal' lijst voor je klanten. Via RegioCrew vind je collega-ondernemers in jouw sector.",
-  },
-  {
-    id: "netwerken",
-    icon: CalendarDays,
-    titel: "Neem je deel aan lokale evenementen, markten of ondernemersnetwerken?",
-    toelichting: "Denk aan een lokale ondernemersvereniging, weekmarkt, beurzen of gemeente-evenementen.",
-    tip: "Bekijk de Gemeente-updates sectie voor aankomende evenementen en aanbestedingen in jouw gemeente.",
-  },
-  {
-    id: "kennis",
-    icon: MapPin,
-    titel: "Ken je de meeste ondernemers in jouw directe omgeving persoonlijk?",
-    toelichting: "Weet je wie er op jouw straat of in jouw wijk ondernemen en wat zij doen?",
-    tip: "Maak een rondje in je buurt en stel jezelf voor. Of plaats een bericht op de Lokale Marktplaats zodat collega's jou vinden.",
-  },
-  {
-    id: "marketing",
-    icon: Megaphone,
-    titel: "Promoot je jouw bedrijf actief via lokale media of lokale online groepen?",
-    toelichting: "Denk aan lokale krant, buurtapp, Facebook-groepen van je gemeente, of een sticker op je raam.",
-    tip: "Meld je aan bij lokale Facebook-groepen en deel je aanbod. Gebruik het Google Bedrijfsprofiel voor zichtbaarheid in de buurt.",
-  },
-  {
-    id: "samenwerken",
-    icon: HandshakeIcon,
-    titel: "Heb je actieve samenwerkingen met andere lokale bedrijven?",
-    toelichting: "Lever je samen met anderen, of heb je een formele of informele samenwerking?",
-    tip: "Gebruik de Lokale Marktplaats om een 'ik zoek samenwerking' oproep te plaatsen. Kleine samenwerkingen beginnen vaak simpel.",
-  },
-  {
-    id: "lokale_diensten",
-    icon: Landmark,
-    titel: "Maak je gebruik van lokale banken, accountants of adviseurs?",
-    toelichting: "Zijn jouw financiële en zakelijke dienstverleners ook lokaal actief?",
-    tip: "Raiffeisen, regionale Rabobank-kantoren en lokale boekhoudkantoren investeren hun winst terug in de regio. Dat maakt verschil.",
-  },
-  {
-    id: "bijdragen",
-    icon: HeartHandshake,
-    titel: "Draag je bij aan lokale initiatieven, sponsoring of community-activiteiten?",
-    toelichting: "Denk aan een plaatselijk sportteam sponsoren, een buurtfeest ondersteunen of lokale schoolactiviteiten.",
-    tip: "Sponsoring hoeft niet duur te zijn — een product, een dienst, of gewoon aanwezig zijn bij lokale activiteiten telt ook.",
-  },
-];
+// ─── Logo ────────────────────────────────────────────────────────────────────
 
-const SCORE_LABELS = [
-  { min: 0, max: 2, label: "Nog veel te winnen", kleur: "text-red-600 dark:text-red-400", bg: "bg-red-50 dark:bg-red-950/40" },
-  { min: 3, max: 5, label: "Op weg lokaal", kleur: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-950/40" },
-  { min: 6, max: 7, label: "Sterk lokaal", kleur: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-950/40" },
-  { min: 8, max: 8, label: "Volledig lokaal!", kleur: "text-green-600 dark:text-green-400", bg: "bg-green-50 dark:bg-green-950/40" },
-];
+function Logo() {
+  return (
+    <div className="flex items-center gap-2.5">
+      <div className="w-8 h-8 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center">
+        <Building2 className="h-4 w-4 text-white" />
+      </div>
+      <span className="font-bold text-white text-base tracking-tight">OpenRegio</span>
+    </div>
+  );
+}
+
+// ─── Urgentie kleur ───────────────────────────────────────────────────────────
+
+function urgentieKleur(u: string) {
+  if (u === "hoog") return { dot: "bg-rose-400", bg: "bg-rose-50 dark:bg-rose-500/10", text: "text-rose-700 dark:text-rose-400", label: "Hoog" };
+  if (u === "middel") return { dot: "bg-amber-400", bg: "bg-amber-50 dark:bg-amber-500/10", text: "text-amber-700 dark:text-amber-400", label: "Middel" };
+  return { dot: "bg-slate-400", bg: "bg-slate-50 dark:bg-slate-500/10", text: "text-slate-600 dark:text-slate-400", label: "Laag" };
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
 
 export default function BasischeckPage() {
-  usePageTitle("Lokaal Ondernemen Check");
-  const [started, setStarted] = useState(false);
-  const [huidigVraag, setHuidigVraag] = useState(0);
-  const [antwoorden, setAntwoorden] = useState<Record<string, boolean>>({});
-  const [klaar, setKlaar] = useState(false);
+  usePageTitle("Gratis Basischeck — OpenRegio");
 
-  const beantwoord = (ja: boolean) => {
-    const vraag = VRAGEN[huidigVraag];
-    setAntwoorden((prev) => ({ ...prev, [vraag.id]: ja }));
-    if (huidigVraag < VRAGEN.length - 1) {
-      setHuidigVraag((prev) => prev + 1);
-    } else {
-      setKlaar(true);
+  const [activeTab, setActiveTab] = useState<AnalyseType>("regio-analyse");
+  const [beroep, setBeroep] = useState("");
+  const [gemeente, setGemeente] = useState("");
+  const [bedrijfsnaam, setBedrijfsnaam] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [resultaat, setResultaat] = useState<Resultaat | null>(null);
+  const [fout, setFout] = useState("");
+  const [submittedFor, setSubmittedFor] = useState<{ beroep: string; gemeente: string; type: AnalyseType } | null>(null);
+  const resultRef = useRef<HTMLDivElement>(null);
+
+  const startAnalyse = async () => {
+    if (!beroep.trim() || !gemeente.trim()) {
+      setFout("Vul je beroep en stad of gemeente in.");
+      return;
+    }
+    setFout("");
+    setLoading(true);
+    setResultaat(null);
+    setSubmittedFor({ beroep: beroep.trim(), gemeente: gemeente.trim(), type: activeTab });
+
+    try {
+      const res = await fetch("/api/basischeck/analyse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ beroep: beroep.trim(), gemeente: gemeente.trim(), bedrijfsnaam: bedrijfsnaam.trim(), type: activeTab }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "Analyse mislukt");
+      }
+
+      const data = await res.json();
+      setResultaat(data);
+      setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
+    } catch (err: any) {
+      setFout(err.message || "Er is iets misgegaan. Probeer het opnieuw.");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const terug = () => {
-    if (huidigVraag > 0) setHuidigVraag((prev) => prev - 1);
-  };
-
   const opnieuw = () => {
-    setStarted(false);
-    setHuidigVraag(0);
-    setAntwoorden({});
-    setKlaar(false);
+    setResultaat(null);
+    setFout("");
+    setSubmittedFor(null);
   };
 
-  const score = Object.values(antwoorden).filter(Boolean).length;
-  const scoreLabel = SCORE_LABELS.find((s) => score >= s.min && score <= s.max) ?? SCORE_LABELS[0];
-  const verbetertips = VRAGEN.filter((v) => antwoorden[v.id] === false);
-  const voortgang = ((huidigVraag + (klaar ? 1 : 0)) / VRAGEN.length) * 100;
-
-  if (!started) {
-    return (
-      <div className="max-w-xl mx-auto py-12 px-4 space-y-6">
-        <div className="text-center space-y-3">
-          <div className="w-14 h-14 rounded-2xl bg-green-50 dark:bg-green-950/40 flex items-center justify-center mx-auto">
-            <MapPin className="h-7 w-7 text-green-600 dark:text-green-400" />
-          </div>
-          <h1 className="text-2xl font-bold">Lokaal Ondernemen Check</h1>
-          <p className="text-muted-foreground leading-relaxed">
-            Hoe lokaal is jouw bedrijf eigenlijk? Met 8 vragen meten we je lokale score en geven we concrete tips om jouw bijdrage aan de regionale economie te vergroten.
-          </p>
-        </div>
-        <Card>
-          <CardContent className="p-5 space-y-4">
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              {[
-                { icon: ShoppingBag, text: "Lokaal inkopen" },
-                { icon: Users, text: "Doorverwijzen" },
-                { icon: CalendarDays, text: "Netwerken" },
-                { icon: HandshakeIcon, text: "Samenwerken" },
-                { icon: Megaphone, text: "Lokale marketing" },
-                { icon: HeartHandshake, text: "Bijdragen" },
-              ].map((item) => (
-                <div key={item.text} className="flex items-center gap-2 text-muted-foreground">
-                  <item.icon className="h-4 w-4 text-green-600 dark:text-green-400 shrink-0" />
-                  {item.text}
-                </div>
-              ))}
-            </div>
-            <Button className="w-full" onClick={() => setStarted(true)} data-testid="button-start-check">
-              Start de check <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  if (klaar) {
-    return (
-      <div className="max-w-xl mx-auto py-12 px-4 space-y-6">
-        <div className="text-center space-y-3">
-          <div className={`w-14 h-14 rounded-2xl ${scoreLabel.bg} flex items-center justify-center mx-auto`}>
-            <MapPin className={`h-7 w-7 ${scoreLabel.kleur}`} />
-          </div>
-          <h1 className="text-2xl font-bold">Jouw lokale score</h1>
-          <div className={`text-4xl font-bold ${scoreLabel.kleur}`}>{score} / {VRAGEN.length}</div>
-          <Badge className={`${scoreLabel.bg} ${scoreLabel.kleur} border-0`} data-testid="badge-score-label">
-            {scoreLabel.label}
-          </Badge>
-        </div>
-
-        {verbetertips.length > 0 && (
-          <Card data-testid="section-verbetertips">
-            <CardContent className="p-5 space-y-4">
-              <h2 className="font-semibold text-sm">Verbeterpunten voor jou</h2>
-              <div className="space-y-4">
-                {verbetertips.map((v) => (
-                  <div key={v.id} className="flex gap-3 border-b last:border-0 pb-4 last:pb-0">
-                    <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center shrink-0">
-                      <v.icon className="h-3.5 w-3.5 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold mb-1">{v.titel}</p>
-                      <p className="text-xs text-muted-foreground leading-relaxed">{v.tip}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {score === VRAGEN.length && (
-          <Card className="bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900/40">
-            <CardContent className="p-5 text-center space-y-2">
-              <CheckCircle2 className="h-8 w-8 text-green-600 dark:text-green-400 mx-auto" />
-              <p className="font-semibold text-sm">Je scoort volledig lokaal!</p>
-              <p className="text-xs text-muted-foreground">Je bent een voorbeeld voor andere ondernemers in jouw regio. Deel jouw aanpak via de Community.</p>
-            </CardContent>
-          </Card>
-        )}
-
-        <div className="flex gap-3">
-          <Button variant="outline" className="flex-1" onClick={opnieuw} data-testid="button-opnieuw">
-            Opnieuw doen
-          </Button>
-          <Link href="/lokaal-marktplaats" asChild>
-            <Button className="flex-1" data-testid="button-naar-marktplaats">
-              Lokale Marktplaats <ArrowRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
-      </div>
-    );
-  }
-
-  const vraag = VRAGEN[huidigVraag];
+  const BG = "#1a3666";
 
   return (
-    <div className="max-w-xl mx-auto py-12 px-4 space-y-6">
-      <div className="space-y-2">
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
-          <span>Vraag {huidigVraag + 1} van {VRAGEN.length}</span>
-          <span>{Math.round(voortgang)}%</span>
+    <div className="min-h-screen bg-[#0f2347]">
+
+      {/* ── Header ────────────────────────────────────────────────────────── */}
+      <header className="border-b border-white/10" style={{ backgroundColor: BG }}>
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
+          <Logo />
+          <nav className="hidden md:flex items-center gap-7">
+            {["Home", "Oplossingen", "Basischeck", "Lidmaatschap", "Contact"].map((item) => (
+              <Link
+                key={item}
+                href={item === "Home" ? "/" : item === "Basischeck" ? "/basischeck" : item === "Lidmaatschap" ? "/lidmaatschap" : "/"}
+              >
+                <span
+                  className={`text-sm font-medium transition ${
+                    item === "Basischeck" ? "text-white" : "text-white/60 hover:text-white/90"
+                  }`}
+                >
+                  {item}
+                </span>
+              </Link>
+            ))}
+          </nav>
+          <div className="flex items-center gap-3">
+            <Link href="/login">
+              <span className="text-sm font-medium text-white/70 hover:text-white transition">Inloggen</span>
+            </Link>
+            <Link href="/register">
+              <button
+                className="rounded-xl px-4 py-2 text-sm font-semibold text-white transition"
+                style={{ backgroundColor: "#b5933a" }}
+                data-testid="button-header-start"
+              >
+                Start de Basischeck
+              </button>
+            </Link>
+          </div>
         </div>
-        <Progress value={voortgang} className="h-1.5" data-testid="progress-vraag" />
-      </div>
+      </header>
 
-      <Card data-testid={`vraag-${vraag.id}`}>
-        <CardContent className="p-6 space-y-5">
-          <div className="w-12 h-12 rounded-xl bg-green-50 dark:bg-green-950/40 flex items-center justify-center">
-            <vraag.icon className="h-6 w-6 text-green-600 dark:text-green-400" />
-          </div>
-          <div>
-            <h2 className="font-semibold text-base leading-snug mb-2">{vraag.titel}</h2>
-            <p className="text-sm text-muted-foreground leading-relaxed">{vraag.toelichting}</p>
-          </div>
-          <div className="grid grid-cols-2 gap-3 pt-2">
-            <Button
-              variant="outline"
-              className="h-12 text-base border-red-200 dark:border-red-900/40 text-red-600 dark:text-red-400"
-              onClick={() => beantwoord(false)}
-              data-testid="button-nee"
-            >
-              <XCircle className="mr-2 h-4 w-4" /> Nee
-            </Button>
-            <Button
-              className="h-12 text-base bg-green-600 hover:bg-green-700"
-              onClick={() => beantwoord(true)}
-              data-testid="button-ja"
-            >
-              <CheckCircle2 className="mr-2 h-4 w-4" /> Ja
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+      {/* ── Hero + Form ───────────────────────────────────────────────────── */}
+      <section className="py-16 px-5" style={{ backgroundColor: BG }}>
+        <div className="mx-auto max-w-2xl text-center">
 
-      {huidigVraag > 0 && (
-        <Button variant="ghost" size="sm" onClick={terug} data-testid="button-terug">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Vorige vraag
-        </Button>
+          {/* Badge */}
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 mb-8">
+            <Star className="h-3.5 w-3.5 text-amber-300" />
+            <span className="text-xs font-semibold text-white/90 uppercase tracking-wider">Gratis Basischeck</span>
+          </div>
+
+          <h1 className="text-4xl md:text-5xl font-black text-white leading-tight mb-4">
+            Zie direct wat er speelt in <span className="text-amber-300">jouw regio.</span>
+          </h1>
+          <p className="text-white/60 text-base mb-10">
+            Duurt minder dan 30 seconden. Geen account nodig.
+          </p>
+
+          {/* Tab selector */}
+          <div className="inline-flex items-center gap-1 rounded-full border border-white/20 bg-white/10 p-1 mb-8" data-testid="tab-selector">
+            {(["regio-analyse", "regelgeving"] as AnalyseType[]).map((tab) => (
+              <button
+                key={tab}
+                onClick={() => { setActiveTab(tab); setResultaat(null); setFout(""); }}
+                className={`rounded-full px-5 py-2 text-sm font-semibold transition-all ${
+                  activeTab === tab
+                    ? "bg-white text-slate-900 shadow-sm"
+                    : "text-white/70 hover:text-white"
+                }`}
+                data-testid={`tab-${tab}`}
+              >
+                {tab === "regio-analyse" ? "Regio-analyse" : "Regelgeving"}
+              </button>
+            ))}
+          </div>
+
+          {/* Form card */}
+          <div className="rounded-[24px] bg-white dark:bg-slate-900 shadow-2xl shadow-black/40 p-6 text-left space-y-4">
+            <div>
+              <input
+                type="text"
+                value={beroep}
+                onChange={(e) => setBeroep(e.target.value)}
+                placeholder="Je beroep (bijv. Bakker, Horeca, Fysiotherapeut)"
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:border-[#1a3666] focus:ring-2 focus:ring-[#1a3666]/10 transition"
+                data-testid="input-beroep"
+                onKeyDown={(e) => e.key === "Enter" && startAnalyse()}
+              />
+            </div>
+            <div>
+              <input
+                type="text"
+                value={gemeente}
+                onChange={(e) => setGemeente(e.target.value)}
+                placeholder="Je stad of gemeente"
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:border-[#1a3666] focus:ring-2 focus:ring-[#1a3666]/10 transition"
+                data-testid="input-gemeente"
+                onKeyDown={(e) => e.key === "Enter" && startAnalyse()}
+              />
+            </div>
+            <div>
+              <input
+                type="text"
+                value={bedrijfsnaam}
+                onChange={(e) => setBedrijfsnaam(e.target.value)}
+                placeholder="Bedrijfsnaam — voor Google-profielcheck (optioneel)"
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:border-[#1a3666] focus:ring-2 focus:ring-[#1a3666]/10 transition"
+                data-testid="input-bedrijfsnaam"
+                onKeyDown={(e) => e.key === "Enter" && startAnalyse()}
+              />
+              <p className="text-xs text-slate-400 mt-1.5 ml-1">Optioneel</p>
+            </div>
+
+            {fout && (
+              <p className="text-sm text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 rounded-xl px-4 py-3" data-testid="error-message">
+                {fout}
+              </p>
+            )}
+
+            <button
+              onClick={startAnalyse}
+              disabled={loading}
+              className="w-full flex items-center justify-center gap-2 rounded-xl py-4 text-sm font-bold text-white transition hover:opacity-90 active:scale-[0.98] disabled:opacity-70"
+              style={{ backgroundColor: "#b5933a" }}
+              data-testid="button-start-analyse"
+            >
+              {loading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Analyse bezig…
+                </>
+              ) : (
+                <>
+                  Start de analyse <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </button>
+          </div>
+
+          <p className="text-xs text-white/40 mt-5">
+            AI-gegenereerd inzicht op basis van openbare bronnen. Geen opslag van persoonsgegevens.
+          </p>
+        </div>
+      </section>
+
+      {/* ── Loading state ─────────────────────────────────────────────────── */}
+      {loading && (
+        <section className="py-16 px-5 bg-[#0f2347]">
+          <div className="mx-auto max-w-2xl text-center space-y-4">
+            <div className="w-14 h-14 rounded-[20px] bg-white/10 border border-white/15 flex items-center justify-center mx-auto">
+              <Loader2 className="h-7 w-7 text-amber-300 animate-spin" />
+            </div>
+            <p className="text-white font-semibold">Analyse wordt opgesteld…</p>
+            <p className="text-white/50 text-sm">
+              We analyseren de situatie voor een <strong className="text-white/80">{beroep}</strong> in <strong className="text-white/80">{gemeente}</strong>
+            </p>
+          </div>
+        </section>
       )}
+
+      {/* ── Resultaten ────────────────────────────────────────────────────── */}
+      {resultaat && submittedFor && (
+        <section className="py-12 px-5 bg-[#0f2347]" ref={resultRef} data-testid="section-resultaat">
+          <div className="mx-auto max-w-2xl space-y-6">
+
+            {/* Header resultaat */}
+            <div className="flex items-start justify-between gap-4 flex-wrap">
+              <div>
+                <p className="text-xs font-semibold text-white/50 uppercase tracking-wider mb-1">
+                  {submittedFor.type === "regio-analyse" ? "Regio-analyse" : "Regelgeving"} voor
+                </p>
+                <h2 className="text-xl font-black text-white">
+                  {submittedFor.beroep} in {submittedFor.gemeente}
+                </h2>
+              </div>
+              <button
+                onClick={opnieuw}
+                className="flex items-center gap-2 rounded-xl border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white/80 hover:bg-white/15 transition"
+                data-testid="button-opnieuw"
+              >
+                <RotateCcw className="h-3.5 w-3.5" /> Opnieuw
+              </button>
+            </div>
+
+            {/* Samenvatting */}
+            <div className="rounded-[20px] border border-amber-400/20 bg-amber-400/8 px-5 py-4" data-testid="card-samenvatting">
+              <p className="text-amber-200 text-sm leading-relaxed">{resultaat.samenvatting}</p>
+            </div>
+
+            {/* Regio-analyse resultaten */}
+            {isRegio(resultaat) && (
+              <>
+                {/* Kansen */}
+                <div className="rounded-[20px] border border-white/10 bg-white/5 p-5 space-y-4" data-testid="card-kansen">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-400/15 flex items-center justify-center">
+                      <TrendingUp className="h-4 w-4 text-emerald-400" />
+                    </div>
+                    <h3 className="font-bold text-white">Kansen in jouw regio</h3>
+                  </div>
+                  <div className="space-y-3">
+                    {resultaat.kansen.map((k, i) => (
+                      <div key={i} className="flex gap-3" data-testid={`kans-${i}`}>
+                        <div className="w-5 h-5 rounded-full bg-emerald-400/20 flex items-center justify-center shrink-0 mt-0.5">
+                          <CheckCircle2 className="h-3 w-3 text-emerald-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-white">{k.titel}</p>
+                          <p className="text-sm text-white/55 leading-relaxed mt-0.5">{k.beschrijving}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Risico's */}
+                <div className="rounded-[20px] border border-white/10 bg-white/5 p-5 space-y-4" data-testid="card-risicos">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-rose-400/15 flex items-center justify-center">
+                      <AlertTriangle className="h-4 w-4 text-rose-400" />
+                    </div>
+                    <h3 className="font-bold text-white">Risico's &amp; uitdagingen</h3>
+                  </div>
+                  <div className="space-y-3">
+                    {resultaat.risicos.map((r, i) => (
+                      <div key={i} className="flex gap-3" data-testid={`risico-${i}`}>
+                        <div className="w-5 h-5 rounded-full bg-rose-400/20 flex items-center justify-center shrink-0 mt-0.5">
+                          <AlertTriangle className="h-3 w-3 text-rose-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-white">{r.titel}</p>
+                          <p className="text-sm text-white/55 leading-relaxed mt-0.5">{r.beschrijving}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Tips */}
+                <div className="rounded-[20px] border border-white/10 bg-white/5 p-5 space-y-4" data-testid="card-tips">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-amber-400/15 flex items-center justify-center">
+                      <Lightbulb className="h-4 w-4 text-amber-400" />
+                    </div>
+                    <h3 className="font-bold text-white">Concrete tips voor jou</h3>
+                  </div>
+                  <div className="space-y-3">
+                    {resultaat.tips.map((t, i) => (
+                      <div key={i} className="flex gap-3" data-testid={`tip-${i}`}>
+                        <div className="w-5 h-5 rounded-full bg-amber-400/20 flex items-center justify-center shrink-0 mt-0.5">
+                          <span className="text-[10px] font-bold text-amber-300">{i + 1}</span>
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-white">{t.actie}</p>
+                          <p className="text-sm text-white/55 leading-relaxed mt-0.5">{t.uitleg}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* Regelgeving resultaten */}
+            {!isRegio(resultaat) && (
+              <>
+                {/* Vergunningen */}
+                <div className="rounded-[20px] border border-white/10 bg-white/5 p-5 space-y-4" data-testid="card-vergunningen">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-blue-400/15 flex items-center justify-center">
+                      <FileText className="h-4 w-4 text-blue-400" />
+                    </div>
+                    <h3 className="font-bold text-white">Relevante vergunningen</h3>
+                  </div>
+                  <div className="space-y-3">
+                    {resultaat.vergunningen.map((v, i) => {
+                      const uk = urgentieKleur(v.urgentie);
+                      return (
+                        <div key={i} className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3.5" data-testid={`vergunning-${i}`}>
+                          <div className="flex items-start gap-2.5">
+                            <div className={`w-2 h-2 rounded-full mt-1.5 shrink-0 ${uk.dot}`} />
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2 flex-wrap mb-1">
+                                <p className="text-sm font-semibold text-white">{v.naam}</p>
+                                <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${uk.bg} ${uk.text}`}>
+                                  {uk.label}
+                                </span>
+                              </div>
+                              <p className="text-sm text-white/55 leading-relaxed">{v.beschrijving}</p>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Aandachtspunten */}
+                <div className="rounded-[20px] border border-white/10 bg-white/5 p-5 space-y-4" data-testid="card-aandachtspunten">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-amber-400/15 flex items-center justify-center">
+                      <AlertTriangle className="h-4 w-4 text-amber-400" />
+                    </div>
+                    <h3 className="font-bold text-white">Aandachtspunten</h3>
+                  </div>
+                  <div className="space-y-3">
+                    {resultaat.aandachtspunten.map((a, i) => (
+                      <div key={i} className="flex gap-3" data-testid={`aandacht-${i}`}>
+                        <div className="w-5 h-5 rounded-full bg-amber-400/20 flex items-center justify-center shrink-0 mt-0.5">
+                          <AlertTriangle className="h-3 w-3 text-amber-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-white">{a.punt}</p>
+                          <p className="text-sm text-white/55 leading-relaxed mt-0.5">{a.toelichting}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Recente wijzigingen */}
+                <div className="rounded-[20px] border border-white/10 bg-white/5 p-5 space-y-4" data-testid="card-wijzigingen">
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-xl bg-violet-400/15 flex items-center justify-center">
+                      <RefreshCw className="h-4 w-4 text-violet-400" />
+                    </div>
+                    <h3 className="font-bold text-white">Recente wijzigingen</h3>
+                  </div>
+                  <div className="space-y-3">
+                    {resultaat.recente_wijzigingen.map((w, i) => (
+                      <div key={i} className="flex gap-3" data-testid={`wijziging-${i}`}>
+                        <div className="w-5 h-5 rounded-full bg-violet-400/20 flex items-center justify-center shrink-0 mt-0.5">
+                          <ChevronRight className="h-3 w-3 text-violet-400" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-white">{w.onderwerp}</p>
+                          <p className="text-sm text-white/55 leading-relaxed mt-0.5">{w.impact}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </>
+            )}
+
+            {/* CTA — lid worden */}
+            <div className="rounded-[20px] border border-amber-400/25 bg-amber-400/8 p-6 text-center space-y-4" data-testid="card-cta-lid">
+              <div className="w-12 h-12 rounded-2xl bg-amber-400/15 flex items-center justify-center mx-auto">
+                <Lock className="h-6 w-6 text-amber-300" />
+              </div>
+              <div>
+                <h3 className="font-black text-white text-lg">Wil je dit elke week automatisch?</h3>
+                <p className="text-white/60 text-sm mt-1.5 max-w-sm mx-auto">
+                  Als lid van OpenRegio ontvang je gepersonaliseerde updates, subsidie-alerts en een uitgebreide basischeck — elke week vers voor jouw sector en regio.
+                </p>
+              </div>
+              <div className="flex gap-3 justify-center flex-wrap">
+                <Link href="/register">
+                  <button
+                    className="rounded-xl px-6 py-3 text-sm font-bold text-white transition hover:opacity-90"
+                    style={{ backgroundColor: "#b5933a" }}
+                    data-testid="button-word-lid"
+                  >
+                    Word gratis lid <ArrowRight className="inline h-4 w-4 ml-1.5" />
+                  </button>
+                </Link>
+                <Link href="/login">
+                  <button className="rounded-xl border border-white/20 bg-white/10 px-6 py-3 text-sm font-semibold text-white hover:bg-white/15 transition" data-testid="button-inloggen">
+                    Inloggen
+                  </button>
+                </Link>
+              </div>
+            </div>
+
+          </div>
+        </section>
+      )}
+
+      {/* ── Waardepropositie (getoond als er geen resultaat is) ───────────── */}
+      {!resultaat && !loading && (
+        <section className="py-16 px-5 bg-[#0f2347]">
+          <div className="mx-auto max-w-4xl">
+            <div className="text-center mb-10">
+              <h2 className="text-2xl font-black text-white mb-2">Wat je gratis krijgt</h2>
+              <p className="text-white/50 text-sm">Direct inzicht, zonder registratie</p>
+            </div>
+            <div className="grid sm:grid-cols-3 gap-4">
+              {[
+                {
+                  icon: TrendingUp,
+                  kleur: "text-emerald-400",
+                  bg: "bg-emerald-400/15",
+                  titel: "Regio-analyse",
+                  tekst: "Kansen, risico's en trends voor jouw beroep in jouw gemeente — AI-gegenereerd op basis van actuele bronnen.",
+                },
+                {
+                  icon: FileText,
+                  kleur: "text-blue-400",
+                  bg: "bg-blue-400/15",
+                  titel: "Regelgeving-check",
+                  tekst: "Welke vergunningen heb je nodig? Wat zijn de actuele aandachtspunten voor jouw sector? Direct antwoord.",
+                },
+                {
+                  icon: Shield,
+                  kleur: "text-violet-400",
+                  bg: "bg-violet-400/15",
+                  titel: "Privacy-first",
+                  tekst: "Geen account nodig. Geen opslag van je gegevens. Resultaten worden niet gedeeld met derden.",
+                },
+              ].map((item) => {
+                const Icon = item.icon;
+                return (
+                  <div key={item.titel} className="rounded-[20px] border border-white/10 bg-white/5 p-5 space-y-3">
+                    <div className={`w-10 h-10 rounded-2xl ${item.bg} flex items-center justify-center`}>
+                      <Icon className={`h-5 w-5 ${item.kleur}`} />
+                    </div>
+                    <p className="font-bold text-white text-sm">{item.titel}</p>
+                    <p className="text-white/50 text-xs leading-relaxed">{item.tekst}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Footer ────────────────────────────────────────────────────────── */}
+      <footer className="border-t border-white/10 py-8 px-5 bg-[#0c1f3e]">
+        <div className="mx-auto max-w-4xl flex items-center justify-between gap-4 flex-wrap">
+          <Logo />
+          <div className="flex gap-5">
+            <Link href="/privacy"><span className="text-xs text-white/40 hover:text-white/70 transition">Privacy</span></Link>
+            <Link href="/voorwaarden"><span className="text-xs text-white/40 hover:text-white/70 transition">Voorwaarden</span></Link>
+            <Link href="/contact"><span className="text-xs text-white/40 hover:text-white/70 transition">Contact</span></Link>
+          </div>
+          <p className="text-xs text-white/30">© 2025 OpenRegio</p>
+        </div>
+      </footer>
+
     </div>
   );
 }

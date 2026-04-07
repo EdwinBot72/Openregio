@@ -5625,6 +5625,105 @@ Geef ALLEEN geldige JSON terug (geen markdown, geen uitleg), in dit exacte forma
     }
   });
 
+  // ─── PUBLIC: POST /api/basischeck/analyse — AI-analyse voor gratis check ─
+
+  const basischeckCache = new Map<string, { data: object; ts: number }>();
+
+  app.post("/api/basischeck/analyse", async (req, res) => {
+    const { beroep, gemeente, bedrijfsnaam, type } = req.body as {
+      beroep?: string;
+      gemeente?: string;
+      bedrijfsnaam?: string;
+      type?: "regio-analyse" | "regelgeving";
+    };
+
+    if (!beroep?.trim() || !gemeente?.trim()) {
+      return res.status(400).json({ error: "Beroep en gemeente zijn verplicht." });
+    }
+    if (!["regio-analyse", "regelgeving"].includes(type ?? "")) {
+      return res.status(400).json({ error: "Ongeldig type." });
+    }
+
+    const cacheKey = `${type}__${beroep.trim().toLowerCase()}__${gemeente.trim().toLowerCase()}`;
+    const cached = basischeckCache.get(cacheKey);
+    if (cached && Date.now() - cached.ts < 6 * 60 * 60 * 1000) {
+      return res.json(cached.data);
+    }
+
+    const isRegio = type === "regio-analyse";
+    const bedrijfExtra = bedrijfsnaam?.trim() ? ` (bedrijfsnaam: ${bedrijfsnaam.trim()})` : "";
+
+    const prompt = isRegio
+      ? `Je bent een expert in de Nederlandse regionale economie. Analyseer de situatie voor een ${beroep} in ${gemeente}${bedrijfExtra}.
+
+Geef een JSON-object (ALLEEN JSON, geen tekst eromheen) met precies deze structuur:
+{
+  "kansen": [
+    { "titel": "...", "beschrijving": "..." },
+    { "titel": "...", "beschrijving": "..." },
+    { "titel": "...", "beschrijving": "..." }
+  ],
+  "risicos": [
+    { "titel": "...", "beschrijving": "..." },
+    { "titel": "...", "beschrijving": "..." }
+  ],
+  "tips": [
+    { "actie": "...", "uitleg": "..." },
+    { "actie": "...", "uitleg": "..." },
+    { "actie": "...", "uitleg": "..." }
+  ],
+  "samenvatting": "Één zin die de regionale situatie voor dit beroep in ${gemeente} samenvat."
+}
+
+Wees specifiek voor dit beroep en deze gemeente/regio. Schrijf in zakelijk maar toegankelijk Nederlands.`
+      : `Je bent een expert in Nederlandse regelgeving voor ondernemers. Geef regelgeving-informatie voor een ${beroep} in ${gemeente}${bedrijfExtra}.
+
+Geef een JSON-object (ALLEEN JSON, geen tekst eromheen) met precies deze structuur:
+{
+  "vergunningen": [
+    { "naam": "...", "beschrijving": "...", "urgentie": "hoog" | "middel" | "laag" },
+    { "naam": "...", "beschrijving": "...", "urgentie": "hoog" | "middel" | "laag" },
+    { "naam": "...", "beschrijving": "...", "urgentie": "hoog" | "middel" | "laag" }
+  ],
+  "aandachtspunten": [
+    { "punt": "...", "toelichting": "..." },
+    { "punt": "...", "toelichting": "..." }
+  ],
+  "recente_wijzigingen": [
+    { "onderwerp": "...", "impact": "..." },
+    { "onderwerp": "...", "impact": "..." }
+  ],
+  "samenvatting": "Één zin over het regelgevingslandschap voor dit beroep in ${gemeente}."
+}
+
+Wees specifiek en praktisch. Schrijf in zakelijk maar toegankelijk Nederlands.`;
+
+    try {
+      const { GoogleGenAI } = await import("@google/genai");
+      const ai = new GoogleGenAI({
+        apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
+        httpOptions: { apiVersion: "", baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL! },
+      });
+
+      const response = await ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: [{ role: "user", parts: [{ text: prompt }] }],
+        config: { maxOutputTokens: 1200, temperature: 0.7, thinkingConfig: { thinkingBudget: 0 } },
+      });
+
+      const parts = response.candidates?.[0]?.content?.parts;
+      let rawText = parts ? parts.filter((p: any) => p.text && !p.thought).map((p: any) => p.text).join("") : "";
+      rawText = rawText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+
+      const parsed = JSON.parse(rawText);
+      basischeckCache.set(cacheKey, { data: parsed, ts: Date.now() });
+      return res.json(parsed);
+    } catch (err) {
+      console.error("[Basischeck] Analyse fout:", err);
+      return res.status(500).json({ error: "Analyse tijdelijk niet beschikbaar. Probeer het later opnieuw." });
+    }
+  });
+
   // ─────────────────────────────────────────────────────────────────────
 
   const httpServer = createServer(app);
