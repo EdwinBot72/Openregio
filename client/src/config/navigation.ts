@@ -85,7 +85,7 @@ export const MAIN_NAV: NavSection[] = [
     sub: [
       { title: "Brief laten checken", url: "/tools/brief-analyse", icon: FileText },
       { title: "Regelgeving verkenner", url: "/regelgeving-verkenner", icon: BookOpen },
-      { title: "RegioBot", url: "/regiobot", icon: Bot, proOnly: true },
+      { title: "Regio Bieb", url: "/regiobot", icon: Bot, proOnly: true },
       { title: "WOO-documenten", url: "/woo-bibliotheek", icon: FolderOpen, proOnly: true },
       { title: "Mijn documenten", url: "/mijn-documenten", icon: Files, proOnly: true },
       { title: "WOO-verzoek opstellen", url: "/woo-wizard", icon: Gavel, proOnly: true },
