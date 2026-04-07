@@ -49,7 +49,7 @@ export const MAIN_NAV: NavSection[] = [
     icon: TrendingUp,
     sub: [
       { title: "Website check", url: "/tools/website-scan", icon: Monitor },
-      { title: "Lokale Basischeck", url: "/basischeck", icon: CheckCircle },
+      { title: "Lokale Basischeck", url: "/lokale-basischeck", icon: CheckCircle },
       { title: "Regelgeving verkenner", url: "/regelgeving-verkenner", icon: BookOpen },
     ],
   },

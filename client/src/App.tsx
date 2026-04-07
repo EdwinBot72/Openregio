@@ -68,6 +68,7 @@ import RegelgevingVerkennerPage from "@/pages/regelgeving-verkenner";
 import IntelPage from "@/pages/intel";
 import AanDeSlagPage from "@/pages/aan-de-slag";
 import KoopLokaalPage from "@/pages/koop-lokaal";
+import LokaleBasischeckPage from "@/pages/lokale-basischeck";
 import LokaalMarktplaatsPage from "@/pages/lokaal-marktplaats";
 import KansenInDeBuurtPage from "@/pages/kansen-in-de-buurt";
 import KansenMarktPage from "@/pages/kansen-markt";
@@ -124,6 +125,7 @@ function AuthenticatedRouter() {
       <Route path="/regiocrew" component={RegioCrewPage} />
       <Route path="/affiliate" component={AffiliatePage} />
       <Route path="/beleidsmonitor" component={BeleidsmonitorPage} />
+      <Route path="/lokale-basischeck" component={LokaleBasischeckPage} />
       <Route path="/intel" component={IntelPage} />
       <Route path="/admin" component={AdminIndexPage} />
       <Route path="/admin/woo" component={AdminWooPage} />
