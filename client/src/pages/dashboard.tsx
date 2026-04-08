@@ -549,7 +549,7 @@ export default function DashboardPage() {
       <section data-testid="section-greeting">
         <div
           className="overflow-hidden rounded-[28px] p-7 text-white"
-          style={{ background: `linear-gradient(135deg, #0c4240 0%, ${TEAL} 55%, #0d8079 100%)` }}
+          style={{ background: "linear-gradient(135deg, #0f2347 0%, #1a3666 55%, #1e4a8c 100%)" }}
         >
           <div className="flex items-center gap-2.5 flex-wrap mb-5">
             <span
