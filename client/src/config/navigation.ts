@@ -71,11 +71,11 @@ export const MAIN_NAV: NavSection[] = [
     title: "Kansen",
     icon: Signal,
     sub: [
+      { title: "Acties van de week", url: "/cursussen", icon: Zap },
       { title: "Kansen overzicht", url: "/kansen-in-de-buurt", icon: LayoutGrid },
       { title: "Aanbestedingen", url: "/kansen/aanbestedingen", icon: Landmark },
       { title: "Subsidies & financiering", url: "/kansen/financiering", icon: Euro },
       { title: "Regio-updates", url: "/intel", icon: Signal },
-      { title: "Acties van de week", url: "/cursussen", icon: Zap },
     ],
   },
 
