@@ -45,6 +45,7 @@ import AdminWooPage from "@/pages/admin/woo";
 import AdminRegiosPage from "@/pages/admin/regios";
 import AdminInzichtPage from "@/pages/admin/inzicht";
 import AffiliatePage from "@/pages/affiliate";
+import LedenPage from "@/pages/leden";
 import ForgotPasswordPage from "@/pages/forgot-password";
 import ResetPasswordPage from "@/pages/reset-password";
 import DisclaimerPage from "@/pages/disclaimer";
@@ -124,6 +125,7 @@ function AuthenticatedRouter() {
       <Route path="/woo-bibliotheek" component={WooBibliotheekPage} />
       <Route path="/regiocrew" component={RegioCrewPage} />
       <Route path="/affiliate" component={AffiliatePage} />
+      <Route path="/leden" component={LedenPage} />
       <Route path="/beleidsmonitor" component={BeleidsmonitorPage} />
       <Route path="/lokale-basischeck" component={LokaleBasischeckPage} />
       <Route path="/intel" component={IntelPage} />

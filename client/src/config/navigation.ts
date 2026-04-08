@@ -92,6 +92,14 @@ export const MAIN_NAV: NavSection[] = [
     ],
   },
 
+  // 4b ── Leden (iedereen)
+  {
+    id: "leden",
+    title: "Leden",
+    icon: Users,
+    url: "/leden",
+  },
+
   // 5 ── Affiliate (iedereen)
   {
     id: "affiliate",

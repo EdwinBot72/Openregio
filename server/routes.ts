@@ -4462,6 +4462,52 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
+  // GET /api/leden — alle ingeschreven ondernemers (voor alle ingelogde gebruikers)
+  app.get("/api/leden", requireAuth, async (req, res) => {
+    try {
+      const search = typeof req.query.search === "string" ? req.query.search.trim() : "";
+      const regionFilter = typeof req.query.region === "string" ? req.query.region.trim() : "";
+      const sectorFilter = typeof req.query.sector === "string" ? req.query.sector.trim() : "";
+
+      const searchFilter = search
+        ? sql`AND (LOWER(COALESCE(u.business_name, '')) LIKE ${`%${search.toLowerCase()}%`} OR LOWER(COALESCE(u.region, '')) LIKE ${`%${search.toLowerCase()}%`})`
+        : sql``;
+      const regionSqlFilter = regionFilter ? sql`AND u.region = ${regionFilter}` : sql``;
+      const sectorSqlFilter = sectorFilter ? sql`AND u.sector = ${sectorFilter}` : sql``;
+
+      const rows = await db.execute(sql`
+        SELECT
+          u.id,
+          COALESCE(u.business_name, 'Ondernemer') AS "businessName",
+          COALESCE(u.region, '') AS region,
+          COALESCE(u.sector, '') AS sector,
+          TO_CHAR(DATE_TRUNC('month', u.created_at), 'Mon YYYY') AS "lidSinds"
+        FROM users u
+        WHERE u.deleted_at IS NULL
+          AND u.business_name IS NOT NULL
+          AND u.must_complete_onboarding = false
+        ${searchFilter}
+        ${regionSqlFilter}
+        ${sectorSqlFilter}
+        ORDER BY u.created_at DESC
+        LIMIT 200
+      `);
+
+      const totaal = await db.execute(sql`
+        SELECT COUNT(*)::int AS n
+        FROM users u
+        WHERE u.deleted_at IS NULL
+          AND u.business_name IS NOT NULL
+          AND u.must_complete_onboarding = false
+      `);
+
+      return res.json({ leden: rows.rows, totaal: (totaal.rows[0] as any)?.n ?? 0 });
+    } catch (err) {
+      console.error("[Leden] Fout:", err);
+      return res.status(500).json({ error: "Kon ledenlijst niet ophalen" });
+    }
+  });
+
   // GET /api/admin/woo/stats — woo monitoring stats
   app.get("/api/admin/woo/stats", requireAuth, requireAdmin, async (_req, res) => {
     try {
