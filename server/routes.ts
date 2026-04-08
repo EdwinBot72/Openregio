@@ -3756,6 +3756,49 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
+  // Admin: GET /api/admin/users — lijst van alle gebruikers
+  app.get("/api/admin/users", requireAdmin, async (req, res) => {
+    try {
+      const allUsers = await storage.getAllUsers();
+      const safe = allUsers.map((u) => ({
+        id: u.id,
+        email: u.email,
+        firstName: u.firstName,
+        lastName: u.lastName,
+        plan: u.plan,
+        role: u.role,
+        sector: u.sector,
+        region: u.region,
+        createdAt: u.createdAt,
+        deletedAt: (u as any).deletedAt ?? null,
+        mustCompleteOnboarding: u.mustCompleteOnboarding,
+      }));
+      return res.json({ users: safe });
+    } catch (err) {
+      console.error("[Admin] Fout bij ophalen gebruikers:", err);
+      return res.status(500).json({ error: "Kon gebruikers niet ophalen" });
+    }
+  });
+
+  // Admin: DELETE /api/admin/users/:id — verwijder gebruiker (soft-delete)
+  app.delete("/api/admin/users/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      if (id === req.user!.id) {
+        return res.status(400).json({ error: "Je kunt je eigen account niet verwijderen." });
+      }
+      const deleted = await storage.softDeleteUser(id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Gebruiker niet gevonden." });
+      }
+      await revokeAllUserTokens(id);
+      return res.json({ success: true });
+    } catch (err) {
+      console.error("[Admin] Fout bij verwijderen gebruiker:", err);
+      return res.status(500).json({ error: "Kon gebruiker niet verwijderen" });
+    }
+  });
+
   // Admin: POST /api/admin/create-user - Create user without payment (backdoor for friends/family)
   app.post("/api/admin/create-user", requireAdmin, async (req, res) => {
     try {
