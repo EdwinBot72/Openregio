@@ -23,6 +23,12 @@ import {
   ChevronUp,
   Clock,
   X,
+  Search,
+  ImageIcon,
+  Check,
+  ChevronLeft,
+  ChevronRight,
+  AlertCircle,
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -120,6 +126,191 @@ function isActive(course: DailyCourse) {
     course.status === "published" &&
     new Date(course.postedAt).getTime() <= now &&
     new Date(course.expiresAt).getTime() > now
+  );
+}
+
+// ─── Pexels Image Picker ─────────────────────────────────────────────────────
+
+type PexelsPhoto = {
+  id: number;
+  url: string;
+  thumb: string;
+  small: string;
+  photographer: string;
+  alt: string;
+};
+
+function PexelsPicker({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (url: string) => void;
+}) {
+  const [input, setInput] = useState("");
+  const [activeQ, setActiveQ] = useState("");
+  const [page, setPage] = useState(1);
+  const [fotos, setFotos] = useState<PexelsPhoto[]>([]);
+  const [totaal, setTotaal] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [noKey, setNoKey] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const search = async (q: string, p: number) => {
+    if (!q.trim()) return;
+    setLoading(true);
+    setNoKey(false);
+    try {
+      const res = await fetch(`/api/admin/image-search?q=${encodeURIComponent(q)}&page=${p}`, {
+        credentials: "include",
+      });
+      const data = await res.json();
+      if (data.noKey) { setNoKey(true); return; }
+      if (!res.ok) return;
+      setFotos(data.fotos ?? []);
+      setTotaal(data.totaal ?? 0);
+      setPage(p);
+      setActiveQ(q);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setPage(1);
+    search(input, 1);
+    setOpen(true);
+  };
+
+  const select = (foto: PexelsPhoto) => {
+    onChange(foto.url);
+    setOpen(false);
+  };
+
+  const clear = () => {
+    onChange("");
+  };
+
+  const totalPages = Math.ceil(Math.min(totaal, 500) / 12);
+
+  return (
+    <div className="space-y-2" data-testid="section-image-picker">
+      <Label>Afbeelding (optioneel)</Label>
+
+      {/* Huidige selectie preview */}
+      {value && (
+        <div className="relative rounded-lg overflow-hidden" style={{ height: 120 }}>
+          <img
+            src={value}
+            alt="Geselecteerde afbeelding"
+            className="w-full h-full object-cover"
+            data-testid="img-selected-preview"
+          />
+          <button
+            type="button"
+            onClick={clear}
+            className="absolute top-2 right-2 bg-black/60 text-white rounded-full p-1 hover:bg-black/80"
+            data-testid="button-clear-image"
+            aria-label="Afbeelding verwijderen"
+          >
+            <X className="h-3 w-3" />
+          </button>
+          <div className="absolute bottom-0 left-0 right-0 bg-black/40 text-[10px] text-white/80 px-2 py-1 text-right">
+            Foto via Pexels
+          </div>
+        </div>
+      )}
+
+      {/* Zoekbalk */}
+      {noKey ? (
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-sm text-amber-800 dark:text-amber-300">
+          <AlertCircle className="h-4 w-4 shrink-0" />
+          <span>Stel de <strong>PEXELS_API_KEY</strong> in als secret om afbeeldingen te zoeken.</span>
+        </div>
+      ) : (
+        <form onSubmit={handleSubmit} className="flex gap-2">
+          <Input
+            placeholder="Zoek bijv. 'detailhandel' of 'marketing'..."
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            data-testid="input-image-search"
+          />
+          <Button type="submit" size="default" disabled={loading || !input.trim()} data-testid="button-search-images">
+            {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+          </Button>
+        </form>
+      )}
+
+      {/* Resultaten grid */}
+      {open && fotos.length > 0 && (
+        <div className="space-y-2 rounded-lg border border-border p-3 bg-background">
+          <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+            {fotos.map((foto) => {
+              const isSelected = value === foto.url;
+              return (
+                <button
+                  key={foto.id}
+                  type="button"
+                  onClick={() => select(foto)}
+                  className={`relative rounded-md overflow-hidden group focus:outline-none ${isSelected ? "ring-2 ring-primary" : ""}`}
+                  style={{ height: 72 }}
+                  data-testid={`button-foto-${foto.id}`}
+                  title={foto.photographer}
+                >
+                  <img
+                    src={foto.small}
+                    alt={foto.alt}
+                    className="w-full h-full object-cover transition-opacity group-hover:opacity-80"
+                    loading="lazy"
+                  />
+                  {isSelected && (
+                    <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                      <Check className="h-5 w-5 text-primary" />
+                    </div>
+                  )}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Paginatie */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-1">
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                disabled={page <= 1 || loading}
+                onClick={() => search(activeQ, page - 1)}
+                data-testid="button-prev-page"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-xs text-muted-foreground">Pagina {page} van {totalPages}</span>
+              <Button
+                type="button"
+                size="icon"
+                variant="ghost"
+                disabled={page >= totalPages || loading}
+                onClick={() => search(activeQ, page + 1)}
+                data-testid="button-next-page"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+
+          <p className="text-[10px] text-muted-foreground text-right">
+            Foto's via <a href="https://www.pexels.com" target="_blank" rel="noopener noreferrer" className="underline">Pexels</a> — gratis te gebruiken
+          </p>
+        </div>
+      )}
+
+      {open && !loading && fotos.length === 0 && activeQ && (
+        <p className="text-sm text-muted-foreground">Geen resultaten voor "{activeQ}".</p>
+      )}
+    </div>
   );
 }
 
@@ -516,6 +707,12 @@ function CourseForm({
               <p className="text-xs text-destructive">{form.formState.errors.result.message}</p>
             )}
           </div>
+
+          {/* Afbeelding */}
+          <PexelsPicker
+            value={form.watch("imageUrl") ?? ""}
+            onChange={(url) => form.setValue("imageUrl", url)}
+          />
 
           {/* CTA label */}
           <div className="space-y-1.5">

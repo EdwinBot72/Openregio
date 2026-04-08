@@ -82,9 +82,23 @@ function CursusCard({ item }: { item: CursusItem }) {
 
   return (
     <div
-      className={`rounded-2xl border border-border bg-card p-5 transition ${item.completed ? "opacity-75" : ""}`}
+      className={`rounded-2xl border border-border bg-card overflow-hidden transition ${item.completed ? "opacity-75" : ""}`}
       data-testid={`card-cursus-${item.id}`}
     >
+      {/* Afbeelding */}
+      {item.imageUrl && (
+        <div className="w-full overflow-hidden" style={{ height: 160 }}>
+          <img
+            src={item.imageUrl}
+            alt={item.title}
+            className="w-full h-full object-cover"
+            data-testid={`img-cursus-${item.id}`}
+            onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+          />
+        </div>
+      )}
+
+      <div className="p-5">
       {/* Top row */}
       <div className="flex items-start justify-between gap-3 mb-4">
         <div className="flex items-center gap-2 flex-wrap">
@@ -165,6 +179,7 @@ function CursusCard({ item }: { item: CursusItem }) {
             </>
           )}
         </Button>
+      </div>
       </div>
     </div>
   );

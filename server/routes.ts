@@ -6035,6 +6035,47 @@ Wees specifiek en praktisch. Schrijf in zakelijk maar toegankelijk Nederlands.`;
     }
   });
 
+  // ─── Pexels afbeeldingen zoeken (admin) ───────────────────────────────────
+  app.get("/api/admin/image-search", requireAdmin, async (req, res) => {
+    const q = (req.query.q as string ?? "").trim();
+    const page = parseInt((req.query.page as string) ?? "1") || 1;
+
+    if (!q) return res.status(400).json({ error: "Zoekterm vereist" });
+
+    const apiKey = process.env.PEXELS_API_KEY;
+    if (!apiKey) {
+      return res.status(503).json({ error: "PEXELS_API_KEY niet ingesteld", noKey: true });
+    }
+
+    try {
+      const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(q)}&per_page=12&page=${page}&orientation=landscape`;
+      const pexelsRes = await fetch(url, {
+        headers: { Authorization: apiKey },
+      });
+
+      if (!pexelsRes.ok) {
+        const text = await pexelsRes.text();
+        console.error("[Pexels] API fout:", pexelsRes.status, text);
+        return res.status(502).json({ error: "Pexels API fout" });
+      }
+
+      const data = await pexelsRes.json() as any;
+      const fotos = (data.photos ?? []).map((p: any) => ({
+        id: p.id,
+        url: p.src.large,
+        thumb: p.src.medium,
+        small: p.src.small,
+        photographer: p.photographer,
+        alt: p.alt ?? q,
+      }));
+
+      res.json({ fotos, totaal: data.total_results ?? 0, pagina: page });
+    } catch (err) {
+      console.error("[Pexels] Fout:", err);
+      res.status(500).json({ error: "Kon afbeeldingen niet ophalen" });
+    }
+  });
+
   // ─────────────────────────────────────────────────────────────────────
 
   const httpServer = createServer(app);
