@@ -287,6 +287,41 @@ export async function runMigrations(): Promise<void> {
     `);
     console.log("[Migration] ✓ intel_signalen.sector column ensured");
 
+    // Seed starter-cursussen (idempotent — alleen als tabel leeg is)
+    const { rows: courseCount } = await db.execute(sql`SELECT COUNT(*)::int AS n FROM daily_courses`);
+    if ((courseCount[0] as any).n === 0) {
+      const weekLater = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+      const twoWeeksLater = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString();
+      const now = new Date().toISOString();
+      await db.execute(sql`
+        INSERT INTO daily_courses
+          (id, title, slug, category, sector, plan, status, posted_at, expires_at, minutes, goal, action, result, cta_label, sort_order)
+        VALUES
+          (gen_random_uuid(), 'Google Bedrijfsprofiel aanscherpen', 'google-bedrijfsprofiel-aanscherpen', 'zichtbaarheid', 'algemeen', 'basis', 'published',
+           ${now}::timestamptz, ${weekLater}::timestamptz,
+           15,
+           'Meer lokale zichtbaarheid in Google zoekresultaten.',
+           'Log in op Google Bedrijfsprofiel, voeg 3 nieuwe foto''s toe, werk je omschrijving bij en controleer je openingstijden.',
+           'Je profiel scoort beter in lokale zoekresultaten en trekt meer klanten.',
+           'Markeer als gedaan', 1),
+          (gen_random_uuid(), 'Één klant bellen voor een review', 'klant-bellen-review', 'marketing', 'algemeen', 'basis', 'published',
+           ${now}::timestamptz, ${weekLater}::timestamptz,
+           10,
+           'Meer positieve reviews om vertrouwen te winnen bij nieuwe klanten.',
+           'Bel één tevreden vaste klant op, vraag hoe het gaat en verzoek vriendelijk om een Google review.',
+           'Je hebt een extra review en verstevigt de klantrelatie tegelijk.',
+           'Markeer als gedaan', 2),
+          (gen_random_uuid(), 'Jouw aanbod in één zin', 'aanbod-in-een-zin', 'marketing', 'algemeen', 'pro', 'published',
+           ${now}::timestamptz, ${twoWeeksLater}::timestamptz,
+           20,
+           'Een scherpe, duidelijke boodschap die klanten direct aanspreekt.',
+           'Schrijf op: voor wie je werkt, wat je doet en wat het oplevert. Schrap alles wat niet essentieel is totdat je op één krachtige zin uitkomt.',
+           'Een positionering die je direct kunt gebruiken op je website, socials en visitekaartje.',
+           'Markeer als gedaan', 3)
+      `);
+      console.log("[Migration] ✓ daily_courses starter-cursussen geseed");
+    }
+
     console.log("[Migration] Database schema is up to date");
   } catch (error) {
     console.error("[Migration] Error running migrations:", error);
