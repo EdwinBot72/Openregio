@@ -23,6 +23,7 @@ import {
   ShieldCheck,
   MapPin,
   Files,
+  Zap,
 } from "lucide-react";
 
 export type NavSubItem = {
@@ -74,6 +75,7 @@ export const MAIN_NAV: NavSection[] = [
       { title: "Aanbestedingen", url: "/kansen/aanbestedingen", icon: Landmark },
       { title: "Subsidies & financiering", url: "/kansen/financiering", icon: Euro },
       { title: "Regio-updates", url: "/intel", icon: Signal },
+      { title: "Acties van de week", url: "/cursussen", icon: Zap },
     ],
   },
 
@@ -134,6 +136,7 @@ export const MAIN_NAV: NavSection[] = [
       { title: "Gebruikers", url: "/admin/users", icon: Users },
       { title: "Ondernemers", url: "/admin/ondernemers", icon: Building2 },
       { title: "Content", url: "/admin/blogs", icon: FileText },
+      { title: "Cursussen", url: "/admin/cursussen", icon: Zap },
       { title: "Regio & WOO", url: "/admin/woo", icon: MapPin },
       { title: "Systeem", url: "/admin/inzicht", icon: Settings },
     ],

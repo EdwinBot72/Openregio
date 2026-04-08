@@ -76,6 +76,8 @@ import KansenMarktPage from "@/pages/kansen-markt";
 import WetgevingIndienenPage from "@/pages/wetgeving-indienen";
 import WetgevingPublicatiesPage from "@/pages/wetgeving/publicaties";
 import AdminWetgevingPage from "@/pages/admin/wetgeving";
+import CursussenPage from "@/pages/cursussen";
+import AdminCursussenPage from "@/pages/admin/cursussen";
 
 // Routes that should NOT have the sidebar/header layout
 const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse", "/koop-lokaal"];
@@ -168,6 +170,10 @@ function AuthenticatedRouter() {
       <Route path="/wetgeving-indienen" component={WetgevingIndienenPage} />
       <Route path="/wetgeving/publicaties" component={WetgevingPublicatiesPage} />
       <Route path="/admin/wetgeving" component={AdminWetgevingPage} />
+
+      {/* Cursussen */}
+      <Route path="/cursussen" component={CursussenPage} />
+      <Route path="/admin/cursussen" component={AdminCursussenPage} />
 
       <Route component={NotFound} />
     </Switch>

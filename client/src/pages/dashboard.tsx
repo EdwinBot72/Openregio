@@ -434,6 +434,138 @@ type BlogPost = {
   category?: string;
 };
 
+// ─── Cursus widget voor dashboard ────────────────────────────────────────────
+
+type CursusItemDash = {
+  id: string;
+  title: string;
+  category: string;
+  minutes: number;
+  daysLeft: number;
+  completed: boolean;
+};
+
+function DashboardCursusWidget() {
+  const qc = useQueryClient();
+  const { toast } = useToast();
+
+  const { data, isLoading } = useQuery<{ items: CursusItemDash[]; totaal: number }>({
+    queryKey: ["/api/cursussen"],
+  });
+
+  const items = (data?.items ?? []).slice(0, 3);
+  const totaal = data?.totaal ?? 0;
+  const gedaan = items.filter((i) => i.completed).length;
+
+  const toggleMutation = useMutation({
+    mutationFn: (id: string) => apiRequest("POST", `/api/cursussen/${id}/voltooid`),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["/api/cursussen"] });
+    },
+    onError: () => {
+      toast({ variant: "destructive", title: "Fout", description: "Kon voortgang niet opslaan." });
+    },
+  });
+
+  if (isLoading) {
+    return (
+      <section data-testid="section-cursussen-widget">
+        <div className={`${CARD} p-6 space-y-3`}>
+          <Skeleton className="h-5 w-40" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-5/6" />
+        </div>
+      </section>
+    );
+  }
+
+  if (totaal === 0) return null;
+
+  const progressPct = items.length > 0 ? Math.round((gedaan / items.length) * 100) : 0;
+
+  return (
+    <section data-testid="section-cursussen-widget">
+      <div className={`${CARD} p-6`}>
+        <div className="flex items-center justify-between gap-2 mb-4 flex-wrap">
+          <div className="flex items-center gap-2">
+            <div className="rounded-2xl bg-primary/10 p-2">
+              <Zap className="w-4 h-4 text-primary" />
+            </div>
+            <h2 className="text-base font-bold text-foreground">Actie van de week</h2>
+          </div>
+          <Link href="/cursussen">
+            <Button variant="ghost" size="sm" className="text-xs h-7 px-2" data-testid="button-alle-cursussen">
+              Alle acties <ChevronRight className="h-3 w-3 ml-1" />
+            </Button>
+          </Link>
+        </div>
+
+        {/* Voortgangsbalk */}
+        <div className="mb-4">
+          <div className="flex items-center justify-between mb-1 text-xs text-muted-foreground">
+            <span>{gedaan} van {items.length} voltooid</span>
+            <span>{progressPct}%</span>
+          </div>
+          <div className="h-1.5 rounded-full bg-primary/15 overflow-hidden">
+            <div
+              className="h-full rounded-full bg-primary transition-all duration-500"
+              style={{ width: `${progressPct}%` }}
+              data-testid="progress-bar-widget"
+            />
+          </div>
+        </div>
+
+        <div className="h-px w-full bg-[#ede8df] dark:bg-border mb-4" />
+
+        <div className="space-y-2.5">
+          {items.map((item) => (
+            <div
+              key={item.id}
+              className={`${INNER} px-4 py-3 flex items-center gap-3`}
+              data-testid={`widget-cursus-${item.id}`}
+            >
+              <button
+                onClick={() => toggleMutation.mutate(item.id)}
+                className="shrink-0 text-primary hover:text-primary/80 transition"
+                data-testid={`button-widget-toggle-${item.id}`}
+              >
+                {item.completed ? (
+                  <CheckCircle className="h-5 w-5" />
+                ) : (
+                  <div className="h-5 w-5 rounded-full border-2 border-primary/40" />
+                )}
+              </button>
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-semibold leading-snug ${item.completed ? "line-through text-muted-foreground" : "text-foreground"}`}>
+                  {item.title}
+                </p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  {item.minutes} min · nog {item.daysLeft} {item.daysLeft === 1 ? "dag" : "dagen"}
+                </p>
+              </div>
+              <Link href="/cursussen">
+                <Button size="icon" variant="ghost" className="h-7 w-7 shrink-0" data-testid={`button-widget-open-${item.id}`}>
+                  <ChevronRight className="h-3.5 w-3.5" />
+                </Button>
+              </Link>
+            </div>
+          ))}
+        </div>
+
+        {totaal > 3 && (
+          <div className="mt-3 text-center">
+            <Link href="/cursussen">
+              <button className="text-xs font-semibold text-primary hover:underline" data-testid="button-meer-acties">
+                +{totaal - 3} meer acties bekijken
+              </button>
+            </Link>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 // ─── Main dashboard ──────────────────────────────────────────────────────────
 
 export default function DashboardPage() {
@@ -935,6 +1067,9 @@ export default function DashboardPage() {
           </div>
         </div>
       </section>
+
+      {/* ── Actie van de week ────────────────────────────────────────────── */}
+      <DashboardCursusWidget />
 
       {/* ── Laatste uit Bibliotheek ───────────────────────────────────────── */}
       {recenteBlogs.length > 0 && (

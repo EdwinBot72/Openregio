@@ -15,7 +15,7 @@ import { objectStorageClient } from "./replit_integrations/object_storage";
 import { randomUUID } from "crypto";
 import { runRegioBot } from "./regiobot";
 import { db } from "db";
-import { eq, sql, gte, and, count } from "drizzle-orm";
+import { eq, sql, gte, lte, gt, and, count } from "drizzle-orm";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 import type { Request, Response, NextFunction } from "express";
 
@@ -5810,6 +5810,197 @@ Wees specifiek en praktisch. Schrijf in zakelijk maar toegankelijk Nederlands.`;
     } catch (err) {
       console.error("[Basischeck] Analyse fout:", err);
       return res.status(500).json({ error: "Analyse tijdelijk niet beschikbaar. Probeer het later opnieuw." });
+    }
+  });
+
+  // ─── Dagelijkse Acties (Cursussen) ────────────────────────────────────────
+
+  const { dailyCourses, dailyCourseProgress, insertDailyCourseSchema } = await import("@shared/schema");
+
+  // GET /api/cursussen — actieve items voor ingelogde gebruiker
+  app.get("/api/cursussen", requireAuth, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      const now = new Date();
+
+      const userPlan = user.plan ?? "basic";
+      const userSector = user.sector ?? null;
+
+      // Plan filter: basis ziet basis + all; pro ziet basis + pro + all
+      const allowedPlans = userPlan === "pro" ? ["basis", "pro", "all"] : ["basis", "all"];
+
+      // Haal actieve cursussen op
+      const courses = await db
+        .select()
+        .from(dailyCourses)
+        .where(
+          and(
+            eq(dailyCourses.status, "published"),
+            lte(dailyCourses.postedAt, now),
+            gt(dailyCourses.expiresAt, now)
+          )
+        )
+        .orderBy(sql`${dailyCourses.sortOrder} ASC, ${dailyCourses.postedAt} DESC`);
+
+      // Filter op plan
+      const planFiltered = courses.filter((c) => allowedPlans.includes(c.plan ?? "basis"));
+
+      // Filter op sector (algemeen = voor iedereen; anders alleen voor die sector)
+      const sectorFiltered = planFiltered.filter((c) => {
+        if (c.sector === "algemeen") return true;
+        if (!userSector) return false;
+        return c.sector === userSector;
+      });
+
+      // Haal voortgang op voor deze gebruiker
+      const progressList = sectorFiltered.length > 0
+        ? await db.select().from(dailyCourseProgress).where(eq(dailyCourseProgress.userId, user.id))
+        : [];
+
+      const progressMap = new Map(progressList.map((p) => [p.courseId, p]));
+
+      const items = sectorFiltered.map((c) => {
+        const prog = progressMap.get(c.id);
+        const daysLeft = Math.ceil((new Date(c.expiresAt).getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+        return {
+          ...c,
+          completed: prog?.completed ?? false,
+          completedAt: prog?.completedAt ?? null,
+          daysLeft,
+        };
+      });
+
+      res.json({ today: now, items, totaal: items.length });
+    } catch (err) {
+      console.error("[Cursussen] Fout:", err);
+      res.status(500).json({ error: "Kon cursussen niet laden" });
+    }
+  });
+
+  // POST /api/cursussen/:id/voltooid — toggle completed status
+  app.post("/api/cursussen/:id/voltooid", requireAuth, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      const { id } = req.params;
+
+      // Check of cursus bestaat
+      const [course] = await db.select().from(dailyCourses).where(eq(dailyCourses.id, id));
+      if (!course) return res.status(404).json({ error: "Cursus niet gevonden" });
+
+      // Haal huidige voortgang op
+      const [existing] = await db
+        .select()
+        .from(dailyCourseProgress)
+        .where(and(eq(dailyCourseProgress.userId, user.id), eq(dailyCourseProgress.courseId, id)));
+
+      if (existing) {
+        // Toggle
+        const newCompleted = !existing.completed;
+        await db
+          .update(dailyCourseProgress)
+          .set({
+            completed: newCompleted,
+            completedAt: newCompleted ? new Date() : null,
+          })
+          .where(and(eq(dailyCourseProgress.userId, user.id), eq(dailyCourseProgress.courseId, id)));
+        res.json({ completed: newCompleted });
+      } else {
+        // Aanmaken
+        await db.insert(dailyCourseProgress).values({
+          id: (await import("crypto")).randomUUID(),
+          userId: user.id,
+          courseId: id,
+          completed: true,
+          completedAt: new Date(),
+        });
+        res.json({ completed: true });
+      }
+    } catch (err) {
+      console.error("[Cursussen] Voltooid fout:", err);
+      res.status(500).json({ error: "Kon voortgang niet opslaan" });
+    }
+  });
+
+  // GET /api/admin/cursussen — alle cursussen voor admin
+  app.get("/api/admin/cursussen", requireAdmin, async (req, res) => {
+    try {
+      const courses = await db
+        .select()
+        .from(dailyCourses)
+        .orderBy(sql`${dailyCourses.postedAt} DESC`);
+      res.json({ cursussen: courses, totaal: courses.length });
+    } catch (err) {
+      console.error("[Admin Cursussen] Fout:", err);
+      res.status(500).json({ error: "Kon cursussen niet laden" });
+    }
+  });
+
+  // POST /api/admin/cursussen — nieuwe cursus aanmaken
+  app.post("/api/admin/cursussen", requireAdmin, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      const parsed = insertDailyCourseSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Validatiefout", details: parsed.error.errors });
+      }
+
+      const id = (await import("crypto")).randomUUID();
+      const [created] = await db.insert(dailyCourses).values({
+        ...parsed.data,
+        id,
+        createdBy: user.id,
+      }).returning();
+
+      res.status(201).json(created);
+    } catch (err: any) {
+      console.error("[Admin Cursussen] Aanmaken fout:", err);
+      if (err?.code === "23505") {
+        return res.status(409).json({ error: "Slug bestaat al. Kies een andere slug." });
+      }
+      res.status(500).json({ error: "Kon cursus niet aanmaken" });
+    }
+  });
+
+  // PUT /api/admin/cursussen/:id — cursus bijwerken
+  app.put("/api/admin/cursussen/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const [existing] = await db.select().from(dailyCourses).where(eq(dailyCourses.id, id));
+      if (!existing) return res.status(404).json({ error: "Cursus niet gevonden" });
+
+      const parsed = insertDailyCourseSchema.partial().safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Validatiefout", details: parsed.error.errors });
+      }
+
+      const [updated] = await db
+        .update(dailyCourses)
+        .set({ ...parsed.data, updatedAt: new Date() })
+        .where(eq(dailyCourses.id, id))
+        .returning();
+
+      res.json(updated);
+    } catch (err: any) {
+      console.error("[Admin Cursussen] Bijwerken fout:", err);
+      if (err?.code === "23505") {
+        return res.status(409).json({ error: "Slug bestaat al. Kies een andere slug." });
+      }
+      res.status(500).json({ error: "Kon cursus niet bijwerken" });
+    }
+  });
+
+  // DELETE /api/admin/cursussen/:id — cursus verwijderen
+  app.delete("/api/admin/cursussen/:id", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const [existing] = await db.select().from(dailyCourses).where(eq(dailyCourses.id, id));
+      if (!existing) return res.status(404).json({ error: "Cursus niet gevonden" });
+
+      await db.delete(dailyCourses).where(eq(dailyCourses.id, id));
+      res.json({ ok: true });
+    } catch (err) {
+      console.error("[Admin Cursussen] Verwijderen fout:", err);
+      res.status(500).json({ error: "Kon cursus niet verwijderen" });
     }
   });
 

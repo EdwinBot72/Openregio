@@ -1173,3 +1173,60 @@ export const insertWetgevingInzendingSchema = createInsertSchema(wetgevingInzend
 });
 export type InsertWetgevingInzending = z.infer<typeof insertWetgevingInzendingSchema>;
 export type WetgevingInzending = typeof wetgevingInzendingen.$inferSelect;
+
+// ─── Dagelijkse Acties (Cursussen) ──────────────────────────────────────────
+export const COURSE_CATEGORIES = ["zichtbaarheid", "financieel", "marketing", "operatie", "wetgeving", "netwerk"] as const;
+export type CourseCategoryType = typeof COURSE_CATEGORIES[number];
+
+export const COURSE_PLAN_TYPES = ["basis", "pro", "all"] as const;
+export type CoursePlanType = typeof COURSE_PLAN_TYPES[number];
+
+export const COURSE_STATUS = ["draft", "published"] as const;
+
+export const dailyCourses = pgTable("daily_courses", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  title: varchar("title", { length: 255 }).notNull(),
+  slug: varchar("slug", { length: 255 }).notNull().unique(),
+  category: varchar("category", { enum: COURSE_CATEGORIES }).notNull(),
+  sector: varchar("sector").notNull().default("algemeen"),
+  plan: varchar("plan", { enum: COURSE_PLAN_TYPES }).notNull().default("basis"),
+  status: varchar("status", { enum: COURSE_STATUS }).notNull().default("draft"),
+  postedAt: timestamp("posted_at", { withTimezone: true }).notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  minutes: integer("minutes").notNull().default(15),
+  goal: text("goal").notNull(),
+  action: text("action").notNull(),
+  result: text("result").notNull(),
+  imageUrl: varchar("image_url"),
+  ctaLabel: varchar("cta_label").default("Markeer als gedaan"),
+  sortOrder: integer("sort_order").default(0),
+  createdBy: varchar("created_by"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const dailyCourseProgress = pgTable("daily_course_progress", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  courseId: varchar("course_id").notNull().references(() => dailyCourses.id, { onDelete: "cascade" }),
+  completed: boolean("completed").notNull().default(false),
+  completedAt: timestamp("completed_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  unique().on(table.userId, table.courseId),
+]);
+
+export const insertDailyCourseSchema = createInsertSchema(dailyCourses).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+export type InsertDailyCourse = z.infer<typeof insertDailyCourseSchema>;
+export type DailyCourse = typeof dailyCourses.$inferSelect;
+
+export const insertDailyCourseProgressSchema = createInsertSchema(dailyCourseProgress).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertDailyCourseProgress = z.infer<typeof insertDailyCourseProgressSchema>;
+export type DailyCourseProgress = typeof dailyCourseProgress.$inferSelect;
