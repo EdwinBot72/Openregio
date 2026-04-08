@@ -75,7 +75,7 @@ export const SECTOR_CONFIG: Record<SectorKey, SectorConfig> = {
     categorieen: {
       kansen: {
         sub: "Lokale acties, winkelgebied-kansen, regionale vraag",
-        href: "/intel",
+        href: "/kansen-markt",
       },
       zichtbaarheid: {
         sub: "Online vindbaarheid, profielverbetering, websitekansen",
@@ -83,7 +83,7 @@ export const SECTOR_CONFIG: Record<SectorKey, SectorConfig> = {
       },
       regels: {
         sub: "Lokale regels, centrumbeleid, ontwikkelingen in de regio",
-        href: "/intel",
+        href: "/beleidsmonitor",
       },
       samenwerking: {
         sub: "Samenwerkingen, lokale initiatieven, ondernemerscontact",
@@ -100,7 +100,7 @@ export const SECTOR_CONFIG: Record<SectorKey, SectorConfig> = {
     categorieen: {
       kansen: {
         sub: "Arrangementen, events, seizoenskansen, lokale vraag",
-        href: "/intel",
+        href: "/kansen-markt",
       },
       zichtbaarheid: {
         sub: "Lokaal zoeken, reviews, website en profieloptimalisatie",
@@ -108,7 +108,7 @@ export const SECTOR_CONFIG: Record<SectorKey, SectorConfig> = {
       },
       regels: {
         sub: "Actuele regels, vergunningen, gemeentelijke ontwikkelingen",
-        href: "/intel",
+        href: "/beleidsmonitor",
       },
       samenwerking: {
         sub: "Regionale samenwerkingen, events, gezamenlijke promotie",
@@ -125,7 +125,7 @@ export const SECTOR_CONFIG: Record<SectorKey, SectorConfig> = {
     categorieen: {
       kansen: {
         sub: "Opdrachten, regionale vraag, groeikansen",
-        href: "/intel",
+        href: "/kansen-markt",
       },
       zichtbaarheid: {
         sub: "Profieloptimalisatie, vertrouwen, online uitstraling",
@@ -133,7 +133,7 @@ export const SECTOR_CONFIG: Record<SectorKey, SectorConfig> = {
       },
       regels: {
         sub: "Regelgeving, aanbestedingen, ontwikkelingen die impact hebben",
-        href: "/intel",
+        href: "/beleidsmonitor",
       },
       samenwerking: {
         sub: "Samenwerking met andere bedrijven, lokaal netwerk, doorverwijzingen",
@@ -150,7 +150,7 @@ export const SECTOR_CONFIG: Record<SectorKey, SectorConfig> = {
     categorieen: {
       kansen: {
         sub: "Afzet, regionale vraag, nieuwe mogelijkheden",
-        href: "/intel",
+        href: "/kansen-markt",
       },
       zichtbaarheid: {
         sub: "Zichtbaarheid, positionering, bedrijfsprofiel",
@@ -158,7 +158,7 @@ export const SECTOR_CONFIG: Record<SectorKey, SectorConfig> = {
       },
       regels: {
         sub: "Beleid, ruimte, sector-signalen, regelgeving",
-        href: "/intel",
+        href: "/beleidsmonitor",
       },
       samenwerking: {
         sub: "Samenwerking, ketencontact, regionale verbinding",
