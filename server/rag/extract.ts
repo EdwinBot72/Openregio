@@ -10,7 +10,8 @@ interface ExtractResult {
 
 export async function extractTextFromPDF(buffer: Buffer): Promise<ExtractResult> {
   try {
-    const pdf = require("pdf-parse");
+    const pdfModule = require("pdf-parse");
+    const pdf = typeof pdfModule === "function" ? pdfModule : (pdfModule.default ?? pdfModule);
     const data = await pdf(buffer);
     const text = (data.text || "").trim();
     const needsOcr = text.length < 200;
