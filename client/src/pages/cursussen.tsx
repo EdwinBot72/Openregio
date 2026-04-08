@@ -207,8 +207,7 @@ export default function CursussenPage() {
 
       {/* ── Hero ─────────────────────────────────────────────────────────── */}
       <div
-        className="rounded-2xl p-6 text-white"
-        style={{ background: "linear-gradient(135deg, #1a3666 0%, #1e4a8c 100%)" }}
+        className="rounded-2xl p-6 text-white bg-primary"
         data-testid="section-cursussen-hero"
       >
         <div className="flex items-center gap-2 mb-3">

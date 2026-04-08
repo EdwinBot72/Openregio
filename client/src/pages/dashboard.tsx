@@ -453,9 +453,10 @@ function DashboardCursusWidget() {
     queryKey: ["/api/cursussen"],
   });
 
-  const items = (data?.items ?? []).slice(0, 2);
+  const allItems = data?.items ?? [];
+  const items = allItems.slice(0, 2);
   const totaal = data?.totaal ?? 0;
-  const gedaan = items.filter((i) => i.completed).length;
+  const gedaan = allItems.filter((i) => i.completed).length;
 
   const toggleMutation = useMutation({
     mutationFn: (id: string) => apiRequest("POST", `/api/cursussen/${id}/voltooid`),
@@ -481,7 +482,7 @@ function DashboardCursusWidget() {
 
   if (totaal === 0) return null;
 
-  const progressPct = items.length > 0 ? Math.round((gedaan / items.length) * 100) : 0;
+  const progressPct = totaal > 0 ? Math.round((gedaan / totaal) * 100) : 0;
 
   return (
     <section data-testid="section-cursussen-widget">
@@ -503,7 +504,7 @@ function DashboardCursusWidget() {
         {/* Voortgangsbalk */}
         <div className="mb-4">
           <div className="flex items-center justify-between mb-1 text-xs text-muted-foreground">
-            <span>{gedaan} van {items.length} voltooid</span>
+            <span>{gedaan} van {totaal} voltooid</span>
             <span>{progressPct}%</span>
           </div>
           <div className="h-1.5 rounded-full bg-primary/15 overflow-hidden">
