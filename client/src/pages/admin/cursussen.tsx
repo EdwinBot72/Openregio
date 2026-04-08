@@ -99,7 +99,15 @@ const PLANS = [
 
 function toLocalInput(isoString: string): string {
   if (!isoString) return "";
-  return new Date(isoString).toISOString().slice(0, 16);
+  const date = new Date(isoString);
+  const offset = date.getTimezoneOffset();
+  return new Date(date.getTime() - offset * 60000).toISOString().slice(0, 16);
+}
+
+function nowLocalInput(): string {
+  const now = new Date();
+  const offset = now.getTimezoneOffset();
+  return new Date(now.getTime() - offset * 60000).toISOString().slice(0, 16);
 }
 
 function formatDate(isoString: string) {
@@ -238,10 +246,10 @@ function CourseForm({
   const { toast } = useToast();
   const qc = useQueryClient();
 
-  const defaultPostedAt = existing ? toLocalInput(existing.postedAt) : new Date().toISOString().slice(0, 16);
+  const defaultPostedAt = existing ? toLocalInput(existing.postedAt) : nowLocalInput();
   const defaultExpiresAt = existing
     ? toLocalInput(existing.expiresAt)
-    : new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 16);
+    : toLocalInput(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString());
 
   const form = useForm<CourseFormValues>({
     resolver: zodResolver(courseFormSchema),
