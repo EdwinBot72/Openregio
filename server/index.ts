@@ -6,6 +6,7 @@ import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 import { securityHeaders } from "./middleware/security";
 import { runMigrations } from "./db-migrate";
+import { RateLimiterMemory } from "rate-limiter-flexible";
 
 // ─── Early environment validation ─────────────────────────────────────────────
 // Fail fast with a clear message if critical variables are missing.
@@ -37,6 +38,29 @@ if (!process.env.OPENAI_BASE_URL && process.env.AI_INTEGRATIONS_OPENAI_BASE_URL)
 }
 
 const app = express();
+
+// ─── Globale anti-DDoS rate limiter ───────────────────────────────────────────
+// Max 120 API-verzoeken per minuut per IP (2 per seconde gemiddeld).
+// Auth-endpoints hebben hun eigen strengere limieten bovenop deze globale limiet.
+const globalApiLimiter = new RateLimiterMemory({
+  points: 120,
+  duration: 60,
+  blockDuration: 60,
+});
+
+app.use("/api", async (req: Request, res: Response, next: NextFunction) => {
+  const ip = req.ip || req.socket?.remoteAddress || "unknown";
+  try {
+    await globalApiLimiter.consume(ip);
+    next();
+  } catch {
+    res.status(429).json({
+      error: "Te veel verzoeken. Probeer het over een minuut opnieuw.",
+      code: 429,
+    });
+  }
+});
+// ──────────────────────────────────────────────────────────────────────────────
 
 // Security headers middleware (privacy-first, geen trackers)
 app.use(securityHeaders);

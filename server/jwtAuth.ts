@@ -362,6 +362,9 @@ export function setupJwtAuth(app: Express) {
         console.log(`[Auth] Auto-cleared onboarding for user ${user.email} (successful password login)`);
       }
       
+      // Één sessie per gebruiker: alle bestaande sessies intrekken bij nieuw inloggen
+      await revokeAllUserTokens(user.id);
+
       const tokenId = generateTokenId();
       const accessToken = generateAccessToken(user.id, user.email);
       const refreshToken = generateRefreshToken();

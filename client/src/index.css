@@ -266,6 +266,21 @@
  */
 @layer utilities {
 
+  /* Content-bescherming: voorkomt selecteren/kopiëren achter de login */
+  .protected-content {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  /* Inputs en textareas blijven wél selecteerbaar */
+  .protected-content input,
+  .protected-content textarea,
+  .protected-content select,
+  .protected-content [contenteditable] {
+    user-select: text;
+    -webkit-user-select: text;
+  }
+
   /* Hide ugly search cancel button in Chrome until we can style it properly */
   input[type="search"]::-webkit-search-cancel-button {
     @apply hidden;

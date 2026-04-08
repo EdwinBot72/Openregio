@@ -9,6 +9,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { useAuth } from "@/hooks/useAuth";
+import { useContentProtection } from "@/hooks/useContentProtection";
 import { Skeleton } from "@/components/ui/skeleton";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home";
@@ -211,6 +212,7 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
 }
 
 function AppContent() {
+  useContentProtection();
   const [isHomePage] = useRoute("/");
   const [isLoginPage] = useRoute("/login");
   const [isRegisterPage] = useRoute("/register");
@@ -249,7 +251,7 @@ function AppContent() {
             <SidebarTrigger data-testid="button-sidebar-toggle" />
             <ThemeToggle />
           </header>
-          <main className="flex-1 overflow-y-auto p-6">
+          <main className="flex-1 overflow-y-auto p-6 protected-content">
             <AuthGuard>
               <AuthenticatedRouter />
             </AuthGuard>
