@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema, insertBedrijfsprofielSchema, regioBotChatSchema, visibilitySettingsSchema, DEFAULT_VISIBILITY_SETTINGS, insertCrewProfileSchema, insertCrewRequestSchema, insertCrewApplicationSchema, CREW_CATEGORIES, users, ragDocuments, documents, insertRegioDealSchema, crewApplications, crewRequests, bedrijfsprofielen } from "@shared/schema";
+import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema, insertBedrijfsprofielSchema, regioBotChatSchema, visibilitySettingsSchema, DEFAULT_VISIBILITY_SETTINGS, insertCrewProfileSchema, insertCrewRequestSchema, insertCrewApplicationSchema, CREW_CATEGORIES, users, ragDocuments, documents, insertRegioDealSchema, crewApplications, crewRequests, bedrijfsprofielen, dailyCourses, dailyCourseProgress, insertDailyCourseSchema } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { createMollieClient } from "@mollie/api-client";
@@ -5815,12 +5815,10 @@ Wees specifiek en praktisch. Schrijf in zakelijk maar toegankelijk Nederlands.`;
 
   // ─── Dagelijkse Acties (Cursussen) ────────────────────────────────────────
 
-  const { dailyCourses, dailyCourseProgress, insertDailyCourseSchema } = await import("@shared/schema");
-  const { z: zLocal } = await import("zod");
   // Override date fields to coerce ISO strings → Date objects (frontend sends ISO strings)
   const insertCursusSchema = insertDailyCourseSchema.extend({
-    postedAt: zLocal.coerce.date(),
-    expiresAt: zLocal.coerce.date(),
+    postedAt: z.coerce.date(),
+    expiresAt: z.coerce.date(),
   });
 
   // GET /api/cursussen — actieve items voor ingelogde gebruiker
@@ -5889,9 +5887,30 @@ Wees specifiek en praktisch. Schrijf in zakelijk maar toegankelijk Nederlands.`;
       const user = (req as any).user;
       const { id } = req.params;
 
-      // Check of cursus bestaat
-      const [course] = await db.select().from(dailyCourses).where(eq(dailyCourses.id, id));
-      if (!course) return res.status(404).json({ error: "Cursus niet gevonden" });
+      // Check of cursus bestaat en actief is
+      const now = new Date();
+      const [course] = await db.select().from(dailyCourses).where(
+        and(
+          eq(dailyCourses.id, id),
+          eq(dailyCourses.status, "published"),
+          lte(dailyCourses.postedAt, now),
+          gt(dailyCourses.expiresAt, now)
+        )
+      );
+      if (!course) return res.status(404).json({ error: "Cursus niet gevonden of niet actief" });
+
+      // Controleer plan-toegang
+      const userPlan = user.plan ?? "basic";
+      const allowedPlans = userPlan === "pro" ? ["basis", "pro", "all"] : ["basis", "all"];
+      if (!allowedPlans.includes(course.plan ?? "basis")) {
+        return res.status(403).json({ error: "Geen toegang tot deze actie" });
+      }
+
+      // Controleer sector-toegang
+      const userSector = user.sector ?? null;
+      if (course.sector !== "algemeen" && course.sector !== userSector) {
+        return res.status(403).json({ error: "Geen toegang tot deze actie" });
+      }
 
       // Haal huidige voortgang op
       const [existing] = await db
@@ -5913,7 +5932,7 @@ Wees specifiek en praktisch. Schrijf in zakelijk maar toegankelijk Nederlands.`;
       } else {
         // Aanmaken
         await db.insert(dailyCourseProgress).values({
-          id: (await import("crypto")).randomUUID(),
+          id: randomUUID(),
           userId: user.id,
           courseId: id,
           completed: true,
@@ -5950,7 +5969,7 @@ Wees specifiek en praktisch. Schrijf in zakelijk maar toegankelijk Nederlands.`;
         return res.status(400).json({ error: "Validatiefout", details: parsed.error.errors });
       }
 
-      const id = (await import("crypto")).randomUUID();
+      const id = randomUUID();
       const [created] = await db.insert(dailyCourses).values({
         ...parsed.data,
         id,
