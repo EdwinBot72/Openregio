@@ -5821,13 +5821,19 @@ Wees specifiek en praktisch. Schrijf in zakelijk maar toegankelijk Nederlands.`;
     expiresAt: z.coerce.date(),
   });
 
+  // Normalize user plan values: "basic" (legacy) and "basis" (NL) both map to "basis" for course plan matching
+  function normalizePlan(plan: string | null | undefined): "basis" | "pro" {
+    if (plan === "pro") return "pro";
+    return "basis";
+  }
+
   // GET /api/cursussen — actieve items voor ingelogde gebruiker
   app.get("/api/cursussen", requireAuth, async (req, res) => {
     try {
       const user = (req as any).user;
       const now = new Date();
 
-      const userPlan = user.plan ?? "basic";
+      const userPlan = normalizePlan(user.plan);
       const userSector = user.sector ?? null;
 
       // Plan filter: basis ziet basis + all; pro ziet basis + pro + all
@@ -5900,7 +5906,7 @@ Wees specifiek en praktisch. Schrijf in zakelijk maar toegankelijk Nederlands.`;
       if (!course) return res.status(404).json({ error: "Cursus niet gevonden of niet actief" });
 
       // Controleer plan-toegang
-      const userPlan = user.plan ?? "basic";
+      const userPlan = normalizePlan(user.plan);
       const allowedPlans = userPlan === "pro" ? ["basis", "pro", "all"] : ["basis", "all"];
       if (!allowedPlans.includes(course.plan ?? "basis")) {
         return res.status(403).json({ error: "Geen toegang tot deze actie" });
