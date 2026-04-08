@@ -5816,6 +5816,12 @@ Wees specifiek en praktisch. Schrijf in zakelijk maar toegankelijk Nederlands.`;
   // ─── Dagelijkse Acties (Cursussen) ────────────────────────────────────────
 
   const { dailyCourses, dailyCourseProgress, insertDailyCourseSchema } = await import("@shared/schema");
+  const { z: zLocal } = await import("zod");
+  // Override date fields to coerce ISO strings → Date objects (frontend sends ISO strings)
+  const insertCursusSchema = insertDailyCourseSchema.extend({
+    postedAt: zLocal.coerce.date(),
+    expiresAt: zLocal.coerce.date(),
+  });
 
   // GET /api/cursussen — actieve items voor ingelogde gebruiker
   app.get("/api/cursussen", requireAuth, async (req, res) => {
@@ -5939,7 +5945,7 @@ Wees specifiek en praktisch. Schrijf in zakelijk maar toegankelijk Nederlands.`;
   app.post("/api/admin/cursussen", requireAdmin, async (req, res) => {
     try {
       const user = (req as any).user;
-      const parsed = insertDailyCourseSchema.safeParse(req.body);
+      const parsed = insertCursusSchema.safeParse(req.body);
       if (!parsed.success) {
         return res.status(400).json({ error: "Validatiefout", details: parsed.error.errors });
       }
@@ -5968,7 +5974,7 @@ Wees specifiek en praktisch. Schrijf in zakelijk maar toegankelijk Nederlands.`;
       const [existing] = await db.select().from(dailyCourses).where(eq(dailyCourses.id, id));
       if (!existing) return res.status(404).json({ error: "Cursus niet gevonden" });
 
-      const parsed = insertDailyCourseSchema.partial().safeParse(req.body);
+      const parsed = insertCursusSchema.partial().safeParse(req.body);
       if (!parsed.success) {
         return res.status(400).json({ error: "Validatiefout", details: parsed.error.errors });
       }

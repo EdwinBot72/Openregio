@@ -453,7 +453,7 @@ function DashboardCursusWidget() {
     queryKey: ["/api/cursussen"],
   });
 
-  const items = (data?.items ?? []).slice(0, 3);
+  const items = (data?.items ?? []).slice(0, 2);
   const totaal = data?.totaal ?? 0;
   const gedaan = items.filter((i) => i.completed).length;
 
@@ -552,11 +552,11 @@ function DashboardCursusWidget() {
           ))}
         </div>
 
-        {totaal > 3 && (
+        {totaal > 2 && (
           <div className="mt-3 text-center">
             <Link href="/cursussen">
               <button className="text-xs font-semibold text-primary hover:underline" data-testid="button-meer-acties">
-                +{totaal - 3} meer acties bekijken
+                +{totaal - 2} meer acties bekijken
               </button>
             </Link>
           </div>
