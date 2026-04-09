@@ -488,8 +488,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         role: user.role as "member" | "master" | "admin",
       });
 
-      // Delete onboarding token
-      await storage.deleteOnboardingToken(token);
+      // Delete all onboarding tokens for this user (cleans up any resent links too)
+      await storage.deleteOnboardingTokensByUserId(onboardingToken.userId);
 
       // Issue JWT tokens
       await issueTokensForUser(res, updatedUser as any);
@@ -3885,8 +3885,6 @@ Maak het verzoek professioneel en juridisch correct.`;
       if (!user.mustCompleteOnboarding) {
         return res.status(400).json({ error: "Deze gebruiker heeft de onboarding al voltooid" });
       }
-
-      await storage.deleteOnboardingTokensByUserId(user.id);
 
       const tempPassword = generateRandomPassword();
       const onboardingToken = generateOnboardingToken();
