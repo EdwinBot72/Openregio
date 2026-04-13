@@ -41,9 +41,11 @@ import {
   Bell,
   Info,
   Landmark,
+  Image,
 } from "lucide-react";
 import type { IntelSignaal, InsertIntelSignaal } from "@shared/schema";
 import { insertIntelSignaalSchema, INTEL_CATEGORIES, INTEL_URGENTIE } from "@shared/schema";
+import { PexelsPicker } from "@/components/PexelsPicker";
 
 const CATEGORIE_LABELS: Record<string, string> = {
   wetgeving: "Wetgeving",
@@ -89,11 +91,15 @@ function SignaalForm({
       bron: "",
       regio: "Nationaal",
       bronUrl: "",
+      photoUrl: "",
       isPublished: true,
       datum: new Date(),
       ...defaultValues,
     },
   });
+
+  const watchedCategorie = form.watch("categorie");
+  const watchedTitel = form.watch("titel");
 
   return (
     <Form {...form}>
@@ -215,6 +221,28 @@ function SignaalForm({
               <FormLabel>Bron-URL (optioneel)</FormLabel>
               <FormControl>
                 <Input placeholder="https://www.rijksoverheid.nl/..." {...field} value={field.value ?? ""} data-testid="input-signaal-bron-url" />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="photoUrl"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="flex items-center gap-1.5">
+                <Image className="h-3.5 w-3.5" />
+                Afbeelding via Pexels (optioneel)
+              </FormLabel>
+              <FormControl>
+                <PexelsPicker
+                  value={field.value ?? ""}
+                  onChange={field.onChange}
+                  defaultQuery={watchedTitel || CATEGORIE_LABELS[watchedCategorie] || watchedCategorie}
+                  compact
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -360,12 +388,23 @@ export default function AdminIntelPage() {
             <div className="divide-y">
               {signalen.map((signaal) => {
                 const UrgIcon = URGENTIE_ICON[signaal.urgentie] ?? Info;
+                const photoUrl = (signaal as any).photoUrl as string | null | undefined;
                 return (
                   <div
                     key={signaal.id}
                     className="flex flex-wrap items-center gap-3 p-4"
                     data-testid={`row-signaal-${signaal.id}`}
                   >
+                    {photoUrl && (
+                      <div className="w-14 h-10 rounded-md overflow-hidden shrink-0 bg-muted">
+                        <img
+                          src={photoUrl}
+                          alt={signaal.titel}
+                          className="w-full h-full object-cover"
+                          data-testid={`thumb-signaal-${signaal.id}`}
+                        />
+                      </div>
+                    )}
                     <div className="flex-1 min-w-0">
                       <div className="flex flex-wrap items-center gap-2 mb-1">
                         <Badge variant={URGENTIE_BADGE[signaal.urgentie] ?? "outline"} className="text-xs gap-1">

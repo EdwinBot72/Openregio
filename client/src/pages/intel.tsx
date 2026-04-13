@@ -509,80 +509,94 @@ export default function IntelPage() {
               const urgentieConfig = URGENTIE_CONFIG[urgentie] ?? URGENTIE_CONFIG.normaal;
               const UrgentieIcon = urgentieConfig.icon;
               const bronConfig = BRONNEN.find((b) => b.id === signaal.categorie);
+              const hasPhoto = !!(signaal as any).photoUrl;
 
               return (
                 <div
                   key={signaal.id}
-                  className="rounded-3xl bg-card border p-5"
+                  className="rounded-3xl bg-card border overflow-hidden"
                   data-testid={`card-signaal-${signaal.id}`}
                 >
-                  <div className="flex items-start gap-4">
-                    {bronConfig && (
-                      <div
-                        className={`w-10 h-10 rounded-xl ${bronConfig.bg} flex items-center justify-center shrink-0 mt-0.5`}
-                      >
-                        <bronConfig.icon className={`h-5 w-5 ${bronConfig.kleur}`} />
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-2">
-                        <Badge
-                          variant={urgentieConfig.variant}
-                          className="text-xs gap-1"
-                          data-testid={`badge-urgentie-${signaal.id}`}
+                  {hasPhoto && (
+                    <div className="relative h-36 overflow-hidden">
+                      <img
+                        src={(signaal as any).photoUrl}
+                        alt={signaal.titel}
+                        className="w-full h-full object-cover"
+                        data-testid={`img-signaal-${signaal.id}`}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-card/80 to-transparent" />
+                    </div>
+                  )}
+                  <div className="p-5">
+                    <div className="flex items-start gap-4">
+                      {bronConfig && !hasPhoto && (
+                        <div
+                          className={`w-10 h-10 rounded-xl ${bronConfig.bg} flex items-center justify-center shrink-0 mt-0.5`}
                         >
-                          <UrgentieIcon className="h-3 w-3" />
-                          {urgentieConfig.label}
-                        </Badge>
-                        {bronConfig && (
-                          <Badge variant="outline" className="text-xs">
-                            {bronConfig.label}
+                          <bronConfig.icon className={`h-5 w-5 ${bronConfig.kleur}`} />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap mb-2">
+                          <Badge
+                            variant={urgentieConfig.variant}
+                            className="text-xs gap-1"
+                            data-testid={`badge-urgentie-${signaal.id}`}
+                          >
+                            <UrgentieIcon className="h-3 w-3" />
+                            {urgentieConfig.label}
                           </Badge>
-                        )}
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {signaal.regio}
-                        </span>
-                        <span className="text-xs text-muted-foreground flex items-center gap-1">
-                          <Clock className="h-3 w-3" />
-                          {formatDatum(signaal.datum)}
-                        </span>
-                      </div>
-                      <h3
-                        className="font-semibold text-base mb-1"
-                        data-testid={`text-signaal-titel-${signaal.id}`}
-                      >
-                        {signaal.titel}
-                      </h3>
-                      <p
-                        className="text-sm text-muted-foreground leading-relaxed"
-                        data-testid={`text-signaal-samenvatting-${signaal.id}`}
-                      >
-                        {signaal.samenvatting}
-                      </p>
-                      <div className="flex items-center gap-4 mt-3 flex-wrap">
-                        <span className="text-xs text-muted-foreground">Bron: {signaal.bron}</span>
-                        {signaal.bronUrl && (
-                          <a
-                            href={signaal.bronUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
-                            data-testid={`link-bron-${signaal.id}`}
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                            Bron bekijken
-                          </a>
-                        )}
-                        <Link href="/regiobot">
-                          <button
-                            className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
-                            data-testid={`button-vraag-regiobot-${signaal.id}`}
-                          >
-                            <ChevronRight className="h-3 w-3" />
-                            Vraag RegioBot
-                          </button>
-                        </Link>
+                          {bronConfig && (
+                            <Badge variant="outline" className="text-xs">
+                              {bronConfig.label}
+                            </Badge>
+                          )}
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {signaal.regio}
+                          </span>
+                          <span className="text-xs text-muted-foreground flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {formatDatum(signaal.datum)}
+                          </span>
+                        </div>
+                        <h3
+                          className="font-semibold text-base mb-1"
+                          data-testid={`text-signaal-titel-${signaal.id}`}
+                        >
+                          {signaal.titel}
+                        </h3>
+                        <p
+                          className="text-sm text-muted-foreground leading-relaxed"
+                          data-testid={`text-signaal-samenvatting-${signaal.id}`}
+                        >
+                          {signaal.samenvatting}
+                        </p>
+                        <div className="flex items-center gap-4 mt-3 flex-wrap">
+                          <span className="text-xs text-muted-foreground">Bron: {signaal.bron}</span>
+                          {signaal.bronUrl && (
+                            <a
+                              href={signaal.bronUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                              data-testid={`link-bron-${signaal.id}`}
+                            >
+                              <ExternalLink className="h-3 w-3" />
+                              Bron bekijken
+                            </a>
+                          )}
+                          <Link href="/regiobot">
+                            <button
+                              className="inline-flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                              data-testid={`button-vraag-regiobot-${signaal.id}`}
+                            >
+                              <ChevronRight className="h-3 w-3" />
+                              Vraag RegioBot
+                            </button>
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   </div>

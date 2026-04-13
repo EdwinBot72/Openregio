@@ -287,6 +287,12 @@ export async function runMigrations(): Promise<void> {
     `);
     console.log("[Migration] ✓ intel_signalen.sector column ensured");
 
+    // Pexels afbeelding URL voor intel_signalen
+    await db.execute(sql`
+      ALTER TABLE intel_signalen ADD COLUMN IF NOT EXISTS photo_url VARCHAR(1024);
+    `);
+    console.log("[Migration] ✓ intel_signalen.photo_url column ensured");
+
     // Seed starter-cursussen (idempotent — alleen als tabel leeg is)
     const { rows: courseCount } = await db.execute(sql`SELECT COUNT(*)::int AS n FROM daily_courses`);
     if ((courseCount[0] as any).n === 0) {

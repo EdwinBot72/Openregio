@@ -12,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Eye, Calendar, BookOpen, Image } from "lucide-react";
 import type { Blog, InsertBlog } from "@shared/schema";
+import { PexelsPicker } from "@/components/PexelsPicker";
 
 export default function AdminBlogsPage() {
   const { toast } = useToast();
@@ -230,35 +231,17 @@ export default function AdminBlogsPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="featuredImage">
+                <Label>
                   <div className="flex items-center gap-2">
                     <Image className="h-4 w-4" />
-                    Uitgelichte afbeelding (optioneel)
+                    Coverafbeelding via Pexels (optioneel)
                   </div>
                 </Label>
-                <Input
-                  id="featuredImage"
+                <PexelsPicker
                   value={formData.featuredImage || ""}
-                  onChange={(e) => setFormData({ ...formData, featuredImage: e.target.value })}
-                  placeholder="Plak hier een afbeelding URL (https://...)"
-                  data-testid="input-blog-image"
+                  onChange={(url) => setFormData({ ...formData, featuredImage: url })}
+                  defaultQuery={formData.title || "ondernemer"}
                 />
-                {formData.featuredImage && (
-                  <div className="mt-2 rounded-md overflow-hidden border">
-                    <img 
-                      src={formData.featuredImage} 
-                      alt="Preview" 
-                      className="w-full h-40 object-cover"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = 'none';
-                      }}
-                      data-testid="preview-blog-image"
-                    />
-                  </div>
-                )}
-                <p className="text-xs text-muted-foreground">
-                  Tip: Upload een afbeelding naar een dienst zoals Imgur of Cloudinary en plak de URL hier
-                </p>
               </div>
 
               <div className="space-y-2">

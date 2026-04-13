@@ -1074,6 +1074,7 @@ export const intelSignalen = pgTable("intel_signalen", {
   sector: varchar("sector", { enum: SIGNAAL_SECTOR_TYPES }), // null = iedereen; "alle" = alle sectored users; specifieke sector = alleen die sector
   datum: timestamp("datum", { withTimezone: true }).notNull().defaultNow(),
   bronUrl: varchar("bron_url"),
+  photoUrl: varchar("photo_url"),
   isPublished: boolean("is_published").notNull().default(true),
   externalId: varchar("external_id").unique(),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),

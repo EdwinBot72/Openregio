@@ -79,36 +79,58 @@ export default function BlogDetailPage() {
             </Button>
           </Link>
 
-          {blog.featuredImage && (
-            <div className="aspect-video overflow-hidden rounded-md mb-8">
-              <img 
-                src={blog.featuredImage} 
-                alt={blog.title} 
+          {blog.featuredImage ? (
+            <div className="relative overflow-hidden rounded-xl mb-8" style={{ height: "420px" }}>
+              <img
+                src={blog.featuredImage}
+                alt={blog.title}
                 className="w-full h-full object-cover"
                 data-testid="img-blog-featured"
               />
-            </div>
-          )}
-
-          <h1 
-            className="font-accent text-3xl md:text-5xl font-bold mb-4" 
-            data-testid="text-blog-title"
-          >
-            {blog.title}
-          </h1>
-
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-8">
-            <div className="flex items-center gap-2">
-              <Calendar className="h-4 w-4" />
-              <span data-testid="text-blog-date">{formatDate(blog.publishedAt)}</span>
-            </div>
-            {blog.authorName && (
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4" />
-                <span data-testid="text-blog-author">{blog.authorName}</span>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-8">
+                <h1
+                  className="font-accent text-3xl md:text-5xl font-bold text-white mb-3"
+                  data-testid="text-blog-title"
+                >
+                  {blog.title}
+                </h1>
+                <div className="flex flex-wrap items-center gap-4 text-sm text-white/80">
+                  <div className="flex items-center gap-2">
+                    <Calendar className="h-4 w-4" />
+                    <span data-testid="text-blog-date">{formatDate(blog.publishedAt)}</span>
+                  </div>
+                  {blog.authorName && (
+                    <div className="flex items-center gap-2">
+                      <User className="h-4 w-4" />
+                      <span data-testid="text-blog-author">{blog.authorName}</span>
+                    </div>
+                  )}
+                </div>
               </div>
-            )}
-          </div>
+            </div>
+          ) : (
+            <>
+              <h1
+                className="font-accent text-3xl md:text-5xl font-bold mb-4"
+                data-testid="text-blog-title"
+              >
+                {blog.title}
+              </h1>
+              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-8">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  <span data-testid="text-blog-date">{formatDate(blog.publishedAt)}</span>
+                </div>
+                {blog.authorName && (
+                  <div className="flex items-center gap-2">
+                    <User className="h-4 w-4" />
+                    <span data-testid="text-blog-author">{blog.authorName}</span>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
 
           <Card className="mb-8">
             <CardContent className="p-6">
