@@ -38,7 +38,9 @@ export function PexelsPicker({ value, onChange, defaultQuery = "", compact = fal
     setLoading(true);
     setSearched(true);
     try {
-      const res = await fetch(`/api/admin/image-search?q=${encodeURIComponent(q)}`);
+      const res = await fetch(`/api/admin/image-search?q=${encodeURIComponent(q)}`, {
+        credentials: "include",
+      });
       const data = await res.json();
       if (data.noKey) {
         setNoKey(true);
