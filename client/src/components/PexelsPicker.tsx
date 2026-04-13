@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -9,7 +9,6 @@ type PexelsPhoto = {
   url: string;
   thumb: string;
   photographer: string;
-  photographerUrl: string;
   alt: string;
 };
 
@@ -26,6 +25,13 @@ export function PexelsPicker({ value, onChange, defaultQuery = "", compact = fal
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
   const [noKey, setNoKey] = useState(false);
+  const userTyped = useRef(false);
+
+  useEffect(() => {
+    if (!userTyped.current && defaultQuery) {
+      setQuery(defaultQuery);
+    }
+  }, [defaultQuery]);
 
   const search = useCallback(async (q: string) => {
     if (!q.trim()) return;
@@ -66,7 +72,7 @@ export function PexelsPicker({ value, onChange, defaultQuery = "", compact = fal
           <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
           <Input
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => { userTyped.current = true; setQuery(e.target.value); }}
             onKeyDown={handleKeyDown}
             placeholder="Zoek foto op Pexels..."
             className="pl-8 text-sm"
