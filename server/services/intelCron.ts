@@ -2,6 +2,41 @@ import cron from "node-cron";
 import { storage } from "../storage";
 import type { InsertIntelSignaal } from "@shared/schema";
 
+// ─── Pexels helper ──────────────────────────────────────────────────────────
+
+type PexelsPhoto = {
+  src: {
+    large: string;
+  };
+};
+
+type PexelsSearchResponse = {
+  photos: PexelsPhoto[];
+  total_results: number;
+};
+
+export async function fetchPexelsPhotoUrl(zoekterm: string): Promise<string | null> {
+  const apiKey = process.env.PEXELS_API_KEY;
+  if (!apiKey) {
+    console.warn("[Pexels] PEXELS_API_KEY niet ingesteld — overgeslagen");
+    return null;
+  }
+  try {
+    const url = `https://api.pexels.com/v1/search?query=${encodeURIComponent(zoekterm)}&per_page=1&page=1&orientation=landscape`;
+    const res = await fetch(url, { headers: { Authorization: apiKey } });
+    if (!res.ok) {
+      console.warn(`[Pexels] API antwoordde ${res.status} voor zoekterm "${zoekterm}"`);
+      return null;
+    }
+    const data = await res.json() as PexelsSearchResponse;
+    const foto = data?.photos?.[0];
+    return foto?.src?.large ?? null;
+  } catch (err) {
+    console.error("[Pexels] Fout bij ophalen foto:", (err as Error).message);
+    return null;
+  }
+}
+
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 async function fetchWithTimeout(url: string, ms = 10_000): Promise<Response> {
@@ -265,15 +300,29 @@ export async function runIntelFetch(): Promise<number> {
   let nieuw = 0;
 
   for (const kandidaat of candidates) {
+    let aangemaakt: Awaited<ReturnType<typeof storage.createIntelSignaal>> | null = null;
+
     if (!kandidaat.externalId) {
-      await storage.createIntelSignaal(kandidaat);
+      aangemaakt = await storage.createIntelSignaal(kandidaat);
       nieuw++;
-      continue;
+    } else {
+      const bestaand = await storage.getIntelSignaalByExternalId(kandidaat.externalId);
+      if (!bestaand) {
+        aangemaakt = await storage.createIntelSignaal(kandidaat);
+        nieuw++;
+      }
     }
-    const bestaand = await storage.getIntelSignaalByExternalId(kandidaat.externalId);
-    if (!bestaand) {
-      await storage.createIntelSignaal(kandidaat);
-      nieuw++;
+
+    if (aangemaakt && !aangemaakt.photoUrl) {
+      try {
+        const photoUrl = await fetchPexelsPhotoUrl(aangemaakt.titel);
+        if (photoUrl) {
+          await storage.updateIntelSignaal(aangemaakt.id, { photoUrl });
+          console.log(`[IntelCron] Foto toegevoegd aan signaal "${aangemaakt.titel.slice(0, 60)}"`);
+        }
+      } catch (err) {
+        console.error(`[IntelCron] Fout bij ophalen Pexels-foto voor signaal ${aangemaakt.id}:`, (err as Error).message);
+      }
     }
   }
 

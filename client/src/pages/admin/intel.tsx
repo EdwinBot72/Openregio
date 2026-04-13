@@ -42,6 +42,7 @@ import {
   Info,
   Landmark,
   Image,
+  ImagePlus,
 } from "lucide-react";
 import type { IntelSignaal, InsertIntelSignaal } from "@shared/schema";
 import { insertIntelSignaalSchema, INTEL_CATEGORIES, INTEL_URGENTIE } from "@shared/schema";
@@ -331,6 +332,17 @@ export default function AdminIntelPage() {
     onError: () => toast({ title: "Fout", description: "Fetch mislukt.", variant: "destructive" }),
   });
 
+  const backfillMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/admin/intel/photo-backfill"),
+    onSuccess: async (res: Response) => {
+      const json = await res.json() as { bijgewerkt: number; overgeslagen: number };
+      queryClient.invalidateQueries({ queryKey: ["/api/intel/signalen/all"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/intel/signalen"] });
+      toast({ title: `${json.bijgewerkt} signalen voorzien van foto`, description: `${json.overgeslagen} overgeslagen` });
+    },
+    onError: () => toast({ title: "Fout", description: "Foto-aanvulling mislukt.", variant: "destructive" }),
+  });
+
   const togglePublished = (signaal: IntelSignaal) => {
     updateMutation.mutate({ id: signaal.id, data: { isPublished: !signaal.isPublished } });
   };
@@ -357,6 +369,15 @@ export default function AdminIntelPage() {
           >
             <RefreshCw className={`w-4 h-4 mr-2 ${fetchMutation.isPending ? "animate-spin" : ""}`} />
             {fetchMutation.isPending ? "Ophalen..." : "Nu ophalen"}
+          </Button>
+          <Button
+            variant="outline"
+            onClick={() => backfillMutation.mutate()}
+            disabled={backfillMutation.isPending}
+            data-testid="button-photo-backfill"
+          >
+            <ImagePlus className={`w-4 h-4 mr-2 ${backfillMutation.isPending ? "animate-pulse" : ""}`} />
+            {backfillMutation.isPending ? "Foto's aanvullen..." : "Foto's automatisch aanvullen"}
           </Button>
           <Button onClick={() => setShowCreate(true)} data-testid="button-new-signaal">
             <Plus className="w-4 h-4 mr-2" />

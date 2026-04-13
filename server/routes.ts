@@ -6101,6 +6101,41 @@ Wees specifiek en praktisch. Schrijf in zakelijk maar toegankelijk Nederlands.`;
     }
   });
 
+  // POST /api/admin/intel/photo-backfill — voeg Pexels-foto toe aan signalen zonder foto
+  app.post("/api/admin/intel/photo-backfill", requireAuth, requireAdmin, async (req, res) => {
+    try {
+      const { fetchPexelsPhotoUrl } = await import("./services/intelCron");
+      const alleSignalen = await storage.getIntelSignalen();
+      const zonderFoto = alleSignalen.filter((s) => !s.photoUrl);
+
+      let bijgewerkt = 0;
+      let overgeslagen = alleSignalen.length - zonderFoto.length;
+
+      for (const signaal of zonderFoto) {
+        try {
+          const photoUrl = await fetchPexelsPhotoUrl(signaal.titel);
+          if (photoUrl) {
+            await storage.updateIntelSignaal(signaal.id, { photoUrl });
+            bijgewerkt++;
+          } else {
+            overgeslagen++;
+          }
+        } catch (err) {
+          console.error(`[PhotoBackfill] Fout voor signaal ${signaal.id}:`, (err as Error).message);
+          overgeslagen++;
+        }
+        // Kleine pauze om Pexels rate-limits te respecteren
+        await new Promise((r) => setTimeout(r, 300));
+      }
+
+      console.log(`[PhotoBackfill] Klaar — ${bijgewerkt} bijgewerkt, ${overgeslagen} overgeslagen`);
+      res.json({ bijgewerkt, overgeslagen });
+    } catch (err: unknown) {
+      console.error("[PhotoBackfill] Onverwachte fout:", err);
+      res.status(500).json({ error: "Backfill mislukt" });
+    }
+  });
+
   // ─────────────────────────────────────────────────────────────────────
 
   const httpServer = createServer(app);
