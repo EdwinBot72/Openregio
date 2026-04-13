@@ -388,7 +388,7 @@ export default function AdminIntelPage() {
             <div className="divide-y">
               {signalen.map((signaal) => {
                 const UrgIcon = URGENTIE_ICON[signaal.urgentie] ?? Info;
-                const photoUrl = (signaal as any).photoUrl as string | null | undefined;
+                const photoUrl = signaal.photoUrl;
                 return (
                   <div
                     key={signaal.id}
