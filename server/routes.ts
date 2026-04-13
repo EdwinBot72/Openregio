@@ -4338,23 +4338,50 @@ Maak het verzoek professioneel en juridisch correct.`;
   // GET /api/admin/stats — platform overview stats
   app.get("/api/admin/stats", requireAuth, requireAdmin, async (_req, res) => {
     try {
-      const [userStats, wooStats, regionCount, crewCount, newUsers] = await Promise.all([
+      const [userStats, wooStats, regionCount, crewCount, newUsers, prevMonthUsers, dailySignups, recentUsers, wooThisMonth] = await Promise.all([
         db.execute(sql`SELECT plan, COUNT(*)::int AS cnt FROM users WHERE deleted_at IS NULL GROUP BY plan`),
         db.execute(sql`SELECT status, COUNT(*)::int AS cnt FROM woo_requests GROUP BY status`),
         db.execute(sql`SELECT COUNT(*)::int AS cnt FROM regions`),
         db.execute(sql`SELECT COUNT(*)::int AS cnt FROM crew_profiles`),
         db.execute(sql`SELECT COUNT(*)::int AS cnt FROM users WHERE deleted_at IS NULL AND created_at > NOW() - INTERVAL '30 days'`),
+        db.execute(sql`SELECT COUNT(*)::int AS cnt FROM users WHERE deleted_at IS NULL AND created_at > NOW() - INTERVAL '60 days' AND created_at <= NOW() - INTERVAL '30 days'`),
+        db.execute(sql`
+          SELECT TO_CHAR(d::date, 'DD MMM') AS day, COALESCE(cnt, 0)::int AS cnt
+          FROM generate_series(NOW() - INTERVAL '13 days', NOW(), '1 day') AS d
+          LEFT JOIN (
+            SELECT DATE_TRUNC('day', created_at) AS day, COUNT(*)::int AS cnt
+            FROM users WHERE deleted_at IS NULL AND created_at > NOW() - INTERVAL '14 days'
+            GROUP BY DATE_TRUNC('day', created_at)
+          ) u ON DATE_TRUNC('day', d) = u.day
+          ORDER BY d ASC
+        `),
+        db.execute(sql`
+          SELECT email, COALESCE(first_name, '') AS "firstName", COALESCE(last_name, '') AS "lastName",
+                 COALESCE(plan, 'basic') AS plan, created_at AS "createdAt"
+          FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT 6
+        `),
+        db.execute(sql`SELECT COUNT(*)::int AS cnt FROM woo_requests WHERE created_at > NOW() - INTERVAL '30 days'`),
       ]);
       const byPlan: Record<string, number> = {};
       for (const row of userStats.rows as any[]) byPlan[row.plan || "basic"] = row.cnt;
       const byStatus: Record<string, number> = {};
       for (const row of wooStats.rows as any[]) byStatus[row.status || "sent"] = row.cnt;
+      const totalUsers = Object.values(byPlan).reduce((a, b) => a + b, 0);
+      const newThis = (newUsers.rows[0] as any)?.cnt || 0;
+      const newPrev = (prevMonthUsers.rows[0] as any)?.cnt || 0;
+      const growthPct = newPrev > 0 ? Math.round(((newThis - newPrev) / newPrev) * 100) : null;
+      const proCount = byPlan["pro"] || 0;
+      const revenueMonthly = proCount * 12.95;
       res.json({
-        users: { total: Object.values(byPlan).reduce((a, b) => a + b, 0), byPlan },
-        woo: { total: Object.values(byStatus).reduce((a, b) => a + b, 0), byStatus },
+        users: { total: totalUsers, byPlan },
+        woo: { total: Object.values(byStatus).reduce((a, b) => a + b, 0), byStatus, thisMonth: (wooThisMonth.rows[0] as any)?.cnt || 0 },
         regions: (regionCount.rows[0] as any)?.cnt || 0,
         crewProfiles: (crewCount.rows[0] as any)?.cnt || 0,
-        newUsersLast30Days: (newUsers.rows[0] as any)?.cnt || 0,
+        newUsersLast30Days: newThis,
+        growthPct,
+        revenueMonthly,
+        dailySignups: dailySignups.rows,
+        recentUsers: recentUsers.rows,
       });
     } catch (err: any) {
       console.error("Admin stats error:", err);
