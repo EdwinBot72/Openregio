@@ -297,6 +297,9 @@ function AppContent() {
   const [isRegioAnalysePage] = useRoute("/regio-analyse");
   const [isKoopLokaalPage] = useRoute("/koop-lokaal");
 
+  const [currentLocation] = useLocation();
+  const isVandaagPage = currentLocation === "/vandaag" || currentLocation.startsWith("/vandaag/");
+
   const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isLidmaatschapPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage || isBlogsPage || isForgotPasswordPage || isResetPasswordPage || isDisclaimerPage || isCookiebeleidPage || isRegioAnalysePage || isKoopLokaalPage;
 
   if (isPublicRoute) {
@@ -308,7 +311,7 @@ function AppContent() {
   };
 
   return (
-    <SidebarProvider style={style as CSSProperties}>
+    <SidebarProvider style={style as CSSProperties} defaultOpen={!isVandaagPage}>
       <div className="flex h-screen w-full">
         <AppSidebar />
         <div className="flex flex-col flex-1 overflow-hidden bg-regio-base dark:bg-background">
@@ -316,7 +319,7 @@ function AppContent() {
             <SidebarTrigger data-testid="button-sidebar-toggle" />
             <ThemeToggle />
           </header>
-          <main className="flex-1 overflow-y-auto p-6 protected-content">
+          <main className={`flex-1 overflow-y-auto protected-content ${isVandaagPage ? "" : "p-6"}`}>
             <AuthGuard>
               <AuthenticatedRouter />
             </AuthGuard>
