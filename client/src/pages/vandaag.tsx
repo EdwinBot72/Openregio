@@ -66,7 +66,13 @@ function useLastVisit() {
 }
 
 // ─── Ranking function ─────────────────────────────────────────────────────────
-// Volgorde: risk_level hoog→normaal→info, sector-match, regio-match, nieuwste eerst
+// Volgorde per spec: risk_level → impact → soonest deadline → regio-match → sector-match → newest
+// - risk_level: urgentie hoog > normaal > info
+// - impact: urgentie fungeert ook als impact-proxy (geen apart veld in schema)
+// - deadline: datum oplopend (eerstvolgende datum = meest urgent om op te handelen)
+// - regio-match: nationaal of gebruikers-gemeente
+// - sector-match: geen sector, "alle", of overeenkomende sector
+// - newest: createdAt aflopend
 function rankSignalen(
   signalen: IntelSignaal[],
   userSector?: string | null,
@@ -74,26 +80,33 @@ function rankSignalen(
 ): IntelSignaal[] {
   const urgOrd: Record<string, number> = { hoog: 0, normaal: 1, info: 2 };
   return [...signalen].sort((a, b) => {
-    // 1. Risk level
+    // 1. Risk level (hoog → normaal → info)
     const riskDiff = (urgOrd[a.urgentie] ?? 2) - (urgOrd[b.urgentie] ?? 2);
     if (riskDiff !== 0) return riskDiff;
 
-    // 2. Sector match
-    const aSect = !a.sector || a.sector === "alle" || a.sector === userSector;
-    const bSect = !b.sector || b.sector === "alle" || b.sector === userSector;
-    if (aSect && !bSect) return -1;
-    if (!aSect && bSect) return 1;
+    // 2. Impact (proxy: zelfde als urgentie — geen apart veld; gelijkheid valt door naar volgende stap)
 
-    // 3. Regio match
+    // 3. Soonest deadline (datum oplopend = dichtstbijzijnde datum heeft prioriteit)
+    const aD = new Date(a.datum ?? a.createdAt ?? 0).getTime();
+    const bD = new Date(b.datum ?? b.createdAt ?? 0).getTime();
+    if (aD !== bD) return aD - bD;
+
+    // 4. Regio match (nationaal of gebruikers-regio gaat voor)
     const aReg = !userRegio || a.regio === "Nationaal" || a.regio === userRegio;
     const bReg = !userRegio || b.regio === "Nationaal" || b.regio === userRegio;
     if (aReg && !bReg) return -1;
     if (!aReg && bReg) return 1;
 
-    // 4. Nieuwste eerst
-    const aT = new Date(a.datum ?? a.createdAt ?? 0).getTime();
-    const bT = new Date(b.datum ?? b.createdAt ?? 0).getTime();
-    return bT - aT;
+    // 5. Sector match
+    const aSect = !a.sector || a.sector === "alle" || a.sector === userSector;
+    const bSect = !b.sector || b.sector === "alle" || b.sector === userSector;
+    if (aSect && !bSect) return -1;
+    if (!aSect && bSect) return 1;
+
+    // 6. Nieuwste eerst (createdAt aflopend)
+    const aCr = new Date(a.createdAt ?? 0).getTime();
+    const bCr = new Date(b.createdAt ?? 0).getTime();
+    return bCr - aCr;
   });
 }
 
@@ -425,6 +438,7 @@ type Aanbesteding = {
   description: string | null;
   deadline: string | null;
   daysLeft: number | null;
+  publicationDate: string | null;
   url: string | null;
 };
 
@@ -638,9 +652,12 @@ export default function VandaagPage() {
   }
 
   // Aanbestedingen toevoegen als kansen-items (max resterende slots)
+  // Nieuwheid: als publicationDate na last visit valt, markeer als nieuw
   if (aanbestedingenData?.items) {
     for (const a of aanbestedingenData.items) {
       if (feedItems.length >= 6) break;
+      const aanbestedingDatum = a.publicationDate ? new Date(a.publicationDate) : null;
+      const isNieuwKans = aanbestedingDatum ? isNieuwFn(aanbestedingDatum) : false;
       feedItems.push({
         id: `kans-${a.id}`,
         type: "kans",
@@ -649,8 +666,8 @@ export default function VandaagPage() {
         tekst: a.description ?? a.buyer,
         dotColor: "bg-emerald-500",
         href: "/kansen/opdrachten",
-        isNieuw: false,
-        datum: new Date(0),
+        isNieuw: isNieuwKans,
+        datum: aanbestedingDatum ?? new Date(0),
       });
     }
   }
