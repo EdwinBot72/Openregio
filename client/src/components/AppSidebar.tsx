@@ -27,7 +27,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "wouter";
 import { queryClient } from "@/lib/queryClient";
 import { MAIN_NAV, type NavSection } from "@/config/navigation";
-import { type SectorKey } from "@/config/sectors";
 
 // ── Generieke nav-sectie ──────────────────────────────────────────────────────
 
