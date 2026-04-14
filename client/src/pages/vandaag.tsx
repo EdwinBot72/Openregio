@@ -15,9 +15,11 @@ import {
   BarChart3,
   Bell,
   Building2,
+  Calendar,
   CheckCircle2,
   ChevronRight,
   Euro,
+  Eye,
   FileText,
   Globe,
   Landmark,
@@ -27,8 +29,6 @@ import {
   Sparkles,
   TrendingUp,
   Zap,
-  Circle,
-  CalendarDays,
 } from "lucide-react";
 import {
   SECTOR_CONFIG,
@@ -36,27 +36,23 @@ import {
   type SectorKey,
 } from "@/config/sectors";
 
-// ─── Design tokens ───────────────────────────────────────────────────────────
+// ─── Design tokens ────────────────────────────────────────────────────────────
 const CARD = "rounded-[28px] border border-[#e4dfd2] dark:border-border bg-white dark:bg-card shadow-sm";
 
-// ─── Helpers ─────────────────────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 function getGreeting() {
-  const uur = new Date().getHours();
-  if (uur < 6) return "Goedenacht";
-  if (uur < 12) return "Goedemorgen";
-  if (uur < 18) return "Goedemiddag";
+  const h = new Date().getHours();
+  if (h < 6) return "Goedenacht";
+  if (h < 12) return "Goedemorgen";
+  if (h < 18) return "Goedemiddag";
   return "Goedenavond";
 }
 
 function formatDatum(d: Date) {
-  return d.toLocaleDateString("nl-NL", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-  });
+  return d.toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long" });
 }
 
-// ─── Last-visit tracking (localStorage) ──────────────────────────────────────
+// ─── Last-visit tracking ──────────────────────────────────────────────────────
 const LS_KEY = "vandaag_last_visit";
 
 function useLastVisit() {
@@ -69,28 +65,60 @@ function useLastVisit() {
   return prevRef.current;
 }
 
-// ─── Urgency badge ────────────────────────────────────────────────────────────
-function UrgentieBadge({ urgentie }: { urgentie: string }) {
-  if (urgentie === "hoog") return <Badge variant="destructive" className="text-xs shrink-0">Urgent</Badge>;
-  if (urgentie === "normaal") return <Badge variant="secondary" className="text-xs shrink-0">Normaal</Badge>;
-  return <Badge variant="outline" className="text-xs shrink-0">Info</Badge>;
+// ─── Ranking function ─────────────────────────────────────────────────────────
+// Volgorde: risk_level hoog→normaal→info, sector-match, regio-match, nieuwste eerst
+function rankSignalen(
+  signalen: IntelSignaal[],
+  userSector?: string | null,
+  userRegio?: string | null,
+): IntelSignaal[] {
+  const urgOrd: Record<string, number> = { hoog: 0, normaal: 1, info: 2 };
+  return [...signalen].sort((a, b) => {
+    // 1. Risk level
+    const riskDiff = (urgOrd[a.urgentie] ?? 2) - (urgOrd[b.urgentie] ?? 2);
+    if (riskDiff !== 0) return riskDiff;
+
+    // 2. Sector match
+    const aSect = !a.sector || a.sector === "alle" || a.sector === userSector;
+    const bSect = !b.sector || b.sector === "alle" || b.sector === userSector;
+    if (aSect && !bSect) return -1;
+    if (!aSect && bSect) return 1;
+
+    // 3. Regio match
+    const aReg = !userRegio || a.regio === "Nationaal" || a.regio === userRegio;
+    const bReg = !userRegio || b.regio === "Nationaal" || b.regio === userRegio;
+    if (aReg && !bReg) return -1;
+    if (!aReg && bReg) return 1;
+
+    // 4. Nieuwste eerst
+    const aT = new Date(a.datum ?? a.createdAt ?? 0).getTime();
+    const bT = new Date(b.datum ?? b.createdAt ?? 0).getTime();
+    return bT - aT;
+  });
 }
 
-// ─── Category dot color ───────────────────────────────────────────────────────
-const CAT_COLOR: Record<string, string> = {
+// ─── Category dot ─────────────────────────────────────────────────────────────
+const CAT_DOT: Record<string, string> = {
   wetgeving: "bg-blue-500",
   beleid: "bg-purple-500",
   financieel: "bg-amber-500",
   subsidies: "bg-emerald-500",
 };
 
-// ─── Sector onboarding prompt ─────────────────────────────────────────────────
+// ─── Urgency badge ─────────────────────────────────────────────────────────────
+function UrgentieBadge({ urgentie }: { urgentie: string }) {
+  if (urgentie === "hoog") return <Badge variant="destructive" className="text-xs shrink-0">Urgent</Badge>;
+  if (urgentie === "normaal") return <Badge variant="secondary" className="text-xs shrink-0">Normaal</Badge>;
+  return <Badge variant="outline" className="text-xs shrink-0">Info</Badge>;
+}
+
+// ─── Sector onboarding ────────────────────────────────────────────────────────
 function SectorOnboarding() {
   const qc = useQueryClient();
   const { toast } = useToast();
   const [saving, setSaving] = useState<SectorKey | null>(null);
 
-  const handleKiesSector = async (key: SectorKey) => {
+  const handleKies = async (key: SectorKey) => {
     setSaving(key);
     try {
       await apiRequest("PATCH", "/api/user/sector", { sector: key });
@@ -123,7 +151,7 @@ function SectorOnboarding() {
           return (
             <button
               key={tile.key}
-              onClick={() => handleKiesSector(tile.key)}
+              onClick={() => handleKies(tile.key)}
               disabled={!!saving}
               data-testid={`button-sector-${tile.key}`}
               className="flex flex-col items-center gap-2 rounded-2xl border border-border bg-muted/40 hover-elevate active-elevate-2 p-4 text-center transition disabled:opacity-50"
@@ -139,7 +167,7 @@ function SectorOnboarding() {
   );
 }
 
-// ─── Highlight card (top 4) ──────────────────────────────────────────────────
+// ─── Highlight card ────────────────────────────────────────────────────────────
 type HighlightCard = {
   id: string;
   kleur: string;
@@ -179,7 +207,7 @@ function HighlightKaart({ kaart }: { kaart: HighlightCard }) {
   );
 }
 
-// ─── Quick action tile ────────────────────────────────────────────────────────
+// ─── Quick action tile ─────────────────────────────────────────────────────────
 type QuickAction = {
   icon: React.ElementType;
   label: string;
@@ -210,34 +238,44 @@ function QuickActionTile({ action }: { action: QuickAction }) {
   );
 }
 
-// ─── Nieuws feed item ─────────────────────────────────────────────────────────
-function NieuwFeedItem({ signaal, isNieuw }: { signaal: IntelSignaal; isNieuw: boolean }) {
-  const dot = CAT_COLOR[signaal.categorie] ?? "bg-muted-foreground";
+// ─── Feed item type (unified intel + kansen) ──────────────────────────────────
+type FeedItem = {
+  id: string;
+  type: "intel" | "kans";
+  label: string;
+  titel: string;
+  tekst: string;
+  urgentie?: string;
+  dotColor: string;
+  href: string;
+  isNieuw: boolean;
+  datum: Date;
+};
+
+function FeedItemRow({ item }: { item: FeedItem }) {
   return (
-    <Link href="/regels/updates">
+    <Link href={item.href}>
       <div
         className="flex items-start gap-3 py-3 border-b border-border last:border-0 hover-elevate cursor-pointer px-1 rounded-md -mx-1"
-        data-testid={`feed-item-${signaal.id}`}
+        data-testid={`feed-item-${item.id}`}
       >
         <div className="mt-1.5 shrink-0">
-          <span className={`inline-block w-2 h-2 rounded-full ${dot}`} />
+          <span className={`inline-block w-2 h-2 rounded-full ${item.dotColor}`} />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-0.5">
-            {isNieuw && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-white">
+            {item.isNieuw && (
+              <span className="inline-flex items-center rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-white">
                 Nieuw
               </span>
             )}
             <span className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
-              {signaal.categorie}
+              {item.label}
             </span>
-            {signaal.urgentie === "hoog" && (
-              <UrgentieBadge urgentie="hoog" />
-            )}
+            {item.urgentie === "hoog" && <UrgentieBadge urgentie="hoog" />}
           </div>
-          <p className="text-sm font-semibold text-foreground leading-snug line-clamp-2">{signaal.titel}</p>
-          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{signaal.samenvatting}</p>
+          <p className="text-sm font-semibold text-foreground leading-snug line-clamp-2">{item.titel}</p>
+          <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{item.tekst}</p>
         </div>
         <ChevronRight className="h-4 w-4 text-muted-foreground shrink-0 mt-1" />
       </div>
@@ -245,64 +283,76 @@ function NieuwFeedItem({ signaal, isNieuw }: { signaal: IntelSignaal; isNieuw: b
   );
 }
 
-// ─── Voortgangsblok ────────────────────────────────────────────────────────────
+// ─── Voortgangsblok ───────────────────────────────────────────────────────────
 type ProfielData = {
   naam?: string;
   beschrijving?: string;
-  website?: string;
+  websiteUrl?: string;
   telefoon?: string;
   adres?: string;
   kvkNummer?: string;
   regio?: string;
 };
 
-type CursusItem = {
-  id: string;
-  title: string;
-  completed: boolean;
-  minutes: number;
-  daysLeft: number;
+type VoortgangStat = {
+  icon: React.ElementType;
+  label: string;
+  value: string;
+  sub: string;
+  href: string;
+  testid: string;
 };
 
 function VoortgangsBlok({
   profiel,
-  cursusItems,
+  cursusCompleted,
+  cursusTotal,
   intelAantal,
+  kansenAantal,
+  documentenAantal,
 }: {
   profiel: ProfielData | null | undefined;
-  cursusItems: CursusItem[];
+  cursusCompleted: number;
+  cursusTotal: number;
   intelAantal: number;
+  kansenAantal: number;
+  documentenAantal: number;
 }) {
-  const velden: (keyof ProfielData)[] = ["naam", "beschrijving", "website", "telefoon", "adres", "kvkNummer"];
+  const velden: (keyof ProfielData)[] = ["naam", "beschrijving", "websiteUrl", "adres", "kvkNummer"];
   const ingevuld = profiel ? velden.filter((v) => !!profiel[v]).length : 0;
   const profielPct = Math.round((ingevuld / velden.length) * 100);
 
-  const actiesTotaal = cursusItems.length;
-  const actiesGedaan = cursusItems.filter((i) => i.completed).length;
-
-  const stats = [
+  const stats: VoortgangStat[] = [
     {
       icon: Building2,
       label: "Bedrijfsprofiel",
       value: `${profielPct}%`,
-      sub: profielPct < 100 ? "Nog niet compleet" : "Compleet",
+      sub: profielPct < 100 ? "Completer maken" : "Volledig ingevuld",
       href: "/groei/profiel",
       testid: "stat-profiel",
     },
     {
       icon: Zap,
       label: "Acties deze week",
-      value: `${actiesGedaan}/${actiesTotaal}`,
-      sub: actiesGedaan === actiesTotaal && actiesTotaal > 0 ? "Alles gedaan!" : "Nog te doen",
+      value: `${cursusCompleted}/${cursusTotal}`,
+      sub: cursusCompleted === cursusTotal && cursusTotal > 0 ? "Alles gedaan!" : `${cursusTotal - cursusCompleted} open`,
       href: "/vandaag/acties",
       testid: "stat-acties",
     },
     {
-      icon: Newspaper,
-      label: "Signalen beschikbaar",
-      value: String(intelAantal),
-      sub: "Bekijk updates",
-      href: "/regels/updates",
+      icon: FileText,
+      label: "Docs geanalyseerd",
+      value: String(documentenAantal),
+      sub: "Documenten",
+      href: "/regels/documenten",
+      testid: "stat-documenten",
+    },
+    {
+      icon: TrendingUp,
+      label: "Kansen beschikbaar",
+      value: String(kansenAantal),
+      sub: "Bekijk overzicht",
+      href: "/kansen/opdrachten",
       testid: "stat-signalen",
     },
   ];
@@ -335,7 +385,8 @@ function VoortgangsBlok({
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      {/* 4 stat tiles */}
+      <div className="grid grid-cols-2 gap-2.5">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -357,7 +408,25 @@ function VoortgangsBlok({
   );
 }
 
-// ─── Main page ────────────────────────────────────────────────────────────────
+// ─── Main page ─────────────────────────────────────────────────────────────────
+
+type CursusItem = {
+  id: string;
+  title: string;
+  completed: boolean;
+  minutes: number;
+  daysLeft: number;
+};
+
+type Aanbesteding = {
+  id: string;
+  title: string;
+  buyer: string;
+  description: string | null;
+  deadline: string | null;
+  daysLeft: number | null;
+  url: string | null;
+};
 
 export default function VandaagPage() {
   usePageTitle("Vandaag");
@@ -374,54 +443,80 @@ export default function VandaagPage() {
     enabled: !!user,
   });
 
-  const { data: cursusData, isLoading: cursusLoading } = useQuery<{ today: string; items: CursusItem[]; totaal: number }>({
+  const { data: cursusData, isLoading: cursusLoading } = useQuery<{
+    today: string;
+    items: CursusItem[];
+    totaal: number;
+  }>({
     queryKey: ["/api/cursussen"],
     enabled: !!user,
   });
 
-  const cursusItems = cursusData?.items ?? [];
+  const { data: documentenData } = useQuery<{ documents: { id: string }[] } | { id: string }[]>({
+    queryKey: ["/api/documents"],
+    enabled: !!user,
+  });
 
-  if (authLoading) {
-    return (
-      <div className="space-y-5 pb-8" data-testid="skeleton-vandaag">
-        <Skeleton className="h-44 w-full rounded-[28px]" />
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-44 rounded-[28px]" />)}
-        </div>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-28 rounded-2xl" />)}
-        </div>
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <Skeleton className="h-64 rounded-[28px] lg:col-span-2" />
-          <Skeleton className="h-64 rounded-[28px]" />
-        </div>
-      </div>
-    );
+  // Fetch beste aanbesteding voor de regio (als er een is)
+  const userRegio = profiel?.regio || user?.region || "";
+  const { data: aanbestedingenData } = useQuery<{
+    gemeente: string;
+    count: number;
+    items: Aanbesteding[];
+  }>({
+    queryKey: ["/api/tenderned/aanbestedingen", userRegio],
+    queryFn: () =>
+      fetch(`/api/tenderned/aanbestedingen?gemeente=${encodeURIComponent(userRegio)}&limit=5`, {
+        credentials: "include",
+      }).then((r) => {
+        if (!r.ok) throw new Error("Niet beschikbaar");
+        return r.json();
+      }),
+    enabled: !!userRegio,
+    staleTime: 15 * 60 * 1000,
+  });
+
+  // ── Derived data ──────────────────────────────────────────────────────────
+
+  const cursusItems = cursusData?.items ?? [];
+  const cursusCompleted = cursusItems.filter((i) => i.completed).length;
+  const cursusTotal = cursusItems.length;
+  const eersteActie = cursusItems.find((i) => !i.completed) ?? cursusItems[0] ?? null;
+
+  // Documenten count
+  let documentenAantal = 0;
+  if (Array.isArray(documentenData)) {
+    documentenAantal = documentenData.length;
+  } else if (documentenData && "documents" in documentenData) {
+    documentenAantal = (documentenData as { documents: { id: string }[] }).documents.length;
   }
 
-  if (!user) return null;
+  // Kansen = aanbestedingen + subsidies/financieel intel signalen
+  const kansenSignalen = intelSignalen.filter(
+    (s) => s.categorie === "subsidies" || s.categorie === "financieel"
+  );
+  const kansenAantal = (aanbestedingenData?.count ?? 0) + kansenSignalen.length;
 
-  // ── Compute derived data ─────────────────────────────────────────────────
-
-  const displayName = user.firstName || profiel?.naam || user.businessName || "ondernemer";
-  const hasSector = !!user.sector;
-  const sectorConfig = (hasSector && user.sector && user.sector in SECTOR_CONFIG)
+  const displayName = user?.firstName || profiel?.naam || user?.businessName || "ondernemer";
+  const hasSector = !!user?.sector;
+  const sectorConfig = (hasSector && user?.sector && user.sector in SECTOR_CONFIG)
     ? SECTOR_CONFIG[user.sector as SectorKey]
     : null;
 
-  // Prioritize by urgentie: hoog first
-  const signaalenGesoorteerd = [...intelSignalen].sort((a, b) => {
-    const ord = { hoog: 0, normaal: 1, info: 2 };
-    return (ord[a.urgentie as keyof typeof ord] ?? 2) - (ord[b.urgentie as keyof typeof ord] ?? 2);
-  });
+  // Gesorteerde signalen
+  const signaalenGerankt = rankSignalen(
+    intelSignalen,
+    user?.sector,
+    userRegio,
+  );
 
-  const hoogsteSignaal = signaalenGesoorteerd[0] ?? null;
-  const risicoSignaal = signaalenGesoorteerd.find((s) => s.urgentie === "hoog") ?? signaalenGesoorteerd[1] ?? null;
+  const hoogsteSignaal = signaalenGerankt[0] ?? null;
+  const risicoSignaal = signaalenGerankt.find((s) => s.urgentie === "hoog") ?? signaalenGerankt[0] ?? null;
 
-  // Eerste onvoltooide cursus
-  const eersteActie = cursusItems.find((i) => !i.completed) ?? cursusItems[0] ?? null;
+  // Beste aanbesteding
+  const besteKans = aanbestedingenData?.items?.[0] ?? null;
 
-  // ── Build highlight cards ────────────────────────────────────────────────
+  // ── Highlight cards ────────────────────────────────────────────────────────
 
   const highlightCards: HighlightCard[] = [
     {
@@ -438,12 +533,17 @@ export default function VandaagPage() {
       id: "kans",
       kleur: "bg-emerald-500",
       icon: TrendingUp,
-      label: "Kansen voor jou",
-      titel: "Bekijk actuele opdrachten en subsidies",
-      tekst: sectorConfig
-        ? `Actuele aanbestedingen, subsidies en lokale kansen voor ${sectorConfig.label}-ondernemers in jouw regio.`
-        : "Ontdek aanbestedingen, subsidies en lokale kansen die voor jouw bedrijf interessant zijn.",
-      href: "/kansen/opdrachten",
+      label: "Beste kans vandaag",
+      titel: besteKans?.title ?? (kansenSignalen[0]?.titel ?? "Bekijk kansen en subsidies"),
+      tekst: besteKans
+        ? `${besteKans.buyer}${besteKans.daysLeft !== null ? ` · nog ${besteKans.daysLeft} dagen` : ""}`
+        : (kansenSignalen[0]?.samenvatting ?? (sectorConfig
+            ? `Actuele aanbestedingen en subsidies voor ${sectorConfig.label}-ondernemers in jouw regio.`
+            : "Ontdek aanbestedingen en subsidies die voor jouw bedrijf interessant zijn.")),
+      href: besteKans ? "/kansen/opdrachten" : (kansenSignalen[0] ? "/kansen/subsidies" : "/kansen/opdrachten"),
+      badge: besteKans?.daysLeft !== null && besteKans?.daysLeft !== undefined
+        ? <Badge variant="outline" className="text-xs shrink-0">{besteKans.daysLeft} d.</Badge>
+        : undefined,
     },
     {
       id: "actie",
@@ -478,48 +578,15 @@ export default function VandaagPage() {
     },
   ];
 
-  // ── Quick actions ────────────────────────────────────────────────────────
-
+  // ── 4 Quick actions ────────────────────────────────────────────────────────
   const quickActions: QuickAction[] = [
     {
-      icon: Newspaper,
-      label: "Regelgeving updates",
-      sublabel: "Wat is er veranderd?",
-      href: "/regels/updates",
-      kleur: "bg-blue-500",
-      testid: "quick-regels-updates",
-    },
-    {
-      icon: Landmark,
-      label: "Opdrachten & aanbestedingen",
-      sublabel: "Open aanbestedingen bekijken",
-      href: "/kansen/opdrachten",
-      kleur: "bg-emerald-500",
-      testid: "quick-opdrachten",
-    },
-    {
-      icon: Euro,
-      label: "Subsidies & financiering",
-      sublabel: "Beschikbare subsidies",
-      href: "/kansen/subsidies",
-      kleur: "bg-amber-500",
-      testid: "quick-subsidies",
-    },
-    {
-      icon: Scale,
-      label: "Raakt dit mijn bedrijf?",
-      sublabel: "Check wet- en regelgeving",
-      href: "/regels/check",
-      kleur: "bg-violet-500",
-      testid: "quick-check",
-    },
-    {
-      icon: MapPin,
-      label: "Kansen in de buurt",
-      sublabel: "Lokale kansen in jouw gemeente",
-      href: "/kansen/in-de-buurt",
-      kleur: "bg-rose-500",
-      testid: "quick-buurt",
+      icon: Building2,
+      label: "Profiel bijwerken",
+      sublabel: "Houd je bedrijfsprofiel compleet",
+      href: "/groei/profiel",
+      kleur: "bg-primary",
+      testid: "quick-profiel",
     },
     {
       icon: FileText,
@@ -529,22 +596,95 @@ export default function VandaagPage() {
       kleur: "bg-slate-500",
       testid: "quick-documenten",
     },
+    {
+      icon: Eye,
+      label: "Zichtbaarheid check",
+      sublabel: "Hoe zichtbaar ben jij online?",
+      href: "/groei/zichtbaarheid",
+      kleur: "bg-violet-500",
+      testid: "quick-zichtbaarheid",
+    },
+    {
+      icon: Landmark,
+      label: "Kansen bekijken",
+      sublabel: "Opdrachten, subsidies & meer",
+      href: "/kansen/opdrachten",
+      kleur: "bg-emerald-500",
+      testid: "quick-kansen",
+    },
   ];
 
-  // ── Feed: nieuw since last visit ────────────────────────────────────────
+  // ── Combined feed (intel + aanbestedingen, max 6) ─────────────────────────
+  const isNieuwFn = (datum: Date) => !!lastVisit && datum > lastVisit;
 
-  const feedSignalen = signaalenGesoorteerd.slice(0, 6);
-  const isNieuwFn = (s: IntelSignaal) =>
-    lastVisit && s.createdAt ? new Date(s.createdAt) > lastVisit : false;
-  const nieuwCount = feedSignalen.filter(isNieuwFn).length;
+  const feedItems: FeedItem[] = [];
+
+  // Intel signalen toevoegen (gesorteerd)
+  for (const s of signaalenGerankt) {
+    if (feedItems.length >= 6) break;
+    const datum = new Date(s.datum ?? s.createdAt ?? 0);
+    feedItems.push({
+      id: `intel-${s.id}`,
+      type: "intel",
+      label: s.categorie,
+      titel: s.titel,
+      tekst: s.samenvatting,
+      urgentie: s.urgentie,
+      dotColor: CAT_DOT[s.categorie] ?? "bg-muted-foreground",
+      href: "/regels/updates",
+      isNieuw: isNieuwFn(datum),
+      datum,
+    });
+  }
+
+  // Aanbestedingen toevoegen als kansen-items (max resterende slots)
+  if (aanbestedingenData?.items) {
+    for (const a of aanbestedingenData.items) {
+      if (feedItems.length >= 6) break;
+      feedItems.push({
+        id: `kans-${a.id}`,
+        type: "kans",
+        label: "aanbesteding",
+        titel: a.title,
+        tekst: a.description ?? a.buyer,
+        dotColor: "bg-emerald-500",
+        href: "/kansen/opdrachten",
+        isNieuw: false,
+        datum: new Date(0),
+      });
+    }
+  }
+
+  const nieuwCount = feedItems.filter((i) => i.isNieuw).length;
+
+  // ── Loading skeleton ───────────────────────────────────────────────────────
+  if (authLoading) {
+    return (
+      <div className="space-y-5 pb-8" data-testid="skeleton-vandaag">
+        <Skeleton className="h-44 w-full rounded-[28px]" />
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-44 rounded-[28px]" />)}
+        </div>
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-28 rounded-2xl" />)}
+        </div>
+        <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
+          <Skeleton className="h-64 rounded-[28px] lg:col-span-2" />
+          <Skeleton className="h-64 rounded-[28px]" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) return null;
 
   return (
     <div className="space-y-5 pb-8" data-testid="page-vandaag">
 
-      {/* ── Sector onboarding prompt ─────────────────────────────────────── */}
+      {/* ── Sector onboarding ─────────────────────────────────────────────── */}
       {!hasSector && <SectorOnboarding />}
 
-      {/* ── Hero greeting ────────────────────────────────────────────────── */}
+      {/* ── Hero ──────────────────────────────────────────────────────────── */}
       <section
         className="overflow-hidden rounded-[28px] p-7 text-white"
         style={{ background: "linear-gradient(135deg, #0f2347 0%, #1a3666 55%, #1e4a8c 100%)" }}
@@ -553,11 +693,17 @@ export default function VandaagPage() {
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
             <div className="flex items-center gap-2.5 mb-3 flex-wrap">
-              <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white/90" data-testid="badge-plan">
+              <span
+                className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white/90"
+                data-testid="badge-plan"
+              >
                 {user.plan === "pro" ? "Pro-lid" : "Basis-lid"}
               </span>
               {sectorConfig && (
-                <span className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white/90" data-testid="badge-sector">
+                <span
+                  className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white/90"
+                  data-testid="badge-sector"
+                >
                   {sectorConfig.label}
                 </span>
               )}
@@ -572,7 +718,10 @@ export default function VandaagPage() {
 
           {/* Signalen samenvatting */}
           {!intelLoading && (
-            <div className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-center min-w-[100px]" data-testid="stat-hero-signalen">
+            <div
+              className="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 text-center min-w-[100px]"
+              data-testid="stat-hero-signalen"
+            >
               <p className="text-2xl font-black text-white">{intelSignalen.length}</p>
               <p className="text-xs text-white/70 font-medium">signalen</p>
               {intelSignalen.filter((s) => s.urgentie === "hoog").length > 0 && (
@@ -584,7 +733,7 @@ export default function VandaagPage() {
           )}
         </div>
 
-        {/* Snelle navigatie knoppen */}
+        {/* Navigatie knoppen */}
         <div className="flex flex-wrap gap-2 mt-5">
           <Link href="/regels/updates">
             <Button size="sm" variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" data-testid="btn-hero-updates">
@@ -595,55 +744,51 @@ export default function VandaagPage() {
           <Link href="/vandaag/acties">
             <Button size="sm" variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" data-testid="btn-hero-acties">
               <Zap className="h-3.5 w-3.5 mr-1.5" />
-              Acties{cursusItems.length > 0 && ` (${cursusItems.filter(i => !i.completed).length})`}
+              Acties{cursusTotal > 0 && ` (${cursusTotal - cursusCompleted})`}
             </Button>
           </Link>
-          <Link href="/groei/profiel">
-            <Button size="sm" variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" data-testid="btn-hero-profiel">
-              <Building2 className="h-3.5 w-3.5 mr-1.5" />
-              Profiel
+          <Link href="/kansen/opdrachten">
+            <Button size="sm" variant="outline" className="bg-white/10 border-white/20 text-white hover:bg-white/20" data-testid="btn-hero-kansen">
+              <TrendingUp className="h-3.5 w-3.5 mr-1.5" />
+              Kansen
             </Button>
           </Link>
         </div>
       </section>
 
-      {/* ── 4 Highlight cards ────────────────────────────────────────────── */}
+      {/* ── 4 Highlight-kaarten ──────────────────────────────────────────── */}
       <section data-testid="section-highlights">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
           {intelLoading || cursusLoading ? (
-            [1, 2, 3, 4].map((i) => (
-              <Skeleton key={i} className="h-44 rounded-[28px]" />
-            ))
+            [1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-44 rounded-[28px]" />)
           ) : (
-            highlightCards.map((kaart) => (
-              <HighlightKaart key={kaart.id} kaart={kaart} />
-            ))
+            highlightCards.map((kaart) => <HighlightKaart key={kaart.id} kaart={kaart} />)
           )}
         </div>
       </section>
 
-      {/* ── Snelle acties ────────────────────────────────────────────────── */}
+      {/* ── 4 Snelle acties ──────────────────────────────────────────────── */}
       <section data-testid="section-quick-actions">
         <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
           <h2 className="font-bold text-sm text-foreground">Snel naar</h2>
         </div>
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
           {quickActions.map((action) => (
             <QuickActionTile key={action.testid} action={action} />
           ))}
         </div>
       </section>
 
-      {/* ── Feed + Voortgang (2 kolommen op breed scherm) ─────────────── */}
+      {/* ── Feed + Voortgang ─────────────────────────────────────────────── */}
       <div className="grid grid-cols-1 gap-5 lg:grid-cols-3">
 
-        {/* Feed: recente signalen */}
+        {/* Combined feed (intel + kansen, max 6) */}
         <section className={`${CARD} p-6 lg:col-span-2`} data-testid="section-feed">
           <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
             <div className="flex items-center gap-2">
-              <CalendarDays className="h-4 w-4 text-primary" />
+              <Calendar className="h-4 w-4 text-primary" />
               <h2 className="font-bold text-sm text-foreground">
-                Recente updates
+                Nieuw sinds je laatste bezoek
                 {nieuwCount > 0 && (
                   <span className="ml-2 inline-flex items-center rounded-full bg-primary px-1.5 py-0.5 text-[10px] font-bold text-white">
                     {nieuwCount} nieuw
@@ -653,15 +798,15 @@ export default function VandaagPage() {
             </div>
             <Link href="/regels/updates">
               <button className="text-xs font-semibold text-primary hover:underline" data-testid="link-alle-updates">
-                Alles bekijken
+                Alle updates
               </button>
             </Link>
           </div>
 
           {intelLoading ? (
-            <div className="space-y-3">
+            <div className="space-y-4">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="flex gap-3">
+                <div key={i} className="flex gap-3 py-1">
                   <Skeleton className="w-2 h-2 rounded-full mt-2 shrink-0" />
                   <div className="flex-1 space-y-1.5">
                     <Skeleton className="h-3 w-1/3" />
@@ -671,25 +816,28 @@ export default function VandaagPage() {
                 </div>
               ))}
             </div>
-          ) : feedSignalen.length === 0 ? (
+          ) : feedItems.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <Newspaper className="h-8 w-8 mx-auto mb-2 opacity-30" />
               <p className="text-sm">Nog geen updates beschikbaar.</p>
             </div>
           ) : (
             <div>
-              {feedSignalen.map((s) => (
-                <NieuwFeedItem key={s.id} signaal={s} isNieuw={isNieuwFn(s)} />
+              {feedItems.map((item) => (
+                <FeedItemRow key={item.id} item={item} />
               ))}
             </div>
           )}
         </section>
 
-        {/* Voortgangsblok */}
+        {/* Voortgangsblok met 4 statistieken */}
         <VoortgangsBlok
           profiel={profiel}
-          cursusItems={cursusItems}
+          cursusCompleted={cursusCompleted}
+          cursusTotal={cursusTotal}
           intelAantal={intelSignalen.length}
+          kansenAantal={kansenAantal}
+          documentenAantal={documentenAantal}
         />
       </div>
 
