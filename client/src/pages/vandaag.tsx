@@ -42,8 +42,8 @@ import {
 } from "@/config/sectors";
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
-const PANEL = "rounded-md border border-border bg-card";
-const PANEL_HEADER = "text-[10px] font-bold uppercase tracking-widest text-muted-foreground px-3 py-2 border-b border-border bg-muted/40";
+const PANEL = "border border-border bg-white dark:bg-card";
+const PANEL_HEADER = "text-[10px] font-bold uppercase tracking-widest text-white px-3 py-2 bg-[#1a3666] dark:bg-[#0d1c3d]";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function getGreeting() {
@@ -216,13 +216,13 @@ function PortalNavBtn({
     <Link href={href}>
       <button
         data-testid={testid}
-        className="flex items-center justify-between gap-2 w-full rounded-md border border-border bg-primary/5 hover-elevate active-elevate-2 px-3 py-2 text-left"
+        className="flex items-center justify-between gap-2 w-full border border-[#c5d8f0] dark:border-border bg-[#e8f0fb] dark:bg-primary/10 hover-elevate active-elevate-2 px-3 py-2 text-left"
       >
         <span className="flex items-center gap-2">
-          <Icon className="h-3.5 w-3.5 text-primary shrink-0" />
-          <span className="text-xs font-semibold text-foreground">{label}</span>
+          <Icon className="h-3.5 w-3.5 text-[#1a3666] dark:text-primary shrink-0" />
+          <span className="text-xs font-semibold text-[#1a3666] dark:text-foreground">{label}</span>
         </span>
-        <ChevronRight className="h-3 w-3 text-muted-foreground shrink-0" />
+        <ChevronRight className="h-3 w-3 text-[#1a3666]/60 dark:text-muted-foreground shrink-0" />
       </button>
     </Link>
   );
