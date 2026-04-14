@@ -496,10 +496,13 @@ export default function HomePage() {
                       </div>
                       <p className="font-black text-slate-900 text-lg mb-1">Log in om je volledige rapport te zien</p>
                       <p className="text-slate-400 text-sm mb-6 max-w-xs mx-auto">Je analyse staat klaar. Maak een gratis account aan of log in.</p>
-                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                      <div className="flex flex-col sm:flex-row gap-3 justify-center mb-4">
                         <Link href="/register"><button className="px-6 py-3 rounded-xl text-sm font-black text-white" style={{ background: "#1a56db" }} data-testid="button-rapport-register">Account aanmaken</button></Link>
                         <Link href="/login"><button className="px-6 py-3 rounded-xl text-sm font-bold text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors" data-testid="button-rapport-login">Inloggen</button></Link>
                       </div>
+                      <button onClick={resetWizard} className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-600 transition-colors mx-auto" data-testid="button-rapport-opnieuw">
+                        <RotateCcw className="w-3.5 h-3.5" /> Doe de check opnieuw
+                      </button>
                     </div>
                   )}
                 </div>
