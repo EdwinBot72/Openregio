@@ -52,8 +52,9 @@ function formatDatum(d: Date) {
   return d.toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long" });
 }
 
-// ─── Last-visit tracking ──────────────────────────────────────────────────────
+// ─── Last-visit + kansen-bekeken tracking ─────────────────────────────────────
 const LS_KEY = "vandaag_last_visit";
+const LS_KANSEN_KEY = "vandaag_kansen_bekeken_ids";
 
 function useLastVisit() {
   const prevRef = useRef<Date | null>(null);
@@ -63,6 +64,19 @@ function useLastVisit() {
     localStorage.setItem(LS_KEY, new Date().toISOString());
   }, []);
   return prevRef.current;
+}
+
+// Registreer bekeken kansen-IDs in localStorage; geeft het totaal aantal bekeken unieke kansen terug.
+function trackKansenBekeken(ids: string[]): number {
+  try {
+    const raw = localStorage.getItem(LS_KANSEN_KEY);
+    const seenSet: Set<string> = raw ? new Set(JSON.parse(raw)) : new Set();
+    ids.forEach((id) => seenSet.add(id));
+    localStorage.setItem(LS_KANSEN_KEY, JSON.stringify([...seenSet]));
+    return seenSet.size;
+  } catch {
+    return ids.length;
+  }
 }
 
 // ─── Ranking function ─────────────────────────────────────────────────────────
@@ -321,14 +335,14 @@ function VoortgangsBlok({
   cursusCompleted,
   cursusTotal,
   intelAantal,
-  kansenAantal,
+  kansenBekeken,
   documentenAantal,
 }: {
   profiel: ProfielData | null | undefined;
   cursusCompleted: number;
   cursusTotal: number;
   intelAantal: number;
-  kansenAantal: number;
+  kansenBekeken: number;
   documentenAantal: number;
 }) {
   const velden: (keyof ProfielData)[] = ["naam", "beschrijving", "websiteUrl", "adres", "kvkNummer"];
@@ -362,9 +376,9 @@ function VoortgangsBlok({
     },
     {
       icon: TrendingUp,
-      label: "Kansen beschikbaar",
-      value: String(kansenAantal),
-      sub: "Bekijk overzicht",
+      label: "Kansen bekeken",
+      value: String(kansenBekeken),
+      sub: kansenBekeken > 0 ? "Via dit dashboard" : "Bekijk overzicht",
       href: "/kansen/opdrachten",
       testid: "stat-signalen",
     },
@@ -628,16 +642,16 @@ export default function VandaagPage() {
     },
   ];
 
-  // ── Combined feed (intel + aanbestedingen, max 6) ─────────────────────────
+  // ── Combined feed (intel + aanbestedingen, gecombineerd gesorteerd op datum, max 6) ─────
   const isNieuwFn = (datum: Date) => !!lastVisit && datum > lastVisit;
 
-  const feedItems: FeedItem[] = [];
+  // Bouw alle potentiële feed-items op (niet begrensd)
+  const allFeedItems: FeedItem[] = [];
 
-  // Intel signalen toevoegen (gesorteerd)
+  // Intel signalen
   for (const s of signaalenGerankt) {
-    if (feedItems.length >= 6) break;
     const datum = new Date(s.datum ?? s.createdAt ?? 0);
-    feedItems.push({
+    allFeedItems.push({
       id: `intel-${s.id}`,
       type: "intel",
       label: s.categorie,
@@ -651,14 +665,12 @@ export default function VandaagPage() {
     });
   }
 
-  // Aanbestedingen toevoegen als kansen-items (max resterende slots)
-  // Nieuwheid: als publicationDate na last visit valt, markeer als nieuw
+  // Aanbestedingen (nieuwheid via publicationDate)
   if (aanbestedingenData?.items) {
     for (const a of aanbestedingenData.items) {
-      if (feedItems.length >= 6) break;
       const aanbestedingDatum = a.publicationDate ? new Date(a.publicationDate) : null;
       const isNieuwKans = aanbestedingDatum ? isNieuwFn(aanbestedingDatum) : false;
-      feedItems.push({
+      allFeedItems.push({
         id: `kans-${a.id}`,
         type: "kans",
         label: "aanbesteding",
@@ -671,6 +683,20 @@ export default function VandaagPage() {
       });
     }
   }
+
+  // Sorteer gecombineerd op datum (nieuwste eerst), neem top 6
+  const feedItems = allFeedItems
+    .sort((a, b) => b.datum.getTime() - a.datum.getTime())
+    .slice(0, 6);
+
+  // Track bekeken kansen in localStorage voor voortgangsteller
+  const kansenFeedIds = feedItems.filter((i) => i.type === "kans").map((i) => i.id);
+  const kansenBekeken = kansenFeedIds.length > 0 ? trackKansenBekeken(kansenFeedIds) : (() => {
+    try {
+      const raw = localStorage.getItem(LS_KANSEN_KEY);
+      return raw ? JSON.parse(raw).length : 0;
+    } catch { return 0; }
+  })();
 
   const nieuwCount = feedItems.filter((i) => i.isNieuw).length;
 
@@ -853,7 +879,7 @@ export default function VandaagPage() {
           cursusCompleted={cursusCompleted}
           cursusTotal={cursusTotal}
           intelAantal={intelSignalen.length}
-          kansenAantal={kansenAantal}
+          kansenBekeken={kansenBekeken}
           documentenAantal={documentenAantal}
         />
       </div>
