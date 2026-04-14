@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
@@ -56,27 +56,39 @@ function formatDatum(d: Date) {
 const LS_KEY = "vandaag_last_visit";
 const LS_KANSEN_KEY = "vandaag_kansen_bekeken_ids";
 
-function useLastVisit() {
-  const prevRef = useRef<Date | null>(null);
+// Leest last-visit timestamp via lazy useState (deterministische render) en
+// slaat de huidige bezoektijd op via useEffect (na mount, nooit vóór render).
+function useLastVisit(): Date | null {
+  const [lastVisit] = useState<Date | null>(() => {
+    try {
+      const stored = localStorage.getItem(LS_KEY);
+      return stored ? new Date(stored) : null;
+    } catch { return null; }
+  });
   useEffect(() => {
-    const stored = localStorage.getItem(LS_KEY);
-    prevRef.current = stored ? new Date(stored) : null;
-    localStorage.setItem(LS_KEY, new Date().toISOString());
+    try { localStorage.setItem(LS_KEY, new Date().toISOString()); } catch { /* noop */ }
   }, []);
-  return prevRef.current;
+  return lastVisit;
 }
 
-// Registreer bekeken kansen-IDs in localStorage; geeft het totaal aantal bekeken unieke kansen terug.
-function trackKansenBekeken(ids: string[]): number {
+// Registreer een bekeken kans-ID op basis van gebruikersklik (niet render-tijd).
+// Geeft het nieuwe totaal terug.
+function registerKansGeklikt(id: string): number {
   try {
     const raw = localStorage.getItem(LS_KANSEN_KEY);
     const seenSet: Set<string> = raw ? new Set(JSON.parse(raw)) : new Set();
-    ids.forEach((id) => seenSet.add(id));
+    seenSet.add(id);
     localStorage.setItem(LS_KANSEN_KEY, JSON.stringify([...seenSet]));
     return seenSet.size;
-  } catch {
-    return ids.length;
-  }
+  } catch { return 0; }
+}
+
+// Leest het huidig aantal unieke bekeken kansen vanuit localStorage.
+function readKansenBekeken(): number {
+  try {
+    const raw = localStorage.getItem(LS_KANSEN_KEY);
+    return raw ? JSON.parse(raw).length : 0;
+  } catch { return 0; }
 }
 
 // ─── Ranking function ─────────────────────────────────────────────────────────
@@ -279,12 +291,13 @@ type FeedItem = {
   datum: Date;
 };
 
-function FeedItemRow({ item }: { item: FeedItem }) {
+function FeedItemRow({ item, onClick }: { item: FeedItem; onClick?: () => void }) {
   return (
     <Link href={item.href}>
       <div
         className="flex items-start gap-3 py-3 border-b border-border last:border-0 hover-elevate cursor-pointer px-1 rounded-md -mx-1"
         data-testid={`feed-item-${item.id}`}
+        onClick={onClick}
       >
         <div className="mt-1.5 shrink-0">
           <span className={`inline-block w-2 h-2 rounded-full ${item.dotColor}`} />
@@ -523,7 +536,9 @@ export default function VandaagPage() {
   const kansenSignalen = intelSignalen.filter(
     (s) => s.categorie === "subsidies" || s.categorie === "financieel"
   );
-  const kansenAantal = (aanbestedingenData?.count ?? 0) + kansenSignalen.length;
+
+  // Kansen bekeken via localStorage; bijgehouden op klik (niet render-tijd)
+  const [kansenBekeken, setKansenBekeken] = useState<number>(() => readKansenBekeken());
 
   const displayName = user?.firstName || profiel?.naam || user?.businessName || "ondernemer";
   const hasSector = !!user?.sector;
@@ -689,14 +704,11 @@ export default function VandaagPage() {
     .sort((a, b) => b.datum.getTime() - a.datum.getTime())
     .slice(0, 6);
 
-  // Track bekeken kansen in localStorage voor voortgangsteller
-  const kansenFeedIds = feedItems.filter((i) => i.type === "kans").map((i) => i.id);
-  const kansenBekeken = kansenFeedIds.length > 0 ? trackKansenBekeken(kansenFeedIds) : (() => {
-    try {
-      const raw = localStorage.getItem(LS_KANSEN_KEY);
-      return raw ? JSON.parse(raw).length : 0;
-    } catch { return 0; }
-  })();
+  // Klik-handler voor kansen-feed items: registreer in localStorage op klik
+  const handleKansClick = (id: string) => {
+    const nieuwTotaal = registerKansGeklikt(id);
+    setKansenBekeken(nieuwTotaal);
+  };
 
   const nieuwCount = feedItems.filter((i) => i.isNieuw).length;
 
@@ -867,7 +879,11 @@ export default function VandaagPage() {
           ) : (
             <div>
               {feedItems.map((item) => (
-                <FeedItemRow key={item.id} item={item} />
+                <FeedItemRow
+                  key={item.id}
+                  item={item}
+                  onClick={item.type === "kans" ? () => handleKansClick(item.id) : undefined}
+                />
               ))}
             </div>
           )}
