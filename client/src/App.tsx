@@ -157,6 +157,20 @@ function AuthenticatedRouter() {
         <Redirect to="/kansen/subsidies" />
       </Route>
 
+      {/* ── Basis-sectie redirects ────────────────────────────────────────── */}
+      <Route path="/kansen">
+        <Redirect to="/kansen/opdrachten" />
+      </Route>
+      <Route path="/regels">
+        <Redirect to="/regels/updates" />
+      </Route>
+      <Route path="/groei">
+        <Redirect to="/groei/profiel" />
+      </Route>
+      <Route path="/account">
+        <Redirect to="/account/instellingen" />
+      </Route>
+
       {/* ── Vandaag (Sectie 1) ─────────────────────────────────────────────── */}
       <Route path="/vandaag" component={DashboardPage} />
       <Route path="/vandaag/updates" component={IntelPage} />
