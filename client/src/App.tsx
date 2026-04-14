@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { Switch, Route, useRoute, useLocation } from "wouter";
+import { Switch, Route, useRoute, useLocation, Redirect } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
@@ -79,6 +79,7 @@ import WetgevingPublicatiesPage from "@/pages/wetgeving/publicaties";
 import AdminWetgevingPage from "@/pages/admin/wetgeving";
 import CursussenPage from "@/pages/cursussen";
 import AdminCursussenPage from "@/pages/admin/cursussen";
+import BinnenkortPage from "@/pages/binnenkort";
 
 // Routes that should NOT have the sidebar/header layout
 const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse", "/koop-lokaal"];
@@ -112,26 +113,82 @@ function PublicRouter() {
 function AuthenticatedRouter() {
   return (
     <Switch>
-      <Route path="/onboarding" component={OnboardingPage} />
-      <Route path="/aan-de-slag" component={AanDeSlagPage} />
-      <Route path="/dashboard" component={DashboardPage} />
-      <Route path="/bedrijfsprofiel" component={BedrijfsprofielPage} />
-      <Route path="/network" component={NetworkPage} />
-      <Route path="/community" component={CommunityPage} />
-      <Route path="/chat" component={ChatPage} />
-      <Route path="/regiobot" component={RegioBotPage} />
-      <Route path="/cooperative" component={CooperativePage} />
-      <Route path="/privacy-dashboard" component={PrivacyDashboardPage} />
-      <Route path="/pro/visibility-settings" component={ProVisibilitySettingsPage} />
-      <Route path="/woo-bot" component={WooBotPage} />
-      <Route path="/woo-wizard" component={WooWizardPage} />
-      <Route path="/woo-bibliotheek" component={WooBibliotheekPage} />
-      <Route path="/regiocrew" component={RegioCrewPage} />
-      <Route path="/affiliate" component={AffiliatePage} />
-      <Route path="/leden" component={LedenPage} />
-      <Route path="/beleidsmonitor" component={BeleidsmonitorPage} />
-      <Route path="/lokale-basischeck" component={LokaleBasischeckPage} />
-      <Route path="/intel" component={IntelPage} />
+      {/* ── Redirects: legacy → nieuwe URLs ─────────────────────────────── */}
+      <Route path="/dashboard">
+        <Redirect to="/vandaag" />
+      </Route>
+      <Route path="/intel">
+        <Redirect to="/regels/updates" />
+      </Route>
+      <Route path="/kansen/aanbestedingen">
+        <Redirect to="/kansen/opdrachten" />
+      </Route>
+      <Route path="/kansen-in-de-buurt">
+        <Redirect to="/kansen/in-de-buurt" />
+      </Route>
+      <Route path="/affiliate">
+        <Redirect to="/account/affiliate" />
+      </Route>
+      <Route path="/bedrijfsprofiel">
+        <Redirect to="/groei/profiel" />
+      </Route>
+      <Route path="/privacy-dashboard">
+        <Redirect to="/account/instellingen" />
+      </Route>
+      <Route path="/pro/visibility-settings">
+        <Redirect to="/groei/zichtbaarheid" />
+      </Route>
+      <Route path="/tools/website-scan">
+        <Redirect to="/groei/website-check" />
+      </Route>
+      <Route path="/tools/brief-analyse">
+        <Redirect to="/regels/documenten" />
+      </Route>
+      <Route path="/actie/check">
+        <Redirect to="/regels/check" />
+      </Route>
+      <Route path="/woo-bibliotheek">
+        <Redirect to="/regels/woo" />
+      </Route>
+      <Route path="/cursussen">
+        <Redirect to="/vandaag/acties" />
+      </Route>
+      <Route path="/kansen/financiering">
+        <Redirect to="/kansen/subsidies" />
+      </Route>
+
+      {/* ── Vandaag (Sectie 1) ─────────────────────────────────────────────── */}
+      <Route path="/vandaag" component={DashboardPage} />
+      <Route path="/vandaag/updates" component={IntelPage} />
+      <Route path="/vandaag/acties" component={CursussenPage} />
+
+      {/* ── Kansen (Sectie 2) ─────────────────────────────────────────────── */}
+      <Route path="/kansen/opdrachten" component={AanbestedingenPage} />
+      <Route path="/kansen/subsidies" component={FinancieringPage} />
+      <Route path="/kansen/in-de-buurt" component={KansenInDeBuurtPage} />
+      <Route path="/kansen/samenwerkingen">
+        <BinnenkortPage titel="Samenwerkingen" />
+      </Route>
+
+      {/* ── Regels (Sectie 3) ─────────────────────────────────────────────── */}
+      <Route path="/regels/updates" component={IntelPage} />
+      <Route path="/regels/check" component={CheckSituatiePage} />
+      <Route path="/regels/documenten" component={BriefAnalysePage} />
+      <Route path="/regels/woo" component={WooBibliotheekPage} />
+
+      {/* ── Groei (Sectie 4) ──────────────────────────────────────────────── */}
+      <Route path="/groei/zichtbaarheid" component={ProVisibilitySettingsPage} />
+      <Route path="/groei/profiel" component={BedrijfsprofielPage} />
+      <Route path="/groei/website-check" component={WebsiteScanPage} />
+
+      {/* ── Mijn account (Sectie 5) ───────────────────────────────────────── */}
+      <Route path="/account/voortgang">
+        <BinnenkortPage titel="Voortgang" />
+      </Route>
+      <Route path="/account/instellingen" component={PrivacyDashboardPage} />
+      <Route path="/account/affiliate" component={AffiliatePage} />
+
+      {/* ── Beheer (admin) ────────────────────────────────────────────────── */}
       <Route path="/admin" component={AdminIndexPage} />
       <Route path="/admin/woo" component={AdminWooPage} />
       <Route path="/admin/regios" component={AdminRegiosPage} />
@@ -142,39 +199,33 @@ function AuthenticatedRouter() {
       <Route path="/admin/regio-deals" component={RegiodealsAdminPage} />
       <Route path="/admin/ondernemers" component={AdminOndernemersPage} />
       <Route path="/admin/intel" component={AdminIntelPage} />
+      <Route path="/admin/wetgeving" component={AdminWetgevingPage} />
+      <Route path="/admin/cursussen" component={AdminCursussenPage} />
 
-      {/* Kansen / Informatie */}
+      {/* ── Overige authenticeerde routes (intern / deeplink) ─────────────── */}
+      <Route path="/onboarding" component={OnboardingPage} />
+      <Route path="/aan-de-slag" component={AanDeSlagPage} />
+      <Route path="/network" component={NetworkPage} />
+      <Route path="/community" component={CommunityPage} />
+      <Route path="/chat" component={ChatPage} />
+      <Route path="/regiobot" component={RegioBotPage} />
+      <Route path="/cooperative" component={CooperativePage} />
+      <Route path="/woo-bot" component={WooBotPage} />
+      <Route path="/woo-wizard" component={WooWizardPage} />
+      <Route path="/regiocrew" component={RegioCrewPage} />
+      <Route path="/leden" component={LedenPage} />
+      <Route path="/beleidsmonitor" component={BeleidsmonitorPage} />
+      <Route path="/lokale-basischeck" component={LokaleBasischeckPage} />
       <Route path="/kansen-markt" component={KansenMarktPage} />
-      <Route path="/kansen-in-de-buurt" component={KansenInDeBuurtPage} />
-      <Route path="/kansen/aanbestedingen" component={AanbestedingenPage} />
       <Route path="/kansen/gemeente-updates" component={GemeenteUpdatesPage} />
       <Route path="/kansen/regio-deals" component={RegiodealsPage} />
-      <Route path="/kansen/financiering" component={FinancieringPage} />
       <Route path="/informatie/regelkaart" component={RegelkaartPage} />
       <Route path="/informatie/kennisbank" component={KennisbankPage} />
-
-      {/* Actie */}
-      <Route path="/actie/check" component={CheckSituatiePage} />
-
-      {/* Tools */}
-      <Route path="/tools/brief-analyse" component={BriefAnalysePage} />
-      <Route path="/tools/website-scan" component={WebsiteScanPage} />
       <Route path="/regelgeving-verkenner" component={RegelgevingVerkennerPage} />
-
-      {/* Zichtbaarheid */}
       <Route path="/zichtbaarheid/website-onderhoud" component={WebsiteOnderhoudPage} />
-
-      {/* Lokale marktplaats */}
       <Route path="/lokaal-marktplaats" component={LokaalMarktplaatsPage} />
-
-      {/* Wetgeving indienen & publicaties */}
       <Route path="/wetgeving-indienen" component={WetgevingIndienenPage} />
       <Route path="/wetgeving/publicaties" component={WetgevingPublicatiesPage} />
-      <Route path="/admin/wetgeving" component={AdminWetgevingPage} />
-
-      {/* Cursussen */}
-      <Route path="/cursussen" component={CursussenPage} />
-      <Route path="/admin/cursussen" component={AdminCursussenPage} />
 
       <Route component={NotFound} />
     </Switch>
@@ -198,7 +249,6 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
   }
 
   if (!user) {
-    // Not authenticated — redirect to login
     setLocation("/login");
     return null;
   }

@@ -317,7 +317,7 @@ export function AppSidebar() {
             </div>
             <div className="flex gap-1 shrink-0">
               <Button size="icon" variant="ghost" asChild data-testid="link-profiel">
-                <Link href="/bedrijfsprofiel">
+                <Link href="/groei/profiel">
                   <User className="h-4 w-4" />
                 </Link>
               </Button>

@@ -1,29 +1,26 @@
 import {
-  Sparkles,
-  Building2,
-  Monitor,
-  Signal,
+  CalendarDays,
+  TrendingUp,
+  Scale,
+  BarChart3,
+  User,
+  ShieldCheck,
+  Newspaper,
+  Zap,
   Landmark,
   Euro,
-  ScanText,
-  Gavel,
-  FolderOpen,
-  Bot,
-  CreditCard,
-  Shield,
-  LayoutGrid,
-  BookOpen,
-  Settings,
-  CheckCircle,
-  Link2,
-  Coins,
-  Users,
-  FileText,
-  BarChart2,
-  ShieldCheck,
   MapPin,
-  Files,
-  Zap,
+  Handshake,
+  Bell,
+  HelpCircle,
+  FileText,
+  Library,
+  Eye,
+  Building2,
+  Globe,
+  BarChart2,
+  Users,
+  Settings,
 } from "lucide-react";
 
 export type NavSubItem = {
@@ -43,89 +40,71 @@ export type NavSection = {
   adminOnly?: boolean;
 };
 
-/** Definitieve hoofdnavigatie — alle rollen */
+/** Definitieve hoofdnavigatie — 5 secties + Beheer (admin) */
 export const MAIN_NAV: NavSection[] = [
-  // 1 ── Dashboard
+  // 1 ── Vandaag
   {
-    id: "dashboard",
-    title: "Dashboard",
-    icon: Sparkles,
-    url: "/dashboard",
-  },
-
-  // 2 ── Mijn bedrijf
-  {
-    id: "mijn-bedrijf",
-    title: "Mijn bedrijf",
-    icon: Building2,
+    id: "vandaag",
+    title: "Vandaag",
+    icon: CalendarDays,
     sub: [
-      { title: "Bedrijfsprofiel", url: "/bedrijfsprofiel", icon: Building2 },
-      { title: "Lokale Basischeck", url: "/lokale-basischeck", icon: CheckCircle },
-      { title: "Website scan", url: "/tools/website-scan", icon: Monitor, proOnly: true },
+      { title: "Overzicht", url: "/vandaag", icon: CalendarDays },
+      { title: "Nieuwe updates", url: "/vandaag/updates", icon: Bell },
+      { title: "Acties", url: "/vandaag/acties", icon: Zap },
     ],
   },
 
-  // 3 ── Kansen
+  // 2 ── Kansen
   {
     id: "kansen",
     title: "Kansen",
-    icon: Signal,
+    icon: TrendingUp,
     sub: [
-      { title: "Acties van de week", url: "/cursussen", icon: Zap },
-      { title: "Kansen overzicht", url: "/kansen-in-de-buurt", icon: LayoutGrid },
-      { title: "Aanbestedingen", url: "/kansen/aanbestedingen", icon: Landmark },
-      { title: "Subsidies & financiering", url: "/kansen/financiering", icon: Euro },
-      { title: "Regio-updates", url: "/intel", icon: Signal },
+      { title: "Opdrachten", url: "/kansen/opdrachten", icon: Landmark },
+      { title: "Subsidies", url: "/kansen/subsidies", icon: Euro },
+      { title: "In de buurt", url: "/kansen/in-de-buurt", icon: MapPin },
+      { title: "Samenwerkingen", url: "/kansen/samenwerkingen", icon: Handshake },
     ],
   },
 
-  // 4 ── Analyse
+  // 3 ── Regels
   {
-    id: "analyse",
-    title: "Analyse",
-    icon: ScanText,
+    id: "regels",
+    title: "Regels",
+    icon: Scale,
     sub: [
-      { title: "Brief laten checken", url: "/tools/brief-analyse", icon: FileText },
-      { title: "Regelgeving verkenner", url: "/regelgeving-verkenner", icon: BookOpen },
-      { title: "Regio Bieb", url: "/regiobot", icon: Bot, proOnly: true },
-      { title: "WOO-documenten", url: "/woo-bibliotheek", icon: FolderOpen, proOnly: true },
-      { title: "Mijn documenten", url: "/mijn-documenten", icon: Files, proOnly: true },
-      { title: "WOO-verzoek opstellen", url: "/woo-wizard", icon: Gavel, proOnly: true },
+      { title: "Updates", url: "/regels/updates", icon: Newspaper },
+      { title: "Raakt dit mijn bedrijf?", url: "/regels/check", icon: HelpCircle },
+      { title: "Documenten", url: "/regels/documenten", icon: FileText },
+      { title: "Woo-bibliotheek", url: "/regels/woo", icon: Library, proOnly: true },
     ],
   },
 
-  // 4b ── Leden (iedereen)
+  // 4 ── Groei
   {
-    id: "leden",
-    title: "Leden",
-    icon: Users,
-    url: "/leden",
-  },
-
-  // 5 ── Affiliate (iedereen)
-  {
-    id: "affiliate",
-    title: "Affiliate",
-    icon: Link2,
+    id: "groei",
+    title: "Groei",
+    icon: BarChart3,
     sub: [
-      { title: "Mijn affiliate-link", url: "/affiliate", icon: Link2 },
-      { title: "Commissie & beloningen", url: "/affiliate", icon: Coins },
-      { title: "Mijn referrals", url: "/affiliate", icon: Users },
+      { title: "Zichtbaarheid", url: "/groei/zichtbaarheid", icon: Eye, proOnly: true },
+      { title: "Profiel", url: "/groei/profiel", icon: Building2 },
+      { title: "Website-check", url: "/groei/website-check", icon: Globe, proOnly: true },
     ],
   },
 
-  // 6 ── Account
+  // 5 ── Mijn account
   {
     id: "account",
-    title: "Account",
-    icon: Settings,
+    title: "Mijn account",
+    icon: User,
     sub: [
-      { title: "Lidmaatschap", url: "/lidmaatschap", icon: CreditCard },
-      { title: "Privacy & Gegevens", url: "/privacy-dashboard", icon: Shield },
+      { title: "Voortgang", url: "/account/voortgang", icon: BarChart3 },
+      { title: "Instellingen", url: "/account/instellingen", icon: Settings },
+      { title: "Affiliate", url: "/account/affiliate", icon: Euro },
     ],
   },
 
-  // 7 ── Beheer (alleen admin)
+  // 6 ── Beheer (alleen admin)
   {
     id: "beheer",
     title: "Beheer",
@@ -138,14 +117,15 @@ export const MAIN_NAV: NavSection[] = [
       { title: "Content", url: "/admin/blogs", icon: FileText },
       { title: "Cursussen", url: "/admin/cursussen", icon: Zap },
       { title: "Regio & WOO", url: "/admin/woo", icon: MapPin },
+      { title: "Intel signalen", url: "/admin/intel", icon: Bell },
       { title: "Systeem", url: "/admin/inzicht", icon: Settings },
     ],
   },
 ];
 
 export const ACCOUNT_NAV = [
-  { title: "Lidmaatschap", url: "/lidmaatschap", icon: CreditCard },
-  { title: "Privacy & Gegevens", url: "/privacy-dashboard", icon: Shield },
+  { title: "Instellingen", url: "/account/instellingen", icon: Settings },
+  { title: "Affiliate", url: "/account/affiliate", icon: Euro },
 ];
 
 /** Legacy — backward compat */
