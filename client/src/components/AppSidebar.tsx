@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -27,69 +27,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "wouter";
 import { queryClient } from "@/lib/queryClient";
 import { MAIN_NAV, type NavSection } from "@/config/navigation";
-import {
-  SECTOR_CONFIG,
-  CATEGORIE_META,
-  CATEGORIE_KEYS,
-  getSectorConfig,
-  type SectorKey,
-} from "@/config/sectors";
-
-// ── Sector-specifieke kansen-items (onder de "Kansen" sectie) ─────────────────
-
-function SectorKansenItems({
-  sectorKey,
-  currentPath,
-}: {
-  sectorKey: SectorKey;
-  currentPath: string;
-}) {
-  const sectorConf = getSectorConfig(sectorKey);
-  if (!sectorConf) return null;
-
-  const SectorIcon = sectorConf.icon;
-
-  return (
-    <>
-      <SidebarMenuSubItem>
-        <SidebarMenuSubButton
-          asChild
-          isActive={currentPath === "/kansen-markt"}
-          data-testid="label-kansen-in-de-markt"
-        >
-          <Link href="/kansen-markt" className="flex items-center gap-1.5">
-            <SectorIcon className="h-3.5 w-3.5 shrink-0" />
-            <span className="font-semibold">{sectorConf.label}</span>
-          </Link>
-        </SidebarMenuSubButton>
-      </SidebarMenuSubItem>
-
-      {CATEGORIE_KEYS.map((catKey) => {
-        const catMeta = CATEGORIE_META[catKey];
-        const catContent = sectorConf.categorieen[catKey];
-        const CatIcon = catMeta.icon;
-        const subActive =
-          currentPath === catContent.href ||
-          currentPath.startsWith(catContent.href + "/");
-
-        return (
-          <SidebarMenuSubItem key={catKey}>
-            <SidebarMenuSubButton
-              asChild
-              isActive={subActive}
-              data-testid={`link-sector-${catKey}`}
-            >
-              <Link href={catContent.href} className="flex items-center gap-2">
-                <CatIcon className="h-3.5 w-3.5 shrink-0" />
-                <span className="truncate">{catMeta.label}</span>
-              </Link>
-            </SidebarMenuSubButton>
-          </SidebarMenuSubItem>
-        );
-      })}
-    </>
-  );
-}
+import { type SectorKey } from "@/config/sectors";
 
 // ── Generieke nav-sectie ──────────────────────────────────────────────────────
 
@@ -98,33 +36,27 @@ function NavSectionItem({
   currentPath,
   isPro,
   isAdmin,
-  userSector,
 }: {
   section: NavSection;
   currentPath: string;
   isPro: boolean;
   isAdmin: boolean;
-  userSector?: SectorKey | null;
 }) {
-  const isKansen = section.id === "kansen";
-
-  const sectorActive =
-    isKansen && userSector && SECTOR_CONFIG[userSector]
-      ? CATEGORIE_KEYS.some((k) => {
-          const href = SECTOR_CONFIG[userSector].categorieen[k].href;
-          return currentPath === href || currentPath.startsWith(href + "/");
-        })
-      : false;
-
   const isActive =
-    sectorActive ||
-    (section.url
+    section.url
       ? currentPath === section.url
       : section.sub?.some(
           (s) => currentPath === s.url || currentPath.startsWith(s.url + "/")
-        ));
+        ) ?? false;
 
-  const [open, setOpen] = useState(isActive ?? false);
+  const [open, setOpen] = useState(isActive);
+
+  // Sync open-state when the active section changes (e.g. after redirects or deep links)
+  useEffect(() => {
+    if (isActive) {
+      setOpen(true);
+    }
+  }, [isActive]);
 
   // Direct-link (geen sub-items)
   if (section.url && !section.sub) {
@@ -178,7 +110,7 @@ function NavSectionItem({
                 <SidebarMenuSubButton
                   asChild
                   isActive={subActive}
-                  data-testid={`link-sub-${sub.url.replace(/\//g, "-").replace(/^-/, "")}-${sub.title.replace(/\s+/g, "-").toLowerCase()}`}
+                  data-testid={`link-sub-${sub.url.replace(/\//g, "-").replace(/^-/, "")}`}
                 >
                   <Link href={sub.url} className="flex items-center gap-2">
                     <sub.icon className="h-3.5 w-3.5" />
@@ -188,14 +120,6 @@ function NavSectionItem({
               </SidebarMenuSubItem>
             );
           })}
-
-          {/* Sector-specifieke kansen-items onder de "Kansen" sectie */}
-          {isKansen && userSector && (
-            <SectorKansenItems
-              sectorKey={userSector}
-              currentPath={currentPath}
-            />
-          )}
         </SidebarMenuSub>
       )}
     </SidebarMenuItem>
@@ -220,7 +144,6 @@ export function AppSidebar() {
 
   const isPro = user?.plan === "pro";
   const isAdmin = user?.role === "master" || user?.role === "admin" || !!user?.isAdmin;
-  const userSector = (user?.sector as SectorKey) || null;
 
   const getInitials = () => {
     if (user?.firstName || user?.lastName) {
@@ -265,7 +188,6 @@ export function AppSidebar() {
           <SidebarGroupContent>
             <SidebarMenu>
               {MAIN_NAV.map((section) => {
-                // Beheer alleen tonen voor admins
                 if (section.adminOnly && !isAdmin) return null;
 
                 return (
@@ -275,7 +197,6 @@ export function AppSidebar() {
                     currentPath={location}
                     isPro={isPro}
                     isAdmin={isAdmin}
-                    userSector={userSector}
                   />
                 );
               })}
