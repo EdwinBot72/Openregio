@@ -1,0 +1,207 @@
+export default function OpenRegioAllesSiteMockup() {
+  const topTabs = [
+    { label: "Feed", active: true },
+    { label: "Kansen" },
+    { label: "Regels" },
+    { label: "Kennisbank" },
+  ];
+
+  const leftMenu = ["Monitor", "Inzichten", "Documenten"];
+  const wooItems = ["Nieuwe regels", "Kennisbank dossiers"];
+  const rightDocs = ["Vraag documentatie aan...", "Rapportages", "Regelverzoeken"];
+  const rightSignals = ["Wetgeving", "Verboden", "Verborsz", "Rapport"];
+  const opportunities = [
+    "Doe mee aan clusterproject",
+    "Vraag subsidie aan",
+    "Inschrijven voor aanbesteding",
+    "Nieuwe regionale samenwerking beschikbaar",
+    "Vergunning update voor centrumgebied",
+    "Nieuwe kennisbank-update voor ondernemers",
+  ];
+
+  return (
+    <div className="min-h-screen bg-[#e8edf3] text-slate-800 p-8">
+      <div className="mx-auto max-w-[1400px] rounded-[28px] border border-[#b8c7d8] bg-gradient-to-b from-[#eef3f8] to-[#dfe8f0] shadow-[0_20px_60px_rgba(49,78,112,0.15)] overflow-hidden">
+        <header className="px-8 pt-8 pb-5 border-b border-[#c3d0de] bg-[#edf2f7]">
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4 min-w-[280px]">
+              <div className="h-14 w-14 rounded-xl bg-gradient-to-br from-[#70b844] via-[#3990c8] to-[#24517d] shadow-inner" />
+              <div className="text-[52px] leading-none font-black tracking-tight text-[#21486f]">OPENREGIO</div>
+            </div>
+            <div className="flex-1 flex items-center gap-3 rounded-2xl border border-[#b7c7d7] bg-white/80 px-4 py-3 shadow-inner">
+              <input
+                placeholder="Zoek:"
+                className="flex-1 bg-transparent outline-none text-lg placeholder:text-slate-400"
+              />
+              <button className="rounded-xl bg-[#2f679a] px-6 py-3 text-white font-semibold shadow-sm">Zoek en Filter</button>
+            </div>
+          </div>
+        </header>
+
+        <main className="p-6 space-y-5">
+          <section className="rounded-2xl border border-[#c0cddd] bg-white/70 px-6 py-5 shadow-sm">
+            <h1 className="text-[42px] font-bold tracking-tight text-[#294f78]">RegioMarkt</h1>
+          </section>
+
+          <section className="grid grid-cols-4 gap-3">
+            {topTabs.map((tab, i) => (
+              <div
+                key={i}
+                className={`rounded-2xl border px-5 py-5 text-[22px] font-semibold shadow-sm ${
+                  tab.active
+                    ? "border-[#2d6a9f] bg-[#2f679a] text-white"
+                    : "border-[#bacedf] bg-[#dfe9f3] text-[#35587e]"
+                }`}
+              >
+                {tab.label}
+              </div>
+            ))}
+          </section>
+
+          <section className="grid grid-cols-[280px_minmax(0,1fr)_320px] gap-5 items-start">
+            <aside className="space-y-4">
+              <div className="rounded-2xl border border-[#b8c8d8] bg-white/80 overflow-hidden shadow-sm">
+                <div className="bg-[#3f6f9f] px-5 py-4 text-white text-[18px] font-bold uppercase tracking-wide">Info / Toepassingen</div>
+                <div className="p-4 space-y-3">
+                  {leftMenu.map((item) => (
+                    <button key={item} className="w-full rounded-2xl bg-[#5c93c6] text-white text-left px-5 py-4 text-[18px] font-semibold shadow-sm">{item}</button>
+                  ))}
+                  <div className="grid grid-cols-2 gap-3 pt-2">
+                    <div className="rounded-2xl bg-[#4f87bb] h-16" />
+                    <div className="rounded-2xl bg-[#84a9c9] h-16" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-[#b8c8d8] bg-white/80 overflow-hidden shadow-sm">
+                <div className="bg-[#3f6f9f] px-5 py-4 text-white text-[18px] font-bold uppercase tracking-wide">Wet & Regelgeving</div>
+                <div className="p-4 space-y-3">
+                  {wooItems.map((item) => (
+                    <div key={item} className="rounded-2xl bg-[#eef3f8] border border-[#c8d4e0] px-4 py-4 text-[18px] font-semibold text-[#35587e]">{item}</div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-[#b8c8d8] bg-white/80 overflow-hidden shadow-sm">
+                <div className="bg-[#edf3f8] px-5 py-4 text-[#35587e] text-[22px] font-bold">REGIOBOT</div>
+                <div className="p-5 text-[18px] text-[#35587e] font-medium">Zoek in wet- en regelgeving</div>
+              </div>
+            </aside>
+
+            <section className="space-y-4">
+              <div className="rounded-2xl border border-[#b8c8d8] bg-white/85 overflow-hidden shadow-sm sticky top-4">
+                <div className="flex items-center border-b border-[#d2dbe4] bg-[#eef3f8] text-[#385b80] font-semibold text-[18px]">
+                  <div className="px-5 py-4 border-r border-[#d2dbe4]">Feed</div>
+                  <div className="px-5 py-4">Snel scrollen</div>
+                  <div className="ml-auto px-5 py-4">Signalen</div>
+                </div>
+                <div className="p-5">
+                  <h2 className="text-[22px] font-bold text-[#304f73] mb-4">Vandaag in jouw regio</h2>
+                  <div className="space-y-3 max-h-[620px] overflow-y-auto pr-1">
+                    {opportunities.map((item, i) => (
+                      <div key={i} className="rounded-2xl border border-[#cfdae6] bg-[#f6f9fc] px-5 py-4 flex items-center justify-between hover:bg-white transition">
+                        <div>
+                          <div className="text-[18px] font-bold text-[#314f72]">{item}</div>
+                          <div className="text-sm text-slate-500 mt-1">Snelle briefing • direct scanbaar • actiegericht</div>
+                        </div>
+                        <div className="h-10 w-10 rounded-xl bg-[#d9e7f3]" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-[#b8c8d8] bg-white/85 overflow-hidden shadow-sm">
+                <div className="px-5 py-4 border-b border-[#d2dbe4] text-[22px] font-bold text-[#304f73]">Wet- en regelgeving</div>
+                <div className="p-4">
+                  <div className="h-44 rounded-2xl bg-gradient-to-r from-[#8cb0ce] via-[#dbe8f4] to-[#d8c970]" />
+                  <h3 className="mt-4 text-[20px] font-bold text-[#304f73]">Klein maar fijn, doorlopend herstel en groei</h3>
+                  <p className="mt-2 text-[16px] leading-7 text-slate-600">
+                    Regionale briefing over verandering, impact en wat jij vandaag moet regelen.
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <aside className="space-y-4">
+              <div className="rounded-2xl border border-[#b8c8d8] bg-white/85 overflow-hidden shadow-sm">
+                <div className="px-5 py-4 border-b border-[#d2dbe4] text-[18px] font-bold uppercase tracking-wide text-[#35587e]">Documenten / Monitor</div>
+                <div className="p-4 space-y-3">
+                  {rightDocs.map((item, i) => (
+                    <div key={i} className={`rounded-2xl px-4 py-4 text-[18px] font-semibold ${i===0 ? 'bg-[#eef4ef] text-[#3f6f46]' : 'bg-[#eef3f8] text-[#35587e]'}`}>
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-[#b8c8d8] bg-white/85 overflow-hidden shadow-sm">
+                <div className="px-5 py-4 border-b border-[#d2dbe4] text-[18px] font-bold uppercase tracking-wide text-[#35587e]">Acties / Signalen</div>
+                <div className="p-4 space-y-3">
+                  {rightSignals.map((item, i) => (
+                    <div key={i} className={`rounded-2xl px-4 py-4 text-[18px] font-semibold ${i===0 ? 'bg-[#eef7ee] text-[#4c7c40]' : i===1 ? 'bg-[#faf3e9] text-[#9b7a36]' : 'bg-[#f5f7fa] text-[#445e77]'}`}>
+                      {item}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </aside>
+          </section>
+
+          <section className="grid grid-cols-3 gap-5">
+            <div className="rounded-2xl border border-[#b8c8d8] bg-white/80 overflow-hidden shadow-sm">
+              <div className="px-5 py-4 border-b border-[#d2dbe4] text-[18px] font-bold uppercase tracking-wide text-[#35587e]">Kennisbank</div>
+              <div className="p-4 space-y-3">
+                <div className="rounded-2xl bg-[#eef3f8] px-4 py-4 text-[18px] font-semibold text-[#35587e]">Praktische dossiers</div>
+                <div className="rounded-2xl bg-[#eef3f8] px-4 py-4 text-[18px] font-semibold text-[#35587e]">Uitleg & handleidingen</div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-[#b8c8d8] bg-white/80 overflow-hidden shadow-sm">
+              <div className="px-5 py-4 border-b border-[#d2dbe4] text-[18px] font-bold uppercase tracking-wide text-[#35587e]">Kennisbank / Regelgeving</div>
+              <div className="p-4 space-y-3">
+                <div className="rounded-2xl bg-[#eef3f8] px-4 py-4 text-[18px] font-semibold text-[#35587e]">Wetgeving Monitor</div>
+                <div className="rounded-2xl bg-[#eef3f8] px-4 py-4 text-[18px] font-semibold text-[#35587e]">Kennisbank Dossiers</div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-[#b8c8d8] bg-white/80 overflow-hidden shadow-sm">
+              <div className="px-5 py-4 border-b border-[#d2dbe4] text-[18px] font-bold uppercase tracking-wide text-[#35587e]">Updates / Provincie</div>
+              <div className="p-4 space-y-3">
+                <div className="rounded-2xl bg-[#eef3f8] px-4 py-4 text-[18px] font-semibold text-[#35587e]">Regio Reports</div>
+                <div className="rounded-2xl bg-[#eef3f8] px-4 py-4 text-[18px] font-semibold text-[#35587e]">Provincie Updates</div>
+              </div>
+            </div>
+          </section>
+
+          <section className="grid grid-cols-2 gap-5">
+            <div className="rounded-2xl border border-[#b8c8d8] bg-white/75 overflow-hidden shadow-sm">
+              <div className="px-5 py-4 border-b border-[#d2dbe4] text-[18px] font-bold uppercase tracking-wide text-[#35587e]">Kennisbank</div>
+              <div className="p-4 grid grid-cols-2 gap-3">
+                <div className="rounded-2xl bg-[#2f679a] text-white p-5 text-[18px] font-bold">Praktische dossiers</div>
+                <div className="rounded-2xl bg-[#dfe9f3] text-[#35587e] p-5 text-[18px] font-semibold">Uitleg & handleidingen</div>
+                <div className="rounded-2xl bg-[#eef3f8] text-[#35587e] p-5 text-[18px] font-semibold">Intel & Overheid Monitor</div>
+                <div className="rounded-2xl bg-[#eef3f8] text-[#35587e] p-5 text-[18px] font-semibold">Kennisbank Dossiers</div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-[#b8c8d8] bg-white/75 overflow-hidden shadow-sm">
+              <div className="px-5 py-4 border-b border-[#d2dbe4] text-[18px] font-bold uppercase tracking-wide text-[#35587e]">Updates / Provincie</div>
+              <div className="p-4">
+                <div className="h-28 rounded-2xl bg-gradient-to-r from-[#c9da8f] via-[#e8f0cc] to-[#7fa2c4]" />
+                <h3 className="mt-4 text-[20px] font-bold text-[#304f73]">Klein maar fijn, doorlopend herstel en groei</h3>
+                <p className="mt-2 text-[16px] leading-7 text-slate-600">
+                  Snel scanbare feed met regionale updates, regelgeving en kennisblokken in één doorlopende scroll.
+                </p>
+              </div>
+            </div>
+          </section>
+        </main>
+
+        <footer className="px-8 py-6 border-t border-[#c3d0de] text-center text-[18px] tracking-wide text-[#516f8d] bg-[#e8eef4]">
+          Feed | Kansen | Regels | Kennisbank
+        </footer>
+      </div>
+    </div>
+  );
+}

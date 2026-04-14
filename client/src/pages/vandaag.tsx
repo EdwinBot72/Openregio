@@ -6,12 +6,9 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { useSidebar } from "@/components/ui/sidebar";
 import type { IntelSignaal } from "@shared/schema";
 import {
-  ArrowRight,
   ArrowUpRight,
   BarChart3,
   Bell,
@@ -19,12 +16,10 @@ import {
   Building2,
   Calendar,
   CheckCircle2,
-  ChevronRight,
   Euro,
   Eye,
   FileText,
   Globe,
-  MapPin,
   MessageSquare,
   Monitor,
   Newspaper,
@@ -33,7 +28,6 @@ import {
   Sparkles,
   TrendingUp,
   Users,
-  Zap,
 } from "lucide-react";
 import {
   SECTOR_CONFIG,
@@ -41,26 +35,8 @@ import {
   type SectorKey,
 } from "@/config/sectors";
 
-// ─── Design tokens ────────────────────────────────────────────────────────────
-const PANEL = "border border-border bg-white dark:bg-card";
-const PANEL_HEADER = "text-[10px] font-bold uppercase tracking-widest text-white px-3 py-2 bg-[#1a3666] dark:bg-[#0d1c3d]";
-
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-function getGreeting() {
-  const h = new Date().getHours();
-  if (h < 6) return "Goedenacht";
-  if (h < 12) return "Goedemorgen";
-  if (h < 18) return "Goedemiddag";
-  return "Goedenavond";
-}
-
-function formatDatum(d: Date) {
-  return d.toLocaleDateString("nl-NL", { weekday: "long", day: "numeric", month: "long" });
-}
-
 // ─── Last-visit tracking ──────────────────────────────────────────────────────
 const LS_KEY = "vandaag_last_visit";
-
 function useLastVisit(): Date | null {
   const [lastVisit] = useState<Date | null>(() => {
     try {
@@ -75,11 +51,7 @@ function useLastVisit(): Date | null {
 }
 
 // ─── Ranking ──────────────────────────────────────────────────────────────────
-function rankSignalen(
-  signalen: IntelSignaal[],
-  userSector?: string | null,
-  userRegio?: string | null,
-): IntelSignaal[] {
+function rankSignalen(signalen: IntelSignaal[], userSector?: string | null, userRegio?: string | null): IntelSignaal[] {
   const urgOrd: Record<string, number> = { hoog: 0, normaal: 1, info: 2 };
   return [...signalen].sort((a, b) => {
     const riskDiff = (urgOrd[a.urgentie] ?? 2) - (urgOrd[b.urgentie] ?? 2);
@@ -95,33 +67,26 @@ function rankSignalen(
     const bSect = !b.sector || b.sector === "alle" || b.sector === userSector;
     if (aSect && !bSect) return -1;
     if (!aSect && bSect) return 1;
-    const aCr = new Date(a.createdAt ?? 0).getTime();
-    const bCr = new Date(b.createdAt ?? 0).getTime();
-    return bCr - aCr;
+    return new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime();
   });
 }
 
-// ─── Category dot ─────────────────────────────────────────────────────────────
-const CAT_DOT: Record<string, string> = {
-  wetgeving: "bg-blue-500",
-  beleid: "bg-purple-500",
-  financieel: "bg-amber-500",
-  subsidies: "bg-emerald-500",
+// ─── Types ────────────────────────────────────────────────────────────────────
+type ProfielData = {
+  naam?: string; beschrijving?: string; websiteUrl?: string;
+  telefoon?: string; adres?: string; kvkNummer?: string; regio?: string;
 };
-
-// ─── Urgency badge ─────────────────────────────────────────────────────────────
-function UrgentieBadge({ urgentie }: { urgentie: string }) {
-  if (urgentie === "hoog") return <Badge variant="destructive" className="text-xs shrink-0">Urgent</Badge>;
-  if (urgentie === "normaal") return <Badge variant="secondary" className="text-xs shrink-0">Normaal</Badge>;
-  return <Badge variant="outline" className="text-xs shrink-0">Info</Badge>;
-}
+type CursusItem = { id: string; title: string; completed: boolean; minutes: number; daysLeft: number; };
+type Aanbesteding = {
+  id: string; title: string; buyer: string; description: string | null;
+  deadline: string | null; daysLeft: number | null; publicationDate: string | null; url: string | null;
+};
 
 // ─── Sector onboarding ────────────────────────────────────────────────────────
 function SectorOnboarding() {
   const qc = useQueryClient();
   const { toast } = useToast();
   const [saving, setSaving] = useState<SectorKey | null>(null);
-
   const handleKies = async (key: SectorKey) => {
     setSaving(key);
     try {
@@ -131,25 +96,15 @@ function SectorOnboarding() {
       toast({ title: "Sector opgeslagen", description: `Je ziet nu content voor ${SECTOR_CONFIG[key].label}.` });
     } catch {
       toast({ title: "Fout", description: "Kon sector niet opslaan.", variant: "destructive" });
-    } finally {
-      setSaving(null);
-    }
+    } finally { setSaving(null); }
   };
-
   return (
-    <div className={`${PANEL} p-4 mb-4`} data-testid="section-sector-onboarding">
-      <div className="flex items-start gap-3 mb-3">
-        <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
-          <Sparkles className="h-4 w-4 text-primary" />
-        </div>
-        <div>
-          <h2 className="font-bold text-foreground text-sm">In welke sector ben je actief?</h2>
-          <p className="text-xs text-muted-foreground mt-0.5">
-            We tonen dan de meest relevante signalen voor jouw branche.
-          </p>
-        </div>
+    <div className="rounded-2xl border border-[#b8c8d8] bg-white/80 overflow-hidden shadow-sm mb-4" data-testid="section-sector-onboarding">
+      <div className="bg-[#3f6f9f] px-5 py-4 text-white text-base font-bold uppercase tracking-wide flex items-center gap-2">
+        <Sparkles className="h-4 w-4" />
+        In welke sector ben je actief?
       </div>
-      <div className="grid grid-cols-2 gap-2">
+      <div className="p-4 grid grid-cols-2 gap-3">
         {SECTOR_TILES.map((tile) => {
           const Icon = tile.icon;
           return (
@@ -158,10 +113,10 @@ function SectorOnboarding() {
               onClick={() => handleKies(tile.key)}
               disabled={!!saving}
               data-testid={`button-sector-${tile.key}`}
-              className="flex items-center gap-2 rounded-md border border-border bg-muted/40 hover-elevate active-elevate-2 p-2.5 text-left transition disabled:opacity-50"
+              className="flex items-center gap-2 rounded-2xl bg-[#5c93c6] text-white text-left px-4 py-3 text-sm font-semibold shadow-sm hover-elevate active-elevate-2 disabled:opacity-50"
             >
-              <Icon className="h-4 w-4 text-primary shrink-0" />
-              <span className="text-xs font-semibold text-foreground">{tile.label}</span>
+              <Icon className="h-4 w-4 shrink-0" />
+              <span>{tile.label}</span>
             </button>
           );
         })}
@@ -170,138 +125,69 @@ function SectorOnboarding() {
   );
 }
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-type ProfielData = {
-  naam?: string;
-  beschrijving?: string;
-  websiteUrl?: string;
-  telefoon?: string;
-  adres?: string;
-  kvkNummer?: string;
-  regio?: string;
-};
+// ─── Card header ─────────────────────────────────────────────────────────────
+function CardHeader({ children, light = false }: { children: React.ReactNode; light?: boolean }) {
+  return (
+    <div className={`px-5 py-4 border-b border-[#d2dbe4] text-base font-bold uppercase tracking-wide ${light ? "text-[#35587e] bg-[#edf3f8]" : "text-white bg-[#3f6f9f]"}`}>
+      {children}
+    </div>
+  );
+}
 
-type CursusItem = {
-  id: string;
-  title: string;
-  completed: boolean;
-  minutes: number;
-  daysLeft: number;
-};
+// ─── Kans feed item ─────────────────────────────────────────────────────────
+function FeedCard({ label, sub, href, testid }: { label: string; sub: string; href: string; testid: string }) {
+  return (
+    <Link href={href}>
+      <div
+        data-testid={testid}
+        className="rounded-2xl border border-[#cfdae6] bg-[#f6f9fc] px-5 py-4 flex items-center justify-between hover:bg-white transition cursor-pointer"
+      >
+        <div className="min-w-0 flex-1">
+          <div className="text-sm font-bold text-[#314f72] leading-snug line-clamp-2">{label}</div>
+          <div className="text-xs text-slate-500 mt-1 line-clamp-1">{sub}</div>
+        </div>
+        <div className="h-9 w-9 rounded-xl bg-[#d9e7f3] flex items-center justify-center shrink-0 ml-3">
+          <ArrowUpRight className="h-4 w-4 text-[#2f679a]" />
+        </div>
+      </div>
+    </Link>
+  );
+}
 
-type Aanbesteding = {
-  id: string;
-  title: string;
-  buyer: string;
-  description: string | null;
-  deadline: string | null;
-  daysLeft: number | null;
-  publicationDate: string | null;
-  url: string | null;
-};
-
-// ─── Portal nav button ─────────────────────────────────────────────────────────
-function PortalNavBtn({
-  icon: Icon,
-  label,
-  href,
-  testid,
-}: {
-  icon: React.ElementType;
-  label: string;
-  href: string;
-  testid: string;
-}) {
+// ─── Sidebar nav button ───────────────────────────────────────────────────────
+function NavBtn({ icon: Icon, label, href, testid }: { icon: React.ElementType; label: string; href: string; testid: string }) {
   return (
     <Link href={href}>
       <button
         data-testid={testid}
-        className="flex items-center justify-between gap-2 w-full border border-[#c5d8f0] dark:border-border bg-[#e8f0fb] dark:bg-primary/10 hover-elevate active-elevate-2 px-3 py-2 text-left"
+        className="w-full rounded-2xl bg-[#5c93c6] text-white text-left px-5 py-4 text-sm font-semibold shadow-sm hover-elevate active-elevate-2 flex items-center gap-3"
       >
-        <span className="flex items-center gap-2">
-          <Icon className="h-3.5 w-3.5 text-[#1a3666] dark:text-primary shrink-0" />
-          <span className="text-xs font-semibold text-[#1a3666] dark:text-foreground">{label}</span>
-        </span>
-        <ChevronRight className="h-3 w-3 text-[#1a3666]/60 dark:text-muted-foreground shrink-0" />
+        <Icon className="h-4 w-4 shrink-0" />
+        {label}
       </button>
     </Link>
   );
 }
 
-// ─── Portal action row ────────────────────────────────────────────────────────
-function ActionRow({
-  label,
-  sub,
-  href,
-  testid,
-}: {
-  label: string;
-  sub?: string;
-  href: string;
-  testid: string;
-}) {
+// ─── Light list item ──────────────────────────────────────────────────────────
+function ListItem({ label, href, testid, color = "bg-[#eef3f8] text-[#35587e]" }: { label: string; href: string; testid: string; color?: string }) {
   return (
     <Link href={href}>
       <div
         data-testid={testid}
-        className="flex items-start gap-2 py-2 border-b border-border last:border-0 hover-elevate cursor-pointer rounded-md px-1 -mx-1"
+        className={`rounded-2xl px-4 py-4 text-sm font-semibold cursor-pointer hover-elevate ${color}`}
       >
-        <ArrowRight className="h-3.5 w-3.5 text-primary shrink-0 mt-0.5" />
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-foreground leading-snug line-clamp-2">{label}</p>
-          {sub && <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">{sub}</p>}
-        </div>
-        <ArrowUpRight className="h-3 w-3 text-muted-foreground shrink-0 mt-0.5" />
+        {label}
       </div>
     </Link>
   );
 }
 
-// ─── Signal row ───────────────────────────────────────────────────────────────
-function SignaalRow({ signaal }: { signaal: IntelSignaal }) {
-  const dot = CAT_DOT[signaal.categorie] ?? "bg-muted-foreground";
-  return (
-    <Link href="/regels/updates">
-      <div className="flex items-start gap-2 py-2 border-b border-border last:border-0 hover-elevate cursor-pointer rounded-md px-1 -mx-1">
-        <span className={`inline-block w-2 h-2 rounded-full ${dot} shrink-0 mt-1`} />
-        <div className="flex-1 min-w-0">
-          <p className="text-xs font-semibold text-foreground leading-snug line-clamp-2">{signaal.titel}</p>
-          <p className="text-[10px] text-muted-foreground mt-0.5 capitalize">{signaal.categorie}</p>
-        </div>
-        {signaal.urgentie === "hoog" && (
-          <span className="text-[9px] font-bold text-destructive shrink-0 mt-0.5">URGENT</span>
-        )}
-      </div>
-    </Link>
-  );
-}
-
-// ─── Bottom panel item ────────────────────────────────────────────────────────
-function BottomPanelLink({
-  icon: Icon,
-  label,
-  href,
-  testid,
-}: {
-  icon: React.ElementType;
-  label: string;
-  href: string;
-  testid: string;
-}) {
-  return (
-    <Link href={href}>
-      <div
-        data-testid={testid}
-        className="flex items-center justify-between gap-2 py-2 border-b border-border last:border-0 hover-elevate cursor-pointer rounded-md px-1 -mx-1"
-      >
-        <span className="flex items-center gap-2">
-          <Icon className="h-3.5 w-3.5 text-primary shrink-0" />
-          <span className="text-xs font-medium text-foreground">{label}</span>
-        </span>
-        <ChevronRight className="h-3 w-3 text-muted-foreground shrink-0" />
-      </div>
-    </Link>
-  );
+// ─── Urgentie pill ──────────────────────────────────────────────────────────
+function UrgPill({ urgentie }: { urgentie: string }) {
+  if (urgentie === "hoog") return <span className="text-[10px] font-bold text-red-600 bg-red-50 px-2 py-0.5 rounded-full shrink-0">URGENT</span>;
+  if (urgentie === "normaal") return <span className="text-[10px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full shrink-0">Normaal</span>;
+  return null;
 }
 
 // ─── Main page ─────────────────────────────────────────────────────────────────
@@ -309,106 +195,80 @@ export default function VandaagPage() {
   usePageTitle("Vandaag");
   const { user, isLoading: authLoading } = useAuth();
   const lastVisit = useLastVisit();
-  const [activeTab, setActiveTab] = useState<"nieuws" | "kansen">("nieuws");
+  const [activeTab, setActiveTab] = useState<"feed" | "kansen" | "regels" | "kennisbank">("feed");
   const { setOpen, isMobile } = useSidebar();
-  const [location] = useLocation();
 
   useEffect(() => {
-    if (!isMobile) {
-      setOpen(false);
-    }
+    if (!isMobile) setOpen(false);
   }, [setOpen, isMobile]);
 
-  const { data: profiel } = useQuery<ProfielData | null>({
-    queryKey: ["/api/business-profile/me"],
-    enabled: !!user,
-  });
-
-  const { data: intelSignalen = [], isLoading: intelLoading } = useQuery<IntelSignaal[]>({
-    queryKey: ["/api/intel/signalen"],
-    enabled: !!user,
-  });
-
-  const { data: cursusData, isLoading: cursusLoading } = useQuery<{
-    today: string;
-    items: CursusItem[];
-    totaal: number;
-  }>({
-    queryKey: ["/api/cursussen"],
-    enabled: !!user,
-  });
-
-  const { data: documentenData } = useQuery<{ documents: { id: string }[] } | { id: string }[]>({
-    queryKey: ["/api/documents"],
-    enabled: !!user,
-  });
+  const { data: profiel } = useQuery<ProfielData | null>({ queryKey: ["/api/business-profile/me"], enabled: !!user });
+  const { data: intelSignalen = [], isLoading: intelLoading } = useQuery<IntelSignaal[]>({ queryKey: ["/api/intel/signalen"], enabled: !!user });
+  const { data: cursusData, isLoading: cursusLoading } = useQuery<{ today: string; items: CursusItem[]; totaal: number }>({ queryKey: ["/api/cursussen"], enabled: !!user });
+  const { data: documentenData } = useQuery<{ documents: { id: string }[] } | { id: string }[]>({ queryKey: ["/api/documents"], enabled: !!user });
 
   const userRegio = profiel?.regio || user?.region || "";
-  const { data: aanbestedingenData } = useQuery<{
-    gemeente: string;
-    count: number;
-    items: Aanbesteding[];
-  }>({
+  const { data: aanbestedingenData } = useQuery<{ gemeente: string; count: number; items: Aanbesteding[] }>({
     queryKey: ["/api/tenderned/aanbestedingen", userRegio],
     queryFn: () =>
-      fetch(`/api/tenderned/aanbestedingen?gemeente=${encodeURIComponent(userRegio)}&limit=5`, {
-        credentials: "include",
-      }).then((r) => {
-        if (!r.ok) throw new Error("Niet beschikbaar");
-        return r.json();
-      }),
+      fetch(`/api/tenderned/aanbestedingen?gemeente=${encodeURIComponent(userRegio)}&limit=6`, { credentials: "include" })
+        .then((r) => { if (!r.ok) throw new Error("Niet beschikbaar"); return r.json(); }),
     enabled: !!userRegio,
     staleTime: 15 * 60 * 1000,
   });
 
   // ── Derived data ─────────────────────────────────────────────────────────
   const cursusItems = cursusData?.items ?? [];
+  const hasSector = !!user?.sector;
+  const displayName = user?.firstName || profiel?.naam || user?.businessName || "ondernemer";
 
   let documentenAantal = 0;
-  if (Array.isArray(documentenData)) {
-    documentenAantal = documentenData.length;
-  } else if (documentenData && "documents" in documentenData) {
-    documentenAantal = (documentenData as { documents: { id: string }[] }).documents.length;
-  }
-
-  const hasSector = !!user?.sector;
+  if (Array.isArray(documentenData)) documentenAantal = documentenData.length;
+  else if (documentenData && "documents" in documentenData) documentenAantal = (documentenData as { documents: { id: string }[] }).documents.length;
 
   const signaalenGerankt = rankSignalen(intelSignalen, user?.sector, userRegio);
-  const topSignalen = signaalenGerankt.slice(0, 4);
-  const wooSignalen = signaalenGerankt.filter(
-    (s) => s.categorie === "wetgeving" || s.categorie === "beleid"
-  ).slice(0, 3);
-  const actiefKansen = cursusItems.filter((i) => !i.completed).slice(0, 4);
+  const topSignalen = signaalenGerankt.slice(0, 6);
+  const wooSignalen = signaalenGerankt.filter((s) => s.categorie === "wetgeving" || s.categorie === "beleid").slice(0, 2);
+  const actiefKansen = cursusItems.filter((i) => !i.completed).slice(0, 3);
   const openAanbestedingen = aanbestedingenData?.items?.slice(0, 4) ?? [];
 
   const isNieuwFn = (datum: Date) => !!lastVisit && datum > lastVisit;
 
-  // Feed items for Nieuws tab
-  const feedItems = signaalenGerankt
-    .slice(0, 6)
-    .map((s) => ({
+  // Feed: merged & sorted intel + aanbestedingen, newest first, max 8
+  const feedItems = [
+    ...signaalenGerankt.slice(0, 6).map((s) => ({
       id: `intel-${s.id}`,
-      titel: s.titel,
-      tekst: s.samenvatting,
-      label: s.categorie,
-      urgentie: s.urgentie,
-      dotColor: CAT_DOT[s.categorie] ?? "bg-muted-foreground",
+      label: s.titel,
+      sub: `${s.categorie} · ${s.urgentie === "hoog" ? "Urgent" : "Signaal"}`,
+      href: "/regels/updates",
       isNieuw: isNieuwFn(new Date(s.datum ?? s.createdAt ?? 0)),
-    }));
+      datum: new Date(s.datum ?? s.createdAt ?? 0).getTime(),
+    })),
+    ...openAanbestedingen.map((a) => ({
+      id: `kans-${a.id}`,
+      label: a.title,
+      sub: `Aanbesteding · ${a.buyer}`,
+      href: "/kansen/opdrachten",
+      isNieuw: a.publicationDate ? isNieuwFn(new Date(a.publicationDate)) : false,
+      datum: a.publicationDate ? new Date(a.publicationDate).getTime() : 0,
+    })),
+  ]
+    .sort((a, b) => b.datum - a.datum)
+    .slice(0, 8);
 
-  const displayName = user?.firstName || profiel?.naam || user?.businessName || "ondernemer";
-
-  // ── Loading state ─────────────────────────────────────────────────────────
+  // ── Loading skeleton ────────────────────────────────────────────────────
   if (authLoading) {
     return (
-      <div className="p-4 space-y-4" data-testid="skeleton-vandaag">
-        <Skeleton className="h-12 w-full rounded-md" />
-        <Skeleton className="h-8 w-full rounded-md" />
-        <Skeleton className="h-10 w-full rounded-md" />
-        <div className="grid grid-cols-3 gap-3">
-          <Skeleton className="h-64 rounded-md" />
-          <Skeleton className="h-64 rounded-md" />
-          <Skeleton className="h-64 rounded-md" />
+      <div className="min-h-screen bg-[#e8edf3] p-6" data-testid="skeleton-vandaag">
+        <div className="mx-auto max-w-[1400px] space-y-4">
+          <Skeleton className="h-24 rounded-[28px]" />
+          <Skeleton className="h-14 rounded-[28px]" />
+          <Skeleton className="h-12 rounded-2xl" />
+          <div className="grid grid-cols-3 gap-5">
+            <Skeleton className="h-80 rounded-2xl" />
+            <Skeleton className="h-80 rounded-2xl" />
+            <Skeleton className="h-80 rounded-2xl" />
+          </div>
         </div>
       </div>
     );
@@ -416,586 +276,467 @@ export default function VandaagPage() {
 
   if (!user) return null;
 
+  const TABS = [
+    { id: "feed" as const, label: "Feed" },
+    { id: "kansen" as const, label: "Kansen" },
+    { id: "regels" as const, label: "Regels" },
+    { id: "kennisbank" as const, label: "Kennisbank" },
+  ];
+
   return (
-    <div className="min-h-full bg-muted/20 dark:bg-background" data-testid="page-vandaag">
+    <div className="min-h-screen bg-[#e8edf3] dark:bg-background p-4 md:p-8" data-testid="page-vandaag">
+      <div className="mx-auto max-w-[1400px] rounded-[28px] border border-[#b8c7d8] dark:border-border bg-gradient-to-b from-[#eef3f8] to-[#dfe8f0] dark:from-card dark:to-background shadow-[0_20px_60px_rgba(49,78,112,0.15)] overflow-hidden">
 
-      {/* ── Portal Header ──────────────────────────────────────────────────── */}
-      <div className="bg-background border-b border-border px-4 py-3">
-        <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-2 shrink-0">
-            <div className="h-8 w-8 rounded-md bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-sm">OR</span>
+        {/* ── Header ─────────────────────────────────────────────────────── */}
+        <header className="px-6 pt-6 pb-5 border-b border-[#c3d0de] dark:border-border bg-[#edf2f7] dark:bg-card">
+          <div className="flex items-center gap-4 flex-wrap">
+            <div className="flex items-center gap-3 min-w-[240px]">
+              <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-[#70b844] via-[#3990c8] to-[#24517d] shadow-inner shrink-0" />
+              <div className="text-4xl leading-none font-black tracking-tight text-[#21486f] dark:text-foreground">OPENREGIO</div>
             </div>
-            <span className="font-bold text-base text-foreground hidden sm:block">OpenRegio</span>
-          </div>
-          <div className="flex-1 flex items-center gap-2 min-w-0">
-            <div className="relative flex-1 max-w-xl">
-              <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
+            <div className="flex-1 flex items-center gap-3 rounded-2xl border border-[#b7c7d7] dark:border-border bg-white/80 dark:bg-muted/30 px-4 py-2.5 shadow-inner min-w-0">
+              <Search className="h-4 w-4 text-slate-400 shrink-0" />
               <input
-                type="text"
-                placeholder="Zoek..."
+                placeholder="Zoek in signalen, kansen en regelgeving..."
                 data-testid="input-portal-search"
-                className="w-full rounded-md border border-border bg-muted/40 pl-8 pr-3 py-1.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                className="flex-1 bg-transparent outline-none text-base placeholder:text-slate-400 text-[#21486f] dark:text-foreground min-w-0"
               />
-            </div>
-            <Button size="sm" variant="outline" data-testid="button-zoek-filter">
-              <Search className="h-3.5 w-3.5 mr-1.5" />
-              Zoek en Filter
-            </Button>
-          </div>
-          <div className="text-xs text-muted-foreground shrink-0 hidden md:block">
-            {getGreeting()}, {displayName} &middot; {formatDatum(new Date())}
-          </div>
-        </div>
-      </div>
-
-      {/* ── RegioMarkt banner ──────────────────────────────────────────────── */}
-      <div
-        className="bg-primary/10 border-b border-primary/20 px-4 py-2.5 flex items-center justify-between gap-2"
-        data-testid="banner-regiomarkt"
-      >
-        <div className="flex items-center gap-2">
-          <MapPin className="h-4 w-4 text-primary shrink-0" />
-          <span className="text-sm font-semibold text-foreground">RegioMarkt</span>
-          <span className="text-xs text-muted-foreground hidden sm:inline">
-            &mdash; Lokale kansen, samenwerkingen en aanbestedingen in jouw regio
-          </span>
-        </div>
-        <Link href="/kansen/in-de-buurt">
-          <button className="text-xs font-semibold text-primary hover:underline" data-testid="link-regiomarkt">
-            Bekijk alles
-          </button>
-        </Link>
-      </div>
-
-      {/* ── Horizontal nav tabs ────────────────────────────────────────────── */}
-      <div className="bg-primary px-4 flex items-center gap-1" data-testid="portal-nav-tabs">
-        {[
-          { id: "info", label: "Info / Toepassingen", icon: Monitor, href: "/vandaag" },
-          { id: "kansen", label: "Kansen / Acties", icon: TrendingUp, href: "/kansen/opdrachten" },
-          { id: "regels", label: "Regels", icon: Scale, href: "/regels/updates" },
-          { id: "groei", label: "Groei", icon: BarChart3, href: "/groei/profiel" },
-        ].map((tab) => {
-          const Icon = tab.icon;
-          const isActive =
-            tab.href === "/vandaag"
-              ? location === "/vandaag"
-              : location.startsWith(tab.href.split("/").slice(0, 2).join("/"));
-          return (
-            <Link key={tab.id} href={tab.href}>
               <button
+                data-testid="button-zoek-filter"
+                className="rounded-xl bg-[#2f679a] px-5 py-2 text-white text-sm font-semibold shadow-sm shrink-0 hover-elevate active-elevate-2"
+              >
+                Zoek en Filter
+              </button>
+            </div>
+            <div className="text-sm text-[#516f8d] dark:text-muted-foreground hidden lg:block shrink-0">
+              Welkom, {displayName}
+            </div>
+          </div>
+        </header>
+
+        <main className="p-5 space-y-5">
+
+          {/* ── RegioMarkt banner ─────────────────────────────────────────── */}
+          <section
+            className="rounded-2xl border border-[#c0cddd] bg-white/70 dark:bg-card px-6 py-5 shadow-sm"
+            data-testid="banner-regiomarkt"
+          >
+            <h1 className="text-3xl font-bold tracking-tight text-[#294f78] dark:text-foreground">RegioMarkt</h1>
+            <p className="text-sm text-[#516f8d] dark:text-muted-foreground mt-1">
+              Lokale kansen, samenwerkingen en aanbestedingen in jouw regio
+              {userRegio ? ` · ${userRegio}` : ""}
+            </p>
+          </section>
+
+          {/* ── Top tabs ──────────────────────────────────────────────────── */}
+          <section className="grid grid-cols-4 gap-3" data-testid="portal-nav-tabs">
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
                 data-testid={`tab-portal-${tab.id}`}
-                className={`flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold transition-colors ${
-                  isActive
-                    ? "text-white border-b-2 border-white"
-                    : "text-white/70 hover:text-white"
+                onClick={() => setActiveTab(tab.id)}
+                className={`rounded-2xl border px-5 py-5 text-lg font-semibold shadow-sm transition-all hover-elevate ${
+                  activeTab === tab.id
+                    ? "border-[#2d6a9f] bg-[#2f679a] text-white"
+                    : "border-[#bacedf] bg-[#dfe9f3] dark:bg-muted text-[#35587e] dark:text-muted-foreground"
                 }`}
               >
-                <Icon className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">{tab.label}</span>
+                {tab.label}
               </button>
-            </Link>
-          );
-        })}
-      </div>
+            ))}
+          </section>
 
-      {/* ── Main 3-column content ─────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-[220px_1fr_240px] gap-0 min-h-0">
+          {/* ── Sector onboarding (if no sector) ─────────────────────────── */}
+          {!hasSector && <SectorOnboarding />}
 
-        {/* ── LEFT COLUMN ────────────────────────────────────────────────── */}
-        <aside className="border-r border-border bg-background flex flex-col gap-0 lg:flex lg:flex-col">
+          {/* ── Main 3-column grid ────────────────────────────────────────── */}
+          <section className="grid grid-cols-1 lg:grid-cols-[280px_minmax(0,1fr)_320px] gap-5 items-start">
 
-          {/* INFO / TOEPASSINGEN */}
-          <div>
-            <div className={PANEL_HEADER} data-testid="section-info-toepassingen">
-              INFO / TOEPASSINGEN
-            </div>
-            <div className="p-2 flex flex-col gap-1.5">
-              <PortalNavBtn icon={Monitor} label="Monitor" href="/vandaag/updates" testid="nav-monitor" />
-              <PortalNavBtn icon={Eye} label="Inzichten" href="/regels/updates" testid="nav-inzichten" />
-              <PortalNavBtn icon={FileText} label="Documenten" href="/regels/documenten" testid="nav-documenten" />
-              <div className="flex gap-1.5 mt-0.5">
-                <Link href="/regels/woo" className="flex-1">
-                  <button
-                    data-testid="nav-woo-bibliotheek"
-                    className="flex items-center justify-center gap-1 w-full rounded-md border border-border bg-muted/40 hover-elevate active-elevate-2 px-2 py-1.5"
-                  >
-                    <BookOpen className="h-3.5 w-3.5 text-primary" />
-                    <span className="text-[10px] font-semibold text-foreground">WOO</span>
-                  </button>
-                </Link>
-                <Link href="/regels/check" className="flex-1">
-                  <button
-                    data-testid="nav-check-situatie"
-                    className="flex items-center justify-center gap-1 w-full rounded-md border border-border bg-muted/40 hover-elevate active-elevate-2 px-2 py-1.5"
-                  >
-                    <Scale className="h-3.5 w-3.5 text-primary" />
-                    <span className="text-[10px] font-semibold text-foreground">Check</span>
-                  </button>
-                </Link>
-              </div>
-            </div>
-          </div>
+            {/* LEFT COLUMN */}
+            <aside className="space-y-4" data-testid="section-left-column">
 
-          {/* WOO INZICHTEN */}
-          <div className="border-t border-border">
-            <Link href="/regels/woo">
-              <div className={`${PANEL_HEADER} flex items-center justify-between cursor-pointer hover:bg-muted/60`} data-testid="section-woo-inzichten">
-                <span>WOO INZICHTEN</span>
-                <ChevronRight className="h-3 w-3" />
-              </div>
-            </Link>
-            <div className="px-3 py-2">
-              {intelLoading ? (
-                <div className="space-y-2">
-                  {[1, 2].map((i) => <Skeleton key={i} className="h-8 rounded" />)}
-                </div>
-              ) : wooSignalen.length === 0 ? (
-                <p className="text-xs text-muted-foreground py-2">Geen recente WOO signalen.</p>
-              ) : (
-                wooSignalen.map((s) => <SignaalRow key={s.id} signaal={s} />)
-              )}
-            </div>
-          </div>
-
-          {/* REGIOBOT */}
-          <div className="border-t border-border">
-            <div className={PANEL_HEADER} data-testid="section-regiobot">
-              REGIOBOT
-            </div>
-            <div className="p-2">
-              <Link href="/regiobot">
-                <button
-                  data-testid="nav-regiobot"
-                  className="flex items-center gap-2 w-full rounded-md border border-border bg-primary/5 hover-elevate active-elevate-2 px-3 py-2.5 text-left"
-                >
-                  <MessageSquare className="h-4 w-4 text-primary shrink-0" />
-                  <div className="min-w-0">
-                    <p className="text-xs font-semibold text-foreground">Zoek in regels</p>
-                    <p className="text-[10px] text-muted-foreground">en besluiten</p>
+              {/* Info / Toepassingen */}
+              <div className="rounded-2xl border border-[#b8c8d8] bg-white/80 dark:bg-card overflow-hidden shadow-sm">
+                <CardHeader>Info / Toepassingen</CardHeader>
+                <div className="p-4 space-y-3">
+                  <NavBtn icon={Monitor} label="Monitor" href="/vandaag/updates" testid="nav-monitor" />
+                  <NavBtn icon={Eye} label="Inzichten" href="/regels/updates" testid="nav-inzichten" />
+                  <NavBtn icon={FileText} label="Documenten" href="/regels/documenten" testid="nav-documenten" />
+                  <div className="grid grid-cols-2 gap-3 pt-1">
+                    <Link href="/regels/woo">
+                      <div data-testid="nav-woo" className="rounded-2xl bg-[#4f87bb] dark:bg-primary/70 h-16 flex items-center justify-center cursor-pointer hover-elevate">
+                        <BookOpen className="h-5 w-5 text-white" />
+                      </div>
+                    </Link>
+                    <Link href="/regels/check">
+                      <div data-testid="nav-check" className="rounded-2xl bg-[#84a9c9] dark:bg-primary/40 h-16 flex items-center justify-center cursor-pointer hover-elevate">
+                        <Scale className="h-5 w-5 text-white" />
+                      </div>
+                    </Link>
                   </div>
-                </button>
-              </Link>
-            </div>
-          </div>
+                </div>
+              </div>
 
-          {/* COMMUNITY */}
-          <div className="border-t border-border">
-            <div className={PANEL_HEADER} data-testid="section-community-left">
-              COMMUNITY
-            </div>
-            <div className="p-2 flex flex-col gap-1.5">
-              <PortalNavBtn icon={Users} label="Club & Partners" href="/community" testid="nav-club-partners" />
-              <PortalNavBtn icon={Calendar} label="Evenementen" href="/community" testid="nav-evenementen" />
-            </div>
-          </div>
-        </aside>
+              {/* Wet & Regelgeving */}
+              <div className="rounded-2xl border border-[#b8c8d8] bg-white/80 dark:bg-card overflow-hidden shadow-sm">
+                <CardHeader>Wet &amp; Regelgeving</CardHeader>
+                <div className="p-4 space-y-3">
+                  {intelLoading ? (
+                    <>
+                      <Skeleton className="h-14 rounded-2xl" />
+                      <Skeleton className="h-14 rounded-2xl" />
+                    </>
+                  ) : wooSignalen.length > 0 ? (
+                    wooSignalen.map((s) => (
+                      <Link key={s.id} href="/regels/updates">
+                        <div
+                          data-testid={`woo-signaal-${s.id}`}
+                          className="rounded-2xl bg-[#eef3f8] dark:bg-muted border border-[#c8d4e0] dark:border-border px-4 py-4 text-sm font-semibold text-[#35587e] dark:text-foreground cursor-pointer hover-elevate leading-snug"
+                        >
+                          {s.titel}
+                          {s.urgentie === "hoog" && <UrgPill urgentie="hoog" />}
+                        </div>
+                      </Link>
+                    ))
+                  ) : (
+                    <>
+                      <ListItem label="Nieuwe regels" href="/regels/updates" testid="woo-new-rules" />
+                      <ListItem label="Kennisbank dossiers" href="/informatie/kennisbank" testid="woo-kennisbank" />
+                    </>
+                  )}
+                </div>
+              </div>
 
-        {/* ── CENTER COLUMN ───────────────────────────────────────────────── */}
-        <main className="min-w-0 flex flex-col">
+              {/* RegioBot */}
+              <div className="rounded-2xl border border-[#b8c8d8] bg-white/80 dark:bg-card overflow-hidden shadow-sm">
+                <CardHeader light>REGIOBOT</CardHeader>
+                <Link href="/regiobot">
+                  <div className="p-5 text-sm text-[#35587e] dark:text-muted-foreground font-medium cursor-pointer hover-elevate" data-testid="nav-regiobot">
+                    Zoek in wet- en regelgeving met AI
+                  </div>
+                </Link>
+              </div>
 
-          {/* Sector onboarding (only if no sector set) */}
-          {!hasSector && (
-            <div className="p-4">
-              <SectorOnboarding />
-            </div>
-          )}
+            </aside>
 
-          {/* Tab switcher */}
-          <div className="flex items-center gap-0 border-b border-border bg-background px-4 sticky top-0 z-10">
-            <button
-              data-testid="tab-nieuws"
-              onClick={() => setActiveTab("nieuws")}
-              className={`px-4 py-3 text-xs font-semibold transition-colors border-b-2 ${
-                activeTab === "nieuws"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Nieuws / Updates
-            </button>
-            <button
-              data-testid="tab-kansen"
-              onClick={() => setActiveTab("kansen")}
-              className={`px-4 py-3 text-xs font-semibold transition-colors border-b-2 ${
-                activeTab === "kansen"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Kansen / Acties
-            </button>
-            <div className="ml-auto flex items-center gap-1 py-2">
-              <Link href="/regels/updates">
-                <Button size="sm" variant="outline" data-testid="btn-signaleren">
-                  <Bell className="h-3.5 w-3.5 mr-1" />
-                  Signaleren
-                </Button>
-              </Link>
-            </div>
-          </div>
+            {/* CENTER COLUMN */}
+            <section className="space-y-4 min-w-0" data-testid="section-center">
 
-          <div className="p-4 flex flex-col gap-5">
-
-            {/* ── NIEUWS / UPDATES tab content ──────────────────────────── */}
-            {activeTab === "nieuws" && (
-              <>
-                {/* REGELS section */}
-                <section data-testid="section-regels">
-                  <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-sm font-bold text-foreground">Regels</h2>
-                      {topSignalen.slice(0, 4).map((s) => (
-                        <span
-                          key={s.id}
-                          className={`inline-block w-2 h-2 rounded-full ${CAT_DOT[s.categorie] ?? "bg-muted-foreground"}`}
-                        />
-                      ))}
-                    </div>
+              {/* Feed / tab content */}
+              <div className="rounded-2xl border border-[#b8c8d8] bg-white/85 dark:bg-card overflow-hidden shadow-sm">
+                {/* Sub-tabs */}
+                <div className="flex items-center border-b border-[#d2dbe4] dark:border-border bg-[#eef3f8] dark:bg-muted/40 text-[#385b80] dark:text-muted-foreground font-semibold text-sm">
+                  <button
+                    data-testid="tab-nieuws"
+                    onClick={() => setActiveTab("feed")}
+                    className={`px-5 py-4 border-r border-[#d2dbe4] dark:border-border transition-colors ${activeTab === "feed" ? "bg-white dark:bg-card text-[#2f679a] dark:text-primary" : "hover:bg-white/60"}`}
+                  >
+                    Feed
+                  </button>
+                  <button
+                    data-testid="tab-kansen"
+                    onClick={() => setActiveTab("kansen")}
+                    className={`px-5 py-4 border-r border-[#d2dbe4] dark:border-border transition-colors ${activeTab === "kansen" ? "bg-white dark:bg-card text-[#2f679a] dark:text-primary" : "hover:bg-white/60"}`}
+                  >
+                    Kansen
+                  </button>
+                  <div className="ml-auto px-5 py-4">
                     <Link href="/regels/updates">
-                      <button className="text-xs font-semibold text-primary hover:underline" data-testid="link-alle-regels">
-                        Alle regels
+                      <button data-testid="btn-signaleren" className="text-xs font-semibold text-[#2f679a] dark:text-primary hover:underline flex items-center gap-1">
+                        <Bell className="h-3.5 w-3.5" />
+                        Signalen
                       </button>
                     </Link>
                   </div>
-                  <div className={`${PANEL} overflow-hidden`}>
-                    <div
-                      className="w-full h-36 bg-gradient-to-br from-emerald-100 to-blue-100 dark:from-emerald-900/30 dark:to-blue-900/30 flex items-end p-3"
-                      data-testid="img-regels"
-                    >
-                      <div className="flex items-center gap-2">
-                        <Globe className="h-4 w-4 text-emerald-700 dark:text-emerald-300" />
-                        <span className="text-xs font-semibold text-emerald-800 dark:text-emerald-200">Lokale regelgeving &amp; groei</span>
-                      </div>
-                    </div>
-                    <div className="p-3">
-                      {intelLoading ? (
-                        <Skeleton className="h-12 rounded" />
-                      ) : topSignalen[0] ? (
-                        <>
-                          <Link href="/regels/updates">
-                            <p className="text-sm font-bold text-foreground hover:underline cursor-pointer leading-snug mb-1.5">
-                              {topSignalen[0].titel}
-                            </p>
-                          </Link>
-                          <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
-                            {topSignalen[0].samenvatting}
-                          </p>
-                        </>
+                </div>
+
+                <div className="p-5">
+                  <h2 className="text-xl font-bold text-[#304f73] dark:text-foreground mb-4">
+                    {activeTab === "feed" ? "Vandaag in jouw regio" : "Kansen & Acties"}
+                  </h2>
+
+                  {/* FEED tab */}
+                  {activeTab === "feed" && (
+                    <div className="space-y-3 max-h-[520px] overflow-y-auto pr-1" data-testid="section-feed">
+                      {intelLoading || cursusLoading ? (
+                        [1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-20 rounded-2xl" />)
+                      ) : feedItems.length === 0 ? (
+                        <div className="text-center py-8 text-[#516f8d] dark:text-muted-foreground text-sm">
+                          Geen updates beschikbaar. Kom later terug.
+                        </div>
                       ) : (
-                        <p className="text-xs text-muted-foreground">
-                          Klein maar fijn, doorlopend herstel en groei voor lokale ondernemers in jouw regio. Ontdek hoe regelgeving jouw bedrijf raakt en wat je kunt ondernemen.
-                        </p>
+                        feedItems.map((item) => (
+                          <FeedCard key={item.id} label={item.label} sub={item.sub} href={item.href} testid={`feed-item-${item.id}`} />
+                        ))
                       )}
                     </div>
-                  </div>
-                </section>
+                  )}
 
-                {/* News feed items */}
-                {feedItems.length > 0 && (
-                  <section>
-                    <div className={`${PANEL} p-3`}>
-                      <div className="flex items-center justify-between mb-2 flex-wrap gap-1">
-                        <div className="flex items-center gap-2">
-                          <Newspaper className="h-3.5 w-3.5 text-primary" />
-                          <span className="text-xs font-bold text-foreground">Nieuws / Updates</span>
+                  {/* KANSEN tab */}
+                  {activeTab === "kansen" && (
+                    <div className="space-y-3" data-testid="section-kansen-acties">
+                      {cursusLoading ? (
+                        [1, 2, 3].map((i) => <Skeleton key={i} className="h-20 rounded-2xl" />)
+                      ) : actiefKansen.length === 0 && openAanbestedingen.length === 0 ? (
+                        <div className="text-center py-8">
+                          <CheckCircle2 className="h-8 w-8 text-[#2f679a] mx-auto mb-2" />
+                          <p className="text-sm text-[#516f8d] dark:text-muted-foreground">Alle acties voltooid!</p>
                         </div>
-                        <Link href="/vandaag/updates">
-                          <button className="text-[10px] font-semibold text-primary hover:underline">Alle updates</button>
-                        </Link>
-                      </div>
-                      {feedItems.map((item) => (
-                        <Link key={item.id} href="/regels/updates">
-                          <div
-                            data-testid={`feed-item-${item.id}`}
-                            className="flex items-start gap-2 py-2 border-b border-border last:border-0 hover-elevate cursor-pointer rounded-md px-1 -mx-1"
-                          >
-                            <span className={`inline-block w-2 h-2 rounded-full ${item.dotColor} shrink-0 mt-1`} />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                                {item.isNieuw && (
-                                  <span className="inline-flex items-center rounded-full bg-primary px-1.5 py-0.5 text-[9px] font-bold text-white">
-                                    Nieuw
-                                  </span>
-                                )}
-                                <span className="text-[9px] font-semibold uppercase tracking-wide text-muted-foreground">{item.label}</span>
-                                {item.urgentie === "hoog" && <UrgentieBadge urgentie="hoog" />}
-                              </div>
-                              <p className="text-xs font-semibold text-foreground leading-snug line-clamp-2">{item.titel}</p>
-                            </div>
-                          </div>
-                        </Link>
-                      ))}
+                      ) : (
+                        <>
+                          {actiefKansen.map((item) => (
+                            <FeedCard
+                              key={item.id}
+                              label={item.title}
+                              sub={`${item.minutes} min · nog ${item.daysLeft} ${item.daysLeft === 1 ? "dag" : "dagen"}`}
+                              href="/vandaag/acties"
+                              testid={`action-cursus-${item.id}`}
+                            />
+                          ))}
+                          {openAanbestedingen.map((item) => (
+                            <FeedCard
+                              key={item.id}
+                              label={item.title}
+                              sub={`Aanbesteding · ${item.buyer}${item.daysLeft !== null ? ` · nog ${item.daysLeft} dagen` : ""}`}
+                              href="/kansen/opdrachten"
+                              testid={`action-aanbesteding-${item.id}`}
+                            />
+                          ))}
+                        </>
+                      )}
                     </div>
-                  </section>
-                )}
-              </>
-            )}
+                  )}
 
-            {/* ── KANSEN / ACTIES tab content ────────────────────────────── */}
-            {activeTab === "kansen" && (
-              <section data-testid="section-kansen-acties">
-                <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-                  <h2 className="text-sm font-bold text-foreground">Kansen &amp; Acties</h2>
-                  <Link href="/vandaag/acties">
-                    <button className="text-xs font-semibold text-primary hover:underline" data-testid="link-alle-acties">
-                      Alle acties
-                    </button>
-                  </Link>
-                </div>
-                <div className={`${PANEL}`}>
-                  {cursusLoading ? (
-                    <div className="p-3 space-y-2">
-                      {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-10 rounded" />)}
+                  {/* REGELS tab */}
+                  {activeTab === "regels" && (
+                    <div className="space-y-3" data-testid="section-regels-tab">
+                      {intelLoading ? (
+                        [1, 2, 3].map((i) => <Skeleton key={i} className="h-20 rounded-2xl" />)
+                      ) : topSignalen.length === 0 ? (
+                        <p className="text-sm text-[#516f8d] py-4">Geen regelupdates beschikbaar.</p>
+                      ) : (
+                        topSignalen.map((s) => (
+                          <FeedCard
+                            key={s.id}
+                            label={s.titel}
+                            sub={`${s.categorie} · ${s.urgentie === "hoog" ? "Urgent" : "Signaal"}`}
+                            href="/regels/updates"
+                            testid={`regels-signaal-${s.id}`}
+                          />
+                        ))
+                      )}
                     </div>
-                  ) : actiefKansen.length === 0 && openAanbestedingen.length === 0 ? (
-                    <div className="p-4 text-center">
-                      <CheckCircle2 className="h-6 w-6 text-primary mx-auto mb-1.5" />
-                      <p className="text-xs text-muted-foreground">Alle acties zijn voltooid. Goed gedaan!</p>
-                    </div>
-                  ) : (
-                    <div className="p-3">
-                      {actiefKansen.slice(0, 2).map((item) => (
-                        <ActionRow
-                          key={item.id}
-                          label={item.title}
-                          sub={`${item.minutes} min · nog ${item.daysLeft} ${item.daysLeft === 1 ? "dag" : "dagen"}`}
-                          href="/vandaag/acties"
-                          testid={`action-cursus-${item.id}`}
-                        />
-                      ))}
-                      {openAanbestedingen.slice(0, 4).map((item) => (
-                        <ActionRow
-                          key={item.id}
-                          label={item.title}
-                          sub={`${item.buyer}${item.daysLeft !== null ? ` · nog ${item.daysLeft} dagen` : ""}`}
-                          href="/kansen/opdrachten"
-                          testid={`action-aanbesteding-${item.id}`}
-                        />
+                  )}
+
+                  {/* KENNISBANK tab */}
+                  {activeTab === "kennisbank" && (
+                    <div className="space-y-3" data-testid="section-kennisbank-tab">
+                      {[
+                        { label: "Praktische dossiers", sub: "Stap-voor-stap handleidingen", href: "/informatie/kennisbank", testid: "kb-dossiers" },
+                        { label: "Wetgeving Monitor", sub: "Alle actuele wetswijzigingen", href: "/regels/updates", testid: "kb-wetgeving" },
+                        { label: "Intel & Overheid Monitor", sub: "Signalen van overheidsinstanties", href: "/vandaag/updates", testid: "kb-intel" },
+                        { label: "Vraag Hulp aan Groeilab", sub: "AI-assistent voor ondernemers", href: "/regiobot", testid: "kb-groeilab" },
+                        { label: "Kennisbank Dossiers", sub: "Uitgebreide sectordossiers", href: "/informatie/kennisbank", testid: "kb-dossiers-2" },
+                        { label: "Initiatieven in de regio", sub: "Samenwerkingskansen", href: "/kansen/in-de-buurt", testid: "kb-initiatieven" },
+                      ].map((item) => (
+                        <FeedCard key={item.testid} label={item.label} sub={item.sub} href={item.href} testid={item.testid} />
                       ))}
                     </div>
                   )}
                 </div>
-                <div className="mt-3 flex gap-2">
-                  <Link href="/kansen/opdrachten" className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full text-xs" data-testid="btn-naar-opdrachten">
-                      <TrendingUp className="h-3.5 w-3.5 mr-1.5" />
-                      Alle opdrachten
-                    </Button>
-                  </Link>
-                  <Link href="/kansen/subsidies" className="flex-1">
-                    <Button variant="outline" size="sm" className="w-full text-xs" data-testid="btn-naar-subsidies">
-                      <Euro className="h-3.5 w-3.5 mr-1.5" />
-                      Subsidies
-                    </Button>
-                  </Link>
+              </div>
+
+              {/* Wet- en regelgeving card (always visible below feed) */}
+              <div className="rounded-2xl border border-[#b8c8d8] bg-white/85 dark:bg-card overflow-hidden shadow-sm" data-testid="section-regels">
+                <div className="px-5 py-4 border-b border-[#d2dbe4] dark:border-border text-xl font-bold text-[#304f73] dark:text-foreground">
+                  Wet- en regelgeving
                 </div>
-              </section>
-            )}
-          </div>
-        </main>
-
-        {/* ── RIGHT COLUMN ────────────────────────────────────────────────── */}
-        <aside className="border-l border-border bg-background flex flex-col">
-
-          {/* DOCUMENTEN / MONITOR */}
-          <div>
-            <div className={PANEL_HEADER} data-testid="section-documenten-monitor">
-              DOCUMENTEN / MONITOR
-            </div>
-            <div className="px-3 py-2">
-              <Link href="/regels/documenten">
-                <div className="flex items-center justify-between gap-2 py-2 border-b border-border hover-elevate cursor-pointer rounded-md px-1 -mx-1">
-                  <span className="flex items-center gap-2">
-                    <FileText className="h-3.5 w-3.5 text-primary shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-xs font-semibold text-foreground">Document analyseren</p>
-                      <p className="text-[10px] text-muted-foreground">Brief of besluit begrijpen</p>
+                <div className="p-4">
+                  <div className="h-44 rounded-2xl bg-gradient-to-r from-[#8cb0ce] via-[#dbe8f4] to-[#d8c970] dark:from-primary/30 dark:via-primary/10 dark:to-muted" data-testid="img-regels" />
+                  {intelLoading ? (
+                    <div className="mt-4 space-y-2">
+                      <Skeleton className="h-6 w-3/4 rounded" />
+                      <Skeleton className="h-4 w-full rounded" />
                     </div>
-                  </span>
-                  <ChevronRight className="h-3 w-3 text-muted-foreground shrink-0" />
-                </div>
-              </Link>
-              <Link href="/vandaag/updates">
-                <div className="flex items-center justify-between gap-2 py-2 border-b border-border hover-elevate cursor-pointer rounded-md px-1 -mx-1">
-                  <span className="flex items-center gap-2">
-                    <BarChart3 className="h-3.5 w-3.5 text-primary shrink-0" />
-                    <div className="min-w-0">
-                      <p className="text-xs font-semibold text-foreground">Rapportage</p>
-                      <p className="text-[10px] text-muted-foreground">
-                        {documentenAantal > 0 ? `${documentenAantal} docs geanalyseerd` : "Bekijk overzicht"}
-                      </p>
-                    </div>
-                  </span>
-                  <ChevronRight className="h-3 w-3 text-muted-foreground shrink-0" />
-                </div>
-              </Link>
-              <Link href="/regels/woo">
-                <div className="flex items-center justify-between gap-2 py-2 hover-elevate cursor-pointer rounded-md px-1 -mx-1">
-                  <span className="flex items-center gap-2">
-                    <BookOpen className="h-3.5 w-3.5 text-primary shrink-0" />
-                    <p className="text-xs font-semibold text-foreground">WOO Verzoeken</p>
-                  </span>
-                  <ArrowUpRight className="h-3 w-3 text-muted-foreground shrink-0" />
-                </div>
-              </Link>
-            </div>
-          </div>
-
-          {/* ACTIES / SIGNALEN */}
-          <div className="border-t border-border flex-1">
-            <div className={PANEL_HEADER} data-testid="section-acties-signalen">
-              ACTIES / SIGNALEN
-            </div>
-            <div className="px-3 py-2">
-              {intelLoading ? (
-                <div className="space-y-2">
-                  {[1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-10 rounded" />)}
-                </div>
-              ) : topSignalen.length === 0 ? (
-                <p className="text-xs text-muted-foreground py-2">Geen actieve signalen.</p>
-              ) : (
-                <>
-                  {topSignalen.map((s) => (
-                    <Link key={s.id} href="/regels/updates">
-                      <div
-                        data-testid={`signaal-right-${s.id}`}
-                        className="flex items-start gap-2 py-2 border-b border-border last:border-0 hover-elevate cursor-pointer rounded-md px-1 -mx-1"
-                      >
-                        <div className={`w-7 h-7 rounded-md flex items-center justify-center shrink-0 ${
-                          s.urgentie === "hoog" ? "bg-destructive/10" :
-                          s.categorie === "wetgeving" ? "bg-blue-500/10" :
-                          s.categorie === "beleid" ? "bg-purple-500/10" :
-                          s.categorie === "financieel" ? "bg-amber-500/10" :
-                          "bg-emerald-500/10"
-                        }`}>
-                          {s.categorie === "wetgeving" ? <Scale className="h-3.5 w-3.5 text-blue-500" /> :
-                           s.categorie === "financieel" || s.categorie === "subsidies" ? <Euro className="h-3.5 w-3.5 text-amber-500" /> :
-                           <Bell className="h-3.5 w-3.5 text-primary" />}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-xs font-semibold text-foreground leading-snug line-clamp-2">{s.titel}</p>
-                          <p className="text-[10px] text-muted-foreground capitalize mt-0.5">{s.categorie}</p>
-                        </div>
-                        <ArrowUpRight className="h-3 w-3 text-muted-foreground shrink-0 mt-1" />
-                      </div>
-                    </Link>
-                  ))}
-                  <div className="mt-2">
+                  ) : topSignalen[0] ? (
                     <Link href="/regels/updates">
-                      <Button size="sm" variant="outline" className="w-full text-xs" data-testid="btn-alle-signalen">
-                        Alle signalen bekijken
-                      </Button>
+                      <h3 className="mt-4 text-lg font-bold text-[#304f73] dark:text-foreground hover:underline cursor-pointer leading-snug">
+                        {topSignalen[0].titel}
+                      </h3>
+                      <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-muted-foreground line-clamp-3">
+                        {topSignalen[0].samenvatting}
+                      </p>
                     </Link>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        </aside>
-      </div>
+                  ) : (
+                    <>
+                      <h3 className="mt-4 text-lg font-bold text-[#304f73] dark:text-foreground">
+                        Klein maar fijn, doorlopend herstel en groei
+                      </h3>
+                      <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-muted-foreground">
+                        Regionale briefing over verandering, impact en wat jij vandaag moet regelen.
+                      </p>
+                    </>
+                  )}
+                </div>
+              </div>
+            </section>
 
-      {/* ── Bottom 3-column panels ─────────────────────────────────────────── */}
-      <div
-        className="grid grid-cols-1 sm:grid-cols-3 gap-0 border-t border-border bg-background"
-        data-testid="section-bottom-panels"
-      >
-        {/* Community */}
-        <div className="border-r border-border last:border-r-0">
-          <div className={`${PANEL_HEADER} text-xs`}>COMMUNITY</div>
-          <div className="p-3">
-            <BottomPanelLink icon={Users} label="Club &amp; Partners" href="/community" testid="bottom-club-partners" />
-            <BottomPanelLink icon={Calendar} label="Evenementen" href="/community" testid="bottom-evenementen" />
-          </div>
-        </div>
-        {/* Kennisbank / Inzichten */}
-        <div className="border-r border-border last:border-r-0">
-          <div className={`${PANEL_HEADER} text-xs`}>KENNISBANK / INZICHTEN</div>
-          <div className="p-3">
-            <BottomPanelLink icon={Eye} label="Intel &amp; Overheid Monitor" href="/vandaag/updates" testid="bottom-intel-monitor" />
-            <BottomPanelLink icon={BookOpen} label="Kennisbank Dossiers" href="/informatie/kennisbank" testid="bottom-kennisbank" />
-          </div>
-        </div>
-        {/* Updates / Provincie */}
-        <div>
-          <div className="flex items-center justify-between pr-2">
-            <div className={`${PANEL_HEADER} flex-1 text-xs`}>UPDATES / PROVINCIE</div>
-            <Link href="/vandaag/updates">
-              <button className="text-[10px] font-semibold text-primary hover:underline whitespace-nowrap">
-                Alles bekijken
-              </button>
-            </Link>
-          </div>
-          <div className="p-3">
-            <BottomPanelLink icon={Newspaper} label="Regio Reports" href="/vandaag/updates" testid="bottom-regio-reports" />
-            <BottomPanelLink icon={Building2} label="Provincie Updates" href="/vandaag/updates" testid="bottom-provincie-updates" />
-          </div>
-        </div>
-      </div>
+            {/* RIGHT COLUMN */}
+            <aside className="space-y-4" data-testid="section-right-column">
 
-      {/* ── Kennisbank wide block ──────────────────────────────────────────── */}
-      <div
-        className="grid grid-cols-1 lg:grid-cols-2 gap-0 border-t border-border"
-        data-testid="section-kennisbank-wide"
-      >
-        {/* Kennisbank links */}
-        <div className="bg-background border-r border-border p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <BookOpen className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-bold text-foreground">KENNISBANK</h3>
-          </div>
-          <div className="flex flex-col gap-1">
-            <BottomPanelLink icon={Users} label="Club &amp; Partners" href="/community" testid="kennisbank-club" />
-            <BottomPanelLink icon={Calendar} label="Evenementen" href="/community" testid="kennisbank-evenementen" />
-            <BottomPanelLink icon={Eye} label="Intel &amp; Overheid Monitor" href="/vandaag/updates" testid="kennisbank-intel" />
-            <BottomPanelLink icon={MessageSquare} label="Vraag Hulp aan Groeilab" href="/regiobot" testid="kennisbank-groeilab" />
-            <BottomPanelLink icon={BookOpen} label="Kennisbank Dossiers" href="/informatie/kennisbank" testid="kennisbank-dossiers" />
-            <BottomPanelLink icon={Globe} label="Initiatieven in de regio" href="/kansen/in-de-buurt" testid="kennisbank-initiatieven" />
-          </div>
-        </div>
+              {/* Documenten / Monitor */}
+              <div className="rounded-2xl border border-[#b8c8d8] bg-white/85 dark:bg-card overflow-hidden shadow-sm">
+                <CardHeader light>Documenten / Monitor</CardHeader>
+                <div className="p-4 space-y-3" data-testid="section-documenten-monitor">
+                  <ListItem
+                    label="Vraag documentatie aan..."
+                    href="/regels/documenten"
+                    testid="doc-aanvragen"
+                    color="bg-[#eef4ef] text-[#3f6f46] dark:bg-emerald-900/20 dark:text-emerald-300"
+                  />
+                  <ListItem
+                    label={`Rapportages${documentenAantal > 0 ? ` (${documentenAantal})` : ""}`}
+                    href="/vandaag/updates"
+                    testid="doc-rapportages"
+                  />
+                  <ListItem
+                    label="WOO Verzoeken"
+                    href="/regels/woo"
+                    testid="doc-woo"
+                  />
+                </div>
+              </div>
 
-        {/* Updates / Provincie featured */}
-        <div className="bg-background p-4" data-testid="section-updates-provincie">
-          <div className="flex items-center gap-2 mb-3">
-            <Newspaper className="h-4 w-4 text-primary" />
-            <h3 className="text-sm font-bold text-foreground">UPDATES / PROVINCIE</h3>
-          </div>
-          <div className="rounded-md overflow-hidden border border-border">
-            <div className="w-full h-28 bg-gradient-to-br from-blue-100 to-emerald-100 dark:from-blue-900/30 dark:to-emerald-900/30 flex items-end p-3">
-              <div className="flex items-center gap-1.5">
-                <MapPin className="h-3.5 w-3.5 text-blue-700 dark:text-blue-300" />
-                <span className="text-xs font-semibold text-blue-800 dark:text-blue-200">Regio nieuws</span>
+              {/* Acties / Signalen */}
+              <div className="rounded-2xl border border-[#b8c8d8] bg-white/85 dark:bg-card overflow-hidden shadow-sm">
+                <CardHeader light>Acties / Signalen</CardHeader>
+                <div className="p-4 space-y-3" data-testid="section-acties-signalen">
+                  {intelLoading ? (
+                    [1, 2, 3, 4].map((i) => <Skeleton key={i} className="h-14 rounded-2xl" />)
+                  ) : topSignalen.length === 0 ? (
+                    <p className="text-sm text-[#516f8d] py-2">Geen actieve signalen.</p>
+                  ) : (
+                    topSignalen.slice(0, 4).map((s, idx) => {
+                      const colors = [
+                        "bg-[#eef7ee] text-[#4c7c40] dark:bg-emerald-900/20 dark:text-emerald-300",
+                        "bg-[#faf3e9] text-[#9b7a36] dark:bg-amber-900/20 dark:text-amber-300",
+                        "bg-[#f5f7fa] text-[#445e77] dark:bg-muted dark:text-muted-foreground",
+                        "bg-[#f5f7fa] text-[#445e77] dark:bg-muted dark:text-muted-foreground",
+                      ];
+                      return (
+                        <Link key={s.id} href="/regels/updates">
+                          <div
+                            data-testid={`signaal-right-${s.id}`}
+                            className={`rounded-2xl px-4 py-4 text-sm font-semibold cursor-pointer hover-elevate leading-snug ${colors[idx] ?? colors[2]}`}
+                          >
+                            <div className="flex items-center justify-between gap-2">
+                              <span className="line-clamp-2">{s.titel}</span>
+                              {s.urgentie === "hoog" && <UrgPill urgentie="hoog" />}
+                            </div>
+                            <span className="text-[11px] opacity-70 capitalize mt-0.5 block">{s.categorie}</span>
+                          </div>
+                        </Link>
+                      );
+                    })
+                  )}
+                  {topSignalen.length > 4 && (
+                    <Link href="/regels/updates">
+                      <button data-testid="btn-alle-signalen" className="w-full text-sm font-semibold text-[#2f679a] dark:text-primary hover:underline pt-1">
+                        Alle signalen bekijken →
+                      </button>
+                    </Link>
+                  )}
+                </div>
+              </div>
+            </aside>
+          </section>
+
+          {/* ── Bottom 3-column panels ────────────────────────────────────── */}
+          <section className="grid grid-cols-1 sm:grid-cols-3 gap-5" data-testid="section-bottom-panels">
+            <div className="rounded-2xl border border-[#b8c8d8] bg-white/80 dark:bg-card overflow-hidden shadow-sm">
+              <CardHeader light>Kennisbank</CardHeader>
+              <div className="p-4 space-y-3">
+                <ListItem label="Praktische dossiers" href="/informatie/kennisbank" testid="bottom-dossiers" />
+                <ListItem label="Uitleg &amp; handleidingen" href="/informatie/kennisbank" testid="bottom-handleidingen" />
               </div>
             </div>
-            <div className="p-3">
-              {intelLoading ? (
-                <Skeleton className="h-12 rounded" />
-              ) : topSignalen[1] ? (
-                <>
+
+            <div className="rounded-2xl border border-[#b8c8d8] bg-white/80 dark:bg-card overflow-hidden shadow-sm">
+              <CardHeader light>Kennisbank / Regelgeving</CardHeader>
+              <div className="p-4 space-y-3">
+                <ListItem label="Wetgeving Monitor" href="/regels/updates" testid="bottom-wetgeving" />
+                <ListItem label="Kennisbank Dossiers" href="/informatie/kennisbank" testid="bottom-kennisbank" />
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-[#b8c8d8] bg-white/80 dark:bg-card overflow-hidden shadow-sm">
+              <CardHeader light>Updates / Provincie</CardHeader>
+              <div className="p-4 space-y-3">
+                <ListItem label="Regio Reports" href="/vandaag/updates" testid="bottom-regio-reports" />
+                <ListItem label="Provincie Updates" href="/vandaag/updates" testid="bottom-provincie-updates" />
+              </div>
+            </div>
+          </section>
+
+          {/* ── Bottom 2-wide panels ──────────────────────────────────────── */}
+          <section className="grid grid-cols-1 lg:grid-cols-2 gap-5" data-testid="section-kennisbank-wide">
+
+            {/* Kennisbank featured */}
+            <div className="rounded-2xl border border-[#b8c8d8] bg-white/75 dark:bg-card overflow-hidden shadow-sm">
+              <CardHeader light>Kennisbank</CardHeader>
+              <div className="p-4 grid grid-cols-2 gap-3">
+                <Link href="/informatie/kennisbank">
+                  <div data-testid="kennisbank-featured" className="rounded-2xl bg-[#2f679a] text-white p-5 text-sm font-bold cursor-pointer hover-elevate">
+                    Praktische dossiers
+                  </div>
+                </Link>
+                <ListItem label="Uitleg &amp; handleidingen" href="/informatie/kennisbank" testid="kennisbank-handleidingen" color="bg-[#dfe9f3] text-[#35587e] dark:bg-muted dark:text-foreground" />
+                <ListItem label="Intel &amp; Overheid Monitor" href="/vandaag/updates" testid="kennisbank-intel" />
+                <ListItem label="Kennisbank Dossiers" href="/informatie/kennisbank" testid="kennisbank-dossiers" />
+              </div>
+            </div>
+
+            {/* Updates/Provincie featured */}
+            <div className="rounded-2xl border border-[#b8c8d8] bg-white/75 dark:bg-card overflow-hidden shadow-sm" data-testid="section-updates-provincie">
+              <CardHeader light>Updates / Provincie</CardHeader>
+              <div className="p-4">
+                <div className="h-28 rounded-2xl bg-gradient-to-r from-[#c9da8f] via-[#e8f0cc] to-[#7fa2c4] dark:from-primary/20 dark:via-primary/10 dark:to-muted" />
+                {intelLoading ? (
+                  <div className="mt-4 space-y-2">
+                    <Skeleton className="h-5 w-3/4 rounded" />
+                    <Skeleton className="h-4 w-full rounded" />
+                  </div>
+                ) : topSignalen[1] ? (
                   <Link href="/vandaag/updates">
-                    <p className="text-sm font-bold text-foreground hover:underline cursor-pointer leading-snug mb-1">
+                    <h3 className="mt-4 text-lg font-bold text-[#304f73] dark:text-foreground hover:underline cursor-pointer leading-snug">
                       {topSignalen[1].titel}
+                    </h3>
+                    <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-muted-foreground line-clamp-2">
+                      {topSignalen[1].samenvatting}
                     </p>
                   </Link>
-                  <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
-                    {topSignalen[1].samenvatting}
-                  </p>
-                </>
-              ) : (
-                <>
-                  <p className="text-sm font-bold text-foreground leading-snug mb-1">
-                    Klein maar fijn, doorlopend herstel en groei
-                  </p>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                    Blijf op de hoogte van de laatste provinciale updates en regionale ontwikkelingen die van invloed zijn op jouw bedrijfsvoering in de regio.
-                  </p>
-                </>
-              )}
+                ) : (
+                  <>
+                    <h3 className="mt-4 text-lg font-bold text-[#304f73] dark:text-foreground">
+                      Klein maar fijn, doorlopend herstel en groei
+                    </h3>
+                    <p className="mt-2 text-sm leading-7 text-slate-600 dark:text-muted-foreground">
+                      Snel scanbare feed met regionale updates, regelgeving en kennisblokken in één doorlopende scroll.
+                    </p>
+                  </>
+                )}
+              </div>
             </div>
-          </div>
-        </div>
-      </div>
+          </section>
 
+        </main>
+
+        {/* ── Footer ─────────────────────────────────────────────────────── */}
+        <footer className="px-8 py-6 border-t border-[#c3d0de] dark:border-border text-center text-sm tracking-wide text-[#516f8d] dark:text-muted-foreground bg-[#e8eef4] dark:bg-muted/30">
+          Feed &nbsp;|&nbsp; Kansen &nbsp;|&nbsp; Regels &nbsp;|&nbsp; Kennisbank
+        </footer>
+
+      </div>
     </div>
   );
 }
