@@ -16,6 +16,7 @@ import HomePage from "@/pages/home";
 import LoginPage from "@/pages/login";
 import RegisterPage from "@/pages/register";
 import DashboardPage from "@/pages/dashboard";
+import VandaagPage from "@/pages/vandaag";
 import NetworkPage from "@/pages/network";
 import CommunityPage from "@/pages/community";
 import RegioBotPage from "@/pages/regiobot";
@@ -172,7 +173,7 @@ function AuthenticatedRouter() {
       </Route>
 
       {/* ── Vandaag (Sectie 1) ─────────────────────────────────────────────── */}
-      <Route path="/vandaag" component={DashboardPage} />
+      <Route path="/vandaag" component={VandaagPage} />
       <Route path="/vandaag/updates" component={IntelPage} />
       <Route path="/vandaag/acties" component={CursussenPage} />
 
