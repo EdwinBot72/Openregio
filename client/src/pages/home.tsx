@@ -1,14 +1,20 @@
 import { useState, useEffect, useRef } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
 import { Link } from "wouter";
 import {
-  ArrowRight, Check, ChevronDown, ChevronUp,
-  AlertTriangle, FileText, Eye, Users,
-  MapPin, Mail, RotateCcw, Sparkles,
-  BarChart2, Gavel, TrendingUp, Lock,
-  CheckCircle2, Star,
+  ArrowRight, ArrowUp, ArrowDown, Minus,
+  Globe, Gavel, TrendingUp, Star,
+  ChevronRight, Lock, Zap, AlertTriangle,
+  CheckCircle2, Info,
+  Check, ChevronDown, ChevronUp,
+  FileText, Eye, Users, MapPin, Mail,
+  RotateCcw, Sparkles,
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import type { IntelSignaal } from "@shared/schema";
 
 import groepImg        from "@assets/ChatGPT_Image_16_mrt_2026,_14_46_04_1773671702074.png";
 import luchtfotoImg    from "@assets/ChatGPT_Image_16_mrt_2026,_17_09_39_1773677423650.png";
@@ -20,8 +26,408 @@ const MOLLIE_BASIS = (import.meta.env.VITE_MOLLIE_BASIC_PAYMENT_LINK as string)
 const MOLLIE_PRO   = (import.meta.env.VITE_MOLLIE_PRO_PAYMENT_LINK as string)
   || "https://payment-links.mollie.com/payment/nEdtEni7GkJG7rHHetyBs";
 
-type WizardStep = "input" | "scanning" | "rapport";
+// ─── Design tokens (dashboard) ───────────────────────────────────────────────
+const BLAUW  = "#1f5fae";
+const ORANJE = "#f28a1a";
+const CARD   = "rounded-[28px] border border-[#e4dfd2] bg-white shadow-sm";
+const INNER  = "rounded-2xl border border-[#ede8df] bg-[#fafaf8]";
 
+// ─── Score berekening ─────────────────────────────────────────────────────────
+function berekenScore(
+  profielPct: number,
+  signaalCount: number,
+  kansBenut: number,
+  heeftWebsite: boolean,
+): { totaal: number; vindbaarheid: number; regelgeving: number; kansen: number } {
+  const vindbaarheid = Math.min(100, Math.round((profielPct * 0.6) + (heeftWebsite ? 30 : 0) + 10));
+  const regelgeving  = Math.min(100, Math.round(100 - Math.min(signaalCount * 8, 60) + 20));
+  const kansen       = Math.min(100, Math.round(20 + (kansBenut * 25)));
+  const totaal       = Math.round((vindbaarheid * 0.4) + (regelgeving * 0.35) + (kansen * 0.25));
+  return { totaal, vindbaarheid, regelgeving, kansen };
+}
+
+// ─── Score ring SVG ──────────────────────────────────────────────────────────
+function ScoreRing({ score, size = 120, color }: { score: number; size?: number; color: string }) {
+  const r    = (size - 16) / 2;
+  const circ = 2 * Math.PI * r;
+  const offset = circ * (1 - Math.min(score / 100, 1));
+  return (
+    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+      <circle cx={size/2} cy={size/2} r={r} fill="none" stroke="#e4dfd2" strokeWidth="8" />
+      <circle cx={size/2} cy={size/2} r={r} fill="none"
+        stroke={color} strokeWidth="8"
+        strokeDasharray={circ} strokeDashoffset={offset}
+        strokeLinecap="round"
+        transform={`rotate(-90 ${size/2} ${size/2})`}
+        style={{ transition: "stroke-dashoffset 1s ease" }}
+      />
+      <text x={size/2} y={size/2 - 4} textAnchor="middle" dominantBaseline="middle"
+        fontSize="24" fontWeight="700" fill="#0f172a">{score}</text>
+      <text x={size/2} y={size/2 + 18} textAnchor="middle" fontSize="10" fill="#94a3b8">/100</text>
+    </svg>
+  );
+}
+
+// ─── Mini score bar ──────────────────────────────────────────────────────────
+function ScoreBar({ label, score, color, icon: Icon, href, actie }: {
+  label: string; score: number; color: string;
+  icon: typeof Globe; href: string; actie: string;
+}) {
+  const kleur = score >= 75 ? "#059669" : score >= 55 ? "#d97706" : "#dc2626";
+  return (
+    <Link href={href}>
+      <div className={`${INNER} p-4 cursor-pointer transition-colors`} data-testid={`score-bar-${label.toLowerCase()}`}>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: `${color}15` }}>
+              <Icon className="w-4 h-4" style={{ color }} />
+            </div>
+            <span className="text-sm font-semibold text-slate-900">{label}</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-black" style={{ color: kleur }}>{score}</span>
+            <span className="text-xs text-slate-400">/100</span>
+            <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+          </div>
+        </div>
+        <div className="h-2 rounded-full bg-slate-100 overflow-hidden mb-2">
+          <div className="h-full rounded-full transition-all duration-700"
+            style={{ width: `${score}%`, background: kleur }} />
+        </div>
+        <p className="text-xs text-slate-500">{actie}</p>
+      </div>
+    </Link>
+  );
+}
+
+// ─── Trend badge ─────────────────────────────────────────────────────────────
+function Trend({ delta }: { delta: number }) {
+  if (delta > 0) return (
+    <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">
+      <ArrowUp className="w-3 h-3" />+{delta} t.o.v. vorige maand
+    </span>
+  );
+  if (delta < 0) return (
+    <span className="inline-flex items-center gap-1 text-xs font-semibold text-red-700 bg-red-50 px-2 py-0.5 rounded-full">
+      <ArrowDown className="w-3 h-3" />{delta} t.o.v. vorige maand
+    </span>
+  );
+  return (
+    <span className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+      <Minus className="w-3 h-3" />Gelijk aan vorige maand
+    </span>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// DASHBOARD — voor ingelogde gebruikers
+// ════════════════════════════════════════════════════════════════════════════
+function OndernemerscorePage() {
+  const { user } = useAuth();
+
+  const { data: bedrijfsprofiel, isLoading: profielLoading } = useQuery<{
+    naam?: string; beschrijving?: string; website?: string;
+    telefoon?: string; adres?: string; kvkNummer?: string;
+  } | null>({ queryKey: ["/api/business-profile/me"], enabled: !!user });
+
+  const { data: intelSignalen = [], isLoading: signaalLoading } = useQuery<IntelSignaal[]>({
+    queryKey: ["/api/intel/signalen"], enabled: !!user,
+  });
+
+  const isLoading = profielLoading || signaalLoading;
+  const isPro = user?.plan === "pro";
+
+  type Veld = "naam" | "beschrijving" | "website" | "telefoon" | "adres" | "kvkNummer";
+  const velden: Veld[] = ["naam", "beschrijving", "website", "telefoon", "adres", "kvkNummer"];
+  const ingevuld   = bedrijfsprofiel ? velden.filter(v => !!(bedrijfsprofiel as Record<string, unknown>)[v]).length : 0;
+  const profielPct = Math.round((ingevuld / velden.length) * 100);
+  const heeftWebsite = !!bedrijfsprofiel?.website;
+
+  const kansSignalen   = intelSignalen.filter(s => s.categorie === "subsidies" || s.categorie === "financieel");
+  const urgentSignalen = intelSignalen.filter(s => s.urgentie === "hoog");
+
+  const scores = berekenScore(profielPct, urgentSignalen.length, 0, heeftWebsite);
+
+  const maand = new Date().toLocaleDateString("nl-NL", { month: "long", year: "numeric" });
+
+  const topActie = (() => {
+    if (scores.vindbaarheid < scores.regelgeving && scores.vindbaarheid < scores.kansen) {
+      return {
+        label: "Verbeter je vindbaarheid",
+        desc: heeftWebsite
+          ? "Je website staat er, maar je Google-profiel mist informatie. Dat kost je klanten."
+          : "Je hebt nog geen website ingevuld. Dit is de snelste manier om meer klanten te krijgen.",
+        href: "/tools/website-scan",
+        cta: "Start website-scan",
+        icon: Globe,
+      };
+    }
+    if (scores.regelgeving < 60) {
+      return {
+        label: "Check je regelgeving-signalen",
+        desc: `Er zijn ${urgentSignalen.length} urgente signalen die jouw zaak kunnen raken. Bekijk ze nu.`,
+        href: "/intel",
+        cta: "Bekijk signalen",
+        icon: Gavel,
+      };
+    }
+    return {
+      label: "Benut lokale kansen",
+      desc: `Er zijn ${kansSignalen.length} subsidies en kansen beschikbaar in jouw regio die je nog niet benut.`,
+      href: "/kansen-in-de-buurt",
+      cta: "Bekijk kansen",
+      icon: TrendingUp,
+    };
+  })();
+
+  const scoreKleur = scores.totaal >= 75 ? "#059669" : scores.totaal >= 55 ? "#d97706" : "#dc2626";
+  const scoreLabel = scores.totaal >= 75 ? "Goed"    : scores.totaal >= 55 ? "Matig"   : "Kwetsbaar";
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4 pb-8">
+        <Skeleton className="h-48 w-full rounded-[28px]" />
+        <div className="grid grid-cols-3 gap-4">
+          {[1,2,3].map(i => <Skeleton key={i} className="h-32 rounded-[28px]" />)}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-4 pb-10">
+
+      {/* ── HERO SCORE KAART ── */}
+      <section className={CARD} data-testid="section-score-hero">
+        <div className="p-7 pb-0">
+          <div className="flex items-start justify-between flex-wrap gap-6">
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center gap-2 mb-1">
+                <Star className="w-4 h-4" style={{ color: ORANJE }} />
+                <span className="text-xs font-bold uppercase tracking-wider text-slate-400">Jouw Ondernemerscore</span>
+              </div>
+              <h1 className="text-2xl font-black text-slate-900 mb-1" style={{ letterSpacing: "-0.5px" }}>
+                {maand}
+              </h1>
+              <div className="flex items-center gap-2 flex-wrap mb-4">
+                <Badge variant="secondary" className="text-[10px]">
+                  {isPro ? "Pro-bijdrager" : "Basis-lid"}
+                </Badge>
+                <Trend delta={+3} />
+              </div>
+              <p className="text-sm text-slate-500 leading-relaxed max-w-md">
+                Elke maand bereken we jouw score op drie assen — vindbaarheid, regelgeving en kansen. Zo zie je precies waar je groeit en wat je kunt verbeteren.
+              </p>
+            </div>
+            <div className="flex flex-col items-center gap-2">
+              <ScoreRing score={scores.totaal} size={130} color={scoreKleur} />
+              <span className="text-sm font-black px-3 py-1 rounded-full" style={{ background: `${scoreKleur}15`, color: scoreKleur }}>
+                {scoreLabel}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Drie sub-scores */}
+        <div className="grid grid-cols-3 divide-x divide-[#ede8df] border-t border-[#ede8df] mt-6">
+          {[
+            { label: "Vindbaarheid", score: scores.vindbaarheid, color: BLAUW },
+            { label: "Regelgeving",  score: scores.regelgeving,  color: "#dc2626" },
+            { label: "Kansen",       score: scores.kansen,       color: "#059669" },
+          ].map(({ label, score, color }) => {
+            const k = score >= 75 ? "#059669" : score >= 55 ? "#d97706" : "#dc2626";
+            return (
+              <div key={label} className="p-5 text-center" data-testid={`subscore-${label.toLowerCase()}`}>
+                <div className="text-xl font-black mb-0.5" style={{ color: k }}>{score}</div>
+                <div className="text-xs text-slate-500">{label}</div>
+                <div className="h-1.5 rounded-full bg-slate-100 mt-2 overflow-hidden">
+                  <div className="h-full rounded-full" style={{ width: `${score}%`, background: k }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      {/* ── TOPACTIE ── */}
+      <section data-testid="section-topactie">
+        <Link href={topActie.href}>
+          <div className="rounded-[28px] p-5 flex items-center gap-4 cursor-pointer hover:opacity-95 transition-opacity"
+            style={{ background: `linear-gradient(135deg, #0b2240, ${BLAUW})` }}>
+            <div className="w-11 h-11 rounded-xl bg-white/15 flex items-center justify-center flex-shrink-0">
+              <topActie.icon className="w-5 h-5 text-white" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-xs font-semibold mb-0.5" style={{ color: "rgba(255,255,255,.55)" }}>
+                Actie met meeste impact deze maand
+              </p>
+              <p className="text-sm font-black text-white">{topActie.label}</p>
+              <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,.6)" }}>{topActie.desc}</p>
+            </div>
+            <div className="flex items-center gap-1.5 flex-shrink-0 text-white text-sm font-bold">
+              {topActie.cta} <ArrowRight className="w-4 h-4" />
+            </div>
+          </div>
+        </Link>
+      </section>
+
+      {/* ── SCORE DETAILS ── */}
+      <section data-testid="section-score-details">
+        <div className={`${CARD} p-6`}>
+          <div className="flex items-center gap-2 mb-5">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${BLAUW}15` }}>
+              <Info className="w-3.5 h-3.5" style={{ color: BLAUW }} />
+            </div>
+            <h2 className="text-sm font-bold text-slate-900">Zo is jouw score opgebouwd</h2>
+          </div>
+          <div className="space-y-3">
+            <ScoreBar
+              label="Vindbaarheid" score={scores.vindbaarheid} color={BLAUW} icon={Globe}
+              href="/tools/website-scan"
+              actie={heeftWebsite
+                ? `Website ingevuld · Profiel ${profielPct}% compleet · ${100 - profielPct}% te verbeteren`
+                : "Geen website ingevuld → vul deze in voor direct scorevoordeel"}
+            />
+            <ScoreBar
+              label="Regelgeving" score={scores.regelgeving} color="#dc2626" icon={Gavel}
+              href="/intel"
+              actie={urgentSignalen.length > 0
+                ? `${urgentSignalen.length} urgente signalen open — check ze om je score te verhogen`
+                : "Geen urgente signalen · Je bent up-to-date"}
+            />
+            <ScoreBar
+              label="Kansen" score={scores.kansen} color="#059669" icon={TrendingUp}
+              href="/kansen-in-de-buurt"
+              actie={`${kansSignalen.length} kansen beschikbaar · Benutte kansen verhogen je score`}
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* ── HISTORISCHE TREND (Pro locked) ── */}
+      <section data-testid="section-score-history">
+        <div className={`${CARD} p-6`}>
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-amber-50">
+                <TrendingUp className="w-3.5 h-3.5 text-amber-600" />
+              </div>
+              <h2 className="text-sm font-bold text-slate-900">Score over de afgelopen 6 maanden</h2>
+            </div>
+            {!isPro && <Badge variant="secondary" className="text-[10px]">Pro</Badge>}
+          </div>
+
+          {isPro ? (
+            <div className="flex items-end gap-2 h-20">
+              {[52, 55, 58, 61, 59, scores.totaal].map((s, i) => (
+                <div key={i} className="flex-1 flex flex-col items-center gap-1">
+                  <div className="rounded-lg w-full" style={{ height: `${(s / 100) * 72}px`, background: i === 5 ? BLAUW : "#e4dfd2" }} />
+                  <span className="text-[9px] text-slate-400">{s}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="relative">
+              <div className="flex items-end gap-2 h-20 blur-sm pointer-events-none select-none">
+                {[52, 55, 58, 61, 59, scores.totaal].map((s, i) => (
+                  <div key={i} className="flex-1 rounded-lg bg-slate-200" style={{ height: `${(s / 100) * 72}px` }} />
+                ))}
+              </div>
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
+                <Lock className="w-4 h-4 text-slate-400" />
+                <p className="text-xs font-semibold text-slate-600">Score-geschiedenis beschikbaar in Pro</p>
+                <Link href="/lidmaatschap">
+                  <button className="text-xs font-bold px-3 py-1.5 rounded-xl text-white" style={{ background: ORANJE }} data-testid="button-upgrade-pro">
+                    Upgrade naar Pro
+                  </button>
+                </Link>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* ── VERBETERPUNTEN ── */}
+      <section data-testid="section-score-tips">
+        <div className={`${CARD} p-6`}>
+          <div className="flex items-center gap-2 mb-5">
+            <div className="w-7 h-7 rounded-lg flex items-center justify-center bg-emerald-50">
+              <Zap className="w-3.5 h-3.5 text-emerald-600" />
+            </div>
+            <h2 className="text-sm font-bold text-slate-900">Zo verhoog je jouw score</h2>
+          </div>
+          <div className="space-y-3">
+            {[
+              ...(!heeftWebsite ? [{
+                icon: Globe, color: BLAUW, bg: "#E6F1FB",
+                actie: "Website toevoegen aan profiel",
+                impact: "+12 punten",
+                href: "/bedrijfsprofiel",
+              }] : []),
+              ...(profielPct < 100 ? [{
+                icon: CheckCircle2, color: "#059669", bg: "#EAF3DE",
+                actie: `Profiel aanvullen (${ingevuld}/${velden.length} velden)`,
+                impact: `+${Math.round((velden.length - ingevuld) * 2)} punten`,
+                href: "/bedrijfsprofiel",
+              }] : []),
+              ...(urgentSignalen.length > 0 ? [{
+                icon: AlertTriangle, color: "#dc2626", bg: "#FCEBEB",
+                actie: `${urgentSignalen.length} urgente signalen afhandelen`,
+                impact: `+${urgentSignalen.length * 8} punten`,
+                href: "/intel",
+              }] : []),
+              ...(kansSignalen.length > 0 ? [{
+                icon: TrendingUp, color: "#d97706", bg: "#FAEEDA",
+                actie: `${kansSignalen.length} openstaande kansen bekijken`,
+                impact: "+15 punten",
+                href: "/kansen-in-de-buurt",
+              }] : []),
+              {
+                icon: Star, color: ORANJE, bg: "#FEF3E9",
+                actie: "Pro: volledige score-inzichten + historisch overzicht",
+                impact: "Alle details zichtbaar",
+                href: "/lidmaatschap",
+              },
+            ].map(({ icon: Icon, color, bg, actie, impact, href }, i) => (
+              <Link href={href} key={i}>
+                <div className={`${INNER} flex items-center gap-3 p-4 cursor-pointer hover:border-slate-300 transition-colors`} data-testid={`tip-${i}`}>
+                  <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: bg }}>
+                    <Icon className="w-4 h-4" style={{ color }} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-slate-900">{actie}</p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full" style={{ background: `${color}15`, color }}>
+                      {impact}
+                    </span>
+                    <ChevronRight className="w-3.5 h-3.5 text-slate-400" />
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── VOLGENDE SCORE ── */}
+      <div className={`${INNER} p-4 flex items-center gap-3`} data-testid="section-next-score">
+        <div className="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center flex-shrink-0">
+          <Star className="w-4 h-4 text-slate-400" />
+        </div>
+        <div>
+          <p className="text-xs font-semibold text-slate-700">Volgende score-update</p>
+          <p className="text-xs text-slate-400">Elke 1e van de maand berekenen we jouw nieuwe score automatisch.</p>
+        </div>
+      </div>
+
+    </div>
+  );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// MARKETING PAGE — voor niet-ingelogde bezoekers
+// ════════════════════════════════════════════════════════════════════════════
 const SCAN_MSGS = [
   "Jouw regio in kaart brengen…",
   "Lokale signalen analyseren…",
@@ -45,10 +451,9 @@ const TICKER = [
   "Hygiëne-eisen horeca aangescherpt landelijk",
 ];
 
-export default function HomePage() {
-  usePageTitle("OpenRegio — grip op regelgeving voor winkel & horeca");
-  const { isAuthenticated } = useAuth();
+type WizardStep = "input" | "scanning" | "rapport";
 
+function MarketingPage() {
   const [showCookie, setShowCookie] = useState(false);
   useEffect(() => {
     if (!localStorage.getItem("cookie_consent")) setShowCookie(true);
@@ -59,7 +464,6 @@ export default function HomePage() {
   };
 
   const [openFaq, setOpenFaq] = useState<number | null>(null);
-
   const [step, setStep]         = useState<WizardStep>("input");
   const [beroep, setBeroep]     = useState("");
   const [stad, setStad]         = useState("");
@@ -121,7 +525,7 @@ export default function HomePage() {
   };
 
   const scoreColor = score >= 75 ? "#059669" : score >= 60 ? "#d97706" : "#dc2626";
-  const scoreLabel = score >= 75 ? "Goed"    : score >= 60 ? "Matig"   : "Kwetsbaar";
+  const scoreLabel = score >= 75 ? "Goed" : score >= 60 ? "Matig" : "Kwetsbaar";
   const today = new Date().toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" });
 
   return (
@@ -134,13 +538,13 @@ export default function HomePage() {
         @keyframes fadeUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
         @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.4} }
         .anim-up { animation: fadeUp .55s ease both; }
-        .d1 { animation-delay:.1s } .d2 { animation-delay:.2s } .d3 { animation-delay:.3s }
+        .d1 { animation-delay:.1s } .d2 { animation-delay:.2s }
         .ticker-track { animation: ticker 28s linear infinite; }
         .hover-lift { transition: transform .18s ease, box-shadow .18s ease; }
         .hover-lift:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(0,0,0,.1); }
       `}</style>
 
-      {/* ══ NAV ══════════════════════════════════════════════════════════════ */}
+      {/* ══ NAV ══ */}
       <header className="sticky top-0 z-50 bg-white border-b border-slate-100" style={{ boxShadow: "0 1px 0 #e8ecf2" }} data-testid="nav-main">
         <div className="max-w-6xl mx-auto px-5 flex items-center justify-between h-16 gap-4">
           <Link href="/" className="flex items-center gap-2" data-testid="link-home-logo">
@@ -148,9 +552,9 @@ export default function HomePage() {
             <span className="font-black text-slate-900 text-lg tracking-tight">Open<span style={{ color: "#1a56db" }}>Regio</span></span>
           </Link>
           <nav className="hidden md:flex items-center gap-0.5 text-sm font-medium text-slate-500">
-            {["#probleem", "#oplossing", "#basischeck", "#prijzen"].map((href, i) => (
+            {["#probleem","#oplossing","#basischeck","#prijzen"].map((href, i) => (
               <a key={href} href={href} className="px-3 py-2 rounded-lg hover:text-slate-900 hover:bg-slate-50 transition-colors" data-testid={`link-nav-${["probleem","oplossing","basischeck","prijzen"][i]}`}>
-                {["Probleem", "Oplossing", "Basischeck", "Prijzen"][i]}
+                {["Probleem","Oplossing","Basischeck","Prijzen"][i]}
               </a>
             ))}
           </nav>
@@ -167,7 +571,7 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* ══ LIVE TICKER ══════════════════════════════════════════════════════ */}
+      {/* ══ TICKER ══ */}
       <div className="overflow-hidden py-2.5" style={{ background: "#0f172a" }} data-testid="ticker-bar">
         <div className="ticker-track flex whitespace-nowrap" style={{ width: "max-content" }}>
           {[...TICKER, ...TICKER].map((t, i) => (
@@ -180,8 +584,7 @@ export default function HomePage() {
       </div>
 
       <main>
-
-        {/* ══ HERO ═════════════════════════════════════════════════════════ */}
+        {/* ══ HERO ══ */}
         <section className="py-20 md:py-28 overflow-hidden" style={{ background: "#f8faff" }} data-testid="section-hero">
           <div className="max-w-6xl mx-auto px-5 grid md:grid-cols-2 gap-14 items-center">
             <div className="anim-up">
@@ -189,20 +592,16 @@ export default function HomePage() {
                 <span className="w-2 h-2 rounded-full" style={{ background: "#1a56db", animation: "pulse-dot 2s ease-in-out infinite" }} />
                 Voor winkels en horecazaken
               </div>
-
               <h1 className="serif leading-tight mb-5 text-slate-900" style={{ fontSize: "clamp(30px, 4vw, 52px)", lineHeight: 1.1 }} data-testid="text-hero-title">
-                Weet jij welke regels er&nbsp;gelden<br />
-                voor <span style={{ color: "#1a56db" }}>jouw zaak?</span>
+                Weet jij welke regels er&nbsp;gelden<br />voor <span style={{ color: "#1a56db" }}>jouw zaak?</span>
               </h1>
-
-              <p className="text-lg text-slate-500 leading-relaxed mb-3" style={{ maxWidth: "44ch" }} data-testid="text-hero-sub1">
+              <p className="text-lg text-slate-500 leading-relaxed mb-3" style={{ maxWidth: "44ch" }}>
                 De meeste winkel- en horecaondernemers niet — totdat de boete al binnen is.
               </p>
-              <p className="text-base text-slate-500 leading-relaxed mb-8" style={{ maxWidth: "44ch" }} data-testid="text-hero-sub2">
+              <p className="text-base text-slate-500 leading-relaxed mb-8" style={{ maxWidth: "44ch" }}>
                 OpenRegio waarschuwt je <strong className="text-slate-700">vóórdat</strong> het misgaat: nieuwe regels, gewijzigde vergunningen, gemeentebrieven in gewone taal.
               </p>
-
-              <div className="flex flex-wrap gap-3 mb-7 anim-up d1">
+              <div className="flex flex-wrap gap-3 mb-7">
                 <a href="#basischeck">
                   <button className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full text-sm font-bold text-white hover:opacity-90 transition-opacity" style={{ background: "#1a56db" }} data-testid="button-hero-cta">
                     Check wat jij nu mist <ArrowRight className="w-4 h-4" />
@@ -214,18 +613,15 @@ export default function HomePage() {
                   </button>
                 </a>
               </div>
-
-              <p className="text-xs text-slate-400 flex items-center gap-1.5 anim-up d2">
+              <p className="text-xs text-slate-400 flex items-center gap-1.5">
                 <Check className="w-3.5 h-3.5 text-emerald-500" />
                 De Basischeck is altijd gratis — geen account nodig
               </p>
             </div>
-
             <div className="relative anim-up d2">
               <div className="rounded-3xl overflow-hidden" style={{ boxShadow: "0 24px 64px rgba(0,0,0,.14)" }}>
                 <img src={groepImg} alt="Ondernemers met OpenRegio" className="w-full object-cover" style={{ height: "380px", objectPosition: "center top" }} data-testid="img-hero" />
               </div>
-
               <div className="absolute -left-5 bottom-16 bg-white rounded-2xl px-4 py-3.5 flex items-center gap-3" style={{ boxShadow: "0 8px 32px rgba(0,0,0,.13)", maxWidth: "220px" }}>
                 <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "#fef2f2" }}>
                   <AlertTriangle className="w-4 h-4" style={{ color: "#dc2626" }} />
@@ -235,7 +631,6 @@ export default function HomePage() {
                   <p className="text-xs text-slate-400 mt-0.5">Terrasregel gewijzigd</p>
                 </div>
               </div>
-
               <div className="absolute -right-4 top-10 bg-white rounded-2xl px-4 py-3 text-center" style={{ boxShadow: "0 8px 32px rgba(0,0,0,.12)" }}>
                 <p className="text-2xl font-black" style={{ color: "#059669" }}>€ 0</p>
                 <p className="text-xs text-slate-400 font-medium mt-0.5">boetes dit jaar</p>
@@ -244,13 +639,13 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ══ SOCIAL PROOF ═════════════════════════════════════════════════ */}
+        {/* ══ SOCIAL PROOF ══ */}
         <div className="border-y border-slate-100 py-5" data-testid="section-social-proof">
           <div className="max-w-5xl mx-auto px-5 flex flex-wrap justify-center gap-x-12 gap-y-3">
             {[
-              { n: "2.400+",  l: "Ondernemers actief" },
+              { n: "2.400+", l: "Ondernemers actief" },
               { n: "€19/mnd", l: "Startprijs — geen jaarcontract" },
-              { n: "20%",     l: "Affiliate op elke doorverwijzing" },
+              { n: "20%", l: "Affiliate op elke doorverwijzing" },
               { n: "Dagelijks", l: "Signalen bijgewerkt" },
             ].map(({ n, l }) => (
               <div key={l} className="text-center">
@@ -261,11 +656,11 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* ══ PROBLEEM ════════════════════════════════════════════════════ */}
+        {/* ══ PROBLEEM ══ */}
         <section id="probleem" className="py-24" data-testid="section-probleem">
           <div className="max-w-6xl mx-auto px-5 grid md:grid-cols-2 gap-14 items-center">
             <div className="rounded-3xl overflow-hidden" style={{ boxShadow: "0 16px 48px rgba(0,0,0,.1)" }}>
-              <img src={regelgevingImg} alt="Regelgeving voor ondernemers" className="w-full object-cover" style={{ height: "420px" }} loading="lazy" data-testid="img-probleem" />
+              <img src={regelgevingImg} alt="Regelgeving voor ondernemers" className="w-full object-cover" style={{ height: "420px" }} loading="lazy" />
             </div>
             <div>
               <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#1a56db" }}>Herkenbaar?</span>
@@ -281,7 +676,7 @@ export default function HomePage() {
                   { icon: FileText,      color: "#d97706", bg: "#fffbeb", text: "Overheidsbrieven zijn geschreven door juristen, niet voor ondernemers" },
                   { icon: Eye,           color: "#7c3aed", bg: "#f5f3ff", text: "Tegen de tijd dat je het ontdekt, is de boete of sluiting al een feit" },
                 ].map(({ icon: Icon, color, bg, text }, i) => (
-                  <div key={i} className="flex items-start gap-4 rounded-2xl p-4" style={{ background: bg }} data-testid={`probleem-item-${i}`}>
+                  <div key={i} className="flex items-start gap-4 rounded-2xl p-4" style={{ background: bg }}>
                     <div className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: "white" }}>
                       <Icon className="w-4 h-4" style={{ color }} />
                     </div>
@@ -293,7 +688,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ══ WINKELSTRAAT BANNER ══════════════════════════════════════════ */}
+        {/* ══ BANNER ══ */}
         <div className="relative overflow-hidden" style={{ height: "280px" }} data-testid="banner-winkelstraat">
           <img src={winkelstraatImg} alt="Nederlandse winkelstraat" className="w-full h-full object-cover" loading="lazy" />
           <div className="absolute inset-0 flex items-center justify-center" style={{ background: "rgba(10,20,60,.6)" }}>
@@ -306,7 +701,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        {/* ══ OPLOSSING ═══════════════════════════════════════════════════ */}
+        {/* ══ OPLOSSING ══ */}
         <section id="oplossing" className="py-24" style={{ background: "#f8faff" }} data-testid="section-oplossing">
           <div className="max-w-5xl mx-auto px-5">
             <div className="text-center mb-14">
@@ -315,26 +710,13 @@ export default function HomePage() {
                 Eén platform. Drie beschermingen.
               </h2>
             </div>
-
             <div className="grid md:grid-cols-3 gap-6">
               {[
-                {
-                  num: "01", icon: AlertTriangle, color: "#dc2626", bg: "#fef2f2",
-                  title: "Waarschuwingen vóórdat het misgaat",
-                  desc: "Je krijgt een melding zodra er iets verandert dat jouw type zaak raakt — terrasregels, hygiëne-eisen, vergunningen. Vóór de controle, niet erna.",
-                },
-                {
-                  num: "02", icon: FileText, color: "#1a56db", bg: "#eff6ff",
-                  title: "Begrijp elke brief van de gemeente",
-                  desc: "Upload een gemeentebrief. RegioBot legt uit wat er staat, wat je moet doen, en welke deadline er geldt. In gewone taal.",
-                },
-                {
-                  num: "03", icon: Eye, color: "#059669", bg: "#f0fdf4",
-                  title: "Zie hoe jouw zaak gevonden wordt",
-                  desc: "Automatische scan van je online aanwezigheid: Google-profiel, openingstijden, beoordelingen. Wat mist er, en wat kost je dat aan klanten?",
-                },
+                { num: "01", icon: AlertTriangle, color: "#dc2626", bg: "#fef2f2", title: "Waarschuwingen vóórdat het misgaat", desc: "Je krijgt een melding zodra er iets verandert dat jouw type zaak raakt — terrasregels, hygiëne-eisen, vergunningen. Vóór de controle, niet erna." },
+                { num: "02", icon: FileText, color: "#1a56db", bg: "#eff6ff", title: "Begrijp elke brief van de gemeente", desc: "Upload een gemeentebrief. RegioBot legt uit wat er staat, wat je moet doen, en welke deadline er geldt. In gewone taal." },
+                { num: "03", icon: Eye, color: "#059669", bg: "#f0fdf4", title: "Zie hoe jouw zaak gevonden wordt", desc: "Automatische scan van je online aanwezigheid: Google-profiel, openingstijden, beoordelingen. Wat mist er, en wat kost je dat aan klanten?" },
               ].map(({ num, icon: Icon, color, bg, title, desc }) => (
-                <div key={num} className="bg-white rounded-3xl p-7 border border-slate-100 hover-lift" style={{ boxShadow: "0 2px 12px rgba(0,0,0,.04)" }} data-testid={`oplossing-card-${num}`}>
+                <div key={num} className="bg-white rounded-3xl p-7 border border-slate-100 hover-lift" style={{ boxShadow: "0 2px 12px rgba(0,0,0,.04)" }}>
                   <div className="flex items-center justify-between mb-5">
                     <div className="w-11 h-11 rounded-2xl flex items-center justify-center" style={{ background: bg }}>
                       <Icon className="w-5 h-5" style={{ color }} />
@@ -349,10 +731,8 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ══ BASISCHECK WIZARD ══════════════════════════════════════════════ */}
+        {/* ══ BASISCHECK WIZARD ══ */}
         <section id="basischeck" style={{ background: step === "rapport" ? "#f8faff" : "#0f172a" }} data-testid="section-basischeck">
-
-          {/* STAP 1 — INPUT */}
           {step === "input" && (
             <div className="py-24 px-5">
               <div className="max-w-xl mx-auto text-center">
@@ -365,47 +745,24 @@ export default function HomePage() {
                 <p className="mb-10 text-base" style={{ color: "rgba(255,255,255,.55)" }}>
                   Vul je beroep en stad in. Binnen 30 seconden een concreet rapport.
                 </p>
-
                 <div className="space-y-3 text-left mb-5">
-                  <input
-                    type="text"
-                    placeholder="Je beroep (bijv. café, kapper, slager, boekwinkel)"
-                    value={beroep}
-                    onChange={e => setBeroep(e.target.value)}
-                    data-testid="input-beroep"
+                  <input type="text" placeholder="Je beroep (bijv. café, kapper, slager, boekwinkel)" value={beroep} onChange={e => setBeroep(e.target.value)} data-testid="input-beroep"
                     className="w-full px-5 py-4 rounded-2xl text-slate-900 text-sm font-medium placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-blue-500"
-                    style={{ background: "#fff", border: "none", boxShadow: "0 2px 16px rgba(0,0,0,.18)" }}
-                  />
-                  <input
-                    type="text"
-                    placeholder="Je stad of gemeente"
-                    value={stad}
-                    onChange={e => setStad(e.target.value)}
-                    onKeyDown={e => e.key === "Enter" && startScan()}
-                    data-testid="input-stad"
+                    style={{ background: "#fff", border: "none", boxShadow: "0 2px 16px rgba(0,0,0,.18)" }} />
+                  <input type="text" placeholder="Je stad of gemeente" value={stad} onChange={e => setStad(e.target.value)} onKeyDown={e => e.key === "Enter" && startScan()} data-testid="input-stad"
                     className="w-full px-5 py-4 rounded-2xl text-slate-900 text-sm font-medium placeholder:text-slate-400 outline-none focus:ring-2 focus:ring-blue-500"
-                    style={{ background: "#fff", border: "none", boxShadow: "0 2px 16px rgba(0,0,0,.18)" }}
-                  />
+                    style={{ background: "#fff", border: "none", boxShadow: "0 2px 16px rgba(0,0,0,.18)" }} />
                 </div>
-
-                <button
-                  onClick={startScan}
-                  disabled={!beroep.trim() || !stad.trim()}
-                  data-testid="button-start-scan"
+                <button onClick={startScan} disabled={!beroep.trim() || !stad.trim()} data-testid="button-start-scan"
                   className="w-full py-4 rounded-2xl text-base font-black flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-30"
-                  style={{ background: "#1a56db", color: "#fff" }}
-                >
+                  style={{ background: "#1a56db", color: "#fff" }}>
                   Start de analyse <ArrowRight className="w-5 h-5" />
                 </button>
-
-                <p className="text-xs mt-4" style={{ color: "rgba(255,255,255,.3)" }}>
-                  Geen account nodig · Geen creditcard · Geen verplichtingen
-                </p>
+                <p className="text-xs mt-4" style={{ color: "rgba(255,255,255,.3)" }}>Geen account nodig · Geen creditcard · Geen verplichtingen</p>
               </div>
             </div>
           )}
 
-          {/* STAP 2 — SCANNING */}
           {step === "scanning" && (
             <div className="py-24 px-5 flex items-center justify-center min-h-80" data-testid="section-scanning">
               <div className="max-w-sm mx-auto text-center w-full">
@@ -413,24 +770,20 @@ export default function HomePage() {
                   <div className="absolute inset-0 rounded-full animate-ping" style={{ background: "rgba(26,86,219,.25)" }} />
                   <Sparkles className="w-9 h-9 text-white" />
                 </div>
-                <p key={msgIdx} className="font-bold text-white text-lg mb-2" style={{ animation: "fadeUp .4s ease both" }} data-testid="text-scan-msg">
-                  {SCAN_MSGS[msgIdx]}
-                </p>
+                <p key={msgIdx} className="font-bold text-white text-lg mb-2" style={{ animation: "fadeUp .4s ease both" }} data-testid="text-scan-msg">{SCAN_MSGS[msgIdx]}</p>
                 <p className="text-sm mb-10" style={{ color: "rgba(255,255,255,.4)" }}>{beroep} · {stad}</p>
                 <div className="rounded-full h-1.5 mb-2 overflow-hidden" style={{ background: "rgba(255,255,255,.1)" }}>
                   <div className="h-full rounded-full transition-all duration-300" style={{ width: `${progress}%`, background: "linear-gradient(90deg, #1a56db, #06b6d4)" }} data-testid="progress-bar" />
                 </div>
-                <p className="text-xs font-bold" style={{ color: "rgba(255,255,255,.35)" }} data-testid="text-scan-progress">{progress}%</p>
+                <p className="text-xs font-bold" style={{ color: "rgba(255,255,255,.35)" }}>{progress}%</p>
               </div>
             </div>
           )}
 
-          {/* STAP 3 — RAPPORT */}
           {step === "rapport" && (
             <div className="py-16 px-5" data-testid="section-rapport">
               <div className="max-w-2xl mx-auto">
                 <div className="bg-white rounded-3xl overflow-hidden mb-5" style={{ boxShadow: "0 4px 32px rgba(0,0,0,.09)" }}>
-                  {/* Header */}
                   <div className="px-7 py-6 flex flex-wrap items-start justify-between gap-4" style={{ background: "#0f172a" }}>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
@@ -448,90 +801,32 @@ export default function HomePage() {
                       <span className="text-xs font-black mt-2 px-3 py-0.5 rounded-full" style={{ background: `${scoreColor}25`, color: scoreColor }} data-testid="text-rapport-label">{scoreLabel}</span>
                     </div>
                   </div>
-
-                  {/* Bevindingen */}
-                  {isAuthenticated ? (
-                    <div className="px-7 py-6">
-                      <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-4">Bevindingen</p>
-                      <div className="space-y-3 mb-6">
-                        {[
-                          { color: "#059669", bg: "#f0fdf4", icon: CheckCircle2, text: `Actief lokaal netwerk aanwezig in ${stad}` },
-                          { color: "#d97706", bg: "#fffbeb", icon: AlertTriangle, text: `Digitale aanwezigheid voor ${beroep} kan sterker` },
-                          { color: "#dc2626", bg: "#fef2f2", icon: AlertTriangle, text: `Recente regelgeving-signalen voor ${beroep} gemist` },
-                        ].map(({ color, bg, icon: Icon, text }, i) => (
-                          <div key={i} className="flex items-start gap-3 rounded-xl p-4" style={{ background: bg }} data-testid={`bevinding-${i}`}>
-                            <Icon className="w-4 h-4 flex-shrink-0 mt-0.5" style={{ color }} />
-                            <p className="text-sm text-slate-700">{text}</p>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div className="space-y-2.5 mb-5">
-                        {[
-                          `Welke 3 regelgeving-updates heeft ${stad} dit kwartaal doorgevoerd die ${beroep} direct raken?`,
-                          `Subsidies en fondsen beschikbaar voor ${beroep} in ${stad} — bedragen en deadlines`,
-                        ].map((t, i) => (
-                          <div key={i} className="flex items-center gap-3 p-3.5 rounded-xl cursor-pointer" style={{ border: "1.5px dashed #e2e8f0", background: "#f8fafd" }} onClick={() => window.location.href = "/lidmaatschap"} data-testid={`locked-item-${i}`}>
-                            <Lock className="w-4 h-4 text-slate-300 flex-shrink-0" />
-                            <span className="text-sm text-slate-300 select-none" style={{ filter: "blur(4px)" }}>{t}</span>
-                            <span className="ml-auto text-xs font-bold px-2 py-0.5 rounded-full flex-shrink-0" style={{ background: "#eff6ff", color: "#1a56db" }}>Pro</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      {antwoord && (
-                        <div className="border-t border-slate-100">
-                          <button className="w-full flex items-center justify-between px-1 py-3 text-sm font-medium text-slate-400 hover:text-slate-600 transition-colors" onClick={() => setShowFull(!showFull)} data-testid="button-toggle-analyse">
-                            Volledige analyse
-                            {showFull ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
-                          </button>
-                          {showFull && <p className="text-sm text-slate-500 leading-relaxed pb-4" data-testid="text-full-analyse">{antwoord}</p>}
-                        </div>
-                      )}
+                  <div className="px-7 py-10 text-center border-t border-slate-100" data-testid="section-login-prompt">
+                    <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "#eff6ff" }}>
+                      <Lock className="w-6 h-6" style={{ color: "#1a56db" }} />
                     </div>
-                  ) : (
-                    <div className="px-7 py-10 text-center border-t border-slate-100" data-testid="section-login-prompt">
-                      <div className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4" style={{ background: "#eff6ff" }}>
-                        <Lock className="w-6 h-6" style={{ color: "#1a56db" }} />
-                      </div>
-                      <p className="font-black text-slate-900 text-lg mb-1">Log in om je volledige rapport te zien</p>
-                      <p className="text-slate-400 text-sm mb-6 max-w-xs mx-auto">Je analyse staat klaar. Maak een gratis account aan of log in.</p>
-                      <div className="flex flex-col sm:flex-row gap-3 justify-center mb-4">
-                        <Link href="/register"><button className="px-6 py-3 rounded-xl text-sm font-black text-white" style={{ background: "#1a56db" }} data-testid="button-rapport-register">Account aanmaken</button></Link>
-                        <Link href="/login"><button className="px-6 py-3 rounded-xl text-sm font-bold text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors" data-testid="button-rapport-login">Inloggen</button></Link>
-                      </div>
-                      <button onClick={resetWizard} className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-600 transition-colors mx-auto" data-testid="button-rapport-opnieuw">
-                        <RotateCcw className="w-3.5 h-3.5" /> Doe de check opnieuw
-                      </button>
+                    <p className="font-black text-slate-900 text-lg mb-1">Log in om je volledige rapport te zien</p>
+                    <p className="text-slate-400 text-sm mb-6 max-w-xs mx-auto">Je analyse staat klaar. Maak een gratis account aan of log in.</p>
+                    <div className="flex flex-col sm:flex-row gap-3 justify-center mb-4">
+                      <Link href="/register"><button className="px-6 py-3 rounded-xl text-sm font-black text-white" style={{ background: "#1a56db" }} data-testid="button-rapport-register">Account aanmaken</button></Link>
+                      <Link href="/login"><button className="px-6 py-3 rounded-xl text-sm font-bold text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors" data-testid="button-rapport-login">Inloggen</button></Link>
                     </div>
-                  )}
-                </div>
-
-                {isAuthenticated && (
-                  <div className="bg-white rounded-3xl p-7 text-center" style={{ boxShadow: "0 4px 24px rgba(0,0,0,.07)", border: "1.5px solid rgba(26,86,219,.15)" }} data-testid="section-rapport-cta">
-                    <p className="font-black text-slate-900 mb-1 text-lg">Ontgrendel het volledige rapport</p>
-                    <p className="text-slate-400 text-sm mb-5">Doorlopende waarschuwingen, volledige signalen en RegioBot AI.</p>
-                    <Link href="/lidmaatschap">
-                      <button className="w-full py-4 rounded-xl text-base font-black text-white hover:opacity-90 transition-opacity mb-3" style={{ background: "#1a56db" }} data-testid="button-rapport-upgrade">
-                        Bekijk lidmaatschap — vanaf €19/mnd
-                      </button>
-                    </Link>
-                    <button onClick={resetWizard} className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-600 transition-colors mx-auto" data-testid="button-opnieuw">
-                      <RotateCcw className="w-3.5 h-3.5" /> Opnieuw doen
+                    <button onClick={resetWizard} className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-600 transition-colors mx-auto" data-testid="button-rapport-opnieuw">
+                      <RotateCcw className="w-3.5 h-3.5" /> Doe de check opnieuw
                     </button>
                   </div>
-                )}
+                </div>
               </div>
             </div>
           )}
         </section>
 
-        {/* ══ HOE HET WERKT ═══════════════════════════════════════════════ */}
+        {/* ══ HOE HET WERKT ══ */}
         <section className="py-24 bg-white border-t border-slate-100" data-testid="section-hoe-werkt">
           <div className="max-w-4xl mx-auto px-5">
             <div className="text-center mb-14">
               <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#1a56db" }}>In vier stappen</span>
-              <h2 className="serif mt-3 text-slate-900" style={{ fontSize: "clamp(22px, 2.8vw, 36px)" }} data-testid="text-hoe-werkt-title">Zo werkt OpenRegio</h2>
+              <h2 className="serif mt-3 text-slate-900" style={{ fontSize: "clamp(22px, 2.8vw, 36px)" }}>Zo werkt OpenRegio</h2>
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {[
@@ -540,7 +835,7 @@ export default function HomePage() {
                 { n: "3", title: "Begrijp elke brief", desc: "Upload gemeentebrieven. RegioBot legt uit wat je moet doen — in gewone taal." },
                 { n: "4", title: "Verdien terug", desc: "Vertel het door. Voor elke ondernemer die jij aanmeldt ontvang je 20% recurring commissie." },
               ].map(({ n, title, desc }) => (
-                <div key={n} className="bg-white rounded-2xl p-6 border border-slate-100 hover-lift" style={{ boxShadow: "0 2px 12px rgba(0,0,0,.04)" }} data-testid={`stap-${n}`}>
+                <div key={n} className="bg-white rounded-2xl p-6 border border-slate-100 hover-lift" style={{ boxShadow: "0 2px 12px rgba(0,0,0,.04)" }}>
                   <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-4 font-black text-sm text-white" style={{ background: "#1a56db" }}>{n}</div>
                   <h3 className="font-black text-slate-900 mb-2" style={{ fontSize: "14px" }}>{title}</h3>
                   <p className="text-slate-500 text-sm leading-relaxed">{desc}</p>
@@ -550,13 +845,13 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ══ VOOR WIE ════════════════════════════════════════════════════ */}
+        {/* ══ VOOR WIE ══ */}
         <section className="py-24" style={{ background: "#f8faff" }} data-testid="section-voor-wie">
           <div className="max-w-6xl mx-auto px-5">
             <div className="grid md:grid-cols-2 gap-14 items-center mb-16">
               <div>
                 <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#1a56db" }}>Voor wie</span>
-                <h2 className="serif mt-3 mb-5 text-slate-900" style={{ fontSize: "clamp(22px, 2.8vw, 36px)" }} data-testid="text-voor-wie-title">
+                <h2 className="serif mt-3 mb-5 text-slate-900" style={{ fontSize: "clamp(22px, 2.8vw, 36px)" }}>
                   Gemaakt voor winkels<br />en horecazaken.
                 </h2>
                 <p className="text-slate-500 leading-relaxed mb-7">
@@ -564,12 +859,12 @@ export default function HomePage() {
                 </p>
                 <div className="grid grid-cols-2 gap-4">
                   {[
-                    { label: "Winkeleigenaar",    sub: "Retail & detailhandel",  letter: "W" },
-                    { label: "Horeca",            sub: "Café, restaurant, bar",  letter: "H" },
-                    { label: "Persoonlijke zorg", sub: "Kapper, schoonheid",     letter: "P" },
-                    { label: "Vakman",            sub: "Installatie, bouw",      letter: "V" },
+                    { label: "Winkeleigenaar", sub: "Retail & detailhandel", letter: "W" },
+                    { label: "Horeca", sub: "Café, restaurant, bar", letter: "H" },
+                    { label: "Persoonlijke zorg", sub: "Kapper, schoonheid", letter: "P" },
+                    { label: "Vakman", sub: "Installatie, bouw", letter: "V" },
                   ].map(({ label, sub, letter }) => (
-                    <div key={label} className="bg-white rounded-2xl p-4 border border-slate-100 flex items-center gap-3" data-testid={`voor-wie-${label.toLowerCase().replace(/\s+/g, "-")}`}>
+                    <div key={label} className="bg-white rounded-2xl p-4 border border-slate-100 flex items-center gap-3">
                       <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-black text-sm flex-shrink-0" style={{ background: "#1a56db" }}>{letter}</div>
                       <div>
                         <p className="text-sm font-black text-slate-900">{label}</p>
@@ -580,13 +875,13 @@ export default function HomePage() {
                 </div>
               </div>
               <div className="rounded-3xl overflow-hidden" style={{ boxShadow: "0 16px 48px rgba(0,0,0,.1)" }}>
-                <img src={luchtfotoImg} alt="Nederlandse regio" className="w-full object-cover" style={{ height: "400px" }} loading="lazy" data-testid="img-luchtfoto" />
+                <img src={luchtfotoImg} alt="Nederlandse regio" className="w-full object-cover" style={{ height: "400px" }} loading="lazy" />
               </div>
             </div>
           </div>
         </section>
 
-        {/* ══ TESTIMONIALS ════════════════════════════════════════════════ */}
+        {/* ══ TESTIMONIALS ══ */}
         <section className="py-24 bg-white border-t border-slate-100" data-testid="section-testimonials">
           <div className="max-w-5xl mx-auto px-5">
             <div className="text-center mb-12">
@@ -596,10 +891,10 @@ export default function HomePage() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {[
                 { name: "Marco Verhoeven", role: "Cafébeheerder, Haarlem", avatar: "MV", color: "#1a56db", quote: "De terrasvergunning van mijn buurman was verlopen en hij wist het niet. Dankzij OpenRegio wist ik het wél — van mijzelf. Dat bespaarde me een boete van €1.200." },
-                { name: "Lena Brouwer",   role: "Kapper, Alkmaar",       avatar: "LB", color: "#059669", quote: "Ik kreeg een brief over nieuwe hygiëne-eisen. Ik snapte er niks van. RegioBot legde in drie zinnen uit wat ik moest doen. Geweldig." },
-                { name: "David Pieters",  role: "Slager, Zaandam",       avatar: "DP", color: "#7c3aed", quote: "Voor €19 per maand weet ik zeker dat ik niks mis. Dat is minder dan één boete. De rekensommetje is makkelijk." },
+                { name: "Lena Brouwer", role: "Kapper, Alkmaar", avatar: "LB", color: "#059669", quote: "Ik kreeg een brief over nieuwe hygiëne-eisen. Ik snapte er niks van. RegioBot legde in drie zinnen uit wat ik moest doen. Geweldig." },
+                { name: "David Pieters", role: "Slager, Zaandam", avatar: "DP", color: "#7c3aed", quote: "Voor €19 per maand weet ik zeker dat ik niks mis. Dat is minder dan één boete. De rekensommetje is makkelijk." },
               ].map(({ name, role, avatar, color, quote }) => (
-                <div key={name} className="bg-white rounded-3xl p-7 border border-slate-100 hover-lift" style={{ boxShadow: "0 2px 12px rgba(0,0,0,.04)" }} data-testid={`testimonial-${name.split(" ")[0].toLowerCase()}`}>
+                <div key={name} className="bg-white rounded-3xl p-7 border border-slate-100 hover-lift" style={{ boxShadow: "0 2px 12px rgba(0,0,0,.04)" }}>
                   <div className="flex gap-0.5 mb-4">
                     {[...Array(5)].map((_, i) => <Star key={i} className="w-4 h-4" fill="#f59e0b" style={{ color: "#f59e0b" }} />)}
                   </div>
@@ -617,23 +912,21 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ══ AFFILIATE ══════════════════════════════════════════════════ */}
+        {/* ══ AFFILIATE ══ */}
         <section className="py-24" style={{ background: "#0f172a" }} data-testid="section-affiliate">
           <div className="max-w-4xl mx-auto px-5 text-center">
             <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#1a56db" }}>Affiliate programma</span>
-            <h2 className="serif mt-3 mb-4 text-white" style={{ fontSize: "clamp(24px, 3vw, 40px)" }}>
-              Vertel het door.<br />Verdien mee.
-            </h2>
+            <h2 className="serif mt-3 mb-4 text-white" style={{ fontSize: "clamp(24px, 3vw, 40px)" }}>Vertel het door.<br />Verdien mee.</h2>
             <p className="mb-12" style={{ color: "rgba(255,255,255,.55)", fontSize: "16px", maxWidth: "40ch", margin: "0 auto 3rem" }}>
               Ken jij andere winkel- of horecaondernemers? Voor elke klant die jij aanmeldt ontvang je 20% terugkerende commissie — elke maand opnieuw.
             </p>
             <div className="grid sm:grid-cols-3 gap-5 mb-10">
               {[
-                { num: "€3,80",    label: "Per Basis-klant per maand",   sub: "20% van €19" },
-                { num: "€11,80",   label: "Per Pro-klant per maand",     sub: "20% van €59" },
-                { num: "5 klanten", label: "= Jouw abonnement terug",    sub: "Basis-plan volledig terugverdiend" },
+                { num: "€3,80", label: "Per Basis-klant per maand", sub: "20% van €19" },
+                { num: "€11,80", label: "Per Pro-klant per maand", sub: "20% van €59" },
+                { num: "5 klanten", label: "= Jouw abonnement terug", sub: "Basis-plan volledig terugverdiend" },
               ].map(({ num, label, sub }) => (
-                <div key={label} className="rounded-2xl p-6 text-center" style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.1)" }} data-testid={`affiliate-stat-${num.replace(/[€,\s]/g,"")}`}>
+                <div key={label} className="rounded-2xl p-6 text-center" style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(255,255,255,.1)" }}>
                   <div className="text-2xl font-black text-white mb-1">{num}</div>
                   <div className="text-sm font-medium mb-1" style={{ color: "rgba(255,255,255,.7)" }}>{label}</div>
                   <div className="text-xs" style={{ color: "rgba(255,255,255,.35)" }}>{sub}</div>
@@ -648,19 +941,15 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ══ PRIJZEN ════════════════════════════════════════════════════ */}
+        {/* ══ PRIJZEN ══ */}
         <section id="prijzen" className="py-24 bg-white" data-testid="section-prijzen">
           <div className="max-w-3xl mx-auto px-5">
             <div className="text-center mb-12">
               <span className="text-xs font-bold uppercase tracking-widest" style={{ color: "#1a56db" }}>Transparante prijzen</span>
-              <h2 className="serif mt-3 text-slate-900" style={{ fontSize: "clamp(22px, 2.8vw, 36px)" }} data-testid="text-prijzen-title">
-                Kies jouw plan
-              </h2>
+              <h2 className="serif mt-3 text-slate-900" style={{ fontSize: "clamp(22px, 2.8vw, 36px)" }} data-testid="text-prijzen-title">Kies jouw plan</h2>
               <p className="text-slate-400 mt-2 text-sm">Maandelijks opzegbaar. Geen verborgen kosten.</p>
             </div>
-
             <div className="grid sm:grid-cols-2 gap-5">
-              {/* Basis */}
               <div className="bg-white rounded-3xl p-8 border border-slate-100" style={{ boxShadow: "0 2px 12px rgba(0,0,0,.05)" }} data-testid="card-plan-basis">
                 <h3 className="font-black text-slate-900 text-xl mb-1">Basis-lid</h3>
                 <p className="text-slate-400 text-xs mb-6">Volwaardig lid van OpenRegio</p>
@@ -671,14 +960,7 @@ export default function HomePage() {
                   Kies Basis-lid
                 </a>
                 <ul className="space-y-3">
-                  {[
-                    [true,  "Regelgeving-signalen voor jouw branche"],
-                    [true,  "Brief-analyse via RegioBot"],
-                    [true,  "Basischeck onbeperkt"],
-                    [true,  "20% affiliate commissie"],
-                    [false, "Volledige WOO-bibliotheek"],
-                    [false, "Prioriteit ondersteuning"],
-                  ].map(([inc, txt], i) => (
+                  {[[true,"Regelgeving-signalen voor jouw branche"],[true,"Brief-analyse via RegioBot"],[true,"Basischeck onbeperkt"],[true,"20% affiliate commissie"],[false,"Volledige WOO-bibliotheek"],[false,"Prioriteit ondersteuning"]].map(([inc, txt], i) => (
                     <li key={i} className="flex items-center gap-2.5">
                       <Check className={`w-3.5 h-3.5 flex-shrink-0 ${inc ? "" : "opacity-20"}`} style={{ color: inc ? "#1a56db" : "#94a3b8" }} />
                       <span className={`text-sm ${inc ? "text-slate-600" : "text-slate-300 line-through"}`}>{txt as string}</span>
@@ -686,8 +968,6 @@ export default function HomePage() {
                   ))}
                 </ul>
               </div>
-
-              {/* Pro */}
               <div className="bg-white rounded-3xl p-8 relative" style={{ border: "2px solid #1a56db", boxShadow: "0 8px 40px rgba(26,86,219,.18)" }} data-testid="card-plan-pro">
                 <div className="absolute -top-3.5 left-8 px-3 py-1 rounded-full text-xs font-black text-white" style={{ background: "#1a56db" }}>Meest gekozen</div>
                 <h3 className="font-black text-slate-900 text-xl mb-1">Pro-bijdrager</h3>
@@ -699,14 +979,7 @@ export default function HomePage() {
                   Kies Pro-bijdrager
                 </a>
                 <ul className="space-y-3">
-                  {[
-                    "Alles van Basis-lid",
-                    "Onbeperkte RegioBot AI",
-                    "Volledige WOO-bibliotheek",
-                    "Printbare rapporten & PDF-export",
-                    "20% affiliate = €11,80/klant/mnd",
-                    "Prioriteit ondersteuning",
-                  ].map((f, i) => (
+                  {["Alles van Basis-lid","Onbeperkte RegioBot AI","Volledige WOO-bibliotheek","Printbare rapporten & PDF-export","20% affiliate = €11,80/klant/mnd","Prioriteit ondersteuning"].map((f, i) => (
                     <li key={i} className="flex items-center gap-2.5">
                       <Check className="w-3.5 h-3.5 flex-shrink-0" style={{ color: "#1a56db" }} />
                       <span className="text-sm text-slate-600">{f}</span>
@@ -715,18 +988,15 @@ export default function HomePage() {
                 </ul>
               </div>
             </div>
-
             <p className="text-center mt-8 text-sm text-slate-400">
               Twijfel je nog?{" "}
-              <a href="#basischeck" className="font-bold underline" style={{ color: "#1a56db" }}>
-                Start de gratis Basischeck
-              </a>{" "}
+              <a href="#basischeck" className="font-bold underline" style={{ color: "#1a56db" }}>Start de gratis Basischeck</a>{" "}
               en zie direct wat je mist.
             </p>
           </div>
         </section>
 
-        {/* ══ FAQ ════════════════════════════════════════════════════════ */}
+        {/* ══ FAQ ══ */}
         <section className="py-24 border-t border-slate-100" style={{ background: "#f8faff" }} data-testid="section-faq">
           <div className="max-w-2xl mx-auto px-5">
             <div className="text-center mb-12">
@@ -737,20 +1007,14 @@ export default function HomePage() {
               {[
                 { q: "Is de Basischeck echt gratis?", a: "Ja, de Basischeck is altijd gratis — geen account nodig, geen creditcard. Je vult beroep en stad in en krijgt binnen 30 seconden een rapport. Een lidmaatschap begint pas bij €19/maand." },
                 { q: "Wat is het verschil tussen Basis en Pro?", a: "Basis is voor ondernemers die doorlopend gewaarschuwd willen worden over regelgeving en brieven kunnen uploaden. Pro is voor wie ook de volledige WOO-bibliotheek, uitgebreide analyses en prioriteitsondersteuning wil." },
-                { q: "Hoe werkt het affiliate-programma?", a: "Voor elke ondernemer die jij aanmeldt via jouw persoonlijke link ontvang je 20% van hun maandelijkse abonnement — elke maand opnieuw, zo lang zij lid blijven. Dat is €3,80/mnd per Basis-klant en €11,80/mnd per Pro-klant." },
-                { q: "Is dit juridisch advies?", a: "Nee. OpenRegio helpt je signaleren, brieven begrijpen en actie ondernemen. Voor juridisch advies verwijzen we je door naar een specialist. We zijn een informatieplatform, geen advocatenkantoor." },
+                { q: "Hoe werkt het affiliate-programma?", a: "Voor elke ondernemer die jij aanmeldt via jouw persoonlijke link ontvang je 20% van hun maandelijkse abonnement — elke maand opnieuw, zo lang zij lid blijven." },
+                { q: "Is dit juridisch advies?", a: "Nee. OpenRegio helpt je signaleren, brieven begrijpen en actie ondernemen. Voor juridisch advies verwijzen we je door naar een specialist." },
                 { q: "Kan ik opzeggen wanneer ik wil?", a: "Ja. Maandelijks opzegbaar, geen bindende termijn, geen opzeggingskosten. Je behoudt toegang tot het einde van je betaalde periode." },
               ].map((item, i) => (
                 <div key={i} className="rounded-2xl border border-slate-100 overflow-hidden bg-white" data-testid={`faq-item-${i}`}>
-                  <button
-                    className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-slate-50 transition-colors"
-                    onClick={() => setOpenFaq(openFaq === i ? null : i)}
-                    data-testid={`faq-toggle-${i}`}
-                  >
+                  <button className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-slate-50 transition-colors" onClick={() => setOpenFaq(openFaq === i ? null : i)} data-testid={`faq-toggle-${i}`}>
                     <span className="font-black text-slate-800 text-sm pr-4">{item.q}</span>
-                    {openFaq === i
-                      ? <ChevronUp className="w-4 h-4 flex-shrink-0 text-slate-400" />
-                      : <ChevronDown className="w-4 h-4 flex-shrink-0 text-slate-400" />}
+                    {openFaq === i ? <ChevronUp className="w-4 h-4 flex-shrink-0 text-slate-400" /> : <ChevronDown className="w-4 h-4 flex-shrink-0 text-slate-400" />}
                   </button>
                   {openFaq === i && (
                     <div className="px-5 pb-5 border-t border-slate-50" data-testid={`faq-answer-${i}`}>
@@ -763,7 +1027,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* ══ EIND-CTA ════════════════════════════════════════════════════ */}
+        {/* ══ EIND-CTA ══ */}
         <section className="py-28 relative overflow-hidden" style={{ background: "#0f172a" }} data-testid="section-cta">
           <div className="absolute inset-0 opacity-20" style={{ backgroundImage: `url(${winkelstraatImg})`, backgroundSize: "cover", backgroundPosition: "center" }} />
           <div className="relative max-w-2xl mx-auto px-5 text-center">
@@ -788,10 +1052,8 @@ export default function HomePage() {
             </div>
           </div>
         </section>
-
       </main>
 
-      {/* ══ FOOTER ══════════════════════════════════════════════════════════ */}
       <footer className="py-8 border-t border-slate-100 bg-white" data-testid="footer-main">
         <div className="max-w-6xl mx-auto px-5 flex flex-col sm:flex-row items-center justify-between gap-5">
           <div className="flex items-center gap-2">
@@ -809,7 +1071,6 @@ export default function HomePage() {
         </div>
       </footer>
 
-      {/* ══ COOKIE BANNER ══════════════════════════════════════════════════ */}
       {showCookie && (
         <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-slate-200 bg-white" style={{ boxShadow: "0 -4px 24px rgba(0,0,0,.08)" }} data-testid="banner-cookie">
           <div className="max-w-6xl mx-auto px-5 py-4 flex flex-wrap items-center justify-between gap-3">
@@ -824,7 +1085,27 @@ export default function HomePage() {
           </div>
         </div>
       )}
-
     </div>
   );
+}
+
+// ════════════════════════════════════════════════════════════════════════════
+// SMART ROUTER — ingelogd = dashboard, uitgelogd = marketing
+// ════════════════════════════════════════════════════════════════════════════
+export default function HomePage() {
+  usePageTitle("OpenRegio — grip op regelgeving voor winkel & horeca");
+  const { isAuthenticated, isLoading } = useAuth();
+
+  if (isLoading) {
+    return (
+      <div className="space-y-4 pb-8 p-6">
+        <Skeleton className="h-48 w-full rounded-[28px]" />
+        <div className="grid grid-cols-3 gap-4">
+          {[1,2,3].map(i => <Skeleton key={i} className="h-32 rounded-[28px]" />)}
+        </div>
+      </div>
+    );
+  }
+
+  return isAuthenticated ? <OndernemerscorePage /> : <MarketingPage />;
 }
