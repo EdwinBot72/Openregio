@@ -147,9 +147,6 @@ export default function HomePage() {
           .rg-2-inner { grid-template-columns: 1fr 1fr; }
           .rg-split-img { min-height: 220px; }
           .home-hero-left { padding: 40px 20px 32px 20px !important; }
-          .home-hero-right { min-height: 280px !important; }
-          .home-section-pad { padding: 40px 20px !important; }
-          .home-split-content { padding: 36px 24px !important; }
         }
         @media (max-width: 480px) {
           .rg-2-inner { grid-template-columns: 1fr; }
