@@ -132,6 +132,28 @@ export default function HomePage() {
         .pc-hover:hover { transform: translateY(-4px); box-shadow: 0 14px 36px rgba(0,0,0,.09); }
         .blog-img { transition: transform .3s ease; }
         .blog-card:hover .blog-img { transform: scale(1.04); }
+
+        /* Responsive grids */
+        .rg-2 { display: grid; grid-template-columns: 1fr 1fr; }
+        .rg-3 { display: grid; grid-template-columns: repeat(3,1fr); }
+        .rg-4 { display: grid; grid-template-columns: repeat(4,1fr); }
+        .rg-2-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+
+        .rg-split-img { overflow: hidden; position: relative; min-height: 300px; }
+        .rg-split-img img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; position: absolute; inset: 0; }
+
+        @media (max-width: 768px) {
+          .rg-2, .rg-3, .rg-4 { grid-template-columns: 1fr !important; }
+          .rg-2-inner { grid-template-columns: 1fr 1fr; }
+          .rg-split-img { min-height: 220px; }
+          .home-hero-left { padding: 40px 20px 32px 20px !important; }
+          .home-hero-right { min-height: 280px !important; }
+          .home-section-pad { padding: 40px 20px !important; }
+          .home-split-content { padding: 36px 24px !important; }
+        }
+        @media (max-width: 480px) {
+          .rg-2-inner { grid-template-columns: 1fr; }
+        }
       `}</style>
 
       {/* ══ NAV ══ */}
@@ -185,8 +207,8 @@ export default function HomePage() {
 
       {/* ══ HERO ══ */}
       <div style={{ background: "#fff" }} data-testid="section-hero">
-        <div style={{ ...centered, display: "grid", gridTemplateColumns: "1fr 1fr", minHeight: "500px" }}>
-          <div className="fu" style={{ padding: "56px 40px 56px 28px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+        <div className="rg-2" style={{ ...centered, minHeight: "500px" }}>
+          <div className="fu home-hero-left" style={{ padding: "56px 40px 56px 28px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: "7px", background: "#eef2ff", color: "#1f5fae", fontSize: "11px", fontWeight: 700, padding: "5px 13px", borderRadius: "20px", marginBottom: "20px", width: "fit-content" }}>
               <span className="badge-dot" style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#1f5fae", display: "inline-block" }} />
               Voor lokale ondernemers die willen groeien
@@ -234,7 +256,7 @@ export default function HomePage() {
 
       {/* ══ STATS ══ */}
       <div style={{ borderTop: "1px solid #f0f4ff", borderBottom: "1px solid #f0f4ff", background: "#fafbff" }} data-testid="section-stats">
-        <div style={{ ...centered, display: "grid", gridTemplateColumns: "repeat(4,1fr)" }}>
+        <div className="rg-4" style={{ ...centered }}>
           {[
             { n: "20", l: "Ondernemers actief" },
             { n: "€19/mnd", l: "Startprijs — geen jaarcontract" },
@@ -255,7 +277,7 @@ export default function HomePage() {
           <div style={{ fontSize: "11px", fontWeight: 700, color: "#f28a1a", textTransform: "uppercase", letterSpacing: ".6px", marginBottom: "8px" }}>Drie pijlers</div>
           <div style={{ fontSize: "30px", fontWeight: 800, color: "#0f172a", letterSpacing: "-.5px", marginBottom: "8px" }}>Alles wat jij als lokale ondernemer nodig hebt.</div>
           <div style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.7, maxWidth: "46ch", marginBottom: "32px" }}>Niet één ding. Het complete plaatje — in gewone taal, zonder overbodige complexiteit.</div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "16px" }}>
+          <div className="rg-3" style={{ gap: "16px" }}>
             {[
               { num: "01", img: groupWebp, pos: "top center", title: "Meer klanten & beter vindbaar", desc: "Google-profiel, website, lokale SEO. We checken wat er beter kan en geven je concrete stappen." },
               { num: "02", img: websiteScanWebp, pos: "center", title: "Slimmer werken met AI & tools", desc: "Welke AI-tools besparen jou tijd? Kleine SaaS-oplossingen die echt werken voor een lokaal bedrijf." },
@@ -286,7 +308,7 @@ export default function HomePage() {
                 Alle artikelen →
               </Link>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "16px" }}>
+            <div className="rg-3" style={{ gap: "16px" }}>
               {visibleBlogs.map((blog) => (
                 <Link key={blog.id} href={`/blog/${blog.slug}`} style={{ textDecoration: "none" }} data-testid={`card-blog-${blog.id}`}>
                   <div className="blog-card pc-hover" style={{ borderRadius: "20px", overflow: "hidden", border: "1px solid #e8edf8", background: "#fff", height: "100%" }}>
@@ -329,9 +351,9 @@ export default function HomePage() {
 
       {/* ══ REGIOBOT SPLIT ══ */}
       <div style={{ background: "#fff" }} data-testid="section-regiobot">
-        <div style={{ ...centered, display: "grid", gridTemplateColumns: "1fr 1fr", minHeight: "460px" }}>
-          <div style={{ overflow: "hidden", position: "relative", minHeight: "380px" }}>
-            <img src={streetWebp} alt="RegioBot AI" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center", display: "block", position: "absolute", inset: 0 }} />
+        <div className="rg-2" style={{ ...centered, minHeight: "460px" }}>
+          <div className="rg-split-img">
+            <img src={streetWebp} alt="RegioBot AI" />
           </div>
           <div style={{ padding: "56px 48px", display: "flex", flexDirection: "column", justifyContent: "center", background: "#0b2240" }}>
             <div style={{ fontSize: "11px", fontWeight: 700, color: "#f28a1a", textTransform: "uppercase", letterSpacing: ".6px", marginBottom: "12px" }}>Maak kennis met RegioBot</div>
@@ -489,11 +511,11 @@ export default function HomePage() {
 
       {/* ══ AANBOD SPLIT ══ */}
       <div style={{ background: "#fff" }} data-testid="section-aanbod">
-        <div style={{ ...centered, display: "grid", gridTemplateColumns: "1fr 1fr", minHeight: "400px" }}>
+        <div className="rg-2" style={{ ...centered, minHeight: "400px" }}>
           <div style={{ padding: "56px 40px", background: "#fafbff", display: "flex", flexDirection: "column", justifyContent: "center" }}>
             <div style={{ fontSize: "11px", fontWeight: 700, color: "#f28a1a", textTransform: "uppercase", letterSpacing: ".6px" }}>Wat je krijgt</div>
             <div style={{ fontSize: "26px", fontWeight: 800, color: "#0f172a", letterSpacing: "-.5px", marginTop: "6px", marginBottom: "0", lineHeight: 1.2 }}>Geen beloftes.<br />Concrete tools.</div>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", marginTop: "20px" }}>
+            <div className="rg-2-inner">
               {[
                 { bg: "#eef2ff", title: "Website-scan", desc: "Hoe vindbaar ben jij op Google? We checken het voor je.", icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1f5fae" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> },
                 { bg: "#fef3e9", title: "Brief analyse", desc: "Upload een gemeentebrief. RegioBot legt het uit.", icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f28a1a" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> },
@@ -516,12 +538,12 @@ export default function HomePage() {
 
       {/* ══ AFFILIATE ══ */}
       <div style={{ background: "#0b2240" }} data-testid="section-affiliate">
-        <div style={{ ...centered, padding: "48px 28px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "40px", alignItems: "center" }}>
+        <div className="rg-2" style={{ ...centered, padding: "48px 28px", gap: "40px", alignItems: "center" }}>
           <div>
             <h2 style={{ fontSize: "26px", fontWeight: 800, color: "#fff", letterSpacing: "-.4px", marginBottom: "8px", lineHeight: 1.2 }}>Ken je andere ondernemers?<br />Verdien mee.</h2>
             <p style={{ fontSize: "13px", color: "rgba(255,255,255,.5)", lineHeight: 1.7 }}>Voor elke ondernemer die jij aanmeldt ontvang je 20% van hun maandelijks abonnement — elke maand opnieuw, zo lang zij lid blijven.</p>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: "10px" }}>
+          <div className="rg-3" style={{ gap: "10px" }}>
             {[
               { n: "€3,80", l: "per Basis-klant\n/maand" },
               { n: "€11,80", l: "per Pro-klant\n/maand" },
@@ -544,7 +566,7 @@ export default function HomePage() {
             <div style={{ fontSize: "30px", fontWeight: 800, color: "#0f172a", letterSpacing: "-.5px", marginTop: "6px" }} data-testid="text-prijzen-title">Kies jouw plan</div>
             <div style={{ fontSize: "14px", color: "#64748b", marginTop: "4px" }}>Maandelijks opzegbaar · Geen verborgen kosten · De Basischeck is altijd gratis</div>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px", maxWidth: "640px", margin: "28px auto 0" }}>
+          <div className="rg-2" style={{ gap: "16px", maxWidth: "640px", margin: "28px auto 0" }}>
             <div style={{ background: "#fff", border: "1px solid #e8edf8", borderRadius: "24px", padding: "28px" }} data-testid="card-plan-basis">
               <div style={{ fontSize: "17px", fontWeight: 800, color: "#0f172a", marginBottom: "2px" }}>Basis-lid</div>
               <div style={{ fontSize: "11px", color: "#94a3b8", marginBottom: "16px" }}>Alle essentials voor gezond ondernemen</div>
