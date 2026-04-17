@@ -5875,7 +5875,16 @@ Geef context: leg in 3-5 zinnen uit waar dit verhaal in past, welke bredere ontw
 
 Geef daarnaast 2-3 gerelateerde verhaallijnen of vervolgvragen die de lezer kan onderzoeken.
 
-Geef tot slot 2-4 andere onafhankelijke / alternatieve Nederlandse mediabronnen die met dit verhaal te maken (kunnen) hebben. NIET de mainstream/staatsmedia (dus EXPLICIET GEEN NOS, NOS Journaal, NRC, Telegraaf, Volkskrant, AD, Trouw, RTL Nieuws, NU.nl, FD, regionale omroepen of vakmedia). Wél kanalen zoals Blckbx, De Andere Krant, Café Weltschmerz, Ongehoord Nederland (ON!), Potkaars, Niburu, Jensen, Café Engels, Substack-auteurs, onafhankelijke YouTube/Telegram-journalisten en vergelijkbare alternatieve onderzoeksjournalistiek. Per bron: naam, korte invalshoek (waarom die bron hier waarschijnlijk over schrijft of geschreven heeft, of welk gerelateerd nieuws zij brengen), en de impact die dit verhaal of dit type berichtgeving kan hebben op lokale ondernemers in Nederland (heel concreet: koopgedrag, regelgeving, vergunningen, personeel, kosten, vertrouwen, etc.).
+Geef tot slot 2-4 andere onafhankelijke / alternatieve Nederlandse of Vlaamse mediabronnen die met dit verhaal te maken (kunnen) hebben. EXPLICIET GEEN mainstream/staatsmedia: dus NIET NOS, NOS Journaal, NRC, Telegraaf, Volkskrant, AD, Trouw, RTL Nieuws, NU.nl, FD, BNR, EenVandaag, Nieuwsuur, Op1, regionale omroepen of klassieke vakmedia.
+
+Kies juist uit het brede alternatieve/onafhankelijke landschap en VARIEER bewust per bericht — vermijd dat je elk bericht dezelfde 3 namen geeft. Mogelijke bronnen (zoek wat ECHT bij dit specifieke verhaal past):
+- Online platforms: Blckbx, De Andere Krant, Café Weltschmerz, Ongehoord Nederland (ON!), Potkaars, Niburu, Geenstijl, Dagelijkse Standaard, Wynia's Week, Stichting Vaccin Vrij, Indepen, Frontnieuws, De Nieuwe Wereld, Common Sense TV, OpenDebat, Compact, Gezond Verstand
+- Substacks/blogs: substacks van Maurice de Hond, Pierre Capel, Karel van Wolferen, Ad Verbrugge, Frank Ruesink, Eva Vlaardingerbroek, Thierry Baudet-analisten, Erik Mouthaan-kritische schrijvers
+- Onafhankelijke journalisten / podcasts: Jensen!, Café Engels, De Nieuwe Realiteit, Tom Zwitser, Sven Hulleman, Flavio Pasquino, Ramon Bril, Karel de Werd-archieven, Robert Jensen, Lange Frans-podcast, Sander Boon, Arno Wellens zelf
+- X/Twitter- en Telegram-accounts van onafhankelijke onderzoekers
+- Internationaal-alternatief met NL-relevantie: Rebel News NL, RAIR Foundation, Off-Guardian (NL-vertalingen)
+
+Per bron: naam, korte invalshoek (waarom die bron hier waarschijnlijk over schrijft of geschreven heeft, of welk gerelateerd nieuws zij brengen), en de impact die dit verhaal of dit type berichtgeving kan hebben op lokale ondernemers in Nederland (heel concreet: koopgedrag, regelgeving, vergunningen, personeel, kosten, vertrouwen, etc.).
 
 Antwoord ALLEEN met JSON, exact deze structuur:
 {
@@ -5899,7 +5908,7 @@ Antwoord ALLEEN met JSON, exact deze structuur:
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: [{ role: "user", parts: [{ text: prompt }] }],
-      config: { maxOutputTokens: 1500, temperature: 0.6, thinkingConfig: { thinkingBudget: 0 } },
+      config: { maxOutputTokens: 1500, temperature: 0.9, thinkingConfig: { thinkingBudget: 0 } },
     });
 
     const parts = response.candidates?.[0]?.content?.parts;
