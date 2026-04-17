@@ -6,11 +6,12 @@ import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { createMollieClient } from "@mollie/api-client";
 import { setupJwtAuth, attachUser, requireAuth, requireAdmin, requirePro, issueTokensForUser, clearTokenCookies, revokeAllUserTokens } from "./jwtAuth";
-import { seedMasterAccount } from "./seed";
+import { seedMasterAccount, seedTestAccounts } from "./seed";
 import { generateRandomPassword, generateOnboardingToken, getPlanPrice, getPlanDisplayName, generateReferralCode } from "./utils/auth";
 import { sendOnboardingEmail, sendNotificationEmail } from "./services/emailService";
 import bcrypt from "bcrypt";
 import { uploadMemory, getDocumentType } from "./middleware/upload";
+import { publicAiRateLimit, authenticatedAiRateLimit } from "./middleware/aiRateLimit";
 import { objectStorageClient } from "./replit_integrations/object_storage";
 import { randomUUID, createHash } from "crypto";
 import { runRegioBot } from "./regiobot";
@@ -110,6 +111,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Seed master account (idempotent - non-fatal if DB not yet ready)
   try {
     await seedMasterAccount();
+    await seedTestAccounts();
   } catch (err) {
     console.error("[Startup] Seed skipped — DB may not be ready:", (err as Error).message);
   }
@@ -1356,7 +1358,7 @@ Schrijf in het Nederlands. Toon: helder, gezaghebbend, praktisch. Geef geen juri
   });
 
   // Brief Analyse - gestructureerde analyse van overheidsbrieven
-  app.post("/api/brief-analyse", requireAuth, async (req, res) => {
+  app.post("/api/brief-analyse", requireAuth, authenticatedAiRateLimit, async (req, res) => {
     try {
       const { tekst } = req.body;
       if (!tekst || typeof tekst !== "string" || tekst.trim().length < 20) {
@@ -1648,7 +1650,7 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
     }
   });
 
-  app.post("/api/rag/ask", requireAuth, async (req, res) => {
+  app.post("/api/rag/ask", requireAuth, authenticatedAiRateLimit, async (req, res) => {
     try {
       const user = req.user;
       if (!user?.id) return res.status(401).json({ error: "Niet ingelogd" });
@@ -1815,7 +1817,7 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
   });
 
   // WOO Template Generator - generates ready-to-use WOO request letters
-  app.post("/api/woo/generate", async (req, res) => {
+  app.post("/api/woo/generate", publicAiRateLimit, async (req, res) => {
     try {
       // Early check for OpenAI API key
       if (!process.env.OPENAI_API_KEY) {

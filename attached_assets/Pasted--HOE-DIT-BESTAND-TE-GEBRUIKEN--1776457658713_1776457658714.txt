@@ -1,0 +1,68 @@
+// ═══════════════════════════════════════════════════════════════
+// HOE DIT BESTAND TE GEBRUIKEN
+// ═══════════════════════════════════════════════════════════════
+//
+// Dit is GEEN volledig bestand dat je copy-paste.
+// Het zijn PATCHES: exacte wijzigingen in server/routes.ts.
+//
+// Stap 1: Open server/routes.ts in Replit
+// Stap 2: Voeg onderaan de imports (bovenaan het bestand) toe:
+//
+//   import { publicAiRateLimit, authenticatedAiRateLimit } from "./middleware/aiRateLimit";
+//
+// Stap 3: Pas de drie AI-endpoints hieronder aan zoals aangegeven.
+// ═══════════════════════════════════════════════════════════════
+ 
+ 
+// ── PATCH A: /api/woo/generate ───────────────────────────────────
+//
+// VOOR (regel ~1818):
+//   app.post("/api/woo/generate", async (req, res) => {
+//
+// NA:
+//   app.post("/api/woo/generate", publicAiRateLimit, async (req, res) => {
+//
+// Toelichting: dit is een publiek endpoint zonder auth — iedereen kan het
+// aanroepen. De rate limiter beschermt tegen misbruik en onbedoelde OpenAI-kosten.
+ 
+ 
+// ── PATCH B: /api/brief-analyse ──────────────────────────────────
+//
+// VOOR (regel ~1359):
+//   app.post("/api/brief-analyse", requireAuth, async (req, res) => {
+//
+// NA:
+//   app.post("/api/brief-analyse", requireAuth, authenticatedAiRateLimit, async (req, res) => {
+//
+// Toelichting: ingelogde gebruikers zijn al beperkt via requireAuth, maar
+// zonder extra limiter kan één account onbeperkt OpenAI-calls maken.
+ 
+ 
+// ── PATCH C: /api/rag/ask ─────────────────────────────────────────
+//
+// VOOR (regel ~1651):
+//   app.post("/api/rag/ask", requireAuth, async (req, res) => {
+//
+// NA:
+//   app.post("/api/rag/ask", requireAuth, authenticatedAiRateLimit, async (req, res) => {
+//
+// Toelichting: zelfde reden als PATCH B — RAG-vragen zijn dure AI-calls.
+ 
+ 
+// ── PATCH D: Import toevoegen bovenaan routes.ts ──────────────────
+//
+// Voeg toe onder de bestaande imports (bijv. na import { uploadMemory ... }):
+//
+//   import { publicAiRateLimit, authenticatedAiRateLimit } from "./middleware/aiRateLimit";
+//
+ 
+ 
+// ── PATCH E: seedTestAccounts aanroepen in server/index.ts ────────
+//
+// In server/index.ts, zoek de regel waar seedMasterAccount() wordt aangeroepen.
+// Voeg eronder toe:
+//
+//   import { seedMasterAccount, seedTestAccounts } from "./seed";
+//
+//   seedMasterAccount();
+//   seedTestAccounts(); // ← toevoegen — werkt alleen als NODE_ENV=test of TEST_SEED=true
