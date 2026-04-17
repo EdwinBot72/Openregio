@@ -18,7 +18,7 @@ export default function BlogsPage() {
   return (
     <div className="openregio-public-page" data-testid="page-blogs">
       <PublicTopNav />
-      <div className="openregio-public-content" style={{ maxWidth: 1080 }}>
+      <div className="openregio-public-content" style={{ maxWidth: 880 }}>
         <h1 className="openregio-public-title" data-testid="text-blogs-title">Blogs</h1>
         <p className="openregio-public-lead">Nieuws, tips en inzichten voor lokale ondernemers.</p>
 
