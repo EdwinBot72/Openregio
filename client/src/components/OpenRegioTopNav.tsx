@@ -192,7 +192,7 @@ export function OpenRegioTopNav() {
 
         {user ? (
           <div className="openregio-topnav-right">
-            {!isPro && (
+            {!isPro && !isAdmin && (
               <Link
                 href="/lidmaatschap?plan=pro"
                 className="openregio-button openregio-button-pro openregio-button-small"
@@ -363,7 +363,7 @@ export function OpenRegioTopNav() {
                   </div>
                 </div>
               </div>
-              {!isPro && (
+              {!isPro && !isAdmin && (
                 <Link
                   href="/lidmaatschap?plan=pro"
                   className="openregio-button openregio-button-pro"
