@@ -384,7 +384,7 @@ export default function IntelPage() {
     });
 
   return (
-    <div className="space-y-6 pb-8 mx-auto w-full max-w-4xl px-4">
+    <div className="space-y-6">
 
       {/* ── Hero ─────────────────────────────────────────────────────────────── */}
       <div

@@ -351,6 +351,34 @@
     -webkit-font-smoothing: antialiased;
 }
 
+/* Generieke welkom-achtige wrapper voor alle ingelogde pagina's
+   die zelf nog geen openregio-* wrapper-class hebben. Wordt op het
+   <main>-element gezet en zet zichzelf "uit" zodra een direct kind
+   al z'n eigen welkom-achtige wrapper meebrengt (anders dubbele padding). */
+.openregio-page-shell {
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    color: #0f172a;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 24px 64px;
+    -webkit-font-smoothing: antialiased;
+}
+.openregio-page-shell:has(> .openregio-home),
+.openregio-page-shell:has(> .openregio-start),
+.openregio-page-shell:has(> .openregio-onboarding),
+.openregio-page-shell:has(> .openregio-dashboard),
+.openregio-page-shell:has(> .openregio-network),
+.openregio-page-shell:has(> .openregio-community),
+.openregio-page-shell:has(> .openregio-chat),
+.openregio-page-shell:has(> .openregio-regiobot),
+.openregio-page-shell:has(> .openregio-upgrade) {
+    max-width: none;
+    padding: 0;
+}
+@media (max-width: 768px) {
+    .openregio-page-shell { padding: 28px 16px 48px; }
+}
+
 .openregio-home h1,
 .openregio-start h1,
 .openregio-onboarding h1,

@@ -323,7 +323,7 @@ function AppContent() {
   return (
     <div className="openregio-page" data-testid="layout-openregio-topnav">
       <OpenRegioTopNav />
-      <main className="flex-1 protected-content">
+      <main className="flex-1 protected-content openregio-page-shell">
         <AuthGuard>
           <AuthenticatedRouter />
         </AuthGuard>
