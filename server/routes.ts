@@ -5875,7 +5875,7 @@ Geef context: leg in 3-5 zinnen uit waar dit verhaal in past, welke bredere ontw
 
 Geef daarnaast 2-3 gerelateerde verhaallijnen of vervolgvragen die de lezer kan onderzoeken.
 
-Geef tot slot 2-4 andere media of nieuwsbronnen die met dit verhaal te maken (kunnen) hebben. Dit mogen Nederlandse landelijke media zijn (NOS, NRC, Telegraaf, Volkskrant, RTL Nieuws, NU.nl, FD), regionale omroepen, vakmedia of relevante alternatieve/onafhankelijke kanalen. Per bron: naam, korte invalshoek (waarom die bron hier waarschijnlijk over schrijft of geschreven heeft, of welk gerelateerd nieuws zij brengen), en de impact die dit verhaal of dit type berichtgeving kan hebben op lokale ondernemers in Nederland (heel concreet: koopgedrag, regelgeving, vergunningen, personeel, kosten, vertrouwen, etc.).
+Geef tot slot 2-4 andere onafhankelijke / alternatieve Nederlandse mediabronnen die met dit verhaal te maken (kunnen) hebben. NIET de mainstream/staatsmedia (dus EXPLICIET GEEN NOS, NOS Journaal, NRC, Telegraaf, Volkskrant, AD, Trouw, RTL Nieuws, NU.nl, FD, regionale omroepen of vakmedia). Wél kanalen zoals Blckbx, De Andere Krant, Café Weltschmerz, Ongehoord Nederland (ON!), Potkaars, Niburu, Jensen, Café Engels, Substack-auteurs, onafhankelijke YouTube/Telegram-journalisten en vergelijkbare alternatieve onderzoeksjournalistiek. Per bron: naam, korte invalshoek (waarom die bron hier waarschijnlijk over schrijft of geschreven heeft, of welk gerelateerd nieuws zij brengen), en de impact die dit verhaal of dit type berichtgeving kan hebben op lokale ondernemers in Nederland (heel concreet: koopgedrag, regelgeving, vergunningen, personeel, kosten, vertrouwen, etc.).
 
 Antwoord ALLEEN met JSON, exact deze structuur:
 {
