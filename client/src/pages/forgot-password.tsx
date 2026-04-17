@@ -97,17 +97,6 @@ export default function ForgotPasswordPage() {
         </div>
       </div>
 
-      <style>{`
-        .openregio-auth-page { background: #f4f6fb; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
-        .openregio-auth-center { width: 100%; max-width: 440px; }
-        .openregio-auth-logo { text-align: center; margin-bottom: 24px; }
-        .openregio-auth-logo .openregio-topnav-logo { font-size: 24px; font-weight: 800; letter-spacing: -.4px; text-decoration: none; }
-        .openregio-auth-card { margin-bottom: 0; }
-        .openregio-auth-header { margin-bottom: 22px; }
-        .openregio-auth-title { font-size: 20px; font-weight: 800; color: #0b2240; margin-bottom: 6px; letter-spacing: -.3px; }
-        .openregio-auth-sub { font-size: 13px; color: #64748b; line-height: 1.6; margin: 0; }
-        .openregio-auth-footer { font-size: 13px; color: #94a3b8; text-align: center; margin-top: 18px; margin-bottom: 0; }
-      `}</style>
     </div>
   );
 }
