@@ -866,7 +866,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Cooperatief ledenstats: telt totaal/basic/pro members vanuit de users tabel
-  app.get("/api/cooperatief-stats", async (_req, res) => {
+  // Alleen voor ingelogde leden (dashboard-data, niet publiek).
+  app.get("/api/cooperatief-stats", requireAuth, async (_req, res) => {
     try {
       const rows = await db
         .select({
