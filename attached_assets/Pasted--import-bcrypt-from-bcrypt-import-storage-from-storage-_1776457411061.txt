@@ -1,25 +1,26 @@
+
 import bcrypt from "bcrypt";
 import { storage } from "./storage";
-
+ 
 const SALT_ROUNDS = 10;
-
+ 
 // ─── MASTER ACCOUNT ──────────────────────────────────────────────────────────
 // Wachtwoord wordt geladen uit MASTER_PASSWORD env-variabele.
 // Stel dit in als Replit Secret: MASTER_PASSWORD=jouw-veilig-wachtwoord
 export async function seedMasterAccount() {
   const masterEmail = process.env.MASTER_EMAIL || "edwin@stroombox.nl";
   const masterPassword = process.env.MASTER_PASSWORD;
-
+ 
   if (!masterPassword) {
     console.warn(
       "[Seed] MASTER_PASSWORD niet ingesteld — master account wordt niet aangemaakt of bijgewerkt."
     );
     return;
   }
-
+ 
   try {
     const existingMaster = await storage.getUserByEmail(masterEmail);
-
+ 
     if (existingMaster) {
       if (existingMaster.plan !== "pro" || existingMaster.role !== "master") {
         await storage.updateUser(existingMaster.id, { plan: "pro", role: "master" });
@@ -29,9 +30,9 @@ export async function seedMasterAccount() {
       }
       return;
     }
-
+ 
     const passwordHash = await bcrypt.hash(masterPassword, SALT_ROUNDS);
-
+ 
     const masterUser = await storage.createUser({
       email: masterEmail,
       passwordHash,
@@ -40,13 +41,13 @@ export async function seedMasterAccount() {
       firstName: "Edwin",
       lastName: "Stroombox",
     });
-
+ 
     console.log("✓ Master account aangemaakt:", masterUser.email, "met rol:", masterUser.role);
   } catch (error) {
     console.error("[Seed] Master account seed mislukt (niet fataal):", (error as Error).message || error);
   }
 }
-
+ 
 // ─── TEST SEED ────────────────────────────────────────────────────────────────
 // Alleen uitvoeren als NODE_ENV=test of TEST_SEED=true.
 // Maakt drie testgebruikers aan: admin, pro en basic.
@@ -55,9 +56,9 @@ export async function seedTestAccounts() {
   if (process.env.NODE_ENV !== "test" && process.env.TEST_SEED !== "true") {
     return;
   }
-
+ 
   console.log("[TestSeed] Testgebruikers aanmaken...");
-
+ 
   const accounts = [
     {
       email: "admin@test.openregio.nl",
@@ -84,7 +85,7 @@ export async function seedTestAccounts() {
       lastName: "Basic",
     },
   ];
-
+ 
   for (const account of accounts) {
     try {
       const existing = await storage.getUserByEmail(account.email);
@@ -92,7 +93,7 @@ export async function seedTestAccounts() {
         console.log(`[TestSeed] Bestaat al: ${account.email}`);
         continue;
       }
-
+ 
       const passwordHash = await bcrypt.hash(account.password, SALT_ROUNDS);
       await storage.createUser({
         email: account.email,
@@ -109,3 +110,4 @@ export async function seedTestAccounts() {
     }
   }
 }
+ 
