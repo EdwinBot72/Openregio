@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { PublicTopNav } from "@/components/PublicTopNav";
-import { ExternalLink, Loader2, Newspaper, Radio, Sparkles } from "lucide-react";
+import { Loader2, Newspaper, Radio, Sparkles } from "lucide-react";
 
 interface NewsItem {
   id: string;
@@ -69,110 +69,80 @@ export default function NieuwsPage() {
             key={item.id}
             className="openregio-public-card"
             data-testid={`card-news-${item.id}`}
+            style={{ padding: "32px 36px" }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#64748b", marginBottom: 8 }}>
-              <Newspaper className="h-3.5 w-3.5" style={{ color: "#1f5fae" }} />
+            <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#94a3b8", marginBottom: 14, textTransform: "uppercase", letterSpacing: ".5px", fontWeight: 600 }}>
+              <Newspaper className="h-3.5 w-3.5" style={{ color: "#94a3b8" }} />
               <span>{formatDate(item.publishedAt)}</span>
             </div>
 
-            <h2 style={{ fontSize: 18, fontWeight: 800, color: "#0b2240", margin: "0 0 8px", lineHeight: 1.35 }}>
-              <a
-                href={item.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "inherit", textDecoration: "none" }}
-                data-testid={`link-title-${item.id}`}
-              >
-                {item.title}
-              </a>
+            <h2
+              style={{ fontSize: 24, fontWeight: 800, color: "#0b2240", margin: "0 0 14px", lineHeight: 1.3 }}
+              data-testid={`text-title-${item.id}`}
+            >
+              {item.title}
             </h2>
 
             {item.summary && (
-              <p style={{ fontSize: 14, color: "#475569", margin: "0 0 14px", lineHeight: 1.6 }}>
+              <p style={{ fontSize: 16, color: "#475569", margin: "0 0 24px", lineHeight: 1.7 }}>
                 {item.summary}
               </p>
             )}
 
-            <a
-              href={item.link}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, color: "#1f5fae", fontWeight: 600, textDecoration: "none", marginBottom: 14 }}
-              data-testid={`link-original-${item.id}`}
-            >
-              Lees origineel bericht <ExternalLink className="h-3.5 w-3.5" />
-            </a>
-
             {item.aiContext && (
-              <div
-                style={{
-                  background: "#fff",
-                  border: "1px solid #e6ebf2",
-                  borderRadius: 10,
-                  padding: "14px 16px",
-                  marginTop: 4,
-                }}
-                data-testid={`ai-context-${item.id}`}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-                  <Sparkles className="h-3.5 w-3.5" style={{ color: "#1f5fae" }} />
-                  <span style={{ fontSize: 11, fontWeight: 800, color: "#0b2240", textTransform: "uppercase", letterSpacing: ".5px" }}>
-                    AI-context
+              <div style={{ marginTop: 8 }} data-testid={`ai-context-${item.id}`}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                  <Sparkles className="h-4 w-4" style={{ color: "#1f5fae" }} />
+                  <span style={{ fontSize: 12, fontWeight: 800, color: "#0b2240", textTransform: "uppercase", letterSpacing: ".5px" }}>
+                    Wat speelt hier?
                   </span>
                 </div>
-                <p style={{ fontSize: 13, color: "#374151", margin: 0, lineHeight: 1.65, whiteSpace: "pre-wrap" }}>
+                <p style={{ fontSize: 15, color: "#334155", margin: 0, lineHeight: 1.75, whiteSpace: "pre-wrap" }}>
                   {item.aiContext}
                 </p>
+              </div>
+            )}
 
-                {item.related && item.related.length > 0 && (
-                  <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid #e6ebf2" }}>
-                    <p style={{ fontSize: 11, fontWeight: 700, color: "#0b2240", textTransform: "uppercase", letterSpacing: ".5px", margin: "0 0 6px" }}>
-                      Gerelateerde verhaallijnen
-                    </p>
-                    <ul style={{ margin: 0, paddingLeft: 18, listStyle: "disc" }}>
-                      {item.related.map((r, i) => (
-                        <li key={i} style={{ fontSize: 13, color: "#374151", lineHeight: 1.6, marginBottom: 4 }}>
-                          <strong style={{ color: "#0b2240" }}>{r.titel}</strong> — {r.toelichting}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
+            {item.related && item.related.length > 0 && (
+              <div style={{ marginTop: 24 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
+                  <span style={{ fontSize: 12, fontWeight: 800, color: "#0b2240", textTransform: "uppercase", letterSpacing: ".5px" }}>
+                    Verwante verhaallijnen
+                  </span>
+                </div>
+                <ul style={{ margin: 0, paddingLeft: 20, listStyle: "disc" }}>
+                  {item.related.map((r, i) => (
+                    <li key={i} style={{ fontSize: 15, color: "#334155", lineHeight: 1.75, marginBottom: 8 }}>
+                      <strong style={{ color: "#0b2240" }}>{r.titel}</strong> — {r.toelichting}
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
 
             {item.media && item.media.length > 0 && (
-              <div
-                style={{
-                  background: "#fff",
-                  border: "1px solid #e6ebf2",
-                  borderRadius: 10,
-                  padding: "14px 16px",
-                  marginTop: 10,
-                }}
-                data-testid={`media-impact-${item.id}`}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-                  <Radio className="h-3.5 w-3.5" style={{ color: "#1f5fae" }} />
-                  <span style={{ fontSize: 11, fontWeight: 800, color: "#0b2240", textTransform: "uppercase", letterSpacing: ".5px" }}>
-                    Andere media die hier mee te maken hebben
+              <div style={{ marginTop: 24 }} data-testid={`media-impact-${item.id}`}>
+                <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
+                  <Radio className="h-4 w-4" style={{ color: "#1f5fae" }} />
+                  <span style={{ fontSize: 12, fontWeight: 800, color: "#0b2240", textTransform: "uppercase", letterSpacing: ".5px" }}>
+                    Andere media hierover
                   </span>
                 </div>
-                <ul style={{ margin: 0, paddingLeft: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 10 }}>
+                <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
                   {item.media.map((m, i) => (
-                    <li key={i} style={{ fontSize: 13, color: "#374151", lineHeight: 1.6 }}>
-                      <div style={{ fontWeight: 700, color: "#0b2240" }}>{m.naam}</div>
+                    <div key={i} style={{ fontSize: 15, color: "#334155", lineHeight: 1.7 }}>
+                      <div style={{ fontWeight: 700, color: "#0b2240", marginBottom: 2 }}>{m.naam}</div>
                       {m.hoek && (
                         <div style={{ color: "#475569" }}>{m.hoek}</div>
                       )}
                       {m.impact && (
-                        <div style={{ marginTop: 4, fontSize: 12, color: "#475569" }}>
+                        <div style={{ marginTop: 6, fontSize: 14, color: "#475569" }}>
                           <strong style={{ color: "#0b2240" }}>Impact lokale ondernemer:</strong> {m.impact}
                         </div>
                       )}
-                    </li>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
             )}
           </article>
