@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { PublicTopNav } from "@/components/PublicTopNav";
-import { ExternalLink, Loader2, Newspaper, Sparkles } from "lucide-react";
+import { ExternalLink, Loader2, Newspaper, Radio, Sparkles } from "lucide-react";
 
 interface NewsItem {
   id: string;
@@ -12,6 +12,7 @@ interface NewsItem {
   publishedAt: string;
   aiContext: string | null;
   related: { titel: string; toelichting: string }[];
+  media?: { naam: string; hoek: string; impact: string }[];
 }
 
 interface NewsResponse {
@@ -147,6 +148,41 @@ export default function NieuwsPage() {
                     </ul>
                   </div>
                 )}
+              </div>
+            )}
+
+            {item.media && item.media.length > 0 && (
+              <div
+                style={{
+                  background: "#eff6ff",
+                  border: "1px solid #bfdbfe",
+                  borderRadius: 10,
+                  padding: "14px 16px",
+                  marginTop: 10,
+                }}
+                data-testid={`media-impact-${item.id}`}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
+                  <Radio className="h-3.5 w-3.5" style={{ color: "#1f5fae" }} />
+                  <span style={{ fontSize: 11, fontWeight: 800, color: "#1f5fae", textTransform: "uppercase", letterSpacing: ".5px" }}>
+                    Andere media die hier mee te maken hebben
+                  </span>
+                </div>
+                <ul style={{ margin: 0, paddingLeft: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 10 }}>
+                  {item.media.map((m, i) => (
+                    <li key={i} style={{ fontSize: 13, color: "#1e3a8a", lineHeight: 1.6 }}>
+                      <div style={{ fontWeight: 700, color: "#0b2240" }}>{m.naam}</div>
+                      {m.hoek && (
+                        <div style={{ color: "#1e40af" }}>{m.hoek}</div>
+                      )}
+                      {m.impact && (
+                        <div style={{ marginTop: 4, fontSize: 12, color: "#475569" }}>
+                          <strong style={{ color: "#1f5fae" }}>Impact lokale ondernemer:</strong> {m.impact}
+                        </div>
+                      )}
+                    </li>
+                  ))}
+                </ul>
               </div>
             )}
           </article>

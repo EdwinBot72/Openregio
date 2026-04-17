@@ -5795,10 +5795,11 @@ Geef ALLEEN geldige JSON terug (geen markdown, geen uitleg), in dit exacte forma
     publishedAt: string;
     aiContext: string | null;
     related: { titel: string; toelichting: string }[];
+    media: { naam: string; hoek: string; impact: string }[];
   };
 
   const newsListCache: { items: NewsItem[]; fetchedAt: number } = { items: [], fetchedAt: 0 };
-  const newsContextCache = new Map<string, { aiContext: string; related: { titel: string; toelichting: string }[]; ts: number }>();
+  const newsContextCache = new Map<string, { aiContext: string; related: { titel: string; toelichting: string }[]; media: { naam: string; hoek: string; impact: string }[]; ts: number }>();
   const NEWS_LIST_TTL_MS = 30 * 60 * 1000;
   const NEWS_CONTEXT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
   const NEWS_MAX_ITEMS = 8;
@@ -5856,12 +5857,12 @@ Geef ALLEEN geldige JSON terug (geen markdown, geen uitleg), in dit exacte forma
       if (!title || !link) continue;
       const id = createHash("sha1").update(guid).digest("base64url").slice(0, 16);
       const summary = desc.length > 220 ? desc.slice(0, 220).trim() + "…" : desc;
-      items.push({ id, title, summary, link, source: sourceName, publishedAt: safeIsoDate(pub), aiContext: null, related: [] });
+      items.push({ id, title, summary, link, source: sourceName, publishedAt: safeIsoDate(pub), aiContext: null, related: [], media: [] });
     }
     return items;
   }
 
-  async function generateNewsContext(item: NewsItem): Promise<{ aiContext: string; related: { titel: string; toelichting: string }[] }> {
+  async function generateNewsContext(item: NewsItem): Promise<{ aiContext: string; related: { titel: string; toelichting: string }[]; media: { naam: string; hoek: string; impact: string }[] }> {
     const prompt = `Je bent een Nederlandse onderzoeksjournalist die korte achtergrondduiding schrijft bij nieuwsberichten voor lokale ondernemers.
 
 Bericht:
@@ -5874,12 +5875,18 @@ Geef context: leg in 3-5 zinnen uit waar dit verhaal in past, welke bredere ontw
 
 Geef daarnaast 2-3 gerelateerde verhaallijnen of vervolgvragen die de lezer kan onderzoeken.
 
+Geef tot slot 2-4 andere media of nieuwsbronnen die met dit verhaal te maken (kunnen) hebben. Dit mogen Nederlandse landelijke media zijn (NOS, NRC, Telegraaf, Volkskrant, RTL Nieuws, NU.nl, FD), regionale omroepen, vakmedia of relevante alternatieve/onafhankelijke kanalen. Per bron: naam, korte invalshoek (waarom die bron hier waarschijnlijk over schrijft of geschreven heeft, of welk gerelateerd nieuws zij brengen), en de impact die dit verhaal of dit type berichtgeving kan hebben op lokale ondernemers in Nederland (heel concreet: koopgedrag, regelgeving, vergunningen, personeel, kosten, vertrouwen, etc.).
+
 Antwoord ALLEEN met JSON, exact deze structuur:
 {
   "aiContext": "...",
   "related": [
     { "titel": "...", "toelichting": "..." },
     { "titel": "...", "toelichting": "..." }
+  ],
+  "media": [
+    { "naam": "...", "hoek": "...", "impact": "..." },
+    { "naam": "...", "hoek": "...", "impact": "..." }
   ]
 }`;
 
@@ -5892,7 +5899,7 @@ Antwoord ALLEEN met JSON, exact deze structuur:
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: [{ role: "user", parts: [{ text: prompt }] }],
-      config: { maxOutputTokens: 800, temperature: 0.6, thinkingConfig: { thinkingBudget: 0 } },
+      config: { maxOutputTokens: 1500, temperature: 0.6, thinkingConfig: { thinkingBudget: 0 } },
     });
 
     const parts = response.candidates?.[0]?.content?.parts;
@@ -5902,6 +5909,16 @@ Antwoord ALLEEN met JSON, exact deze structuur:
     return {
       aiContext: typeof parsed.aiContext === "string" ? parsed.aiContext : "",
       related: Array.isArray(parsed.related) ? parsed.related.slice(0, 3) : [],
+      media: Array.isArray(parsed.media)
+        ? parsed.media
+            .filter((m: any) => m && typeof m.naam === "string")
+            .slice(0, 4)
+            .map((m: any) => ({
+              naam: String(m.naam),
+              hoek: typeof m.hoek === "string" ? m.hoek : "",
+              impact: typeof m.impact === "string" ? m.impact : "",
+            }))
+        : [],
     };
   }
 
@@ -5932,13 +5949,13 @@ Antwoord ALLEEN met JSON, exact deze structuur:
       const items = await Promise.all(
         newsListCache.items.map(async (item) => {
           const cached = newsContextCache.get(item.id);
-          if (cached && now - cached.ts < NEWS_CONTEXT_TTL_MS) {
-            return { ...item, aiContext: cached.aiContext, related: cached.related };
+          if (cached && now - cached.ts < NEWS_CONTEXT_TTL_MS && cached.media) {
+            return { ...item, aiContext: cached.aiContext, related: cached.related, media: cached.media };
           }
           try {
             const ctx = await generateNewsContext(item);
             newsContextCache.set(item.id, { ...ctx, ts: now });
-            return { ...item, aiContext: ctx.aiContext, related: ctx.related };
+            return { ...item, aiContext: ctx.aiContext, related: ctx.related, media: ctx.media };
           } catch (err) {
             console.error("[News] AI-context fout voor", item.id, err);
             return item;
