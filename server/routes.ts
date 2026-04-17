@@ -4255,6 +4255,23 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
+  // GET /api/intel/signalen/public — publieke ticker-feed (geen auth, max 8 items)
+  app.get("/api/intel/signalen/public", async (_req, res) => {
+    try {
+      const signalen = await storage.getIntelSignalen({ isPublished: true });
+      const items = signalen.slice(0, 8).map((s) => ({
+        id: s.id,
+        titel: s.titel,
+        regio: s.regio,
+      }));
+      res.set("Cache-Control", "public, max-age=300");
+      res.json(items);
+    } catch (err: any) {
+      console.error("Intel signalen (publiek) ophalen fout:", err);
+      res.status(500).json({ error: "Kon signalen niet ophalen" });
+    }
+  });
+
   // GET /api/intel/signalen — haal signalen op (iedereen die is ingelogd)
   app.get("/api/intel/signalen", requireAuth, async (req, res) => {
     try {

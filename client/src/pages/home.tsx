@@ -53,6 +53,14 @@ export default function HomePage() {
     queryKey: ["/api/blogs/public"],
   });
 
+  const { data: tickerSignalen = [] } = useQuery<{ id: string; titel: string; regio: string }[]>({
+    queryKey: ["/api/intel/signalen/public"],
+    staleTime: 5 * 60 * 1000,
+  });
+  const tickerItems = tickerSignalen.length > 0
+    ? tickerSignalen.map((s) => s.titel)
+    : TICKER;
+
   const [showCookie, setShowCookie] = useState(false);
   useEffect(() => {
     if (!localStorage.getItem("cookie_consent")) setShowCookie(true);
@@ -254,7 +262,7 @@ export default function HomePage() {
       {/* ══ TICKER ══ */}
       <div style={{ overflow: "hidden", background: "#0b2240", padding: "10px 0" }} data-testid="ticker-bar">
         <div className="tick-track" style={{ display: "flex", width: "max-content" }}>
-          {[...TICKER, ...TICKER].map((t, i) => (
+          {[...tickerItems, ...tickerItems].map((t, i) => (
             <span key={i} className="ticker-text" style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "0 28px", fontSize: "11px", fontWeight: 500, color: "#7ea8d4", whiteSpace: "nowrap" }}>
               <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#f28a1a", flexShrink: 0, display: "inline-block" }} />
               {t}
