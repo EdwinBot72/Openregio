@@ -51,6 +51,7 @@ export const MAIN_NAV: NavSection[] = [
       { title: "Overzicht", url: "/vandaag", icon: CalendarDays },
       { title: "Nieuwe updates", url: "/vandaag/updates", icon: Bell },
       { title: "Acties", url: "/vandaag/acties", icon: Zap },
+      { title: "Samen aanpakken", url: "/vandaag/samen", icon: Users },
     ],
   },
 

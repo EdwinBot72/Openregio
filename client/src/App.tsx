@@ -79,6 +79,7 @@ import CursussenPage from "@/pages/cursussen";
 import AdminCursussenPage from "@/pages/admin/cursussen";
 import BinnenkortPage from "@/pages/binnenkort";
 import NieuwsPage from "@/pages/nieuws";
+import SamenAanpakkenPage from "@/pages/samen-aanpakken";
 
 // Routes that should NOT have the sidebar/header layout
 const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse", "/koop-lokaal"];
@@ -175,6 +176,7 @@ function AuthenticatedRouter() {
       <Route path="/vandaag" component={VandaagPage} />
       <Route path="/vandaag/updates" component={IntelPage} />
       <Route path="/vandaag/acties" component={CursussenPage} />
+      <Route path="/vandaag/samen" component={SamenAanpakkenPage} />
 
       {/* ── Kansen (Sectie 2) ─────────────────────────────────────────────── */}
       <Route path="/kansen/opdrachten" component={AanbestedingenPage} />
