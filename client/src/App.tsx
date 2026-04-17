@@ -302,16 +302,33 @@ function AppContent() {
   const isVandaagPage = currentLocation === "/vandaag" || currentLocation.startsWith("/vandaag/");
   const isNetworkPage = currentLocation === "/network" || currentLocation.startsWith("/network/");
   const isRegioBotPage = currentLocation === "/regiobot" || currentLocation.startsWith("/regiobot/");
-  const isOpenRegioTopNavPage = isVandaagPage || isNetworkPage || isRegioBotPage;
+  // Authenticated OpenRegio-pagina's met top-nav (vereisen AuthGuard)
+  const isOpenRegioAuthPage = isVandaagPage || isNetworkPage || isRegioBotPage;
 
-  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isLidmaatschapPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage || isBlogsPage || isForgotPasswordPage || isResetPasswordPage || isDisclaimerPage || isCookiebeleidPage || isRegioAnalysePage || isKoopLokaalPage;
+  // /lidmaatschap krijgt óók de top-nav, maar blijft publiek bereikbaar.
+  // Daarom NIET in PUBLIC_ROUTES en NIET in AuthGuard, maar in een eigen
+  // layout-tak hieronder.
+  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage || isBlogsPage || isForgotPasswordPage || isResetPasswordPage || isDisclaimerPage || isCookiebeleidPage || isRegioAnalysePage || isKoopLokaalPage;
 
   if (isPublicRoute) {
     return <PublicRouter />;
   }
 
+  // /lidmaatschap: publieke pagina met OpenRegio top-nav (top-nav past zich
+  // aan op basis van of de gebruiker is ingelogd)
+  if (isLidmaatschapPage) {
+    return (
+      <div className="openregio-page" data-testid="layout-openregio-topnav-public">
+        <OpenRegioTopNav />
+        <main className="flex-1 protected-content">
+          <LidmaatschapPage />
+        </main>
+      </div>
+    );
+  }
+
   // OpenRegio top-nav layout (geen sidebar) voor /vandaag, /network, /regiobot
-  if (isOpenRegioTopNavPage) {
+  if (isOpenRegioAuthPage) {
     return (
       <div className="openregio-page" data-testid="layout-openregio-topnav">
         <OpenRegioTopNav />

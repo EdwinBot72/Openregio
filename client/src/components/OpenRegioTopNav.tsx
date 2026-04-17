@@ -64,21 +64,40 @@ export function OpenRegioTopNav() {
           })}
         </nav>
 
-        <div className="openregio-topnav-user" data-testid="topnav-user">
-          <div className="openregio-topnav-avatar" aria-hidden="true">
-            {initials}
+        {user ? (
+          <div className="openregio-topnav-user" data-testid="topnav-user">
+            <div className="openregio-topnav-avatar" aria-hidden="true">
+              {initials}
+            </div>
+            <span className="openregio-topnav-username" data-testid="text-topnav-name">
+              {displayName}
+            </span>
+            <span className="openregio-topnav-dot" aria-hidden="true">·</span>
+            <span
+              className={`openregio-topnav-plan ${isPro ? "is-pro" : "is-basic"}`}
+              data-testid="text-topnav-plan"
+            >
+              {planLabel}
+            </span>
           </div>
-          <span className="openregio-topnav-username" data-testid="text-topnav-name">
-            {displayName}
-          </span>
-          <span className="openregio-topnav-dot" aria-hidden="true">·</span>
-          <span
-            className={`openregio-topnav-plan ${isPro ? "is-pro" : "is-basic"}`}
-            data-testid="text-topnav-plan"
-          >
-            {planLabel}
-          </span>
-        </div>
+        ) : (
+          <div className="openregio-topnav-user" data-testid="topnav-guest">
+            <Link
+              href="/login"
+              className="openregio-topnav-tab"
+              data-testid="link-topnav-login"
+            >
+              Inloggen
+            </Link>
+            <Link
+              href="/lidmaatschap"
+              className="openregio-button openregio-button-pro openregio-button-small"
+              data-testid="link-topnav-signup"
+            >
+              Word lid
+            </Link>
+          </div>
+        )}
 
         <button
           type="button"
@@ -113,23 +132,42 @@ export function OpenRegioTopNav() {
               </Link>
             );
           })}
-          <div className="openregio-topnav-mobile-user">
-            <div className="openregio-topnav-avatar" aria-hidden="true">{initials}</div>
-            <div>
-              <div
-                className="openregio-topnav-username"
-                data-testid="text-topnav-mobile-name"
-              >
-                {displayName}
-              </div>
-              <div
-                className={`openregio-topnav-plan ${isPro ? "is-pro" : "is-basic"}`}
-                data-testid="text-topnav-mobile-plan"
-              >
-                {planLabel}
+          {user ? (
+            <div className="openregio-topnav-mobile-user">
+              <div className="openregio-topnav-avatar" aria-hidden="true">{initials}</div>
+              <div>
+                <div
+                  className="openregio-topnav-username"
+                  data-testid="text-topnav-mobile-name"
+                >
+                  {displayName}
+                </div>
+                <div
+                  className={`openregio-topnav-plan ${isPro ? "is-pro" : "is-basic"}`}
+                  data-testid="text-topnav-mobile-plan"
+                >
+                  {planLabel}
+                </div>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="openregio-topnav-mobile-user" style={{ flexDirection: "column", alignItems: "stretch", gap: 8 }}>
+              <Link
+                href="/login"
+                className="openregio-topnav-mobile-tab"
+                data-testid="link-topnav-mobile-login"
+              >
+                Inloggen
+              </Link>
+              <Link
+                href="/lidmaatschap"
+                className="openregio-button openregio-button-pro openregio-button-small"
+                data-testid="link-topnav-mobile-signup"
+              >
+                Word lid
+              </Link>
+            </div>
+          )}
         </div>
       )}
     </header>

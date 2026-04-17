@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Link, useSearch } from "wouter";
+// De OpenRegio top-nav wordt nu verzorgd door de layout-wrapper in App.tsx,
+// dus deze pagina rendert zelf geen extra publieke navigatie meer.
 
 const MOLLIE_BASIC_LINK =
   (import.meta.env.VITE_MOLLIE_BASIC_PAYMENT_LINK as string) ||
@@ -74,28 +76,7 @@ export default function LidmaatschapPage() {
   const active = PLANS[selected];
 
   return (
-    <div className="min-h-screen bg-[#f4f6fb]">
-      {/* Lichtgewicht nav voor publieke toegang */}
-      <nav className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-[#e8edf8]">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-          <Link
-            href="/"
-            className="text-xl font-extrabold text-[#0b2240]"
-            style={{ fontFamily: "'Plus Jakarta Sans', system-ui, sans-serif" }}
-            data-testid="link-home-logo"
-          >
-            OpenRegio
-          </Link>
-          <Link
-            href="/login"
-            className="text-sm font-semibold text-[#1f5fae] hover:underline"
-            data-testid="link-login"
-          >
-            Al lid? Inloggen
-          </Link>
-        </div>
-      </nav>
-
+    <div className="bg-[#f4f6fb]">
       <div className="openregio-upgrade" data-testid="page-lidmaatschap">
         <h1 data-testid="text-page-title">Word lid van OpenRegio</h1>
         <p className="openregio-subtitle">
