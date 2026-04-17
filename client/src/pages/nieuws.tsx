@@ -72,16 +72,6 @@ export default function NieuwsPage() {
           >
             <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#64748b", marginBottom: 8 }}>
               <Newspaper className="h-3.5 w-3.5" style={{ color: "#1f5fae" }} />
-              <a
-                href={item.source.startsWith("http") ? item.source : `https://${item.source}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{ color: "#1f5fae", fontWeight: 600, textDecoration: "none" }}
-                data-testid={`link-source-${item.id}`}
-              >
-                {item.source.replace(/^https?:\/\//, "").replace(/\/$/, "")}
-              </a>
-              <span>·</span>
               <span>{formatDate(item.publishedAt)}</span>
             </div>
 
