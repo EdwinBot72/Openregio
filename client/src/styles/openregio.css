@@ -11,6 +11,210 @@
    Valt terug op system-ui / sans-serif zoals gespecificeerd in font-family. */
 
 /* ═══════════════════════════════════════════════════════════════
+   TOP-NAV (vervangt sidebar op de OpenRegio pagina's)
+═══════════════════════════════════════════════════════════════ */
+
+.openregio-topnav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: #fff;
+    border-bottom: 1px solid #e8edf8;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+.openregio-topnav-inner {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+.openregio-topnav-logo {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -.4px;
+    text-decoration: none;
+    flex-shrink: 0;
+}
+.openregio-topnav-logo-dark { color: #0b2240; }
+.openregio-topnav-logo-blue { color: #1f5fae; }
+
+.openregio-topnav-tabs {
+    display: flex;
+    gap: 6px;
+    flex: 1;
+    justify-content: center;
+}
+.openregio-topnav-tab {
+    padding: 9px 22px;
+    border-radius: 24px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #64748b;
+    text-decoration: none;
+    background: transparent;
+    border: 1px solid transparent;
+    transition: background .15s, color .15s, border-color .15s;
+    white-space: nowrap;
+}
+.openregio-topnav-tab:hover {
+    background: #f0f4ff;
+    color: #1f5fae;
+}
+.openregio-topnav-tab.is-active {
+    background: #fff;
+    color: #0b2240;
+    border-color: #cbd5e1;
+}
+
+.openregio-topnav-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.openregio-topnav-avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: #f0f4ff;
+    color: #1f5fae;
+    font-size: 12px;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.openregio-topnav-username {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0f172a;
+    white-space: nowrap;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.openregio-topnav-dot {
+    color: #94a3b8;
+    font-weight: 700;
+}
+.openregio-topnav-plan {
+    font-size: 12px;
+    font-weight: 700;
+}
+.openregio-topnav-plan.is-basic { color: #1f5fae; }
+.openregio-topnav-plan.is-pro   { color: #f28a1a; }
+
+.openregio-topnav-burger {
+    display: none;
+    background: transparent;
+    border: 1px solid #e8edf8;
+    border-radius: 10px;
+    padding: 7px;
+    color: #0f172a;
+    cursor: pointer;
+}
+
+.openregio-topnav-mobile {
+    display: none;
+    padding: 12px 18px 16px;
+    border-top: 1px solid #e8edf8;
+    background: #fff;
+    flex-direction: column;
+    gap: 6px;
+}
+.openregio-topnav-mobile-tab {
+    padding: 10px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+    background: #f8faff;
+    text-decoration: none;
+}
+.openregio-topnav-mobile-tab.is-active {
+    background: #f0f4ff;
+    color: #1f5fae;
+}
+.openregio-topnav-mobile-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+    padding-top: 12px;
+    border-top: 1px solid #e8edf8;
+}
+
+@media (max-width: 860px) {
+    .openregio-topnav-tabs,
+    .openregio-topnav-user { display: none; }
+    .openregio-topnav-burger { display: inline-flex; margin-left: auto; }
+    .openregio-topnav-mobile { display: flex; }
+}
+
+/* Pagina-wrapper voor de OpenRegio top-nav layout */
+.openregio-page {
+    min-height: 100vh;
+    background: #f4f6fb;
+    display: flex;
+    flex-direction: column;
+}
+.openregio-page > main {
+    flex: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   VANDAAG-DASHBOARD (nieuw): begroeting + ledenstats + grid
+═══════════════════════════════════════════════════════════════ */
+
+.openregio-greeting {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-bottom: 6px;
+}
+.openregio-greeting h1 {
+    font-size: 30px !important;
+    margin-bottom: 0 !important;
+}
+.openregio-greeting-wave {
+    display: inline-block;
+    margin-left: 8px;
+    transform-origin: 70% 70%;
+    animation: openregio-wave 2.4s ease-in-out infinite;
+}
+@keyframes openregio-wave {
+    0%, 60%, 100% { transform: rotate(0deg); }
+    10%, 30% { transform: rotate(14deg); }
+    20%, 40% { transform: rotate(-8deg); }
+}
+.openregio-greeting-plan {
+    margin-bottom: 22px;
+}
+.openregio-laatste-nieuws {
+    background: #fff;
+    border: 1px solid #e8edf8;
+    border-radius: 20px;
+    padding: 22px;
+}
+.openregio-laatste-nieuws h3 {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0f172a;
+    margin-bottom: 8px;
+}
+.openregio-laatste-nieuws p {
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* ═══════════════════════════════════════════════════════════════
    RESET & BASIS
 ═══════════════════════════════════════════════════════════════ */
 

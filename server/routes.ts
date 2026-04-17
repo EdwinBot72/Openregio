@@ -865,6 +865,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Cooperatief ledenstats: telt totaal/basic/pro members vanuit de users tabel
+  app.get("/api/cooperatief-stats", async (_req, res) => {
+    try {
+      const rows = await db
+        .select({
+          plan: users.plan,
+          count: sql<number>`count(*)`,
+        })
+        .from(users)
+        .groupBy(users.plan);
+
+      let basic = 0;
+      let pro = 0;
+      for (const r of rows) {
+        const c = Number(r.count);
+        if (r.plan === "pro") pro += c;
+        else basic += c;
+      }
+      res.json({
+        totalMembers: basic + pro,
+        basicMembers: basic,
+        proMembers: pro,
+      });
+    } catch (error) {
+      console.warn("Cooperatief stats endpoint: DB unavailable, returning fallback");
+      res.json({ totalMembers: 0, basicMembers: 0, proMembers: 0 });
+    }
+  });
+
   // RegioBot chat route with mode support: general, legal, marketing (Pro-only)
   app.post("/api/regiobot/chat", requirePro, async (req, res) => {
     try {

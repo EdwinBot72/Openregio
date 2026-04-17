@@ -1,106 +1,61 @@
-import { useEffect } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useSidebar } from "@/components/ui/sidebar";
-import type { IntelSignaal } from "@shared/schema";
 
 type ProfielData = {
   naam?: string;
   beschrijving?: string;
   websiteUrl?: string;
   regio?: string;
-};
-type CursusItem = { id: string; title: string; completed: boolean; minutes: number; daysLeft: number };
-type Aanbesteding = {
-  id: string;
-  title: string;
-  buyer: string;
-  daysLeft: number | null;
+  categorieId?: string;
 };
 
-const URG_LABEL: Record<string, string> = {
-  hoog: "Urgent",
-  normaal: "Normaal",
-  info: "Info",
+type CooperatiefStats = {
+  totalMembers: number;
+  basicMembers: number;
+  proMembers: number;
 };
 
-function rankSignalen(s: IntelSignaal[]): IntelSignaal[] {
-  const o: Record<string, number> = { hoog: 0, normaal: 1, info: 2 };
-  return [...s].sort((a, b) => {
-    const d = (o[a.urgentie] ?? 2) - (o[b.urgentie] ?? 2);
-    if (d !== 0) return d;
-    return new Date(b.createdAt ?? 0).getTime() - new Date(a.createdAt ?? 0).getTime();
-  });
-}
+const CATEGORIE_LABELS: Record<string, string> = {
+  retail: "Retail & Winkels",
+  food: "Horeca & Voeding",
+  services: "Zakelijke Diensten",
+  tech: "Technologie & ICT",
+  health: "Gezondheid & Welzijn",
+  education: "Onderwijs & Training",
+  creative: "Creatief & Media",
+  construction: "Bouw & Renovatie",
+  agriculture: "Landbouw & Tuinbouw",
+  transport: "Transport & Logistiek",
+};
 
 export default function VandaagPage() {
   usePageTitle("Vandaag");
   const { user, isLoading: authLoading } = useAuth();
-  const { setOpen, isMobile } = useSidebar();
-
-  useEffect(() => {
-    if (!isMobile) setOpen(false);
-  }, [setOpen, isMobile]);
 
   const isPro = user?.plan === "pro";
-  const planLabel = isPro ? "Pro-bijdrager" : "Basis-lid";
+  const planLabel = isPro ? "Pro-bijdrager" : "Basic lid";
 
   const { data: profiel } = useQuery<ProfielData | null>({
     queryKey: ["/api/business-profile/me"],
     enabled: !!user,
   });
-  const { data: intelSignalen = [], isLoading: intelLoading } = useQuery<IntelSignaal[]>({
-    queryKey: ["/api/intel/signalen"],
-    enabled: !!user,
-  });
-  const { data: cursusData, isLoading: cursusLoading } = useQuery<{
-    items: CursusItem[];
-  }>({
-    queryKey: ["/api/cursussen"],
-    enabled: !!user,
-  });
-  const { data: documentenData } = useQuery<
-    { documents: { id: string }[] } | { id: string }[]
-  >({
-    queryKey: ["/api/documents"],
+
+  const { data: stats, isLoading: statsLoading } = useQuery<CooperatiefStats>({
+    queryKey: ["/api/cooperatief-stats"],
     enabled: !!user,
   });
 
-  const userRegio = profiel?.regio || user?.region || "";
-  const { data: aanbestedingenData } = useQuery<{ items: Aanbesteding[] }>({
-    queryKey: ["/api/tenderned/aanbestedingen", userRegio],
-    queryFn: () =>
-      fetch(
-        `/api/tenderned/aanbestedingen?gemeente=${encodeURIComponent(userRegio)}&limit=4`,
-        { credentials: "include" }
-      ).then((r) => {
-        if (!r.ok) throw new Error("nb");
-        return r.json();
-      }),
-    enabled: !!userRegio,
-    staleTime: 15 * 60 * 1000,
-  });
-
-  let documentenAantal = 0;
-  if (Array.isArray(documentenData)) documentenAantal = documentenData.length;
-  else if (documentenData && "documents" in documentenData)
-    documentenAantal = documentenData.documents.length;
-
-  const cursusItems = cursusData?.items ?? [];
-  const actiefKansen = cursusItems.filter((i) => !i.completed);
-  const aanbestedingen = aanbestedingenData?.items ?? [];
-
-  const signalenGerankt = rankSignalen(intelSignalen);
-  const topSignalen = signalenGerankt.slice(0, 5);
-  const totaalSignalen = signalenGerankt.length;
-  const aantalUrgent = signalenGerankt.filter((s) => s.urgentie === "hoog").length;
-
-  const displayName =
-    user?.firstName || profiel?.naam || user?.businessName || "ondernemer";
-  const bedrijfsnaam = profiel?.naam || user?.businessName || "—";
+  const displayFirstName =
+    user?.firstName ||
+    (profiel?.naam ? profiel.naam.split(" ")[0] : "") ||
+    "ondernemer";
+  const bedrijfsnaam = profiel?.naam || user?.businessName || "Mijn onderneming";
+  const categorieLabel = profiel?.categorieId
+    ? CATEGORIE_LABELS[profiel.categorieId] ?? profiel.categorieId
+    : "";
 
   if (authLoading) {
     return (
@@ -119,15 +74,26 @@ export default function VandaagPage() {
 
   return (
     <div className="openregio-dashboard" data-testid="page-vandaag">
-      {/* Header met begroeting + plan badge */}
-      <div className="openregio-dashboard-header">
-        <div>
-          <h1 data-testid="text-greeting">Welkom terug, {displayName}</h1>
-          <p className="openregio-subtitle" style={{ marginBottom: 0 }}>
-            Lokale signalen, kansen en regelgeving voor jouw onderneming
-            {userRegio ? ` in ${userRegio}` : ""}.
-          </p>
-        </div>
+      {/* Begroeting + Upgrade-knop */}
+      <div className="openregio-greeting">
+        <h1 data-testid="text-greeting">
+          Welkom, {displayFirstName}
+          <span className="openregio-greeting-wave" role="img" aria-label="zwaaiende hand">
+            👋
+          </span>
+        </h1>
+        {!isPro && (
+          <Link
+            href="/lidmaatschap?plan=pro"
+            className="openregio-button openregio-button-pro"
+            data-testid="button-upgrade-header"
+          >
+            Upgrade naar Pro
+          </Link>
+        )}
+      </div>
+
+      <div className="openregio-greeting-plan">
         <span
           className={`openregio-plan-badge ${
             isPro ? "openregio-plan-pro" : "openregio-plan-basic"
@@ -138,37 +104,42 @@ export default function VandaagPage() {
         </span>
       </div>
 
-      {/* 3 stat cards */}
+      {/* Ledenstats: totaal / basic / pro */}
       <div className="openregio-dashboard-stats">
-        <div className="openregio-stat-card" data-testid="stat-signalen">
-          <h3>Signalen</h3>
-          <p className="openregio-stat-number">{intelLoading ? "—" : totaalSignalen}</p>
+        <div className="openregio-stat-card" data-testid="stat-totaal">
+          <h3>Totaal leden</h3>
+          <p className="openregio-stat-number">
+            {statsLoading ? "—" : stats?.totalMembers ?? 0}
+          </p>
         </div>
-        <div className="openregio-stat-card" data-testid="stat-urgent">
-          <h3>Urgent</h3>
-          <p className="openregio-stat-number">{intelLoading ? "—" : aantalUrgent}</p>
+        <div className="openregio-stat-card" data-testid="stat-basic">
+          <h3>Basic leden</h3>
+          <p className="openregio-stat-number">
+            {statsLoading ? "—" : stats?.basicMembers ?? 0}
+          </p>
         </div>
-        <div className="openregio-stat-card" data-testid="stat-documenten">
-          <h3>Documenten</h3>
-          <p className="openregio-stat-number">{documentenAantal}</p>
+        <div className="openregio-stat-card" data-testid="stat-pro">
+          <h3>Pro leden</h3>
+          <p className="openregio-stat-number">
+            {statsLoading ? "—" : stats?.proMembers ?? 0}
+          </p>
         </div>
       </div>
 
-      {/* Hoofd-grid: 1fr / 300px */}
+      {/* Hoofd-grid: profiel/snelle links links — upgrade + nieuws rechts */}
       <div className="openregio-dashboard-content">
-        {/* MAIN COLUMN */}
         <div className="openregio-dashboard-main">
-          {/* Profiel-samenvatting */}
+          {/* Jouw profiel */}
           <div className="openregio-card" data-testid="card-profile-summary">
-            <h2>Jouw onderneming</h2>
+            <h2>Jouw profiel</h2>
             <div className="openregio-profile-summary">
               <p>
-                <strong>{bedrijfsnaam}</strong>
+                <strong data-testid="text-bedrijfsnaam">{bedrijfsnaam}</strong>
               </p>
-              {userRegio && (
+              {categorieLabel && (
                 <p>
-                  <span className="openregio-category" data-testid="text-regio">
-                    {userRegio}
+                  <span className="openregio-category" data-testid="text-categorie">
+                    {categorieLabel}
                   </span>
                 </p>
               )}
@@ -185,153 +156,55 @@ export default function VandaagPage() {
             </Link>
           </div>
 
-          {/* Wet- en regelgeving */}
-          <div className="openregio-card" data-testid="card-regelgeving">
-            <h2>Wet- en regelgeving</h2>
-            {intelLoading ? (
-              <ul>
-                {[1, 2, 3].map((i) => (
-                  <li key={i}>
-                    <Skeleton className="h-4 w-full" />
-                  </li>
-                ))}
-              </ul>
-            ) : topSignalen.length === 0 ? (
-              <p>Geen actuele signalen — kom later terug.</p>
-            ) : (
-              <ul>
-                {topSignalen.map((s) => (
-                  <li key={s.id} data-testid={`signaal-${s.id}`}>
-                    <Link
-                      href="/regels/updates"
-                      style={{ color: "inherit", textDecoration: "none", flex: 1 }}
-                    >
-                      <strong style={{ color: "#0f172a", fontWeight: 600 }}>
-                        {s.titel}
-                      </strong>
-                      <span style={{ color: "#94a3b8", marginLeft: 6 }}>
-                        · {s.categorie} · {URG_LABEL[s.urgentie] ?? s.urgentie}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <Link
-              href="/regels/updates"
-              className="openregio-button openregio-button-outline openregio-button-small"
-              data-testid="button-alle-signalen"
-            >
-              Alle signalen
-            </Link>
-          </div>
-
-          {/* Open kansen */}
-          <div className="openregio-card" data-testid="card-kansen">
-            <h2>Open kansen & acties</h2>
-            {cursusLoading ? (
-              <ul>
-                {[1, 2].map((i) => (
-                  <li key={i}>
-                    <Skeleton className="h-4 w-full" />
-                  </li>
-                ))}
-              </ul>
-            ) : actiefKansen.length === 0 && aanbestedingen.length === 0 ? (
-              <p>Alles op orde — geen openstaande acties.</p>
-            ) : (
-              <ul>
-                {actiefKansen.slice(0, 3).map((k) => (
-                  <li key={k.id} data-testid={`kans-${k.id}`}>
-                    <Link
-                      href="/vandaag/acties"
-                      style={{ color: "inherit", textDecoration: "none", flex: 1 }}
-                    >
-                      <strong style={{ color: "#0f172a", fontWeight: 600 }}>
-                        {k.title}
-                      </strong>
-                      <span style={{ color: "#94a3b8", marginLeft: 6 }}>
-                        · {k.minutes} min · nog {k.daysLeft}{" "}
-                        {k.daysLeft === 1 ? "dag" : "dagen"}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-                {aanbestedingen.slice(0, 3).map((a) => (
-                  <li key={a.id} data-testid={`aanbesteding-${a.id}`}>
-                    <Link
-                      href="/kansen/opdrachten"
-                      style={{ color: "inherit", textDecoration: "none", flex: 1 }}
-                    >
-                      <strong style={{ color: "#0f172a", fontWeight: 600 }}>
-                        {a.title}
-                      </strong>
-                      <span style={{ color: "#94a3b8", marginLeft: 6 }}>
-                        · Aanbesteding · {a.buyer}
-                      </span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
-            <Link
-              href="/kansen/opdrachten"
-              className="openregio-button openregio-button-outline openregio-button-small"
-              data-testid="button-alle-kansen"
-            >
-              Alle kansen
-            </Link>
-          </div>
-        </div>
-
-        {/* SIDEBAR */}
-        <div className="openregio-dashboard-sidebar">
+          {/* Snelle links */}
           <div className="openregio-card" data-testid="card-quick-links">
-            <h3>Snel naar</h3>
+            <h2>Snelle links</h2>
             <ul className="openregio-quick-links">
               <li>
-                <Link href="/netwerk" data-testid="quick-netwerk">
-                  Netwerk & Kansenbord
-                </Link>
-              </li>
-              <li>
-                <Link href="/regels/updates" data-testid="quick-monitor">
-                  Regelgeving Monitor
-                </Link>
-              </li>
-              <li>
-                <Link href="/regels/woo" data-testid="quick-woo">
-                  WOO-bibliotheek
+                <Link href="/network" data-testid="quick-netwerk">
+                  Ontdek het netwerk
                 </Link>
               </li>
               <li>
                 <Link href="/regiobot" data-testid="quick-regiobot">
-                  RegioBot
+                  Vraag iets aan RegioBot
                 </Link>
               </li>
               <li>
-                <Link href="/informatie/kennisbank" data-testid="quick-kennisbank">
-                  Kennisbank
+                <Link href="/regels/updates" data-testid="quick-regelgeving">
+                  Regelgeving & signalen
+                </Link>
+              </li>
+              <li>
+                <Link href="/groei/profiel" data-testid="quick-profiel">
+                  Bewerk je bedrijfsprofiel
                 </Link>
               </li>
             </ul>
           </div>
+        </div>
 
+        <div className="openregio-dashboard-sidebar">
+          {/* Donkerblauwe upgrade kaart met expliciete prijs */}
           {!isPro && (
             <div className="openregio-card openregio-upgrade-card" data-testid="card-upgrade-promo">
-              <h3>Word Pro-bijdrager</h3>
-              <p>
-                Krijg toegang tot RegioBot, WOO-bibliotheek en printbare overzichten.
-              </p>
+              <h3>Upgrade naar Pro</h3>
+              <p>Krijg toegang tot RegioBot AI en nog veel meer features</p>
               <Link
                 href="/lidmaatschap?plan=pro"
                 className="openregio-button openregio-button-pro"
                 data-testid="button-upgrade-pro"
               >
-                Upgrade naar Pro
+                Upgrade nu — €19,95/mnd
               </Link>
             </div>
           )}
+
+          {/* Laatste nieuws */}
+          <div className="openregio-laatste-nieuws" data-testid="card-laatste-nieuws">
+            <h3>Laatste nieuws</h3>
+            <p>Binnenkort meer updates over het coöperatief!</p>
+          </div>
         </div>
       </div>
     </div>

@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
+import { OpenRegioTopNav } from "@/components/OpenRegioTopNav";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { useAuth } from "@/hooks/useAuth";
@@ -299,6 +300,9 @@ function AppContent() {
 
   const [currentLocation] = useLocation();
   const isVandaagPage = currentLocation === "/vandaag" || currentLocation.startsWith("/vandaag/");
+  const isNetworkPage = currentLocation === "/network" || currentLocation.startsWith("/network/");
+  const isRegioBotPage = currentLocation === "/regiobot" || currentLocation.startsWith("/regiobot/");
+  const isOpenRegioTopNavPage = isVandaagPage || isNetworkPage || isRegioBotPage;
 
   const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isLidmaatschapPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage || isBlogsPage || isForgotPasswordPage || isResetPasswordPage || isDisclaimerPage || isCookiebeleidPage || isRegioAnalysePage || isKoopLokaalPage;
 
@@ -306,12 +310,26 @@ function AppContent() {
     return <PublicRouter />;
   }
 
+  // OpenRegio top-nav layout (geen sidebar) voor /vandaag, /network, /regiobot
+  if (isOpenRegioTopNavPage) {
+    return (
+      <div className="openregio-page" data-testid="layout-openregio-topnav">
+        <OpenRegioTopNav />
+        <main className="flex-1 protected-content">
+          <AuthGuard>
+            <AuthenticatedRouter />
+          </AuthGuard>
+        </main>
+      </div>
+    );
+  }
+
   const style = {
     "--sidebar-width": "16rem",
   };
 
   return (
-    <SidebarProvider style={style as CSSProperties} defaultOpen={!isVandaagPage}>
+    <SidebarProvider style={style as CSSProperties}>
       <div className="flex h-screen w-full">
         <AppSidebar />
         <div className="flex flex-col flex-1 overflow-hidden bg-regio-base dark:bg-background">
@@ -319,7 +337,7 @@ function AppContent() {
             <SidebarTrigger data-testid="button-sidebar-toggle" />
             <ThemeToggle />
           </header>
-          <main className={`flex-1 overflow-y-auto protected-content ${isVandaagPage ? "" : "p-6"}`}>
+          <main className="flex-1 overflow-y-auto protected-content p-6">
             <AuthGuard>
               <AuthenticatedRouter />
             </AuthGuard>
