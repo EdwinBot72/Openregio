@@ -5,7 +5,7 @@ export default function DisclaimerPage() {
   return (
     <div className="openregio-public-page" data-testid="page-disclaimer">
       <PublicTopNav />
-      <div className="openregio-public-content" style={{ maxWidth: 800 }}>
+      <div className="openregio-public-content">
         <h1 className="openregio-public-title" data-testid="text-disclaimer-title">Disclaimer</h1>
         <p className="openregio-public-lead">
           Laatst bijgewerkt: {new Date().toLocaleDateString("nl-NL", { year: "numeric", month: "long", day: "numeric" })}

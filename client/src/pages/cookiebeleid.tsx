@@ -5,7 +5,7 @@ export default function CookiebeleidPage() {
   return (
     <div className="openregio-public-page" data-testid="page-cookiebeleid">
       <PublicTopNav />
-      <div className="openregio-public-content" style={{ maxWidth: 800 }}>
+      <div className="openregio-public-content">
         <h1 className="openregio-public-title" data-testid="text-cookiebeleid-title">Cookiebeleid</h1>
         <p className="openregio-public-lead">
           Laatst bijgewerkt: {new Date().toLocaleDateString("nl-NL", { year: "numeric", month: "long", day: "numeric" })}
