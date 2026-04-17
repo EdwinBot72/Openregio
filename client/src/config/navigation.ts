@@ -29,6 +29,7 @@ export type NavSubItem = {
   icon: React.ElementType;
   proOnly?: boolean;
   adminOnly?: boolean;
+  comingSoon?: boolean;
 };
 
 export type NavSection = {
@@ -65,7 +66,7 @@ export const MAIN_NAV: NavSection[] = [
       { title: "Opdrachten", url: "/kansen/opdrachten", icon: Landmark },
       { title: "Subsidies", url: "/kansen/subsidies", icon: Euro },
       { title: "In de buurt", url: "/kansen/in-de-buurt", icon: MapPin },
-      { title: "Samenwerkingen", url: "/kansen/samenwerkingen", icon: Handshake },
+      { title: "Samenwerkingen", url: "/kansen/samenwerkingen", icon: Handshake, comingSoon: true },
     ],
   },
 
@@ -100,7 +101,7 @@ export const MAIN_NAV: NavSection[] = [
     title: "Mijn account",
     icon: User,
     sub: [
-      { title: "Voortgang", url: "/account/voortgang", icon: BarChart3 },
+      { title: "Voortgang", url: "/account/voortgang", icon: BarChart3, comingSoon: true },
       { title: "Instellingen", url: "/account/instellingen", icon: Settings },
       { title: "Affiliate", url: "/account/affiliate", icon: Euro },
     ],

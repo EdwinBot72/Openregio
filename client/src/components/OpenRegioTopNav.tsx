@@ -10,7 +10,7 @@ type TopTab = {
   label: string;
   href?: string;
   match: string[];
-  sub?: { label: string; href: string; proOnly?: boolean; adminOnly?: boolean }[];
+  sub?: { label: string; href: string; proOnly?: boolean; adminOnly?: boolean; comingSoon?: boolean }[];
 };
 
 function buildTabs(isAdmin: boolean): TopTab[] {
@@ -27,6 +27,7 @@ function buildTabs(isAdmin: boolean): TopTab[] {
         href: x.url,
         proOnly: x.proOnly,
         adminOnly: x.adminOnly,
+        comingSoon: x.comingSoon,
       })),
     }),
   );
@@ -154,20 +155,36 @@ export function OpenRegioTopNav() {
                       role="menu"
                       data-testid={`dropdown-${t.id}`}
                     >
-                      {visibleSub.map((s) => (
-                        <Link
-                          key={s.href}
-                          href={s.href}
-                          className="openregio-topnav-dropdown-item"
-                          role="menuitem"
-                          data-testid={`dropdown-item-${s.href.replace(/\//g, "-").replace(/^-/, "")}`}
-                        >
-                          {s.label}
-                          {s.proOnly && !isPro && !isAdmin && (
-                            <span className="openregio-topnav-pill-pro">Pro</span>
-                          )}
-                        </Link>
-                      ))}
+                      {visibleSub.map((s) => {
+                        if (s.comingSoon) {
+                          return (
+                            <div
+                              key={s.href}
+                              className="openregio-topnav-dropdown-item openregio-topnav-dropdown-item-disabled"
+                              role="menuitem"
+                              aria-disabled="true"
+                              data-testid={`dropdown-item-${s.href.replace(/\//g, "-").replace(/^-/, "")}`}
+                            >
+                              {s.label}
+                              <span className="openregio-topnav-pill-soon">Binnenkort</span>
+                            </div>
+                          );
+                        }
+                        return (
+                          <Link
+                            key={s.href}
+                            href={s.href}
+                            className="openregio-topnav-dropdown-item"
+                            role="menuitem"
+                            data-testid={`dropdown-item-${s.href.replace(/\//g, "-").replace(/^-/, "")}`}
+                          >
+                            {s.label}
+                            {s.proOnly && !isPro && !isAdmin && (
+                              <span className="openregio-topnav-pill-pro">Pro</span>
+                            )}
+                          </Link>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -326,16 +343,31 @@ export function OpenRegioTopNav() {
                 )}
                 {visibleSub && visibleSub.length > 0 && (
                   <div className="openregio-topnav-mobile-sub">
-                    {visibleSub.map((s) => (
-                      <Link
-                        key={s.href}
-                        href={s.href}
-                        className="openregio-topnav-mobile-subitem"
-                        data-testid={`mobile-subitem-${s.href.replace(/\//g, "-").replace(/^-/, "")}`}
-                      >
-                        {s.label}
-                      </Link>
-                    ))}
+                    {visibleSub.map((s) => {
+                      if (s.comingSoon) {
+                        return (
+                          <div
+                            key={s.href}
+                            className="openregio-topnav-mobile-subitem openregio-topnav-dropdown-item-disabled"
+                            aria-disabled="true"
+                            data-testid={`mobile-subitem-${s.href.replace(/\//g, "-").replace(/^-/, "")}`}
+                          >
+                            {s.label}
+                            <span className="openregio-topnav-pill-soon">Binnenkort</span>
+                          </div>
+                        );
+                      }
+                      return (
+                        <Link
+                          key={s.href}
+                          href={s.href}
+                          className="openregio-topnav-mobile-subitem"
+                          data-testid={`mobile-subitem-${s.href.replace(/\//g, "-").replace(/^-/, "")}`}
+                        >
+                          {s.label}
+                        </Link>
+                      );
+                    })}
                   </div>
                 )}
               </div>
