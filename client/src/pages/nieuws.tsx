@@ -106,8 +106,8 @@ export default function NieuwsPage() {
             {item.aiContext && (
               <div
                 style={{
-                  background: "#fff7ed",
-                  border: "1px solid #fed7aa",
+                  background: "#fff",
+                  border: "1px solid #e6ebf2",
                   borderRadius: 10,
                   padding: "14px 16px",
                   marginTop: 4,
@@ -115,24 +115,24 @@ export default function NieuwsPage() {
                 data-testid={`ai-context-${item.id}`}
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
-                  <Sparkles className="h-3.5 w-3.5" style={{ color: "#c2410c" }} />
-                  <span style={{ fontSize: 11, fontWeight: 800, color: "#c2410c", textTransform: "uppercase", letterSpacing: ".5px" }}>
+                  <Sparkles className="h-3.5 w-3.5" style={{ color: "#1f5fae" }} />
+                  <span style={{ fontSize: 11, fontWeight: 800, color: "#0b2240", textTransform: "uppercase", letterSpacing: ".5px" }}>
                     AI-context
                   </span>
                 </div>
-                <p style={{ fontSize: 13, color: "#7c2d12", margin: 0, lineHeight: 1.65, whiteSpace: "pre-wrap" }}>
+                <p style={{ fontSize: 13, color: "#374151", margin: 0, lineHeight: 1.65, whiteSpace: "pre-wrap" }}>
                   {item.aiContext}
                 </p>
 
                 {item.related && item.related.length > 0 && (
-                  <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid #fed7aa" }}>
-                    <p style={{ fontSize: 11, fontWeight: 700, color: "#c2410c", textTransform: "uppercase", letterSpacing: ".5px", margin: "0 0 6px" }}>
+                  <div style={{ marginTop: 12, paddingTop: 12, borderTop: "1px solid #e6ebf2" }}>
+                    <p style={{ fontSize: 11, fontWeight: 700, color: "#0b2240", textTransform: "uppercase", letterSpacing: ".5px", margin: "0 0 6px" }}>
                       Gerelateerde verhaallijnen
                     </p>
                     <ul style={{ margin: 0, paddingLeft: 18, listStyle: "disc" }}>
                       {item.related.map((r, i) => (
-                        <li key={i} style={{ fontSize: 13, color: "#7c2d12", lineHeight: 1.6, marginBottom: 4 }}>
-                          <strong>{r.titel}</strong> — {r.toelichting}
+                        <li key={i} style={{ fontSize: 13, color: "#374151", lineHeight: 1.6, marginBottom: 4 }}>
+                          <strong style={{ color: "#0b2240" }}>{r.titel}</strong> — {r.toelichting}
                         </li>
                       ))}
                     </ul>
@@ -144,8 +144,8 @@ export default function NieuwsPage() {
             {item.media && item.media.length > 0 && (
               <div
                 style={{
-                  background: "#eff6ff",
-                  border: "1px solid #bfdbfe",
+                  background: "#fff",
+                  border: "1px solid #e6ebf2",
                   borderRadius: 10,
                   padding: "14px 16px",
                   marginTop: 10,
@@ -154,20 +154,20 @@ export default function NieuwsPage() {
               >
                 <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 8 }}>
                   <Radio className="h-3.5 w-3.5" style={{ color: "#1f5fae" }} />
-                  <span style={{ fontSize: 11, fontWeight: 800, color: "#1f5fae", textTransform: "uppercase", letterSpacing: ".5px" }}>
+                  <span style={{ fontSize: 11, fontWeight: 800, color: "#0b2240", textTransform: "uppercase", letterSpacing: ".5px" }}>
                     Andere media die hier mee te maken hebben
                   </span>
                 </div>
                 <ul style={{ margin: 0, paddingLeft: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 10 }}>
                   {item.media.map((m, i) => (
-                    <li key={i} style={{ fontSize: 13, color: "#1e3a8a", lineHeight: 1.6 }}>
+                    <li key={i} style={{ fontSize: 13, color: "#374151", lineHeight: 1.6 }}>
                       <div style={{ fontWeight: 700, color: "#0b2240" }}>{m.naam}</div>
                       {m.hoek && (
-                        <div style={{ color: "#1e40af" }}>{m.hoek}</div>
+                        <div style={{ color: "#475569" }}>{m.hoek}</div>
                       )}
                       {m.impact && (
                         <div style={{ marginTop: 4, fontSize: 12, color: "#475569" }}>
-                          <strong style={{ color: "#1f5fae" }}>Impact lokale ondernemer:</strong> {m.impact}
+                          <strong style={{ color: "#0b2240" }}>Impact lokale ondernemer:</strong> {m.impact}
                         </div>
                       )}
                     </li>
