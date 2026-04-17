@@ -1,3 +1,6 @@
+/* OpenRegio huisstijl — alleen actief op pagina's met .openregio-* wrapper */
+@import "./styles/openregio.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
