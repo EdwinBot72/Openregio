@@ -142,14 +142,75 @@ export default function HomePage() {
         .rg-split-img { overflow: hidden; position: relative; min-height: 300px; }
         .rg-split-img img { width: 100%; height: 100%; object-fit: cover; object-position: center; display: block; position: absolute; inset: 0; }
 
+        /* Tablet: 3-kolom pijlers/blogs naar 2 kolommen */
+        @media (max-width: 1024px) {
+          .rg-3 { grid-template-columns: repeat(2,1fr) !important; }
+        }
+
+        /* Tablet en kleiner */
+        @media (max-width: 900px) {
+          .nav-links { display: none !important; }
+          .nav-row { padding: 0 18px !important; }
+          .nav-cta { padding: 8px 14px !important; font-size: 12px !important; }
+          .nav-login { padding: 7px 10px !important; }
+        }
+
+        /* Mobiel */
         @media (max-width: 768px) {
-          .rg-2, .rg-3, .rg-4 { grid-template-columns: 1fr !important; }
+          .rg-2, .rg-4 { grid-template-columns: 1fr !important; }
+          .rg-3 { grid-template-columns: 1fr !important; }
           .rg-2-inner { grid-template-columns: 1fr 1fr; }
           .rg-split-img { min-height: 220px; }
-          .home-hero-left { padding: 40px 20px 32px 20px !important; }
+
+          /* Hero */
+          .home-hero-left { padding: 32px 18px 28px 18px !important; }
+          .home-hero-title { font-size: 30px !important; letter-spacing: -.6px !important; }
+          .home-hero-sub { font-size: 14px !important; }
+          .home-hero-img-wrap { min-height: 260px; }
+          .home-hero-floats { display: none !important; }
+
+          /* Stats: 2 kolommen op mobiel i.p.v. 1 */
+          .stats-grid { grid-template-columns: 1fr 1fr !important; }
+          .stats-grid > div { border-right: none !important; border-bottom: 1px solid #f0f4ff; }
+          .stats-grid > div:nth-child(odd) { border-right: 1px solid #f0f4ff !important; }
+          .stats-grid > div:nth-last-child(-n+2) { border-bottom: none; }
+
+          /* Section paddings */
+          .sec-pad { padding: 40px 18px !important; }
+          .sec-h-xl { font-size: 24px !important; letter-spacing: -.3px !important; }
+          .sec-h-lg { font-size: 22px !important; letter-spacing: -.3px !important; }
+
+          /* RegioBot split donker paneel */
+          .regiobot-panel { padding: 36px 22px !important; }
+
+          /* Basischeck card */
+          .bc-card { padding: 24px 20px !important; border-radius: 20px !important; }
+          .bc-card-title { font-size: 20px !important; }
+
+          /* Aanbod split linker paneel */
+          .aanbod-left { padding: 36px 20px !important; }
+
+          /* Affiliate */
+          .affiliate-row { padding: 36px 18px !important; gap: 24px !important; }
+
+          /* Final CTA */
+          .cta-final { padding: 56px 20px !important; }
+          .cta-final-title { font-size: 26px !important; }
+          .cta-final-sub { font-size: 14px !important; }
+
+          /* Footer stack */
+          .footer-row { flex-direction: column; align-items: flex-start !important; text-align: left; padding: 20px 18px !important; }
+
+          /* Ticker iets compacter */
+          .ticker-text { padding: 0 18px !important; font-size: 10px !important; }
         }
+
         @media (max-width: 480px) {
           .rg-2-inner { grid-template-columns: 1fr; }
+          .home-hero-title { font-size: 26px !important; }
+          .stats-grid { grid-template-columns: 1fr !important; }
+          .stats-grid > div { border-right: none !important; border-bottom: 1px solid #f0f4ff; }
+          .stats-grid > div:last-child { border-bottom: none; }
         }
       `}</style>
 
@@ -163,11 +224,11 @@ export default function HomePage() {
         }}
         data-testid="nav-main"
       >
-        <div style={{ ...centered, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 28px", height: "62px" }}>
+        <div className="nav-row" style={{ ...centered, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 28px", height: "62px" }}>
           <Link href="/" style={{ fontSize: "18px", fontWeight: 800, letterSpacing: "-.4px", color: "#1f5fae", textDecoration: "none" }} data-testid="link-home-logo">
             Open<span style={{ color: "#0f172a" }}>Regio</span>
           </Link>
-          <div style={{ display: "flex", gap: "4px" }}>
+          <div className="nav-links" style={{ display: "flex", gap: "4px" }}>
             {[["pijlers","Wat we doen"],["bc-section","Basischeck"],["prijzen","Prijzen"]].map(([id,label]) => (
               <button key={id} onClick={() => scrollTo(id)} data-testid={`link-nav-${id}`}
                 style={{ padding: "7px 14px", borderRadius: "10px", fontSize: "13px", fontWeight: 500, color: "#64748b", cursor: "pointer", border: "none", background: "none" }}
@@ -178,11 +239,11 @@ export default function HomePage() {
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <Link href="/login">
-              <button style={{ padding: "7px 16px", fontSize: "13px", fontWeight: 600, color: "#64748b", background: "none", border: "none", cursor: "pointer" }} data-testid="button-nav-login">
+              <button className="nav-login" style={{ padding: "7px 16px", fontSize: "13px", fontWeight: 600, color: "#64748b", background: "none", border: "none", cursor: "pointer" }} data-testid="button-nav-login">
                 Inloggen
               </button>
             </Link>
-            <button onClick={() => scrollTo("bc-section")} data-testid="button-nav-basischeck"
+            <button onClick={() => scrollTo("bc-section")} data-testid="button-nav-basischeck" className="nav-cta"
               style={{ background: "#1f5fae", color: "#fff", border: "none", borderRadius: "24px", padding: "9px 20px", fontSize: "13px", fontWeight: 700, cursor: "pointer" }}>
               Gratis check starten
             </button>
@@ -194,7 +255,7 @@ export default function HomePage() {
       <div style={{ overflow: "hidden", background: "#0b2240", padding: "10px 0" }} data-testid="ticker-bar">
         <div className="tick-track" style={{ display: "flex", width: "max-content" }}>
           {[...TICKER, ...TICKER].map((t, i) => (
-            <span key={i} style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "0 28px", fontSize: "11px", fontWeight: 500, color: "#7ea8d4", whiteSpace: "nowrap" }}>
+            <span key={i} className="ticker-text" style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "0 28px", fontSize: "11px", fontWeight: 500, color: "#7ea8d4", whiteSpace: "nowrap" }}>
               <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: "#f28a1a", flexShrink: 0, display: "inline-block" }} />
               {t}
             </span>
@@ -210,10 +271,10 @@ export default function HomePage() {
               <span className="badge-dot" style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#1f5fae", display: "inline-block" }} />
               Voor lokale ondernemers die willen groeien
             </div>
-            <h1 data-testid="text-hero-title" style={{ fontSize: "38px", fontWeight: 800, lineHeight: 1.12, letterSpacing: "-1.2px", marginBottom: "16px" }}>
+            <h1 className="home-hero-title" data-testid="text-hero-title" style={{ fontSize: "38px", fontWeight: 800, lineHeight: 1.12, letterSpacing: "-1.2px", marginBottom: "16px" }}>
               Meer klanten.<br />Slimmer werken.<br /><em style={{ fontStyle: "normal", color: "#1f5fae" }}>Beter geregeld.</em>
             </h1>
-            <p style={{ fontSize: "15px", color: "#64748b", lineHeight: 1.75, marginBottom: "28px", maxWidth: "40ch" }}>
+            <p className="home-hero-sub" style={{ fontSize: "15px", color: "#64748b", lineHeight: 1.75, marginBottom: "28px", maxWidth: "40ch" }}>
               OpenRegio helpt jou als lokale ondernemer groeien — met praktisch advies over vindbaarheid, AI-tools en grip op de regels.
             </p>
             <div className="fu d1" style={{ display: "flex", gap: "10px", marginBottom: "16px", flexWrap: "wrap" }}>
@@ -231,10 +292,10 @@ export default function HomePage() {
               Geen jurist. Geen consultant. Gewoon eerlijk en praktisch.
             </div>
           </div>
-          <div className="fu d2" style={{ position: "relative", overflow: "hidden" }}>
+          <div className="fu d2 home-hero-img-wrap" style={{ position: "relative", overflow: "hidden" }}>
             <img src={groupWebp} alt="Lokale ondernemers" style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top center", display: "block" }} data-testid="img-hero" />
             <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to right, rgba(255,255,255,.12), transparent 40%)" }} />
-            <div style={{ position: "absolute", bottom: "24px", left: "24px", background: "#fff", borderRadius: "18px", padding: "13px 16px", display: "flex", alignItems: "center", gap: "12px", boxShadow: "0 8px 32px rgba(0,0,0,.14)" }}>
+            <div className="home-hero-floats" style={{ position: "absolute", bottom: "24px", left: "24px", background: "#fff", borderRadius: "18px", padding: "13px 16px", display: "flex", alignItems: "center", gap: "12px", boxShadow: "0 8px 32px rgba(0,0,0,.14)" }}>
               <div style={{ width: "38px", height: "38px", borderRadius: "12px", background: "#eef2ff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1f5fae" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
               </div>
@@ -243,7 +304,7 @@ export default function HomePage() {
                 <div style={{ fontSize: "10px", color: "#94a3b8", marginTop: "1px" }}>Jouw slimme buurman 24/7</div>
               </div>
             </div>
-            <div style={{ position: "absolute", top: "24px", right: "24px", background: "#0b2240", borderRadius: "18px", padding: "12px 16px", boxShadow: "0 8px 28px rgba(0,0,0,.2)" }}>
+            <div className="home-hero-floats" style={{ position: "absolute", top: "24px", right: "24px", background: "#0b2240", borderRadius: "18px", padding: "12px 16px", boxShadow: "0 8px 28px rgba(0,0,0,.2)" }}>
               <div style={{ fontSize: "22px", fontWeight: 800, color: "#f28a1a", letterSpacing: "-.5px" }}>20</div>
               <div style={{ fontSize: "10px", color: "rgba(255,255,255,.55)", marginTop: "1px" }}>ondernemers actief</div>
             </div>
@@ -253,7 +314,7 @@ export default function HomePage() {
 
       {/* ══ STATS ══ */}
       <div style={{ borderTop: "1px solid #f0f4ff", borderBottom: "1px solid #f0f4ff", background: "#fafbff" }} data-testid="section-stats">
-        <div className="rg-4" style={{ ...centered }}>
+        <div className="rg-4 stats-grid" style={{ ...centered }}>
           {[
             { n: "20", l: "Ondernemers actief" },
             { n: "€19/mnd", l: "Startprijs — geen jaarcontract" },
@@ -270,9 +331,9 @@ export default function HomePage() {
 
       {/* ══ DRIE PIJLERS ══ */}
       <div id="pijlers" style={{ background: "#fff" }} data-testid="section-pijlers">
-        <div style={{ ...centered, padding: "64px 28px" }}>
+        <div className="sec-pad" style={{ ...centered, padding: "64px 28px" }}>
           <div style={{ fontSize: "11px", fontWeight: 700, color: "#f28a1a", textTransform: "uppercase", letterSpacing: ".6px", marginBottom: "8px" }}>Drie pijlers</div>
-          <div style={{ fontSize: "30px", fontWeight: 800, color: "#0f172a", letterSpacing: "-.5px", marginBottom: "8px" }}>Alles wat jij als lokale ondernemer nodig hebt.</div>
+          <div className="sec-h-xl" style={{ fontSize: "30px", fontWeight: 800, color: "#0f172a", letterSpacing: "-.5px", marginBottom: "8px" }}>Alles wat jij als lokale ondernemer nodig hebt.</div>
           <div style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.7, maxWidth: "46ch", marginBottom: "32px" }}>Niet één ding. Het complete plaatje — in gewone taal, zonder overbodige complexiteit.</div>
           <div className="rg-3" style={{ gap: "16px" }}>
             {[
@@ -297,10 +358,10 @@ export default function HomePage() {
       {/* ══ ACTUEEL & INZICHTEN (blogs) ══ */}
       {visibleBlogs.length > 0 && (
         <div style={{ background: "#f8faff" }} data-testid="section-blogs">
-          <div style={{ ...centered, padding: "64px 28px" }}>
+          <div className="sec-pad" style={{ ...centered, padding: "64px 28px" }}>
             <div style={{ fontSize: "11px", fontWeight: 700, color: "#f28a1a", textTransform: "uppercase", letterSpacing: ".6px", marginBottom: "8px" }}>Actueel & Inzichten</div>
             <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: "28px", flexWrap: "wrap", gap: "12px" }}>
-              <div style={{ fontSize: "26px", fontWeight: 800, color: "#0f172a", letterSpacing: "-.4px" }}>Laatste nieuws voor lokale ondernemers</div>
+              <div className="sec-h-lg" style={{ fontSize: "26px", fontWeight: 800, color: "#0f172a", letterSpacing: "-.4px" }}>Laatste nieuws voor lokale ondernemers</div>
               <Link href="/blogs" style={{ fontSize: "13px", fontWeight: 700, color: "#1f5fae", textDecoration: "none" }} data-testid="link-all-blogs">
                 Alle artikelen →
               </Link>
@@ -352,9 +413,9 @@ export default function HomePage() {
           <div className="rg-split-img">
             <img src={streetWebp} alt="RegioBot AI" />
           </div>
-          <div style={{ padding: "56px 48px", display: "flex", flexDirection: "column", justifyContent: "center", background: "#0b2240" }}>
+          <div className="regiobot-panel" style={{ padding: "56px 48px", display: "flex", flexDirection: "column", justifyContent: "center", background: "#0b2240" }}>
             <div style={{ fontSize: "11px", fontWeight: 700, color: "#f28a1a", textTransform: "uppercase", letterSpacing: ".6px", marginBottom: "12px" }}>Maak kennis met RegioBot</div>
-            <div style={{ fontSize: "26px", fontWeight: 800, color: "#fff", lineHeight: 1.2, letterSpacing: "-.4px", marginBottom: "16px" }}>Jouw slimme buurman die alles weet over ondernemen in jouw regio.</div>
+            <div className="sec-h-lg" style={{ fontSize: "26px", fontWeight: 800, color: "#fff", lineHeight: 1.2, letterSpacing: "-.4px", marginBottom: "16px" }}>Jouw slimme buurman die alles weet over ondernemen in jouw regio.</div>
             <div style={{ fontSize: "13px", color: "rgba(255,255,255,.55)", lineHeight: 1.75, marginBottom: "24px" }}>RegioBot is de AI-assistent van OpenRegio. Hij kent jouw gemeente, jouw branche en de regels die voor jou gelden. Stel elke vraag — hij antwoordt in gewone taal.</div>
             <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "24px" }}>
               {[
@@ -396,21 +457,21 @@ export default function HomePage() {
 
       {/* ══ BASISCHECK ══ */}
       <div id="bc-section" style={{ background: "#f0f4ff" }} data-testid="section-basischeck">
-        <div style={{ ...centered, padding: "64px 28px" }}>
+        <div className="sec-pad" style={{ ...centered, padding: "64px 28px" }}>
           <div style={{ textAlign: "center", marginBottom: "28px" }}>
             <div style={{ fontSize: "11px", fontWeight: 700, color: "#f28a1a", textTransform: "uppercase", letterSpacing: ".6px", display: "inline-block" }}>Gratis bedrijfscheck</div>
-            <div style={{ fontSize: "26px", fontWeight: 800, color: "#0f172a", letterSpacing: "-.5px", marginTop: "6px" }} data-testid="text-basischeck-title">Hoe gezond is jouw bedrijf online?</div>
+            <div className="sec-h-lg" style={{ fontSize: "26px", fontWeight: 800, color: "#0f172a", letterSpacing: "-.5px", marginTop: "6px" }} data-testid="text-basischeck-title">Hoe gezond is jouw bedrijf online?</div>
             <div style={{ fontSize: "13px", color: "#64748b", lineHeight: 1.7, display: "block", marginTop: "4px" }}>Vul in — in 30 seconden zie je wat je mist.</div>
           </div>
           <div style={{ maxWidth: "560px", margin: "0 auto" }}>
-            <div style={{ background: "#0b2240", borderRadius: "24px", padding: "36px" }}>
+            <div className="bc-card" style={{ background: "#0b2240", borderRadius: "24px", padding: "36px" }}>
               <div style={{ display: "inline-flex", alignItems: "center", gap: "6px", background: "rgba(242,138,26,.2)", color: "#f28a1a", fontSize: "10px", fontWeight: 700, padding: "4px 12px", borderRadius: "20px", marginBottom: "16px" }}>
                 ✦ Altijd gratis · Geen account nodig
               </div>
 
               {step === "input" && (
                 <>
-                  <div style={{ fontSize: "24px", fontWeight: 800, color: "#fff", marginBottom: "8px", letterSpacing: "-.3px" }} data-testid="text-basischeck-card-title">Check nu wat jij mist.</div>
+                  <div className="bc-card-title" style={{ fontSize: "24px", fontWeight: 800, color: "#fff", marginBottom: "8px", letterSpacing: "-.3px" }} data-testid="text-basischeck-card-title">Check nu wat jij mist.</div>
                   <div style={{ fontSize: "13px", color: "rgba(255,255,255,.45)", marginBottom: "24px" }}>Vul je beroep en stad in. Binnen 30 seconden een concreet rapport.</div>
                   <input
                     placeholder="Wat doe je? (bijv. café, kapper, loodgieter)"
@@ -509,9 +570,9 @@ export default function HomePage() {
       {/* ══ AANBOD SPLIT ══ */}
       <div style={{ background: "#fff" }} data-testid="section-aanbod">
         <div className="rg-2" style={{ ...centered, minHeight: "400px" }}>
-          <div style={{ padding: "56px 40px", background: "#fafbff", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          <div className="aanbod-left" style={{ padding: "56px 40px", background: "#fafbff", display: "flex", flexDirection: "column", justifyContent: "center" }}>
             <div style={{ fontSize: "11px", fontWeight: 700, color: "#f28a1a", textTransform: "uppercase", letterSpacing: ".6px" }}>Wat je krijgt</div>
-            <div style={{ fontSize: "26px", fontWeight: 800, color: "#0f172a", letterSpacing: "-.5px", marginTop: "6px", marginBottom: "0", lineHeight: 1.2 }}>Geen beloftes.<br />Concrete tools.</div>
+            <div className="sec-h-lg" style={{ fontSize: "26px", fontWeight: 800, color: "#0f172a", letterSpacing: "-.5px", marginTop: "6px", marginBottom: "0", lineHeight: 1.2 }}>Geen beloftes.<br />Concrete tools.</div>
             <div className="rg-2-inner">
               {[
                 { bg: "#eef2ff", title: "Website-scan", desc: "Hoe vindbaar ben jij op Google? We checken het voor je.", icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1f5fae" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> },
@@ -535,9 +596,9 @@ export default function HomePage() {
 
       {/* ══ AFFILIATE ══ */}
       <div style={{ background: "#0b2240" }} data-testid="section-affiliate">
-        <div className="rg-2" style={{ ...centered, padding: "48px 28px", gap: "40px", alignItems: "center" }}>
+        <div className="rg-2 affiliate-row" style={{ ...centered, padding: "48px 28px", gap: "40px", alignItems: "center" }}>
           <div>
-            <h2 style={{ fontSize: "26px", fontWeight: 800, color: "#fff", letterSpacing: "-.4px", marginBottom: "8px", lineHeight: 1.2 }}>Ken je andere ondernemers?<br />Verdien mee.</h2>
+            <h2 className="sec-h-lg" style={{ fontSize: "26px", fontWeight: 800, color: "#fff", letterSpacing: "-.4px", marginBottom: "8px", lineHeight: 1.2 }}>Ken je andere ondernemers?<br />Verdien mee.</h2>
             <p style={{ fontSize: "13px", color: "rgba(255,255,255,.5)", lineHeight: 1.7 }}>Voor elke ondernemer die jij aanmeldt ontvang je 20% van hun maandelijks abonnement — elke maand opnieuw, zo lang zij lid blijven.</p>
           </div>
           <div className="rg-3" style={{ gap: "10px" }}>
@@ -557,10 +618,10 @@ export default function HomePage() {
 
       {/* ══ PRIJZEN ══ */}
       <div id="prijzen" style={{ background: "#fff" }} data-testid="section-prijzen">
-        <div style={{ ...centered, padding: "64px 28px" }}>
+        <div className="sec-pad" style={{ ...centered, padding: "64px 28px" }}>
           <div style={{ textAlign: "center" }}>
             <div style={{ fontSize: "11px", fontWeight: 700, color: "#f28a1a", textTransform: "uppercase", letterSpacing: ".6px", display: "inline-block" }}>Transparante prijzen</div>
-            <div style={{ fontSize: "30px", fontWeight: 800, color: "#0f172a", letterSpacing: "-.5px", marginTop: "6px" }} data-testid="text-prijzen-title">Kies jouw plan</div>
+            <div className="sec-h-xl" style={{ fontSize: "30px", fontWeight: 800, color: "#0f172a", letterSpacing: "-.5px", marginTop: "6px" }} data-testid="text-prijzen-title">Kies jouw plan</div>
             <div style={{ fontSize: "14px", color: "#64748b", marginTop: "4px" }}>Maandelijks opzegbaar · Geen verborgen kosten · De Basischeck is altijd gratis</div>
           </div>
           <div className="rg-2" style={{ gap: "16px", maxWidth: "640px", margin: "28px auto 0" }}>
@@ -608,11 +669,11 @@ export default function HomePage() {
 
       {/* ══ FAQ ══ */}
       <div style={{ background: "#f0f4ff" }} data-testid="section-faq">
-        <div style={{ ...centered, padding: "64px 28px" }}>
+        <div className="sec-pad" style={{ ...centered, padding: "64px 28px" }}>
           <div style={{ maxWidth: "620px", margin: "0 auto" }}>
             <div style={{ textAlign: "center", marginBottom: "28px" }}>
               <div style={{ fontSize: "11px", fontWeight: 700, color: "#f28a1a", textTransform: "uppercase", letterSpacing: ".6px", display: "inline-block" }}>Vragen</div>
-              <div style={{ fontSize: "26px", fontWeight: 800, color: "#0f172a", marginTop: "6px", letterSpacing: "-.5px" }}>Veelgestelde vragen</div>
+              <div className="sec-h-lg" style={{ fontSize: "26px", fontWeight: 800, color: "#0f172a", marginTop: "6px", letterSpacing: "-.5px" }}>Veelgestelde vragen</div>
             </div>
             {[
               { q: "Is de Basischeck echt gratis?", a: "Ja — altijd gratis, geen account, geen creditcard. Een lidmaatschap begint bij €19/maand voor doorlopende inzichten." },
@@ -642,12 +703,12 @@ export default function HomePage() {
       </div>
 
       {/* ══ FINAL CTA ══ */}
-      <div style={{ position: "relative", overflow: "hidden", padding: "72px 28px", textAlign: "center" }} data-testid="section-cta">
+      <div className="cta-final" style={{ position: "relative", overflow: "hidden", padding: "72px 28px", textAlign: "center" }} data-testid="section-cta">
         <img src={groepImg} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block" }} alt="" />
         <div style={{ position: "absolute", inset: 0, background: "rgba(11,34,64,.85)" }} />
         <div style={{ position: "relative", ...centered }}>
-          <div style={{ fontSize: "34px", fontWeight: 800, color: "#fff", letterSpacing: "-.5px", marginBottom: "12px", lineHeight: 1.2 }}>Klaar om te groeien?</div>
-          <div style={{ fontSize: "15px", color: "rgba(255,255,255,.55)", marginBottom: "32px", maxWidth: "40ch", marginLeft: "auto", marginRight: "auto" }}>
+          <div className="cta-final-title" style={{ fontSize: "34px", fontWeight: 800, color: "#fff", letterSpacing: "-.5px", marginBottom: "12px", lineHeight: 1.2 }}>Klaar om te groeien?</div>
+          <div className="cta-final-sub" style={{ fontSize: "15px", color: "rgba(255,255,255,.55)", marginBottom: "32px", maxWidth: "40ch", marginLeft: "auto", marginRight: "auto" }}>
             Start vandaag gratis. Geen verplichtingen — gewoon praktische hulp voor jouw bedrijf.
           </div>
           <div style={{ display: "flex", gap: "12px", justifyContent: "center", flexWrap: "wrap" }}>
@@ -665,7 +726,7 @@ export default function HomePage() {
 
       {/* ══ FOOTER ══ */}
       <footer style={{ borderTop: "1px solid #f0f4ff" }} data-testid="footer-main">
-        <div style={{ ...centered, padding: "24px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "14px" }}>
+        <div className="footer-row" style={{ ...centered, padding: "24px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "14px" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             <span style={{ fontSize: "16px", fontWeight: 800, letterSpacing: "-.3px", color: "#1f5fae" }}>Open<span style={{ color: "#0f172a" }}>Regio</span></span>
             <span style={{ fontSize: "12px", color: "#94a3b8" }}>Meer klanten. Slimmer werken. Beter geregeld.</span>
