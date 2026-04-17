@@ -167,7 +167,9 @@ function getInitials(naam: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-function MemberCard({ member }: { member: Bedrijfsprofiel }) {
+type MemberWithPro = Bedrijfsprofiel & { isPro?: boolean };
+
+function MemberCard({ member }: { member: MemberWithPro }) {
   const categorieLabel = CATEGORIE_LABELS[member.categorieId] ?? member.categorieId;
   const websiteUrl = member.websiteUrl
     ? member.websiteUrl.startsWith("http")
@@ -182,6 +184,15 @@ function MemberCard({ member }: { member: Bedrijfsprofiel }) {
       </div>
       <div className="openregio-member-header">
         <h3 data-testid={`text-member-name-${member.id}`}>{member.naam}</h3>
+        {member.isPro && (
+          <span
+            className="openregio-plan-badge openregio-plan-pro"
+            style={{ marginLeft: 8, fontSize: 10 }}
+            data-testid={`badge-pro-${member.id}`}
+          >
+            Pro
+          </span>
+        )}
       </div>
       {categorieLabel && (
         <span className="openregio-member-category" data-testid={`text-categorie-${member.id}`}>
@@ -300,7 +311,7 @@ export default function NetworkPage() {
   const { user } = useAuth();
 
   const { data: posts, isLoading: postsLoading } = useQuery<Post[]>({ queryKey: ["/api/posts"] });
-  const { data: allMembers, isLoading: membersLoading } = useQuery<Bedrijfsprofiel[]>({
+  const { data: allMembers, isLoading: membersLoading } = useQuery<MemberWithPro[]>({
     queryKey: ["/api/business-profiles/public"],
   });
 
