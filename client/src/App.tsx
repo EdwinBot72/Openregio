@@ -78,6 +78,7 @@ import AdminWetgevingPage from "@/pages/admin/wetgeving";
 import CursussenPage from "@/pages/cursussen";
 import AdminCursussenPage from "@/pages/admin/cursussen";
 import BinnenkortPage from "@/pages/binnenkort";
+import NieuwsPage from "@/pages/nieuws";
 
 // Routes that should NOT have the sidebar/header layout
 const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse", "/koop-lokaal"];
@@ -103,6 +104,7 @@ function PublicRouter() {
       <Route path="/cookiebeleid" component={CookiebeleidPage} />
       <Route path="/regio-analyse" component={RegioAnalysePage} />
       <Route path="/koop-lokaal" component={KoopLokaalPage} />
+      <Route path="/nieuws" component={NieuwsPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -293,11 +295,12 @@ function AppContent() {
   const [isCookiebeleidPage] = useRoute("/cookiebeleid");
   const [isRegioAnalysePage] = useRoute("/regio-analyse");
   const [isKoopLokaalPage] = useRoute("/koop-lokaal");
+  const [isNieuwsPage] = useRoute("/nieuws");
 
   // /lidmaatschap krijgt de top-nav, maar blijft publiek bereikbaar.
   // Daarom NIET in PUBLIC_ROUTES en NIET in AuthGuard, maar in een eigen
   // layout-tak hieronder.
-  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage || isBlogsPage || isForgotPasswordPage || isResetPasswordPage || isDisclaimerPage || isCookiebeleidPage || isRegioAnalysePage || isKoopLokaalPage;
+  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage || isBlogsPage || isForgotPasswordPage || isResetPasswordPage || isDisclaimerPage || isCookiebeleidPage || isRegioAnalysePage || isKoopLokaalPage || isNieuwsPage;
 
   if (isPublicRoute) {
     return <PublicRouter />;

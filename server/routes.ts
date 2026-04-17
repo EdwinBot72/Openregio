@@ -12,7 +12,7 @@ import { sendOnboardingEmail, sendNotificationEmail } from "./services/emailServ
 import bcrypt from "bcrypt";
 import { uploadMemory, getDocumentType } from "./middleware/upload";
 import { objectStorageClient } from "./replit_integrations/object_storage";
-import { randomUUID } from "crypto";
+import { randomUUID, createHash } from "crypto";
 import { runRegioBot } from "./regiobot";
 import { db } from "db";
 import { eq, sql, gte, lte, gt, and, count } from "drizzle-orm";
@@ -5777,6 +5777,179 @@ Geef ALLEEN geldige JSON terug (geen markdown, geen uitleg), in dit exacte forma
     } catch (error) {
       console.error("[Wetgeving] Fout bij ophalen publicaties:", error);
       return res.status(500).json({ error: "Kon publicaties niet ophalen" });
+    }
+  });
+
+  // ─── PUBLIC: GET /api/news — RSS-aggregatie + AI-context ──────────────────
+
+  const NEWS_SOURCES = [
+    { name: "arnowellens.nl", feedUrl: "https://www.arnowellens.nl/feed" },
+  ];
+
+  type NewsItem = {
+    id: string;
+    title: string;
+    summary: string;
+    link: string;
+    source: string;
+    publishedAt: string;
+    aiContext: string | null;
+    related: { titel: string; toelichting: string }[];
+  };
+
+  const newsListCache: { items: NewsItem[]; fetchedAt: number } = { items: [], fetchedAt: 0 };
+  const newsContextCache = new Map<string, { aiContext: string; related: { titel: string; toelichting: string }[]; ts: number }>();
+  const NEWS_LIST_TTL_MS = 30 * 60 * 1000;
+  const NEWS_CONTEXT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+  const NEWS_MAX_ITEMS = 8;
+
+  function decodeEntities(s: string): string {
+    return s
+      .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
+      .replace(/&amp;/g, "&")
+      .replace(/&lt;/g, "<")
+      .replace(/&gt;/g, ">")
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&nbsp;/g, " ")
+      .replace(/&apos;/g, "'");
+  }
+
+  function stripHtml(s: string): string {
+    return decodeEntities(s).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  }
+
+  function pick(re: RegExp, xml: string): string {
+    const m = xml.match(re);
+    return m ? decodeEntities(m[1].trim()) : "";
+  }
+
+  function safeHttpUrl(raw: string): string | null {
+    try {
+      const u = new URL(raw);
+      if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+      return u.toString();
+    } catch {
+      return null;
+    }
+  }
+
+  function safeIsoDate(raw: string): string {
+    if (raw) {
+      const d = new Date(raw);
+      if (!isNaN(d.getTime())) return d.toISOString();
+    }
+    return new Date().toISOString();
+  }
+
+  function parseRss(xml: string, sourceName: string): NewsItem[] {
+    const items: NewsItem[] = [];
+    const itemRe = /<item[\s>][\s\S]*?<\/item>/gi;
+    const matches = xml.match(itemRe) || [];
+    for (const raw of matches) {
+      const title = stripHtml(pick(/<title[^>]*>([\s\S]*?)<\/title>/i, raw));
+      const linkRaw = pick(/<link[^>]*>([\s\S]*?)<\/link>/i, raw);
+      const link = safeHttpUrl(linkRaw);
+      const guid = pick(/<guid[^>]*>([\s\S]*?)<\/guid>/i, raw) || linkRaw;
+      const desc = stripHtml(pick(/<description[^>]*>([\s\S]*?)<\/description>/i, raw));
+      const pub = pick(/<pubDate[^>]*>([\s\S]*?)<\/pubDate>/i, raw);
+      if (!title || !link) continue;
+      const id = createHash("sha1").update(guid).digest("base64url").slice(0, 16);
+      const summary = desc.length > 220 ? desc.slice(0, 220).trim() + "…" : desc;
+      items.push({ id, title, summary, link, source: sourceName, publishedAt: safeIsoDate(pub), aiContext: null, related: [] });
+    }
+    return items;
+  }
+
+  async function generateNewsContext(item: NewsItem): Promise<{ aiContext: string; related: { titel: string; toelichting: string }[] }> {
+    const prompt = `Je bent een Nederlandse onderzoeksjournalist die korte achtergrondduiding schrijft bij nieuwsberichten voor lokale ondernemers.
+
+Bericht:
+Titel: "${item.title}"
+Bron: ${item.source}
+Datum: ${item.publishedAt}
+Samenvatting: ${item.summary || "(geen samenvatting beschikbaar)"}
+
+Geef context: leg in 3-5 zinnen uit waar dit verhaal in past, welke bredere ontwikkeling erachter speelt en waarom het relevant kan zijn voor lokale ondernemers in Nederland. Wees feitelijk en niet-politiek; als je iets niet zeker weet, zeg dat.
+
+Geef daarnaast 2-3 gerelateerde verhaallijnen of vervolgvragen die de lezer kan onderzoeken.
+
+Antwoord ALLEEN met JSON, exact deze structuur:
+{
+  "aiContext": "...",
+  "related": [
+    { "titel": "...", "toelichting": "..." },
+    { "titel": "...", "toelichting": "..." }
+  ]
+}`;
+
+    const { GoogleGenAI } = await import("@google/genai");
+    const ai = new GoogleGenAI({
+      apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
+      httpOptions: { apiVersion: "", baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL! },
+    });
+
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      config: { maxOutputTokens: 800, temperature: 0.6, thinkingConfig: { thinkingBudget: 0 } },
+    });
+
+    const parts = response.candidates?.[0]?.content?.parts;
+    let raw = parts ? parts.filter((p: any) => p.text && !p.thought).map((p: any) => p.text).join("") : "";
+    raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+    const parsed = JSON.parse(raw);
+    return {
+      aiContext: typeof parsed.aiContext === "string" ? parsed.aiContext : "",
+      related: Array.isArray(parsed.related) ? parsed.related.slice(0, 3) : [],
+    };
+  }
+
+  async function fetchNewsItems(): Promise<NewsItem[]> {
+    const all: NewsItem[] = [];
+    for (const src of NEWS_SOURCES) {
+      try {
+        const res = await fetch(src.feedUrl, { headers: { "User-Agent": "OpenRegio/1.0" } });
+        if (!res.ok) continue;
+        const xml = await res.text();
+        all.push(...parseRss(xml, src.name));
+      } catch (err) {
+        console.error("[News] Fetch fout voor", src.name, err);
+      }
+    }
+    all.sort((a, b) => +new Date(b.publishedAt) - +new Date(a.publishedAt));
+    return all.slice(0, NEWS_MAX_ITEMS);
+  }
+
+  app.get("/api/news", async (_req, res) => {
+    try {
+      const now = Date.now();
+      if (newsListCache.items.length === 0 || now - newsListCache.fetchedAt > NEWS_LIST_TTL_MS) {
+        newsListCache.items = await fetchNewsItems();
+        newsListCache.fetchedAt = now;
+      }
+
+      const items = await Promise.all(
+        newsListCache.items.map(async (item) => {
+          const cached = newsContextCache.get(item.id);
+          if (cached && now - cached.ts < NEWS_CONTEXT_TTL_MS) {
+            return { ...item, aiContext: cached.aiContext, related: cached.related };
+          }
+          try {
+            const ctx = await generateNewsContext(item);
+            newsContextCache.set(item.id, { ...ctx, ts: now });
+            return { ...item, aiContext: ctx.aiContext, related: ctx.related };
+          } catch (err) {
+            console.error("[News] AI-context fout voor", item.id, err);
+            return item;
+          }
+        })
+      );
+
+      res.json({ items, fetchedAt: new Date(newsListCache.fetchedAt).toISOString() });
+    } catch (err) {
+      console.error("[News] Fout:", err);
+      res.status(500).json({ error: "Nieuws kan tijdelijk niet worden opgehaald." });
     }
   });
 

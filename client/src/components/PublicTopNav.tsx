@@ -19,6 +19,11 @@ export function PublicTopNav({ showWordLid = true }: PublicTopNavProps) {
           </span>
         </Link>
         <div className="flex items-center gap-2">
+          <Link href="/nieuws">
+            <button className="openregio-button openregio-button-outline openregio-button-small" data-testid="link-nav-nieuws">
+              Nieuws
+            </button>
+          </Link>
           <Link href="/blogs">
             <button className="openregio-button openregio-button-outline openregio-button-small" data-testid="link-nav-blogs">
               Blogs
