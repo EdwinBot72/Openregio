@@ -51,8 +51,9 @@ function PostPaymentRegisterForm({ plan }: { plan: "basic" | "pro" }) {
       await refetch();
       toast({ title: "Account aangemaakt!", description: "Je wordt doorgestuurd naar je dashboard…" });
       setTimeout(() => setLocation("/dashboard"), 500);
-    } catch (err: any) {
-      toast({ variant: "destructive", title: "Verbindingsfout", description: err?.message || "Kan geen verbinding maken met de server. Probeer het opnieuw." });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Kan geen verbinding maken met de server. Probeer het opnieuw.";
+      toast({ variant: "destructive", title: "Verbindingsfout", description: message });
     }
   };
 

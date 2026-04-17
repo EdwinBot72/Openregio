@@ -17,14 +17,13 @@ const PLANS = {
     name: "Basis-lid",
     price: "€19",
     period: "excl. BTW per maand",
-    tagline: "Alle essentials voor gezond ondernemen",
+    tagline: "Volwaardig lid van de coöperatie",
     benefitsTitle: "Wat krijg je",
     benefits: [
-      "Vindbaarheidscheck & verbeterpunten",
-      "Regelgeving in gewone taal",
-      "Brief-analyse via RegioBot",
-      "Signalen & kansen in jouw regio",
-      "20% affiliate commissie",
+      "Bedrijfsprofiel in lokaal netwerk",
+      "Ontdek en ontmoet ondernemers",
+      "Volledig stemrecht in de coöperatie",
+      "Basischeck & weerbaarheidsbadges",
     ],
     paymentLink: MOLLIE_BASIC_LINK,
     badge: "Basis",
@@ -32,16 +31,16 @@ const PLANS = {
   pro: {
     id: "pro" as PlanId,
     name: "Pro-bijdrager",
-    price: "€59",
+    price: "€49",
     period: "excl. BTW per maand",
-    tagline: "Alles voor serieuze groei",
+    tagline: "Draag extra bij en krijg krachtige tools",
     benefitsTitle: "Alles van Basis, plus",
     benefits: [
-      "Onbeperkte RegioBot AI",
-      "Volledige WOO-bibliotheek",
-      "Ondernemerscore (maandelijks)",
-      "20% affiliate = €11,80/klant/mnd",
+      "RegioBot: WOO & regelgeving AI",
+      "Persoonlijke WOO-bibliotheek",
+      "Printbare overzichten",
       "Prioriteit ondersteuning",
+      "Bouw mee aan nieuwe features",
     ],
     paymentLink: MOLLIE_PRO_LINK,
     badge: "Pro",
@@ -66,7 +65,7 @@ export default function LidmaatschapPage() {
       <div className="openregio-upgrade" data-testid="page-lidmaatschap">
         <h1 data-testid="text-page-title">Word lid van OpenRegio</h1>
         <p className="openregio-subtitle">
-          Kies een plan dat bij jouw onderneming past en start vandaag nog.
+          Kies een plan dat bij jouw onderneming past en start vandaag nog met lokale samenwerking.
         </p>
 
         {/* Plan-toggle */}
@@ -141,17 +140,8 @@ export default function LidmaatschapPage() {
             Ga naar betaling ({active.price}/mnd)
           </a>
 
-          {/* Affiliate-blok */}
-          <div style={{ marginTop: 20, padding: "14px 16px", background: "rgba(255,255,255,.08)", borderRadius: 12, border: "1px solid rgba(255,255,255,.12)" }}>
-            <p style={{ fontSize: 12, fontWeight: 700, color: "#f28a1a", marginBottom: 6 }}>💰 Affiliate-programma</p>
-            <p style={{ fontSize: 12, color: "rgba(255,255,255,.75)", lineHeight: 1.6, margin: 0 }}>
-              Verdien 20% terugkerende commissie voor elke ondernemer die jij aanmeldt.
-              {active.id === "pro" ? " Dat is €11,80/klant/mnd." : " Dat is €3,80/klant/mnd."} 5 klanten = jouw abonnement terug.
-            </p>
-          </div>
-
           <p className="openregio-upgrade-note">
-            Veilige betaling via Mollie · maandelijks opzegbaar · geen binding
+            Veilige betaling via Mollie · opzegbaar per maand
           </p>
         </div>
 

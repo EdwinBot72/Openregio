@@ -26,7 +26,7 @@ export default function VoorwaardenPage() {
           <p>OpenRegio biedt twee soorten lidmaatschappen:</p>
           <ul>
             <li><strong>Basis (€19/maand excl. BTW):</strong> Toegang tot netwerk, stemrecht, bedrijfsprofiel</li>
-            <li><strong>Pro (€59/maand excl. BTW):</strong> Alle Basis functies plus RegioBot AI, documentupload</li>
+            <li><strong>Pro (€49/maand excl. BTW):</strong> Alle Basis functies plus RegioBot AI, documentupload</li>
           </ul>
           <h3>2.2 Registratie</h3>
           <p>Door een account aan te maken, ga je akkoord met deze voorwaarden. Je bent verantwoordelijk voor de juistheid van je gegevens en het geheimhouden van je inloggegevens.</p>
