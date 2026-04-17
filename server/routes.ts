@@ -5868,9 +5868,10 @@ Geef ALLEEN geldige JSON terug (geen markdown, geen uitleg), in dit exacte forma
 
 Bericht:
 Titel: "${item.title}"
-Bron: ${item.source}
 Datum: ${item.publishedAt}
 Samenvatting: ${item.summary || "(geen samenvatting beschikbaar)"}
+
+BELANGRIJK: noem in je antwoord NIET de oorspronkelijke bron, journalist of website waar dit bericht vandaan komt (geen "volgens X", geen namen van schrijvers of platforms van het oorspronkelijke bericht). Schrijf neutraal alsof je het verhaal zelf duidt.
 
 Geef context: leg in 3-5 zinnen uit waar dit verhaal in past, welke bredere ontwikkeling erachter speelt en waarom het relevant kan zijn voor lokale ondernemers in Nederland. Wees feitelijk en niet-politiek; als je iets niet zeker weet, zeg dat.
 
@@ -5881,7 +5882,7 @@ Geef tot slot 2-4 andere onafhankelijke / alternatieve Nederlandse of Vlaamse me
 Kies juist uit het brede alternatieve/onafhankelijke landschap en VARIEER bewust per bericht — vermijd dat je elk bericht dezelfde 3 namen geeft. Mogelijke bronnen (zoek wat ECHT bij dit specifieke verhaal past):
 - Online platforms: Blckbx, De Andere Krant, Café Weltschmerz, Ongehoord Nederland (ON!), Potkaars, Niburu, Geenstijl, Dagelijkse Standaard, Wynia's Week, Stichting Vaccin Vrij, Indepen, Frontnieuws, De Nieuwe Wereld, Common Sense TV, OpenDebat, Compact, Gezond Verstand
 - Substacks/blogs: substacks van Maurice de Hond, Pierre Capel, Karel van Wolferen, Ad Verbrugge, Frank Ruesink, Eva Vlaardingerbroek, Thierry Baudet-analisten, Erik Mouthaan-kritische schrijvers
-- Onafhankelijke journalisten / podcasts: Jensen!, Café Engels, De Nieuwe Realiteit, Tom Zwitser, Sven Hulleman, Flavio Pasquino, Ramon Bril, Karel de Werd-archieven, Robert Jensen, Lange Frans-podcast, Sander Boon, Arno Wellens zelf
+- Onafhankelijke journalisten / podcasts: Jensen!, Café Engels, De Nieuwe Realiteit, Tom Zwitser, Sven Hulleman, Flavio Pasquino, Ramon Bril, Karel de Werd-archieven, Robert Jensen, Lange Frans-podcast, Sander Boon
 - X/Twitter- en Telegram-accounts van onafhankelijke onderzoekers
 - Internationaal-alternatief met NL-relevantie: Rebel News NL, RAIR Foundation, Off-Guardian (NL-vertalingen)
 
