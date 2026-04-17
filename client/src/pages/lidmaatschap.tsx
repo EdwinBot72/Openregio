@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Link, useSearch } from "wouter";
-// De OpenRegio top-nav wordt nu verzorgd door de layout-wrapper in App.tsx,
-// dus deze pagina rendert zelf geen extra publieke navigatie meer.
 
 const MOLLIE_BASIC_LINK =
   (import.meta.env.VITE_MOLLIE_BASIC_PAYMENT_LINK as string) ||
@@ -13,48 +11,37 @@ const MOLLIE_PRO_LINK =
 
 type PlanId = "basic" | "pro";
 
-interface Plan {
-  id: PlanId;
-  name: string;
-  price: string;
-  period: string;
-  tagline: string;
-  benefitsTitle: string;
-  benefits: string[];
-  paymentLink: string;
-  badge: string;
-}
-
-const PLANS: Record<PlanId, Plan> = {
+const PLANS = {
   basic: {
-    id: "basic",
+    id: "basic" as PlanId,
     name: "Basis-lid",
     price: "€19",
     period: "excl. BTW per maand",
-    tagline: "Volwaardig lid van de coöperatie",
+    tagline: "Alle essentials voor gezond ondernemen",
     benefitsTitle: "Wat krijg je",
     benefits: [
-      "Bedrijfsprofiel in lokaal netwerk",
-      "Ontdek en ontmoet ondernemers",
-      "Volledig stemrecht in de coöperatie",
-      "Basischeck & weerbaarheidsbadges",
+      "Vindbaarheidscheck & verbeterpunten",
+      "Regelgeving in gewone taal",
+      "Brief-analyse via RegioBot",
+      "Signalen & kansen in jouw regio",
+      "20% affiliate commissie",
     ],
     paymentLink: MOLLIE_BASIC_LINK,
     badge: "Basis",
   },
   pro: {
-    id: "pro",
+    id: "pro" as PlanId,
     name: "Pro-bijdrager",
-    price: "€49",
+    price: "€59",
     period: "excl. BTW per maand",
-    tagline: "Draag extra bij en krijg krachtige tools",
+    tagline: "Alles voor serieuze groei",
     benefitsTitle: "Alles van Basis, plus",
     benefits: [
-      "RegioBot: WOO & regelgeving AI",
-      "Persoonlijke WOO-bibliotheek",
-      "Printbare overzichten",
+      "Onbeperkte RegioBot AI",
+      "Volledige WOO-bibliotheek",
+      "Ondernemerscore (maandelijks)",
+      "20% affiliate = €11,80/klant/mnd",
       "Prioriteit ondersteuning",
-      "Bouw mee aan nieuwe features",
     ],
     paymentLink: MOLLIE_PRO_LINK,
     badge: "Pro",
@@ -66,7 +53,6 @@ export default function LidmaatschapPage() {
   const searchParams = useSearch();
   const params = new URLSearchParams(searchParams);
   const urlPlan = params.get("plan");
-
   const [selected, setSelected] = useState<PlanId>(urlPlan === "pro" ? "pro" : "basic");
 
   useEffect(() => {
@@ -80,7 +66,7 @@ export default function LidmaatschapPage() {
       <div className="openregio-upgrade" data-testid="page-lidmaatschap">
         <h1 data-testid="text-page-title">Word lid van OpenRegio</h1>
         <p className="openregio-subtitle">
-          Kies een plan dat bij jouw onderneming past en start vandaag nog met lokale samenwerking.
+          Kies een plan dat bij jouw onderneming past en start vandaag nog.
         </p>
 
         {/* Plan-toggle */}
@@ -114,7 +100,7 @@ export default function LidmaatschapPage() {
           })}
         </div>
 
-        {/* Donkerblauwe upgrade-kaart */}
+        {/* Upgrade-kaart */}
         <div className="openregio-upgrade-card" data-testid={`card-upgrade-${active.id}`}>
           <span className="openregio-upgrade-badge" data-testid="badge-plan">
             {active.badge}
@@ -155,8 +141,17 @@ export default function LidmaatschapPage() {
             Ga naar betaling ({active.price}/mnd)
           </a>
 
+          {/* Affiliate-blok */}
+          <div style={{ marginTop: 20, padding: "14px 16px", background: "rgba(255,255,255,.08)", borderRadius: 12, border: "1px solid rgba(255,255,255,.12)" }}>
+            <p style={{ fontSize: 12, fontWeight: 700, color: "#f28a1a", marginBottom: 6 }}>💰 Affiliate-programma</p>
+            <p style={{ fontSize: 12, color: "rgba(255,255,255,.75)", lineHeight: 1.6, margin: 0 }}>
+              Verdien 20% terugkerende commissie voor elke ondernemer die jij aanmeldt.
+              {active.id === "pro" ? " Dat is €11,80/klant/mnd." : " Dat is €3,80/klant/mnd."} 5 klanten = jouw abonnement terug.
+            </p>
+          </div>
+
           <p className="openregio-upgrade-note">
-            Veilige betaling via Mollie · opzegbaar per maand
+            Veilige betaling via Mollie · maandelijks opzegbaar · geen binding
           </p>
         </div>
 

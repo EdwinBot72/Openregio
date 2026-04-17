@@ -1,9 +1,5 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle, Mail, AlertCircle, Loader2 } from "lucide-react";
 import { Link, useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,11 +8,11 @@ import { useAuth } from "@/hooks/useAuth";
 
 const registerSchema = z.object({
   firstName: z.string().optional(),
-  lastName: z.string().optional(),
-  email: z.string().email("Vul een geldig e-mailadres in"),
-  password: z.string().min(6, "Wachtwoord moet minimaal 6 tekens zijn"),
+  lastName:  z.string().optional(),
+  email:     z.string().email("Vul een geldig e-mailadres in"),
+  password:  z.string().min(6, "Wachtwoord moet minimaal 6 tekens zijn"),
   confirmPassword: z.string().min(1, "Bevestig je wachtwoord"),
-}).refine((data) => data.password === data.confirmPassword, {
+}).refine((d) => d.password === d.confirmPassword, {
   message: "Wachtwoorden komen niet overeen",
   path: ["confirmPassword"],
 });
@@ -30,270 +26,215 @@ const PLAN_LABELS: Record<string, string> = {
 
 function PostPaymentRegisterForm({ plan }: { plan: "basic" | "pro" }) {
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
-  const { refetch } = useAuth();
+  const { toast }       = useToast();
+  const { refetch }     = useAuth();
 
-  const form = useForm<RegisterFormData>({
+  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<RegisterFormData>({
     resolver: zodResolver(registerSchema),
-    defaultValues: {
-      firstName: "",
-      lastName: "",
-      email: "",
-      password: "",
-      confirmPassword: "",
-    },
+    defaultValues: { firstName: "", lastName: "", email: "", password: "", confirmPassword: "" },
   });
 
   const onSubmit = async (data: RegisterFormData) => {
-    try {
-      const { confirmPassword, ...rest } = data;
-      const response = await fetch("/api/auth/register-after-payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...rest, plan }),
-        credentials: "include",
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || "Registratie mislukt");
-      }
-
-      await refetch();
-
-      toast({
-        title: "Account aangemaakt!",
-        description: "Je wordt doorgestuurd naar je dashboard...",
-      });
-
-      setTimeout(() => {
-        setLocation("/dashboard");
-      }, 500);
-    } catch (error: unknown) {
-      toast({
-        variant: "destructive",
-        title: "Registratie mislukt",
-        description: error instanceof Error ? error.message : "Probeer het opnieuw",
-      });
+    const { confirmPassword, ...rest } = data;
+    const response = await fetch("/api/auth/register-after-payment", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...rest, plan }),
+      credentials: "include",
+    });
+    const result = await response.json();
+    if (!response.ok) {
+      toast({ variant: "destructive", title: "Registratie mislukt", description: result.error || "Probeer het opnieuw" });
+      return;
     }
+    await refetch();
+    toast({ title: "Account aangemaakt!", description: "Je wordt doorgestuurd naar je dashboard…" });
+    setTimeout(() => setLocation("/dashboard"), 500);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-background flex items-center justify-center p-4">
-      <Card className="max-w-lg w-full" data-testid="card-post-payment-register">
-        <CardHeader className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-            <CheckCircle className="w-10 h-10 text-primary" data-testid="icon-success" />
+    <div className="openregio-page openregio-auth-page" data-testid="card-post-payment-register">
+      <div className="openregio-auth-center" style={{ maxWidth: 480 }}>
+
+        <div className="openregio-auth-logo">
+          <Link href="/">
+            <span className="openregio-topnav-logo">
+              <span className="openregio-topnav-logo-dark">Open</span>
+              <span className="openregio-topnav-logo-blue">Regio</span>
+            </span>
+          </Link>
+        </div>
+
+        {/* Succes-badge */}
+        <div style={{ textAlign: "center", marginBottom: 20 }}>
+          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#dcfce7", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
+            <CheckCircle size={28} style={{ color: "#059669" }} data-testid="icon-success" />
           </div>
-          <CardTitle className="text-3xl font-accent">Betaling geslaagd!</CardTitle>
-          <CardDescription className="text-lg">
-            Welkom als <span className="font-semibold text-foreground">{PLAN_LABELS[plan]}</span>. Maak nu je account aan.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="firstName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Voornaam (optioneel)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Jan" data-testid="input-first-name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="lastName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Achternaam (optioneel)</FormLabel>
-                      <FormControl>
-                        <Input placeholder="Jansen" data-testid="input-last-name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+          <span style={{ display: "inline-block", background: "rgba(31,95,174,.1)", color: "#1f5fae", border: "1px solid rgba(31,95,174,.2)", borderRadius: 20, padding: "4px 14px", fontSize: 12, fontWeight: 700 }}>
+            Betaling geslaagd — {PLAN_LABELS[plan]} actief
+          </span>
+        </div>
+
+        <div className="openregio-card openregio-auth-card">
+          <div className="openregio-auth-header">
+            <h1 className="openregio-auth-title">Account aanmaken</h1>
+            <p className="openregio-auth-sub">
+              Jouw betaling is verwerkt. Maak nu je account aan om direct aan de slag te gaan.
+            </p>
+          </div>
+
+          <form onSubmit={handleSubmit(onSubmit)} className="openregio-onboarding-form">
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+              <div className="openregio-form-group" style={{ marginBottom: 0 }}>
+                <label>Voornaam</label>
+                <input {...register("firstName")} type="text" placeholder="Jan" data-testid="input-first-name" />
               </div>
+              <div className="openregio-form-group" style={{ marginBottom: 0 }}>
+                <label>Achternaam</label>
+                <input {...register("lastName")} type="text" placeholder="Jansen" data-testid="input-last-name" />
+              </div>
+            </div>
 
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>E-mailadres *</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="email"
-                        placeholder="jouw@email.nl"
-                        data-testid="input-email"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <div className="openregio-form-group">
+              <label>E-mailadres *</label>
+              <input {...register("email")} type="email" placeholder="jouw@email.nl" data-testid="input-email" />
+              {errors.email && <p style={{ fontSize: 11, color: "#dc2626", marginTop: 4 }}>{errors.email.message}</p>}
+            </div>
 
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Wachtwoord *</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Minimaal 6 tekens"
-                        data-testid="input-password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <div className="openregio-form-group">
+              <label>Wachtwoord *</label>
+              <input {...register("password")} type="password" placeholder="Minimaal 6 tekens" data-testid="input-password" />
+              {errors.password && <p style={{ fontSize: 11, color: "#dc2626", marginTop: 4 }}>{errors.password.message}</p>}
+            </div>
 
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Bevestig wachtwoord *</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="password"
-                        placeholder="Herhaal je wachtwoord"
-                        data-testid="input-confirm-password"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <div className="openregio-form-group">
+              <label>Bevestig wachtwoord *</label>
+              <input {...register("confirmPassword")} type="password" placeholder="Herhaal je wachtwoord" data-testid="input-confirm-password" />
+              {errors.confirmPassword && <p style={{ fontSize: 11, color: "#dc2626", marginTop: 4 }}>{errors.confirmPassword.message}</p>}
+            </div>
 
-              <Button
-                type="submit"
-                className="w-full"
-                disabled={form.formState.isSubmitting}
-                data-testid="button-create-account"
-              >
-                {form.formState.isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Account aanmaken...
-                  </>
-                ) : (
-                  "Account aanmaken en inloggen"
-                )}
-              </Button>
+            <button
+              type="submit"
+              className="openregio-button openregio-button-primary"
+              disabled={isSubmitting}
+              data-testid="button-create-account"
+              style={{ width: "100%" }}
+            >
+              {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
+              {isSubmitting ? "Account aanmaken…" : "Account aanmaken en inloggen"}
+            </button>
+          </form>
 
-              <p className="text-xs text-center text-muted-foreground">
-                Heb je al een account?{" "}
-                <Link href="/login" className="text-primary hover:underline" data-testid="link-login">
-                  Log hier in
-                </Link>
-              </p>
-            </form>
-          </Form>
-        </CardContent>
-      </Card>
+          <p className="openregio-auth-footer">
+            Al een account?{" "}
+            <Link href="/login">
+              <span style={{ color: "#1f5fae", fontWeight: 700, cursor: "pointer" }} data-testid="link-login">Log hier in</span>
+            </Link>
+          </p>
+        </div>
+      </div>
+
+      <style>{`
+        .openregio-auth-page { background: #f4f6fb; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+        .openregio-auth-center { width: 100%; max-width: 440px; }
+        .openregio-auth-logo { text-align: center; margin-bottom: 20px; }
+        .openregio-auth-logo .openregio-topnav-logo { font-size: 24px; font-weight: 800; letter-spacing: -.4px; text-decoration: none; }
+        .openregio-auth-card { margin-bottom: 0; }
+        .openregio-auth-header { margin-bottom: 22px; }
+        .openregio-auth-title { font-size: 20px; font-weight: 800; color: #0b2240; margin-bottom: 6px; letter-spacing: -.3px; }
+        .openregio-auth-sub { font-size: 13px; color: #64748b; line-height: 1.6; margin: 0; }
+        .openregio-auth-footer { font-size: 13px; color: #94a3b8; text-align: center; margin-top: 18px; margin-bottom: 0; }
+      `}</style>
     </div>
   );
 }
 
 function EmailCheckPage({ email }: { email: string }) {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-primary/5 via-background to-background flex items-center justify-center p-4">
-      <Card className="max-w-2xl w-full" data-testid="card-payment-success">
-        <CardHeader className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center">
-            <CheckCircle className="w-10 h-10 text-primary" data-testid="icon-success" />
+    <div className="openregio-page openregio-auth-page" data-testid="card-payment-success">
+      <div className="openregio-auth-center">
+        <div className="openregio-auth-logo">
+          <Link href="/">
+            <span className="openregio-topnav-logo">
+              <span className="openregio-topnav-logo-dark">Open</span>
+              <span className="openregio-topnav-logo-blue">Regio</span>
+            </span>
+          </Link>
+        </div>
+
+        <div className="openregio-card openregio-auth-card" style={{ textAlign: "center" }}>
+          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#dcfce7", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+            <CheckCircle size={28} style={{ color: "#059669" }} data-testid="icon-success" />
           </div>
-          <CardTitle className="text-3xl font-accent">Betaling geslaagd!</CardTitle>
-          <CardDescription className="text-lg">
-            Welkom bij OpenRegio! Je bent nu onderdeel van de coöperatieve beweging.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
+          <h1 className="openregio-auth-title">Betaling geslaagd!</h1>
+          <p className="openregio-auth-sub" style={{ marginBottom: 20 }}>
+            Welkom bij OpenRegio! Je ontvangt een e-mail met je persoonlijke onboarding-link.
+          </p>
+
           {email && (
-            <div className="bg-muted/50 rounded-lg p-4 space-y-2">
-              <div className="flex items-start gap-3">
-                <Mail className="w-5 h-5 text-primary mt-0.5" />
-                <div className="flex-1">
-                  <p className="font-medium text-sm">Check je inbox</p>
-                  <p className="text-sm text-muted-foreground">
-                    We hebben je registratiegegevens verstuurd naar{" "}
-                    <span className="font-semibold text-foreground" data-testid="text-email">
-                      {email}
-                    </span>
-                  </p>
-                </div>
+            <div style={{ background: "#f4f6fb", borderRadius: 12, padding: "12px 16px", marginBottom: 20, display: "flex", alignItems: "flex-start", gap: 10, textAlign: "left" }}>
+              <Mail size={16} style={{ color: "#1f5fae", flexShrink: 0, marginTop: 2 }} />
+              <div>
+                <p style={{ fontSize: 12, fontWeight: 600, color: "#475569", margin: "0 0 2px" }}>Check je inbox</p>
+                <p style={{ fontSize: 12, color: "#64748b", margin: 0 }}>
+                  Verstuurd naar <strong style={{ color: "#0b2240" }} data-testid="text-email">{email}</strong>
+                </p>
               </div>
             </div>
           )}
 
-          <div className="space-y-3">
-            <h3 className="font-semibold">Volgende stappen:</h3>
-            <ol className="space-y-2 list-decimal list-inside text-sm text-muted-foreground">
-              <li>Check je e-mail voor je persoonlijke onboarding link</li>
-              <li>Klik op de link om je account te activeren</li>
-              <li>Maak je bedrijfsprofiel compleet</li>
-              <li>Start met netwerken en ontdek RegioBot!</li>
-            </ol>
-          </div>
-
-          <div className="bg-muted/30 border border-muted rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-muted-foreground mt-0.5" />
-              <div className="flex-1 space-y-1">
-                <p className="text-sm font-medium">Geen email ontvangen?</p>
-                <p className="text-sm text-muted-foreground">
-                  Check je spam folder. Als je na 10 minuten nog geen email hebt ontvangen, neem dan contact met ons op via info@openregio.nl
-                </p>
+          <div style={{ textAlign: "left", marginBottom: 24 }}>
+            <p style={{ fontSize: 12, fontWeight: 700, color: "#0b2240", marginBottom: 10 }}>Volgende stappen:</p>
+            {[
+              "Check je e-mail voor je persoonlijke onboarding-link",
+              "Klik op de link om je account te activeren",
+              "Maak je bedrijfsprofiel compleet",
+              "Start met RegioBot en de basischeck!",
+            ].map((s, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 12, color: "#475569", marginBottom: 8 }}>
+                <span style={{ width: 20, height: 20, borderRadius: "50%", background: "#E6F1FB", color: "#1f5fae", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, flexShrink: 0 }}>{i + 1}</span>
+                {s}
               </div>
-            </div>
+            ))}
           </div>
 
-          <div className="flex flex-col gap-3 pt-4">
-            <Link href="/">
-              <Button
-                variant="outline"
-                className="w-full"
-                data-testid="button-back-home"
-              >
-                Terug naar homepage
-              </Button>
-            </Link>
-            <p className="text-xs text-center text-muted-foreground">
-              Heb je al toegang tot je account?{" "}
-              <Link href="/login" className="text-primary hover:underline" data-testid="link-login">
-                Log direct in
-              </Link>
+          <div style={{ background: "#fffbeb", border: "1px solid #fde68a", borderRadius: 12, padding: "12px 16px", marginBottom: 20, display: "flex", alignItems: "flex-start", gap: 10, textAlign: "left" }}>
+            <AlertCircle size={14} style={{ color: "#d97706", flexShrink: 0, marginTop: 2 }} />
+            <p style={{ fontSize: 11, color: "#92400e", margin: 0, lineHeight: 1.6 }}>
+              Geen e-mail ontvangen? Check je spam of neem contact op via info@openregio.nl
             </p>
           </div>
-        </CardContent>
-      </Card>
+
+          <Link href="/" data-testid="button-back-home">
+            <button className="openregio-button openregio-button-primary" style={{ width: "100%", marginBottom: 10 }}>
+              Terug naar homepage
+            </button>
+          </Link>
+          <Link href="/login" data-testid="link-login">
+            <button className="openregio-button openregio-button-outline" style={{ width: "100%" }}>
+              Al toegang? Log direct in
+            </button>
+          </Link>
+        </div>
+      </div>
+
+      <style>{`
+        .openregio-auth-page { background: #f4f6fb; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+        .openregio-auth-center { width: 100%; max-width: 440px; }
+        .openregio-auth-logo { text-align: center; margin-bottom: 20px; }
+        .openregio-auth-logo .openregio-topnav-logo { font-size: 24px; font-weight: 800; letter-spacing: -.4px; text-decoration: none; }
+        .openregio-auth-card { margin-bottom: 0; }
+        .openregio-auth-title { font-size: 20px; font-weight: 800; color: #0b2240; margin-bottom: 6px; letter-spacing: -.3px; }
+        .openregio-auth-sub { font-size: 13px; color: #64748b; line-height: 1.6; margin: 0; }
+      `}</style>
     </div>
   );
 }
 
 export default function BetalingGeslaagd() {
   const params = new URLSearchParams(window.location.search);
-  const plan = params.get("plan");
-  const email = params.get("email") || "";
-
-  if (plan === "basic" || plan === "pro") {
-    return <PostPaymentRegisterForm plan={plan} />;
-  }
-
+  const plan   = params.get("plan");
+  const email  = params.get("email") || "";
+  if (plan === "basic" || plan === "pro") return <PostPaymentRegisterForm plan={plan} />;
   return <EmailCheckPage email={email} />;
 }

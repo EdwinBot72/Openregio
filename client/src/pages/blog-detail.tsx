@@ -1,9 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { useRoute, Link } from "wouter";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, User } from "lucide-react";
 import type { Blog } from "@shared/schema";
+import { PublicTopNav } from "@/components/PublicTopNav";
 
 export default function BlogDetailPage() {
   const [, params] = useRoute("/blog/:slug");
@@ -27,139 +26,114 @@ export default function BlogDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Laden...</p>
+      <div className="openregio-public-page">
+        <PublicTopNav />
+        <div className="openregio-public-content" style={{ textAlign: "center" }}>
+          <p style={{ color: "#64748b" }}>Laden…</p>
+        </div>
       </div>
     );
   }
 
   if (error || !blog) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
-        <h1 className="text-2xl font-bold">Blog niet gevonden</h1>
-        <Link href="/">
-          <Button variant="outline">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Terug naar home
-          </Button>
-        </Link>
+      <div className="openregio-public-page">
+        <PublicTopNav />
+        <div className="openregio-public-content" style={{ textAlign: "center" }}>
+          <h1 className="openregio-public-title">Blog niet gevonden</h1>
+          <Link href="/">
+            <button className="openregio-button openregio-button-outline" style={{ display: "inline-flex", alignItems: "center", gap: 6 }}>
+              <ArrowLeft className="h-4 w-4" /> Terug naar home
+            </button>
+          </Link>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen">
-      <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-        <div className="max-w-4xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-          <Link 
-            href="/" 
-            className="font-accent text-2xl font-bold text-primary" 
-            data-testid="link-home-logo"
+    <div className="openregio-public-page" data-testid="page-blog-detail">
+      <PublicTopNav />
+      <article className="openregio-public-content" style={{ maxWidth: 760 }} data-testid="blog-article">
+        <Link href="/blogs">
+          <button
+            className="openregio-button openregio-button-outline openregio-button-small"
+            data-testid="button-back-blogs"
+            style={{ marginBottom: 18, display: "inline-flex", alignItems: "center", gap: 6 }}
           >
-            OpenRegio
-          </Link>
-          <div className="flex items-center gap-4">
-            <Link 
-              href="/login" 
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors hover-elevate active-elevate-2 h-8 px-3 py-2" 
-              data-testid="button-nav-login"
-            >
-              Inloggen
-            </Link>
-          </div>
-        </div>
-      </nav>
+            <ArrowLeft className="h-3 w-3" /> Alle blogs
+          </button>
+        </Link>
 
-      <article className="py-12 px-4" data-testid="blog-article">
-        <div className="max-w-4xl mx-auto">
-          <Link href="/">
-            <Button variant="ghost" size="sm" className="mb-6" data-testid="button-back-home">
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Terug naar home
-            </Button>
-          </Link>
-
-          {blog.featuredImage ? (
-            <div className="relative overflow-hidden rounded-xl mb-8" style={{ height: "420px" }}>
-              <img
-                src={blog.featuredImage}
-                alt={blog.title}
-                className="w-full h-full object-cover"
-                data-testid="img-blog-featured"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-8">
-                <h1
-                  className="font-accent text-3xl md:text-5xl font-bold text-white mb-3"
-                  data-testid="text-blog-title"
-                >
-                  {blog.title}
-                </h1>
-                <div className="flex flex-wrap items-center gap-4 text-sm text-white/80">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4" />
-                    <span data-testid="text-blog-date">{formatDate(blog.publishedAt)}</span>
-                  </div>
-                  {blog.authorName && (
-                    <div className="flex items-center gap-2">
-                      <User className="h-4 w-4" />
-                      <span data-testid="text-blog-author">{blog.authorName}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <>
-              <h1
-                className="font-accent text-3xl md:text-5xl font-bold mb-4"
-                data-testid="text-blog-title"
-              >
+        {blog.featuredImage ? (
+          <div style={{ position: "relative", overflow: "hidden", borderRadius: 14, marginBottom: 24, height: 380 }}>
+            <img
+              src={blog.featuredImage}
+              alt={blog.title}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+              data-testid="img-blog-featured"
+            />
+            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(11,34,64,.85), rgba(11,34,64,.2), transparent)" }} />
+            <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 28 }}>
+              <h1 style={{ fontSize: 30, fontWeight: 800, color: "#fff", marginBottom: 8, letterSpacing: "-.5px" }} data-testid="text-blog-title">
                 {blog.title}
               </h1>
-              <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mb-8">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
+              <div style={{ display: "flex", gap: 14, fontSize: 12, color: "rgba(255,255,255,.85)" }}>
+                <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <Calendar className="h-3 w-3" />
                   <span data-testid="text-blog-date">{formatDate(blog.publishedAt)}</span>
-                </div>
+                </span>
                 {blog.authorName && (
-                  <div className="flex items-center gap-2">
-                    <User className="h-4 w-4" />
+                  <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                    <User className="h-3 w-3" />
                     <span data-testid="text-blog-author">{blog.authorName}</span>
-                  </div>
+                  </span>
                 )}
               </div>
-            </>
-          )}
-
-          <Card className="mb-8">
-            <CardContent className="p-6">
-              <p className="text-lg text-muted-foreground italic" data-testid="text-blog-excerpt">
-                {blog.excerpt}
-              </p>
-            </CardContent>
-          </Card>
-
-          <div 
-            className="prose prose-lg max-w-none dark:prose-invert" 
-            data-testid="content-blog-body"
-            dangerouslySetInnerHTML={{ __html: blog.content.replace(/\n/g, '<br/>') }}
-          />
-
-          <div className="mt-12 pt-8 border-t">
-            <Link href="/">
-              <Button data-testid="button-blog-cta">
-                Word lid van OpenRegio
-              </Button>
-            </Link>
+            </div>
           </div>
+        ) : (
+          <>
+            <h1 className="openregio-public-title" data-testid="text-blog-title">{blog.title}</h1>
+            <div style={{ display: "flex", gap: 14, fontSize: 12, color: "#94a3b8", marginBottom: 24 }}>
+              <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                <Calendar className="h-3 w-3" />
+                <span data-testid="text-blog-date">{formatDate(blog.publishedAt)}</span>
+              </span>
+              {blog.authorName && (
+                <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <User className="h-3 w-3" />
+                  <span data-testid="text-blog-author">{blog.authorName}</span>
+                </span>
+              )}
+            </div>
+          </>
+        )}
+
+        <div className="openregio-public-card" style={{ marginBottom: 24 }}>
+          <p style={{ fontSize: 16, color: "#475569", fontStyle: "italic", margin: 0, lineHeight: 1.6 }} data-testid="text-blog-excerpt">
+            {blog.excerpt}
+          </p>
+        </div>
+
+        <div
+          className="openregio-public-card"
+          data-testid="content-blog-body"
+          style={{ fontSize: 15, lineHeight: 1.8, color: "#1f2937" }}
+          dangerouslySetInnerHTML={{ __html: blog.content.replace(/\n/g, "<br/>") }}
+        />
+
+        <div style={{ marginTop: 28, paddingTop: 24, borderTop: "1px solid #e6ebf2", textAlign: "center" }}>
+          <Link href="/lidmaatschap">
+            <button className="openregio-button openregio-button-primary" data-testid="button-blog-cta">
+              Word lid van OpenRegio
+            </button>
+          </Link>
         </div>
       </article>
 
-      <footer className="py-8 px-4 border-t">
-        <div className="max-w-4xl mx-auto text-center text-sm text-muted-foreground">
-          <p>© 2026 OpenRegio – Regionale omzet. Duidelijke regels. Sterke ondernemers.</p>
-        </div>
+      <footer style={{ borderTop: "1px solid #e6ebf2", padding: "24px 16px", textAlign: "center", fontSize: 12, color: "#94a3b8" }}>
+        © 2026 OpenRegio – Regionale omzet. Duidelijke regels. Sterke ondernemers.
       </footer>
     </div>
   );

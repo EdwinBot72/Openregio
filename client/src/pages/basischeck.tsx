@@ -105,42 +105,49 @@ export default function BasischeckPage() {
     setSubmittedFor(null);
   };
 
-  const BG = "#1a3666";
+  const BG = "#143464";
 
   return (
-    <div className="min-h-screen bg-[#0f2347]">
+    <div className="min-h-screen bg-[#0b2240]">
 
       {/* ── Header ────────────────────────────────────────────────────────── */}
       <header className="border-b border-white/10" style={{ backgroundColor: BG }}>
         <div className="mx-auto flex max-w-6xl items-center justify-between px-5 py-4">
-          <Logo />
+          <Link href="/" data-testid="link-home-logo">
+            <span style={{ fontSize: 20, fontWeight: 800, letterSpacing: "-.4px", color: "#fff" }}>
+              <span>Open</span>
+              <span style={{ color: "#f28a1a" }}>Regio</span>
+            </span>
+          </Link>
           <nav className="hidden md:flex items-center gap-7">
-            {["Home", "Oplossingen", "Basischeck", "Lidmaatschap", "Contact"].map((item) => (
-              <Link
-                key={item}
-                href={item === "Home" ? "/" : item === "Basischeck" ? "/basischeck" : item === "Lidmaatschap" ? "/lidmaatschap" : "/"}
-              >
+            {[
+              { label: "Home", href: "/" },
+              { label: "Basischeck", href: "/basischeck" },
+              { label: "Lidmaatschap", href: "/lidmaatschap" },
+              { label: "Blogs", href: "/blogs" },
+            ].map((item) => (
+              <Link key={item.label} href={item.href}>
                 <span
                   className={`text-sm font-medium transition ${
-                    item === "Basischeck" ? "text-white" : "text-white/60 hover:text-white/90"
+                    item.label === "Basischeck" ? "text-white" : "text-white/60 hover:text-white/90"
                   }`}
                 >
-                  {item}
+                  {item.label}
                 </span>
               </Link>
             ))}
           </nav>
           <div className="flex items-center gap-3">
             <Link href="/login">
-              <span className="text-sm font-medium text-white/70 hover:text-white transition">Inloggen</span>
+              <span className="text-sm font-medium text-white/70 hover:text-white transition" data-testid="button-nav-login">Inloggen</span>
             </Link>
-            <Link href="/register">
+            <Link href="/lidmaatschap">
               <button
                 className="rounded-xl px-4 py-2 text-sm font-semibold text-white transition"
-                style={{ backgroundColor: "#b5933a" }}
+                style={{ backgroundColor: "#f28a1a" }}
                 data-testid="button-header-start"
               >
-                Start de Basischeck
+                Word lid
               </button>
             </Link>
           </div>
@@ -190,7 +197,7 @@ export default function BasischeckPage() {
                 value={beroep}
                 onChange={(e) => setBeroep(e.target.value)}
                 placeholder="Je beroep (bijv. Bakker, Horeca, Fysiotherapeut)"
-                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:border-[#1a3666] focus:ring-2 focus:ring-[#1a3666]/10 transition"
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:border-[#143464] focus:ring-2 focus:ring-[#143464]/10 transition"
                 data-testid="input-beroep"
                 onKeyDown={(e) => e.key === "Enter" && startAnalyse()}
               />
@@ -201,7 +208,7 @@ export default function BasischeckPage() {
                 value={gemeente}
                 onChange={(e) => setGemeente(e.target.value)}
                 placeholder="Je stad of gemeente"
-                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:border-[#1a3666] focus:ring-2 focus:ring-[#1a3666]/10 transition"
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:border-[#143464] focus:ring-2 focus:ring-[#143464]/10 transition"
                 data-testid="input-gemeente"
                 onKeyDown={(e) => e.key === "Enter" && startAnalyse()}
               />
@@ -212,7 +219,7 @@ export default function BasischeckPage() {
                 value={bedrijfsnaam}
                 onChange={(e) => setBedrijfsnaam(e.target.value)}
                 placeholder="Bedrijfsnaam — voor Google-profielcheck (optioneel)"
-                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:border-[#1a3666] focus:ring-2 focus:ring-[#1a3666]/10 transition"
+                className="w-full rounded-xl border border-slate-200 dark:border-slate-700 bg-transparent px-4 py-3.5 text-sm text-slate-900 dark:text-white placeholder-slate-400 outline-none focus:border-[#143464] focus:ring-2 focus:ring-[#143464]/10 transition"
                 data-testid="input-bedrijfsnaam"
                 onKeyDown={(e) => e.key === "Enter" && startAnalyse()}
               />
@@ -229,7 +236,7 @@ export default function BasischeckPage() {
               onClick={startAnalyse}
               disabled={loading}
               className="w-full flex items-center justify-center gap-2 rounded-xl py-4 text-sm font-bold text-white transition hover:opacity-90 active:scale-[0.98] disabled:opacity-70"
-              style={{ backgroundColor: "#b5933a" }}
+              style={{ backgroundColor: "#f28a1a" }}
               data-testid="button-start-analyse"
             >
               {loading ? (
@@ -253,7 +260,7 @@ export default function BasischeckPage() {
 
       {/* ── Loading state ─────────────────────────────────────────────────── */}
       {loading && (
-        <section className="py-16 px-5 bg-[#0f2347]">
+        <section className="py-16 px-5 bg-[#0b2240]">
           <div className="mx-auto max-w-2xl text-center space-y-4">
             <div className="w-14 h-14 rounded-[20px] bg-white/10 border border-white/15 flex items-center justify-center mx-auto">
               <Loader2 className="h-7 w-7 text-amber-300 animate-spin" />
@@ -268,7 +275,7 @@ export default function BasischeckPage() {
 
       {/* ── Resultaten ────────────────────────────────────────────────────── */}
       {resultaat && submittedFor && (
-        <section className="py-12 px-5 bg-[#0f2347]" ref={resultRef} data-testid="section-resultaat">
+        <section className="py-12 px-5 bg-[#0b2240]" ref={resultRef} data-testid="section-resultaat">
           <div className="mx-auto max-w-2xl space-y-6">
 
             {/* Header resultaat */}
@@ -466,7 +473,7 @@ export default function BasischeckPage() {
                 <Link href="/register">
                   <button
                     className="rounded-xl px-6 py-3 text-sm font-bold text-white transition hover:opacity-90"
-                    style={{ backgroundColor: "#b5933a" }}
+                    style={{ backgroundColor: "#f28a1a" }}
                     data-testid="button-word-lid"
                   >
                     Word gratis lid <ArrowRight className="inline h-4 w-4 ml-1.5" />
@@ -486,7 +493,7 @@ export default function BasischeckPage() {
 
       {/* ── Waardepropositie (getoond als er geen resultaat is) ───────────── */}
       {!resultaat && !loading && (
-        <section className="py-16 px-5 bg-[#0f2347]">
+        <section className="py-16 px-5 bg-[#0b2240]">
           <div className="mx-auto max-w-4xl">
             <div className="text-center mb-10">
               <h2 className="text-2xl font-black text-white mb-2">Wat je gratis krijgt</h2>
@@ -533,7 +540,7 @@ export default function BasischeckPage() {
       )}
 
       {/* ── Footer ────────────────────────────────────────────────────────── */}
-      <footer className="border-t border-white/10 py-8 px-5 bg-[#0c1f3e]">
+      <footer className="border-t border-white/10 py-8 px-5 bg-[#08182f]">
         <div className="mx-auto max-w-4xl flex items-center justify-between gap-4 flex-wrap">
           <Logo />
           <div className="flex gap-5">

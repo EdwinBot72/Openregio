@@ -1,11 +1,7 @@
 import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ArrowLeft, Mail } from "lucide-react";
+import { Loader2, Mail } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 export default function ForgotPasswordPage() {
@@ -16,116 +12,102 @@ export default function ForgotPasswordPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!email) {
-      toast({
-        variant: "destructive",
-        title: "Email verplicht",
-        description: "Vul je emailadres in",
-      });
+      toast({ variant: "destructive", title: "Email verplicht", description: "Vul je emailadres in" });
       return;
     }
-
     setIsLoading(true);
-    
     try {
       await apiRequest("POST", "/api/auth/forgot-password", { email });
       setIsSubmitted(true);
-      toast({
-        title: "Email verzonden",
-        description: "Als dit emailadres bij ons bekend is, ontvang je een herstelmail.",
-      });
+      toast({ title: "Email verzonden", description: "Als dit emailadres bij ons bekend is, ontvang je een herstelmail." });
     } catch (error: any) {
-      toast({
-        variant: "destructive",
-        title: "Fout",
-        description: error.message || "Er is een fout opgetreden",
-      });
+      toast({ variant: "destructive", title: "Fout", description: error.message || "Er is een fout opgetreden" });
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <nav className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 h-16 flex items-center justify-between">
-          <Link 
-            href="/" 
-            className="font-accent text-2xl font-bold text-primary"
-            data-testid="link-home-logo"
-          >
-            OpenRegio
+    <div className="openregio-page openregio-auth-page" data-testid="page-forgot-password">
+      <div className="openregio-auth-center">
+        <div className="openregio-auth-logo">
+          <Link href="/" data-testid="link-home-logo">
+            <span className="openregio-topnav-logo">
+              <span className="openregio-topnav-logo-dark">Open</span>
+              <span className="openregio-topnav-logo-blue">Regio</span>
+            </span>
           </Link>
         </div>
-      </nav>
 
-      <div className="flex-1 flex items-center justify-center px-4 py-12 bg-muted/30">
-        <Card className="w-full max-w-md" data-testid="card-forgot-password">
-          <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-accent">Wachtwoord vergeten</CardTitle>
-            <CardDescription>
-              {isSubmitted 
+        <div className="openregio-card openregio-auth-card" data-testid="card-forgot-password">
+          <div className="openregio-auth-header">
+            <h1 className="openregio-auth-title">Wachtwoord vergeten</h1>
+            <p className="openregio-auth-sub">
+              {isSubmitted
                 ? "Controleer je inbox voor verdere instructies."
-                : "Vul je emailadres in om een herstellink te ontvangen."
-              }
-            </CardDescription>
-          </CardHeader>
-          
+                : "Vul je emailadres in om een herstellink te ontvangen."}
+            </p>
+          </div>
+
           {isSubmitted ? (
-            <CardContent className="space-y-4">
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                  <Mail className="w-8 h-8 text-primary" />
-                </div>
-                <p className="text-muted-foreground">
-                  Als dit emailadres bij ons bekend is, ontvang je binnen enkele minuten een email met een link om je wachtwoord te herstellen.
-                </p>
+            <div style={{ textAlign: "center", padding: "16px 0" }}>
+              <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#E6F1FB", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
+                <Mail size={24} style={{ color: "#1f5fae" }} />
               </div>
-            </CardContent>
+              <p style={{ fontSize: 13, color: "#64748b", lineHeight: 1.6, margin: 0 }}>
+                Als dit emailadres bij ons bekend is, ontvang je binnen enkele minuten een email met een link om je wachtwoord te herstellen.
+              </p>
+            </div>
           ) : (
-            <form onSubmit={handleSubmit}>
-              <CardContent className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="jouw@email.nl"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    disabled={isLoading}
-                    required
-                    data-testid="input-email"
-                  />
-                </div>
-              </CardContent>
-              <CardFooter className="flex flex-col gap-4">
-                <Button
-                  type="submit"
-                  className="w-full"
+            <form onSubmit={handleSubmit} className="openregio-onboarding-form">
+              <div className="openregio-form-group">
+                <label htmlFor="email">E-mailadres</label>
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="jouw@email.nl"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   disabled={isLoading}
-                  data-testid="button-submit"
-                >
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Verstuur herstellink
-                </Button>
-              </CardFooter>
+                  required
+                  data-testid="input-email"
+                />
+              </div>
+              <button
+                type="submit"
+                className="openregio-button openregio-button-primary"
+                disabled={isLoading}
+                data-testid="button-submit"
+                style={{ width: "100%", marginTop: 4 }}
+              >
+                {isLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                {isLoading ? "Versturen…" : "Verstuur herstellink"}
+              </button>
             </form>
           )}
-          
-          <CardFooter className="pt-0">
-            <Link 
-              href="/login"
-              className="flex items-center text-sm text-primary hover:underline"
-              data-testid="link-back-to-login"
-            >
-              <ArrowLeft className="w-4 h-4 mr-1" />
-              Terug naar inloggen
+
+          <p className="openregio-auth-footer">
+            <Link href="/login">
+              <span style={{ color: "#1f5fae", fontWeight: 700, cursor: "pointer" }} data-testid="link-back-to-login">
+                ← Terug naar inloggen
+              </span>
             </Link>
-          </CardFooter>
-        </Card>
+          </p>
+        </div>
       </div>
+
+      <style>{`
+        .openregio-auth-page { background: #f4f6fb; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
+        .openregio-auth-center { width: 100%; max-width: 440px; }
+        .openregio-auth-logo { text-align: center; margin-bottom: 24px; }
+        .openregio-auth-logo .openregio-topnav-logo { font-size: 24px; font-weight: 800; letter-spacing: -.4px; text-decoration: none; }
+        .openregio-auth-card { margin-bottom: 0; }
+        .openregio-auth-header { margin-bottom: 22px; }
+        .openregio-auth-title { font-size: 20px; font-weight: 800; color: #0b2240; margin-bottom: 6px; letter-spacing: -.3px; }
+        .openregio-auth-sub { font-size: 13px; color: #64748b; line-height: 1.6; margin: 0; }
+        .openregio-auth-footer { font-size: 13px; color: #94a3b8; text-align: center; margin-top: 18px; margin-bottom: 0; }
+      `}</style>
     </div>
   );
 }

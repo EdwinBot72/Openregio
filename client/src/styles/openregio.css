@@ -1164,3 +1164,71 @@
     .openregio-hero h1         { font-size: 26px; }
     .openregio-upgrade > .openregio-upgrade-card { padding: 28px 20px; }
 }
+
+/* ─── Publieke pagina layout ─────────────────────────────────────── */
+.openregio-public-page {
+  background: #f4f6fb;
+  min-height: 100vh;
+  font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+  color: #0b2240;
+}
+.openregio-public-content {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 40px 16px 64px;
+}
+.openregio-public-content h1.openregio-public-title {
+  font-size: 32px;
+  font-weight: 800;
+  color: #0b2240;
+  margin: 0 0 8px;
+  letter-spacing: -.5px;
+}
+.openregio-public-lead {
+  font-size: 15px;
+  color: #64748b;
+  margin: 0 0 28px;
+}
+.openregio-public-card {
+  background: #fff;
+  border: 1px solid #e6ebf2;
+  border-radius: 14px;
+  padding: 28px;
+  margin-bottom: 18px;
+}
+.openregio-public-card h2 {
+  font-size: 18px;
+  font-weight: 800;
+  color: #0b2240;
+  margin: 0 0 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.openregio-public-card h3 {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0b2240;
+  margin: 14px 0 6px;
+}
+.openregio-public-card p,
+.openregio-public-card li {
+  font-size: 14px;
+  color: #374151;
+  line-height: 1.7;
+}
+.openregio-public-card ul {
+  margin: 6px 0 12px 18px;
+  list-style: disc;
+}
+.openregio-public-card .openregio-soft-box {
+  background: #f4f6fb;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-top: 10px;
+}
+@media (max-width: 600px) {
+  .openregio-public-content { padding: 24px 14px 48px; }
+  .openregio-public-card    { padding: 20px; }
+  .openregio-public-content h1.openregio-public-title { font-size: 26px; }
+}
