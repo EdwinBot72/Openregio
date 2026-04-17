@@ -105,7 +105,6 @@ function PublicRouter() {
       <Route path="/cookiebeleid" component={CookiebeleidPage} />
       <Route path="/regio-analyse" component={RegioAnalysePage} />
       <Route path="/koop-lokaal" component={KoopLokaalPage} />
-      <Route path="/nieuws" component={NieuwsPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -177,6 +176,7 @@ function AuthenticatedRouter() {
       <Route path="/vandaag/updates" component={IntelPage} />
       <Route path="/vandaag/acties" component={CursussenPage} />
       <Route path="/vandaag/samen" component={SamenAanpakkenPage} />
+      <Route path="/vandaag/nieuws" component={NieuwsPage} />
 
       {/* ── Kansen (Sectie 2) ─────────────────────────────────────────────── */}
       <Route path="/kansen/opdrachten" component={AanbestedingenPage} />
@@ -297,12 +297,11 @@ function AppContent() {
   const [isCookiebeleidPage] = useRoute("/cookiebeleid");
   const [isRegioAnalysePage] = useRoute("/regio-analyse");
   const [isKoopLokaalPage] = useRoute("/koop-lokaal");
-  const [isNieuwsPage] = useRoute("/nieuws");
 
   // /lidmaatschap krijgt de top-nav, maar blijft publiek bereikbaar.
   // Daarom NIET in PUBLIC_ROUTES en NIET in AuthGuard, maar in een eigen
   // layout-tak hieronder.
-  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage || isBlogsPage || isForgotPasswordPage || isResetPasswordPage || isDisclaimerPage || isCookiebeleidPage || isRegioAnalysePage || isKoopLokaalPage || isNieuwsPage;
+  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage || isBlogsPage || isForgotPasswordPage || isResetPasswordPage || isDisclaimerPage || isCookiebeleidPage || isRegioAnalysePage || isKoopLokaalPage;
 
   if (isPublicRoute) {
     return <PublicRouter />;
