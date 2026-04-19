@@ -1,6 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { Loader2, Newspaper, Radio, Sparkles, Building2 } from "lucide-react";
+import { Loader2, Newspaper, Radio, Sparkles, Building2, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { queryClient } from "@/lib/queryClient";
 
 interface NewsItem {
   id: string;
@@ -28,10 +30,16 @@ function formatDate(iso: string) {
 export default function NieuwsPage() {
   usePageTitle("Nieuws — OpenRegio");
 
-  const { data, isLoading, isError } = useQuery<NewsResponse>({
+  const { data, isLoading, isError, isFetching, refetch } = useQuery<NewsResponse>({
     queryKey: ["/api/news"],
     staleTime: 1000 * 60 * 10,
   });
+
+  async function handleRefresh() {
+    await fetch("/api/news?refresh=1", { credentials: "include" });
+    await queryClient.invalidateQueries({ queryKey: ["/api/news"] });
+    await refetch();
+  }
 
   return (
     <div data-testid="page-nieuws">
@@ -40,6 +48,23 @@ export default function NieuwsPage() {
         <p style={{ color: "#475569", fontSize: 15, lineHeight: 1.7, margin: "8px 0 0", maxWidth: 720 }}>
           Actuele berichten uit Nederlandse bronnen, voorzien van AI-context, alternatieve media en een concreet beeld van welke lokale ondernemingen het raakt.
         </p>
+        <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 12 }}>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleRefresh}
+            disabled={isFetching}
+            data-testid="button-refresh-news"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${isFetching ? "animate-spin" : ""}`} />
+            {isFetching ? "Bezig met verversen…" : "Nieuws verversen"}
+          </Button>
+          {data?.fetchedAt && (
+            <span style={{ color: "#94a3b8", fontSize: 12 }} data-testid="text-fetched-at">
+              Laatst opgehaald: {new Date(data.fetchedAt).toLocaleString("nl-NL")}
+            </span>
+          )}
+        </div>
       </div>
 
       {isLoading && (

@@ -5984,10 +5984,11 @@ Antwoord ALLEEN met JSON, exact deze structuur:
     return all.slice(0, NEWS_MAX_ITEMS);
   }
 
-  app.get("/api/news", async (_req, res) => {
+  app.get("/api/news", async (req, res) => {
     try {
       const now = Date.now();
-      if (newsListCache.items.length === 0 || now - newsListCache.fetchedAt > NEWS_LIST_TTL_MS) {
+      const forceRefresh = req.query.refresh === "1";
+      if (forceRefresh || newsListCache.items.length === 0 || now - newsListCache.fetchedAt > NEWS_LIST_TTL_MS) {
         newsListCache.items = await fetchNewsItems();
         newsListCache.fetchedAt = now;
       }
