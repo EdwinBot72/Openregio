@@ -70,6 +70,20 @@ export function QuestionField({ question, value, onChange }: Props) {
         </select>
       )}
 
+      {question.type === "checkbox" && (
+        <label
+          className={`flow-radio ${value === "ja" ? "is-selected" : ""}`}
+          data-testid={testId}
+        >
+          <input
+            type="checkbox"
+            checked={value === "ja"}
+            onChange={(e) => onChange(e.target.checked ? "ja" : "")}
+          />
+          <span>{question.placeholder ?? "Ja"}</span>
+        </label>
+      )}
+
       {question.type === "radio" && (
         <div className="flow-radio-group" data-testid={testId}>
           {question.options?.map((o) => (

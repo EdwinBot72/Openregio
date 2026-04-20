@@ -1,6 +1,6 @@
 export type RiskLevel = "laag" | "midden" | "hoog";
 
-export type QuestionType = "radio" | "select" | "text" | "textarea" | "date";
+export type QuestionType = "radio" | "select" | "text" | "textarea" | "date" | "checkbox";
 
 export interface QuestionOption {
   value: string;
