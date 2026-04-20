@@ -351,6 +351,42 @@
     line-height: 1.6;
     margin: 0;
 }
+.openregio-nieuws-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.openregio-nieuws-item {
+    border-top: 1px solid #eef2f9;
+    padding-top: 10px;
+}
+.openregio-nieuws-item:first-child {
+    border-top: none;
+    padding-top: 0;
+}
+.openregio-nieuws-link {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    text-decoration: none;
+    color: inherit;
+}
+.openregio-nieuws-link:hover .openregio-nieuws-titel {
+    color: #1e3a8a;
+}
+.openregio-nieuws-titel {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0f172a;
+    line-height: 1.4;
+}
+.openregio-nieuws-datum {
+    font-size: 11px;
+    color: #64748b;
+}
 
 /* ═══════════════════════════════════════════════════════════════
    RESET & BASIS

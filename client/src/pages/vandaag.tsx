@@ -18,6 +18,27 @@ type CooperatiefStats = {
   proMembers: number;
 };
 
+type BlogItem = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  publishedAt: string | null;
+  createdAt: string;
+  status: string;
+};
+
+function formatNieuwsDatum(value: string | null | undefined): string {
+  if (!value) return "";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("nl-NL", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
+}
+
 const CATEGORIE_LABELS: Record<string, string> = {
   retail: "Retail & Winkels",
   food: "Horeca & Voeding",
@@ -47,6 +68,13 @@ export default function VandaagPage() {
     queryKey: ["/api/cooperatief-stats"],
     enabled: !!user,
   });
+
+  const { data: nieuws, isLoading: nieuwsLoading } = useQuery<BlogItem[]>({
+    queryKey: ["/api/blogs/public"],
+    enabled: !!user,
+  });
+
+  const laatsteNieuws = (nieuws ?? []).slice(0, 3);
 
   const displayFirstName =
     user?.firstName ||
@@ -203,7 +231,47 @@ export default function VandaagPage() {
           {/* Laatste nieuws */}
           <div className="openregio-laatste-nieuws" data-testid="card-laatste-nieuws">
             <h3>Laatste nieuws</h3>
-            <p>Binnenkort meer updates over het coöperatief!</p>
+            {nieuwsLoading ? (
+              <div data-testid="skeleton-nieuws" className="openregio-nieuws-list">
+                {[1, 2, 3].map((i) => (
+                  <Skeleton key={i} className="h-12 rounded-md" />
+                ))}
+              </div>
+            ) : laatsteNieuws.length === 0 ? (
+              <p data-testid="text-nieuws-empty">
+                Er is nog geen nieuws gepubliceerd. Kom binnenkort terug!
+              </p>
+            ) : (
+              <ul className="openregio-nieuws-list" data-testid="list-nieuws">
+                {laatsteNieuws.map((item) => {
+                  const datum = formatNieuwsDatum(item.publishedAt ?? item.createdAt);
+                  return (
+                    <li key={item.id} className="openregio-nieuws-item">
+                      <Link
+                        href={`/blog/${item.slug}`}
+                        className="openregio-nieuws-link"
+                        data-testid={`link-nieuws-${item.id}`}
+                      >
+                        <span
+                          className="openregio-nieuws-titel"
+                          data-testid={`text-nieuws-titel-${item.id}`}
+                        >
+                          {item.title}
+                        </span>
+                        {datum && (
+                          <span
+                            className="openregio-nieuws-datum"
+                            data-testid={`text-nieuws-datum-${item.id}`}
+                          >
+                            {datum}
+                          </span>
+                        )}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
           </div>
         </div>
       </div>
