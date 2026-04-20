@@ -187,7 +187,7 @@ function AuthenticatedRouter() {
       <Route path="/kansen/subsidies" component={FinancieringPage} />
       <Route path="/kansen/in-de-buurt" component={KansenInDeBuurtPage} />
       <Route path="/kansen/samenwerkingen">
-        <Redirect to="/regiocrew" />
+        <Redirect to="/network" />
       </Route>
 
       {/* ── Regels (Sectie 3) ─────────────────────────────────────────────── */}

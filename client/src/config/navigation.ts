@@ -66,7 +66,7 @@ export const MAIN_NAV: NavSection[] = [
       { title: "Opdrachten", url: "/kansen/opdrachten", icon: Landmark },
       { title: "Subsidies", url: "/kansen/subsidies", icon: Euro },
       { title: "In de buurt", url: "/kansen/in-de-buurt", icon: MapPin },
-      { title: "Samenwerkingen", url: "/regiocrew", icon: Handshake },
+      { title: "Samenwerkingen", url: "/network", icon: Handshake },
     ],
   },
 
