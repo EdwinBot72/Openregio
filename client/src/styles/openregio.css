@@ -1322,3 +1322,132 @@
   margin-top: 18px;
   margin-bottom: 0;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   RESPONSIVE — extra mobile/tablet polish voor sub-pagina's
+═══════════════════════════════════════════════════════════════ */
+
+/* Register: voor- en achternaam-grid stapelt op smal scherm */
+.openregio-register-name-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+@media (max-width: 520px) {
+  .openregio-register-name-grid { grid-template-columns: 1fr; gap: 0; }
+  .openregio-register-name-grid .openregio-form-group { margin-bottom: 16px !important; }
+  .openregio-register-name-grid .openregio-form-group:last-child { margin-bottom: 0 !important; }
+}
+
+/* Auth-pagina: minder padding op telefoon zodat de kaart goed past */
+@media (max-width: 480px) {
+  .openregio-auth-page { padding: 16px 12px; }
+  .openregio-auth-card { padding: 22px 18px !important; }
+  .openregio-auth-title { font-size: 18px; }
+  .openregio-auth-logo { margin-bottom: 18px; }
+  .openregio-auth-logo .openregio-topnav-logo { font-size: 22px; }
+}
+
+/* Inputs: zet font-size op 16px op telefoon zodat iOS niet inzoomt */
+@media (max-width: 600px) {
+  .openregio-form-group input,
+  .openregio-form-group textarea,
+  .openregio-form-group select,
+  .openregio-onboarding-form input,
+  .openregio-onboarding-form textarea,
+  .openregio-onboarding-form select {
+    font-size: 16px !important;
+  }
+}
+
+/* Blog detail: hero-afbeelding met titel responsief */
+.openregio-blog-hero {
+  position: relative;
+  overflow: hidden;
+  border-radius: 14px;
+  margin-bottom: 24px;
+  height: 380px;
+}
+.openregio-blog-hero img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.openregio-blog-hero-wash {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(11,34,64,.85), rgba(11,34,64,.2), transparent);
+}
+.openregio-blog-hero-content {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 28px;
+}
+.openregio-blog-hero-title {
+  font-size: 30px;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 8px;
+  letter-spacing: -.5px;
+  line-height: 1.2;
+}
+.openregio-blog-hero-meta {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  color: rgba(255,255,255,.85);
+}
+@media (max-width: 720px) {
+  .openregio-blog-hero { height: 280px; border-radius: 12px; }
+  .openregio-blog-hero-content { padding: 20px; }
+  .openregio-blog-hero-title { font-size: 22px; }
+}
+@media (max-width: 480px) {
+  .openregio-blog-hero { height: 220px; }
+  .openregio-blog-hero-content { padding: 16px; }
+  .openregio-blog-hero-title { font-size: 19px; }
+  .openregio-blog-hero-meta { gap: 10px; font-size: 11px; }
+}
+
+/* Blogs-overzicht: iets minder content-padding op telefoon */
+@media (max-width: 600px) {
+  [data-testid="page-blogs"] .openregio-public-content {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+}
+
+/* Vandaag (dashboard) — extra polish op telefoon */
+@media (max-width: 600px) {
+  .openregio-greeting h1 { font-size: 24px !important; }
+  .openregio-greeting { gap: 10px; }
+  .openregio-greeting .openregio-button { font-size: 12px; padding: 9px 14px; }
+  .openregio-stat-card { padding: 16px 18px; }
+  .openregio-stat-number { font-size: 24px; }
+}
+
+/* Publieke (privacy/voorwaarden) — verklein headings nog wat op telefoon */
+@media (max-width: 480px) {
+  .openregio-public-content h1.openregio-public-title { font-size: 22px; }
+  .openregio-public-card { padding: 18px 16px; }
+  .openregio-public-card h2 { font-size: 16px; flex-wrap: wrap; }
+  .openregio-public-card p,
+  .openregio-public-card li { font-size: 13px; }
+}
+
+/* Voorkom horizontaal scrollen door brede content */
+.openregio-public-page,
+.openregio-auth-page,
+.openregio-page {
+  overflow-x: hidden;
+}
+.openregio-public-card,
+.openregio-card {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}

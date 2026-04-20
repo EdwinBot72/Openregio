@@ -78,7 +78,7 @@ export default function RegisterPage() {
           </div>
 
           <form onSubmit={handleSubmit(onSubmit)} className="openregio-onboarding-form">
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
+            <div className="openregio-register-name-grid">
               <div className="openregio-form-group" style={{ marginBottom: 0 }}>
                 <label>Voornaam</label>
                 <input {...register("firstName")} type="text" placeholder="Jan" data-testid="input-first-name" />

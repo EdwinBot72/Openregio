@@ -66,19 +66,18 @@ export default function BlogDetailPage() {
         </Link>
 
         {blog.featuredImage ? (
-          <div style={{ position: "relative", overflow: "hidden", borderRadius: 14, marginBottom: 24, height: 380 }}>
+          <div className="openregio-blog-hero">
             <img
               src={blog.featuredImage}
               alt={blog.title}
-              style={{ width: "100%", height: "100%", objectFit: "cover" }}
               data-testid="img-blog-featured"
             />
-            <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(11,34,64,.85), rgba(11,34,64,.2), transparent)" }} />
-            <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, padding: 28 }}>
-              <h1 style={{ fontSize: 30, fontWeight: 800, color: "#fff", marginBottom: 8, letterSpacing: "-.5px" }} data-testid="text-blog-title">
+            <div className="openregio-blog-hero-wash" />
+            <div className="openregio-blog-hero-content">
+              <h1 className="openregio-blog-hero-title" data-testid="text-blog-title">
                 {blog.title}
               </h1>
-              <div style={{ display: "flex", gap: 14, fontSize: 12, color: "rgba(255,255,255,.85)" }}>
+              <div className="openregio-blog-hero-meta">
                 <span style={{ display: "flex", alignItems: "center", gap: 4 }}>
                   <Calendar className="h-3 w-3" />
                   <span data-testid="text-blog-date">{formatDate(blog.publishedAt)}</span>
