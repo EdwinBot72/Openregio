@@ -330,10 +330,10 @@ export default function HomePage() {
           </div>
           <div className="rg-4 stats-grid" style={{ gap: "16px" }}>
             {[
-              { Icon: Banknote,    title: "Financieel gezond",  text: "Vind opdrachten, subsidies en kansen in je regio voordat ze elders weglopen.", href: "/login",    cta: "Naar kansen" },
-              { Icon: ShieldCheck, title: "Bestuurlijk gezond", text: "Begrijp gemeentebrieven en zet WOO-verzoeken in zonder juridische kennis.",  href: "/regiobot", cta: "Naar RegioBot" },
-              { Icon: Handshake,   title: "Mentaal gezond",     text: "Sta er niet alleen voor: deel signalen en pak zaken samen met andere ondernemers aan.", href: "/login", cta: "Samen aanpakken" },
-              { Icon: TrendingUp,  title: "Strategisch gezond", text: "Weet wat er in je regio speelt — en welke ondernemers het raakt — voordat het je raakt.", href: "/blogs", cta: "Nieuws met context" },
+              { Icon: Banknote,    title: "Financieel gezond",  text: "Vind opdrachten, subsidies en kansen in je regio voordat ze elders weglopen.", href: "/gezond/financieel",   cta: "Bekijk pijler" },
+              { Icon: ShieldCheck, title: "Bestuurlijk gezond", text: "Begrijp gemeentebrieven en zet WOO-verzoeken in zonder juridische kennis.",  href: "/gezond/bestuurlijk", cta: "Bekijk pijler" },
+              { Icon: Handshake,   title: "Mentaal gezond",     text: "Sta er niet alleen voor: deel signalen en pak zaken samen met andere ondernemers aan.", href: "/gezond/mentaal",     cta: "Bekijk pijler" },
+              { Icon: TrendingUp,  title: "Strategisch gezond", text: "Weet wat er in je regio speelt — en welke ondernemers het raakt — voordat het je raakt.", href: "/gezond/strategisch", cta: "Bekijk pijler" },
             ].map(({ Icon, title, text, href, cta }) => (
               <Link key={title} href={href} data-testid={`gezond-card-${title.toLowerCase().replace(/\s+/g, "-")}`}
                 style={{ textDecoration: "none", color: "inherit", display: "block" }}>

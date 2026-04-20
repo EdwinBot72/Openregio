@@ -82,9 +82,10 @@ import NieuwsPage from "@/pages/nieuws";
 import SamenAanpakkenPage from "@/pages/samen-aanpakken";
 import RegelsHelpPage from "@/pages/regels-help";
 import RegelsHelpFlowPage from "@/pages/regels-help-flow";
+import GezondPijlerPage from "@/pages/gezond-pijler";
 
 // Routes that should NOT have the sidebar/header layout
-const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse", "/koop-lokaal"];
+const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse", "/koop-lokaal", "/gezond/:slug"];
 
 function PublicRouter() {
   return (
@@ -107,6 +108,7 @@ function PublicRouter() {
       <Route path="/cookiebeleid" component={CookiebeleidPage} />
       <Route path="/regio-analyse" component={RegioAnalysePage} />
       <Route path="/koop-lokaal" component={KoopLokaalPage} />
+      <Route path="/gezond/:slug" component={GezondPijlerPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -301,11 +303,12 @@ function AppContent() {
   const [isCookiebeleidPage] = useRoute("/cookiebeleid");
   const [isRegioAnalysePage] = useRoute("/regio-analyse");
   const [isKoopLokaalPage] = useRoute("/koop-lokaal");
+  const [isGezondPijlerPage] = useRoute("/gezond/:slug");
 
   // /lidmaatschap krijgt de top-nav, maar blijft publiek bereikbaar.
   // Daarom NIET in PUBLIC_ROUTES en NIET in AuthGuard, maar in een eigen
   // layout-tak hieronder.
-  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage || isBlogsPage || isForgotPasswordPage || isResetPasswordPage || isDisclaimerPage || isCookiebeleidPage || isRegioAnalysePage || isKoopLokaalPage;
+  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage || isBlogsPage || isForgotPasswordPage || isResetPasswordPage || isDisclaimerPage || isCookiebeleidPage || isRegioAnalysePage || isKoopLokaalPage || isGezondPijlerPage;
 
   if (isPublicRoute) {
     return <PublicRouter />;
