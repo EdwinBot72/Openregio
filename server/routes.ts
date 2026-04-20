@@ -6007,6 +6007,9 @@ Antwoord ALLEEN met JSON, exact deze structuur:
     try {
       const now = Date.now();
       const forceRefresh = req.query.refresh === "1";
+      if (forceRefresh) {
+        newsContextCache.clear();
+      }
       if (forceRefresh || newsListCache.items.length === 0 || now - newsListCache.fetchedAt > NEWS_LIST_TTL_MS) {
         newsListCache.items = await fetchNewsItems();
         newsListCache.fetchedAt = now;
