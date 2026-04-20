@@ -46,20 +46,26 @@ const JWT_SECRET = process.env.SESSION_SECRET;
 const isProduction = process.env.NODE_ENV === "production";
 const cookieSameSite: "strict" | "lax" = isProduction ? "strict" : "lax";
 
+// Rate-limiters: relaxed outside of production so local dev / e2e test runs
+// don't exhaust the 5-per-hour register cap. Set E2E_BYPASS_RATE_LIMITS=true
+// in addition for completely unbounded limits.
+const E2E_BYPASS_RATE_LIMITS =
+  process.env.NODE_ENV !== "production" || process.env.E2E_BYPASS_RATE_LIMITS === "true";
+
 const loginLimiter = new RateLimiterMemory({
-  points: 10,
+  points: E2E_BYPASS_RATE_LIMITS ? 100_000 : 10,
   duration: 15 * 60,
   blockDuration: 15 * 60,
 });
 
 const registerLimiter = new RateLimiterMemory({
-  points: 5,
+  points: E2E_BYPASS_RATE_LIMITS ? 100_000 : 5,
   duration: 60 * 60,
   blockDuration: 60 * 60,
 });
 
 const emailLimiter = new RateLimiterMemory({
-  points: 5,
+  points: E2E_BYPASS_RATE_LIMITS ? 100_000 : 5,
   duration: 15 * 60,
 });
 

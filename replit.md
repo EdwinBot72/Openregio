@@ -97,3 +97,11 @@ Nieuwe 7-sectie opbouw op basis van structuurdocument:
 -   **Object Storage**: Replit's built-in Object Storage (Google Cloud Storage)
 -   **Email Service**: SMTP (via mail.mijndomein.nl)
 -   **External APIs**: TenderNed public API, KOOP SRU API (overheid.nl)
+## E2E tests (Playwright)
+
+De vier OpenRegio-pagina's (Vandaag, Netwerk, RegioBot, Lidmaatschap) hebben Playwright e2e-tests in `e2e/`. Draai ze met `scripts/run-e2e.sh` of `npx playwright test` tegen een lokale dev-server (port 5000).
+
+- Configuratie: `playwright.config.ts`
+- Helpers: `e2e/helpers.ts` (registreert + logt een gebruiker in via /api/auth en injecteert cookies)
+- Spec-bestanden: `e2e/lidmaatschap.spec.ts`, `e2e/network.spec.ts`, `e2e/regiobot.spec.ts`, `e2e/vandaag.spec.ts`
+- Server: in non-production zijn de auth rate-limiters opgehoogd zodat tests veel registraties achter elkaar kunnen doen (zie `server/jwtAuth.ts` E2E_BYPASS_RATE_LIMITS).
