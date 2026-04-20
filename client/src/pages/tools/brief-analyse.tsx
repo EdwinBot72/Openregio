@@ -56,8 +56,17 @@ export default function BriefAnalysePage() {
     mutationFn: async (file: File) => {
       const form = new FormData();
       form.append("file", file);
-      const res = await apiRequest("POST", "/api/brief-analyse/upload", form);
-      return res.json() as Promise<AnalyseResultaat>;
+      const res = await fetch("/api/brief-analyse/upload", {
+        method: "POST",
+        body: form,
+        credentials: "include",
+      });
+      const data = await res.json().catch(() => ({} as any));
+      if (!res.ok) {
+        const msg = [data?.error, data?.hint].filter(Boolean).join(" — ") || `Upload mislukt (${res.status})`;
+        throw new Error(msg);
+      }
+      return data as AnalyseResultaat;
     },
     onSuccess: (data) => setResultaat(data),
     onError: (err: Error) => {

@@ -1473,9 +1473,33 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
         tekst = pdf.text;
       }
 
-      if (!tekst || tekst.trim().length < 20) {
-        return res.status(400).json({ error: "Geen tekst gevonden in het bestand. Probeer een duidelijker document." });
+      const tekstTrimmed = (tekst || "").trim();
+      console.log(
+        `[BriefAnalyse/upload] file=${file.originalname} mime=${file.mimetype} ` +
+        `size=${file.size} extractedChars=${tekstTrimmed.length}`
+      );
+
+      if (tekstTrimmed.length < 20) {
+        if (file.mimetype === "application/pdf") {
+          return res.status(400).json({
+            error: "Geen leesbare tekst in deze PDF",
+            hint:
+              "Dit lijkt een gescande PDF zonder tekstlaag. Maak van elke pagina een schermafbeelding (JPG of PNG) en upload die los — die kunnen we wel lezen. Of plak de tekst rechtstreeks in het tekstvak.",
+          });
+        }
+        if (isImage) {
+          return res.status(400).json({
+            error: "We konden geen tekst herkennen op deze afbeelding",
+            hint:
+              "Maak een scherpere foto/scan in goed licht, recht van boven, en zorg dat de tekst goed leesbaar is. Of plak de tekst rechtstreeks in het tekstvak.",
+          });
+        }
+        return res.status(400).json({
+          error: "Geen tekst gevonden in het bestand",
+          hint: "Plak de tekst rechtstreeks in het tekstvak in plaats van uploaden.",
+        });
       }
+      tekst = tekstTrimmed;
 
       const tekst8k = tekst.slice(0, 8000);
 
@@ -1584,10 +1608,32 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
         pages = pdfResult.pages;
       }
 
-      if (!text || text.trim().length < 10) {
-        return res.status(400).json({ 
-          error: "Geen tekst gevonden in document", 
-          hint: "Probeer een document met meer tekst of een duidelijker gescande afbeelding." 
+      const trimmed = (text || "").trim();
+      console.log(
+        `[RAG/upload] file=${file.originalname} mime=${file.mimetype} ` +
+        `size=${file.size} extractedChars=${trimmed.length} needsOcr=${needsOcr} ` +
+        `pages=${pages ?? "?"} ocrConf=${ocrConfidence ?? "?"}`
+      );
+
+      if (trimmed.length < 10) {
+        if (file.mimetype === "application/pdf") {
+          return res.status(400).json({
+            error: "Geen leesbare tekst in deze PDF",
+            hint:
+              "Dit lijkt een gescande PDF zonder tekstlaag. Maak van elke pagina een schermafbeelding (JPG of PNG) en upload die — die kunnen we wel lezen. Of gebruik een 'OCR'-optie in je PDF-programma voordat je hem hier uploadt.",
+          });
+        }
+        if (isImage) {
+          return res.status(400).json({
+            error: "We konden geen tekst herkennen op deze afbeelding",
+            hint:
+              "Maak een scherpere foto/scan in goed licht, recht van boven, en zorg dat de tekst goed leesbaar is. Hoge resolutie (>1200px breed) werkt het best.",
+          });
+        }
+        return res.status(400).json({
+          error: "Geen tekst gevonden in document",
+          hint:
+            "Probeer een document met meer tekst, of plak de tekst rechtstreeks in plaats van uploaden.",
         });
       }
 

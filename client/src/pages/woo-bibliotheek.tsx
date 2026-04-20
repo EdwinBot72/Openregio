@@ -61,16 +61,21 @@ export default function WooBibliotheekPage() {
       setIsUploading(true);
       setUploadProgress(10);
 
-      const response = await apiRequest("POST", "/api/rag/documents", formData);
+      const response = await fetch("/api/rag/documents", {
+        method: "POST",
+        body: formData,
+        credentials: "include",
+      });
 
       setUploadProgress(90);
 
+      const data = await response.json().catch(() => ({} as any));
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Upload mislukt");
+        const msg = [data?.error, data?.hint].filter(Boolean).join(" — ") || `Upload mislukt (${response.status})`;
+        throw new Error(msg);
       }
 
-      return response.json();
+      return data;
     },
     onSuccess: (data) => {
       setUploadProgress(100);
