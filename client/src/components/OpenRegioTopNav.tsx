@@ -257,7 +257,7 @@ export function OpenRegioTopNav() {
                     data-testid="dropdown-item-instellingen"
                   >
                     <Settings className="h-3.5 w-3.5 mr-2 inline-block" />
-                    Instellingen
+                    Account &amp; instellingen
                   </Link>
                   <Link
                     href="/groei/profiel"
@@ -404,12 +404,28 @@ export function OpenRegioTopNav() {
                   Upgrade naar Pro
                 </Link>
               )}
+              <Link
+                href="/account/instellingen"
+                className="openregio-topnav-mobile-tab"
+                data-testid="link-topnav-mobile-instellingen"
+              >
+                <Settings className="h-4 w-4 mr-2 inline-block" />
+                Account &amp; instellingen
+              </Link>
+              <Link
+                href="/groei/profiel"
+                className="openregio-topnav-mobile-tab"
+                data-testid="link-topnav-mobile-profiel"
+              >
+                Bedrijfsprofiel
+              </Link>
               <button
                 type="button"
                 className="openregio-topnav-mobile-tab openregio-topnav-dropdown-logout"
                 onClick={handleLogout}
                 data-testid="button-topnav-mobile-logout"
               >
+                <LogOut className="h-4 w-4 mr-2 inline-block" />
                 Uitloggen
               </button>
             </>
