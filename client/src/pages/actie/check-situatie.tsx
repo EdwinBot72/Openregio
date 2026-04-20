@@ -1,3 +1,4 @@
+import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -12,6 +13,7 @@ import {
   Clock,
   Building2,
   Briefcase,
+  ArrowRight,
 } from "lucide-react";
 
 export default function CheckSituatiePage() {
@@ -36,6 +38,29 @@ export default function CheckSituatiePage() {
           </div>
         </div>
       </div>
+
+      {/* Direct beschikbaar: hulp-engine */}
+      <Card className="border-[#1f5fae]/30 bg-[#f0f4ff]">
+        <CardContent className="pt-5 pb-5">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+            <div className="flex-1 space-y-1">
+              <p className="text-sm font-semibold text-[#0b2240]">
+                Wel al beschikbaar: Hulp bij regels
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Drie korte hulplijnen voor brieven van de overheid, onduidelijke
+                regels en controles of boetes — met direct een concept-tekst.
+              </p>
+            </div>
+            <Button asChild data-testid="button-naar-hulp-engine">
+              <Link href="/regels/help">
+                Open Hulp bij regels
+                <ArrowRight className="h-4 w-4 ml-2" />
+              </Link>
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Wat wordt het? */}
       <Card>

@@ -80,6 +80,8 @@ import AdminCursussenPage from "@/pages/admin/cursussen";
 import BinnenkortPage from "@/pages/binnenkort";
 import NieuwsPage from "@/pages/nieuws";
 import SamenAanpakkenPage from "@/pages/samen-aanpakken";
+import RegelsHelpPage from "@/pages/regels-help";
+import RegelsHelpFlowPage from "@/pages/regels-help-flow";
 
 // Routes that should NOT have the sidebar/header layout
 const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse", "/koop-lokaal"];
@@ -188,6 +190,8 @@ function AuthenticatedRouter() {
 
       {/* ── Regels (Sectie 3) ─────────────────────────────────────────────── */}
       <Route path="/regels/updates" component={IntelPage} />
+      <Route path="/regels/help" component={RegelsHelpPage} />
+      <Route path="/regels/help/:flowId" component={RegelsHelpFlowPage} />
       <Route path="/regels/check" component={CheckSituatiePage} />
       <Route path="/regels/documenten" component={BriefAnalysePage} />
       <Route path="/regels/woo" component={WooBibliotheekPage} />

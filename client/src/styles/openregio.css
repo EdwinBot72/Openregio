@@ -1557,3 +1557,314 @@
 .openregio-page-shell .animate-pulse[class*="bg-muted"] {
   background-color: #eef2fb;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   FLOW-ENGINE (/regels/help) — hub + runner
+═══════════════════════════════════════════════════════════════ */
+
+.flow-back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1f5fae;
+    text-decoration: none;
+    margin-bottom: 16px;
+}
+.flow-back:hover { text-decoration: underline; }
+
+/* Hub */
+.flow-hub-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-top: 8px;
+}
+.flow-hub-card {
+    background: #fff;
+    border: 1px solid #e8edf8;
+    border-radius: 20px;
+    padding: 22px;
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: border-color .15s, transform .12s, box-shadow .15s;
+}
+.flow-hub-card:hover {
+    border-color: #1f5fae;
+    box-shadow: 0 8px 22px rgba(31,95,174,.08);
+    transform: translateY(-1px);
+}
+.flow-hub-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 12px;
+    background: rgba(242,138,26,.15);
+    color: #f28a1a;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.flow-hub-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #0b2240;
+    letter-spacing: -.2px;
+}
+.flow-hub-desc {
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.55;
+    margin: 0;
+    flex: 1;
+}
+.flow-hub-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #1f5fae;
+}
+
+/* Runner grid */
+.flow-engine-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 20px;
+    align-items: start;
+    margin-top: 16px;
+}
+@media (max-width: 900px) {
+    .flow-engine-grid { grid-template-columns: 1fr; }
+}
+
+.flow-questions .openregio-card {
+    margin-bottom: 0;
+}
+.flow-questions-intro {
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.6;
+    margin: 0 0 14px;
+}
+.flow-question-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.flow-question {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.flow-question-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #0b2240;
+}
+.flow-question-required { color: #f28a1a; }
+.flow-question-help {
+    font-size: 12px;
+    color: #64748b;
+    margin: 0;
+}
+.flow-input,
+.flow-textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    background: #fff;
+    font-family: inherit;
+    font-size: 13px;
+    color: #0f172a;
+    transition: border-color .12s, box-shadow .12s;
+}
+.flow-input:focus,
+.flow-textarea:focus {
+    outline: none;
+    border-color: #1f5fae;
+    box-shadow: 0 0 0 3px rgba(31,95,174,.15);
+}
+.flow-textarea {
+    resize: vertical;
+    min-height: 84px;
+    line-height: 1.5;
+}
+.flow-radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.flow-radio {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    cursor: pointer;
+    background: #fff;
+    font-size: 13px;
+    color: #334155;
+    transition: border-color .12s, background .12s;
+}
+.flow-radio:hover { border-color: #1f5fae; }
+.flow-radio.is-selected {
+    border-color: #1f5fae;
+    background: #f0f4ff;
+    color: #0b2240;
+    font-weight: 600;
+}
+.flow-radio input { accent-color: #1f5fae; }
+
+/* Output panel */
+.flow-output-col { position: sticky; top: 84px; }
+@media (max-width: 900px) {
+    .flow-output-col { position: static; }
+}
+.flow-output {
+    background: #fff;
+    border: 1px solid #e8edf8;
+    border-radius: 20px;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+.flow-output-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.flow-output-title {
+    font-size: 15px;
+    font-weight: 800;
+    color: #0b2240;
+    margin: 0;
+    letter-spacing: -.2px;
+}
+.flow-output-textwrap {
+    position: relative;
+    background: #f8faff;
+    border: 1px solid #e8edf8;
+    border-radius: 12px;
+    padding: 14px 14px 14px 14px;
+}
+.flow-output-text {
+    font-family: inherit;
+    font-size: 13px;
+    color: #0f172a;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    margin: 0;
+    padding-top: 18px;
+}
+.flow-copy-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    border-radius: 999px;
+    border: 1px solid #cbd5e1;
+    background: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    color: #1f5fae;
+    cursor: pointer;
+    font-family: inherit;
+    transition: background .12s, border-color .12s;
+}
+.flow-copy-button:hover {
+    background: #f0f4ff;
+    border-color: #1f5fae;
+}
+
+.flow-output-section {
+    border-top: 1px solid #e8edf8;
+    padding-top: 14px;
+}
+.flow-output-section-head {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    color: #1f5fae;
+    margin-bottom: 8px;
+}
+.flow-output-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.flow-output-list li {
+    display: flex;
+    gap: 8px;
+    font-size: 13px;
+    color: #334155;
+    line-height: 1.55;
+}
+.flow-output-list li::before {
+    content: '✓';
+    color: #1f5fae;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+.flow-output-next {
+    font-size: 13px;
+    color: #334155;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* Risk badge */
+.flow-risk-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    border: 1px solid transparent;
+    white-space: nowrap;
+}
+.flow-risk-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentColor;
+}
+.flow-risk-badge--laag {
+    background: #ecfdf5;
+    color: #047857;
+    border-color: #a7f3d0;
+}
+.flow-risk-badge--midden {
+    background: #fff7ed;
+    color: #c2410c;
+    border-color: #fed7aa;
+}
+.flow-risk-badge--hoog {
+    background: #fef2f2;
+    color: #b91c1c;
+    border-color: #fecaca;
+}
