@@ -5936,13 +5936,32 @@ Antwoord ALLEEN met JSON, exact deze structuur:
     const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
       contents: [{ role: "user", parts: [{ text: prompt }] }],
-      config: { maxOutputTokens: 1500, temperature: 0.9, thinkingConfig: { thinkingBudget: 0 } },
+      config: {
+        maxOutputTokens: 4000,
+        temperature: 0.9,
+        thinkingConfig: { thinkingBudget: 0 },
+        responseMimeType: "application/json",
+      },
     });
 
     const parts = response.candidates?.[0]?.content?.parts;
     let raw = parts ? parts.filter((p: any) => p.text && !p.thought).map((p: any) => p.text).join("") : "";
     raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
-    const parsed = JSON.parse(raw);
+    let parsed: any;
+    try {
+      parsed = JSON.parse(raw);
+    } catch (err) {
+      const lastBrace = raw.lastIndexOf("}");
+      if (lastBrace > 0) {
+        try {
+          parsed = JSON.parse(raw.slice(0, lastBrace + 1));
+        } catch {
+          throw err;
+        }
+      } else {
+        throw err;
+      }
+    }
     return {
       aiContext: typeof parsed.aiContext === "string" ? parsed.aiContext : "",
       related: Array.isArray(parsed.related) ? parsed.related.slice(0, 3) : [],
