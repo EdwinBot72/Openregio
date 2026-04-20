@@ -290,10 +290,10 @@ export default function HomePage() {
                 style={{ background: "#1f5fae", color: "#fff", border: "none", borderRadius: "24px", padding: "12px 24px", fontSize: "14px", fontWeight: 700, cursor: "pointer" }}>
                 Zo werkt gezond ondernemen →
               </button>
-              <button onClick={() => scrollTo("bc-section")} data-testid="button-hero-hoe"
-                style={{ background: "#f0f4ff", color: "#1f5fae", border: "none", borderRadius: "24px", padding: "12px 22px", fontSize: "14px", fontWeight: 700, cursor: "pointer" }}>
-                Start de gratis check
-              </button>
+              <Link href="/regiobot" data-testid="button-hero-regiobot"
+                style={{ background: "#f0f4ff", color: "#1f5fae", border: "none", borderRadius: "24px", padding: "12px 22px", fontSize: "14px", fontWeight: 700, cursor: "pointer", textDecoration: "none", display: "inline-flex", alignItems: "center" }}>
+                Praat met RegioBot
+              </Link>
             </div>
             <div className="fu d2" style={{ fontSize: "12px", color: "#94a3b8", display: "flex", alignItems: "center", gap: "6px" }}>
               <Check style={{ width: "14px", height: "14px", color: "#10b981" }} />
@@ -320,6 +320,47 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* ══ VIER PIJLERS GEZOND ONDERNEMEN ══ */}
+      <div id="gezond-pijlers" style={{ background: "#f8faff" }} data-testid="section-gezond">
+        <div className="sec-pad" style={{ ...centered, padding: "64px 28px" }}>
+          <div style={{ fontSize: "11px", fontWeight: 700, color: "#f28a1a", textTransform: "uppercase", letterSpacing: ".6px", marginBottom: "8px" }}>Vier pijlers</div>
+          <div className="sec-h-xl" style={{ fontSize: "30px", fontWeight: 800, color: "#0f172a", letterSpacing: "-.5px", marginBottom: "8px" }}>Wat houdt gezond ondernemen in?</div>
+          <div style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.7, maxWidth: "52ch", marginBottom: "32px" }}>
+            Een gezond bedrijf staat op vier benen. OpenRegio helpt je op alle vier tegelijk — zonder dat het er een vijfde takenlijst bij wordt.
+          </div>
+          <div className="rg-4 stats-grid" style={{ gap: "16px" }}>
+            {[
+              { Icon: Banknote,    title: "Financieel gezond",  text: "Vind opdrachten, subsidies en kansen in je regio voordat ze elders weglopen.", href: "/login",    cta: "Naar kansen" },
+              { Icon: ShieldCheck, title: "Bestuurlijk gezond", text: "Begrijp gemeentebrieven en zet WOO-verzoeken in zonder juridische kennis.",  href: "/regiobot", cta: "Naar RegioBot" },
+              { Icon: Handshake,   title: "Mentaal gezond",     text: "Sta er niet alleen voor: deel signalen en pak zaken samen met andere ondernemers aan.", href: "/login", cta: "Samen aanpakken" },
+              { Icon: TrendingUp,  title: "Strategisch gezond", text: "Weet wat er in je regio speelt — en welke ondernemers het raakt — voordat het je raakt.", href: "/blogs", cta: "Nieuws met context" },
+            ].map(({ Icon, title, text, href, cta }) => (
+              <Link key={title} href={href} data-testid={`gezond-card-${title.toLowerCase().replace(/\s+/g, "-")}`}
+                style={{ textDecoration: "none", color: "inherit", display: "block" }}>
+                <div className="pc-hover" style={{ borderRadius: "20px", border: "1px solid #e8edf8", background: "#fff", padding: "22px", display: "flex", flexDirection: "column", height: "100%" }}>
+                  <div style={{ width: "40px", height: "40px", borderRadius: "12px", background: "rgba(242,138,26,0.12)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "14px" }}>
+                    <Icon style={{ width: "20px", height: "20px", color: "#f28a1a" }} />
+                  </div>
+                  <div style={{ fontSize: "15px", fontWeight: 800, color: "#0f172a", marginBottom: "8px", letterSpacing: "-.2px" }}>{title}</div>
+                  <div style={{ fontSize: "13px", color: "#64748b", lineHeight: 1.6, flex: 1 }}>{text}</div>
+                  <div style={{ marginTop: "14px", fontSize: "12px", fontWeight: 700, color: "#1f5fae" }}>{cta} →</div>
+                </div>
+              </Link>
+            ))}
+          </div>
+
+          <div style={{ marginTop: "32px", background: "#fff", border: "1px solid #e8edf8", borderRadius: "20px", padding: "26px 28px" }}>
+            <div style={{ fontSize: "16px", fontWeight: 800, color: "#0f172a", marginBottom: "10px", letterSpacing: "-.2px" }}>Wat bedoelen wij met gezond ondernemen?</div>
+            <p style={{ fontSize: "13px", color: "#475569", lineHeight: 1.7, margin: 0, marginBottom: "10px" }}>
+              Gezond ondernemen betekent dat je bedrijf werkt — niet dat het je opslokt. Dat regels duidelijk zijn, dat klanten je weten te vinden, dat je niet alleen tegenover de gemeente staat, en dat je weet wat er in je regio speelt voordat het op je bord ligt.
+            </p>
+            <p style={{ fontSize: "13px", color: "#475569", lineHeight: 1.7, margin: 0 }}>
+              OpenRegio brengt die vier dingen bij elkaar: werk en geld, regels en bestuur, contact met andere ondernemers, en context bij wat er om je heen gebeurt. Geen losse tools, geen extra abonnementen — één plek waar je grip houdt op wat je bedrijf gezond houdt.
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* ══ STATS ══ */}
       <div style={{ borderTop: "1px solid #f0f4ff", borderBottom: "1px solid #f0f4ff", background: "#fafbff" }} data-testid="section-stats">
         <div className="rg-4 stats-grid" style={{ ...centered }}>
@@ -337,49 +378,12 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* ══ VIER PIJLERS GEZOND ONDERNEMEN ══ */}
-      <div id="gezond-pijlers" style={{ background: "#f8faff" }} data-testid="section-gezond">
-        <div className="sec-pad" style={{ ...centered, padding: "64px 28px" }}>
-          <div style={{ fontSize: "11px", fontWeight: 700, color: "#f28a1a", textTransform: "uppercase", letterSpacing: ".6px", marginBottom: "8px" }}>Vier pijlers</div>
-          <div className="sec-h-xl" style={{ fontSize: "30px", fontWeight: 800, color: "#0f172a", letterSpacing: "-.5px", marginBottom: "8px" }}>Wat houdt gezond ondernemen in?</div>
-          <div style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.7, maxWidth: "52ch", marginBottom: "32px" }}>
-            Een gezond bedrijf staat op vier benen. OpenRegio helpt je op alle vier tegelijk — zonder dat het er een vijfde takenlijst bij wordt.
-          </div>
-          <div className="rg-4 stats-grid" style={{ gap: "16px" }}>
-            {[
-              { Icon: Banknote,    title: "Financieel gezond",  text: "Vind opdrachten, subsidies en kansen in je regio voordat ze elders weglopen." },
-              { Icon: ShieldCheck, title: "Bestuurlijk gezond", text: "Begrijp gemeentebrieven en zet WOO-verzoeken in zonder juridische kennis." },
-              { Icon: Handshake,   title: "Mentaal gezond",     text: "Sta er niet alleen voor: deel signalen en pak zaken samen met andere ondernemers aan." },
-              { Icon: TrendingUp,  title: "Strategisch gezond", text: "Weet wat er in je regio speelt — en welke ondernemers het raakt — voordat het je raakt." },
-            ].map(({ Icon, title, text }) => (
-              <div key={title} className="pc-hover" style={{ borderRadius: "20px", border: "1px solid #e8edf8", background: "#fff", padding: "22px", display: "flex", flexDirection: "column" }} data-testid={`gezond-card-${title.toLowerCase().replace(/\s+/g, "-")}`}>
-                <div style={{ width: "40px", height: "40px", borderRadius: "12px", background: "rgba(242,138,26,0.12)", display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "14px" }}>
-                  <Icon style={{ width: "20px", height: "20px", color: "#f28a1a" }} />
-                </div>
-                <div style={{ fontSize: "15px", fontWeight: 800, color: "#0f172a", marginBottom: "8px", letterSpacing: "-.2px" }}>{title}</div>
-                <div style={{ fontSize: "13px", color: "#64748b", lineHeight: 1.6 }}>{text}</div>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ marginTop: "32px", background: "#fff", border: "1px solid #e8edf8", borderRadius: "20px", padding: "26px 28px" }}>
-            <div style={{ fontSize: "16px", fontWeight: 800, color: "#0f172a", marginBottom: "10px", letterSpacing: "-.2px" }}>Wat bedoelen wij met gezond ondernemen?</div>
-            <p style={{ fontSize: "13px", color: "#475569", lineHeight: 1.7, margin: 0, marginBottom: "10px" }}>
-              Gezond ondernemen betekent dat je bedrijf werkt — niet dat het je opslokt. Dat regels duidelijk zijn, dat klanten je weten te vinden, dat je niet alleen tegenover de gemeente staat, en dat je weet wat er in je regio speelt voordat het op je bord ligt.
-            </p>
-            <p style={{ fontSize: "13px", color: "#475569", lineHeight: 1.7, margin: 0 }}>
-              OpenRegio brengt die vier dingen bij elkaar: werk en geld, regels en bestuur, contact met andere ondernemers, en context bij wat er om je heen gebeurt. Geen losse tools, geen extra abonnementen — één plek waar je grip houdt op wat je bedrijf gezond houdt.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* ══ DRIE PIJLERS ══ */}
+      {/* ══ ZO DOEN WIJ DAT (oude drie pijlers, nu ondergeschikt) ══ */}
       <div id="pijlers" style={{ background: "#fff" }} data-testid="section-pijlers">
         <div className="sec-pad" style={{ ...centered, padding: "64px 28px" }}>
-          <div style={{ fontSize: "11px", fontWeight: 700, color: "#f28a1a", textTransform: "uppercase", letterSpacing: ".6px", marginBottom: "8px" }}>Drie pijlers</div>
-          <div className="sec-h-xl" style={{ fontSize: "30px", fontWeight: 800, color: "#0f172a", letterSpacing: "-.5px", marginBottom: "8px" }}>Alles wat jij als lokale ondernemer nodig hebt.</div>
-          <div style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.7, maxWidth: "46ch", marginBottom: "32px" }}>Niet één ding. Het complete plaatje — in gewone taal, zonder overbodige complexiteit.</div>
+          <div style={{ fontSize: "11px", fontWeight: 700, color: "#f28a1a", textTransform: "uppercase", letterSpacing: ".6px", marginBottom: "8px" }}>In de praktijk</div>
+          <div className="sec-h-xl" style={{ fontSize: "30px", fontWeight: 800, color: "#0f172a", letterSpacing: "-.5px", marginBottom: "8px" }}>Zo houdt OpenRegio jouw bedrijf gezond.</div>
+          <div style={{ fontSize: "14px", color: "#64748b", lineHeight: 1.7, maxWidth: "52ch", marginBottom: "32px" }}>Drie concrete manieren waarop de vier pijlers in jouw dagelijkse praktijk landen — in gewone taal, zonder extra abonnementen.</div>
           <div className="rg-3" style={{ gap: "16px" }}>
             {[
               { num: "01", img: groupWebp, pos: "top center", title: "Meer klanten & beter vindbaar", desc: "Google-profiel, website, lokale SEO. We checken wat er beter kan en geven je concrete stappen." },
