@@ -1451,3 +1451,101 @@
   overflow-wrap: break-word;
   word-wrap: break-word;
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   OPENREGIO HUISSTIJL — overrides voor shadcn-componenten
+   binnen de openregio-page-shell. Hierdoor krijgen alle
+   ingelogde pagina's (Profiel, Dashboard, Regelgeving Monitor,
+   WOO-bibliotheek, Kennisbank, etc.) automatisch dezelfde
+   OpenRegio look-and-feel als de native openregio-* pagina's,
+   zonder dat hun JSX hoeft te worden herschreven.
+═══════════════════════════════════════════════════════════════ */
+
+.openregio-page-shell {
+  /* Map shadcn CSS variabelen naar het OpenRegio palet
+     (donkerblauw #0b2240 · blauw #1f5fae · oranje #f28a1a) */
+  --primary: 213 70% 40%;
+  --primary-foreground: 0 0% 100%;
+  --ring: 213 70% 40%;
+  --accent: 220 50% 96%;
+  --accent-foreground: 213 70% 30%;
+  --card: 0 0% 100%;
+  --card-foreground: 215 71% 15%;
+  --card-border: 220 47% 94%;
+  --border: 220 47% 94%;
+  --input: 220 47% 90%;
+  --muted: 220 47% 97%;
+  --muted-foreground: 215 16% 47%;
+  --foreground: 215 71% 15%;
+  --radius: 0.875rem;
+}
+
+/* Shadcn Card → OpenRegio kaart-uitstraling */
+.openregio-page-shell .shadcn-card {
+  border-radius: 18px;
+  border-color: #e8edf8;
+  background: #fff;
+  box-shadow: none;
+}
+
+/* Subtiele lift op interactieve kaarten (hover-elevate kaarten) */
+.openregio-page-shell .shadcn-card.hover-elevate {
+  transition: box-shadow .2s ease, transform .2s ease;
+}
+.openregio-page-shell .shadcn-card.hover-elevate:hover {
+  box-shadow: 0 8px 28px rgba(31, 95, 174, .08);
+}
+
+/* Headings binnen de shell krijgen het OpenRegio gewicht/kleur */
+.openregio-page-shell h1 {
+  font-weight: 800;
+  letter-spacing: -.5px;
+  color: #0f172a;
+}
+.openregio-page-shell h2,
+.openregio-page-shell h3,
+.openregio-page-shell h4 {
+  font-weight: 700;
+  letter-spacing: -.2px;
+  color: #0f172a;
+}
+
+/* Native form-elementen binnen kaarten: pas zachte OpenRegio look toe.
+   Shadcn Input/Textarea/SelectTrigger gebruiken al deze CSS-variabelen,
+   maar we maken het visueel iets zachter (achtergrond + radius). */
+.openregio-page-shell input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]):not([type="color"]),
+.openregio-page-shell textarea,
+.openregio-page-shell select,
+.openregio-page-shell .shadcn-card [role="combobox"],
+.openregio-page-shell [data-slot="select-trigger"] {
+  background-color: #fafbff;
+  border-radius: 12px;
+}
+.openregio-page-shell input:focus,
+.openregio-page-shell textarea:focus,
+.openregio-page-shell select:focus,
+.openregio-page-shell [role="combobox"]:focus,
+.openregio-page-shell [data-slot="select-trigger"]:focus {
+  background-color: #fff;
+}
+
+/* Tabellen iets zachter (gebruikt op woo-bibliotheek, admin etc.) */
+.openregio-page-shell table {
+  border-collapse: separate;
+  border-spacing: 0;
+}
+.openregio-page-shell .shadcn-card table th {
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+/* Skeletons gebruiken een zachtere blauw-grijze tint.
+   We targeten alleen het Shadcn Skeleton-component (animate-pulse + bg-muted)
+   zodat opzettelijke muted-achtergronden elders niet per ongeluk meekleuren. */
+.openregio-page-shell .animate-pulse.bg-muted,
+.openregio-page-shell .animate-pulse[class*="bg-muted"] {
+  background-color: #eef2fb;
+}
