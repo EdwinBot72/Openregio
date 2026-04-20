@@ -7,8 +7,16 @@
  * Font:    Plus Jakarta Sans
  */
 
-/* Plus Jakarta Sans wordt niet via een externe CDN geladen (privacy + CSP).
-   Valt terug op system-ui / sans-serif zoals gespecificeerd in font-family. */
+/* Plus Jakarta Sans — lokaal gehost (privacy + CSP, geen externe requests).
+   Variabel font dat alle gewichten 200-800 dekt via één bestand. */
+@font-face {
+    font-family: 'Plus Jakarta Sans';
+    font-style: normal;
+    font-weight: 200 800;
+    font-display: swap;
+    src: url('/fonts/plus-jakarta-sans.woff2') format('woff2-variations'),
+         url('/fonts/plus-jakarta-sans.woff2') format('woff2');
+}
 
 /* ═══════════════════════════════════════════════════════════════
    TOP-NAV (vervangt sidebar op de OpenRegio pagina's)
