@@ -663,7 +663,7 @@ export default function VandaagPage() {
           titel="Lokale marktplaats"
           subtitel="Vraag & aanbod tussen ondernemers — diensten, ruimte, materieel en de rommelmarkt."
           bekijkAlles="/lokaal-marktplaats"
-          bekijkAllesLabel="Open marktplaats"
+          bekijkAllesLabel="Bekijk alles"
         />
         {marktLoading ? (
           <Skeleton className="h-20 w-full" />
@@ -712,7 +712,7 @@ export default function VandaagPage() {
                 className="openregio-button openregio-button-outline openregio-button-small"
                 data-testid="button-plaats-marktplaats"
               >
-                <Plus className="h-3.5 w-3.5" /> Plaats vraag of aanbod
+                <Plus className="h-3.5 w-3.5" /> Plaats aanbod
               </Link>
             </div>
           </>

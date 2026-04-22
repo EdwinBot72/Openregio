@@ -47,6 +47,26 @@ test.describe("Vandaag-pagina", () => {
     );
   });
 
+  test("legacy /vandaag/* paden redirecten naar nieuwe bestemmingen", async ({ page, context, baseURL }) => {
+    await registerAndAuth(context, baseURL!, "basic", "vandaag-redirect");
+
+    await page.goto("/vandaag/nieuws");
+    await waitForReactQuery(page);
+    await expect(page).toHaveURL(/\/nieuws$/);
+
+    await page.goto("/vandaag/acties");
+    await waitForReactQuery(page);
+    await expect(page).toHaveURL(/\/vandaag$/);
+
+    await page.goto("/vandaag/samen");
+    await waitForReactQuery(page);
+    await expect(page).toHaveURL(/\/vandaag$/);
+
+    await page.goto("/vandaag/updates");
+    await waitForReactQuery(page);
+    await expect(page).toHaveURL(/\/regels\/updates$/);
+  });
+
   test("Pro-lid ziet geen upgrade-promo en pro-badge", async ({ page, context, baseURL }) => {
     await registerAndAuth(context, baseURL!, "pro", "vandaag-pro");
 
