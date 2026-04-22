@@ -1,0 +1,63 @@
+import { test, expect } from "@playwright/test";
+import { waitForReactQuery } from "./helpers";
+
+test.describe("Homepage gezond ondernemen", () => {
+  test("hero toont titel en beide CTA-knoppen", async ({ page }) => {
+    await page.goto("/");
+    await waitForReactQuery(page);
+
+    const hero = page.getByTestId("text-hero-title");
+    await expect(hero).toBeVisible();
+    await expect(hero).toContainText(/gezond/i);
+    await expect(hero).toContainText(/ondernemen/i);
+
+    await expect(page.getByTestId("button-hero-cta")).toBeVisible();
+    await expect(page.getByTestId("button-hero-cta")).toContainText(/gezond ondernemen/i);
+    await expect(page.getByTestId("button-hero-regiobot")).toBeVisible();
+  });
+
+  test("vier pijlerkaarten zijn zichtbaar", async ({ page }) => {
+    await page.goto("/");
+    await waitForReactQuery(page);
+
+    const pijlers = [
+      "gezond-card-financieel-gezond",
+      "gezond-card-bestuurlijk-gezond",
+      "gezond-card-mentaal-gezond",
+      "gezond-card-strategisch-gezond",
+    ];
+    for (const id of pijlers) {
+      await expect(page.getByTestId(id)).toBeVisible();
+    }
+
+    // Het uitlegblok onder de pijlers blijft ook gedekt.
+    await expect(
+      page.getByText("Wat bedoelen wij met gezond ondernemen?", { exact: false }),
+    ).toBeVisible();
+  });
+
+  test("klikken op hero-CTA scrolt naar #gezond-pijlers", async ({ page }) => {
+    // Forceer een kleinere viewport zodat de pijler-sectie zeker
+    // niet al direct zichtbaar is na laden.
+    await page.setViewportSize({ width: 1024, height: 600 });
+    await page.goto("/");
+    await waitForReactQuery(page);
+    await page.evaluate(() => window.scrollTo(0, 0));
+
+    const target = page.locator("#gezond-pijlers");
+    await expect(target).toHaveCount(1);
+
+    // Voorwaarde: doel ligt nog buiten de viewport en pagina is bovenaan.
+    await expect(target).not.toBeInViewport();
+    const startScroll = await page.evaluate(() => window.scrollY);
+    expect(startScroll).toBeLessThan(10);
+
+    await page.getByTestId("button-hero-cta").click();
+
+    // Effect: doel komt in beeld én pagina is daadwerkelijk gescrold.
+    await expect(target).toBeInViewport({ timeout: 5_000 });
+    await expect
+      .poll(() => page.evaluate(() => window.scrollY), { timeout: 5_000 })
+      .toBeGreaterThan(startScroll + 50);
+  });
+});
