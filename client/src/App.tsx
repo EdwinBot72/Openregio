@@ -181,11 +181,18 @@ function AuthenticatedRouter() {
       <Route path="/vandaag/updates">
         <Redirect to="/regels/updates" />
       </Route>
-      <Route path="/vandaag/acties" component={CursussenPage} />
-      <Route path="/vandaag/samen" component={SamenAanpakkenPage} />
+      <Route path="/vandaag/acties">
+        <Redirect to="/vandaag" />
+      </Route>
+      <Route path="/vandaag/samen">
+        <Redirect to="/vandaag" />
+      </Route>
       <Route path="/vandaag/nieuws">
         <Redirect to="/nieuws" />
       </Route>
+      {/* Diepe links blijven werken */}
+      <Route path="/cursussen-volledig" component={CursussenPage} />
+      <Route path="/samen-aanpakken" component={SamenAanpakkenPage} />
 
       {/* ── Kansen (Sectie 2) ─────────────────────────────────────────────── */}
       <Route path="/kansen/opdrachten" component={AanbestedingenPage} />

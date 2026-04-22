@@ -8,12 +8,13 @@ import {
   TrendingUp,
   Users,
   Store,
-  FileText,
-  Newspaper,
+  FolderOpen,
+  CheckCircle2,
   ArrowRight,
   MapPin,
   Plus,
-  FolderOpen,
+  Building2,
+  AlertCircle,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { nl } from "date-fns/locale";
@@ -33,19 +34,11 @@ type CooperatiefStats = {
   proMembers: number;
 };
 
-type NieuwsItem = {
-  id: string;
-  title: string;
-  link: string;
-  publishedAt: string;
-};
-type NieuwsResponse = { items: NieuwsItem[]; fetchedAt: string };
-
 type WooDossierItem = {
   id: number;
-  subject?: string | null;
-  authority?: string | null;
-  status?: string | null;
+  subject: string;
+  authority: string;
+  status: string | null;
   createdAt?: string | null;
 };
 
@@ -77,13 +70,24 @@ const POST_TYPE_LABEL: Record<string, string> = {
   update: "Update",
 };
 
+// Dossiers met deze status vragen actie van de ondernemer
+const ACTIE_DOSSIER_STATUSSEN = new Set(["intake", "extracted", "questions", "response_received"]);
+const OPEN_DOSSIER_STATUSSEN = new Set([
+  "intake", "extracted", "questions", "generated", "sent", "response_received", "ingebreke_gesteld",
+]);
+
 function relativeTime(value: string | Date | null | undefined): string {
   if (!value) return "";
-  try {
-    return formatDistanceToNow(new Date(value as string), { addSuffix: true, locale: nl });
-  } catch {
-    return "";
-  }
+  const date = typeof value === "string" ? new Date(value) : value;
+  if (Number.isNaN(date.getTime())) return "";
+  return formatDistanceToNow(date, { addSuffix: true, locale: nl });
+}
+
+function daysSince(value: string | Date | null | undefined): number {
+  if (!value) return 9999;
+  const date = typeof value === "string" ? new Date(value) : value;
+  if (Number.isNaN(date.getTime())) return 9999;
+  return Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
 }
 
 function SectieKop({
@@ -139,16 +143,17 @@ function SectieKop({
   );
 }
 
-function LegeStaat({ icon: Icon, tekst, cta }: { icon: typeof Bell; tekst: string; cta?: { href: string; label: string } }) {
+function LegeStaat({
+  icon: Icon,
+  tekst,
+  cta,
+}: {
+  icon: typeof Bell;
+  tekst: string;
+  cta?: { href: string; label: string };
+}) {
   return (
-    <div
-      style={{
-        textAlign: "center",
-        padding: "20px 12px",
-        color: "#94a3b8",
-        fontSize: 13,
-      }}
-    >
+    <div style={{ textAlign: "center", padding: "20px 12px", color: "#94a3b8", fontSize: 13 }}>
       <Icon className="h-7 w-7" style={{ margin: "0 auto 8px", opacity: 0.45 }} />
       <p style={{ margin: 0 }}>{tekst}</p>
       {cta && (
@@ -161,6 +166,61 @@ function LegeStaat({ icon: Icon, tekst, cta }: { icon: typeof Bell; tekst: strin
         </Link>
       )}
     </div>
+  );
+}
+
+function KpiTile({
+  icon: Icon,
+  value,
+  label,
+  sub,
+  href,
+  testId,
+}: {
+  icon: typeof Bell;
+  value: number | string;
+  label: string;
+  sub: string;
+  href: string;
+  testId: string;
+}) {
+  return (
+    <Link
+      href={href}
+      data-testid={testId}
+      style={{
+        display: "block",
+        background: "#fff",
+        border: "1px solid #e6ebf2",
+        borderRadius: 16,
+        padding: "16px 18px",
+        textDecoration: "none",
+        color: "inherit",
+      }}
+      className="hover-elevate"
+    >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
+        <div
+          style={{
+            background: "#eff6ff",
+            color: "#1f5fae",
+            borderRadius: 12,
+            padding: 9,
+            display: "inline-flex",
+          }}
+        >
+          <Icon className="h-4 w-4" />
+        </div>
+        <span style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: ".4px" }}>
+          Nu
+        </span>
+      </div>
+      <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
+        <span style={{ fontSize: 26, fontWeight: 800, color: "#0b2240", lineHeight: 1 }}>{value}</span>
+        <span style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>{sub}</span>
+      </div>
+      <div style={{ marginTop: 6, fontSize: 13, color: "#475569" }}>{label}</div>
+    </Link>
   );
 }
 
@@ -193,16 +253,10 @@ export default function VandaagPage() {
     enabled: !!user,
   });
 
-  const { data: dossiers = [] } = useQuery<WooDossierItem[]>({
+  const { data: dossiers = [], isLoading: dossiersLoading } = useQuery<WooDossierItem[]>({
     queryKey: ["/api/woo/dossiers"],
     enabled: !!user,
   });
-
-  const { data: nieuwsResp, isLoading: nieuwsLoading } = useQuery<NieuwsResponse>({
-    queryKey: ["/api/news"],
-    enabled: !!user,
-  });
-  const nieuws = nieuwsResp?.items ?? [];
 
   const isPro = user?.plan === "pro";
   const planLabel = isPro ? "Pro-bijdrager" : "Basic lid";
@@ -210,31 +264,67 @@ export default function VandaagPage() {
     user?.firstName ||
     (profiel?.naam ? profiel.naam.split(" ")[0] : "") ||
     "ondernemer";
-  const bedrijfsnaam = profiel?.naam || (user as any)?.businessName || "Mijn onderneming";
+  const bedrijfsnaam = profiel?.naam || user?.businessName || "Mijn onderneming";
   const categorieLabel = profiel?.categorieId
     ? CATEGORIE_LABELS[profiel.categorieId] ?? profiel.categorieId
     : "";
-  const regioLabel = profiel?.regio || (user as any)?.region || "jouw regio";
+  const regioLabel = profiel?.regio || user?.region || "jouw regio";
 
-  const topSignalen = [...signalen]
-    .sort((a, b) => {
-      const order: Record<string, number> = { hoog: 0, normaal: 1, laag: 2 };
-      const ua = order[a.urgentie ?? "normaal"] ?? 1;
-      const ub = order[b.urgentie ?? "normaal"] ?? 1;
-      if (ua !== ub) return ua - ub;
-      return new Date(b.datum as any).getTime() - new Date(a.datum as any).getTime();
-    })
-    .slice(0, 3);
+  // Sorteer signalen: urgent eerst, dan datum
+  const sortedSignalen = [...signalen].sort((a, b) => {
+    const order: Record<string, number> = { hoog: 0, normaal: 1, laag: 2 };
+    const ua = order[a.urgentie] ?? 1;
+    const ub = order[b.urgentie] ?? 1;
+    if (ua !== ub) return ua - ub;
+    const da = a.datum ? new Date(a.datum).getTime() : 0;
+    const db = b.datum ? new Date(b.datum).getTime() : 0;
+    return db - da;
+  });
 
-  const vragenPosts = posts
-    .filter((p) => p.type === "vraag" || p.type === "lead")
-    .slice(0, 3);
+  // KPI-tellingen
+  const updatesDezeWeek = signalen.filter((s) => daysSince(s.datum) <= 7).length;
+  const acties = dossiers.filter((d) => d.status && ACTIE_DOSSIER_STATUSSEN.has(d.status)).length;
+  const kansenCount = posts.filter((p) => {
+    const t = p.type;
+    return (t === "vraag" || t === "aanbod" || t === "aanbieding" || t === "lead" || t === "event")
+      && daysSince(p.createdAt) <= 7;
+  }).length;
+  const dossiersOpen = dossiers.filter((d) => !d.status || OPEN_DOSSIER_STATUSSEN.has(d.status)).length;
+
+  // Aandacht-feed: combineer top signaal + top dossier-actie + top kans (post)
+  type AandachtItem =
+    | { kind: "signaal"; data: IntelSignaal }
+    | { kind: "dossier"; data: WooDossierItem }
+    | { kind: "kans"; data: Post };
+
+  const aandachtItems: AandachtItem[] = [];
+  const topSignaal = sortedSignalen[0];
+  if (topSignaal) aandachtItems.push({ kind: "signaal", data: topSignaal });
+  const topActieDossier = dossiers.find((d) => d.status && ACTIE_DOSSIER_STATUSSEN.has(d.status));
+  if (topActieDossier) aandachtItems.push({ kind: "dossier", data: topActieDossier });
+  const topKans = posts
+    .filter((p) => p.type === "lead" || p.type === "vraag" || p.type === "event")
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())[0];
+  if (topKans) aandachtItems.push({ kind: "kans", data: topKans });
+  if (aandachtItems.length < 3) {
+    sortedSignalen.slice(1).forEach((s) => {
+      if (aandachtItems.length < 3) aandachtItems.push({ kind: "signaal", data: s });
+    });
+  }
+
+  // "Acties voor jou" — dossiers die actie vragen
+  const actieDossiers = dossiers
+    .filter((d) => d.status && ACTIE_DOSSIER_STATUSSEN.has(d.status))
+    .slice(0, 4);
+
+  // Posts: alle types vraag/aanbod/lead/event, gesorteerd op datum
+  const samenwerkPosts = posts
+    .filter((p) => ["vraag", "aanbod", "aanbieding", "lead", "event"].includes(p.type))
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 4);
 
   const topMarkt = marktItems.slice(0, 3);
-
   const topDossiers = dossiers.slice(0, 3);
-
-  const topNieuws = nieuws.slice(0, 3);
 
   if (authLoading) {
     return (
@@ -290,75 +380,149 @@ export default function VandaagPage() {
         )}
       </div>
 
-      {/* 1. Wat vraagt nu aandacht — intel signalen */}
-      <section className="openregio-card" data-testid="section-aandacht" style={{ marginTop: 16 }}>
+      {/* KPI-tegels */}
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
+          gap: 12,
+          marginTop: 18,
+          marginBottom: 18,
+        }}
+        data-testid="kpi-grid"
+      >
+        <KpiTile
+          icon={Bell}
+          value={updatesDezeWeek}
+          sub="nieuw"
+          label="Updates deze week"
+          href="/regels/updates"
+          testId="kpi-updates"
+        />
+        <KpiTile
+          icon={CheckCircle2}
+          value={acties}
+          sub="open"
+          label="Acties voor jou"
+          href="/regels/woo"
+          testId="kpi-acties"
+        />
+        <KpiTile
+          icon={TrendingUp}
+          value={kansenCount}
+          sub="recent"
+          label="Kansen in netwerk"
+          href="/network"
+          testId="kpi-kansen"
+        />
+        <KpiTile
+          icon={FolderOpen}
+          value={dossiersOpen}
+          sub="lopend"
+          label="Lopende dossiers"
+          href="/regels/woo"
+          testId="kpi-dossiers"
+        />
+      </div>
+
+      {/* 1. Wat vraagt nu aandacht — gemixte feed */}
+      <section className="openregio-card" data-testid="section-aandacht">
         <SectieKop
           titel="Wat vraagt nu aandacht?"
-          subtitel="Updates en regelwijzigingen die voor jouw regio en sector relevant zijn."
+          subtitel="De belangrijkste regelupdate, openstaande dossier-actie en lopende kans bij elkaar."
           bekijkAlles="/regels/updates"
         />
-        {signalenLoading ? (
+        {signalenLoading || dossiersLoading || postsLoading ? (
           <Skeleton className="h-20 w-full" />
-        ) : topSignalen.length === 0 ? (
+        ) : aandachtItems.length === 0 ? (
           <LegeStaat
             icon={Bell}
-            tekst="Geen nieuwe signalen vandaag. We checken doorlopend nieuwe bronnen."
+            tekst="Geen actuele zaken die nu aandacht vragen."
             cta={{ href: "/regels/updates", label: "Bekijk archief" }}
           />
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {topSignalen.map((s) => {
-              const u = URGENTIE_KLEUR[s.urgentie ?? "normaal"] ?? URGENTIE_KLEUR.normaal;
+            {aandachtItems.map((item, i) => {
+              if (item.kind === "signaal") {
+                const s = item.data;
+                const u = URGENTIE_KLEUR[s.urgentie] ?? URGENTIE_KLEUR.normaal;
+                return (
+                  <Link
+                    key={`s-${s.id}`}
+                    href="/regels/updates"
+                    data-testid={`item-aandacht-signaal-${s.id}`}
+                    style={{
+                      display: "flex", flexDirection: "column", gap: 6,
+                      padding: "14px 16px", border: "1px solid #e6ebf2", borderRadius: 14,
+                      textDecoration: "none", color: "inherit", background: "#fafbfd",
+                    }}
+                    className="hover-elevate"
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                      <span style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".5px", background: u.bg, color: u.fg, padding: "3px 8px", borderRadius: 999 }}>
+                        Regelupdate · {u.label}
+                      </span>
+                      <span style={{ fontSize: 11, color: "#64748b", display: "inline-flex", alignItems: "center", gap: 3 }}>
+                        <MapPin className="h-3 w-3" />{s.regio}
+                      </span>
+                      <span style={{ fontSize: 11, color: "#94a3b8" }}>{relativeTime(s.datum)}</span>
+                    </div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#0b2240", lineHeight: 1.4 }}>{s.titel}</div>
+                    {s.samenvatting && (
+                      <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.55, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                        {s.samenvatting}
+                      </div>
+                    )}
+                  </Link>
+                );
+              }
+              if (item.kind === "dossier") {
+                const d = item.data;
+                return (
+                  <Link
+                    key={`d-${d.id}`}
+                    href="/regels/woo"
+                    data-testid={`item-aandacht-dossier-${d.id}`}
+                    style={{
+                      display: "flex", flexDirection: "column", gap: 6,
+                      padding: "14px 16px", border: "1px solid #fed7aa", borderRadius: 14,
+                      textDecoration: "none", color: "inherit", background: "#fff7ed",
+                    }}
+                    className="hover-elevate"
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+                      <span style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".5px", background: "#fff", color: "#c2410c", padding: "3px 8px", borderRadius: 999 }}>
+                        Actie · Dossier
+                      </span>
+                      <span style={{ fontSize: 11, color: "#64748b" }}>{d.authority}</span>
+                      <span style={{ fontSize: 11, color: "#94a3b8" }}>{d.status}</span>
+                    </div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: "#0b2240", lineHeight: 1.4 }}>{d.subject}</div>
+                    <div style={{ fontSize: 13, color: "#475569" }}>Open dit dossier en zet de volgende stap.</div>
+                  </Link>
+                );
+              }
+              const p = item.data;
               return (
                 <Link
-                  key={s.id}
-                  href="/regels/updates"
-                  data-testid={`item-signaal-${s.id}`}
+                  key={`p-${p.id}-${i}`}
+                  href="/network"
+                  data-testid={`item-aandacht-kans-${p.id}`}
                   style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 6,
-                    padding: "14px 16px",
-                    border: "1px solid #e6ebf2",
-                    borderRadius: 14,
-                    textDecoration: "none",
-                    color: "inherit",
-                    background: "#fafbfd",
-                    transition: "border-color .15s, background .15s",
+                    display: "flex", flexDirection: "column", gap: 6,
+                    padding: "14px 16px", border: "1px solid #d1fae5", borderRadius: 14,
+                    textDecoration: "none", color: "inherit", background: "#ecfdf5",
                   }}
                   className="hover-elevate"
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
-                    <span
-                      style={{
-                        fontSize: 10,
-                        fontWeight: 800,
-                        textTransform: "uppercase",
-                        letterSpacing: ".5px",
-                        background: u.bg,
-                        color: u.fg,
-                        padding: "3px 8px",
-                        borderRadius: 999,
-                      }}
-                    >
-                      {u.label}
+                    <span style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".5px", background: "#fff", color: "#047857", padding: "3px 8px", borderRadius: 999 }}>
+                      Kans · {POST_TYPE_LABEL[p.type] ?? p.type}
                     </span>
-                    <span style={{ fontSize: 11, color: "#64748b", display: "inline-flex", alignItems: "center", gap: 3 }}>
-                      <MapPin className="h-3 w-3" />
-                      {s.regio}
-                    </span>
-                    <span style={{ fontSize: 11, color: "#94a3b8" }}>
-                      {relativeTime(s.datum as any)}
-                    </span>
+                    <span style={{ fontSize: 11, color: "#64748b" }}>{p.region}</span>
+                    <span style={{ fontSize: 11, color: "#94a3b8" }}>{relativeTime(p.createdAt)}</span>
                   </div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#0b2240", lineHeight: 1.4 }}>
-                    {s.titel}
-                  </div>
-                  {s.samenvatting && (
-                    <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.55, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                      {s.samenvatting}
-                    </div>
-                  )}
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#0b2240", lineHeight: 1.4 }}>{p.title}</div>
                 </Link>
               );
             })}
@@ -366,73 +530,92 @@ export default function VandaagPage() {
         )}
       </section>
 
-      {/* 2. Vragen & samenwerken — posts */}
+      {/* 2. Acties voor jou — dossiers die actie vragen */}
+      <section className="openregio-card" data-testid="section-acties" style={{ marginTop: 16 }}>
+        <SectieKop
+          titel="Acties voor jou"
+          subtitel="Concrete vervolgstappen op je eigen dossiers."
+          bekijkAlles="/regels/woo"
+        />
+        {dossiersLoading ? (
+          <Skeleton className="h-16 w-full" />
+        ) : actieDossiers.length === 0 ? (
+          <LegeStaat
+            icon={CheckCircle2}
+            tekst="Geen openstaande acties — alles bij. Mooi!"
+          />
+        ) : (
+          <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+            {actieDossiers.map((d) => (
+              <li key={d.id}>
+                <Link
+                  href="/regels/woo"
+                  data-testid={`item-actie-${d.id}`}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12,
+                    padding: "12px 14px", border: "1px solid #e6ebf2", borderRadius: 12,
+                    textDecoration: "none", color: "inherit",
+                  }}
+                  className="hover-elevate"
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+                    <AlertCircle className="h-4 w-4" style={{ color: "#c2410c", flexShrink: 0 }} />
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: "#0b2240", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                        {d.subject}
+                      </div>
+                      <div style={{ fontSize: 11, color: "#64748b" }}>
+                        {d.authority} · {d.status}
+                      </div>
+                    </div>
+                  </div>
+                  <ArrowRight className="h-4 w-4" style={{ color: "#94a3b8", flexShrink: 0 }} />
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {/* 3. Samenwerken & vragen — alle post types */}
       <section className="openregio-card" data-testid="section-vragen" style={{ marginTop: 16 }}>
         <SectieKop
-          titel="Vragen & samenwerken"
-          subtitel="Wat ondernemers nu delen — vragen, leads en gezamenlijke acties."
+          titel="Samenwerken & vragen"
+          subtitel="Wat ondernemers nu delen — vragen, aanbod, leads en events."
           bekijkAlles="/network"
           bekijkAllesLabel="Naar netwerk"
         />
         {postsLoading ? (
           <Skeleton className="h-20 w-full" />
-        ) : vragenPosts.length === 0 ? (
+        ) : samenwerkPosts.length === 0 ? (
           <LegeStaat
             icon={Users}
-            tekst="Nog geen openstaande vragen. Plaats zelf de eerste!"
-            cta={{ href: "/network", label: "Plaats vraag" }}
+            tekst="Nog niets gedeeld. Plaats zelf de eerste!"
+            cta={{ href: "/network", label: "Plaats post" }}
           />
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-            {vragenPosts.map((p) => (
+            {samenwerkPosts.map((p) => (
               <Link
                 key={p.id}
                 href="/network"
                 data-testid={`item-post-${p.id}`}
                 style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: 4,
-                  padding: "12px 14px",
-                  border: "1px solid #e6ebf2",
-                  borderRadius: 12,
-                  textDecoration: "none",
-                  color: "inherit",
-                  background: "#fff",
+                  display: "flex", flexDirection: "column", gap: 4,
+                  padding: "12px 14px", border: "1px solid #e6ebf2", borderRadius: 12,
+                  textDecoration: "none", color: "inherit", background: "#fff",
                 }}
                 className="hover-elevate"
               >
                 <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                  <span
-                    style={{
-                      fontSize: 10,
-                      fontWeight: 800,
-                      textTransform: "uppercase",
-                      background: "#f0f4ff",
-                      color: "#1f5fae",
-                      padding: "2px 8px",
-                      borderRadius: 999,
-                    }}
-                  >
+                  <span style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", background: "#f0f4ff", color: "#1f5fae", padding: "2px 8px", borderRadius: 999 }}>
                     {POST_TYPE_LABEL[p.type] ?? p.type}
                   </span>
                   <span style={{ fontSize: 11, color: "#64748b" }}>{p.region}</span>
-                  <span style={{ fontSize: 11, color: "#94a3b8" }}>
-                    {relativeTime(p.createdAt as any)}
-                  </span>
+                  <span style={{ fontSize: 11, color: "#94a3b8" }}>{relativeTime(p.createdAt)}</span>
                 </div>
                 <div style={{ fontSize: 14, fontWeight: 700, color: "#0b2240" }}>{p.title}</div>
-                <div
-                  style={{
-                    fontSize: 13,
-                    color: "#475569",
-                    lineHeight: 1.5,
-                    display: "-webkit-box",
-                    WebkitLineClamp: 2,
-                    WebkitBoxOrient: "vertical",
-                    overflow: "hidden",
-                  }}
-                >
+                <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                   {p.body}
                 </div>
               </Link>
@@ -441,7 +624,7 @@ export default function VandaagPage() {
         )}
       </section>
 
-      {/* 3. Lokale marktplaats — vraag/aanbod & rommelmarkt */}
+      {/* 4. Lokale marktplaats */}
       <section className="openregio-card" data-testid="section-marktplaats" style={{ marginTop: 16 }}>
         <SectieKop
           titel="Lokale marktplaats"
@@ -459,61 +642,32 @@ export default function VandaagPage() {
           />
         ) : (
           <>
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))",
-                gap: 12,
-              }}
-            >
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 12 }}>
               {topMarkt.map((m) => (
                 <Link
                   key={m.id}
                   href="/lokaal-marktplaats"
                   data-testid={`item-markt-${m.id}`}
                   style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    gap: 6,
-                    padding: "12px 14px",
-                    border: "1px solid #e6ebf2",
-                    borderRadius: 12,
-                    textDecoration: "none",
-                    color: "inherit",
-                    background: "#fff",
+                    display: "flex", flexDirection: "column", gap: 6,
+                    padding: "12px 14px", border: "1px solid #e6ebf2", borderRadius: 12,
+                    textDecoration: "none", color: "inherit", background: "#fff",
                   }}
                   className="hover-elevate"
                 >
                   <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
-                    <span
-                      style={{
-                        fontSize: 10,
-                        fontWeight: 800,
-                        textTransform: "uppercase",
-                        background: m.type === "bied" ? "#ecfdf5" : "#eff6ff",
-                        color: m.type === "bied" ? "#047857" : "#1f5fae",
-                        padding: "2px 8px",
-                        borderRadius: 999,
-                      }}
-                    >
+                    <span style={{
+                      fontSize: 10, fontWeight: 800, textTransform: "uppercase",
+                      background: m.type === "bied" ? "#ecfdf5" : "#eff6ff",
+                      color: m.type === "bied" ? "#047857" : "#1f5fae",
+                      padding: "2px 8px", borderRadius: 999,
+                    }}>
                       {m.type === "bied" ? "Ik bied" : "Ik zoek"}
                     </span>
                     <span style={{ fontSize: 11, color: "#64748b" }}>{m.regio}</span>
                   </div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#0b2240", lineHeight: 1.35 }}>
-                    {m.titel}
-                  </div>
-                  <div
-                    style={{
-                      fontSize: 12,
-                      color: "#64748b",
-                      lineHeight: 1.5,
-                      display: "-webkit-box",
-                      WebkitLineClamp: 2,
-                      WebkitBoxOrient: "vertical",
-                      overflow: "hidden",
-                    }}
-                  >
+                  <div style={{ fontSize: 14, fontWeight: 700, color: "#0b2240", lineHeight: 1.35 }}>{m.titel}</div>
+                  <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                     {m.beschrijving}
                   </div>
                 </Link>
@@ -532,116 +686,107 @@ export default function VandaagPage() {
         )}
       </section>
 
-      {/* 4. Lopende dossiers + Laatste nieuws — twee kolommen */}
+      {/* 5. Gezamenlijke dossiers */}
+      <section className="openregio-card" data-testid="section-dossiers" style={{ marginTop: 16 }}>
+        <SectieKop
+          titel="Gezamenlijke dossiers"
+          subtitel="Wat ondernemers samen oppakken via Woo-trajecten richting overheid."
+          bekijkAlles="/regels/woo"
+        />
+        {dossiersLoading ? (
+          <Skeleton className="h-16 w-full" />
+        ) : topDossiers.length === 0 ? (
+          <LegeStaat
+            icon={FolderOpen}
+            tekst="Nog geen lopende dossiers."
+            cta={{ href: "/regels/woo", label: "Bekijk Woo-bibliotheek" }}
+          />
+        ) : (
+          <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+            {topDossiers.map((d) => (
+              <li key={d.id}>
+                <Link
+                  href="/regels/woo"
+                  data-testid={`item-dossier-${d.id}`}
+                  style={{
+                    display: "flex", flexDirection: "column", gap: 2,
+                    padding: "10px 12px", border: "1px solid #e6ebf2", borderRadius: 10,
+                    textDecoration: "none", color: "inherit",
+                  }}
+                  className="hover-elevate"
+                >
+                  <span style={{ fontSize: 13, fontWeight: 700, color: "#0b2240" }}>{d.subject}</span>
+                  <span style={{ fontSize: 11, color: "#64748b" }}>
+                    {d.authority}
+                    {d.status && <> · {d.status}</>}
+                    {d.createdAt && <> · {relativeTime(d.createdAt)}</>}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {/* 6. Jouw bedrijf — compacte strip */}
       <div
+        className="openregio-card"
+        data-testid="strip-jouw-bedrijf"
         style={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-          gap: 16,
           marginTop: 16,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          gap: 14,
+          flexWrap: "wrap",
         }}
       >
-        <section className="openregio-card" data-testid="section-dossiers" style={{ marginBottom: 0 }}>
-          <SectieKop
-            titel="Lopende dossiers"
-            subtitel="Gezamenlijke vragen aan de overheid via Woo-trajecten."
-            bekijkAlles="/regels/woo"
-          />
-          {topDossiers.length === 0 ? (
-            <LegeStaat
-              icon={FolderOpen}
-              tekst="Nog geen lopende dossiers."
-              cta={{ href: "/regels/woo", label: "Bekijk Woo-bibliotheek" }}
-            />
-          ) : (
-            <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
-              {topDossiers.map((d) => (
-                <li key={d.id}>
-                  <Link
-                    href={`/regels/woo`}
-                    data-testid={`item-dossier-${d.id}`}
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 2,
-                      padding: "10px 12px",
-                      border: "1px solid #e6ebf2",
-                      borderRadius: 10,
-                      textDecoration: "none",
-                      color: "inherit",
-                    }}
-                    className="hover-elevate"
-                  >
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#0b2240" }}>
-                      {d.subject || `Dossier #${d.id}`}
-                    </span>
-                    <span style={{ fontSize: 11, color: "#64748b" }}>
-                      {d.authority || "Overheid"}
-                      {d.status && <> · {d.status}</>}
-                      {d.createdAt && <> · {relativeTime(d.createdAt)}</>}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+        <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
+          <div
+            style={{
+              width: 38, height: 38, borderRadius: 10,
+              background: "#eff6ff", color: "#1f5fae",
+              display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+            }}
+          >
+            <Building2 className="h-5 w-5" />
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div style={{ fontSize: 14, fontWeight: 700, color: "#0b2240" }} data-testid="text-strip-bedrijf">
+              {bedrijfsnaam}
+            </div>
+            <div style={{ fontSize: 12, color: "#64748b" }}>
+              {[categorieLabel, regioLabel].filter(Boolean).join(" · ") || "Werk je profiel bij voor betere matches"}
+            </div>
+          </div>
+        </div>
+        <Link
+          href="/groei/profiel"
+          className="openregio-button openregio-button-outline openregio-button-small"
+          data-testid="button-strip-profiel"
+        >
+          Profiel bewerken
+        </Link>
+      </div>
 
-        <section className="openregio-card" data-testid="section-nieuws" style={{ marginBottom: 0 }}>
-          <SectieKop
-            titel="Laatste nieuws"
-            subtitel="Berichten met AI-context en lokale impact."
-            bekijkAlles="/nieuws"
-            bekijkAllesLabel="Naar nieuws"
-          />
-          {nieuwsLoading ? (
-            <Skeleton className="h-16 w-full" />
-          ) : topNieuws.length === 0 ? (
-            <LegeStaat
-              icon={Newspaper}
-              tekst="Geen recente artikelen."
-              cta={{ href: "/nieuws", label: "Open nieuws" }}
-            />
-          ) : (
-            <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
-              {topNieuws.map((n) => (
-                <li key={n.id}>
-                  <Link
-                    href="/nieuws"
-                    data-testid={`item-nieuws-${n.id}`}
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      gap: 2,
-                      padding: "10px 12px",
-                      border: "1px solid #e6ebf2",
-                      borderRadius: 10,
-                      textDecoration: "none",
-                      color: "inherit",
-                    }}
-                    className="hover-elevate"
-                  >
-                    <span style={{ fontSize: 13, fontWeight: 700, color: "#0b2240", lineHeight: 1.35 }}>
-                      {n.title}
-                    </span>
-                    <span style={{ fontSize: 11, color: "#94a3b8" }}>
-                      {relativeTime(n.publishedAt)}
-                    </span>
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+      {/* Subtiele nieuwslink onderaan */}
+      <div style={{ marginTop: 18, textAlign: "center" }}>
+        <Link
+          href="/nieuws"
+          data-testid="link-volledig-nieuws"
+          style={{
+            fontSize: 13, fontWeight: 600, color: "#1f5fae",
+            textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6,
+          }}
+        >
+          Bekijk volledig nieuwsoverzicht met AI-context
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
       </div>
 
       {/* Upgrade-promo onderaan voor basic users */}
       {!isPro && (
-        <div
-          className="openregio-card openregio-upgrade-card"
-          data-testid="card-upgrade-promo"
-          style={{ marginTop: 16 }}
-        >
+        <div className="openregio-card openregio-upgrade-card" data-testid="card-upgrade-promo" style={{ marginTop: 16 }}>
           <h3>Upgrade naar Pro</h3>
           <p>Krijg toegang tot RegioBot AI, alle signalen, Woo-bibliotheek en meer.</p>
           <Link
