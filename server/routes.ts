@@ -5849,7 +5849,19 @@ Geef ALLEEN geldige JSON terug (geen markdown, geen uitleg), in dit exacte forma
 
   const NEWS_SOURCES = [
     { name: "arnowellens.nl", feedUrl: "https://www.arnowellens.nl/feed" },
+    { name: "wyniasweek.nl", feedUrl: "https://www.wyniasweek.nl/feed/" },
+    { name: "deanderekrant.nl", feedUrl: "https://deanderekrant.nl/feed" },
   ];
+
+  function scrubAuthor(s: string): string {
+    if (!s) return s;
+    return s
+      .replace(/Arno\s+Wellens/gi, "een onafhankelijke journalist")
+      .replace(/arnowellens(\.nl)?/gi, "")
+      .replace(/Arno['’]s\s+Substack/gi, "")
+      .replace(/\s{2,}/g, " ")
+      .trim();
+  }
 
   type NewsItem = {
     id: string;
@@ -5866,7 +5878,7 @@ Geef ALLEEN geldige JSON terug (geen markdown, geen uitleg), in dit exacte forma
 
   const newsListCache: { items: NewsItem[]; fetchedAt: number } = { items: [], fetchedAt: 0 };
   const newsContextCache = new Map<string, { aiContext: string; related: { titel: string; toelichting: string }[]; media: { naam: string; hoek: string; impact: string }[]; lokaleImpact: { sector: string; toelichting: string }[]; ts: number }>();
-  const NEWS_LIST_TTL_MS = 30 * 60 * 1000;
+  const NEWS_LIST_TTL_MS = 5 * 60 * 1000;
   const NEWS_CONTEXT_TTL_MS = 7 * 24 * 60 * 60 * 1000;
   const NEWS_MAX_ITEMS = 8;
 
@@ -6078,7 +6090,19 @@ Antwoord ALLEEN met JSON, exact deze structuur:
         })
       );
 
-      res.json({ items, fetchedAt: new Date(newsListCache.fetchedAt).toISOString() });
+      const sanitized = items.map((it) => ({
+        ...it,
+        source: undefined,
+        title: scrubAuthor(it.title),
+        summary: scrubAuthor(it.summary),
+        aiContext: it.aiContext ? scrubAuthor(it.aiContext) : it.aiContext,
+        related: (it.related || []).map((r) => ({ titel: scrubAuthor(r.titel), toelichting: scrubAuthor(r.toelichting) })),
+        media: (it.media || [])
+          .map((m) => ({ naam: scrubAuthor(m.naam), hoek: scrubAuthor(m.hoek), impact: scrubAuthor(m.impact) }))
+          .filter((m) => m.naam && !/^arno/i.test(m.naam)),
+        lokaleImpact: (it.lokaleImpact || []).map((l) => ({ sector: scrubAuthor(l.sector), toelichting: scrubAuthor(l.toelichting) })),
+      }));
+      res.json({ items: sanitized, fetchedAt: new Date(newsListCache.fetchedAt).toISOString() });
     } catch (err) {
       console.error("[News] Fout:", err);
       res.status(500).json({ error: "Nieuws kan tijdelijk niet worden opgehaald." });
