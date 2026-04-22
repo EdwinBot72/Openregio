@@ -43,18 +43,12 @@ export type NavSection = {
 
 /** Definitieve hoofdnavigatie — 5 secties + Beheer (admin) */
 export const MAIN_NAV: NavSection[] = [
-  // 1 ── Vandaag
+  // 1 ── Vandaag (geen submenu — alles op één overzichtspagina)
   {
     id: "vandaag",
     title: "Vandaag",
     icon: CalendarDays,
-    sub: [
-      { title: "Overzicht", url: "/vandaag", icon: CalendarDays },
-      { title: "Nieuwe updates", url: "/vandaag/updates", icon: Bell },
-      { title: "Nieuws", url: "/vandaag/nieuws", icon: Newspaper },
-      { title: "Acties", url: "/vandaag/acties", icon: Zap },
-      { title: "Samen aanpakken", url: "/vandaag/samen", icon: Users },
-    ],
+    url: "/vandaag",
   },
 
   // 2 ── Kansen
@@ -66,7 +60,8 @@ export const MAIN_NAV: NavSection[] = [
       { title: "Opdrachten", url: "/kansen/opdrachten", icon: Landmark },
       { title: "Subsidies", url: "/kansen/subsidies", icon: Euro },
       { title: "In de buurt", url: "/kansen/in-de-buurt", icon: MapPin },
-      { title: "Samenwerkingen", url: "/network", icon: Handshake },
+      { title: "Marktplaats (vraag & rommelmarkt)", url: "/lokaal-marktplaats", icon: Handshake },
+      { title: "Samenwerkingen", url: "/network", icon: Users },
     ],
   },
 

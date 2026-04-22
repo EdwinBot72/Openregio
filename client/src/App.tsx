@@ -175,12 +175,17 @@ function AuthenticatedRouter() {
         <Redirect to="/account/instellingen" />
       </Route>
 
-      {/* ── Vandaag (Sectie 1) ─────────────────────────────────────────────── */}
+      {/* ── Vandaag (Sectie 1) — alles op één overzichtspagina ─────────── */}
       <Route path="/vandaag" component={VandaagPage} />
-      <Route path="/vandaag/updates" component={IntelPage} />
+      <Route path="/nieuws" component={NieuwsPage} />
+      <Route path="/vandaag/updates">
+        <Redirect to="/regels/updates" />
+      </Route>
       <Route path="/vandaag/acties" component={CursussenPage} />
       <Route path="/vandaag/samen" component={SamenAanpakkenPage} />
-      <Route path="/vandaag/nieuws" component={NieuwsPage} />
+      <Route path="/vandaag/nieuws">
+        <Redirect to="/nieuws" />
+      </Route>
 
       {/* ── Kansen (Sectie 2) ─────────────────────────────────────────────── */}
       <Route path="/kansen/opdrachten" component={AanbestedingenPage} />
