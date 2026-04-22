@@ -317,14 +317,29 @@ export default function VandaagPage() {
     .filter((d) => d.status && ACTIE_DOSSIER_STATUSSEN.has(d.status))
     .slice(0, 4);
 
-  // Posts: alle types vraag/aanbod/lead/event, gesorteerd op datum
+  // Posts: alle types vraag/aanbod/lead/event, 3 nieuwste
   const samenwerkPosts = posts
     .filter((p) => ["vraag", "aanbod", "aanbieding", "lead", "event"].includes(p.type))
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-    .slice(0, 4);
+    .slice(0, 3);
 
-  const topMarkt = marktItems.slice(0, 3);
-  const topDossiers = dossiers.slice(0, 3);
+  // Marktplaats: 3 nieuwste op createdAt
+  const topMarkt = [...marktItems]
+    .sort((a, b) => {
+      const da = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const db = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return db - da;
+    })
+    .slice(0, 3);
+
+  // Dossiers: 3 nieuwste op createdAt
+  const topDossiers = [...dossiers]
+    .sort((a, b) => {
+      const da = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const db = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return db - da;
+    })
+    .slice(0, 3);
 
   if (authLoading) {
     return (
@@ -355,15 +370,24 @@ export default function VandaagPage() {
             samengebracht voor {bedrijfsnaam}.
           </p>
         </div>
-        {!isPro && (
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <Link
-            href="/lidmaatschap?plan=pro"
-            className="openregio-button openregio-button-pro"
-            data-testid="button-upgrade-header"
+            href="/groei/profiel"
+            className="openregio-button openregio-button-outline"
+            data-testid="button-profiel-bekijken"
           >
-            Upgrade naar Pro
+            Profiel bekijken
           </Link>
-        )}
+          {!isPro && (
+            <Link
+              href="/lidmaatschap?plan=pro"
+              className="openregio-button openregio-button-pro"
+              data-testid="button-upgrade-header"
+            >
+              Upgrade naar Pro
+            </Link>
+          )}
+        </div>
       </div>
 
       <div className="openregio-greeting-plan">
@@ -703,27 +727,50 @@ export default function VandaagPage() {
           />
         ) : (
           <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
-            {topDossiers.map((d) => (
-              <li key={d.id}>
-                <Link
-                  href="/regels/woo"
-                  data-testid={`item-dossier-${d.id}`}
-                  style={{
-                    display: "flex", flexDirection: "column", gap: 2,
-                    padding: "10px 12px", border: "1px solid #e6ebf2", borderRadius: 10,
-                    textDecoration: "none", color: "inherit",
-                  }}
-                  className="hover-elevate"
-                >
-                  <span style={{ fontSize: 13, fontWeight: 700, color: "#0b2240" }}>{d.subject}</span>
-                  <span style={{ fontSize: 11, color: "#64748b" }}>
-                    {d.authority}
-                    {d.status && <> · {d.status}</>}
-                    {d.createdAt && <> · {relativeTime(d.createdAt)}</>}
-                  </span>
-                </Link>
-              </li>
-            ))}
+            {topDossiers.map((d) => {
+              const statusKleur = d.status && ACTIE_DOSSIER_STATUSSEN.has(d.status)
+                ? { bg: "#fff7ed", fg: "#c2410c" }
+                : d.status === "closed"
+                  ? { bg: "#f1f5f9", fg: "#475569" }
+                  : { bg: "#eff6ff", fg: "#1f5fae" };
+              // Geen dossier-specifieke route beschikbaar; fallback naar Woo-bibliotheek
+              // met dossier id als hash voor toekomstige scroll/anchor.
+              const dossierHref = `/regels/woo#dossier-${d.id}`;
+              return (
+                <li key={d.id}>
+                  <Link
+                    href={dossierHref}
+                    data-testid={`item-dossier-${d.id}`}
+                    style={{
+                      display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 10,
+                      padding: "12px 14px", border: "1px solid #e6ebf2", borderRadius: 10,
+                      textDecoration: "none", color: "inherit",
+                    }}
+                    className="hover-elevate"
+                  >
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: "#0b2240" }}>{d.subject}</div>
+                      <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>
+                        {d.authority}
+                        {d.createdAt && <> · {relativeTime(d.createdAt)}</>}
+                      </div>
+                    </div>
+                    {d.status && (
+                      <span
+                        data-testid={`badge-dossier-status-${d.id}`}
+                        style={{
+                          fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".4px",
+                          background: statusKleur.bg, color: statusKleur.fg,
+                          padding: "3px 8px", borderRadius: 999, flexShrink: 0, whiteSpace: "nowrap",
+                        }}
+                      >
+                        {d.status}
+                      </span>
+                    )}
+                  </Link>
+                </li>
+              );
+            })}
           </ul>
         )}
       </section>
