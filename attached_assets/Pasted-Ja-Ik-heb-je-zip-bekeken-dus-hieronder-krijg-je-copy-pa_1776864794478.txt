@@ -1,0 +1,792 @@
+Ja. Ik heb je zip bekeken, dus hieronder krijg je **copy-paste klaar** wat op jouw structuur aansluit.
+
+Vervang deze 3 bestanden volledig.
+
+---
+
+## 1) `client/src/config/navigation.ts`
+
+```ts
+import {
+  CalendarDays,
+  TrendingUp,
+  Scale,
+  BarChart3,
+  User,
+  ShieldCheck,
+  Euro,
+  FileText,
+  Library,
+  Eye,
+  Building2,
+  Globe,
+  BarChart2,
+  Users,
+  Settings,
+} from "lucide-react";
+
+export type NavSubItem = {
+  title: string;
+  url: string;
+  icon: React.ElementType;
+  proOnly?: boolean;
+  adminOnly?: boolean;
+  comingSoon?: boolean;
+};
+
+export type NavSection = {
+  id: string;
+  title: string;
+  icon: React.ElementType;
+  url?: string;
+  sub?: NavSubItem[];
+  adminOnly?: boolean;
+};
+
+/**
+ * Compacte navigatie:
+ * zo min mogelijk klikken, dus geen druk submenu onder Vandaag.
+ */
+export const MAIN_NAV: NavSection[] = [
+  {
+    id: "vandaag",
+    title: "Vandaag",
+    icon: CalendarDays,
+    url: "/vandaag",
+  },
+  {
+    id: "kansen",
+    title: "Kansen",
+    icon: TrendingUp,
+    url: "/kansen",
+  },
+  {
+    id: "regels",
+    title: "Regels",
+    icon: Scale,
+    url: "/regels",
+  },
+  {
+    id: "groei",
+    title: "Groei",
+    icon: BarChart3,
+    url: "/groei",
+  },
+  {
+    id: "account",
+    title: "Account",
+    icon: User,
+    url: "/account",
+    sub: [
+      { title: "Instellingen", url: "/account/instellingen", icon: Settings },
+      { title: "Affiliate", url: "/account/affiliate", icon: Euro },
+    ],
+  },
+
+  // Admin blijft bestaan
+  {
+    id: "beheer",
+    title: "Beheer",
+    icon: ShieldCheck,
+    adminOnly: true,
+    sub: [
+      { title: "Beheer dashboard", url: "/admin", icon: BarChart2 },
+      { title: "Gebruikers", url: "/admin/users", icon: Users },
+      { title: "Ondernemers", url: "/admin/ondernemers", icon: Building2 },
+      { title: "Content", url: "/admin/blogs", icon: FileText },
+      { title: "Cursussen", url: "/admin/cursussen", icon: CalendarDays },
+      { title: "Regio & WOO", url: "/admin/woo", icon: Library },
+      { title: "Intel signalen", url: "/admin/intel", icon: Eye },
+      { title: "Systeem", url: "/admin/inzicht", icon: Settings },
+    ],
+  },
+];
+
+export const ACCOUNT_NAV = [
+  { title: "Instellingen", url: "/account/instellingen", icon: Settings },
+  { title: "Affiliate", url: "/account/affiliate", icon: Euro },
+];
+
+/** Legacy */
+export const KERN_NAV = MAIN_NAV;
+export const GROEI_NAV: NavSection[] = [];
+export const EXTRA_NAV: NavSection[] = [];
+export const APP_NAV: NavSection[] = MAIN_NAV;
+```
+
+---
+
+## 2) `client/src/pages/vandaag.tsx`
+
+```tsx
+import { Link } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
+import { useQuery } from "@tanstack/react-query";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Bell,
+  CheckCircle2,
+  TrendingUp,
+  FolderOpen,
+  FileText,
+  AlertCircle,
+  Users,
+  Megaphone,
+  ArrowRight,
+} from "lucide-react";
+
+type ProfielData = {
+  naam?: string;
+  beschrijving?: string;
+  websiteUrl?: string;
+  regio?: string;
+  categorieId?: string;
+};
+
+type CooperatiefStats = {
+  totalMembers: number;
+  basicMembers: number;
+  proMembers: number;
+};
+
+const CATEGORIE_LABELS: Record<string, string> = {
+  retail: "Retail & Winkels",
+  food: "Horeca & Voeding",
+  services: "Zakelijke Diensten",
+  tech: "Technologie & ICT",
+  health: "Gezondheid & Welzijn",
+  education: "Onderwijs & Training",
+  creative: "Creatief & Media",
+  construction: "Bouw & Renovatie",
+  agriculture: "Landbouw & Tuinbouw",
+  transport: "Transport & Logistiek",
+};
+
+function SectionTitle({
+  title,
+  subtitle,
+  action,
+}: {
+  title: string;
+  subtitle?: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="mb-4 flex items-start justify-between gap-4">
+      <div>
+        <h2 className="text-xl font-semibold text-slate-900">{title}</h2>
+        {subtitle ? <p className="mt-1 text-sm text-slate-500">{subtitle}</p> : null}
+      </div>
+      {action}
+    </div>
+  );
+}
+
+function SmallActionButton({
+  href,
+  children,
+}: {
+  href: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <Link
+      href={href}
+      className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+    >
+      {children}
+    </Link>
+  );
+}
+
+export default function VandaagPage() {
+  usePageTitle("Vandaag");
+  const { user, isLoading: authLoading } = useAuth();
+
+  const { data: profiel } = useQuery<ProfielData | null>({
+    queryKey: ["/api/business-profile/me"],
+    enabled: !!user,
+  });
+
+  const { data: stats, isLoading: statsLoading } = useQuery<CooperatiefStats>({
+    queryKey: ["/api/cooperatief-stats"],
+    enabled: !!user,
+  });
+
+  const isPro = user?.plan === "pro";
+  const displayFirstName =
+    user?.firstName ||
+    (profiel?.naam ? profiel.naam.split(" ")[0] : "") ||
+    "ondernemer";
+
+  const bedrijfsnaam = profiel?.naam || user?.businessName || "Mijn onderneming";
+  const categorieLabel = profiel?.categorieId
+    ? CATEGORIE_LABELS[profiel.categorieId] ?? profiel.categorieId
+    : "";
+  const regioLabel = profiel?.regio || "jouw regio";
+
+  if (authLoading) {
+    return (
+      <div className="p-4 md:p-6" data-testid="skeleton-vandaag">
+        <Skeleton className="mb-4 h-10 w-56 rounded-xl" />
+        <Skeleton className="mb-8 h-5 w-80 rounded-xl" />
+
+        <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-28 rounded-2xl" />
+          ))}
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+          <Skeleton className="xl:col-span-8 h-72 rounded-2xl" />
+          <Skeleton className="xl:col-span-4 h-72 rounded-2xl" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) return null;
+
+  const kpiCards = [
+    {
+      title: "Updates",
+      value: "3",
+      sub: "nieuw",
+      icon: Bell,
+    },
+    {
+      title: "Acties",
+      value: "2",
+      sub: "open",
+      icon: CheckCircle2,
+    },
+    {
+      title: "Kansen",
+      value: "4",
+      sub: "relevant",
+      icon: TrendingUp,
+    },
+    {
+      title: "Dossiers",
+      value: "1",
+      sub: "lopend",
+      icon: FolderOpen,
+    },
+  ];
+
+  const priorityCards = [
+    {
+      label: "Regelupdate",
+      title: "Nieuwe terrasregels centrum",
+      text: "Kan horeca raken in jouw regio. Bekijk snel wat er verandert.",
+      cta: "Bekijk update",
+      href: "/regels",
+      icon: FileText,
+      labelClass: "bg-blue-50 text-blue-700",
+      iconWrapClass: "bg-blue-50 text-blue-700",
+    },
+    {
+      label: "Actie nodig",
+      title: "Antwoord binnen op documentverzoek",
+      text: "Er is nieuwe informatie binnengekomen. Dit vraagt om een vervolgstap.",
+      cta: "Open dossier",
+      href: "/regels/documenten",
+      icon: AlertCircle,
+      labelClass: "bg-amber-50 text-amber-700",
+      iconWrapClass: "bg-amber-50 text-amber-700",
+    },
+    {
+      label: "Kans",
+      title: "Lokale zomeractie zoekt partners",
+      text: "Ondernemers zoeken aansluiting voor een gezamenlijke promotieactie.",
+      cta: "Bekijk kans",
+      href: "/kansen",
+      icon: Users,
+      labelClass: "bg-emerald-50 text-emerald-700",
+      iconWrapClass: "bg-emerald-50 text-emerald-700",
+    },
+  ];
+
+  const vraagCards = [
+    {
+      title: "Wie heeft ervaring met terrasvergunningen?",
+      meta: "2 reacties",
+      when: "Vandaag",
+      href: "/network",
+      icon: Users,
+    },
+    {
+      title: "Gezocht: partner voor lokale flyeractie",
+      meta: "4 ondernemers aangehaakt",
+      when: "Gisteren",
+      href: "/network",
+      icon: Megaphone,
+    },
+    {
+      title: "Meer ondernemers last van afvalheffing",
+      meta: "Samen oppakken",
+      when: "2 dagen geleden",
+      href: "/regels/woo",
+      icon: FileText,
+    },
+  ];
+
+  const actionItems = [
+    {
+      title: "Reageer op nieuw document in je dossier",
+      sub: "Belangrijk",
+      href: "/regels/documenten",
+    },
+    {
+      title: "Bekijk update over regels in jouw regio",
+      sub: "Nieuw",
+      href: "/regels",
+    },
+    {
+      title: "Controleer 2 kansen die nu relevant zijn",
+      sub: "Vandaag",
+      href: "/kansen",
+    },
+    {
+      title: "Werk je bedrijfsprofiel verder bij",
+      sub: "Laag urgent",
+      href: "/groei/profiel",
+    },
+  ];
+
+  const dossierCards = [
+    {
+      title: "Handhaving bedrijventerrein",
+      status: "In opbouw",
+      text: "Meerdere ondernemers lopen tegen hetzelfde aan. Dossier wordt opgebouwd.",
+      href: "/regels/woo",
+      button: "Bekijk dossier",
+    },
+    {
+      title: "Terrasbeleid binnenstad",
+      status: "Lopend",
+      text: "Nieuwe stukken en signalen worden verzameld en vertaald naar actie.",
+      href: "/regels/woo",
+      button: "Bekijk dossier",
+    },
+    {
+      title: "Afvalheffing ondernemerszone",
+      status: "Verkennen",
+      text: "Er komen meer signalen binnen. Ondernemers kunnen aanhaken.",
+      href: "/regels/woo",
+      button: "Aansluiten",
+    },
+  ];
+
+  return (
+    <div className="p-4 md:p-6" data-testid="page-vandaag">
+      <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div>
+          <div className="mb-2 inline-flex items-center rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600">
+            {isPro ? "Pro" : "Basic"} · {bedrijfsnaam}
+            {categorieLabel ? ` · ${categorieLabel}` : ""}
+          </div>
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+            Vandaag
+          </h1>
+          <p className="mt-2 max-w-2xl text-sm text-slate-600">
+            Dit speelt nu in {regioLabel}, jouw sector en lopende dossiers.
+          </p>
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          {!isPro ? (
+            <Link
+              href="/lidmaatschap?plan=pro"
+              className="inline-flex items-center rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+            >
+              Upgrade naar Pro
+            </Link>
+          ) : null}
+
+          <Link
+            href="/groei/profiel"
+            className="inline-flex items-center rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+          >
+            Profiel bekijken
+          </Link>
+        </div>
+      </div>
+
+      <div className="mb-8 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+        {kpiCards.map((item) => {
+          const Icon = item.icon;
+          return (
+            <div
+              key={item.title}
+              className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <div className="rounded-xl bg-blue-50 p-3 text-blue-700">
+                  <Icon className="h-5 w-5" />
+                </div>
+                <span className="text-xs font-medium text-slate-400">Nu</span>
+              </div>
+
+              <div className="flex items-end gap-2">
+                <span className="text-3xl font-bold text-slate-900">{item.value}</span>
+                <span className="pb-1 text-sm font-medium text-slate-500">{item.sub}</span>
+              </div>
+
+              <p className="mt-2 text-sm text-slate-600">{item.title}</p>
+            </div>
+          );
+        })}
+      </div>
+
+      <div className="space-y-6">
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <SectionTitle
+            title="Wat vraagt nu aandacht?"
+            subtitle={`De belangrijkste dingen voor ${displayFirstName} en ${bedrijfsnaam}.`}
+            action={
+              <Link
+                href="/regels"
+                className="text-sm font-medium text-slate-600 hover:text-slate-900"
+              >
+                Bekijk alles
+              </Link>
+            }
+          />
+
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+            {priorityCards.map((card) => {
+              const Icon = card.icon;
+              return (
+                <div
+                  key={card.title}
+                  className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                >
+                  <div className="mb-4 flex items-start justify-between gap-4">
+                    <span
+                      className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${card.labelClass}`}
+                    >
+                      {card.label}
+                    </span>
+                    <div className={`rounded-xl p-2.5 ${card.iconWrapClass}`}>
+                      <Icon className="h-5 w-5" />
+                    </div>
+                  </div>
+
+                  <h3 className="mb-2 text-base font-semibold text-slate-900">
+                    {card.title}
+                  </h3>
+                  <p className="mb-4 text-sm leading-6 text-slate-600">{card.text}</p>
+
+                  <Link
+                    href={card.href}
+                    className="inline-flex items-center gap-2 text-sm font-semibold text-slate-900"
+                  >
+                    {card.cta}
+                    <ArrowRight className="h-4 w-4" />
+                  </Link>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+
+        <div className="grid grid-cols-1 gap-6 xl:grid-cols-12">
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-8">
+            <SectionTitle
+              title="Samenwerken & vragen"
+              subtitle="Loop je ergens op vast of zoek je samenwerking? Hier zie je wat ondernemers nu delen."
+              action={
+                <div className="flex flex-wrap gap-2">
+                  <SmallActionButton href="/network">Stel een vraag</SmallActionButton>
+                  <SmallActionButton href="/network">Plaats oproep</SmallActionButton>
+                  <SmallActionButton href="/network">Bekijk alles</SmallActionButton>
+                </div>
+              }
+            />
+
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              {vraagCards.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.title}
+                    href={item.href}
+                    className="rounded-2xl border border-slate-200 bg-slate-50 p-4 transition hover:border-slate-300 hover:bg-white"
+                  >
+                    <div className="mb-4 flex items-center justify-between gap-3">
+                      <div className="rounded-xl bg-slate-200 p-2.5 text-slate-700">
+                        <Icon className="h-4 w-4" />
+                      </div>
+                      <span className="text-xs text-slate-400">{item.when}</span>
+                    </div>
+
+                    <h3 className="mb-3 text-sm font-semibold leading-6 text-slate-900">
+                      {item.title}
+                    </h3>
+                    <p className="text-xs font-medium text-slate-500">{item.meta}</p>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+
+          <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm xl:col-span-4">
+            <SectionTitle
+              title="Acties voor jou"
+              subtitle="Concrete vervolgstappen voor vandaag."
+            />
+
+            <div className="space-y-3">
+              {actionItems.map((item, index) => (
+                <div
+                  key={item.title}
+                  className="flex items-start justify-between gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4"
+                >
+                  <div className="flex min-w-0 gap-3">
+                    <span
+                      className={`mt-2 h-2.5 w-2.5 shrink-0 rounded-full ${
+                        index === 0
+                          ? "bg-amber-500"
+                          : index === 1
+                          ? "bg-blue-500"
+                          : index === 2
+                          ? "bg-emerald-500"
+                          : "bg-slate-300"
+                      }`}
+                    />
+                    <div>
+                      <p className="text-sm font-medium text-slate-900">{item.title}</p>
+                      <p className="mt-1 text-xs text-slate-500">{item.sub}</p>
+                    </div>
+                  </div>
+
+                  <Link
+                    href={item.href}
+                    className="shrink-0 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+                  >
+                    Nu doen
+                  </Link>
+                </div>
+              ))}
+            </div>
+          </section>
+        </div>
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <SectionTitle
+            title="Gezamenlijke dossiers"
+            subtitle="Onderwerpen die meerdere ondernemers raken en slim gezamenlijk opgepakt kunnen worden."
+            action={
+              <Link
+                href="/regels/woo"
+                className="text-sm font-medium text-slate-600 hover:text-slate-900"
+              >
+                Bekijk alle dossiers
+              </Link>
+            }
+          />
+
+          <div className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+            {dossierCards.map((item) => (
+              <div
+                key={item.title}
+                className="rounded-2xl border border-slate-200 bg-slate-50 p-4"
+              >
+                <div className="mb-3 flex items-center justify-between gap-3">
+                  <h3 className="text-base font-semibold text-slate-900">{item.title}</h3>
+                  <span className="rounded-full bg-slate-200 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                    {item.status}
+                  </span>
+                </div>
+
+                <p className="mb-4 text-sm leading-6 text-slate-600">{item.text}</p>
+
+                <Link
+                  href={item.href}
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-slate-900"
+                >
+                  {item.button}
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600">
+            <strong className="text-slate-900">Slimme opzet:</strong> ondernemers hoeven niet
+            alles opnieuw uit te zoeken. Wat gezamenlijk speelt, kan worden gebundeld in
+            vragen, documenten en dossiers.
+          </div>
+        </section>
+
+        <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+          <SectionTitle
+            title="Jouw bedrijf"
+            subtitle="Compact profielblok onderaan, zodat Vandaag vooral overzicht houdt."
+          />
+
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Bedrijfsnaam
+              </p>
+              <p className="mt-2 text-base font-semibold text-slate-900">{bedrijfsnaam}</p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Categorie
+              </p>
+              <p className="mt-2 text-base font-semibold text-slate-900">
+                {categorieLabel || "Nog niet ingevuld"}
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                Regio
+              </p>
+              <p className="mt-2 text-base font-semibold text-slate-900">{regioLabel}</p>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      {statsLoading ? null : stats ? (
+        <div className="mt-8 text-xs text-slate-400">
+          Platformstatus · {stats.totalMembers} leden · {stats.proMembers} pro
+        </div>
+      ) : null}
+    </div>
+  );
+}
+```
+
+---
+
+## 3) `client/src/App.tsx`
+
+Dit bestand is groot. Dus hier is de **gerichte aanpassing** die je moet doen in je bestaande `AuthenticatedRouter()`.
+
+### A) Vervang deze redirects:
+
+Zoek dit stuk:
+
+```tsx
+<Route path="/kansen">
+  <Redirect to="/kansen/opdrachten" />
+</Route>
+<Route path="/regels">
+  <Redirect to="/regels/updates" />
+</Route>
+<Route path="/groei">
+  <Redirect to="/groei/profiel" />
+</Route>
+<Route path="/account">
+  <Redirect to="/account/instellingen" />
+</Route>
+```
+
+Vervang door:
+
+```tsx
+<Route path="/kansen">
+  <Redirect to="/kansen/opdrachten" />
+</Route>
+<Route path="/regels">
+  <Redirect to="/regels/updates" />
+</Route>
+<Route path="/groei">
+  <Redirect to="/groei/profiel" />
+</Route>
+<Route path="/account">
+  <Redirect to="/account/instellingen" />
+</Route>
+```
+
+Die kan dus blijven zoals hij is.
+
+### B) Belangrijk: vervang je hele Vandaag-sectie
+
+Zoek dit:
+
+```tsx
+{/* ── Vandaag (Sectie 1) ─────────────────────────────────────────────── */}
+<Route path="/vandaag" component={VandaagPage} />
+<Route path="/vandaag/updates" component={IntelPage} />
+<Route path="/vandaag/acties" component={CursussenPage} />
+<Route path="/vandaag/samen" component={SamenAanpakkenPage} />
+<Route path="/vandaag/nieuws" component={NieuwsPage} />
+```
+
+Vervang door:
+
+```tsx
+{/* ── Vandaag (compact dashboard) ───────────────────────────────────── */}
+<Route path="/vandaag" component={VandaagPage} />
+
+{/* oude submenu-routes van Vandaag terug naar 1 dashboard */}
+<Route path="/vandaag/updates">
+  <Redirect to="/vandaag" />
+</Route>
+<Route path="/vandaag/acties">
+  <Redirect to="/vandaag" />
+</Route>
+<Route path="/vandaag/samen">
+  <Redirect to="/vandaag" />
+</Route>
+<Route path="/vandaag/nieuws">
+  <Redirect to="/vandaag" />
+</Route>
+```
+
+---
+
+## 4) Extra schoonmaak in `App.tsx`
+
+Deze imports gebruik je dan waarschijnlijk niet meer:
+
+```tsx
+import NieuwsPage from "@/pages/nieuws";
+import SamenAanpakkenPage from "@/pages/samen-aanpakken";
+import CursussenPage from "@/pages/cursussen";
+```
+
+Als TypeScript klaagt dat ze unused zijn: **weghalen**.
+
+`IntelPage` blijft wel nodig, want die gebruik je nog bij `/regels/updates`.
+
+---
+
+## 5) Wat je hiermee krijgt
+
+Je menu wordt klein:
+
+* Vandaag
+* Kansen
+* Regels
+* Groei
+* Account
+
+En **Vandaag** wordt je echte commandocenter:
+
+* KPI’s
+* wat nu aandacht vraagt
+* samenwerken & vragen
+* acties voor jou
+* gezamenlijke dossiers
+
+Dus minder klikken, meer overzicht.
+
+---
+
+## 6) Als Replit foutmeldingen geeft
+
+Stuur dan gewoon:
+
+* screenshot van de error
+* of de rode melding uit console
+
+Dan trek ik hem direct recht.
