@@ -1,7 +1,7 @@
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useEffect, useRef, useState } from "react";
-import { Menu, X, ChevronDown, LogOut, Settings, Bot } from "lucide-react";
+import { Menu, X, ChevronDown, LogOut, Settings } from "lucide-react";
 import { MAIN_NAV, type NavSection } from "@/config/navigation";
 import { queryClient } from "@/lib/queryClient";
 
@@ -32,15 +32,8 @@ function buildTabs(isAdmin: boolean): TopTab[] {
     }),
   );
 
-  // RegioBot als losse tab (geen onderdeel van MAIN_NAV).
-  // Bewust voor iedereen zichtbaar; de pagina zelf regelt feature-gating.
-  tabs.splice(4, 0, {
-    id: "regiobot",
-    label: "RegioBot",
-    href: "/regiobot",
-    match: ["/regiobot"],
-  });
-
+  // 5 hoofdtabs (+ Beheer voor admins) — RegioBot is geen losse tab meer;
+  // gebruikers bereiken RegioBot via de pagina's waar het relevant is.
   return tabs;
 }
 
@@ -200,7 +193,6 @@ export function OpenRegioTopNav() {
                 aria-current={active ? "page" : undefined}
                 data-testid={`tab-${t.id}`}
               >
-                {t.id === "regiobot" && <Bot className="h-3.5 w-3.5 mr-1 inline-block" />}
                 {t.label}
               </Link>
             );

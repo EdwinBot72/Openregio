@@ -9,7 +9,7 @@ test.describe("Vandaag-pagina", () => {
     await expect(page.getByTestId("page-vandaag")).toHaveCount(0);
   });
 
-  test("ingelogde basisgebruiker ziet begroeting, plan-badge en stat-cards", async ({ page, context, baseURL }) => {
+  test("ingelogde basisgebruiker ziet hero, KPI-tegels en kernsecties", async ({ page, context, baseURL }) => {
     await registerAndAuth(context, baseURL!, "basic", "vandaag");
 
     await page.goto("/vandaag");
@@ -17,16 +17,27 @@ test.describe("Vandaag-pagina", () => {
 
     await expect(page.getByTestId("page-vandaag")).toBeVisible();
     await expect(page.getByTestId("text-greeting")).toBeVisible();
-    await expect(page.getByTestId("badge-plan")).toHaveText(/Basic|Basis/i);
+    await expect(page.getByTestId("badge-plan")).toContainText(/Basic|Basis/i);
 
-    // Stat-cards laden allemaal
-    await expect(page.getByTestId("stat-totaal")).toBeVisible();
-    await expect(page.getByTestId("stat-basic")).toBeVisible();
-    await expect(page.getByTestId("stat-pro")).toBeVisible();
+    // Hero CTA's
+    await expect(page.getByTestId("button-profiel-bekijken")).toBeVisible();
 
-    // Snelle links naar de andere kernpagina's
-    await expect(page.getByTestId("quick-netwerk")).toBeVisible();
-    await expect(page.getByTestId("quick-regiobot")).toBeVisible();
+    // 4 KPI-tegels
+    await expect(page.getByTestId("kpi-updates")).toBeVisible();
+    await expect(page.getByTestId("kpi-acties")).toBeVisible();
+    await expect(page.getByTestId("kpi-kansen")).toBeVisible();
+    await expect(page.getByTestId("kpi-dossiers")).toBeVisible();
+
+    // Kernsecties
+    await expect(page.getByTestId("section-aandacht")).toBeVisible();
+    await expect(page.getByTestId("section-acties")).toBeVisible();
+    await expect(page.getByTestId("section-vragen")).toBeVisible();
+    await expect(page.getByTestId("section-marktplaats")).toBeVisible();
+    await expect(page.getByTestId("section-dossiers")).toBeVisible();
+
+    // Bedrijfsstrip + nieuwslink onderaan
+    await expect(page.getByTestId("strip-jouw-bedrijf")).toBeVisible();
+    await expect(page.getByTestId("link-volledig-nieuws")).toBeVisible();
 
     // Upgrade-promo voor niet-Pro gebruikers
     await expect(page.getByTestId("card-upgrade-promo")).toBeVisible();
@@ -43,8 +54,10 @@ test.describe("Vandaag-pagina", () => {
     await waitForReactQuery(page);
 
     await expect(page.getByTestId("page-vandaag")).toBeVisible();
-    await expect(page.getByTestId("badge-plan")).toHaveText(/Pro/i);
+    await expect(page.getByTestId("badge-plan")).toContainText(/Pro/i);
     await expect(page.getByTestId("card-upgrade-promo")).toHaveCount(0);
     await expect(page.getByTestId("button-upgrade-header")).toHaveCount(0);
+    // Profiel-CTA in hero blijft beschikbaar voor iedereen
+    await expect(page.getByTestId("button-profiel-bekijken")).toBeVisible();
   });
 });

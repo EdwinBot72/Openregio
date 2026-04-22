@@ -390,15 +390,24 @@ export default function VandaagPage() {
         </div>
       </div>
 
-      <div className="openregio-greeting-plan">
+      <div className="openregio-greeting-plan" style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
         <span
           className={`openregio-plan-badge ${isPro ? "openregio-plan-pro" : "openregio-plan-basic"}`}
           data-testid="badge-plan"
+          style={{ display: "inline-flex", alignItems: "center", gap: 8 }}
         >
-          {planLabel}
+          <span>{planLabel}</span>
+          <span style={{ opacity: 0.55 }}>·</span>
+          <span style={{ fontWeight: 700 }}>{bedrijfsnaam}</span>
+          {categorieLabel && (
+            <>
+              <span style={{ opacity: 0.55 }}>·</span>
+              <span style={{ fontWeight: 600 }}>{categorieLabel}</span>
+            </>
+          )}
         </span>
         {stats && (
-          <span style={{ marginLeft: 10, fontSize: 12, color: "#64748b" }} data-testid="text-leden-totaal">
+          <span style={{ fontSize: 12, color: "#64748b" }} data-testid="text-leden-totaal">
             {stats.totalMembers} ondernemers in OpenRegio
           </span>
         )}
