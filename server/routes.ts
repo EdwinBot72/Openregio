@@ -6192,14 +6192,32 @@ Wees specifiek en praktisch. Schrijf in zakelijk maar toegankelijk Nederlands.`;
       const response = await ai.models.generateContent({
         model: "gemini-2.5-flash",
         contents: [{ role: "user", parts: [{ text: prompt }] }],
-        config: { maxOutputTokens: 1200, temperature: 0.7, thinkingConfig: { thinkingBudget: 0 } },
+        config: {
+          maxOutputTokens: 2400,
+          temperature: 0.7,
+          responseMimeType: "application/json",
+          thinkingConfig: { thinkingBudget: 0 },
+        },
       });
 
       const parts = response.candidates?.[0]?.content?.parts;
       let rawText = parts ? parts.filter((p: any) => p.text && !p.thought).map((p: any) => p.text).join("") : "";
       rawText = rawText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
 
-      const parsed = JSON.parse(rawText);
+      // Sommige modellen sluiten af zonder eind-bracket bij token-limiet — pak alleen
+      // het eerste JSON-object en probeer ontbrekende sluitingen aan te vullen.
+      const firstBrace = rawText.indexOf("{");
+      if (firstBrace > 0) rawText = rawText.slice(firstBrace);
+      const lastBrace = rawText.lastIndexOf("}");
+      if (lastBrace > 0) rawText = rawText.slice(0, lastBrace + 1);
+
+      let parsed: object;
+      try {
+        parsed = JSON.parse(rawText);
+      } catch (parseErr) {
+        console.error("[Basischeck] JSON parse fout, raw:", rawText.slice(0, 500));
+        throw parseErr;
+      }
       basischeckCache.set(cacheKey, { data: parsed, ts: Date.now() });
       return res.json(parsed);
     } catch (err) {
