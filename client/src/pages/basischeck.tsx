@@ -4,9 +4,10 @@ import { Link } from "wouter";
 import {
   ArrowRight, Loader2, TrendingUp, AlertTriangle,
   Lightbulb, CheckCircle2, Shield, FileText, RefreshCw,
-  ChevronRight, Star, Lock, RotateCcw,
+  ChevronRight, Star, Lock, RotateCcw, ListChecks,
 } from "lucide-react";
 import { PublicTopNav } from "@/components/PublicTopNav";
+import { useAuth } from "@/hooks/useAuth";
 
 type AnalyseType = "regio-analyse" | "regelgeving";
 
@@ -38,6 +39,7 @@ function urgentieKleur(u: string) {
 
 export default function BasischeckPage() {
   usePageTitle("Gratis Basischeck — OpenRegio");
+  const { isAuthenticated } = useAuth();
 
   const [activeTab, setActiveTab] = useState<AnalyseType>("regio-analyse");
   const [beroep, setBeroep] = useState("");
@@ -375,36 +377,69 @@ export default function BasischeckPage() {
             </>
           )}
 
-          {/* CTA - lid worden */}
-          <div
-            className="openregio-public-card"
-            style={{ textAlign: "center", background: "#0b2240", borderColor: "#0b2240" }}
-            data-testid="card-cta-lid"
-          >
-            <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(242,138,26,.18)", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
-              <Lock className="h-5 w-5" style={{ color: "#f28a1a" }} />
-            </div>
-            <h2 style={{ color: "#fff", fontSize: 18, fontWeight: 800, margin: "0 0 8px", justifyContent: "center" }}>Wil je dit elke week automatisch?</h2>
-            <p style={{ fontSize: 13, color: "rgba(255,255,255,.75)", margin: "0 auto 16px", maxWidth: 420, lineHeight: 1.6 }}>
-              Als lid van OpenRegio ontvang je gepersonaliseerde updates, subsidie-alerts en een uitgebreide basischeck — elke week vers voor jouw sector en regio.
-            </p>
-            <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
-              <Link href="/lidmaatschap">
-                <button className="openregio-button openregio-button-primary" data-testid="button-word-lid">
-                  Word lid <ArrowRight className="h-4 w-4" />
-                </button>
-              </Link>
-              <Link href="/login">
-                <button
-                  className="openregio-button openregio-button-outline"
-                  style={{ background: "transparent", color: "#fff", borderColor: "rgba(255,255,255,.3)" }}
-                  data-testid="button-inloggen"
-                >
-                  Inloggen
-                </button>
-              </Link>
-            </div>
+          {/* Stappenplan — voor iedereen handig na de scan */}
+          <div className="openregio-public-card" data-testid="card-stappenplan">
+            <h2><ListChecks className="w-4 h-4" style={{ color: "#1f5fae" }} /> Jouw stappenplan</h2>
+            <ol style={{ margin: "10px 0 0", padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 10 }}>
+              {(submittedFor.type === "regio-analyse"
+                ? [
+                    { titel: "Kies één kans uit de lijst hierboven", uitleg: "Pak de kans die het dichtst bij je huidige aanbod ligt — daar boek je het snelst resultaat." },
+                    { titel: "Zet één tip deze week om in actie", uitleg: "Begin klein: één concrete actie uit de tips-lijst, met een einddatum erbij." },
+                    { titel: "Bespreek een risico met een collega-ondernemer", uitleg: "Twee weten meer dan één — vraag iemand uit de regio die hetzelfde meemaakt." },
+                    { titel: "Zet een herinnering over 30 dagen", uitleg: "Doe over een maand opnieuw deze scan en kijk wat er veranderd is." },
+                  ]
+                : [
+                    { titel: "Check welke vergunningen je nu al hebt", uitleg: "Loop de lijst hierboven na en vink af wat al geregeld is." },
+                    { titel: "Plan de hoog-urgente vergunningen direct in", uitleg: "Begin met de rode items — die kosten vaak doorlooptijd bij de gemeente." },
+                    { titel: "Bel je gemeente voor de aandachtspunten", uitleg: "Veel vragen los je op met één telefoontje naar het ondernemersloket." },
+                    { titel: "Houd recente wijzigingen in de gaten", uitleg: "Regels veranderen — abonneer je op updates voor jouw sector." },
+                  ]
+              ).map((stap, i) => (
+                <li key={i} style={{ display: "flex", gap: 10 }} data-testid={`stap-${i}`}>
+                  <span style={{ width: 24, height: 24, borderRadius: "50%", background: "#1f5fae", color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800, flexShrink: 0 }}>
+                    {i + 1}
+                  </span>
+                  <div>
+                    <p style={{ fontSize: 14, fontWeight: 700, color: "#0b2240", margin: "0 0 2px" }}>{stap.titel}</p>
+                    <p style={{ fontSize: 13, color: "#475569", margin: 0, lineHeight: 1.6 }}>{stap.uitleg}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
           </div>
+
+          {/* CTA - lid worden — alleen voor gasten, niet voor ingelogde gebruikers */}
+          {!isAuthenticated && (
+            <div
+              className="openregio-public-card"
+              style={{ textAlign: "center", background: "#0b2240", borderColor: "#0b2240" }}
+              data-testid="card-cta-lid"
+            >
+              <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(242,138,26,.18)", display: "inline-flex", alignItems: "center", justifyContent: "center", marginBottom: 12 }}>
+                <Lock className="h-5 w-5" style={{ color: "#f28a1a" }} />
+              </div>
+              <h2 style={{ color: "#fff", fontSize: 18, fontWeight: 800, margin: "0 0 8px", justifyContent: "center" }}>Wil je dit elke week automatisch?</h2>
+              <p style={{ fontSize: 13, color: "rgba(255,255,255,.75)", margin: "0 auto 16px", maxWidth: 420, lineHeight: 1.6 }}>
+                Als lid van OpenRegio ontvang je gepersonaliseerde updates, subsidie-alerts en een uitgebreide basischeck — elke week vers voor jouw sector en regio.
+              </p>
+              <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
+                <Link href="/lidmaatschap">
+                  <button className="openregio-button openregio-button-primary" data-testid="button-word-lid">
+                    Word lid <ArrowRight className="h-4 w-4" />
+                  </button>
+                </Link>
+                <Link href="/login">
+                  <button
+                    className="openregio-button openregio-button-outline"
+                    style={{ background: "transparent", color: "#fff", borderColor: "rgba(255,255,255,.3)" }}
+                    data-testid="button-inloggen"
+                  >
+                    Inloggen
+                  </button>
+                </Link>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
