@@ -129,7 +129,7 @@ export default function BasischeckPage() {
             Zie direct wat er speelt in <span style={{ color: "#1f5fae" }}>jouw regio.</span>
           </h1>
           <p className="openregio-public-lead" style={{ marginBottom: 0 }}>
-            Duurt minder dan 30 seconden. Geen account nodig.
+            Duurt minder dan 30 seconden.
           </p>
         </div>
 
