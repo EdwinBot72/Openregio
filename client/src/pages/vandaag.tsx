@@ -16,10 +16,13 @@ import {
   Building2,
   AlertCircle,
   Newspaper,
+  Map as MapIcon,
+  Sparkles,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { nl } from "date-fns/locale";
-import type { Post, IntelSignaal, LokaalAanbod } from "@shared/schema";
+import type { Post, IntelSignaal, LokaalAanbod, Bedrijfsprofiel } from "@shared/schema";
+import { BusinessMapView } from "@/components/BusinessMapView";
 
 type ProfielData = {
   naam?: string;
@@ -279,6 +282,12 @@ export default function VandaagPage() {
   });
   const topNieuws = (nieuwsData?.items ?? []).slice(0, 3);
 
+  const { data: bedrijven = [], isLoading: bedrijvenLoading } = useQuery<Bedrijfsprofiel[]>({
+    queryKey: ["/api/business-profiles/public"],
+    enabled: !!user,
+    staleTime: 1000 * 60 * 5,
+  });
+
   const isPro = user?.plan === "pro";
   const planLabel = isPro ? "Pro-bijdrager" : "Basic lid";
   const displayFirstName =
@@ -478,6 +487,52 @@ export default function VandaagPage() {
           testId="kpi-dossiers"
         />
       </div>
+
+      {/* Ledenstats — community in cijfers */}
+      <div className="openregio-dashboard-stats" data-testid="section-ledenstats" style={{ marginTop: 16 }}>
+        <div className="openregio-stat-card" data-testid="stat-totaal">
+          <h3>Totaal leden</h3>
+          <p className="openregio-stat-number" data-testid="text-stat-totaal">
+            {stats ? stats.totalMembers : "—"}
+          </p>
+        </div>
+        <div className="openregio-stat-card" data-testid="stat-basic">
+          <h3>Basic leden</h3>
+          <p className="openregio-stat-number" data-testid="text-stat-basic">
+            {stats ? stats.basicMembers : "—"}
+          </p>
+        </div>
+        <div className="openregio-stat-card" data-testid="stat-pro">
+          <h3>Pro leden</h3>
+          <p className="openregio-stat-number" data-testid="text-stat-pro">
+            {stats ? stats.proMembers : "—"}
+          </p>
+        </div>
+      </div>
+
+      {/* Kaart — wie zit waar */}
+      <section className="openregio-card" data-testid="section-ledenkaart" style={{ marginTop: 16 }}>
+        <SectieKop
+          titel="Wie zit waar?"
+          subtitel="Klik op een marker om het bedrijfsprofiel te bekijken."
+          bekijkAlles="/network"
+        />
+        <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#64748b", margin: "4px 0 12px" }}>
+          <MapIcon className="h-4 w-4" style={{ color: "#1f5fae" }} />
+          <span data-testid="text-kaart-aantal">
+            {bedrijvenLoading ? "Bedrijven worden geladen…" : `${bedrijven.length} bedrijven op de kaart`}
+          </span>
+        </div>
+        {bedrijvenLoading ? (
+          <Skeleton className="h-[500px] w-full rounded-lg" />
+        ) : bedrijven.length === 0 ? (
+          <p style={{ fontSize: 13, color: "#64748b", margin: 0 }} data-testid="text-kaart-leeg">
+            Er zijn nog geen bedrijven met regio bekend.
+          </p>
+        ) : (
+          <BusinessMapView businesses={bedrijven} />
+        )}
+      </section>
 
       {/* 1. Wat vraagt nu aandacht — gemixte feed */}
       <section className="openregio-card" data-testid="section-aandacht">
@@ -805,45 +860,76 @@ export default function VandaagPage() {
         )}
       </section>
 
-      {/* 6. Jouw bedrijf — compacte strip */}
-      <div
-        className="openregio-card"
-        data-testid="strip-jouw-bedrijf"
-        style={{
-          marginTop: 16,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          gap: 14,
-          flexWrap: "wrap",
-        }}
-      >
-        <div style={{ display: "flex", alignItems: "center", gap: 12, minWidth: 0 }}>
-          <div
-            style={{
-              width: 38, height: 38, borderRadius: 10,
-              background: "#eff6ff", color: "#1f5fae",
-              display: "inline-flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
-            }}
-          >
-            <Building2 className="h-5 w-5" />
-          </div>
-          <div style={{ minWidth: 0 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: "#0b2240" }} data-testid="text-strip-bedrijf">
-              {bedrijfsnaam}
+      {/* 6. Jouw profiel + Snelle links */}
+      <div className="openregio-dashboard-content" style={{ marginTop: 16 }}>
+        <div className="openregio-dashboard-main">
+          <div className="openregio-card" data-testid="card-profile-summary">
+            <h2 style={{ display: "inline-flex", alignItems: "center", gap: 8, margin: "0 0 12px", fontSize: 16, fontWeight: 800, color: "#0b2240" }}>
+              <Building2 className="h-4 w-4" style={{ color: "#1f5fae" }} />
+              Jouw profiel
+            </h2>
+            <div className="openregio-profile-summary">
+              <p>
+                <strong data-testid="text-bedrijfsnaam">{bedrijfsnaam}</strong>
+              </p>
+              {categorieLabel && (
+                <p>
+                  <span className="openregio-category" data-testid="text-categorie">
+                    {categorieLabel}
+                  </span>
+                </p>
+              )}
+              {regioLabel && (
+                <p style={{ fontSize: 13, color: "#475569", display: "inline-flex", alignItems: "center", gap: 6 }}>
+                  <MapPin className="h-3.5 w-3.5" style={{ color: "#94a3b8" }} />
+                  <span data-testid="text-profiel-regio">{regioLabel}</span>
+                </p>
+              )}
+              {profiel?.beschrijving && (
+                <p data-testid="text-beschrijving" style={{ fontSize: 13, color: "#475569", lineHeight: 1.6 }}>
+                  {profiel.beschrijving}
+                </p>
+              )}
             </div>
-            <div style={{ fontSize: 12, color: "#64748b" }}>
-              {[categorieLabel, regioLabel].filter(Boolean).join(" · ") || "Werk je profiel bij voor betere matches"}
-            </div>
+            <Link
+              href="/groei/profiel"
+              className="openregio-button openregio-button-outline openregio-button-small"
+              data-testid="button-profile-edit"
+            >
+              Profiel bewerken
+            </Link>
           </div>
         </div>
-        <Link
-          href="/groei/profiel"
-          className="openregio-button openregio-button-outline openregio-button-small"
-          data-testid="button-strip-profiel"
-        >
-          Profiel bewerken
-        </Link>
+        <div className="openregio-dashboard-sidebar">
+          <div className="openregio-card" data-testid="card-quick-links">
+            <h2 style={{ display: "inline-flex", alignItems: "center", gap: 8, margin: "0 0 12px", fontSize: 16, fontWeight: 800, color: "#0b2240" }}>
+              <Sparkles className="h-4 w-4" style={{ color: "#1f5fae" }} />
+              Snelle links
+            </h2>
+            <ul className="openregio-quick-links">
+              <li>
+                <Link href="/network" data-testid="quick-netwerk">
+                  Ontdek het netwerk
+                </Link>
+              </li>
+              <li>
+                <Link href="/regiobot" data-testid="quick-regiobot">
+                  Vraag iets aan RegioBot
+                </Link>
+              </li>
+              <li>
+                <Link href="/regels/updates" data-testid="quick-regelgeving">
+                  Regelgeving & signalen
+                </Link>
+              </li>
+              <li>
+                <Link href="/groei/profiel" data-testid="quick-profiel">
+                  Bewerk je bedrijfsprofiel
+                </Link>
+              </li>
+            </ul>
+          </div>
+        </div>
       </div>
 
       {/* Nieuws — 3 recente berichten met bron */}
