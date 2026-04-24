@@ -15,6 +15,7 @@ import {
   Plus,
   Building2,
   AlertCircle,
+  Newspaper,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { nl } from "date-fns/locale";
@@ -40,6 +41,19 @@ type WooDossierItem = {
   authority: string;
   status: string | null;
   createdAt?: string | null;
+};
+
+type NieuwsItem = {
+  id: string;
+  title: string;
+  link: string;
+  source?: string;
+  publishedAt: string;
+};
+
+type NieuwsResponse = {
+  items: NieuwsItem[];
+  fetchedAt: string;
 };
 
 const CATEGORIE_LABELS: Record<string, string> = {
@@ -257,6 +271,13 @@ export default function VandaagPage() {
     queryKey: ["/api/woo/dossiers"],
     enabled: !!user,
   });
+
+  const { data: nieuwsData, isLoading: nieuwsLoading } = useQuery<NieuwsResponse>({
+    queryKey: ["/api/news"],
+    enabled: !!user,
+    staleTime: 1000 * 60 * 10,
+  });
+  const topNieuws = (nieuwsData?.items ?? []).slice(0, 3);
 
   const isPro = user?.plan === "pro";
   const planLabel = isPro ? "Pro-bijdrager" : "Basic lid";
@@ -825,19 +846,69 @@ export default function VandaagPage() {
         </Link>
       </div>
 
-      {/* Subtiele nieuwslink onderaan */}
-      <div style={{ marginTop: 18, textAlign: "center" }}>
-        <Link
-          href="/nieuws"
-          data-testid="link-volledig-nieuws"
-          style={{
-            fontSize: 13, fontWeight: 600, color: "#1f5fae",
-            textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 6,
-          }}
-        >
-          Bekijk volledig nieuwsoverzicht met AI-context
-          <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
+      {/* Nieuws — 3 recente berichten met bron */}
+      <div className="openregio-card" data-testid="card-nieuws" style={{ marginTop: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, marginBottom: 12, flexWrap: "wrap" }}>
+          <h3 style={{ margin: 0, display: "inline-flex", alignItems: "center", gap: 8, fontSize: 16, fontWeight: 800, color: "#0b2240" }}>
+            <Newspaper className="h-4 w-4" style={{ color: "#1f5fae" }} />
+            Nieuws met context
+          </h3>
+          <Link
+            href="/nieuws"
+            data-testid="link-meer-nieuws"
+            style={{ fontSize: 13, fontWeight: 600, color: "#1f5fae", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: 4 }}
+          >
+            Alles bekijken <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+
+        {nieuwsLoading && (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {[0, 1, 2].map((i) => (
+              <Skeleton key={i} className="h-14 w-full" />
+            ))}
+          </div>
+        )}
+
+        {!nieuwsLoading && topNieuws.length === 0 && (
+          <p style={{ fontSize: 13, color: "#64748b", margin: 0 }} data-testid="text-geen-nieuws">
+            Er is op dit moment geen nieuws beschikbaar.
+          </p>
+        )}
+
+        {!nieuwsLoading && topNieuws.length > 0 && (
+          <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+            {topNieuws.map((n) => (
+              <li key={n.id} data-testid={`item-nieuws-${n.id}`}>
+                <Link
+                  href="/nieuws"
+                  className="hover-elevate"
+                  style={{
+                    display: "block",
+                    padding: "10px 12px",
+                    borderRadius: 10,
+                    border: "1px solid #e6ebf2",
+                    textDecoration: "none",
+                    color: "inherit",
+                  }}
+                >
+                  <div style={{ fontSize: 11, color: "#94a3b8", textTransform: "uppercase", letterSpacing: ".5px", fontWeight: 700, marginBottom: 4, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                    <span>{new Date(n.publishedAt).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}</span>
+                    {n.source && (
+                      <>
+                        <span style={{ color: "#cbd5e1" }}>•</span>
+                        <span data-testid={`text-bron-${n.id}`}>{n.source}</span>
+                      </>
+                    )}
+                  </div>
+                  <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#0b2240", lineHeight: 1.45 }}>
+                    {n.title}
+                  </p>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
 
       {/* Upgrade-promo onderaan voor basic users */}

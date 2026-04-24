@@ -6092,7 +6092,6 @@ Antwoord ALLEEN met JSON, exact deze structuur:
 
       const sanitized = items.map((it) => ({
         ...it,
-        source: undefined,
         title: scrubAuthor(it.title),
         summary: scrubAuthor(it.summary),
         aiContext: it.aiContext ? scrubAuthor(it.aiContext) : it.aiContext,

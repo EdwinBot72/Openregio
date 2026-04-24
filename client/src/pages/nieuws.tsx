@@ -95,9 +95,15 @@ export default function NieuwsPage() {
             style={{ background: "#fff", border: "1px solid #e6ebf2", borderRadius: 14, padding: "30px 32px" }}
             data-testid={`card-news-${item.id}`}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#94a3b8", marginBottom: 14, textTransform: "uppercase", letterSpacing: ".5px", fontWeight: 600 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#94a3b8", marginBottom: 14, textTransform: "uppercase", letterSpacing: ".5px", fontWeight: 600, flexWrap: "wrap" }}>
               <Newspaper className="h-3.5 w-3.5" style={{ color: "#94a3b8" }} />
               <span>{formatDate(item.publishedAt)}</span>
+              {item.source && (
+                <>
+                  <span style={{ color: "#cbd5e1" }}>•</span>
+                  <span data-testid={`text-source-${item.id}`}>{item.source}</span>
+                </>
+              )}
             </div>
 
             <h2
