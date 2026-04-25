@@ -465,10 +465,10 @@ function ResultaatWeergave({
         </span>
         <div style={{ flex: "1 1 220px" }}>
           <div style={{ fontSize: 14, fontWeight: 800, color: "#0b2240" }}>
-            Naar mijn ondernemersdossier
+            Mijn ondernemersdossier (Woo-bibliotheek)
           </div>
           <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.5 }}>
-            Bekijk al je opgeslagen Woo-dossiers, lopende verzoeken en correspondentie op één plek.
+            Bekijk al je opgeslagen Woo-dossiers, lopende verzoeken en correspondentie op één plek. Eerdere RegioScans staan onderaan deze pagina.
           </div>
         </div>
         <Link
@@ -476,7 +476,7 @@ function ResultaatWeergave({
           className="openregio-button openregio-button-primary"
           data-testid="link-naar-ondernemersdossier"
         >
-          Open ondernemersdossier
+          Open Woo-bibliotheek
           <ArrowRight className="h-4 w-4" style={{ marginLeft: 6, display: "inline-block" }} />
         </Link>
       </section>
