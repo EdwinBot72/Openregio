@@ -1097,8 +1097,13 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
   // WOO RegioBot - searches WOO requests/documents and provides AI answers
   app.post("/api/regiobot", async (req, res) => {
     try {
-      // Early check for OpenAI API key
-      if (!process.env.OPENAI_API_KEY) {
+      const payload = req.body ?? {};
+      const isTestFixture =
+        process.env.NODE_ENV !== "production" && payload?.__testFixture === true;
+
+      // Early check for OpenAI API key (skip in non-production test-fixture mode,
+      // omdat de testdouble in runRegioBot dan toch geen OpenAI-aanroep doet)
+      if (!isTestFixture && !process.env.OPENAI_API_KEY) {
         return res.status(503).json({ 
           error: "WOO RegioBot is tijdelijk niet beschikbaar",
           details: "De AI-configuratie is nog niet voltooid. Neem contact op met de beheerder.",
@@ -1106,7 +1111,6 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
         });
       }
 
-      const payload = req.body ?? {};
       const result = await runRegioBot(payload);
       res.json(result);
     } catch (err: any) {
