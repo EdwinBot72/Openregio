@@ -917,6 +917,9 @@ export const regioScanItemSchema = z.object({
   toelichting: z.string().optional().default(""),
   bron: z.string().optional().default(""),
   teVerifieren: z.boolean().optional().default(true),
+  // Verwachte datum of periode (vrij tekstveld zoals "Q3 2026", "voor zomer 2026", "12-09-2026").
+  // Vooral relevant voor "besluiten die eraan komen".
+  datum: z.string().optional().default(""),
 });
 export const regioScanActieSchema = z.object({
   titel: z.string(),

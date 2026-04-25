@@ -75,7 +75,9 @@ function NavSectionItem({
     );
   }
 
-  // Alleen zichtbare sub-items op basis van rol
+  // Alleen zichtbare sub-items op basis van rol.
+  // proOnly = alleen voor Pro zichtbaar.
+  // proLocked = altijd zichtbaar; voor niet-Pro met "Pro"-badge en upgrade-link.
   const visibleSub = section.sub?.filter(
     (s) => (!s.proOnly || isPro || isAdmin) && (!s.adminOnly || isAdmin)
   );
@@ -104,6 +106,7 @@ function NavSectionItem({
           {visibleSub?.map((sub) => {
             const subActive =
               currentPath === sub.url || currentPath.startsWith(sub.url + "/");
+            const showProBadge = sub.proLocked && !isPro && !isAdmin;
             return (
               <SidebarMenuSubItem key={`${sub.url}-${sub.title}`}>
                 <SidebarMenuSubButton
@@ -114,6 +117,15 @@ function NavSectionItem({
                   <Link href={sub.url} className="flex items-center gap-2">
                     <sub.icon className="h-3.5 w-3.5" />
                     <span>{sub.title}</span>
+                    {showProBadge && (
+                      <Badge
+                        variant="secondary"
+                        className="ml-auto text-[9px] px-1.5 py-0 h-4 bg-orange-100 text-orange-700 border-orange-200"
+                        data-testid={`badge-pro-${sub.url.replace(/\//g, "-").replace(/^-/, "")}`}
+                      >
+                        Pro
+                      </Badge>
+                    )}
                   </Link>
                 </SidebarMenuSubButton>
               </SidebarMenuSubItem>

@@ -23,6 +23,9 @@ import {
   Copy,
   Check,
   Loader2,
+  Calendar,
+  FolderOpen,
+  RotateCw,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { nl } from "date-fns/locale";
@@ -115,6 +118,15 @@ function UitkomstBlok({
                 <div style={{ fontSize: 13, color: "#374151", lineHeight: 1.55 }}>{it.toelichting}</div>
               )}
               <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8 }}>
+                {it.datum && it.datum !== "onbekend" && (
+                  <span
+                    style={{ fontSize: 11, color: "#0b2240", background: "#dbeafe", padding: "3px 8px", borderRadius: 999, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: 4 }}
+                    data-testid={`${testId}-datum-${i}`}
+                  >
+                    <Calendar className="h-3 w-3" />
+                    {it.datum}
+                  </span>
+                )}
                 {it.bron && (
                   <span style={{ fontSize: 11, color: "#64748b", background: "#eef2f7", padding: "3px 8px", borderRadius: 999 }}>
                     Bron: {it.bron}
@@ -177,17 +189,21 @@ function ActieBlok({ acties }: { acties: RegioScanActie[] }) {
 function ResultaatWeergave({
   scan,
   onNieuw,
+  onOpnieuwScannen,
   onWooConcept,
   onNaarDossier,
   wooLoading,
   dossierLoading,
+  rescanLoading,
 }: {
   scan: RegioScan;
   onNieuw: () => void;
+  onOpnieuwScannen: () => void;
   onWooConcept: () => void;
   onNaarDossier: () => void;
   wooLoading: boolean;
   dossierLoading: boolean;
+  rescanLoading: boolean;
 }) {
   const [copied, setCopied] = useState(false);
   const result = scan.result as RegioScanResult;
@@ -223,6 +239,26 @@ function ResultaatWeergave({
             </div>
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              className="openregio-button openregio-button-outline"
+              onClick={onOpnieuwScannen}
+              disabled={rescanLoading}
+              data-testid="button-opnieuw-scannen"
+              title={`Opnieuw scannen voor ${scan.branche} in ${scan.gemeente}`}
+            >
+              {rescanLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" style={{ marginRight: 6, display: "inline-block" }} />
+                  Bezig…
+                </>
+              ) : (
+                <>
+                  <RotateCw className="h-4 w-4" style={{ marginRight: 6, display: "inline-block" }} />
+                  Opnieuw scannen
+                </>
+              )}
+            </button>
             <button
               type="button"
               className="openregio-button openregio-button-outline"
@@ -379,7 +415,7 @@ function ResultaatWeergave({
                 <Link
                   href="/regels/woo"
                   className="openregio-button openregio-button-primary"
-                  data-testid="link-naar-dossier"
+                  data-testid="link-bekijk-dossier"
                 >
                   Bekijk dossier
                   <ArrowRight className="h-4 w-4" style={{ marginLeft: 6, display: "inline-block" }} />
@@ -408,6 +444,41 @@ function ResultaatWeergave({
             </div>
           </>
         )}
+      </section>
+
+      {/* Persistente CTA: altijd naar ondernemersdossier-overzicht */}
+      <section
+        className="openregio-public-card"
+        data-testid="dossier-cta-blok"
+        style={{
+          marginTop: 14,
+          background: "linear-gradient(135deg, #eaf2ff 0%, #f7faff 100%)",
+          borderColor: "#cfe1ff",
+          display: "flex",
+          flexWrap: "wrap",
+          alignItems: "center",
+          gap: 14,
+        }}
+      >
+        <span style={{ display: "inline-flex", width: 44, height: 44, borderRadius: 12, background: "#1f5fae", alignItems: "center", justifyContent: "center" }}>
+          <FolderOpen className="h-5 w-5" style={{ color: "#fff" }} />
+        </span>
+        <div style={{ flex: "1 1 220px" }}>
+          <div style={{ fontSize: 14, fontWeight: 800, color: "#0b2240" }}>
+            Naar mijn ondernemersdossier
+          </div>
+          <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.5 }}>
+            Bekijk al je opgeslagen Woo-dossiers, lopende verzoeken en correspondentie op één plek.
+          </div>
+        </div>
+        <Link
+          href="/regels/woo"
+          className="openregio-button openregio-button-primary"
+          data-testid="link-naar-ondernemersdossier"
+        >
+          Open ondernemersdossier
+          <ArrowRight className="h-4 w-4" style={{ marginLeft: 6, display: "inline-block" }} />
+        </Link>
       </section>
     </div>
   );
@@ -630,6 +701,29 @@ export default function RegioScanProPage() {
     },
   });
 
+  const rescanMutation = useMutation({
+    mutationFn: async (s: RegioScan) => {
+      const res = await apiRequest("POST", "/api/regioscan/run", {
+        branche: s.branche,
+        gemeente: s.gemeente,
+        extraContext: s.extraContext ?? undefined,
+      });
+      return (await res.json()) as RegioScan;
+    },
+    onSuccess: (scan) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/regioscan"] });
+      setActieveScan(scan);
+      toast({ title: "Opnieuw gescand", description: "De RegioScan is bijgewerkt met de nieuwste analyse." });
+    },
+    onError: (err: any) => {
+      toast({
+        title: "Opnieuw scannen mislukt",
+        description: err?.message ?? "Probeer het later opnieuw.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const verwijderMutation = useMutation({
     mutationFn: async (id: number) => {
       await apiRequest("DELETE", `/api/regioscan/${id}`);
@@ -705,10 +799,12 @@ export default function RegioScanProPage() {
         <ResultaatWeergave
           scan={actieveScan}
           onNieuw={() => setActieveScan(null)}
+          onOpnieuwScannen={() => rescanMutation.mutate(actieveScan)}
           onWooConcept={() => wooConceptMutation.mutate(actieveScan.id)}
           onNaarDossier={() => naarDossierMutation.mutate(actieveScan.id)}
           wooLoading={wooConceptMutation.isPending}
           dossierLoading={naarDossierMutation.isPending}
+          rescanLoading={rescanMutation.isPending}
         />
       )}
 

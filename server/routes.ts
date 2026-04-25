@@ -6309,11 +6309,11 @@ Geef een JSON-object terug (en ALLEEN JSON, zonder uitleg eromheen) met exact de
   "risicoToelichting": "1-2 zinnen waarom de risicoscore zo is",
   "kansenToelichting": "1-2 zinnen waarom de kansenscore zo is",
   "samenvatting": "Eén zin samenvatting van wat deze ondernemer als eerste moet weten.",
-  "besluiten": [3-5 items met { "titel", "toelichting", "bron" (zo specifiek mogelijk: gemeentelijke regeling, bestemmingsplan, omgevingsvisie, etc.), "teVerifieren": true }],
-  "regels": [3-6 items met { "titel", "toelichting", "bron" (wet, AMvB, APV, omgevingsplan, branchevoorschrift), "teVerifieren": true }],
-  "kansen": [3-6 items met { "titel", "toelichting", "bron" (subsidie, regeling, programma, samenwerking), "teVerifieren": true }],
-  "documenten": [3-6 items met { "titel" (concreet documenttype dat de ondernemer kan opvragen via Woo), "toelichting" (waarom dit document relevant is), "bron" (welk bestuursorgaan), "teVerifieren": true }],
-  "risicos": [2-5 items met { "titel" (risico of valkuil), "toelichting", "bron": "", "teVerifieren": true }],
+  "besluiten": [3-5 items met { "titel", "toelichting", "bron" (zo specifiek mogelijk: gemeentelijke regeling, bestemmingsplan, omgevingsvisie, etc.), "datum" (verwachte datum of periode in vrije vorm: bv. "Q3 2026", "voor zomer 2026", "raadsvergadering 12-09-2026"; als onbekend "onbekend"), "teVerifieren": true }],
+  "regels": [3-6 items met { "titel", "toelichting", "bron" (wet, AMvB, APV, omgevingsplan, branchevoorschrift), "datum": "" (alleen invullen als er een ingangs- of wijzigingsdatum bekend is), "teVerifieren": true }],
+  "kansen": [3-6 items met { "titel", "toelichting", "bron" (subsidie, regeling, programma, samenwerking), "datum": "" (deadline of openingsdatum als bekend, anders ""), "teVerifieren": true }],
+  "documenten": [3-6 items met { "titel" (concreet documenttype dat de ondernemer kan opvragen via Woo), "toelichting" (waarom dit document relevant is), "bron" (welk bestuursorgaan), "datum": "", "teVerifieren": true }],
+  "risicos": [2-5 items met { "titel" (risico of valkuil), "toelichting", "bron": "", "datum": "", "teVerifieren": true }],
   "acties": [3-6 items met { "titel" (concrete actie), "prio" ("hoog"|"midden"|"laag"), "toelichting" (waarom + hoe te starten) }]
 }
 

@@ -29,6 +29,7 @@ export type NavSubItem = {
   url: string;
   icon: React.ElementType;
   proOnly?: boolean;
+  proLocked?: boolean;
   adminOnly?: boolean;
   comingSoon?: boolean;
 };
@@ -88,7 +89,7 @@ export const MAIN_NAV: NavSection[] = [
       { title: "Zichtbaarheid", url: "/groei/zichtbaarheid", icon: Eye, proOnly: true },
       { title: "Profiel", url: "/groei/profiel", icon: Building2 },
       { title: "Website-check", url: "/groei/website-check", icon: Globe, proOnly: true },
-      { title: "RegioScan", url: "/pro/regioscan", icon: Compass, proOnly: true },
+      { title: "RegioScan", url: "/pro/regioscan", icon: Compass, proLocked: true },
     ],
   },
 
