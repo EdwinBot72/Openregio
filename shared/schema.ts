@@ -877,6 +877,69 @@ export const wooDossiers = pgTable("woo_dossiers", {
   index("idx_woo_dossiers_user").on(table.userId),
 ]);
 
+// RegioScan voor Pro — brancheafhankelijke scan met 6 uitkomstblokken,
+// risico/kansenscores, en concept Woo-verzoek. Bewaard als ondernemersdossier.
+export const regioScans = pgTable("regio_scans", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  branche: text("branche").notNull(),
+  gemeente: text("gemeente").notNull(),
+  extraContext: text("extra_context"),
+  scoreRisico: integer("score_risico").notNull().default(0),
+  scoreKans: integer("score_kans").notNull().default(0),
+  result: jsonb("result").notNull(),
+  wooConcept: text("woo_concept"),
+  wooDossierId: integer("woo_dossier_id"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
+}, (table) => [
+  index("idx_regio_scans_user").on(table.userId),
+]);
+
+export const insertRegioScanSchema = createInsertSchema(regioScans).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertRegioScan = z.infer<typeof insertRegioScanSchema>;
+export type RegioScan = typeof regioScans.$inferSelect;
+
+// Schema voor het uitvoeren van een nieuwe scan vanuit de frontend
+export const runRegioScanSchema = z.object({
+  branche: z.string().trim().min(2, "Branche is verplicht").max(120),
+  gemeente: z.string().trim().min(2, "Gemeente is verplicht").max(120),
+  extraContext: z.string().trim().max(2000).optional(),
+});
+export type RunRegioScanInput = z.infer<typeof runRegioScanSchema>;
+
+// Vorm van het resultaat dat de Gemini-prompt teruggeeft (en wat we tonen).
+// We valideren met Zod om de UI te beschermen tegen ongeldige LLM-output.
+export const regioScanItemSchema = z.object({
+  titel: z.string(),
+  toelichting: z.string().optional().default(""),
+  bron: z.string().optional().default(""),
+  teVerifieren: z.boolean().optional().default(true),
+});
+export const regioScanActieSchema = z.object({
+  titel: z.string(),
+  prio: z.enum(["hoog", "midden", "laag"]).default("midden"),
+  toelichting: z.string().optional().default(""),
+});
+export const regioScanResultSchema = z.object({
+  scoreRisico: z.number().int().min(0).max(100),
+  scoreKans: z.number().int().min(0).max(100),
+  risicoToelichting: z.string().default(""),
+  kansenToelichting: z.string().default(""),
+  besluiten: z.array(regioScanItemSchema).default([]),
+  regels: z.array(regioScanItemSchema).default([]),
+  kansen: z.array(regioScanItemSchema).default([]),
+  documenten: z.array(regioScanItemSchema).default([]),
+  risicos: z.array(regioScanItemSchema).default([]),
+  acties: z.array(regioScanActieSchema).default([]),
+  samenvatting: z.string().default(""),
+});
+export type RegioScanItem = z.infer<typeof regioScanItemSchema>;
+export type RegioScanActie = z.infer<typeof regioScanActieSchema>;
+export type RegioScanResult = z.infer<typeof regioScanResultSchema>;
+
 // Refresh tokens for JWT auth (stateless, scalable)
 export const refreshTokens = pgTable("refresh_tokens", {
   id: serial("id").primaryKey(),

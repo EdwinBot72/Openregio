@@ -34,6 +34,9 @@ import {
   type VisibilityLevel,
   type WooDossier,
   type InsertWooDossier,
+  type RegioScan,
+  type InsertRegioScan,
+  regioScans,
   type CrewProfile,
   type InsertCrewProfile,
   type CrewRequest,
@@ -222,6 +225,13 @@ export interface IStorage {
   getWooDossiers(userId: string): Promise<WooDossier[]>;
   getWooDossier(id: number, userId: string): Promise<WooDossier | undefined>;
   updateWooDossier(id: number, userId: string, updates: Partial<InsertWooDossier>): Promise<WooDossier | undefined>;
+
+  // RegioScan voor Pro
+  createRegioScan(scan: InsertRegioScan): Promise<RegioScan>;
+  getRegioScans(userId: string): Promise<RegioScan[]>;
+  getRegioScan(id: number, userId: string): Promise<RegioScan | undefined>;
+  updateRegioScan(id: number, userId: string, updates: Partial<InsertRegioScan>): Promise<RegioScan | undefined>;
+  deleteRegioScan(id: number, userId: string): Promise<boolean>;
 
   // RegioCrew - Flex pool for personnel shortages
   getCrewProfile(userId: string): Promise<CrewProfile | undefined>;
@@ -1779,6 +1789,23 @@ export class MemStorage implements IStorage {
   async upsertOndernemerThema(data: InsertOndernemerThema): Promise<OndernemerThema> {
     return { id: 1, ...data } as OndernemerThema;
   }
+
+  // RegioScan (stubs for MemStorage)
+  async createRegioScan(_data: InsertRegioScan): Promise<RegioScan> {
+    throw new Error("RegioScan not supported in MemStorage");
+  }
+  async getRegioScans(_userId: string): Promise<RegioScan[]> {
+    return [];
+  }
+  async getRegioScan(_id: number, _userId: string): Promise<RegioScan | undefined> {
+    return undefined;
+  }
+  async updateRegioScan(_id: number, _userId: string, _data: Partial<RegioScan>): Promise<RegioScan | undefined> {
+    return undefined;
+  }
+  async deleteRegioScan(_id: number, _userId: string): Promise<boolean> {
+    return false;
+  }
 }
 
 class DbStorage implements IStorage {
@@ -2528,6 +2555,39 @@ class DbStorage implements IStorage {
       .where(and(eq(wooDossiers.id, id), eq(wooDossiers.userId, userId)))
       .returning();
     return result;
+  }
+
+  // RegioScan voor Pro
+  async createRegioScan(scan: InsertRegioScan): Promise<RegioScan> {
+    const [result] = await db.insert(regioScans).values(scan).returning();
+    return result;
+  }
+
+  async getRegioScans(userId: string): Promise<RegioScan[]> {
+    return await db.select().from(regioScans)
+      .where(eq(regioScans.userId, userId))
+      .orderBy(desc(regioScans.createdAt));
+  }
+
+  async getRegioScan(id: number, userId: string): Promise<RegioScan | undefined> {
+    const [result] = await db.select().from(regioScans)
+      .where(and(eq(regioScans.id, id), eq(regioScans.userId, userId)));
+    return result;
+  }
+
+  async updateRegioScan(id: number, userId: string, updates: Partial<InsertRegioScan>): Promise<RegioScan | undefined> {
+    const [result] = await db.update(regioScans)
+      .set(updates)
+      .where(and(eq(regioScans.id, id), eq(regioScans.userId, userId)))
+      .returning();
+    return result;
+  }
+
+  async deleteRegioScan(id: number, userId: string): Promise<boolean> {
+    const result = await db.delete(regioScans)
+      .where(and(eq(regioScans.id, id), eq(regioScans.userId, userId)))
+      .returning({ id: regioScans.id });
+    return result.length > 0;
   }
 
   // RegioCrew - Flex pool for personnel shortages

@@ -21,6 +21,7 @@ import {
   BarChart2,
   Users,
   Settings,
+  Compass,
 } from "lucide-react";
 
 export type NavSubItem = {
@@ -87,6 +88,7 @@ export const MAIN_NAV: NavSection[] = [
       { title: "Zichtbaarheid", url: "/groei/zichtbaarheid", icon: Eye, proOnly: true },
       { title: "Profiel", url: "/groei/profiel", icon: Building2 },
       { title: "Website-check", url: "/groei/website-check", icon: Globe, proOnly: true },
+      { title: "RegioScan", url: "/pro/regioscan", icon: Compass, proOnly: true },
     ],
   },
 

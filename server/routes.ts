@@ -6225,6 +6225,278 @@ Wees specifiek en praktisch. Schrijf in zakelijk maar toegankelijk Nederlands.`;
     }
   });
 
+  // ─── RegioScan voor Pro ───────────────────────────────────────────────────
+  // Brancheafhankelijke scan met 6 uitkomstblokken, risico/kansenscores en
+  // concept Woo-verzoek. V1 = inclusief bij Pro.
+
+  // GET /api/regioscan — lijst van eerdere scans van de ingelogde Pro-gebruiker
+  app.get("/api/regioscan", requireAuth, requirePro, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      const scans = await storage.getRegioScans(user.id);
+      res.json(scans);
+    } catch (err) {
+      console.error("[RegioScan] Lijst fout:", err);
+      res.status(500).json({ error: "Kon RegioScans niet laden" });
+    }
+  });
+
+  // GET /api/regioscan/:id — detail van één scan
+  app.get("/api/regioscan/:id", requireAuth, requirePro, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      const id = parseInt(req.params.id, 10);
+      if (Number.isNaN(id)) return res.status(400).json({ error: "Ongeldig id" });
+      const scan = await storage.getRegioScan(id, user.id);
+      if (!scan) return res.status(404).json({ error: "RegioScan niet gevonden" });
+      res.json(scan);
+    } catch (err) {
+      console.error("[RegioScan] Detail fout:", err);
+      res.status(500).json({ error: "Kon RegioScan niet laden" });
+    }
+  });
+
+  // DELETE /api/regioscan/:id — verwijder een scan
+  app.delete("/api/regioscan/:id", requireAuth, requirePro, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      const id = parseInt(req.params.id, 10);
+      if (Number.isNaN(id)) return res.status(400).json({ error: "Ongeldig id" });
+      const ok = await storage.deleteRegioScan(id, user.id);
+      if (!ok) return res.status(404).json({ error: "RegioScan niet gevonden" });
+      res.json({ ok: true });
+    } catch (err) {
+      console.error("[RegioScan] Verwijder fout:", err);
+      res.status(500).json({ error: "Kon RegioScan niet verwijderen" });
+    }
+  });
+
+  // POST /api/regioscan/run — voer een nieuwe scan uit en sla op
+  app.post("/api/regioscan/run", requireAuth, requirePro, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      const { runRegioScanSchema, regioScanResultSchema } = await import("@shared/schema");
+      const parsed = runRegioScanSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Validatiefout", details: parsed.error.errors });
+      }
+      const { branche, gemeente, extraContext } = parsed.data;
+
+      // Bedrijfsprofiel ophalen voor extra context (optioneel)
+      let profielRegel = "";
+      try {
+        const profiel = await storage.getBedrijfsprofielByUserId(user.id);
+        if (profiel) {
+          const stukjes: string[] = [];
+          if (profiel.naam) stukjes.push(`bedrijfsnaam: ${profiel.naam}`);
+          if (profiel.beschrijving) stukjes.push(`korte omschrijving: ${profiel.beschrijving.slice(0, 200)}`);
+          if (profiel.regio) stukjes.push(`regio: ${profiel.regio}`);
+          if (stukjes.length) profielRegel = `\n\nExtra ondernemerscontext: ${stukjes.join("; ")}.`;
+        }
+      } catch {
+        /* niet kritiek */
+      }
+
+      const extraRegel = extraContext ? `\n\nExtra context van de ondernemer: ${extraContext}` : "";
+
+      const prompt = `Je bent een Nederlandse expert in lokale regelgeving, vergunningen en kansen voor MKB-ondernemers.
+Maak een grondige RegioScan voor een ondernemer in de branche "${branche}" in gemeente "${gemeente}".${profielRegel}${extraRegel}
+
+Geef een JSON-object terug (en ALLEEN JSON, zonder uitleg eromheen) met exact deze structuur:
+{
+  "scoreRisico": getal 0-100 (hoe complex/risicovol is deze branche in deze gemeente; 0=geen risico, 100=zeer hoog),
+  "scoreKans": getal 0-100 (hoe groot zijn de groei- en subsidiekansen; 0=geen, 100=zeer veel),
+  "risicoToelichting": "1-2 zinnen waarom de risicoscore zo is",
+  "kansenToelichting": "1-2 zinnen waarom de kansenscore zo is",
+  "samenvatting": "Eén zin samenvatting van wat deze ondernemer als eerste moet weten.",
+  "besluiten": [3-5 items met { "titel", "toelichting", "bron" (zo specifiek mogelijk: gemeentelijke regeling, bestemmingsplan, omgevingsvisie, etc.), "teVerifieren": true }],
+  "regels": [3-6 items met { "titel", "toelichting", "bron" (wet, AMvB, APV, omgevingsplan, branchevoorschrift), "teVerifieren": true }],
+  "kansen": [3-6 items met { "titel", "toelichting", "bron" (subsidie, regeling, programma, samenwerking), "teVerifieren": true }],
+  "documenten": [3-6 items met { "titel" (concreet documenttype dat de ondernemer kan opvragen via Woo), "toelichting" (waarom dit document relevant is), "bron" (welk bestuursorgaan), "teVerifieren": true }],
+  "risicos": [2-5 items met { "titel" (risico of valkuil), "toelichting", "bron": "", "teVerifieren": true }],
+  "acties": [3-6 items met { "titel" (concrete actie), "prio" ("hoog"|"midden"|"laag"), "toelichting" (waarom + hoe te starten) }]
+}
+
+BELANGRIJK:
+- Gebruik geen verzonnen wetsartikelen of fictieve verordeningnummers. Markeer alles als "teVerifieren": true.
+- Wees specifiek voor branche EN gemeente. Geen algemeenheden zoals "raadpleeg de gemeente".
+- Schrijf in zakelijk maar toegankelijk Nederlands.
+- Documenten moeten concreet en opvraagbaar zijn (bijv. "Handhavingsbeleid horeca 2024 ${gemeente}", "Subsidieaanvragen MKB-versterking 2023-2024 ${gemeente}").`;
+
+      let resultJson: any = null;
+      try {
+        const { GoogleGenAI } = await import("@google/genai");
+        const ai = new GoogleGenAI({
+          apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
+          ...(process.env.AI_INTEGRATIONS_GEMINI_BASE_URL
+            ? { httpOptions: { apiVersion: "", baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL! } }
+            : {}),
+        });
+
+        const response = await ai.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          config: {
+            maxOutputTokens: 4000,
+            temperature: 0.6,
+            responseMimeType: "application/json",
+            thinkingConfig: { thinkingBudget: 0 },
+          },
+        });
+
+        const parts = response.candidates?.[0]?.content?.parts;
+        let raw = parts ? parts.filter((p: any) => p.text && !p.thought).map((p: any) => p.text).join("") : "";
+        raw = raw.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
+        const firstBrace = raw.indexOf("{");
+        if (firstBrace > 0) raw = raw.slice(firstBrace);
+        const lastBrace = raw.lastIndexOf("}");
+        if (lastBrace > 0) raw = raw.slice(0, lastBrace + 1);
+        resultJson = JSON.parse(raw);
+      } catch (err) {
+        console.error("[RegioScan] Gemini fout:", err);
+        return res.status(503).json({ error: "Scan tijdelijk niet beschikbaar. Probeer het later opnieuw." });
+      }
+
+      const validation = regioScanResultSchema.safeParse(resultJson);
+      if (!validation.success) {
+        console.error("[RegioScan] Ongeldige LLM-output:", validation.error.errors);
+        return res.status(502).json({ error: "Onverwacht antwoord van het AI-model." });
+      }
+      const result = validation.data;
+
+      const created = await storage.createRegioScan({
+        userId: user.id,
+        branche,
+        gemeente,
+        extraContext: extraContext ?? null,
+        scoreRisico: result.scoreRisico,
+        scoreKans: result.scoreKans,
+        result,
+        wooConcept: null,
+        wooDossierId: null,
+      });
+
+      res.status(201).json(created);
+    } catch (err) {
+      console.error("[RegioScan] Run fout:", err);
+      res.status(500).json({ error: "Kon RegioScan niet uitvoeren" });
+    }
+  });
+
+  // POST /api/regioscan/:id/woo-concept — genereer concept Woo-verzoek voor deze scan
+  app.post("/api/regioscan/:id/woo-concept", requireAuth, requirePro, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      const id = parseInt(req.params.id, 10);
+      if (Number.isNaN(id)) return res.status(400).json({ error: "Ongeldig id" });
+      const scan = await storage.getRegioScan(id, user.id);
+      if (!scan) return res.status(404).json({ error: "RegioScan niet gevonden" });
+
+      const result = scan.result as any;
+      const documenten: Array<{ titel: string; toelichting?: string; bron?: string }> =
+        Array.isArray(result?.documenten) ? result.documenten : [];
+      const documentenLijst = documenten
+        .map((d, i) => `${i + 1}. ${d.titel}${d.toelichting ? ` — ${d.toelichting}` : ""}${d.bron ? ` (bron: ${d.bron})` : ""}`)
+        .join("\n");
+
+      const prompt = `Je bent een expert in de Wet open overheid (Woo) en juridische correspondentie voor Nederlandse MKB-ondernemers.
+
+Een ondernemer in de branche "${scan.branche}" in gemeente "${scan.gemeente}" wil een Woo-verzoek indienen om de volgende documenten en informatie op te vragen:
+
+${documentenLijst || "(geen specifieke documenten opgegeven)"}
+
+Schrijf één volledig, professioneel Nederlands Woo-verzoek als platte tekst (geen JSON), gericht aan het college van B&W van gemeente ${scan.gemeente}. De brief moet:
+1. Beginnen met een correcte aanhef ("Aan het college van burgemeester en wethouders van ${scan.gemeente}").
+2. De wettelijke grondslag (Wet open overheid, art. 4.1 Woo) noemen.
+3. Per document specifiek vermelden wat wordt gevraagd en waarom.
+4. Een redelijke termijn vragen (4 weken conform art. 4.4 Woo).
+5. Een nette afsluiting met aanduiding "[Naam]", "[Adres]", "[E-mail]" als placeholder.
+6. Zakelijk, beleefd en juridisch correct Nederlands.
+
+Geef alleen de brieftekst terug, zonder commentaar, zonder markdown, zonder JSON.`;
+
+      let conceptText = "";
+      try {
+        const { GoogleGenAI } = await import("@google/genai");
+        const ai = new GoogleGenAI({
+          apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
+          ...(process.env.AI_INTEGRATIONS_GEMINI_BASE_URL
+            ? { httpOptions: { apiVersion: "", baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL! } }
+            : {}),
+        });
+        const response = await ai.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          config: {
+            maxOutputTokens: 2000,
+            temperature: 0.4,
+            thinkingConfig: { thinkingBudget: 0 },
+          },
+        });
+        const parts = response.candidates?.[0]?.content?.parts;
+        conceptText = parts ? parts.filter((p: any) => p.text && !p.thought).map((p: any) => p.text).join("") : "";
+        conceptText = conceptText.replace(/```[a-z]*\n?/gi, "").replace(/```/g, "").trim();
+      } catch (err) {
+        console.error("[RegioScan] Woo-concept Gemini fout:", err);
+        return res.status(503).json({ error: "Concept tijdelijk niet beschikbaar. Probeer het later opnieuw." });
+      }
+
+      if (!conceptText.trim()) {
+        return res.status(502).json({ error: "Geen concept ontvangen van het AI-model." });
+      }
+
+      const updated = await storage.updateRegioScan(id, user.id, { wooConcept: conceptText });
+      if (!updated) {
+        return res.status(404).json({ error: "RegioScan niet meer beschikbaar (mogelijk net verwijderd)." });
+      }
+      res.json(updated);
+    } catch (err) {
+      console.error("[RegioScan] Woo-concept fout:", err);
+      res.status(500).json({ error: "Kon Woo-concept niet genereren" });
+    }
+  });
+
+  // POST /api/regioscan/:id/naar-dossier — sla op als Woo-dossier (met versleuteling)
+  app.post("/api/regioscan/:id/naar-dossier", requireAuth, requirePro, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      const id = parseInt(req.params.id, 10);
+      if (Number.isNaN(id)) return res.status(400).json({ error: "Ongeldig id" });
+      const scan = await storage.getRegioScan(id, user.id);
+      if (!scan) return res.status(404).json({ error: "RegioScan niet gevonden" });
+      if (scan.wooDossierId) {
+        return res.status(409).json({ error: "Deze scan is al als dossier opgeslagen.", wooDossierId: scan.wooDossierId });
+      }
+      if (!scan.wooConcept) {
+        return res.status(400).json({ error: "Genereer eerst een concept Woo-verzoek voor deze scan." });
+      }
+
+      const result = scan.result as any;
+      const documenten: Array<{ titel: string; toelichting?: string }> =
+        Array.isArray(result?.documenten) ? result.documenten : [];
+      const requestedDocuments = documenten.map((d) => `• ${d.titel}${d.toelichting ? ` — ${d.toelichting}` : ""}`).join("\n");
+
+      const { encryptField } = await import("./utils/woo-crypto");
+      const dossier = await storage.createWooDossier({
+        userId: user.id,
+        authority: `Gemeente ${scan.gemeente}`,
+        subject: `RegioScan ${scan.branche} — ${scan.gemeente}`,
+        context: `Automatisch aangemaakt vanuit RegioScan #${scan.id}.\nBranche: ${scan.branche}\nGemeente: ${scan.gemeente}${scan.extraContext ? `\nExtra context: ${scan.extraContext}` : ""}`,
+        requestedDocuments: requestedDocuments || null,
+        generatedLetter: encryptField(scan.wooConcept),
+        status: "generated",
+        location: scan.gemeente,
+        purpose: "onderzoek",
+      });
+
+      await storage.updateRegioScan(id, user.id, { wooDossierId: dossier.id });
+      res.status(201).json({ dossierId: dossier.id });
+    } catch (err) {
+      console.error("[RegioScan] Naar dossier fout:", err);
+      res.status(500).json({ error: "Kon dossier niet aanmaken" });
+    }
+  });
+
   // ─── Dagelijkse Acties (Cursussen) ────────────────────────────────────────
 
   // Override date fields to coerce ISO strings → Date objects (frontend sends ISO strings)

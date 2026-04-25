@@ -268,6 +268,25 @@ export async function runMigrations(): Promise<void> {
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_wetgeving_inzendingen_user ON wetgeving_inzendingen(user_id);`);
     console.log("[Migration] ✓ wetgeving_inzendingen table ensured");
 
+    // RegioScan voor Pro — brancheafhankelijke scan met scores, blokken en concept Woo-verzoek
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS regio_scans (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(255) NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        branche TEXT NOT NULL,
+        gemeente TEXT NOT NULL,
+        extra_context TEXT,
+        score_risico INTEGER NOT NULL DEFAULT 0,
+        score_kans INTEGER NOT NULL DEFAULT 0,
+        result JSONB NOT NULL,
+        woo_concept TEXT,
+        woo_dossier_id INTEGER,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      );
+    `);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_regio_scans_user ON regio_scans(user_id);`);
+    console.log("[Migration] ✓ regio_scans table ensured");
+
     // WOO dossiers — afzendergegevens (versleuteld) + ingebrekestelling tracking
     await db.execute(sql`ALTER TABLE woo_dossiers ADD COLUMN IF NOT EXISTS sender_name_encrypted TEXT`);
     await db.execute(sql`ALTER TABLE woo_dossiers ADD COLUMN IF NOT EXISTS sender_address_encrypted TEXT`);

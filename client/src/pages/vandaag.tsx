@@ -18,6 +18,7 @@ import {
   Newspaper,
   Map as MapIcon,
   Sparkles,
+  Compass,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { nl } from "date-fns/locale";
@@ -487,6 +488,81 @@ export default function VandaagPage() {
           testId="kpi-dossiers"
         />
       </div>
+
+      {/* RegioScan-CTA: voor Pro een directe ingang, voor Basic een teaser */}
+      {isPro ? (
+        <Link
+          href="/pro/regioscan"
+          data-testid="cta-regioscan-pro"
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            gap: 14,
+            padding: "16px 18px",
+            border: "1px solid #cfe1ff",
+            borderRadius: 14,
+            background: "linear-gradient(135deg, #eaf2ff 0%, #f7faff 100%)",
+            color: "inherit",
+            textDecoration: "none",
+            marginBottom: 16,
+          }}
+          className="hover-elevate"
+        >
+          <span style={{ display: "inline-flex", width: 44, height: 44, borderRadius: 12, background: "#1f5fae", alignItems: "center", justifyContent: "center" }}>
+            <Compass className="h-5 w-5" style={{ color: "#fff" }} />
+          </span>
+          <span style={{ display: "flex", flexDirection: "column", flex: "1 1 220px" }}>
+            <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".5px", color: "#1f5fae" }}>
+              Pro · RegioScan
+            </span>
+            <span style={{ fontSize: 16, fontWeight: 800, color: "#0b2240" }}>Doe je RegioScan</span>
+            <span style={{ fontSize: 13, color: "#475569", lineHeight: 1.5 }}>
+              Brancheafhankelijke scan met regels, kansen, op te vragen documenten en concept Woo-verzoek voor {regioLabel}.
+            </span>
+          </span>
+          <span className="openregio-button openregio-button-primary" style={{ flexShrink: 0 }}>
+            Start scan
+            <ArrowRight className="h-4 w-4" style={{ marginLeft: 6, display: "inline-block" }} />
+          </span>
+        </Link>
+      ) : (
+        <div
+          data-testid="cta-regioscan-teaser"
+          style={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "center",
+            gap: 14,
+            padding: "16px 18px",
+            border: "1px solid #fde6c8",
+            borderRadius: 14,
+            background: "linear-gradient(135deg, #fff7ed 0%, #fffbf3 100%)",
+            marginBottom: 16,
+          }}
+        >
+          <span style={{ display: "inline-flex", width: 44, height: 44, borderRadius: 12, background: "#f28a1a", alignItems: "center", justifyContent: "center" }}>
+            <Compass className="h-5 w-5" style={{ color: "#fff" }} />
+          </span>
+          <span style={{ display: "flex", flexDirection: "column", flex: "1 1 220px" }}>
+            <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".5px", color: "#c2410c" }}>
+              Pro-functie · RegioScan
+            </span>
+            <span style={{ fontSize: 16, fontWeight: 800, color: "#0b2240" }}>Brengt jouw regels en kansen in kaart</span>
+            <span style={{ fontSize: 13, color: "#475569", lineHeight: 1.5 }}>
+              Lokale besluiten, kansen, op te vragen documenten en een concept Woo-verzoek — inclusief in Pro.
+            </span>
+          </span>
+          <Link
+            href="/lidmaatschap?plan=pro"
+            className="openregio-button openregio-button-pro"
+            style={{ flexShrink: 0 }}
+            data-testid="cta-regioscan-upgrade"
+          >
+            Upgrade naar Pro
+          </Link>
+        </div>
+      )}
 
       {/* Ledenstats — community in cijfers */}
       <div className="openregio-dashboard-stats" data-testid="section-ledenstats" style={{ marginTop: 16 }}>

@@ -83,6 +83,7 @@ import SamenAanpakkenPage from "@/pages/samen-aanpakken";
 import RegelsHelpPage from "@/pages/regels-help";
 import RegelsHelpFlowPage from "@/pages/regels-help-flow";
 import GezondPijlerPage from "@/pages/gezond-pijler";
+import RegioScanProPage from "@/pages/pro/regioscan";
 
 // Routes that should NOT have the sidebar/header layout
 const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse", "/koop-lokaal", "/gezond/:slug"];
@@ -214,6 +215,9 @@ function AuthenticatedRouter() {
       <Route path="/groei/zichtbaarheid" component={ProVisibilitySettingsPage} />
       <Route path="/groei/profiel" component={BedrijfsprofielPage} />
       <Route path="/groei/website-check" component={WebsiteScanPage} />
+
+      {/* ── Pro tools ─────────────────────────────────────────────────────── */}
+      <Route path="/pro/regioscan" component={RegioScanProPage} />
 
       {/* ── Mijn account (Sectie 5) ───────────────────────────────────────── */}
       <Route path="/account/voortgang">
