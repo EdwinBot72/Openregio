@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,11 +11,13 @@ import {
   Clock,
   FileText,
   Gavel,
+  Hash,
   Info,
   Lightbulb,
   Loader2,
   Scale,
   ScanText,
+  Sparkles,
   Upload,
   X,
 } from "lucide-react";
@@ -24,6 +27,7 @@ import { apiRequest } from "@/lib/queryClient";
 
 interface AnalyseResultaat {
   afzender: string;
+  kenmerk?: string;
   documentType: string;
   juridischeBasis: string;
   bevoegdheid: string;
@@ -32,6 +36,44 @@ interface AnalyseResultaat {
 }
 
 type Modus = "tekst" | "upload";
+
+function detecteerAfzenderEnum(afzender: string): string {
+  const t = (afzender || "").toLowerCase();
+  if (!t || t === "onbekend") return "";
+  if (t.includes("provincie")) return "provincie";
+  if (t.includes("omgevingsdienst") || t.includes("rud") || t.includes("dcmr")) return "omgevingsdienst";
+  if (t.includes("rvo") || t.includes("ministerie") || t.includes("rijksdienst") || t.includes("belastingdienst")) return "rvo";
+  if (t.includes("gemeente") || t.includes("college") || t.includes("burgemeester") || t.includes("b&w")) return "gemeente";
+  return "anders";
+}
+
+function bouwSamenvatting(r: AnalyseResultaat): string {
+  const delen: string[] = [];
+  if (r.documentType && r.documentType.toLowerCase() !== "onbekend") {
+    delen.push(`Document: ${r.documentType}.`);
+  }
+  if (r.juridischeBasis && r.juridischeBasis.toLowerCase() !== "onbekend") {
+    delen.push(`Juridische basis: ${r.juridischeBasis}.`);
+  }
+  if (r.aanbevolenActie && r.aanbevolenActie.toLowerCase() !== "onbekend") {
+    delen.push(`Aanbevolen actie: ${r.aanbevolenActie}`);
+  }
+  return delen.join(" ").trim();
+}
+
+function bouwHulpEngineHref(r: AnalyseResultaat): string {
+  const params = new URLSearchParams();
+  const afzenderEnum = detecteerAfzenderEnum(r.afzender);
+  if (afzenderEnum) params.set("afzender", afzenderEnum);
+  const kenmerk = (r.kenmerk || "").trim();
+  if (kenmerk && kenmerk.toLowerCase() !== "onbekend") {
+    params.set("kenmerk", kenmerk);
+  }
+  const samenvatting = bouwSamenvatting(r);
+  if (samenvatting) params.set("kort", samenvatting);
+  const qs = params.toString();
+  return `/regels/help/brief-ontvangen${qs ? `?${qs}` : ""}`;
+}
 
 export default function BriefAnalysePage() {
   const { toast } = useToast();
@@ -107,6 +149,7 @@ export default function BriefAnalysePage() {
 
   const velden: { label: string; key: keyof AnalyseResultaat; icon: typeof Building2 }[] = [
     { label: "Afzender", key: "afzender", icon: Building2 },
+    { label: "Kenmerk", key: "kenmerk", icon: Hash },
     { label: "Type document", key: "documentType", icon: FileText },
     { label: "Juridische basis", key: "juridischeBasis", icon: Scale },
     { label: "Bevoegdheid", key: "bevoegdheid", icon: Gavel },
@@ -297,6 +340,21 @@ export default function BriefAnalysePage() {
                   </div>
                 );
               })}
+            </div>
+            <div className="mt-5 pt-4 border-t flex flex-col sm:flex-row sm:items-center gap-3">
+              <p className="text-sm text-muted-foreground flex-1">
+                Wil je hier direct iets mee doen? Open de hulp-engine met deze
+                gegevens als startpunt.
+              </p>
+              <Link
+                href={bouwHulpEngineHref(resultaat)}
+                data-testid="link-reageren-met-hulp-engine"
+              >
+                <Button size="sm" className="w-full sm:w-auto">
+                  <Sparkles className="h-4 w-4 mr-2" />
+                  Reageren met hulp-engine
+                </Button>
+              </Link>
             </div>
           </CardContent>
         </Card>

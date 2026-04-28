@@ -1377,6 +1377,7 @@ Analyseer de gegeven tekst van een overheidsbrief of besluit en geef de volgende
 
 {
   "afzender": "naam van de organisatie die de brief stuurde",
+  "kenmerk": "kenmerk, zaaknummer of dossiernummer zoals in de brief vermeld (bv. Z-2026-12345, kenmerk 2024/0001)",
   "documentType": "type document, bijv. Besluit, Aanschrijving, Vergunning, WOO-reactie, Beschikking",
   "juridischeBasis": "de genoemde wettelijke grondslag of wet, bijv. Awb artikel 4:5, Omgevingswet",
   "bevoegdheid": "wie het bevoegd gezag is, bijv. College van B&W, burgemeester, minister",
@@ -1512,6 +1513,7 @@ Analyseer de gegeven tekst van een overheidsbrief of besluit en geef de volgende
 
 {
   "afzender": "naam van de organisatie die de brief stuurde",
+  "kenmerk": "kenmerk, zaaknummer of dossiernummer zoals in de brief vermeld (bv. Z-2026-12345, kenmerk 2024/0001)",
   "documentType": "type document, bijv. Besluit, Aanschrijving, Vergunning, WOO-reactie, Beschikking",
   "juridischeBasis": "de genoemde wettelijke grondslag of wet, bijv. Awb artikel 4:5, Omgevingswet",
   "bevoegdheid": "wie het bevoegd gezag is, bijv. College van B&W, burgemeester, minister",

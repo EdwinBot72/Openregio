@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useSearch } from "wouter";
 import type { Answers, FlowSchema } from "@/lib/flow-engine/types";
 import { matchScenario, renderTemplate } from "@/lib/flow-engine/engine";
 import { QuestionField } from "./QuestionField";
@@ -8,8 +9,29 @@ interface Props {
   schema: FlowSchema;
 }
 
+function buildPrefill(schema: FlowSchema, search: string): Answers {
+  if (!search) return {};
+  const params = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
+  const out: Answers = {};
+  for (const q of schema.questions) {
+    const raw = params.get(q.id);
+    if (raw == null) continue;
+    const trimmed = raw.trim();
+    if (!trimmed) continue;
+    if ((q.type === "select" || q.type === "radio") && q.options) {
+      const allowed = q.options.find((o) => o.value === trimmed);
+      if (allowed) out[q.id] = allowed.value;
+      continue;
+    }
+    out[q.id] = trimmed;
+  }
+  return out;
+}
+
 export function FlowRunner({ schema }: Props) {
-  const [answers, setAnswers] = useState<Answers>({});
+  const search = useSearch();
+  const initialAnswers = useMemo(() => buildPrefill(schema, search), [schema, search]);
+  const [answers, setAnswers] = useState<Answers>(initialAnswers);
 
   const scenario = useMemo(() => matchScenario(schema, answers), [schema, answers]);
 
