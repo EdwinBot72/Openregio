@@ -5480,7 +5480,18 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
     locatie: z.string().trim().min(2, "Vul een locatie in").max(255),
     regio: z.string().trim().min(2, "Vul een regio in").max(255),
     doelgroep: z.enum(LOKALE_ACTIE_DOELGROEPEN),
-    datum: z.union([z.string(), z.date(), z.null()]).optional(),
+    datum: z
+      .union([
+        z
+          .string()
+          .refine(
+            (v) => v === "" || !Number.isNaN(new Date(v).getTime()),
+            "Ongeldige datum",
+          ),
+        z.date(),
+        z.null(),
+      ])
+      .optional(),
     externeLink: z
       .string()
       .trim()
