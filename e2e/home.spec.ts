@@ -34,6 +34,10 @@ test.describe("Homepage gezond ondernemen", () => {
     await expect(
       page.getByText("Wat bedoelen wij met gezond ondernemen?", { exact: false }),
     ).toBeVisible();
+
+    // Beide vereiste wrapper-testids moeten naast elkaar bestaan.
+    await expect(page.getByTestId("section-pijlers")).toBeVisible();
+    await expect(page.getByTestId("section-gezond")).toBeVisible();
   });
 
   test("Lokale verbinding sectie toont 6 tegels en CTA naar lidmaatschap", async ({ page }) => {

@@ -430,7 +430,7 @@ export default function HomePage() {
 
       {/* ══ VIER PIJLERS GEZOND ONDERNEMEN ══ */}
       <div id="gezond-pijlers" style={{ background: "#f8faff" }} data-testid="section-pijlers">
-        <div className="sec-pad" style={{ ...centered, padding: "64px 28px" }}>
+        <div data-testid="section-gezond" className="sec-pad" style={{ ...centered, padding: "64px 28px" }}>
           <SectieKop
             icon={ShieldCheck}
             tint="blauw"
