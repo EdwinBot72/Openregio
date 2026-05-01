@@ -34,7 +34,7 @@ import {
   Search, Sparkles, Building2, Lock, ArrowRight, CheckCircle2, Clock,
 } from "lucide-react";
 import type { LokaleActie } from "@shared/schema";
-import { LOKALE_ACTIE_DOELGROEPEN } from "@shared/schema";
+import { LOKALE_ACTIE_DOELGROEPEN, insertLokaleActieSchema } from "@shared/schema";
 
 const DOELGROEP_LABELS: Record<string, string> = {
   iedereen: "Iedereen",
@@ -46,17 +46,26 @@ const DOELGROEP_LABELS: Record<string, string> = {
   kinderen: "Kinderen",
 };
 
-const actieSchema = z.object({
-  titel: z.string().min(5, "Minimaal 5 tekens").max(255),
-  beschrijving: z.string().min(20, "Minimaal 20 tekens"),
-  datum: z.string().optional(),
-  locatie: z.string().min(2, "Vul een locatie in").max(255),
-  regio: z.string().min(2, "Vul je gemeente of regio in").max(255),
-  doelgroep: z.enum(LOKALE_ACTIE_DOELGROEPEN),
-  externeLink: z.string().url("Vul een geldige URL in").or(z.literal("")).optional(),
-  contactEmail: z.string().email("Ongeldig e-mailadres").or(z.literal("")).optional(),
-  bedrijfsnaam: z.string().max(255).optional(),
-});
+// Derived from shared insertLokaleActieSchema: ownerUserId is set server-side,
+// and we override timestamp/url/email fields to accept the UI's string-input shapes.
+const actieSchema = insertLokaleActieSchema
+  .omit({
+    ownerUserId: true,
+    datum: true,
+    externeLink: true,
+    contactEmail: true,
+    bedrijfsnaam: true,
+  })
+  .extend({
+    titel: z.string().min(5, "Minimaal 5 tekens").max(255),
+    beschrijving: z.string().min(20, "Minimaal 20 tekens"),
+    locatie: z.string().min(2, "Vul een locatie in").max(255),
+    regio: z.string().min(2, "Vul je gemeente of regio in").max(255),
+    datum: z.string().optional(),
+    externeLink: z.string().url("Vul een geldige URL in").or(z.literal("")).optional(),
+    contactEmail: z.string().email("Ongeldig e-mailadres").or(z.literal("")).optional(),
+    bedrijfsnaam: z.string().max(255).optional(),
+  });
 type ActieForm = z.infer<typeof actieSchema>;
 
 function formatDatum(d: string | Date | null | undefined) {
@@ -239,7 +248,7 @@ export default function LokaleActiesPage() {
         </div>
         {isPro ? (
           <Button onClick={openNieuw} data-testid="button-nieuwe-actie">
-            <Plus className="mr-2 h-4 w-4" /> Nieuwe actie
+            <Plus className="mr-2 h-4 w-4" /> Start lokale actie
           </Button>
         ) : (
           <Link href="/lidmaatschap?plan=pro">

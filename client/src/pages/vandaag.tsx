@@ -1375,12 +1375,12 @@ export default function VandaagPage() {
                 className="openregio-button openregio-button-outline openregio-button-small"
                 data-testid="button-start-lokale-actie-vandaag"
               >
-                <Plus className="h-3.5 w-3.5" /> Start
+                <Plus className="h-3.5 w-3.5" /> Start lokale actie
               </Link>
             ) : undefined
           }
         />
-        {!isPro && topActies.length > 0 && (
+        {!isPro && (
           <div
             data-testid="teaser-basic-lokale-acties"
             style={{
