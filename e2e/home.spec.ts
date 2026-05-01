@@ -1,5 +1,5 @@
 import { test, expect } from "@playwright/test";
-import { waitForReactQuery } from "./helpers";
+import { registerAndAuth, waitForReactQuery } from "./helpers";
 
 test.describe("Homepage gezond ondernemen", () => {
   test("hero toont titel en beide CTA-knoppen", async ({ page }) => {
@@ -67,6 +67,22 @@ test.describe("Homepage gezond ondernemen", () => {
     await expect(cta).toBeVisible();
     const href = await cta.getAttribute("href");
     expect(href).toBe("/lidmaatschap?plan=pro");
+  });
+
+  test("Lokale verbinding CTA verwijst naar /vandaag voor ingelogde gebruikers", async ({
+    context,
+    page,
+    baseURL,
+  }) => {
+    await registerAndAuth(context, baseURL!, "basic", "e2e-home-lokale");
+
+    await page.goto("/");
+    await waitForReactQuery(page);
+
+    const cta = page.getByTestId("button-start-lokale-actie");
+    await expect(cta).toBeVisible();
+    const href = await cta.getAttribute("href");
+    expect(href).toBe("/vandaag");
   });
 
   test("klikken op hero-CTA scrolt naar #gezond-pijlers", async ({ page }) => {
