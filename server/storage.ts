@@ -3151,18 +3151,22 @@ class DbStorage implements IStorage {
       "doelgroep", "externeLink", "contactEmail", "bedrijfsnaam",
     ];
     const patch: Record<string, unknown> = {};
+    const updatesRecord = updates as Record<string, unknown>;
     for (const key of allowedKeys) {
-      if (key in updates) patch[key] = (updates as any)[key];
+      if (key in updatesRecord) patch[key] = updatesRecord[key];
     }
     // Bestaande actie ophalen om expiresAt-berekening op createdAt te baseren.
-    if ("datum" in updates) {
+    if ("datum" in updatesRecord) {
       const [existing] = await db.select().from(lokaleActies)
         .where(and(eq(lokaleActies.id, id), eq(lokaleActies.ownerUserId, userId)));
       if (!existing) return undefined;
       const createdMs = new Date(existing.createdAt).getTime();
-      patch.expiresAt = updates.datum
-        ? new Date(updates.datum as Date)
-        : new Date(createdMs + 30 * 24 * 60 * 60 * 1000);
+      const datumValue = updates.datum;
+      patch.expiresAt = datumValue instanceof Date
+        ? datumValue
+        : (typeof datumValue === "string" && datumValue
+            ? new Date(datumValue)
+            : new Date(createdMs + 30 * 24 * 60 * 60 * 1000));
     }
     const [updated] = await db.update(lokaleActies)
       .set(patch)

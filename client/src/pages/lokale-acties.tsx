@@ -90,9 +90,11 @@ export default function LokaleActiesPage() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<LokaleActie | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<LokaleActie | null>(null);
+  const [detail, setDetail] = useState<LokaleActie | null>(null);
   const [zoek, setZoek] = useState("");
   const [filterDoelgroep, setFilterDoelgroep] = useState("alle");
   const [filterRegio, setFilterRegio] = useState("");
+  const [sortBy, setSortBy] = useState<"datum" | "regio">("datum");
 
   const { data: acties = [], isLoading } = useQuery<LokaleActie[]>({
     queryKey: ["/api/lokale-acties"],
@@ -169,10 +171,11 @@ export default function LokaleActiesPage() {
         description: editing ? "Je wijzigingen zijn opgeslagen." : "Je lokale actie staat nu online.",
       });
     },
-    onError: (err: any) => {
+    onError: (err: unknown) => {
+      const message = err instanceof Error ? err.message : "Kon actie niet opslaan.";
       toast({
         title: "Fout",
-        description: err?.message ?? "Kon actie niet opslaan.",
+        description: message,
         variant: "destructive",
       });
     },
@@ -199,7 +202,7 @@ export default function LokaleActiesPage() {
   });
 
   const gefilterd = useMemo(() => {
-    return acties.filter((a) => {
+    const filtered = acties.filter((a) => {
       const matchDoel = filterDoelgroep === "alle" || a.doelgroep === filterDoelgroep;
       const matchRegio = filterRegio.trim() === "" || a.regio.toLowerCase().includes(filterRegio.toLowerCase());
       const matchZoek = zoek.trim() === "" ||
@@ -208,7 +211,19 @@ export default function LokaleActiesPage() {
         a.locatie.toLowerCase().includes(zoek.toLowerCase());
       return matchDoel && matchRegio && matchZoek;
     });
-  }, [acties, filterDoelgroep, filterRegio, zoek]);
+    const sorted = [...filtered];
+    if (sortBy === "regio") {
+      sorted.sort((a, b) => a.regio.localeCompare(b.regio, "nl") || a.titel.localeCompare(b.titel, "nl"));
+    } else {
+      const FAR = Number.POSITIVE_INFINITY;
+      sorted.sort((a, b) => {
+        const ta = a.datum ? new Date(a.datum).getTime() : FAR;
+        const tb = b.datum ? new Date(b.datum).getTime() : FAR;
+        return ta - tb;
+      });
+    }
+    return sorted;
+  }, [acties, filterDoelgroep, filterRegio, zoek, sortBy]);
 
   return (
     <div className="max-w-5xl mx-auto py-8 px-4 space-y-6" data-testid="page-lokale-acties">
@@ -257,8 +272,8 @@ export default function LokaleActiesPage() {
         </Card>
       )}
 
-      {/* Filters */}
-      <div className="grid sm:grid-cols-3 gap-3" data-testid="row-filters">
+      {/* Filters + sortering */}
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3" data-testid="row-filters">
         <div className="relative">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
@@ -284,6 +299,15 @@ export default function LokaleActiesPage() {
             {LOKALE_ACTIE_DOELGROEPEN.map((d) => (
               <SelectItem key={d} value={d}>{DOELGROEP_LABELS[d]}</SelectItem>
             ))}
+          </SelectContent>
+        </Select>
+        <Select value={sortBy} onValueChange={(v) => setSortBy(v as "datum" | "regio")}>
+          <SelectTrigger data-testid="select-sortering">
+            <SelectValue placeholder="Sorteren" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="datum">Sorteer op datum</SelectItem>
+            <SelectItem value="regio">Sorteer op regio</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -316,7 +340,20 @@ export default function LokaleActiesPage() {
           {gefilterd.map((actie) => {
             const isEigen = user?.id === actie.ownerUserId;
             return (
-              <Card key={actie.id} className="hover-elevate" data-testid={`card-actie-${actie.id}`}>
+              <Card
+                key={actie.id}
+                className="hover-elevate cursor-pointer"
+                role="button"
+                tabIndex={0}
+                onClick={() => setDetail(actie)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    setDetail(actie);
+                  }
+                }}
+                data-testid={`card-actie-${actie.id}`}
+              >
                 <CardContent className="p-4 space-y-3">
                   <div className="flex items-start justify-between gap-2 flex-wrap">
                     <div className="flex items-center gap-2 flex-wrap">
@@ -332,11 +369,11 @@ export default function LokaleActiesPage() {
                       )}
                     </div>
                     {isEigen && (
-                      <div className="flex items-center gap-1">
+                      <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
                         <Button
                           size="icon"
                           variant="ghost"
-                          onClick={() => openBewerken(actie)}
+                          onClick={(e) => { e.stopPropagation(); openBewerken(actie); }}
                           data-testid={`button-bewerk-${actie.id}`}
                           aria-label="Bewerk actie"
                         >
@@ -345,7 +382,7 @@ export default function LokaleActiesPage() {
                         <Button
                           size="icon"
                           variant="ghost"
-                          onClick={() => verlopenMutation.mutate(actie.id)}
+                          onClick={(e) => { e.stopPropagation(); verlopenMutation.mutate(actie.id); }}
                           disabled={verlopenMutation.isPending}
                           data-testid={`button-verlopen-${actie.id}`}
                           aria-label="Markeer als verlopen"
@@ -355,7 +392,7 @@ export default function LokaleActiesPage() {
                         <Button
                           size="icon"
                           variant="ghost"
-                          onClick={() => setConfirmDelete(actie)}
+                          onClick={(e) => { e.stopPropagation(); setConfirmDelete(actie); }}
                           data-testid={`button-verwijder-${actie.id}`}
                           aria-label="Verwijder actie"
                         >
@@ -393,32 +430,17 @@ export default function LokaleActiesPage() {
                     )}
                   </div>
 
-                  {(actie.externeLink || actie.contactEmail) && (
-                    <div className="border-t pt-3 flex flex-wrap gap-2">
-                      {actie.externeLink && (
-                        <a
-                          href={actie.externeLink}
-                          target="_blank"
-                          rel="noreferrer noopener"
-                          data-testid={`link-extern-${actie.id}`}
-                        >
-                          <Button size="sm" variant="outline">
-                            <ExternalLink className="mr-1.5 h-3 w-3" /> Meer info
-                          </Button>
-                        </a>
-                      )}
-                      {actie.contactEmail && (
-                        <a
-                          href={`mailto:${actie.contactEmail}`}
-                          data-testid={`link-email-${actie.id}`}
-                        >
-                          <Button size="sm" variant="outline">
-                            <Mail className="mr-1.5 h-3 w-3" /> Contact
-                          </Button>
-                        </a>
-                      )}
-                    </div>
-                  )}
+                  <div className="border-t pt-3 flex items-center justify-between gap-2 flex-wrap">
+                    <span className="text-xs text-muted-foreground">Klik voor meer info</span>
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={(e) => { e.stopPropagation(); setDetail(actie); }}
+                      data-testid={`button-detail-${actie.id}`}
+                    >
+                      Bekijk details <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             );
@@ -631,6 +653,83 @@ export default function LokaleActiesPage() {
               </div>
             </form>
           </Form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Detail-modal */}
+      <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto" data-testid="dialog-detail-actie">
+          {detail && (
+            <>
+              <DialogHeader>
+                <DialogTitle data-testid="text-detail-titel">{detail.titel}</DialogTitle>
+                <DialogDescription>
+                  {detail.bedrijfsnaam ?? "Lokale actie"} — {detail.regio}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Badge variant="secondary">
+                    <Users className="mr-1 h-3 w-3" />
+                    {DOELGROEP_LABELS[detail.doelgroep] ?? detail.doelgroep}
+                  </Badge>
+                  {detail.datum && (
+                    <Badge variant="outline">
+                      <CalendarDays className="mr-1 h-3 w-3" />
+                      {formatDatumKort(detail.datum)}
+                    </Badge>
+                  )}
+                </div>
+                <p className="text-sm leading-relaxed whitespace-pre-line" data-testid="text-detail-beschrijving">
+                  {detail.beschrijving}
+                </p>
+                <div className="space-y-1.5 text-sm text-muted-foreground border-t pt-3">
+                  {detail.datum && (
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 shrink-0" />
+                      <span>{formatDatum(detail.datum)}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center gap-2">
+                    <MapPin className="h-4 w-4 shrink-0" />
+                    <span>{detail.locatie} — {detail.regio}</span>
+                  </div>
+                  {detail.bedrijfsnaam && (
+                    <div className="flex items-center gap-2">
+                      <Building2 className="h-4 w-4 shrink-0" />
+                      <span>{detail.bedrijfsnaam}</span>
+                    </div>
+                  )}
+                </div>
+                {(detail.externeLink || detail.contactEmail) && (
+                  <div className="flex flex-wrap gap-2 border-t pt-3">
+                    {detail.externeLink && (
+                      <a
+                        href={detail.externeLink}
+                        target="_blank"
+                        rel="noreferrer noopener"
+                        data-testid="link-detail-extern"
+                      >
+                        <Button size="sm" variant="outline">
+                          <ExternalLink className="mr-1.5 h-3 w-3" /> Meer info
+                        </Button>
+                      </a>
+                    )}
+                    {detail.contactEmail && (
+                      <a
+                        href={`mailto:${detail.contactEmail}`}
+                        data-testid="link-detail-email"
+                      >
+                        <Button size="sm" variant="outline">
+                          <Mail className="mr-1.5 h-3 w-3" /> Contact opnemen
+                        </Button>
+                      </a>
+                    )}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
         </DialogContent>
       </Dialog>
 

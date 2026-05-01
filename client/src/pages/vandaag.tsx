@@ -555,7 +555,14 @@ export default function VandaagPage() {
     })
     .slice(0, 3);
 
-  const topActies = [...lokaleActies]
+  const eigenRegio = (user?.region ?? "").trim().toLowerCase();
+  const actiesEigenRegio = eigenRegio
+    ? lokaleActies.filter((a) => a.regio.toLowerCase().includes(eigenRegio))
+    : [];
+  // Top 3 voor eigen regio. Als gebruiker geen regio heeft of er nog geen acties in eigen regio zijn,
+  // tonen we de eerstvolgende landelijke acties zodat de sectie altijd nuttig is.
+  const actiesBasis = actiesEigenRegio.length > 0 ? actiesEigenRegio : lokaleActies;
+  const topActies = [...actiesBasis]
     .sort((a, b) => {
       // Toekomstige datum eerst (dichtstbij eerst), dan doorlopende acties op createdAt
       const ad = a.datum ? new Date(a.datum).getTime() : Number.MAX_SAFE_INTEGER;
@@ -563,6 +570,7 @@ export default function VandaagPage() {
       return ad - bd;
     })
     .slice(0, 3);
+  const toontEigenRegio = eigenRegio !== "" && actiesEigenRegio.length > 0;
 
   const topDossiers = [...dossiers]
     .sort((a, b) => {
@@ -1350,8 +1358,14 @@ export default function VandaagPage() {
         <SectieKop
           icon={CalendarDays}
           tint="oranje"
-          titel="Lokale acties in jouw regio"
-          subtitel="Evenementen, buurtacties en initiatieven van Pro-leden — bezoek of organiseer er zelf een."
+          titel={toontEigenRegio ? `Lokale acties in ${user?.region}` : "Lokale acties in jouw regio"}
+          subtitel={
+            toontEigenRegio
+              ? "Evenementen, buurtacties en initiatieven van Pro-leden bij jou in de buurt."
+              : eigenRegio
+                ? "Nog geen acties in jouw regio gevonden — een greep uit recente landelijke acties."
+                : "Vul je gemeente in bij je profiel zodat we acties uit jouw regio kunnen tonen."
+          }
           bekijkAlles="/lokale-acties"
           bekijkAllesAriaLabel="Bekijk alle lokale acties"
           rechts={
@@ -1366,6 +1380,27 @@ export default function VandaagPage() {
             ) : undefined
           }
         />
+        {!isPro && topActies.length > 0 && (
+          <div
+            data-testid="teaser-basic-lokale-acties"
+            style={{
+              display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, flexWrap: "wrap",
+              padding: "10px 12px", borderRadius: 12, border: `1px dashed ${C.border}`,
+              background: C.oranjeTintBg, marginBottom: 10,
+            }}
+          >
+            <span style={{ fontSize: 12, color: C.tekstZacht, lineHeight: 1.4 }}>
+              <strong style={{ color: C.donker }}>Word Pro</strong> en organiseer zelf een lokale actie of evenement in je regio.
+            </span>
+            <Link
+              href="/lidmaatschap?plan=pro"
+              className="openregio-button openregio-button-primary openregio-button-small"
+              data-testid="button-upgrade-pro-vandaag-acties"
+            >
+              Bekijk Pro
+            </Link>
+          </div>
+        )}
         {actiesLoading ? (
           <Skeleton className="h-20 w-full" />
         ) : topActies.length === 0 ? (

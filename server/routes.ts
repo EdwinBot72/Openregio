@@ -5508,13 +5508,14 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
         "titel", "beschrijving", "datum", "locatie", "regio",
         "doelgroep", "externeLink", "contactEmail", "bedrijfsnaam",
       ] as const;
+      const body = (req.body ?? {}) as Record<string, unknown>;
       for (const k of editableKeys) {
-        if (k in req.body) allowed[k] = (req.body as any)[k];
+        if (k in body) allowed[k] = body[k];
       }
       // datum normaliseren — alléén als de client het expliciet meestuurt.
       if ("datum" in allowed) {
         const v = allowed.datum;
-        allowed.datum = v ? new Date(v as string) : null;
+        allowed.datum = typeof v === "string" && v ? new Date(v) : null;
       }
       const parsed = insertLokaleActieSchema.partial().safeParse(allowed);
       if (!parsed.success) {

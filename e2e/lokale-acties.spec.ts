@@ -90,6 +90,108 @@ test.describe("/lokale-acties", () => {
     await ctx.dispose();
   });
 
+  test("Pro maakt actie aan en ziet deze terug op /vandaag", async ({
+    page,
+    context,
+    baseURL,
+  }) => {
+    await registerAndAuth(context, baseURL!, "pro", "e2e-vandaag-pro");
+
+    // Maak actie via API
+    const titel = `Vandaag-actie ${Date.now()}`;
+    const create = await context.request.post("/api/lokale-acties", {
+      data: {
+        titel,
+        beschrijving: "Een actie voor de Vandaag-integratie test, lang genoeg.",
+        locatie: "Centraal",
+        regio: "E2E-Vandaag-Stad",
+        doelgroep: "iedereen",
+        datum: new Date(Date.now() + 86400000).toISOString(), // morgen, zorgt voor positionering
+      },
+    });
+    expect(create.ok()).toBeTruthy();
+
+    await page.goto("/vandaag");
+    await waitForReactQuery(page);
+    await expect(page.getByTestId("section-lokale-acties")).toBeVisible();
+    // Sectie toont fallback (landelijk) wanneer gebruiker geen regio heeft;
+    // de zojuist aangemaakte actie hoort dan in top-3 te staan.
+    await expect(page.getByTestId("section-lokale-acties")).toContainText(titel);
+  });
+
+  test("Sorteren op regio en op datum werkt", async ({
+    page,
+    context,
+    baseURL,
+  }) => {
+    await registerAndAuth(context, baseURL!, "pro", "e2e-sort-pro");
+
+    // Maak 2 acties: 'A' regio Amersfoort (datum +14d), 'Z' regio Zwolle (datum +1d)
+    const stamp = Date.now();
+    const titelA = `A-Workshop ${stamp}`;
+    const titelZ = `Z-Avondmarkt ${stamp}`;
+    await context.request.post("/api/lokale-acties", {
+      data: {
+        titel: titelA, beschrijving: "Workshop in Amersfoort, lang genoeg.",
+        locatie: "Bibliotheek", regio: "Amersfoort", doelgroep: "ondernemers",
+        datum: new Date(Date.now() + 14*86400000).toISOString(),
+      },
+    });
+    await context.request.post("/api/lokale-acties", {
+      data: {
+        titel: titelZ, beschrijving: "Avondmarkt in Zwolle, lang genoeg.",
+        locatie: "Centrum", regio: "Zwolle", doelgroep: "iedereen",
+        datum: new Date(Date.now() + 1*86400000).toISOString(),
+      },
+    });
+
+    await page.goto("/lokale-acties");
+    await waitForReactQuery(page);
+
+    // Default sort = datum: Z (eerder) staat boven A
+    const lijst = page.getByTestId("lijst-acties");
+    const titlesByDatum = await lijst.locator("[data-testid^='text-titel-']").allTextContents();
+    const idxZ_d = titlesByDatum.findIndex((t) => t.includes(titelZ));
+    const idxA_d = titlesByDatum.findIndex((t) => t.includes(titelA));
+    expect(idxZ_d).toBeGreaterThanOrEqual(0);
+    expect(idxA_d).toBeGreaterThanOrEqual(0);
+    expect(idxZ_d).toBeLessThan(idxA_d);
+
+    // Schakel naar sorteren op regio: A (Amersfoort) komt nu boven Z (Zwolle)
+    await page.getByTestId("select-sortering").click();
+    await page.getByRole("option", { name: "Sorteer op regio" }).click();
+    await waitForReactQuery(page);
+
+    const titlesByRegio = await lijst.locator("[data-testid^='text-titel-']").allTextContents();
+    const idxA_r = titlesByRegio.findIndex((t) => t.includes(titelA));
+    const idxZ_r = titlesByRegio.findIndex((t) => t.includes(titelZ));
+    expect(idxA_r).toBeLessThan(idxZ_r);
+  });
+
+  test("Klik op kaart opent detail-modal", async ({
+    page,
+    context,
+    baseURL,
+  }) => {
+    await registerAndAuth(context, baseURL!, "pro", "e2e-detail-pro");
+
+    const titel = `Detail-test ${Date.now()}`;
+    await context.request.post("/api/lokale-acties", {
+      data: {
+        titel, beschrijving: "Beschrijving voor detail-modal test, lang genoeg.",
+        locatie: "Plein 1", regio: "TestStad", doelgroep: "iedereen",
+      },
+    });
+
+    await page.goto("/lokale-acties");
+    await waitForReactQuery(page);
+
+    await page.getByTestId("lijst-acties").locator("[data-testid^='card-actie-']").first().click();
+    await expect(page.getByTestId("dialog-detail-actie")).toBeVisible();
+    await expect(page.getByTestId("text-detail-titel")).toContainText(titel);
+    await expect(page.getByTestId("text-detail-beschrijving")).toContainText("detail-modal");
+  });
+
   test("Niet-eigenaar kan andermans actie niet bewerken/verwijderen", async ({
     baseURL,
   }) => {

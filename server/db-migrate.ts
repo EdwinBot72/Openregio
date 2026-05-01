@@ -236,6 +236,30 @@ export async function runMigrations(): Promise<void> {
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lokaal_aanbod_user ON lokaal_aanbod(user_id);`);
     console.log("[Migration] ✓ lokaal_aanbod table ensured");
 
+    // Lokale Acties (evenementen) - Pro-leden maken acties die alle leden zien
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS lokale_acties (
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+        owner_user_id VARCHAR NOT NULL REFERENCES users(id),
+        titel VARCHAR(255) NOT NULL,
+        beschrijving TEXT NOT NULL,
+        datum TIMESTAMPTZ,
+        locatie VARCHAR(255) NOT NULL,
+        regio VARCHAR(255) NOT NULL,
+        doelgroep VARCHAR NOT NULL DEFAULT 'iedereen',
+        externe_link TEXT,
+        contact_email VARCHAR(255),
+        bedrijfsnaam VARCHAR(255),
+        status VARCHAR NOT NULL DEFAULT 'actief',
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        expires_at TIMESTAMPTZ NOT NULL
+      );
+    `);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lokale_acties_regio ON lokale_acties(regio);`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lokale_acties_owner ON lokale_acties(owner_user_id);`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lokale_acties_status_expires ON lokale_acties(status, expires_at);`);
+    console.log("[Migration] ✓ lokale_acties table ensured");
+
     // Ondernemer Thema's table for AI-generated weekly entrepreneur insights
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS ondernemer_themas (
