@@ -1,0 +1,271 @@
+Ja. Maak er geen “contentplan” van, maar een **OpenRegio leer- en actiemachine**.
+
+# OpenRegio Contentplan 2.0
+
+## Kernidee
+
+OpenRegio helpt ondernemers met:
+
+**begrijpen → verbeteren → verbinden → volhouden**
+
+Dus elke video, les of dashboard-tip moet één van deze doelen hebben.
+
+---
+
+# 1. De 5 hoofdthema’s
+
+## 1️⃣ Minder afhankelijkheid
+
+Voor ondernemers die te veel leunen op platforms.
+
+Onderwerpen:
+
+* minder afhankelijk van Thuisbezorgd
+* minder afhankelijk van Google Ads
+* eigen klantenlijst bouwen
+* direct bestelverkeer
+* eigen website als basis
+
+Dashboardknop:
+
+**Maak mijn bedrijf minder afhankelijk**
+
+---
+
+## 2️⃣ Lokale zichtbaarheid
+
+Voor ondernemers die online wel bestaan, maar lokaal niet gevonden worden.
+
+Onderwerpen:
+
+* Google Bedrijfsprofiel
+* website check
+* lokale SEO
+* reviews
+* AI-zoekmachines
+* regio-profiel
+
+Dashboardknop:
+
+**Check mijn zichtbaarheid**
+
+---
+
+## 3️⃣ Lokale verbinding
+
+Voor ondernemers die meer echte klanten en relaties willen.
+
+Onderwerpen:
+
+* ouderenavond bij pizzeria
+* studentenactie
+* workshop organiseren
+* samenwerken met sportclub
+* nagelstyliste bij verzorgingshuis
+* buurtactie opzetten
+
+Dashboardknop:
+
+**Start lokale actie**
+
+---
+
+## 4️⃣ Regels & gemeente
+
+Voor ondernemers die vastlopen op brieven, vergunningen en beleid.
+
+Onderwerpen:
+
+* brief begrijpen
+* vergunning checken
+* gemeentelijk besluit lezen
+* informatie opvragen
+* bezwaar begrijpen
+* regelgeving volgen
+
+Dashboardknop:
+
+**Begrijp regels en brieven**
+
+---
+
+## 5️⃣ Praktisch ondernemen
+
+Voor dagelijkse druk.
+
+Onderwerpen:
+
+* personeel vinden
+* kosten verlagen
+* continuïteit bij storing
+* klantenbinding
+* basischeck bedrijf
+* samenwerken met andere ondernemers
+
+Dashboardknop:
+
+**Versterk mijn bedrijf**
+
+---
+
+# 2. Nieuwe dashboardstructuur
+
+Heel simpel:
+
+```text
+Vandaag in OpenRegio
+
+[ Begrijp regels & brieven ]
+[ Check mijn zichtbaarheid ]
+[ Start lokale actie ]
+[ Versterk mijn bedrijf ]
+```
+
+Daaronder:
+
+## Vandaag leren
+
+Elke dag/ week 3 lessen:
+
+1. Hoe word je minder afhankelijk van platforms?
+2. Hoe zet je een lokale actie op?
+3. Hoe check je of je website klanten mist?
+
+---
+
+# 3. Contentvorm per onderwerp
+
+Elke les krijgt dezelfde structuur:
+
+```text
+Probleem
+Waarom dit speelt
+
+Voorbeeld
+Bijvoorbeeld pizzeria / fitness / nagelstyliste
+
+Actie
+Wat kun je vandaag doen?
+
+OpenRegio-tool
+Welke knop gebruik je?
+```
+
+Zo wordt content direct gekoppeld aan je platform.
+
+---
+
+# 4. Voorbeeldles
+
+## Minder afhankelijk van bezorgplatforms
+
+**Probleem**
+Veel pizzeria’s betalen hoge commissies aan bezorgapps.
+
+**Voorbeeld**
+Een pizzeria krijgt wel bestellingen, maar verliest marge en klantcontact.
+
+**Actie**
+Zet je eigen bestelkanaal op, verzamel klantgegevens en promoot lokaal.
+
+**OpenRegio-tool**
+Gebruik: **Check mijn zichtbaarheid** + **Start lokale actie**
+
+---
+
+# 5. Homepageblok
+
+## Ondernemerslessen
+
+Praktische lessen voor ondernemers die grip willen houden op regels, zichtbaarheid en lokale groei.
+
+Leer hoe je:
+
+* minder afhankelijk wordt van platforms
+* lokaal beter zichtbaar wordt
+* brieven en regels begrijpt
+* lokale acties organiseert
+* sterker onderneemt in moeilijke tijden
+
+**[Bekijk ondernemerslessen]**
+
+---
+
+# 6. Verdienmodel zonder het te benoemen
+
+Basis ziet:
+
+* lessen
+* voorbeelden
+* regio-updates
+* kennisbank
+
+Pro gebruikt:
+
+* briefanalyse
+* document upload
+* website check
+* lokale actie generator
+* RegioBot
+
+Dus content trekt mensen binnen.
+Tools converteren naar Pro.
+
+---
+
+# 7. Replit-prompt
+
+```text
+Voeg aan OpenRegio een module toe: Ondernemerslessen.
+
+Doel:
+Maak een overzichtelijke leeromgeving voor lokale ondernemers met 5 pijlers:
+
+1. Minder afhankelijkheid
+2. Lokale zichtbaarheid
+3. Lokale verbinding
+4. Regels & gemeente
+5. Praktisch ondernemen
+
+Dashboard:
+Toon bovenaan 4 hoofdknoppen:
+- Begrijp regels & brieven
+- Check mijn zichtbaarheid
+- Start lokale actie
+- Versterk mijn bedrijf
+
+Voeg sectie toe:
+"Vandaag leren"
+met 3 cards:
+- titel
+- korte uitleg
+- thema
+- actieknop
+
+Routes:
+- /lessen
+- /lessen/:slug
+- /lessen/thema/:theme
+
+Lesson model:
+- id
+- title
+- slug
+- theme
+- problem
+- example
+- action_steps
+- related_tool
+- is_pro_related
+
+Basic users can view lessons.
+Pro users can use related tools.
+```
+
+# De kern
+
+OpenRegio wordt geen losse website met tools.
+
+Het wordt:
+
+**een praktische ondernemersschool + toolkit voor grip, zichtbaarheid en lokale kracht.**
