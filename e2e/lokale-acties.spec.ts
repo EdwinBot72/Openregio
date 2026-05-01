@@ -118,6 +118,46 @@ test.describe("/lokale-acties", () => {
     expect(ok.ok()).toBeTruthy();
   });
 
+  test("PATCH herberekent expiresAt: datum verwijderen → createdAt+30d, datum wijzigen → nieuwe datum", async ({
+    context,
+    baseURL,
+  }) => {
+    await registerAndAuth(context, baseURL!, "pro", "e2e-expiry-patch");
+
+    // Maak met datum +5 dagen
+    const dt5 = new Date(Date.now() + 5 * 86400000);
+    const created = await context.request.post("/api/lokale-acties", {
+      data: {
+        titel: "Expiry-PATCH test", beschrijving: "Lange beschrijving voor expiry-test geldig.",
+        locatie: "Plein", regio: "TestStad", doelgroep: "iedereen",
+        datum: dt5.toISOString(),
+      },
+    });
+    expect(created.ok()).toBeTruthy();
+    const item = await created.json();
+    expect(new Date(item.expiresAt).getTime()).toBe(dt5.getTime());
+    const createdAt = new Date(item.createdAt).getTime();
+
+    // Verwijder datum → expiresAt = createdAt + 30d
+    const removed = await context.request.patch(`/api/lokale-acties/${item.id}`, {
+      data: { datum: "" },
+    });
+    expect(removed.ok()).toBeTruthy();
+    const itemNoDatum = await removed.json();
+    const expected30d = createdAt + 30 * 86400000;
+    const diff = Math.abs(new Date(itemNoDatum.expiresAt).getTime() - expected30d);
+    expect(diff).toBeLessThan(2000); // < 2s drift
+
+    // Wijzig datum → expiresAt = nieuwe datum
+    const dt12 = new Date(Date.now() + 12 * 86400000);
+    const updated = await context.request.patch(`/api/lokale-acties/${item.id}`, {
+      data: { datum: dt12.toISOString() },
+    });
+    expect(updated.ok()).toBeTruthy();
+    const itemNew = await updated.json();
+    expect(new Date(itemNew.expiresAt).getTime()).toBe(dt12.getTime());
+  });
+
   test("Server weigert ongeldig contactEmail", async ({ context, baseURL }) => {
     await registerAndAuth(context, baseURL!, "pro", "e2e-bad-email");
     const res = await context.request.post("/api/lokale-acties", {
