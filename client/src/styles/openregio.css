@@ -1904,3 +1904,174 @@
     color: #b91c1c;
     border-color: #fecaca;
 }
+
+/* Save dossier (FlowRunner) */
+.flow-save-row {
+    margin-top: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.flow-save-button {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #fff;
+    background: #1f5fae;
+    border: 1px solid #1f5fae;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color .15s ease, opacity .15s ease;
+}
+.flow-save-button:hover:not(:disabled) {
+    background: #184a89;
+    border-color: #184a89;
+}
+.flow-save-button:disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+.flow-save-hint {
+    margin: 0;
+    font-size: 12px;
+    color: #64748b;
+    line-height: 1.5;
+}
+
+/* Mijn dossiers (RegelsHelp hub) */
+.flow-dossiers-section {
+    margin-top: 36px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+}
+.flow-dossiers-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #0f172a;
+}
+.flow-dossiers-head h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 700;
+}
+.flow-dossiers-intro {
+    margin: 6px 0 14px 0;
+    color: #475569;
+    font-size: 13px;
+    line-height: 1.5;
+}
+.flow-dossiers-empty {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #64748b;
+    font-size: 13px;
+    background: #f8fafc;
+    border: 1px dashed #cbd5e1;
+    border-radius: 8px;
+    padding: 14px 16px;
+}
+.flow-dossiers-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.flow-dossier-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 14px;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+}
+.flow-dossier-info {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.flow-dossier-title {
+    font-weight: 600;
+    color: #0f172a;
+    font-size: 14px;
+    overflow-wrap: anywhere;
+}
+.flow-dossier-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    font-size: 12px;
+    color: #64748b;
+}
+.flow-dossier-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+}
+.flow-dossier-open {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #1f5fae;
+    text-decoration: none;
+    padding: 6px 10px;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    background: #f8fafc;
+}
+.flow-dossier-open:hover {
+    background: #eef4fb;
+    border-color: #1f5fae;
+}
+.flow-dossier-missing {
+    font-size: 12px;
+    color: #9a3412;
+}
+.flow-dossier-retry {
+    background: none;
+    border: none;
+    padding: 0;
+    color: #1f5fae;
+    font: inherit;
+    cursor: pointer;
+    text-decoration: underline;
+}
+.flow-dossier-retry:hover {
+    color: #184a89;
+}
+.flow-dossier-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color .15s ease, color .15s ease, border-color .15s ease;
+}
+.flow-dossier-delete:hover:not(:disabled) {
+    background: #fef2f2;
+    color: #b91c1c;
+    border-color: #fecaca;
+}
+.flow-dossier-delete:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}

@@ -902,6 +902,51 @@ export const insertRegioScanSchema = createInsertSchema(regioScans).omit({
 export type InsertRegioScan = z.infer<typeof insertRegioScanSchema>;
 export type RegioScan = typeof regioScans.$inferSelect;
 
+// Help-flow dossiers — opgeslagen runs van de hulp-engine flows
+// (brief-ontvangen, regel-onduidelijk, controle-vergunning-boete, ...).
+// Antwoorden + scenario-uitkomst worden bewaard zodat een ondernemer later
+// verder kan werken aan dezelfde casus.
+export const helpFlowDossiers = pgTable("help_flow_dossiers", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  flowId: text("flow_id").notNull(),
+  flowTitle: text("flow_title").notNull(),
+  title: text("title").notNull(),
+  answers: jsonb("answers").notNull(),
+  scenarioId: text("scenario_id"),
+  scenarioLevel: text("scenario_level"),
+  scenarioRiskLabel: text("scenario_risk_label"),
+  renderedText: text("rendered_text"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  index("idx_help_flow_dossiers_user").on(table.userId),
+]);
+
+export const insertHelpFlowDossierSchema = createInsertSchema(helpFlowDossiers).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertHelpFlowDossier = z.infer<typeof insertHelpFlowDossierSchema>;
+export type HelpFlowDossier = typeof helpFlowDossiers.$inferSelect;
+
+// Schema voor het opslaan van een nieuwe dossier-run vanuit de frontend.
+// userId wordt server-side ingevuld op basis van de ingelogde gebruiker.
+export const saveHelpFlowDossierSchema = z.object({
+  flowId: z.string().trim().min(1).max(120),
+  flowTitle: z.string().trim().min(1).max(200),
+  title: z.string().trim().min(1).max(200),
+  answers: z
+    .record(z.string().max(4000))
+    .refine((obj) => Object.keys(obj).length <= 50, {
+      message: "Te veel antwoordvelden",
+    }),
+  scenarioId: z.string().trim().max(120).optional().nullable(),
+  scenarioLevel: z.string().trim().max(40).optional().nullable(),
+  scenarioRiskLabel: z.string().trim().max(200).optional().nullable(),
+  renderedText: z.string().max(20000).optional().nullable(),
+});
+export type SaveHelpFlowDossierInput = z.infer<typeof saveHelpFlowDossierSchema>;
+
 // Schema voor het uitvoeren van een nieuwe scan vanuit de frontend
 export const runRegioScanSchema = z.object({
   branche: z.string().trim().min(2, "Branche is verplicht").max(120),

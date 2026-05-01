@@ -287,6 +287,27 @@ export async function runMigrations(): Promise<void> {
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_regio_scans_user ON regio_scans(user_id);`);
     console.log("[Migration] ✓ regio_scans table ensured");
 
+    // Hulp-engine dossiers — bewaarde runs van de hulp-flows (brief-ontvangen,
+    // regel-onduidelijk, controle-vergunning-boete) zodat ondernemers later
+    // verder kunnen met dezelfde casus.
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS help_flow_dossiers (
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+        user_id VARCHAR NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        flow_id TEXT NOT NULL,
+        flow_title TEXT NOT NULL,
+        title TEXT NOT NULL,
+        answers JSONB NOT NULL,
+        scenario_id TEXT,
+        scenario_level TEXT,
+        scenario_risk_label TEXT,
+        rendered_text TEXT,
+        created_at TIMESTAMP NOT NULL DEFAULT NOW()
+      );
+    `);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_help_flow_dossiers_user ON help_flow_dossiers(user_id);`);
+    console.log("[Migration] ✓ help_flow_dossiers table ensured");
+
     // WOO dossiers — afzendergegevens (versleuteld) + ingebrekestelling tracking
     await db.execute(sql`ALTER TABLE woo_dossiers ADD COLUMN IF NOT EXISTS sender_name_encrypted TEXT`);
     await db.execute(sql`ALTER TABLE woo_dossiers ADD COLUMN IF NOT EXISTS sender_address_encrypted TEXT`);

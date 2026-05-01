@@ -6801,6 +6801,83 @@ Geef alleen de brieftekst terug, zonder commentaar, zonder markdown, zonder JSON
     }
   });
 
+  // ─── Hulp-engine dossiers ──────────────────────────────────────────────
+  // Antwoorden + scenario-uitkomst van een hulp-flow (brief-ontvangen,
+  // regel-onduidelijk, controle-vergunning-boete) bewaren onder de ingelogde
+  // gebruiker, zodat een ondernemer later verder kan met dezelfde casus.
+
+  // GET /api/help-flow-dossiers — lijst dossiers van de ingelogde gebruiker
+  app.get("/api/help-flow-dossiers", requireAuth, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      const dossiers = await storage.getHelpFlowDossiers(user.id);
+      res.json(dossiers);
+    } catch (err) {
+      console.error("[HelpFlowDossier] Lijst fout:", err);
+      res.status(500).json({ error: "Kon dossiers niet laden" });
+    }
+  });
+
+  // GET /api/help-flow-dossiers/:id — detail van één dossier
+  app.get("/api/help-flow-dossiers/:id", requireAuth, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      const id = String(req.params.id || "").trim();
+      if (!id) return res.status(400).json({ error: "Ongeldig id" });
+      const dossier = await storage.getHelpFlowDossier(id, user.id);
+      if (!dossier) return res.status(404).json({ error: "Dossier niet gevonden" });
+      res.json(dossier);
+    } catch (err) {
+      console.error("[HelpFlowDossier] Detail fout:", err);
+      res.status(500).json({ error: "Kon dossier niet laden" });
+    }
+  });
+
+  // POST /api/help-flow-dossiers — maak een nieuw dossier aan (snapshot van een run)
+  app.post("/api/help-flow-dossiers", requireAuth, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      const { saveHelpFlowDossierSchema } = await import("@shared/schema");
+      const parsed = saveHelpFlowDossierSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({
+          error: "Ongeldige invoer",
+          details: parsed.error.errors,
+        });
+      }
+      const created = await storage.createHelpFlowDossier({
+        userId: user.id,
+        flowId: parsed.data.flowId,
+        flowTitle: parsed.data.flowTitle,
+        title: parsed.data.title,
+        answers: parsed.data.answers,
+        scenarioId: parsed.data.scenarioId ?? null,
+        scenarioLevel: parsed.data.scenarioLevel ?? null,
+        scenarioRiskLabel: parsed.data.scenarioRiskLabel ?? null,
+        renderedText: parsed.data.renderedText ?? null,
+      });
+      res.status(201).json(created);
+    } catch (err) {
+      console.error("[HelpFlowDossier] Create fout:", err);
+      res.status(500).json({ error: "Kon dossier niet opslaan" });
+    }
+  });
+
+  // DELETE /api/help-flow-dossiers/:id — verwijder een dossier
+  app.delete("/api/help-flow-dossiers/:id", requireAuth, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      const id = String(req.params.id || "").trim();
+      if (!id) return res.status(400).json({ error: "Ongeldig id" });
+      const ok = await storage.deleteHelpFlowDossier(id, user.id);
+      if (!ok) return res.status(404).json({ error: "Dossier niet gevonden" });
+      res.json({ ok: true });
+    } catch (err) {
+      console.error("[HelpFlowDossier] Verwijder fout:", err);
+      res.status(500).json({ error: "Kon dossier niet verwijderen" });
+    }
+  });
+
   // ─────────────────────────────────────────────────────────────────────
 
   const httpServer = createServer(app);

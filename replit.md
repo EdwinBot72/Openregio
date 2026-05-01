@@ -44,6 +44,7 @@ The system implements JWT authentication with short-lived access tokens and rota
 -   **Lokaal Ondernemen Check (/basischeck)**: Public 8-question self-assessment about local business orientation, scoring 0–8, with tailored improvement tips per "nee" answer.
 -   **Koop Lokaal (/koop-lokaal)**: Public business discovery directory listing `lokaal_aanbod` entries categorized by type.
 -   **Lokale Marktplaats (/lokaal-marktplaats)**: Authenticated B2B marketplace for "ik zoek / ik bied" listings; uses `lokaal_aanbod` table with enum types (zoek/bied) and categories.
+-   **Hulp-engine dossiers (/regels/help)**: Antwoorden + scenario-uitkomst van de hulp-flows (brief-ontvangen, regel-onduidelijk, controle-vergunning-boete) kunnen door ingelogde gebruikers worden bewaard via "Bewaar als dossier". Opslag in `help_flow_dossiers` (jsonb-antwoorden + scenario + concept-tekst). Op `/regels/help` staat een "Mijn dossiers"-sectie met openen-knop (`?dossier=<id>` herstelt antwoorden in de runner) en verwijderen-actie. API: `GET/POST/DELETE /api/help-flow-dossiers`.
 
 ### Security and Observability
 

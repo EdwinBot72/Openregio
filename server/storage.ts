@@ -37,6 +37,9 @@ import {
   type RegioScan,
   type InsertRegioScan,
   regioScans,
+  type HelpFlowDossier,
+  type InsertHelpFlowDossier,
+  helpFlowDossiers,
   type CrewProfile,
   type InsertCrewProfile,
   type CrewRequest,
@@ -232,6 +235,12 @@ export interface IStorage {
   getRegioScan(id: number, userId: string): Promise<RegioScan | undefined>;
   updateRegioScan(id: number, userId: string, updates: Partial<InsertRegioScan>): Promise<RegioScan | undefined>;
   deleteRegioScan(id: number, userId: string): Promise<boolean>;
+
+  // Help-flow dossiers — bewaarde runs van de hulp-engine flows
+  createHelpFlowDossier(dossier: InsertHelpFlowDossier): Promise<HelpFlowDossier>;
+  getHelpFlowDossiers(userId: string): Promise<HelpFlowDossier[]>;
+  getHelpFlowDossier(id: string, userId: string): Promise<HelpFlowDossier | undefined>;
+  deleteHelpFlowDossier(id: string, userId: string): Promise<boolean>;
 
   // RegioCrew - Flex pool for personnel shortages
   getCrewProfile(userId: string): Promise<CrewProfile | undefined>;
@@ -1806,6 +1815,20 @@ export class MemStorage implements IStorage {
   async deleteRegioScan(_id: number, _userId: string): Promise<boolean> {
     return false;
   }
+
+  // Help-flow dossiers (stubs for MemStorage)
+  async createHelpFlowDossier(_data: InsertHelpFlowDossier): Promise<HelpFlowDossier> {
+    throw new Error("HelpFlowDossier not supported in MemStorage");
+  }
+  async getHelpFlowDossiers(_userId: string): Promise<HelpFlowDossier[]> {
+    return [];
+  }
+  async getHelpFlowDossier(_id: string, _userId: string): Promise<HelpFlowDossier | undefined> {
+    return undefined;
+  }
+  async deleteHelpFlowDossier(_id: string, _userId: string): Promise<boolean> {
+    return false;
+  }
 }
 
 class DbStorage implements IStorage {
@@ -2587,6 +2610,31 @@ class DbStorage implements IStorage {
     const result = await db.delete(regioScans)
       .where(and(eq(regioScans.id, id), eq(regioScans.userId, userId)))
       .returning({ id: regioScans.id });
+    return result.length > 0;
+  }
+
+  // Help-flow dossiers — bewaarde runs van de hulp-engine flows
+  async createHelpFlowDossier(dossier: InsertHelpFlowDossier): Promise<HelpFlowDossier> {
+    const [result] = await db.insert(helpFlowDossiers).values(dossier).returning();
+    return result;
+  }
+
+  async getHelpFlowDossiers(userId: string): Promise<HelpFlowDossier[]> {
+    return await db.select().from(helpFlowDossiers)
+      .where(eq(helpFlowDossiers.userId, userId))
+      .orderBy(desc(helpFlowDossiers.createdAt));
+  }
+
+  async getHelpFlowDossier(id: string, userId: string): Promise<HelpFlowDossier | undefined> {
+    const [result] = await db.select().from(helpFlowDossiers)
+      .where(and(eq(helpFlowDossiers.id, id), eq(helpFlowDossiers.userId, userId)));
+    return result;
+  }
+
+  async deleteHelpFlowDossier(id: string, userId: string): Promise<boolean> {
+    const result = await db.delete(helpFlowDossiers)
+      .where(and(eq(helpFlowDossiers.id, id), eq(helpFlowDossiers.userId, userId)))
+      .returning({ id: helpFlowDossiers.id });
     return result.length > 0;
   }
 
