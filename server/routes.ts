@@ -5553,6 +5553,9 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
       for (const k of editableKeys) {
         if (k in body) allowed[k] = body[k];
       }
+      if (Object.keys(allowed).length === 0) {
+        return res.status(400).json({ error: "Geen wijzigbare velden meegegeven" });
+      }
       const parsed = strictLokaleActieBaseSchema.partial().safeParse(allowed);
       if (!parsed.success) {
         return res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Ongeldige invoer" });
