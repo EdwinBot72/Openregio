@@ -179,6 +179,7 @@ function SectieKop({
   subtitel,
   bekijkAlles,
   bekijkAllesAriaLabel,
+  bekijkAllesTestId,
   rechts,
 }: {
   icon: typeof Bell;
@@ -187,6 +188,7 @@ function SectieKop({
   subtitel?: string;
   bekijkAlles?: string;
   bekijkAllesAriaLabel?: string;
+  bekijkAllesTestId?: string;
   rechts?: React.ReactNode;
 }) {
   return (
@@ -250,7 +252,7 @@ function SectieKop({
           <Link
             href={bekijkAlles}
             aria-label={bekijkAllesAriaLabel ?? `Bekijk alles van ${titel}`}
-            data-testid={`link-bekijk-alles-${titel.toLowerCase().replace(/\s+/g, "-")}`}
+            data-testid={bekijkAllesTestId ?? `link-bekijk-alles-${titel.toLowerCase().replace(/\s+/g, "-")}`}
             className="hover-elevate"
             style={{
               display: "inline-flex",
@@ -1258,6 +1260,7 @@ export default function VandaagPage() {
           subtitel="Selectie uit landelijke bronnen, relevant voor lokale ondernemers."
           bekijkAlles="/nieuws"
           bekijkAllesAriaLabel="Bekijk alle nieuwsitems"
+          bekijkAllesTestId="link-volledig-nieuws"
         />
 
         {nieuwsLoading && (
@@ -1322,6 +1325,7 @@ export default function VandaagPage() {
         style={{ marginTop: 14, padding: "14px 18px", borderRadius: 18 }}
       >
         <div
+          data-testid="strip-jouw-bedrijf"
           style={{
             display: "flex",
             alignItems: "center",
@@ -1465,9 +1469,8 @@ export default function VandaagPage() {
 
       {/* 9. Upgrade-promo — voor Basic alleen een dunne banner (Pro: niets) */}
       {!isPro && (
-        <Link
-          href="/lidmaatschap?plan=pro"
-          className="openregio-card hover-elevate"
+        <div
+          className="openregio-card"
           data-testid="card-upgrade-promo"
           style={{
             marginTop: 14,
@@ -1478,8 +1481,6 @@ export default function VandaagPage() {
             background: `linear-gradient(135deg, ${C.oranjeTintBg} 0%, ${C.oranjeTintBgZacht} 100%)`,
             border: `1px solid ${C.borderOranje}`,
             borderRadius: 12,
-            textDecoration: "none",
-            color: "inherit",
             flexWrap: "wrap",
           }}
         >
@@ -1489,15 +1490,16 @@ export default function VandaagPage() {
           <span style={{ fontSize: 13, fontWeight: 700, color: C.donker, flex: "1 1 240px" }}>
             Upgrade naar Pro voor RegioBot AI, Woo-bibliotheek en alle signalen.
           </span>
-          <span
+          <Link
+            href="/lidmaatschap?plan=pro"
             data-testid="button-upgrade-pro"
             className="openregio-button openregio-button-pro openregio-button-small"
             style={{ flexShrink: 0 }}
           >
             €19,95/mnd
             <ArrowUpRight className="h-3.5 w-3.5" />
-          </span>
-        </Link>
+          </Link>
+        </div>
       )}
     </div>
   );
