@@ -74,6 +74,7 @@ export const MAIN_NAV: NavSection[] = [
     icon: Scale,
     sub: [
       { title: "Updates", url: "/regels/updates", icon: Newspaper },
+      { title: "Hulp bij regels", url: "/regels/help", icon: HelpCircle },
       { title: "Raakt dit mijn bedrijf?", url: "/regels/check", icon: HelpCircle },
       { title: "Documenten", url: "/regels/documenten", icon: FileText },
       { title: "Woo-bibliotheek", url: "/regels/woo", icon: Library, proOnly: true },

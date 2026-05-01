@@ -27,6 +27,8 @@ import {
   Briefcase,
   Pencil,
   Sparkles,
+  Mail,
+  ShieldAlert,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { nl } from "date-fns/locale";
@@ -902,6 +904,121 @@ export default function VandaagPage() {
             })}
           </div>
         )}
+      </section>
+
+      {/* 1b. Hulp bij regels — snelle ingang naar de drie hulp-flows */}
+      <section
+        className="openregio-card"
+        data-testid="section-hulp-bij-regels"
+        style={{ marginTop: 14 }}
+      >
+        <SectieKop
+          icon={HelpCircle}
+          tint="blauw"
+          titel="Hulp bij regels"
+          subtitel="Korte hulplijnen voor de drie meest voorkomende situaties — start direct."
+          bekijkAlles="/regels/help"
+          bekijkAllesAriaLabel="Alle hulp-flows"
+          bekijkAllesTestId="link-bekijk-alles-hulp-bij-regels"
+        />
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+            gap: 10,
+          }}
+        >
+          {[
+            {
+              id: "brief-ontvangen",
+              titel: "Brief ontvangen",
+              desc: "Van gemeente, provincie of overheid? Krijg direct een concept-reactie.",
+              Icon: Mail,
+              tint: "blauw" as const,
+            },
+            {
+              id: "regel-onduidelijk",
+              titel: "Regel niet duidelijk",
+              desc: "Een regel of besluit raakt je bedrijf — krijg een concept-vraag aan de instantie.",
+              Icon: HelpCircle,
+              tint: "donker" as const,
+            },
+            {
+              id: "controle-vergunning-boete",
+              titel: "Controle, vergunning of boete",
+              desc: "Een handhaver, vergunning of boete? Zie wat je rechten en stappen zijn.",
+              Icon: ShieldAlert,
+              tint: "oranje" as const,
+            },
+          ].map(({ id, titel, desc, Icon, tint }) => (
+            <Link
+              key={id}
+              href={`/regels/help/${id}`}
+              data-testid={`item-hulp-flow-${id}`}
+              style={{
+                display: "flex",
+                flexDirection: "column",
+                gap: 8,
+                padding: "12px 14px",
+                border: `1px solid ${C.border}`,
+                borderRadius: 12,
+                textDecoration: "none",
+                color: "inherit",
+                background: C.blauwTintBgZacht,
+              }}
+              className="hover-elevate"
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <span
+                  aria-hidden
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 28,
+                    height: 28,
+                    borderRadius: 8,
+                    background: TINT_BG[tint],
+                    color: TINT_FG[tint],
+                    flexShrink: 0,
+                  }}
+                >
+                  <Icon className="h-3.5 w-3.5" />
+                </span>
+                <div style={{ fontSize: 14, fontWeight: 700, color: C.donker, lineHeight: 1.3 }}>
+                  {titel}
+                </div>
+              </div>
+              <div
+                style={{
+                  fontSize: 12,
+                  color: C.tekst,
+                  lineHeight: 1.5,
+                  display: "-webkit-box",
+                  WebkitLineClamp: 2,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                }}
+              >
+                {desc}
+              </div>
+              <div
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 4,
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: C.blauw,
+                  marginTop: "auto",
+                  paddingTop: 2,
+                }}
+              >
+                Start <ChevronRight className="h-3.5 w-3.5" />
+              </div>
+            </Link>
+          ))}
+        </div>
       </section>
 
       {/* 2. Twee-kolom rij */}
