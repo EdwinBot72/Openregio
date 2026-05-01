@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema, insertBedrijfsprofielSchema, regioBotChatSchema, visibilitySettingsSchema, DEFAULT_VISIBILITY_SETTINGS, insertCrewProfileSchema, insertCrewRequestSchema, insertCrewApplicationSchema, CREW_CATEGORIES, users, ragDocuments, documents, insertRegioDealSchema, crewApplications, crewRequests, bedrijfsprofielen, dailyCourses, dailyCourseProgress, insertDailyCourseSchema } from "@shared/schema";
+import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema, insertBedrijfsprofielSchema, regioBotChatSchema, visibilitySettingsSchema, DEFAULT_VISIBILITY_SETTINGS, insertCrewProfileSchema, insertCrewRequestSchema, insertCrewApplicationSchema, CREW_CATEGORIES, users, ragDocuments, documents, insertRegioDealSchema, crewApplications, crewRequests, bedrijfsprofielen, dailyCourses, dailyCourseProgress, insertDailyCourseSchema, LOKALE_ACTIE_DOELGROEPEN } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { createMollieClient } from "@mollie/api-client";
@@ -5472,20 +5472,51 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
     }
   });
 
+  // Server-side strikt schema voor lokale-acties: voorkomt javascript:/data:
+  // URL-schemes, dwingt e-mail/lengte af onafhankelijk van de UI.
+  const strictLokaleActieBaseSchema = z.object({
+    titel: z.string().trim().min(5, "Titel moet minimaal 5 tekens bevatten").max(255),
+    beschrijving: z.string().trim().min(20, "Beschrijving moet minimaal 20 tekens bevatten"),
+    locatie: z.string().trim().min(2, "Vul een locatie in").max(255),
+    regio: z.string().trim().min(2, "Vul een regio in").max(255),
+    doelgroep: z.enum(LOKALE_ACTIE_DOELGROEPEN),
+    datum: z.union([z.string(), z.date(), z.null()]).optional(),
+    externeLink: z
+      .string()
+      .trim()
+      .url("Vul een geldige URL in")
+      .refine(
+        (v) => /^https?:\/\//i.test(v),
+        "Alleen http(s)-links zijn toegestaan",
+      )
+      .or(z.literal(""))
+      .nullish(),
+    contactEmail: z.string().trim().email("Ongeldig e-mailadres").or(z.literal("")).nullish(),
+    bedrijfsnaam: z.string().trim().max(255).nullish(),
+  });
+
   // POST /api/lokale-acties — nieuwe actie aanmaken (Pro-only)
   app.post("/api/lokale-acties", requireAuth, requirePro, async (req, res) => {
     try {
-      const { insertLokaleActieSchema } = await import("@shared/schema");
-      const body = {
-        ...req.body,
-        ownerUserId: req.user!.id,
-        datum: req.body.datum ? new Date(req.body.datum) : null,
-      };
-      const parsed = insertLokaleActieSchema.safeParse(body);
+      const parsed = strictLokaleActieBaseSchema.safeParse(req.body ?? {});
       if (!parsed.success) {
         return res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Ongeldige invoer" });
       }
-      const item = await storage.createLokaleActie({ ...parsed.data, ownerUserId: req.user!.id });
+      const d = parsed.data;
+      const datumValue =
+        d.datum instanceof Date ? d.datum : typeof d.datum === "string" && d.datum ? new Date(d.datum) : null;
+      const item = await storage.createLokaleActie({
+        ownerUserId: req.user!.id,
+        titel: d.titel,
+        beschrijving: d.beschrijving,
+        locatie: d.locatie,
+        regio: d.regio,
+        doelgroep: d.doelgroep,
+        datum: datumValue,
+        externeLink: d.externeLink ? d.externeLink : null,
+        contactEmail: d.contactEmail ? d.contactEmail : null,
+        bedrijfsnaam: d.bedrijfsnaam ? d.bedrijfsnaam : null,
+      });
       return res.status(201).json(item);
     } catch (err) {
       console.error("[LokaleActies] fout bij aanmaken:", err);
@@ -5501,7 +5532,6 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
       if (existing.ownerUserId !== req.user!.id) {
         return res.status(403).json({ error: "Geen toegang" });
       }
-      const { insertLokaleActieSchema } = await import("@shared/schema");
       // Whitelist: voorkom dat ownerUserId of status via PATCH meekomt.
       const allowed: Record<string, unknown> = {};
       const editableKeys = [
@@ -5512,16 +5542,20 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
       for (const k of editableKeys) {
         if (k in body) allowed[k] = body[k];
       }
-      // datum normaliseren — alléén als de client het expliciet meestuurt.
-      if ("datum" in allowed) {
-        const v = allowed.datum;
-        allowed.datum = typeof v === "string" && v ? new Date(v) : null;
-      }
-      const parsed = insertLokaleActieSchema.partial().safeParse(allowed);
+      const parsed = strictLokaleActieBaseSchema.partial().safeParse(allowed);
       if (!parsed.success) {
         return res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Ongeldige invoer" });
       }
-      const updated = await storage.updateLokaleActie(req.params.id, req.user!.id, parsed.data);
+      const d = parsed.data;
+      const updates: Record<string, unknown> = { ...d };
+      if ("datum" in d) {
+        updates.datum =
+          d.datum instanceof Date ? d.datum : typeof d.datum === "string" && d.datum ? new Date(d.datum) : null;
+      }
+      if ("externeLink" in d) updates.externeLink = d.externeLink ? d.externeLink : null;
+      if ("contactEmail" in d) updates.contactEmail = d.contactEmail ? d.contactEmail : null;
+      if ("bedrijfsnaam" in d) updates.bedrijfsnaam = d.bedrijfsnaam ? d.bedrijfsnaam : null;
+      const updated = await storage.updateLokaleActie(req.params.id, req.user!.id, updates);
       if (!updated) return res.status(404).json({ error: "Niet gevonden of geen toegang" });
       return res.json(updated);
     } catch (err) {

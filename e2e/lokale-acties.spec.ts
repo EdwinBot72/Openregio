@@ -90,6 +90,47 @@ test.describe("/lokale-acties", () => {
     await ctx.dispose();
   });
 
+  test("Server weigert onveilige externeLink schemes (javascript:/data:)", async ({
+    context,
+    baseURL,
+  }) => {
+    await registerAndAuth(context, baseURL!, "pro", "e2e-unsafe-url");
+
+    const base = {
+      titel: "Veilige titel test",
+      beschrijving: "Beschrijving die voldoet aan de minimale lengte voor validatie.",
+      locatie: "Plein",
+      regio: "TestStad",
+      doelgroep: "iedereen",
+    };
+
+    for (const link of ["javascript:alert(1)", "data:text/html,<script>", "ftp://example.com/x"]) {
+      const res = await context.request.post("/api/lokale-acties", {
+        data: { ...base, externeLink: link },
+      });
+      expect(res.status(), `verwachte 400 voor ${link}`).toBe(400);
+    }
+
+    // Geldige https-link wordt geaccepteerd
+    const ok = await context.request.post("/api/lokale-acties", {
+      data: { ...base, externeLink: "https://example.com/event" },
+    });
+    expect(ok.ok()).toBeTruthy();
+  });
+
+  test("Server weigert ongeldig contactEmail", async ({ context, baseURL }) => {
+    await registerAndAuth(context, baseURL!, "pro", "e2e-bad-email");
+    const res = await context.request.post("/api/lokale-acties", {
+      data: {
+        titel: "Titel met genoeg tekens",
+        beschrijving: "Beschrijving lang genoeg om validatie te halen.",
+        locatie: "Plein", regio: "TestStad", doelgroep: "iedereen",
+        contactEmail: "geen-geldig-emailadres",
+      },
+    });
+    expect(res.status()).toBe(400);
+  });
+
   test("Pro maakt actie aan en ziet deze terug op /vandaag", async ({
     page,
     context,
