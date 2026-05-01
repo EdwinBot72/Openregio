@@ -736,6 +736,35 @@ export default function LokaleActiesPage() {
                     )}
                   </div>
                 )}
+                {user?.id && detail.ownerUserId === user.id && (
+                  <div className="flex flex-wrap gap-2 border-t pt-3" data-testid="detail-owner-acties">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => { const d = detail; setDetail(null); openBewerken(d); }}
+                      data-testid="button-detail-bewerk"
+                    >
+                      <Pencil className="mr-1.5 h-3 w-3" /> Bewerken
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => { verlopenMutation.mutate(detail.id); setDetail(null); }}
+                      disabled={verlopenMutation.isPending}
+                      data-testid="button-detail-verlopen"
+                    >
+                      <CheckCircle2 className="mr-1.5 h-3 w-3" /> Markeer verlopen
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => { const d = detail; setDetail(null); setConfirmDelete(d); }}
+                      data-testid="button-detail-verwijder"
+                    >
+                      <Trash2 className="mr-1.5 h-3 w-3" /> Verwijderen
+                    </Button>
+                  </div>
+                )}
               </div>
             </>
           )}
