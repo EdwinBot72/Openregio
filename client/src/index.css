@@ -372,4 +372,26 @@
   .border.hover-elevate:not(.no-hover-interaction-elevate)::after {
     inset: -1px;
   }
+
+  /* OpenRegio Vandaag — trendy KPI tegel met subtiele accent-onderlijn die op hover opdoemt.
+     Geen overflow:hidden zodat hover-elevate blijft werken. */
+  .or-kpi-trendy::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: var(--or-accent, #1f5fae);
+    border-radius: 0 0 16px 16px;
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform .35s cubic-bezier(.2,.8,.2,1);
+    z-index: 1;
+    pointer-events: none;
+  }
+  .or-kpi-trendy:hover::before,
+  .or-kpi-trendy:focus-visible::before {
+    transform: scaleX(1);
+  }
 }

@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
@@ -10,7 +11,8 @@ import {
   Store,
   FolderOpen,
   CheckCircle2,
-  ArrowRight,
+  ArrowUpRight,
+  ChevronRight,
   MapPin,
   Plus,
   Building2,
@@ -19,6 +21,12 @@ import {
   Map as MapIcon,
   Compass,
   Tag,
+  HelpCircle,
+  FileText,
+  MessageSquare,
+  Briefcase,
+  Pencil,
+  Sparkles,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { nl } from "date-fns/locale";
@@ -73,10 +81,32 @@ const CATEGORIE_LABELS: Record<string, string> = {
   transport: "Transport & Logistiek",
 };
 
+/* OpenRegio palet (donkerblauw / blauw / oranje) + tints */
+const C = {
+  donker: "#0b2240",
+  blauw: "#1f5fae",
+  oranje: "#f28a1a",
+  oranjeDiep: "#c2410c",
+  donkerTintBg: "#eef2f9",
+  donkerTintBgZacht: "#f4f7fc",
+  blauwTintBg: "#eaf2ff",
+  blauwTintBgZacht: "#f5f9ff",
+  oranjeTintBg: "#fff2e0",
+  oranjeTintBgZacht: "#fff8ef",
+  border: "#e6ebf2",
+  borderBlauw: "#cfe1ff",
+  borderOranje: "#fde6c8",
+  tekst: "#475569",
+  tekstZacht: "#64748b",
+  tekstHeelZacht: "#94a3b8",
+};
+
+/* Urgentie → OpenRegio tints (geen rainbow). Legacy "laag" wordt behandeld als "info". */
 const URGENTIE_KLEUR: Record<string, { bg: string; fg: string; label: string }> = {
-  hoog: { bg: "#fef2f2", fg: "#b91c1c", label: "Urgent" },
-  normaal: { bg: "#eff6ff", fg: "#1f5fae", label: "Update" },
-  laag: { bg: "#f8fafc", fg: "#64748b", label: "Info" },
+  hoog: { bg: C.oranjeTintBg, fg: C.oranjeDiep, label: "Urgent" },
+  normaal: { bg: C.blauwTintBg, fg: C.blauw, label: "Update" },
+  info: { bg: C.donkerTintBg, fg: C.donker, label: "Info" },
+  laag: { bg: C.donkerTintBg, fg: C.donker, label: "Info" },
 };
 
 const POST_TYPE_LABEL: Record<string, string> = {
@@ -86,6 +116,38 @@ const POST_TYPE_LABEL: Record<string, string> = {
   lead: "Lead",
   event: "Event",
   update: "Update",
+};
+
+const POST_TYPE_ICON: Record<string, typeof Bell> = {
+  vraag: HelpCircle,
+  aanbieding: Sparkles,
+  aanbod: Sparkles,
+  lead: TrendingUp,
+  event: Bell,
+  update: Newspaper,
+};
+
+const DOSSIER_STATUS: Record<string, { label: string; icon: typeof Bell; tint: "blauw" | "donker" | "oranje" }> = {
+  intake: { label: "Intake", icon: Compass, tint: "blauw" },
+  extracted: { label: "Geanalyseerd", icon: FileText, tint: "donker" },
+  questions: { label: "Vragen open", icon: HelpCircle, tint: "oranje" },
+  response_received: { label: "Antwoord binnen", icon: MessageSquare, tint: "blauw" },
+  generated: { label: "Concept klaar", icon: FileText, tint: "blauw" },
+  sent: { label: "Verzonden", icon: ArrowUpRight, tint: "blauw" },
+  ingebreke_gesteld: { label: "Ingebreke gesteld", icon: AlertCircle, tint: "oranje" },
+  closed: { label: "Afgesloten", icon: CheckCircle2, tint: "donker" },
+};
+
+const TINT_BG: Record<"blauw" | "donker" | "oranje", string> = {
+  blauw: C.blauwTintBg,
+  donker: C.donkerTintBg,
+  oranje: C.oranjeTintBg,
+};
+
+const TINT_FG: Record<"blauw" | "donker" | "oranje", string> = {
+  blauw: C.blauw,
+  donker: C.donker,
+  oranje: C.oranjeDiep,
 };
 
 const ACTIE_DOSSIER_STATUSSEN = new Set(["intake", "extracted", "questions", "response_received"]);
@@ -107,59 +169,107 @@ function daysSince(value: string | Date | null | undefined): number {
   return Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
 }
 
+/* ─────────────────────────────────────────────────────────────
+   SectieKop — leidend icoon links, icon-button rechts (geen zin-link)
+───────────────────────────────────────────────────────────── */
 function SectieKop({
+  icon: Icon,
+  tint = "blauw",
   titel,
   subtitel,
   bekijkAlles,
-  bekijkAllesLabel = "Bekijk alles",
+  bekijkAllesAriaLabel,
   rechts,
 }: {
+  icon: typeof Bell;
+  tint?: "blauw" | "donker" | "oranje";
   titel: string;
   subtitel?: string;
   bekijkAlles?: string;
-  bekijkAllesLabel?: string;
+  bekijkAllesAriaLabel?: string;
   rechts?: React.ReactNode;
 }) {
   return (
     <div
       style={{
         display: "flex",
-        alignItems: "flex-start",
+        alignItems: "center",
         justifyContent: "space-between",
-        gap: 16,
-        marginBottom: 14,
+        gap: 12,
+        marginBottom: 12,
         flexWrap: "wrap",
       }}
     >
-      <div>
-        <h2 style={{ fontSize: 17, fontWeight: 800, color: "#0b2240", margin: 0, letterSpacing: "-.2px" }}>
-          {titel}
-        </h2>
-        {subtitel && (
-          <p style={{ fontSize: 13, color: "#64748b", margin: "4px 0 0", lineHeight: 1.5 }}>
-            {subtitel}
-          </p>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, minWidth: 0, flex: "1 1 220px" }}>
+        <span
+          aria-hidden
+          style={{
+            display: "inline-flex",
+            width: 32,
+            height: 32,
+            borderRadius: 10,
+            background: TINT_BG[tint],
+            color: TINT_FG[tint],
+            alignItems: "center",
+            justifyContent: "center",
+            flexShrink: 0,
+          }}
+        >
+          <Icon className="h-4 w-4" />
+        </span>
+        <div style={{ minWidth: 0 }}>
+          <h2
+            style={{
+              fontSize: 16,
+              fontWeight: 800,
+              color: C.donker,
+              margin: 0,
+              letterSpacing: "-.2px",
+              lineHeight: 1.2,
+            }}
+          >
+            {titel}
+          </h2>
+          {subtitel && (
+            <p
+              style={{
+                fontSize: 12,
+                color: C.tekstZacht,
+                margin: "2px 0 0",
+                lineHeight: 1.45,
+              }}
+            >
+              {subtitel}
+            </p>
+          )}
+        </div>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+        {rechts}
+        {bekijkAlles && (
+          <Link
+            href={bekijkAlles}
+            aria-label={bekijkAllesAriaLabel ?? `Bekijk alles van ${titel}`}
+            data-testid={`link-bekijk-alles-${titel.toLowerCase().replace(/\s+/g, "-")}`}
+            className="hover-elevate"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              justifyContent: "center",
+              width: 32,
+              height: 32,
+              borderRadius: 999,
+              background: "transparent",
+              color: C.blauw,
+              border: `1px solid ${C.border}`,
+              textDecoration: "none",
+              flexShrink: 0,
+            }}
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Link>
         )}
       </div>
-      {rechts ? (
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>{rechts}</div>
-      ) : bekijkAlles ? (
-        <Link
-          href={bekijkAlles}
-          style={{
-            fontSize: 13,
-            fontWeight: 700,
-            color: "#1f5fae",
-            textDecoration: "none",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 4,
-          }}
-          data-testid={`link-bekijk-alles-${titel.toLowerCase().replace(/\s+/g, "-")}`}
-        >
-          {bekijkAllesLabel} <ArrowRight className="h-3.5 w-3.5" />
-        </Link>
-      ) : null}
     </div>
   );
 }
@@ -174,7 +284,7 @@ function LegeStaat({
   cta?: { href: string; label: string };
 }) {
   return (
-    <div style={{ textAlign: "center", padding: "20px 12px", color: "#94a3b8", fontSize: 13 }}>
+    <div style={{ textAlign: "center", padding: "18px 12px", color: C.tekstHeelZacht, fontSize: 13 }}>
       <Icon className="h-7 w-7" style={{ margin: "0 auto 8px", opacity: 0.45 }} />
       <p style={{ margin: 0 }}>{tekst}</p>
       {cta && (
@@ -190,6 +300,9 @@ function LegeStaat({
   );
 }
 
+/* ─────────────────────────────────────────────────────────────
+   KPI-tegel — trendy met accent-onderlijn (or-kpi-trendy)
+───────────────────────────────────────────────────────────── */
 function KpiTile({
   icon: Icon,
   value,
@@ -197,6 +310,8 @@ function KpiTile({
   sub,
   href,
   testId,
+  accent,
+  accentBg,
 }: {
   icon: typeof Bell;
   value: number | string;
@@ -204,6 +319,8 @@ function KpiTile({
   sub: string;
   href: string;
   testId: string;
+  accent: string;
+  accentBg: string;
 }) {
   return (
     <Link
@@ -212,53 +329,104 @@ function KpiTile({
       style={{
         display: "block",
         background: "#fff",
-        border: "1px solid #e6ebf2",
+        border: `1px solid ${C.border}`,
         borderRadius: 16,
-        padding: "16px 18px",
+        padding: "14px 16px",
         textDecoration: "none",
         color: "inherit",
-      }}
-      className="hover-elevate"
+        position: "relative",
+        ["--or-accent" as string]: accent,
+      } as CSSProperties}
+      className="hover-elevate or-kpi-trendy"
     >
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 10 }}>
-        <div
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
+        <span
           style={{
-            background: "#eff6ff",
-            color: "#1f5fae",
-            borderRadius: 12,
-            padding: 9,
+            background: accentBg,
+            color: accent,
+            borderRadius: 10,
+            padding: 8,
             display: "inline-flex",
           }}
         >
           <Icon className="h-4 w-4" />
-        </div>
-        <span style={{ fontSize: 11, fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: ".4px" }}>
+        </span>
+        <span style={{ fontSize: 10, fontWeight: 800, color: C.tekstHeelZacht, textTransform: "uppercase", letterSpacing: ".5px" }}>
           Nu
         </span>
       </div>
       <div style={{ display: "flex", alignItems: "baseline", gap: 6 }}>
-        <span style={{ fontSize: 26, fontWeight: 800, color: "#0b2240", lineHeight: 1 }}>{value}</span>
-        <span style={{ fontSize: 12, color: "#64748b", fontWeight: 600 }}>{sub}</span>
+        <span style={{ fontSize: 24, fontWeight: 800, color: C.donker, lineHeight: 1, letterSpacing: "-.5px" }}>{value}</span>
+        <span style={{ fontSize: 11, color: C.tekstZacht, fontWeight: 700 }}>{sub}</span>
       </div>
-      <div style={{ marginTop: 6, fontSize: 13, color: "#475569" }}>{label}</div>
+      <div style={{ marginTop: 4, fontSize: 12, color: C.tekst, fontWeight: 600 }}>{label}</div>
     </Link>
   );
 }
 
-function StatusBolletje({ kleur }: { kleur: string }) {
+/* ─────────────────────────────────────────────────────────────
+   Mini-icoon "status" voor lijstitems (ipv blanco bolletje)
+───────────────────────────────────────────────────────────── */
+function StatusIcon({
+  icon: Icon,
+  tint,
+}: {
+  icon: typeof Bell;
+  tint: "blauw" | "donker" | "oranje";
+}) {
   return (
     <span
       aria-hidden
       style={{
-        display: "inline-block",
-        width: 10,
-        height: 10,
-        borderRadius: 999,
-        background: kleur,
-        marginTop: 6,
+        display: "inline-flex",
+        width: 28,
+        height: 28,
+        borderRadius: 9,
+        background: TINT_BG[tint],
+        color: TINT_FG[tint],
+        alignItems: "center",
+        justifyContent: "center",
         flexShrink: 0,
       }}
-    />
+    >
+      <Icon className="h-3.5 w-3.5" />
+    </span>
+  );
+}
+
+/* Compacte chip — vervangt veel rainbow-pillen */
+function Chip({
+  icon: Icon,
+  tint,
+  label,
+  testId,
+}: {
+  icon?: typeof Bell;
+  tint: "blauw" | "donker" | "oranje";
+  label: string;
+  testId?: string;
+}) {
+  return (
+    <span
+      data-testid={testId}
+      style={{
+        fontSize: 10,
+        fontWeight: 800,
+        textTransform: "uppercase",
+        letterSpacing: ".4px",
+        background: TINT_BG[tint],
+        color: TINT_FG[tint],
+        padding: "3px 8px",
+        borderRadius: 999,
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 4,
+        whiteSpace: "nowrap",
+      }}
+    >
+      {Icon && <Icon className="h-3 w-3" />}
+      {label}
+    </span>
   );
 }
 
@@ -322,7 +490,7 @@ export default function VandaagPage() {
   const regioLabel = profiel?.regio || user?.region || "jouw regio";
 
   const sortedSignalen = [...signalen].sort((a, b) => {
-    const order: Record<string, number> = { hoog: 0, normaal: 1, laag: 2 };
+    const order: Record<string, number> = { hoog: 0, normaal: 1, info: 2, laag: 2 };
     const ua = order[a.urgentie] ?? 1;
     const ub = order[b.urgentie] ?? 1;
     if (ua !== ub) return ua - ub;
@@ -331,7 +499,6 @@ export default function VandaagPage() {
     return db - da;
   });
 
-  // KPI-tellingen
   const updatesDezeWeek = signalen.filter((s) => daysSince(s.datum) <= 7).length;
   const acties = dossiers.filter((d) => d.status && ACTIE_DOSSIER_STATUSSEN.has(d.status)).length;
   const kansenCount = posts.filter((p) => {
@@ -341,7 +508,6 @@ export default function VandaagPage() {
   }).length;
   const dossiersOpen = dossiers.filter((d) => !d.status || OPEN_DOSSIER_STATUSSEN.has(d.status)).length;
 
-  // Aandacht-feed: combineer top signaal + top dossier-actie + top kans (post)
   type AandachtItem =
     | { kind: "signaal"; data: IntelSignaal }
     | { kind: "dossier"; data: WooDossierItem }
@@ -362,7 +528,6 @@ export default function VandaagPage() {
     });
   }
 
-  // "Acties voor jou" — dossiers die actie vragen
   const actieDossiers = dossiers
     .filter((d) => d.status && ACTIE_DOSSIER_STATUSSEN.has(d.status))
     .slice(0, 4);
@@ -402,25 +567,22 @@ export default function VandaagPage() {
 
   return (
     <div className="openregio-dashboard" data-testid="page-vandaag">
-      {/* Begroeting */}
+      {/* Begroeting — geen emoji meer, compacter */}
       <div className="openregio-greeting">
-        <div>
-          <h1 data-testid="text-greeting">
-            Welkom, {displayFirstName}
-            <span className="openregio-greeting-wave" role="img" aria-label="zwaaiende hand">
-              👋
-            </span>
+        <div style={{ minWidth: 0 }}>
+          <h1 data-testid="text-greeting" style={{ display: "flex", alignItems: "center", gap: 10 }}>
+            <span>Welkom, {displayFirstName}</span>
           </h1>
-          <p style={{ color: "#475569", fontSize: 14, margin: "6px 0 0", lineHeight: 1.6 }}>
-            Dit speelt nu in <strong style={{ color: "#0b2240" }}>{regioLabel}</strong>
-            {categorieLabel && <> voor <strong style={{ color: "#0b2240" }}>{categorieLabel.toLowerCase()}</strong></>} —
+          <p style={{ color: C.tekst, fontSize: 13, margin: "4px 0 0", lineHeight: 1.55 }}>
+            Dit speelt nu in <strong style={{ color: C.donker }}>{regioLabel}</strong>
+            {categorieLabel && <> voor <strong style={{ color: C.donker }}>{categorieLabel.toLowerCase()}</strong></>} —
             samengebracht voor {bedrijfsnaam}.
           </p>
         </div>
         <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
           <Link
             href="/groei/profiel"
-            className="openregio-button openregio-button-outline"
+            className="openregio-button openregio-button-outline openregio-button-small"
             data-testid="button-profiel-bekijken"
           >
             Profiel bekijken
@@ -428,7 +590,7 @@ export default function VandaagPage() {
           {!isPro && (
             <Link
               href="/lidmaatschap?plan=pro"
-              className="openregio-button openregio-button-pro"
+              className="openregio-button openregio-button-pro openregio-button-small"
               data-testid="button-upgrade-header"
             >
               Upgrade naar Pro
@@ -437,7 +599,10 @@ export default function VandaagPage() {
         </div>
       </div>
 
-      <div className="openregio-greeting-plan" style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+      <div
+        className="openregio-greeting-plan"
+        style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap", marginBottom: 16 }}
+      >
         <span
           className={`openregio-plan-badge ${isPro ? "openregio-plan-pro" : "openregio-plan-basic"}`}
           data-testid="badge-plan"
@@ -454,20 +619,19 @@ export default function VandaagPage() {
           )}
         </span>
         {stats && (
-          <span style={{ fontSize: 12, color: "#64748b" }} data-testid="text-leden-totaal">
+          <span style={{ fontSize: 12, color: C.tekstZacht }} data-testid="text-leden-totaal">
             {stats.totalMembers} ondernemers in OpenRegio
           </span>
         )}
       </div>
 
-      {/* KPI-tegels */}
+      {/* KPI-tegels — trendy met accent-onderlijn */}
       <div
         style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
-          gap: 12,
-          marginTop: 18,
-          marginBottom: 18,
+          gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))",
+          gap: 10,
+          marginBottom: 14,
         }}
         data-testid="kpi-grid"
       >
@@ -478,6 +642,8 @@ export default function VandaagPage() {
           label="Updates deze week"
           href="/regels/updates"
           testId="kpi-updates"
+          accent={C.blauw}
+          accentBg={C.blauwTintBg}
         />
         <KpiTile
           icon={CheckCircle2}
@@ -486,6 +652,8 @@ export default function VandaagPage() {
           label="Acties voor jou"
           href="/regels/woo"
           testId="kpi-acties"
+          accent={C.oranjeDiep}
+          accentBg={C.oranjeTintBg}
         />
         <KpiTile
           icon={TrendingUp}
@@ -494,6 +662,8 @@ export default function VandaagPage() {
           label="Kansen in netwerk"
           href="/network"
           testId="kpi-kansen"
+          accent={C.donker}
+          accentBg={C.donkerTintBg}
         />
         <KpiTile
           icon={FolderOpen}
@@ -502,10 +672,12 @@ export default function VandaagPage() {
           label="Lopende dossiers"
           href="/regels/woo"
           testId="kpi-dossiers"
+          accent={C.blauw}
+          accentBg={C.blauwTintBg}
         />
       </div>
 
-      {/* RegioScan-CTA: voor Pro een directe ingang, voor Basic een teaser */}
+      {/* RegioScan-CTA — compactere banner */}
       {isPro ? (
         <Link
           href="/pro/regioscan"
@@ -514,32 +686,38 @@ export default function VandaagPage() {
             display: "flex",
             flexWrap: "wrap",
             alignItems: "center",
-            gap: 14,
-            padding: "16px 18px",
-            border: "1px solid #cfe1ff",
+            gap: 12,
+            padding: "12px 14px",
+            border: `1px solid ${C.borderBlauw}`,
             borderRadius: 14,
-            background: "linear-gradient(135deg, #eaf2ff 0%, #f7faff 100%)",
+            background: `linear-gradient(135deg, ${C.blauwTintBg} 0%, ${C.blauwTintBgZacht} 100%)`,
             color: "inherit",
             textDecoration: "none",
-            marginBottom: 18,
+            marginBottom: 16,
           }}
           className="hover-elevate"
         >
-          <span style={{ display: "inline-flex", width: 44, height: 44, borderRadius: 12, background: "#1f5fae", alignItems: "center", justifyContent: "center" }}>
-            <Compass className="h-5 w-5" style={{ color: "#fff" }} />
+          <span style={{ display: "inline-flex", width: 36, height: 36, borderRadius: 10, background: C.blauw, alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Compass className="h-4 w-4" style={{ color: "#fff" }} />
           </span>
-          <span style={{ display: "flex", flexDirection: "column", flex: "1 1 220px" }}>
-            <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".5px", color: "#1f5fae" }}>
+          <span style={{ display: "flex", flexDirection: "column", flex: "1 1 220px", gap: 2 }}>
+            <span style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".5px", color: C.blauw }}>
               Pro · RegioScan
             </span>
-            <span style={{ fontSize: 16, fontWeight: 800, color: "#0b2240" }}>Doe je RegioScan</span>
-            <span style={{ fontSize: 13, color: "#475569", lineHeight: 1.5 }}>
-              Brancheafhankelijke scan met regels, kansen, op te vragen documenten en concept Woo-verzoek voor {regioLabel}.
+            <span style={{ fontSize: 14, fontWeight: 800, color: C.donker, lineHeight: 1.3 }}>
+              Doe je RegioScan voor {regioLabel}
+            </span>
+            <span style={{ fontSize: 12, color: C.tekst, lineHeight: 1.45 }}>
+              Brancheafhankelijke regels, kansen, op te vragen documenten en concept Woo-verzoek.
             </span>
           </span>
-          <span className="openregio-button openregio-button-primary" style={{ flexShrink: 0 }}>
+          <span
+            aria-hidden
+            className="openregio-button openregio-button-primary openregio-button-small"
+            style={{ flexShrink: 0 }}
+          >
             Start scan
-            <ArrowRight className="h-4 w-4" style={{ marginLeft: 6, display: "inline-block" }} />
+            <ArrowUpRight className="h-3.5 w-3.5" />
           </span>
         </Link>
       ) : (
@@ -549,43 +727,53 @@ export default function VandaagPage() {
             display: "flex",
             flexWrap: "wrap",
             alignItems: "center",
-            gap: 14,
-            padding: "16px 18px",
-            border: "1px solid #fde6c8",
+            gap: 12,
+            padding: "12px 14px",
+            border: `1px solid ${C.borderOranje}`,
             borderRadius: 14,
-            background: "linear-gradient(135deg, #fff7ed 0%, #fffbf3 100%)",
-            marginBottom: 18,
+            background: `linear-gradient(135deg, ${C.oranjeTintBg} 0%, ${C.oranjeTintBgZacht} 100%)`,
+            marginBottom: 16,
           }}
         >
-          <span style={{ display: "inline-flex", width: 44, height: 44, borderRadius: 12, background: "#f28a1a", alignItems: "center", justifyContent: "center" }}>
-            <Compass className="h-5 w-5" style={{ color: "#fff" }} />
+          <span style={{ display: "inline-flex", width: 36, height: 36, borderRadius: 10, background: C.oranje, alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Compass className="h-4 w-4" style={{ color: "#fff" }} />
           </span>
-          <span style={{ display: "flex", flexDirection: "column", flex: "1 1 220px" }}>
-            <span style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".5px", color: "#c2410c" }}>
-              Pro-functie · RegioScan
+          <span style={{ display: "flex", flexDirection: "column", flex: "1 1 220px", gap: 2 }}>
+            <span style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".5px", color: C.oranjeDiep }}>
+              Pro · RegioScan
             </span>
-            <span style={{ fontSize: 16, fontWeight: 800, color: "#0b2240" }}>Brengt jouw regels en kansen in kaart</span>
-            <span style={{ fontSize: 13, color: "#475569", lineHeight: 1.5 }}>
-              Lokale besluiten, kansen, op te vragen documenten en een concept Woo-verzoek — inclusief in Pro.
+            <span style={{ fontSize: 14, fontWeight: 800, color: C.donker, lineHeight: 1.3 }}>
+              Brengt jouw regels en kansen in kaart
+            </span>
+            <span style={{ fontSize: 12, color: C.tekst, lineHeight: 1.45 }}>
+              Lokale besluiten, kansen, op te vragen documenten en concept Woo-verzoek — inclusief in Pro.
             </span>
           </span>
           <Link
             href="/lidmaatschap?plan=pro"
-            className="openregio-button openregio-button-pro"
+            className="openregio-button openregio-button-pro openregio-button-small"
             style={{ flexShrink: 0 }}
             data-testid="cta-regioscan-upgrade"
           >
-            Upgrade naar Pro
+            Upgrade
+            <ArrowUpRight className="h-3.5 w-3.5" />
           </Link>
         </div>
       )}
 
-      {/* 1. Wat vraagt nu aandacht? — 3-kolom grid */}
-      <section className="openregio-card" data-testid="section-aandacht">
+      {/* 1. Wat vraagt nu aandacht? */}
+      <section
+        className="openregio-card"
+        data-testid="section-aandacht"
+        style={{ padding: "18px 20px", borderRadius: 18 }}
+      >
         <SectieKop
+          icon={AlertCircle}
+          tint="oranje"
           titel="Wat vraagt nu aandacht?"
-          subtitel={`De belangrijkste regelupdate, openstaande dossier-actie en lopende kans voor ${displayFirstName}.`}
+          subtitel={`Belangrijkste regelupdate, openstaande dossier-actie en lopende kans voor ${displayFirstName}.`}
           bekijkAlles="/regels/updates"
+          bekijkAllesAriaLabel="Bekijk alle regelupdates"
         />
         {signalenLoading || dossiersLoading || postsLoading ? (
           <Skeleton className="h-20 w-full" />
@@ -600,13 +788,19 @@ export default function VandaagPage() {
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-              gap: 12,
+              gap: 10,
             }}
           >
             {aandachtItems.map((item) => {
               if (item.kind === "signaal") {
                 const s = item.data;
                 const u = URGENTIE_KLEUR[s.urgentie] ?? URGENTIE_KLEUR.normaal;
+                const tint: "blauw" | "donker" | "oranje" =
+                  s.urgentie === "hoog"
+                    ? "oranje"
+                    : (s.urgentie === "info" || (s.urgentie as string) === "laag")
+                      ? "donker"
+                      : "blauw";
                 return (
                   <Link
                     key={`s-${s.id}`}
@@ -614,26 +808,24 @@ export default function VandaagPage() {
                     data-testid={`item-aandacht-signaal-${s.id}`}
                     style={{
                       display: "flex", flexDirection: "column", gap: 8,
-                      padding: "14px 16px", border: "1px solid #e6ebf2", borderRadius: 14,
-                      textDecoration: "none", color: "inherit", background: "#fafbfd",
+                      padding: "12px 14px", border: `1px solid ${C.border}`, borderRadius: 12,
+                      textDecoration: "none", color: "inherit", background: "#fff",
                     }}
                     className="hover-elevate"
                   >
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-                      <span style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".5px", background: u.bg, color: u.fg, padding: "3px 8px", borderRadius: 999 }}>
-                        Regelupdate · {u.label}
+                      <Chip icon={Newspaper} tint={tint} label={`Regelupdate · ${u.label}`} />
+                      <span style={{ display: "inline-flex", borderRadius: 8, padding: 5, background: u.bg, color: u.fg }}>
+                        <Newspaper className="h-3.5 w-3.5" />
                       </span>
-                      <div style={{ borderRadius: 10, padding: 7, background: u.bg, color: u.fg, display: "inline-flex" }}>
-                        <Newspaper className="h-4 w-4" />
-                      </div>
                     </div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "#0b2240", lineHeight: 1.4 }}>{s.titel}</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: C.donker, lineHeight: 1.4 }}>{s.titel}</div>
                     {s.samenvatting && (
-                      <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                      <div style={{ fontSize: 12, color: C.tekst, lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                         {s.samenvatting}
                       </div>
                     )}
-                    <div style={{ display: "flex", gap: 10, marginTop: "auto", paddingTop: 4, fontSize: 11, color: "#94a3b8", flexWrap: "wrap" }}>
+                    <div style={{ display: "flex", gap: 10, marginTop: "auto", paddingTop: 2, fontSize: 11, color: C.tekstHeelZacht, flexWrap: "wrap" }}>
                       <span style={{ display: "inline-flex", alignItems: "center", gap: 3 }}>
                         <MapPin className="h-3 w-3" />{s.regio}
                       </span>
@@ -651,31 +843,30 @@ export default function VandaagPage() {
                     data-testid={`item-aandacht-dossier-${d.id}`}
                     style={{
                       display: "flex", flexDirection: "column", gap: 8,
-                      padding: "14px 16px", border: "1px solid #fed7aa", borderRadius: 14,
-                      textDecoration: "none", color: "inherit", background: "#fff7ed",
+                      padding: "12px 14px", border: `1px solid ${C.borderOranje}`, borderRadius: 12,
+                      textDecoration: "none", color: "inherit", background: C.oranjeTintBgZacht,
                     }}
                     className="hover-elevate"
                   >
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-                      <span style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".5px", background: "#fff", color: "#c2410c", padding: "3px 8px", borderRadius: 999 }}>
-                        Actie · Dossier
+                      <Chip icon={AlertCircle} tint="oranje" label="Actie · Dossier" />
+                      <span style={{ display: "inline-flex", borderRadius: 8, padding: 5, background: "#fff", color: C.oranjeDiep }}>
+                        <AlertCircle className="h-3.5 w-3.5" />
                       </span>
-                      <div style={{ borderRadius: 10, padding: 7, background: "#fff", color: "#c2410c", display: "inline-flex" }}>
-                        <AlertCircle className="h-4 w-4" />
-                      </div>
                     </div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: "#0b2240", lineHeight: 1.4 }}>{d.subject}</div>
-                    <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.5 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: C.donker, lineHeight: 1.4 }}>{d.subject}</div>
+                    <div style={{ fontSize: 12, color: C.tekst, lineHeight: 1.5 }}>
                       Open dit dossier en zet de volgende stap.
                     </div>
-                    <div style={{ display: "flex", gap: 10, marginTop: "auto", paddingTop: 4, fontSize: 11, color: "#94a3b8", flexWrap: "wrap" }}>
+                    <div style={{ display: "flex", gap: 10, marginTop: "auto", paddingTop: 2, fontSize: 11, color: C.tekstHeelZacht, flexWrap: "wrap" }}>
                       <span>{d.authority}</span>
-                      {d.status && <span>· {d.status}</span>}
+                      {d.status && <span>· {DOSSIER_STATUS[d.status]?.label ?? d.status}</span>}
                     </div>
                   </Link>
                 );
               }
               const p = item.data;
+              const PostIcon = POST_TYPE_ICON[p.type] ?? TrendingUp;
               return (
                 <Link
                   key={`p-${p.id}`}
@@ -683,26 +874,24 @@ export default function VandaagPage() {
                   data-testid={`item-aandacht-kans-${p.id}`}
                   style={{
                     display: "flex", flexDirection: "column", gap: 8,
-                    padding: "14px 16px", border: "1px solid #d1fae5", borderRadius: 14,
-                    textDecoration: "none", color: "inherit", background: "#ecfdf5",
+                    padding: "12px 14px", border: `1px solid ${C.borderBlauw}`, borderRadius: 12,
+                    textDecoration: "none", color: "inherit", background: C.blauwTintBgZacht,
                   }}
                   className="hover-elevate"
                 >
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-                    <span style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".5px", background: "#fff", color: "#047857", padding: "3px 8px", borderRadius: 999 }}>
-                      Kans · {POST_TYPE_LABEL[p.type] ?? p.type}
+                    <Chip icon={PostIcon} tint="blauw" label={`Kans · ${POST_TYPE_LABEL[p.type] ?? p.type}`} />
+                    <span style={{ display: "inline-flex", borderRadius: 8, padding: 5, background: "#fff", color: C.blauw }}>
+                      <TrendingUp className="h-3.5 w-3.5" />
                     </span>
-                    <div style={{ borderRadius: 10, padding: 7, background: "#fff", color: "#047857", display: "inline-flex" }}>
-                      <TrendingUp className="h-4 w-4" />
-                    </div>
                   </div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#0b2240", lineHeight: 1.4 }}>{p.title}</div>
+                  <div style={{ fontSize: 14, fontWeight: 700, color: C.donker, lineHeight: 1.4 }}>{p.title}</div>
                   {p.body && (
-                    <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                    <div style={{ fontSize: 12, color: C.tekst, lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                       {p.body}
                     </div>
                   )}
-                  <div style={{ display: "flex", gap: 10, marginTop: "auto", paddingTop: 4, fontSize: 11, color: "#94a3b8", flexWrap: "wrap" }}>
+                  <div style={{ display: "flex", gap: 10, marginTop: "auto", paddingTop: 2, fontSize: 11, color: C.tekstHeelZacht, flexWrap: "wrap" }}>
                     <span>{p.region}</span>
                     <span>· {relativeTime(p.createdAt)}</span>
                   </div>
@@ -713,25 +902,28 @@ export default function VandaagPage() {
         )}
       </section>
 
-      {/* 2. Twee-kolom rij: Samenwerken & vragen + Acties voor jou */}
+      {/* 2. Twee-kolom rij */}
       <div
         style={{
           display: "grid",
           gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))",
-          gap: 16,
-          marginTop: 16,
+          gap: 14,
+          marginTop: 14,
           alignItems: "start",
         }}
       >
         <section
           className="openregio-card"
           data-testid="section-vragen"
+          style={{ padding: "18px 20px", borderRadius: 18 }}
         >
           <SectieKop
+            icon={Users}
+            tint="blauw"
             titel="Samenwerken & vragen"
             subtitel="Wat ondernemers nu delen — vragen, aanbod, leads en events."
             bekijkAlles="/network"
-            bekijkAllesLabel="Naar netwerk"
+            bekijkAllesAriaLabel="Naar netwerk"
           />
           {postsLoading ? (
             <Skeleton className="h-20 w-full" />
@@ -742,54 +934,57 @@ export default function VandaagPage() {
               cta={{ href: "/network", label: "Plaats post" }}
             />
           ) : (
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-                gap: 10,
-              }}
-            >
-              {samenwerkPosts.map((p) => (
-                <Link
-                  key={p.id}
-                  href="/network"
-                  data-testid={`item-post-${p.id}`}
-                  style={{
-                    display: "flex", flexDirection: "column", gap: 6,
-                    padding: "12px 14px", border: "1px solid #e6ebf2", borderRadius: 12,
-                    textDecoration: "none", color: "inherit", background: "#fff",
-                  }}
-                  className="hover-elevate"
-                >
-                  <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
-                    <span style={{ fontSize: 10, fontWeight: 800, textTransform: "uppercase", background: "#f0f4ff", color: "#1f5fae", padding: "2px 8px", borderRadius: 999 }}>
-                      {POST_TYPE_LABEL[p.type] ?? p.type}
-                    </span>
-                    <span style={{ fontSize: 11, color: "#94a3b8" }}>{relativeTime(p.createdAt)}</span>
-                  </div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#0b2240", lineHeight: 1.4 }}>{p.title}</div>
-                  {p.body && (
-                    <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                      {p.body}
-                    </div>
-                  )}
-                  <div style={{ fontSize: 11, color: "#94a3b8", marginTop: "auto", display: "inline-flex", alignItems: "center", gap: 3 }}>
-                    <MapPin className="h-3 w-3" />{p.region}
-                  </div>
-                </Link>
-              ))}
-            </div>
+            <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+              {samenwerkPosts.map((p) => {
+                const PostIcon = POST_TYPE_ICON[p.type] ?? Newspaper;
+                return (
+                  <li key={p.id}>
+                    <Link
+                      href="/network"
+                      data-testid={`item-post-${p.id}`}
+                      style={{
+                        display: "flex", gap: 10, alignItems: "flex-start",
+                        padding: "10px 12px", border: `1px solid ${C.border}`, borderRadius: 12,
+                        textDecoration: "none", color: "inherit", background: "#fff",
+                      }}
+                      className="hover-elevate"
+                    >
+                      <StatusIcon icon={PostIcon} tint="blauw" />
+                      <div style={{ minWidth: 0, flex: 1 }}>
+                        <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap", marginBottom: 2 }}>
+                          <Chip tint="blauw" label={POST_TYPE_LABEL[p.type] ?? p.type} />
+                          <span style={{ fontSize: 11, color: C.tekstHeelZacht }}>{relativeTime(p.createdAt)}</span>
+                        </div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: C.donker, lineHeight: 1.35 }}>{p.title}</div>
+                        {p.body && (
+                          <div style={{ fontSize: 12, color: C.tekstZacht, lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", marginTop: 2 }}>
+                            {p.body}
+                          </div>
+                        )}
+                        <div style={{ fontSize: 11, color: C.tekstHeelZacht, marginTop: 4, display: "inline-flex", alignItems: "center", gap: 3 }}>
+                          <MapPin className="h-3 w-3" />{p.region}
+                        </div>
+                      </div>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
           )}
         </section>
 
         <section
           className="openregio-card"
           data-testid="section-acties"
+          style={{ padding: "18px 20px", borderRadius: 18 }}
         >
           <SectieKop
+            icon={CheckCircle2}
+            tint="oranje"
             titel="Acties voor jou"
             subtitel="Concrete vervolgstappen op je eigen dossiers."
             bekijkAlles="/regels/woo"
+            bekijkAllesAriaLabel="Bekijk alle dossiers"
           />
           {dossiersLoading ? (
             <Skeleton className="h-16 w-full" />
@@ -799,43 +994,44 @@ export default function VandaagPage() {
               tekst="Geen openstaande acties — alles bij. Mooi!"
             />
           ) : (
-            <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
-              {actieDossiers.map((d, idx) => {
-                const kleuren = ["#f28a1a", "#1f5fae", "#047857", "#94a3b8"];
-                const labels: Record<string, string> = {
-                  intake: "Intake",
-                  extracted: "Geanalyseerd",
-                  questions: "Vragen open",
-                  response_received: "Antwoord binnen",
-                };
-                const subLabel = d.status ? (labels[d.status] ?? d.status) : "Open";
+            <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+              {actieDossiers.map((d) => {
+                const meta = d.status ? DOSSIER_STATUS[d.status] : undefined;
+                const Icon = meta?.icon ?? Compass;
+                const tint = meta?.tint ?? "blauw";
+                const subLabel = meta?.label ?? d.status ?? "Open";
                 return (
                   <li key={d.id}>
                     <div
                       style={{
-                        display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12,
-                        padding: "12px 14px", border: "1px solid #e6ebf2", borderRadius: 12,
-                        background: "#fafbfd",
+                        display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10,
+                        padding: "10px 12px", border: `1px solid ${C.border}`, borderRadius: 12,
+                        background: "#fff",
                       }}
                     >
-                      <div style={{ display: "flex", gap: 10, minWidth: 0, flex: 1 }}>
-                        <StatusBolletje kleur={kleuren[idx % kleuren.length]} />
+                      <div style={{ display: "flex", gap: 10, minWidth: 0, flex: 1, alignItems: "center" }}>
+                        <StatusIcon icon={Icon} tint={tint} />
                         <div style={{ minWidth: 0 }}>
-                          <div style={{ fontSize: 13, fontWeight: 700, color: "#0b2240", lineHeight: 1.35 }}>
+                          <div style={{ fontSize: 13, fontWeight: 700, color: C.donker, lineHeight: 1.35 }}>
                             {d.subject}
                           </div>
-                          <div style={{ fontSize: 11, color: "#64748b", marginTop: 2 }}>
+                          <div style={{ fontSize: 11, color: C.tekstZacht, marginTop: 2 }}>
                             {subLabel} · {d.authority}
                           </div>
                         </div>
                       </div>
                       <Link
                         href="/regels/woo"
-                        className="openregio-button openregio-button-outline openregio-button-small"
+                        aria-label={`Open dossier ${d.subject}`}
                         data-testid={`item-actie-${d.id}`}
-                        style={{ flexShrink: 0 }}
+                        className="hover-elevate"
+                        style={{
+                          display: "inline-flex", alignItems: "center", justifyContent: "center",
+                          width: 32, height: 32, borderRadius: 999, background: "transparent",
+                          color: C.blauw, border: `1px solid ${C.border}`, textDecoration: "none", flexShrink: 0,
+                        }}
                       >
-                        Nu doen
+                        <ArrowUpRight className="h-4 w-4" />
                       </Link>
                     </div>
                   </li>
@@ -846,13 +1042,19 @@ export default function VandaagPage() {
         </section>
       </div>
 
-      {/* 3. Gezamenlijke dossiers — 3-kolom grid */}
-      <section className="openregio-card" data-testid="section-dossiers" style={{ marginTop: 16 }}>
+      {/* 3. Gezamenlijke dossiers */}
+      <section
+        className="openregio-card"
+        data-testid="section-dossiers"
+        style={{ marginTop: 14, padding: "18px 20px", borderRadius: 18 }}
+      >
         <SectieKop
+          icon={FolderOpen}
+          tint="donker"
           titel="Gezamenlijke dossiers"
           subtitel="Onderwerpen die meerdere ondernemers raken en slim gezamenlijk opgepakt kunnen worden."
           bekijkAlles="/regels/woo"
-          bekijkAllesLabel="Bekijk alle dossiers"
+          bekijkAllesAriaLabel="Bekijk alle dossiers"
         />
         {dossiersLoading ? (
           <Skeleton className="h-16 w-full" />
@@ -867,15 +1069,14 @@ export default function VandaagPage() {
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-              gap: 12,
+              gap: 10,
             }}
           >
             {topDossiers.map((d) => {
-              const statusKleur = d.status && ACTIE_DOSSIER_STATUSSEN.has(d.status)
-                ? { bg: "#fff7ed", fg: "#c2410c" }
-                : d.status === "closed"
-                  ? { bg: "#f1f5f9", fg: "#475569" }
-                  : { bg: "#eff6ff", fg: "#1f5fae" };
+              const meta = d.status ? DOSSIER_STATUS[d.status] : undefined;
+              const tint: "blauw" | "donker" | "oranje" =
+                meta?.tint ?? (d.status === "closed" ? "donker" : "blauw");
+              const StatusIco = meta?.icon ?? FolderOpen;
               const dossierHref = `/regels/woo#dossier-${d.id}`;
               return (
                 <Link
@@ -884,32 +1085,36 @@ export default function VandaagPage() {
                   data-testid={`item-dossier-${d.id}`}
                   style={{
                     display: "flex", flexDirection: "column", gap: 8,
-                    padding: "14px 16px", border: "1px solid #e6ebf2", borderRadius: 14,
-                    textDecoration: "none", color: "inherit", background: "#fafbfd",
+                    padding: "12px 14px", border: `1px solid ${C.border}`, borderRadius: 12,
+                    textDecoration: "none", color: "inherit", background: "#fff",
                   }}
                   className="hover-elevate"
                 >
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, flexWrap: "wrap" }}>
-                    <h3 style={{ margin: 0, fontSize: 15, fontWeight: 800, color: "#0b2240", lineHeight: 1.3 }}>{d.subject}</h3>
+                    <h3 style={{ margin: 0, fontSize: 14, fontWeight: 800, color: C.donker, lineHeight: 1.3 }}>{d.subject}</h3>
                     {d.status && (
-                      <span
-                        data-testid={`badge-dossier-status-${d.id}`}
-                        style={{
-                          fontSize: 10, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".4px",
-                          background: statusKleur.bg, color: statusKleur.fg,
-                          padding: "3px 8px", borderRadius: 999, flexShrink: 0, whiteSpace: "nowrap",
-                        }}
-                      >
-                        {d.status}
-                      </span>
+                      <Chip
+                        tint={tint}
+                        icon={StatusIco}
+                        label={meta?.label ?? d.status}
+                        testId={`badge-dossier-status-${d.id}`}
+                      />
                     )}
                   </div>
-                  <div style={{ fontSize: 12, color: "#64748b" }}>
+                  <div style={{ fontSize: 12, color: C.tekstZacht }}>
                     {d.authority}
                     {d.createdAt && <> · {relativeTime(d.createdAt)}</>}
                   </div>
-                  <div style={{ marginTop: "auto", display: "inline-flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 700, color: "#1f5fae" }}>
-                    Bekijk dossier <ArrowRight className="h-4 w-4" />
+                  <div style={{ marginTop: "auto", display: "flex", justifyContent: "flex-end" }}>
+                    <span
+                      aria-hidden
+                      style={{
+                        display: "inline-flex", alignItems: "center", justifyContent: "center",
+                        width: 28, height: 28, borderRadius: 999, background: C.blauwTintBg, color: C.blauw,
+                      }}
+                    >
+                      <ArrowUpRight className="h-3.5 w-3.5" />
+                    </span>
                   </div>
                 </Link>
               );
@@ -919,29 +1124,44 @@ export default function VandaagPage() {
 
         <div
           style={{
-            marginTop: 14,
-            padding: "12px 14px",
-            border: "1px dashed #cbd5e1",
-            borderRadius: 12,
-            background: "#f8fafc",
-            fontSize: 13,
-            color: "#475569",
+            marginTop: 12,
+            padding: "10px 12px",
+            border: `1px dashed #cbd5e1`,
+            borderRadius: 10,
+            background: C.donkerTintBgZacht,
+            fontSize: 12,
+            color: C.tekst,
             lineHeight: 1.55,
           }}
         >
-          <strong style={{ color: "#0b2240" }}>Slimme opzet:</strong> ondernemers hoeven niet
-          alles opnieuw uit te zoeken. Wat gezamenlijk speelt, kan worden gebundeld in
-          vragen, documenten en dossiers.
+          <strong style={{ color: C.donker }}>Slimme opzet:</strong> ondernemers hoeven niet alles
+          opnieuw uit te zoeken. Wat gezamenlijk speelt, kan worden gebundeld in vragen, documenten
+          en dossiers.
         </div>
       </section>
 
       {/* 4. Lokale marktplaats */}
-      <section className="openregio-card" data-testid="section-marktplaats" style={{ marginTop: 16 }}>
+      <section
+        className="openregio-card"
+        data-testid="section-marktplaats"
+        style={{ marginTop: 14, padding: "18px 20px", borderRadius: 18 }}
+      >
         <SectieKop
+          icon={Store}
+          tint="blauw"
           titel="Lokale marktplaats"
           subtitel="Vraag & aanbod tussen ondernemers — diensten, ruimte, materieel en de rommelmarkt."
           bekijkAlles="/lokaal-marktplaats"
-          bekijkAllesLabel="Bekijk alles"
+          bekijkAllesAriaLabel="Bekijk alle marktplaats-items"
+          rechts={
+            <Link
+              href="/lokaal-marktplaats"
+              className="openregio-button openregio-button-outline openregio-button-small"
+              data-testid="button-plaats-marktplaats"
+            >
+              <Plus className="h-3.5 w-3.5" /> Plaats
+            </Link>
+          }
         />
         {marktLoading ? (
           <Skeleton className="h-20 w-full" />
@@ -952,125 +1172,142 @@ export default function VandaagPage() {
             cta={{ href: "/lokaal-marktplaats", label: "Plaats aanbod" }}
           />
         ) : (
-          <>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 12 }}>
-              {topMarkt.map((m) => (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 10 }}>
+            {topMarkt.map((m) => {
+              const isBied = m.type === "bied";
+              const tint: "blauw" | "donker" = isBied ? "donker" : "blauw";
+              return (
                 <Link
                   key={m.id}
                   href="/lokaal-marktplaats"
                   data-testid={`item-markt-${m.id}`}
                   style={{
                     display: "flex", flexDirection: "column", gap: 6,
-                    padding: "12px 14px", border: "1px solid #e6ebf2", borderRadius: 12,
+                    padding: "10px 12px", border: `1px solid ${C.border}`, borderRadius: 12,
                     textDecoration: "none", color: "inherit", background: "#fff",
                   }}
                   className="hover-elevate"
                 >
                   <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
-                    <span style={{
-                      fontSize: 10, fontWeight: 800, textTransform: "uppercase",
-                      background: m.type === "bied" ? "#ecfdf5" : "#eff6ff",
-                      color: m.type === "bied" ? "#047857" : "#1f5fae",
-                      padding: "2px 8px", borderRadius: 999,
-                    }}>
-                      {m.type === "bied" ? "Ik bied" : "Ik zoek"}
-                    </span>
-                    <span style={{ fontSize: 11, color: "#64748b" }}>{m.regio}</span>
+                    <Chip
+                      icon={isBied ? Sparkles : HelpCircle}
+                      tint={tint}
+                      label={isBied ? "Ik bied" : "Ik zoek"}
+                    />
+                    <span style={{ fontSize: 11, color: C.tekstZacht }}>{m.regio}</span>
                   </div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: "#0b2240", lineHeight: 1.35 }}>{m.titel}</div>
-                  <div style={{ fontSize: 12, color: "#64748b", lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: C.donker, lineHeight: 1.35 }}>{m.titel}</div>
+                  <div style={{ fontSize: 12, color: C.tekstZacht, lineHeight: 1.5, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                     {m.beschrijving}
                   </div>
                 </Link>
-              ))}
-            </div>
-            <div style={{ marginTop: 14, display: "flex", justifyContent: "flex-end" }}>
-              <Link
-                href="/lokaal-marktplaats"
-                className="openregio-button openregio-button-outline openregio-button-small"
-                data-testid="button-plaats-marktplaats"
-              >
-                <Plus className="h-3.5 w-3.5" /> Plaats aanbod
-              </Link>
-            </div>
-          </>
+              );
+            })}
+          </div>
         )}
       </section>
 
-      {/* 5. Wie zit waar — kaart */}
-      <section className="openregio-card" data-testid="section-ledenkaart" style={{ marginTop: 16 }}>
+      {/* 5. Wie zit waar — kaart, compactere hoogte */}
+      <section
+        className="openregio-card"
+        data-testid="section-ledenkaart"
+        style={{ marginTop: 14, padding: "18px 20px", borderRadius: 18 }}
+      >
         <SectieKop
+          icon={MapIcon}
+          tint="donker"
           titel="Wie zit waar?"
           subtitel="Klik op een marker om het bedrijfsprofiel te bekijken."
           bekijkAlles="/network"
+          bekijkAllesAriaLabel="Naar netwerk"
+          rechts={
+            <span
+              data-testid="text-kaart-aantal"
+              style={{
+                fontSize: 11, fontWeight: 700, color: C.tekstZacht,
+                background: C.donkerTintBg, padding: "4px 10px", borderRadius: 999,
+                display: "inline-flex", alignItems: "center", gap: 4,
+              }}
+            >
+              <MapPin className="h-3 w-3" />
+              {bedrijvenLoading ? "Laden…" : `${bedrijven.length} bedrijven`}
+            </span>
+          }
         />
-        <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#64748b", margin: "4px 0 12px" }}>
-          <MapIcon className="h-4 w-4" style={{ color: "#1f5fae" }} />
-          <span data-testid="text-kaart-aantal">
-            {bedrijvenLoading ? "Bedrijven worden geladen…" : `${bedrijven.length} bedrijven op de kaart`}
-          </span>
-        </div>
         {bedrijvenLoading ? (
-          <Skeleton className="h-[500px] w-full rounded-lg" />
+          <Skeleton className="h-[320px] w-full rounded-lg" />
         ) : bedrijven.length === 0 ? (
-          <p style={{ fontSize: 13, color: "#64748b", margin: 0 }} data-testid="text-kaart-leeg">
+          <p style={{ fontSize: 13, color: C.tekstZacht, margin: 0 }} data-testid="text-kaart-leeg">
             Er zijn nog geen bedrijven met regio bekend.
           </p>
         ) : (
-          <BusinessMapView businesses={bedrijven} />
+          <BusinessMapView businesses={bedrijven} heightClass="h-[320px]" />
         )}
       </section>
 
-      {/* 6. Nieuws — 3 recente berichten met bron */}
-      <section className="openregio-card" data-testid="card-nieuws" style={{ marginTop: 16 }}>
+      {/* 6. Nieuws */}
+      <section
+        className="openregio-card"
+        data-testid="card-nieuws"
+        style={{ marginTop: 14, padding: "18px 20px", borderRadius: 18 }}
+      >
         <SectieKop
+          icon={Newspaper}
+          tint="blauw"
           titel="Nieuws met context"
           subtitel="Selectie uit landelijke bronnen, relevant voor lokale ondernemers."
           bekijkAlles="/nieuws"
+          bekijkAllesAriaLabel="Bekijk alle nieuwsitems"
         />
 
         {nieuwsLoading && (
-          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
             {[0, 1, 2].map((i) => (
-              <Skeleton key={i} className="h-14 w-full" />
+              <Skeleton key={i} className="h-12 w-full" />
             ))}
           </div>
         )}
 
         {!nieuwsLoading && topNieuws.length === 0 && (
-          <p style={{ fontSize: 13, color: "#64748b", margin: 0 }} data-testid="text-geen-nieuws">
+          <p style={{ fontSize: 13, color: C.tekstZacht, margin: 0 }} data-testid="text-geen-nieuws">
             Er is op dit moment geen nieuws beschikbaar.
           </p>
         )}
 
         {!nieuwsLoading && topNieuws.length > 0 && (
-          <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 10 }}>
+          <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
             {topNieuws.map((n) => (
               <li key={n.id} data-testid={`item-nieuws-${n.id}`}>
                 <Link
                   href="/nieuws"
                   className="hover-elevate"
                   style={{
-                    display: "block",
+                    display: "flex",
+                    gap: 10,
+                    alignItems: "flex-start",
                     padding: "10px 12px",
                     borderRadius: 10,
-                    border: "1px solid #e6ebf2",
+                    border: `1px solid ${C.border}`,
                     textDecoration: "none",
                     color: "inherit",
+                    background: "#fff",
                   }}
                 >
-                  <div style={{ fontSize: 11, color: "#94a3b8", textTransform: "uppercase", letterSpacing: ".5px", fontWeight: 700, marginBottom: 4, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
-                    <span>{new Date(n.publishedAt).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}</span>
-                    {n.source && (
-                      <>
-                        <span style={{ color: "#cbd5e1" }}>•</span>
-                        <span data-testid={`text-bron-${n.id}`}>{n.source}</span>
-                      </>
-                    )}
+                  <StatusIcon icon={Newspaper} tint="blauw" />
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontSize: 11, color: C.tekstHeelZacht, textTransform: "uppercase", letterSpacing: ".5px", fontWeight: 700, marginBottom: 2, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                      <span>{new Date(n.publishedAt).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}</span>
+                      {n.source && (
+                        <>
+                          <span style={{ color: "#cbd5e1" }}>•</span>
+                          <span data-testid={`text-bron-${n.id}`}>{n.source}</span>
+                        </>
+                      )}
+                    </div>
+                    <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: C.donker, lineHeight: 1.4 }}>
+                      {n.title}
+                    </p>
                   </div>
-                  <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: "#0b2240", lineHeight: 1.45 }}>
-                    {n.title}
-                  </p>
                 </Link>
               </li>
             ))}
@@ -1078,126 +1315,189 @@ export default function VandaagPage() {
         )}
       </section>
 
-      {/* 7. Compact "Jouw bedrijf" — 3 mini-kaartjes onderaan */}
-      <section className="openregio-card" data-testid="section-jouw-bedrijf" style={{ marginTop: 16 }}>
-        <SectieKop
-          titel="Jouw bedrijf"
-          subtitel="Compact profielblok onderaan — Vandaag houdt vooral overzicht."
-          rechts={
-            <Link
-              href="/groei/profiel"
-              className="openregio-button openregio-button-outline openregio-button-small"
-              data-testid="button-profile-edit"
-            >
-              Profiel bewerken
-            </Link>
-          }
-        />
-
+      {/* 7. Jouw bedrijf — compacte strip ipv 3 kaarten */}
+      <section
+        className="openregio-card"
+        data-testid="section-jouw-bedrijf"
+        style={{ marginTop: 14, padding: "14px 18px", borderRadius: 18 }}
+      >
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: 12,
+            display: "flex",
+            alignItems: "center",
+            gap: 14,
+            flexWrap: "wrap",
           }}
         >
-          <div
-            data-testid="card-bedrijfsnaam"
+          <span
+            aria-hidden
             style={{
-              padding: "14px 16px",
-              border: "1px solid #e6ebf2",
-              borderRadius: 14,
-              background: "#fafbfd",
+              display: "inline-flex",
+              width: 44,
+              height: 44,
+              borderRadius: 12,
+              background: C.donkerTintBg,
+              color: C.donker,
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
             }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-              <Building2 className="h-4 w-4" style={{ color: "#94a3b8" }} />
-              <span style={{ fontSize: 11, fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", letterSpacing: ".5px" }}>
-                Bedrijfsnaam
+            <Briefcase className="h-5 w-5" />
+          </span>
+          <div style={{ display: "flex", flexDirection: "column", gap: 4, minWidth: 0, flex: "1 1 240px" }}>
+            <span style={{ fontSize: 10, fontWeight: 800, color: C.tekstHeelZacht, textTransform: "uppercase", letterSpacing: ".5px" }}>
+              Jouw bedrijf
+            </span>
+            <div data-testid="card-bedrijfsnaam" style={{ display: "contents" }}>
+              <div style={{ fontSize: 16, fontWeight: 800, color: C.donker, lineHeight: 1.2 }} data-testid="text-bedrijfsnaam">
+                {bedrijfsnaam}
+              </div>
+            </div>
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                flexWrap: "wrap",
+                fontSize: 12,
+                color: C.tekstZacht,
+              }}
+            >
+              <span data-testid="card-categorie" style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                <Tag className="h-3.5 w-3.5" />
+                <span data-testid="text-categorie">{categorieLabel || "Nog niet ingevuld"}</span>
+              </span>
+              <span style={{ color: "#cbd5e1" }}>·</span>
+              <span data-testid="card-regio" style={{ display: "inline-flex", alignItems: "center", gap: 4 }}>
+                <MapPin className="h-3.5 w-3.5" />
+                <span data-testid="text-profiel-regio">{regioLabel}</span>
               </span>
             </div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: "#0b2240" }} data-testid="text-bedrijfsnaam">
-              {bedrijfsnaam}
-            </div>
           </div>
-
-          <div
-            data-testid="card-categorie"
-            style={{
-              padding: "14px 16px",
-              border: "1px solid #e6ebf2",
-              borderRadius: 14,
-              background: "#fafbfd",
-            }}
+          <Link
+            href="/groei/profiel"
+            className="openregio-button openregio-button-outline openregio-button-small"
+            data-testid="button-profile-edit"
+            style={{ flexShrink: 0 }}
           >
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-              <Tag className="h-4 w-4" style={{ color: "#94a3b8" }} />
-              <span style={{ fontSize: 11, fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", letterSpacing: ".5px" }}>
-                Categorie
-              </span>
-            </div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: "#0b2240" }} data-testid="text-categorie">
-              {categorieLabel || "Nog niet ingevuld"}
-            </div>
-          </div>
-
-          <div
-            data-testid="card-regio"
-            style={{
-              padding: "14px 16px",
-              border: "1px solid #e6ebf2",
-              borderRadius: 14,
-              background: "#fafbfd",
-            }}
-          >
-            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-              <MapPin className="h-4 w-4" style={{ color: "#94a3b8" }} />
-              <span style={{ fontSize: 11, fontWeight: 800, color: "#94a3b8", textTransform: "uppercase", letterSpacing: ".5px" }}>
-                Regio
-              </span>
-            </div>
-            <div style={{ fontSize: 15, fontWeight: 800, color: "#0b2240" }} data-testid="text-profiel-regio">
-              {regioLabel}
-            </div>
-          </div>
+            <Pencil className="h-3.5 w-3.5" />
+            Profiel bewerken
+          </Link>
         </div>
       </section>
 
-      {/* 8. Ledenstats — community in cijfers */}
-      <div className="openregio-dashboard-stats" data-testid="section-ledenstats" style={{ marginTop: 16 }}>
-        <div className="openregio-stat-card" data-testid="stat-totaal">
-          <h3>Totaal leden</h3>
-          <p className="openregio-stat-number" data-testid="text-stat-totaal">
-            {stats ? stats.totalMembers : "—"}
-          </p>
-        </div>
-        <div className="openregio-stat-card" data-testid="stat-basic">
-          <h3>Basic leden</h3>
-          <p className="openregio-stat-number" data-testid="text-stat-basic">
-            {stats ? stats.basicMembers : "—"}
-          </p>
-        </div>
-        <div className="openregio-stat-card" data-testid="stat-pro">
-          <h3>Pro leden</h3>
-          <p className="openregio-stat-number" data-testid="text-stat-pro">
-            {stats ? stats.proMembers : "—"}
-          </p>
-        </div>
+      {/* 8. Ledenstats — compacte horizontale rij met stat-pillen */}
+      <div
+        className="openregio-dashboard-stats"
+        data-testid="section-ledenstats"
+        style={{
+          marginTop: 14,
+          display: "flex",
+          gap: 8,
+          flexWrap: "wrap",
+        }}
+      >
+        {[
+          { label: "Totaal leden", value: stats?.totalMembers, testId: "stat-totaal", textTestId: "text-stat-totaal", tint: "donker" as const },
+          { label: "Basic leden", value: stats?.basicMembers, testId: "stat-basic", textTestId: "text-stat-basic", tint: "blauw" as const },
+          { label: "Pro leden", value: stats?.proMembers, testId: "stat-pro", textTestId: "text-stat-pro", tint: "oranje" as const },
+        ].map((s) => (
+          <div
+            key={s.testId}
+            data-testid={s.testId}
+            style={{
+              flex: "1 1 160px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 10,
+              padding: "10px 14px",
+              background: "#fff",
+              border: `1px solid ${C.border}`,
+              borderRadius: 12,
+            }}
+          >
+            <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+              <span
+                aria-hidden
+                style={{
+                  display: "inline-flex",
+                  width: 26,
+                  height: 26,
+                  borderRadius: 8,
+                  background: TINT_BG[s.tint],
+                  color: TINT_FG[s.tint],
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Users className="h-3.5 w-3.5" />
+              </span>
+              <h3
+                style={{
+                  fontSize: 12,
+                  fontWeight: 700,
+                  color: C.tekstZacht,
+                  margin: 0,
+                  letterSpacing: ".1px",
+                }}
+              >
+                {s.label}
+              </h3>
+            </div>
+            <p
+              className="openregio-stat-number"
+              data-testid={s.textTestId}
+              style={{
+                fontSize: 18,
+                fontWeight: 800,
+                color: C.donker,
+                margin: 0,
+                lineHeight: 1,
+              }}
+            >
+              {s.value ?? "—"}
+            </p>
+          </div>
+        ))}
       </div>
 
-      {/* 9. Upgrade-promo onderaan voor basic users */}
+      {/* 9. Upgrade-promo — voor Basic alleen een dunne banner (Pro: niets) */}
       {!isPro && (
-        <div className="openregio-card openregio-upgrade-card" data-testid="card-upgrade-promo" style={{ marginTop: 16 }}>
-          <h3>Upgrade naar Pro</h3>
-          <p>Krijg toegang tot RegioBot AI, alle signalen, Woo-bibliotheek en meer.</p>
-          <Link
-            href="/lidmaatschap?plan=pro"
-            className="openregio-button openregio-button-pro"
+        <Link
+          href="/lidmaatschap?plan=pro"
+          className="openregio-card hover-elevate"
+          data-testid="card-upgrade-promo"
+          style={{
+            marginTop: 14,
+            padding: "10px 14px",
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            background: `linear-gradient(135deg, ${C.oranjeTintBg} 0%, ${C.oranjeTintBgZacht} 100%)`,
+            border: `1px solid ${C.borderOranje}`,
+            borderRadius: 12,
+            textDecoration: "none",
+            color: "inherit",
+            flexWrap: "wrap",
+          }}
+        >
+          <span style={{ display: "inline-flex", width: 28, height: 28, borderRadius: 8, background: C.oranje, color: "#fff", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Sparkles className="h-3.5 w-3.5" />
+          </span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: C.donker, flex: "1 1 240px" }}>
+            Upgrade naar Pro voor RegioBot AI, Woo-bibliotheek en alle signalen.
+          </span>
+          <span
             data-testid="button-upgrade-pro"
+            className="openregio-button openregio-button-pro openregio-button-small"
+            style={{ flexShrink: 0 }}
           >
-            Upgrade nu — €19,95/mnd
-          </Link>
-        </div>
+            €19,95/mnd
+            <ArrowUpRight className="h-3.5 w-3.5" />
+          </span>
+        </Link>
       )}
     </div>
   );

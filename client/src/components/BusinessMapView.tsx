@@ -8,6 +8,7 @@ import type { Bedrijfsprofiel } from "@shared/schema";
 
 interface BusinessMapViewProps {
   businesses: Bedrijfsprofiel[];
+  heightClass?: string;
 }
 
 const customIcon = new Icon({
@@ -270,7 +271,7 @@ function getCoordinatesForRegion(region: string): [number, number] | null {
   return null;
 }
 
-export function BusinessMapView({ businesses }: BusinessMapViewProps) {
+export function BusinessMapView({ businesses, heightClass = "h-[500px]" }: BusinessMapViewProps) {
   const defaultCenter: [number, number] = [52.1326, 5.2913];
   
   const businessesWithCoords = businesses
@@ -281,7 +282,7 @@ export function BusinessMapView({ businesses }: BusinessMapViewProps) {
     .filter(b => b.coords !== null);
 
   return (
-    <div className="h-[500px] w-full rounded-lg overflow-hidden border" data-testid="business-map-view">
+    <div className={`${heightClass} w-full rounded-lg overflow-hidden border`} data-testid="business-map-view">
       <MapContainer
         center={defaultCenter}
         zoom={7}
