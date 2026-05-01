@@ -205,8 +205,8 @@ export default function HomePage() {
   const visibleBlogs = blogs.slice(0, 3);
 
   /* Lokale verbinding — 6 inspiratie-tegels.
-     CTA gaat naar /vandaag voor ingelogde leden, anders naar Pro-lidmaatschap. */
-  const lokaleActieHref = user ? "/vandaag" : "/lidmaatschap?plan=pro";
+     CTA gaat naar /lokale-acties voor ingelogde leden, anders naar Pro-lidmaatschap. */
+  const lokaleActieHref = user ? "/lokale-acties" : "/lidmaatschap?plan=pro";
 
   const lokaleVerbindingTegels: Array<{
     icon: typeof Bell;

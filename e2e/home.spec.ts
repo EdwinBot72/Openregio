@@ -82,7 +82,7 @@ test.describe("Homepage gezond ondernemen", () => {
     const cta = page.getByTestId("button-start-lokale-actie");
     await expect(cta).toBeVisible();
     const href = await cta.getAttribute("href");
-    expect(href).toBe("/vandaag");
+    expect(href).toBe("/lokale-acties");
   });
 
   test("klikken op hero-CTA scrolt naar #gezond-pijlers", async ({ page }) => {

@@ -84,6 +84,7 @@ import RegelsHelpPage from "@/pages/regels-help";
 import RegelsHelpFlowPage from "@/pages/regels-help-flow";
 import GezondPijlerPage from "@/pages/gezond-pijler";
 import RegioScanProPage from "@/pages/pro/regioscan";
+import LokaleActiesPage from "@/pages/lokale-acties";
 
 // Routes that should NOT have the sidebar/header layout
 const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse", "/koop-lokaal", "/gezond/:slug"];
@@ -178,6 +179,7 @@ function AuthenticatedRouter() {
 
       {/* ── Vandaag (Sectie 1) — alles op één overzichtspagina ─────────── */}
       <Route path="/vandaag" component={VandaagPage} />
+      <Route path="/lokale-acties" component={LokaleActiesPage} />
       <Route path="/nieuws" component={NieuwsPage} />
       <Route path="/vandaag/updates">
         <Redirect to="/regels/updates" />

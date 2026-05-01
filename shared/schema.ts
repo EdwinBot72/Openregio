@@ -1245,6 +1245,38 @@ export const insertLokaalAanbodSchema = createInsertSchema(lokaalAanbod).omit({
 export type InsertLokaalAanbod = z.infer<typeof insertLokaalAanbodSchema>;
 export type LokaalAanbod = typeof lokaalAanbod.$inferSelect;
 
+// ─── Lokale Acties (evenementen door Pro-leden) ──────────────────────────────
+export const LOKALE_ACTIE_DOELGROEPEN = [
+  "iedereen", "buurtbewoners", "ouderen", "studenten", "gezinnen", "ondernemers", "kinderen",
+] as const;
+export const LOKALE_ACTIE_STATUS = ["actief", "verlopen"] as const;
+
+export const lokaleActies = pgTable("lokale_acties", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ownerUserId: varchar("owner_user_id").notNull().references(() => users.id),
+  titel: varchar("titel", { length: 255 }).notNull(),
+  beschrijving: text("beschrijving").notNull(),
+  datum: timestamp("datum", { withTimezone: true }),
+  locatie: varchar("locatie", { length: 255 }).notNull(),
+  regio: varchar("regio", { length: 255 }).notNull(),
+  doelgroep: varchar("doelgroep", { enum: LOKALE_ACTIE_DOELGROEPEN }).notNull().default("iedereen"),
+  externeLink: text("externe_link"),
+  contactEmail: varchar("contact_email", { length: 255 }),
+  bedrijfsnaam: varchar("bedrijfsnaam", { length: 255 }),
+  status: varchar("status", { enum: LOKALE_ACTIE_STATUS }).notNull().default("actief"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+});
+
+export const insertLokaleActieSchema = createInsertSchema(lokaleActies).omit({
+  id: true,
+  createdAt: true,
+  status: true,
+  expiresAt: true,
+});
+export type InsertLokaleActie = z.infer<typeof insertLokaleActieSchema>;
+export type LokaleActie = typeof lokaleActies.$inferSelect;
+
 // ── Ondernemer Thema's (AI-gegenereerde wekelijkse updates) ──────────────────
 export const ondernemerThemas = pgTable("ondernemer_themas", {
   id: serial("id").primaryKey(),

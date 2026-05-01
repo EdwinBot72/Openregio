@@ -86,13 +86,17 @@ import {
   type LokaalAanbod,
   type InsertLokaalAanbod,
   lokaalAanbod,
+  type LokaleActie,
+  type InsertLokaleActie,
+  lokaleActies,
+  LOKALE_ACTIE_DOELGROEPEN,
   type OndernemerThema,
   type InsertOndernemerThema,
   ondernemerThemas,
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
-import { eq, ilike, or, desc, sql, and, inArray } from "drizzle-orm";
+import { eq, ilike, or, desc, sql, and, inArray, gt, asc } from "drizzle-orm";
 
 // Haversine formula to calculate distance between two lat/lng points in km
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -312,6 +316,15 @@ export interface IStorage {
   getLokaalAanbodByUser(userId: string): Promise<LokaalAanbod[]>;
   createLokaalAanbod(item: InsertLokaalAanbod): Promise<LokaalAanbod>;
   deleteLokaalAanbod(id: string, userId: string): Promise<boolean>;
+
+  // Lokale Acties (evenementen door Pro-leden)
+  getLokaleActies(opts?: { regio?: string; doelgroep?: string; includeVerlopen?: boolean }): Promise<LokaleActie[]>;
+  getLokaleActieById(id: string): Promise<LokaleActie | undefined>;
+  getLokaleActiesByUser(userId: string): Promise<LokaleActie[]>;
+  createLokaleActie(input: InsertLokaleActie & { ownerUserId: string }): Promise<LokaleActie>;
+  updateLokaleActie(id: string, userId: string, updates: Partial<InsertLokaleActie>): Promise<LokaleActie | undefined>;
+  deleteLokaleActie(id: string, userId: string): Promise<boolean>;
+  markLokaleActieVerlopen(id: string, userId: string): Promise<LokaleActie | undefined>;
 
   // Ondernemer Thema's
   getOndernemerThemas(): Promise<OndernemerThema[]>;
@@ -1791,6 +1804,36 @@ export class MemStorage implements IStorage {
     return false;
   }
 
+  // Lokale Acties (stub for MemStorage)
+  async getLokaleActies(_opts?: { regio?: string; doelgroep?: string; includeVerlopen?: boolean }): Promise<LokaleActie[]> {
+    return [];
+  }
+  async getLokaleActieById(_id: string): Promise<LokaleActie | undefined> {
+    return undefined;
+  }
+  async getLokaleActiesByUser(_userId: string): Promise<LokaleActie[]> {
+    return [];
+  }
+  async createLokaleActie(input: InsertLokaleActie & { ownerUserId: string }): Promise<LokaleActie> {
+    const expiresAt = input.datum ? new Date(input.datum) : new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    return {
+      id: randomUUID(),
+      createdAt: new Date(),
+      status: "actief",
+      expiresAt,
+      ...input,
+    } as LokaleActie;
+  }
+  async updateLokaleActie(_id: string, _userId: string, _updates: Partial<InsertLokaleActie>): Promise<LokaleActie | undefined> {
+    return undefined;
+  }
+  async deleteLokaleActie(_id: string, _userId: string): Promise<boolean> {
+    return false;
+  }
+  async markLokaleActieVerlopen(_id: string, _userId: string): Promise<LokaleActie | undefined> {
+    return undefined;
+  }
+
   // Ondernemer Thema's (stubs for MemStorage)
   async getOndernemerThemas(): Promise<OndernemerThema[]> {
     return [];
@@ -3057,6 +3100,90 @@ class DbStorage implements IStorage {
       .where(and(eq(lokaalAanbod.id, id), eq(lokaalAanbod.userId, userId)))
       .returning();
     return result.length > 0;
+  }
+
+  // ─── Lokale Acties ────────────────────────────────────────────────────
+  async getLokaleActies(opts?: { regio?: string; doelgroep?: string; includeVerlopen?: boolean }): Promise<LokaleActie[]> {
+    const conditions = [];
+    if (!opts?.includeVerlopen) {
+      conditions.push(eq(lokaleActies.status, "actief"));
+      conditions.push(gt(lokaleActies.expiresAt, new Date()));
+    }
+    if (opts?.regio) {
+      conditions.push(ilike(lokaleActies.regio, `%${opts.regio}%`));
+    }
+    if (opts?.doelgroep) {
+      conditions.push(eq(lokaleActies.doelgroep, opts.doelgroep as typeof LOKALE_ACTIE_DOELGROEPEN[number]));
+    }
+    const query = db.select().from(lokaleActies);
+    const filtered = conditions.length > 0 ? query.where(and(...conditions)) : query;
+    return filtered.orderBy(asc(lokaleActies.datum), desc(lokaleActies.createdAt));
+  }
+
+  async getLokaleActieById(id: string): Promise<LokaleActie | undefined> {
+    const [actie] = await db.select().from(lokaleActies).where(eq(lokaleActies.id, id));
+    return actie;
+  }
+
+  async getLokaleActiesByUser(userId: string): Promise<LokaleActie[]> {
+    return db.select().from(lokaleActies)
+      .where(eq(lokaleActies.ownerUserId, userId))
+      .orderBy(desc(lokaleActies.createdAt));
+  }
+
+  async createLokaleActie(input: InsertLokaleActie & { ownerUserId: string }): Promise<LokaleActie> {
+    const dertigDagen = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const expiresAt = input.datum
+      ? new Date(input.datum)
+      : dertigDagen;
+    const [created] = await db.insert(lokaleActies).values({
+      ...input,
+      expiresAt,
+      status: "actief",
+    }).returning();
+    return created;
+  }
+
+  async updateLokaleActie(id: string, userId: string, updates: Partial<InsertLokaleActie>): Promise<LokaleActie | undefined> {
+    // Whitelist: alleen door eigenaar wijzigbare velden — nooit ownerUserId of status hier.
+    const allowedKeys: Array<keyof InsertLokaleActie> = [
+      "titel", "beschrijving", "datum", "locatie", "regio",
+      "doelgroep", "externeLink", "contactEmail", "bedrijfsnaam",
+    ];
+    const patch: Record<string, unknown> = {};
+    for (const key of allowedKeys) {
+      if (key in updates) patch[key] = (updates as any)[key];
+    }
+    // Bestaande actie ophalen om expiresAt-berekening op createdAt te baseren.
+    if ("datum" in updates) {
+      const [existing] = await db.select().from(lokaleActies)
+        .where(and(eq(lokaleActies.id, id), eq(lokaleActies.ownerUserId, userId)));
+      if (!existing) return undefined;
+      const createdMs = new Date(existing.createdAt).getTime();
+      patch.expiresAt = updates.datum
+        ? new Date(updates.datum as Date)
+        : new Date(createdMs + 30 * 24 * 60 * 60 * 1000);
+    }
+    const [updated] = await db.update(lokaleActies)
+      .set(patch)
+      .where(and(eq(lokaleActies.id, id), eq(lokaleActies.ownerUserId, userId)))
+      .returning();
+    return updated;
+  }
+
+  async deleteLokaleActie(id: string, userId: string): Promise<boolean> {
+    const result = await db.delete(lokaleActies)
+      .where(and(eq(lokaleActies.id, id), eq(lokaleActies.ownerUserId, userId)))
+      .returning();
+    return result.length > 0;
+  }
+
+  async markLokaleActieVerlopen(id: string, userId: string): Promise<LokaleActie | undefined> {
+    const [updated] = await db.update(lokaleActies)
+      .set({ status: "verlopen" })
+      .where(and(eq(lokaleActies.id, id), eq(lokaleActies.ownerUserId, userId)))
+      .returning();
+    return updated;
   }
 
   // Ondernemer Thema's

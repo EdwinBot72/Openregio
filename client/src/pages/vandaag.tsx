@@ -29,10 +29,11 @@ import {
   Sparkles,
   Mail,
   ShieldAlert,
+  CalendarDays,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { nl } from "date-fns/locale";
-import type { Post, IntelSignaal, LokaalAanbod, Bedrijfsprofiel } from "@shared/schema";
+import type { Post, IntelSignaal, LokaalAanbod, Bedrijfsprofiel, LokaleActie } from "@shared/schema";
 import { BusinessMapView } from "@/components/BusinessMapView";
 
 type ProfielData = {
@@ -463,6 +464,11 @@ export default function VandaagPage() {
     enabled: !!user,
   });
 
+  const { data: lokaleActies = [], isLoading: actiesLoading } = useQuery<LokaleActie[]>({
+    queryKey: ["/api/lokale-acties"],
+    enabled: !!user,
+  });
+
   const { data: dossiers = [], isLoading: dossiersLoading } = useQuery<WooDossierItem[]>({
     queryKey: ["/api/woo/dossiers"],
     enabled: !!user,
@@ -546,6 +552,15 @@ export default function VandaagPage() {
       const da = a.createdAt ? new Date(a.createdAt).getTime() : 0;
       const db = b.createdAt ? new Date(b.createdAt).getTime() : 0;
       return db - da;
+    })
+    .slice(0, 3);
+
+  const topActies = [...lokaleActies]
+    .sort((a, b) => {
+      // Toekomstige datum eerst (dichtstbij eerst), dan doorlopende acties op createdAt
+      const ad = a.datum ? new Date(a.datum).getTime() : Number.MAX_SAFE_INTEGER;
+      const bd = b.datum ? new Date(b.datum).getTime() : Number.MAX_SAFE_INTEGER;
+      return ad - bd;
     })
     .slice(0, 3);
 
@@ -1322,6 +1337,75 @@ export default function VandaagPage() {
                 </Link>
               );
             })}
+          </div>
+        )}
+      </section>
+
+      {/* 4b. Lokale acties — evenementen door Pro-leden */}
+      <section
+        className="openregio-card"
+        data-testid="section-lokale-acties"
+        style={{ marginTop: 14, padding: "18px 20px", borderRadius: 18 }}
+      >
+        <SectieKop
+          icon={CalendarDays}
+          tint="oranje"
+          titel="Lokale acties in jouw regio"
+          subtitel="Evenementen, buurtacties en initiatieven van Pro-leden — bezoek of organiseer er zelf een."
+          bekijkAlles="/lokale-acties"
+          bekijkAllesAriaLabel="Bekijk alle lokale acties"
+          rechts={
+            isPro ? (
+              <Link
+                href="/lokale-acties"
+                className="openregio-button openregio-button-outline openregio-button-small"
+                data-testid="button-start-lokale-actie-vandaag"
+              >
+                <Plus className="h-3.5 w-3.5" /> Start
+              </Link>
+            ) : undefined
+          }
+        />
+        {actiesLoading ? (
+          <Skeleton className="h-20 w-full" />
+        ) : topActies.length === 0 ? (
+          <LegeStaat
+            icon={CalendarDays}
+            tekst={
+              isPro
+                ? "Nog geen lokale acties. Wees de eerste — organiseer iets in jouw regio."
+                : "Nog geen lokale acties in jouw regio. Pro-leden plaatsen hier evenementen en initiatieven."
+            }
+            cta={{ href: "/lokale-acties", label: isPro ? "Start lokale actie" : "Bekijk lokale acties" }}
+          />
+        ) : (
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 10 }}>
+            {topActies.map((a) => (
+              <Link
+                key={a.id}
+                href="/lokale-acties"
+                data-testid={`item-actie-${a.id}`}
+                style={{
+                  display: "flex", flexDirection: "column", gap: 6,
+                  padding: "10px 12px", border: `1px solid ${C.border}`, borderRadius: 12,
+                  textDecoration: "none", color: "inherit", background: "#fff",
+                }}
+                className="hover-elevate"
+              >
+                <div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}>
+                  <Chip icon={Users} tint="oranje" label={a.doelgroep} />
+                  {a.datum && (
+                    <span style={{ fontSize: 11, color: C.tekstZacht }}>
+                      {new Date(a.datum).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })}
+                    </span>
+                  )}
+                </div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: C.donker, lineHeight: 1.35 }}>{a.titel}</div>
+                <div style={{ fontSize: 12, color: C.tekstZacht, lineHeight: 1.5, display: "flex", alignItems: "center", gap: 4 }}>
+                  <MapPin className="h-3 w-3" /> {a.locatie} — {a.regio}
+                </div>
+              </Link>
+            ))}
           </div>
         )}
       </section>

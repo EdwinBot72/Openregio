@@ -5432,6 +5432,127 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
     }
   });
 
+  // ─── Lokale Acties (evenementen door Pro-leden) ──────────────────────
+
+  // GET /api/lokale-acties — lijst voor alle ingelogde leden (filter per regio/doelgroep)
+  app.get("/api/lokale-acties", requireAuth, async (req, res) => {
+    try {
+      const { regio, doelgroep } = req.query as Record<string, string>;
+      const items = await storage.getLokaleActies({
+        regio: regio || undefined,
+        doelgroep: doelgroep || undefined,
+      });
+      return res.json(items);
+    } catch (err) {
+      console.error("[LokaleActies] fout bij ophalen:", err);
+      return res.status(500).json({ error: "Fout bij ophalen lokale acties" });
+    }
+  });
+
+  // GET /api/lokale-acties/me — eigen acties (Pro-eigenaar)
+  app.get("/api/lokale-acties/me", requireAuth, async (req, res) => {
+    try {
+      const items = await storage.getLokaleActiesByUser(req.user!.id);
+      return res.json(items);
+    } catch (err) {
+      console.error("[LokaleActies] fout bij ophalen eigen acties:", err);
+      return res.status(500).json({ error: "Fout bij ophalen eigen acties" });
+    }
+  });
+
+  // GET /api/lokale-acties/:id — detail (alle ingelogde leden)
+  app.get("/api/lokale-acties/:id", requireAuth, async (req, res) => {
+    try {
+      const item = await storage.getLokaleActieById(req.params.id);
+      if (!item) return res.status(404).json({ error: "Niet gevonden" });
+      return res.json(item);
+    } catch (err) {
+      console.error("[LokaleActies] fout bij ophalen detail:", err);
+      return res.status(500).json({ error: "Fout bij ophalen actie" });
+    }
+  });
+
+  // POST /api/lokale-acties — nieuwe actie aanmaken (Pro-only)
+  app.post("/api/lokale-acties", requireAuth, requirePro, async (req, res) => {
+    try {
+      const { insertLokaleActieSchema } = await import("@shared/schema");
+      const body = {
+        ...req.body,
+        ownerUserId: req.user!.id,
+        datum: req.body.datum ? new Date(req.body.datum) : null,
+      };
+      const parsed = insertLokaleActieSchema.safeParse(body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Ongeldige invoer" });
+      }
+      const item = await storage.createLokaleActie({ ...parsed.data, ownerUserId: req.user!.id });
+      return res.status(201).json(item);
+    } catch (err) {
+      console.error("[LokaleActies] fout bij aanmaken:", err);
+      return res.status(500).json({ error: "Fout bij aanmaken actie" });
+    }
+  });
+
+  // PATCH /api/lokale-acties/:id — eigenaar (Pro) bewerkt eigen actie
+  app.patch("/api/lokale-acties/:id", requireAuth, requirePro, async (req, res) => {
+    try {
+      const existing = await storage.getLokaleActieById(req.params.id);
+      if (!existing) return res.status(404).json({ error: "Niet gevonden" });
+      if (existing.ownerUserId !== req.user!.id) {
+        return res.status(403).json({ error: "Geen toegang" });
+      }
+      const { insertLokaleActieSchema } = await import("@shared/schema");
+      // Whitelist: voorkom dat ownerUserId of status via PATCH meekomt.
+      const allowed: Record<string, unknown> = {};
+      const editableKeys = [
+        "titel", "beschrijving", "datum", "locatie", "regio",
+        "doelgroep", "externeLink", "contactEmail", "bedrijfsnaam",
+      ] as const;
+      for (const k of editableKeys) {
+        if (k in req.body) allowed[k] = (req.body as any)[k];
+      }
+      // datum normaliseren — alléén als de client het expliciet meestuurt.
+      if ("datum" in allowed) {
+        const v = allowed.datum;
+        allowed.datum = v ? new Date(v as string) : null;
+      }
+      const parsed = insertLokaleActieSchema.partial().safeParse(allowed);
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.issues[0]?.message ?? "Ongeldige invoer" });
+      }
+      const updated = await storage.updateLokaleActie(req.params.id, req.user!.id, parsed.data);
+      if (!updated) return res.status(404).json({ error: "Niet gevonden of geen toegang" });
+      return res.json(updated);
+    } catch (err) {
+      console.error("[LokaleActies] fout bij bewerken:", err);
+      return res.status(500).json({ error: "Fout bij bewerken actie" });
+    }
+  });
+
+  // POST /api/lokale-acties/:id/verlopen — eigenaar (Pro) markeert verlopen
+  app.post("/api/lokale-acties/:id/verlopen", requireAuth, requirePro, async (req, res) => {
+    try {
+      const updated = await storage.markLokaleActieVerlopen(req.params.id, req.user!.id);
+      if (!updated) return res.status(404).json({ error: "Niet gevonden of geen toegang" });
+      return res.json(updated);
+    } catch (err) {
+      console.error("[LokaleActies] fout bij markeer-verlopen:", err);
+      return res.status(500).json({ error: "Fout bij markeren als verlopen" });
+    }
+  });
+
+  // DELETE /api/lokale-acties/:id — eigenaar (Pro) verwijdert eigen actie
+  app.delete("/api/lokale-acties/:id", requireAuth, requirePro, async (req, res) => {
+    try {
+      const deleted = await storage.deleteLokaleActie(req.params.id, req.user!.id);
+      if (!deleted) return res.status(404).json({ error: "Niet gevonden of geen toegang" });
+      return res.json({ success: true });
+    } catch (err) {
+      console.error("[LokaleActies] fout bij verwijderen:", err);
+      return res.status(500).json({ error: "Fout bij verwijderen" });
+    }
+  });
+
   // ─── Kansen (gedeelde types + caches) ────────────────────────────────
   type KansKaartAI = {
     titel: string;
