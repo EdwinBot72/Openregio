@@ -36,6 +36,35 @@ test.describe("Homepage gezond ondernemen", () => {
     ).toBeVisible();
   });
 
+  test("Lokale verbinding sectie toont 6 tegels en CTA naar lidmaatschap", async ({ page }) => {
+    await page.goto("/");
+    await waitForReactQuery(page);
+
+    // Sectie zelf
+    const sectie = page.getByTestId("section-lokale-verbinding");
+    await expect(sectie).toBeVisible();
+    await expect(sectie).toContainText("Voor ondernemers die meer echte klanten en relaties willen");
+
+    // Alle zes inspiratie-tegels moeten zichtbaar zijn.
+    const tegelIds = [
+      "lokale-tegel-ouderenavond-bij-de-pizzeria",
+      "lokale-tegel-studentenactie",
+      "lokale-tegel-workshop-organiseren",
+      "lokale-tegel-samenwerken-met-de-sportclub",
+      "lokale-tegel-nagelstyliste-bij-verzorgingshuis",
+      "lokale-tegel-buurtactie-opzetten",
+    ];
+    for (const id of tegelIds) {
+      await expect(page.getByTestId(id)).toBeVisible();
+    }
+
+    // CTA "Start lokale actie" — uitgelogd verwijst naar /lidmaatschap?plan=pro.
+    const cta = page.getByTestId("button-start-lokale-actie");
+    await expect(cta).toBeVisible();
+    const href = await cta.getAttribute("href");
+    expect(href).toBe("/lidmaatschap?plan=pro");
+  });
+
   test("klikken op hero-CTA scrolt naar #gezond-pijlers", async ({ page }) => {
     // Forceer een kleinere viewport zodat de pijler-sectie zeker
     // niet al direct zichtbaar is na laden.
