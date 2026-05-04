@@ -1,5 +1,4 @@
 uploads = []
-outputs = []
 
 [[generated]]
 id = "tkCbLYiYQM0YkTd3geyIp"
@@ -24,3 +23,9 @@ id = "M31_XC1mE8Dbu0I6ycH5S"
 uri = "file://client/src/assets/optimized/sector-agrarisch.png"
 type = "image"
 title = "sector agrarisch"
+
+[[outputs]]
+id = "QrA78FbOfalijyMAB1Sx4"
+uri = "file://.local/exports/openregio-source.zip"
+type = "unspecified"
+title = "OpenRegio broncode (zonder node_modules e.d.)"
