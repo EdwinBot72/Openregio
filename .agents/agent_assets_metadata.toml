@@ -29,3 +29,9 @@ id = "QrA78FbOfalijyMAB1Sx4"
 uri = "file://.local/exports/openregio-source.zip"
 type = "unspecified"
 title = "OpenRegio broncode (zonder node_modules e.d.)"
+
+[[outputs]]
+id = "FM10311gmq2NDX_KwtLk5"
+uri = "file://attached_assets/downloads/openregio-source.zip"
+type = "unspecified"
+title = "OpenRegio broncode (36 MB, zonder node_modules)"
