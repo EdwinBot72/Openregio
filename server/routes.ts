@@ -105,22 +105,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ ok: true, ts: Date.now() });
   });
 
-  // Tijdelijke source-download (omzeilt Replit file viewer issue)
-  app.get("/download/source.zip", async (_req, res) => {
-    const pathMod = await import("path");
-    const fsMod = await import("fs");
-    const zipPath = pathMod.resolve(process.cwd(), "attached_assets/downloads/openregio-source.zip");
-    if (!fsMod.existsSync(zipPath)) {
-      res.status(404).send("Bestand niet gevonden");
-      return;
-    }
-    const stat = fsMod.statSync(zipPath);
-    res.setHeader("Content-Type", "application/zip");
-    res.setHeader("Content-Length", String(stat.size));
-    res.setHeader("Content-Disposition", 'attachment; filename="openregio-source.zip"');
-    fsMod.createReadStream(zipPath).pipe(res);
-  });
-
   // Initialize JWT auth with rate limiting (production-ready, stateless)
   setupJwtAuth(app);
   
