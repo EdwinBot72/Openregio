@@ -20,8 +20,8 @@ export function securityHeaders(req: Request, res: Response, next: NextFunction)
     : "script-src 'self' 'unsafe-inline' 'unsafe-eval'";
   
   const styleSrc = isProduction
-    ? "style-src 'self' 'unsafe-inline'" // unsafe-inline nodig voor inline styles van UI libs
-    : "style-src 'self' 'unsafe-inline'";
+    ? "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com" // unsafe-inline + Google Fonts (Nunito) voor mockup-design
+    : "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com";
   
   const connectSrc = isProduction
     ? "connect-src 'self'"
@@ -32,7 +32,7 @@ export function securityHeaders(req: Request, res: Response, next: NextFunction)
     scriptSrc,
     styleSrc,
     "img-src 'self' data: blob:",
-    "font-src 'self'", // Alleen lokale fonts
+    "font-src 'self' https://fonts.gstatic.com", // Lokale fonts + Google Fonts (Nunito)
     connectSrc,
     "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://js.mollie.com", // YouTube embeds + Mollie
     "frame-ancestors 'none'",

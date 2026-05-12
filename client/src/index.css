@@ -1,5 +1,7 @@
 /* OpenRegio huisstijl — alleen actief op pagina's met .openregio-* wrapper */
 @import "./styles/openregio.css";
+/* Nieuwe mockup-design (drie pijlers) — gescoped onder .or-app */
+@import "./styles/openregio-mockup.css";
 
 @tailwind base;
 @tailwind components;
