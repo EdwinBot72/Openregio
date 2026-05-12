@@ -86,6 +86,9 @@ import RegelsHelpFlowPage from "@/pages/regels-help-flow";
 import GezondPijlerPage from "@/pages/gezond-pijler";
 import RegioScanProPage from "@/pages/pro/regioscan";
 import LokaleActiesPage from "@/pages/lokale-acties";
+import PijlerGripPage from "@/pages/pijler-grip";
+import PijlerZichtbaarheidPage from "@/pages/pijler-zichtbaarheid";
+import PijlerKrachtPage from "@/pages/pijler-kracht";
 
 // Routes that should NOT have the sidebar/header layout
 const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse", "/koop-lokaal", "/gezond/:slug"];
@@ -218,6 +221,11 @@ function AuthenticatedRouter() {
       <Route path="/groei/zichtbaarheid" component={ProVisibilitySettingsPage} />
       <Route path="/groei/profiel" component={BedrijfsprofielPage} />
       <Route path="/groei/website-check" component={WebsiteScanPage} />
+
+      {/* ── Pijler-landingspagina's ───────────────────────────────────────── */}
+      <Route path="/pijler/grip" component={PijlerGripPage} />
+      <Route path="/pijler/zichtbaarheid" component={PijlerZichtbaarheidPage} />
+      <Route path="/pijler/kracht" component={PijlerKrachtPage} />
 
       {/* ── Pro tools ─────────────────────────────────────────────────────── */}
       <Route path="/pro/regioscan" component={RegioScanProPage} />

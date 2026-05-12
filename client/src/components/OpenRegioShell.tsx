@@ -25,9 +25,9 @@ const TOP_NAV: SidebarItem[] = [
 ];
 
 const PIJLER_NAV: SidebarItem[] = [
-  { label: "Grip op Regels", icon: "⚖️", url: "/regels/updates", pijler: "p1" },
-  { label: "Lokale Zichtbaarheid", icon: "🌐", url: "/groei/profiel", pijler: "p2" },
-  { label: "Lokale Kracht", icon: "🤝", url: "/kansen/in-de-buurt", pijler: "p3" },
+  { label: "Grip op Regels", icon: "⚖️", url: "/pijler/grip", pijler: "p1" },
+  { label: "Lokale Zichtbaarheid", icon: "🌐", url: "/pijler/zichtbaarheid", pijler: "p2" },
+  { label: "Lokale Kracht", icon: "🤝", url: "/pijler/kracht", pijler: "p3" },
 ];
 
 const OVERIG_NAV: SidebarItem[] = [
