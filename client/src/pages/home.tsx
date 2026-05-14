@@ -94,6 +94,58 @@ export default function HomePage() {
         </div>
       </header>
 
+      {/* VIER GEZONDE PIJLERS — link naar /gezond/<slug> */}
+      <section
+        id="gezond-pijlers"
+        data-testid="section-gezond-pijlers"
+        style={{ background: "#f8faff", padding: "32px 24px" }}
+      >
+        <h2 style={{ textAlign: "center", margin: "0 0 8px", color: "#0f172a" }}>
+          Vier pijlers voor gezond ondernemen
+        </h2>
+        <p style={{ textAlign: "center", color: "#475569", margin: "0 auto 20px", maxWidth: 640 }}>
+          Een gezond bedrijf staat op vier benen. Bekijk per pijler wat OpenRegio voor je doet.
+        </p>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+            gap: 12,
+            maxWidth: 1100,
+            margin: "0 auto",
+          }}
+        >
+          {[
+            { slug: "financieel", label: "Financieel gezond" },
+            { slug: "bestuurlijk", label: "Bestuurlijk gezond" },
+            { slug: "mentaal", label: "Mentaal gezond" },
+            { slug: "strategisch", label: "Strategisch gezond" },
+          ].map((p) => (
+            <Link
+              key={p.slug}
+              href={`/gezond/${p.slug}`}
+              data-testid={`link-gezond-card-${p.slug}`}
+              style={{ textDecoration: "none", color: "inherit" }}
+            >
+              <div
+                className="hover-elevate"
+                style={{
+                  background: "#fff",
+                  border: "1px solid #e8edf8",
+                  borderRadius: 12,
+                  padding: "18px 16px",
+                  fontWeight: 700,
+                  color: "#0f172a",
+                  textAlign: "center",
+                }}
+              >
+                {p.label}
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
       {/* DRIE PIJLERS */}
       <section className="or-pijlers-wrap">
         <h2 className="or-pijlers-titel">OpenRegio helpt ondernemers groeien met drie pijlers</h2>
