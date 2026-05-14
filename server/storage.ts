@@ -268,7 +268,7 @@ export interface IStorage {
 
   // Blogs
   getBlogs(status?: string): Promise<Blog[]>;
-  getPublishedBlogs(limit?: number): Promise<Blog[]>;
+  getPublishedBlogs(limit?: number, audience?: "publiek" | "leden"): Promise<Blog[]>;
   getBlogById(id: string): Promise<Blog | undefined>;
   getBlogBySlug(slug: string): Promise<Blog | undefined>;
   createBlog(blog: InsertBlog): Promise<Blog>;
@@ -1594,9 +1594,10 @@ export class MemStorage implements IStorage {
     return allBlogs.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }
 
-  async getPublishedBlogs(limit?: number): Promise<Blog[]> {
+  async getPublishedBlogs(limit?: number, audience?: "publiek" | "leden"): Promise<Blog[]> {
     const published = Array.from(this.blogsList.values())
       .filter(b => b.status === "published")
+      .filter(b => audience ? (b.audience ?? "publiek") === audience : true)
       .sort((a, b) => new Date(b.publishedAt || b.createdAt).getTime() - new Date(a.publishedAt || a.createdAt).getTime());
     return limit ? published.slice(0, limit) : published;
   }
@@ -1617,6 +1618,7 @@ export class MemStorage implements IStorage {
       authorId: blog.authorId ?? "",
       authorName: blog.authorName ?? "",
       status: blog.status || "draft",
+      audience: blog.audience || "publiek",
       featuredImage: blog.featuredImage || null,
       publishedAt: blog.status === "published" ? new Date() : null,
       createdAt: new Date(),
@@ -2806,11 +2808,14 @@ class DbStorage implements IStorage {
     return await db.select().from(blogs).orderBy(desc(blogs.createdAt));
   }
 
-  async getPublishedBlogs(limit?: number): Promise<Blog[]> {
+  async getPublishedBlogs(limit?: number, audience?: "publiek" | "leden"): Promise<Blog[]> {
+    const whereClause = audience
+      ? sql`${blogs.status} = 'published' AND ${blogs.audience} = ${audience}`
+      : sql`${blogs.status} = 'published'`;
     const query = db.select().from(blogs)
-      .where(sql`${blogs.status} = 'published'`)
+      .where(whereClause)
       .orderBy(desc(blogs.publishedAt));
-    
+
     if (limit) {
       return await query.limit(limit);
     }

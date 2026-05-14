@@ -357,6 +357,12 @@ export async function runMigrations(): Promise<void> {
     `);
     console.log("[Migration] ✓ intel_signalen.photo_url column ensured");
 
+    // Audience-veld voor blogs: scheidt publieke blogposts van leden-updates
+    await db.execute(sql`
+      ALTER TABLE blogs ADD COLUMN IF NOT EXISTS audience VARCHAR(20) NOT NULL DEFAULT 'publiek';
+    `);
+    console.log("[Migration] ✓ blogs.audience column ensured");
+
     // Seed starter-cursussen (idempotent — alleen als tabel leeg is)
     const { rows: courseCount } = await db.execute(sql`SELECT COUNT(*)::int AS n FROM daily_courses`);
     if ((courseCount[0] as any).n === 0) {

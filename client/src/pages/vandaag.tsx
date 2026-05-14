@@ -30,10 +30,11 @@ import {
   Mail,
   ShieldAlert,
   CalendarDays,
+  Megaphone,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { nl } from "date-fns/locale";
-import type { Post, IntelSignaal, LokaalAanbod, Bedrijfsprofiel, LokaleActie } from "@shared/schema";
+import type { Post, IntelSignaal, LokaalAanbod, Bedrijfsprofiel, LokaleActie, Blog } from "@shared/schema";
 import { BusinessMapView } from "@/components/BusinessMapView";
 
 type ProfielData = {
@@ -480,6 +481,13 @@ export default function VandaagPage() {
     staleTime: 1000 * 60 * 10,
   });
   const topNieuws = (nieuwsData?.items ?? []).slice(0, 3);
+
+  const { data: ledenUpdates = [], isLoading: ledenUpdatesLoading } = useQuery<Blog[]>({
+    queryKey: ["/api/news/latest"],
+    enabled: !!user,
+    staleTime: 1000 * 60 * 5,
+  });
+  const topLedenUpdates = ledenUpdates.slice(0, 3);
 
   const { data: bedrijven = [], isLoading: bedrijvenLoading } = useQuery<Bedrijfsprofiel[]>({
     queryKey: ["/api/business-profiles/public"],
@@ -1482,6 +1490,71 @@ export default function VandaagPage() {
           <BusinessMapView businesses={bedrijven} heightClass="h-[320px]" />
         )}
       </section>
+
+      {/* 6a. Leden-updates — platform-aankondigingen alleen voor leden */}
+      {(ledenUpdatesLoading || topLedenUpdates.length > 0) && (
+        <section
+          className="openregio-card"
+          data-testid="card-leden-updates"
+          style={{ marginTop: 14, padding: "18px 20px", borderRadius: 18 }}
+        >
+          <SectieKop
+            icon={Megaphone}
+            tint="oranje"
+            titel="Leden-updates"
+            subtitel="Aankondigingen en nieuws van OpenRegio voor leden."
+          />
+
+          {ledenUpdatesLoading && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {[0, 1, 2].map((i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
+          )}
+
+          {!ledenUpdatesLoading && topLedenUpdates.length > 0 && (
+            <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "flex", flexDirection: "column", gap: 8 }}>
+              {topLedenUpdates.map((b) => (
+                <li key={b.id} data-testid={`item-leden-update-${b.id}`}>
+                  <Link
+                    href={`/blog/${b.slug}`}
+                    className="hover-elevate"
+                    style={{
+                      display: "flex",
+                      gap: 10,
+                      alignItems: "flex-start",
+                      padding: "10px 12px",
+                      borderRadius: 10,
+                      border: `1px solid ${C.border}`,
+                      textDecoration: "none",
+                      color: "inherit",
+                      background: "#fff",
+                    }}
+                  >
+                    <StatusIcon icon={Megaphone} tint="oranje" />
+                    <div style={{ minWidth: 0, flex: 1 }}>
+                      <div style={{ fontSize: 11, color: C.tekstHeelZacht, textTransform: "uppercase", letterSpacing: ".5px", fontWeight: 700, marginBottom: 2 }}>
+                        {b.publishedAt
+                          ? new Date(b.publishedAt).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })
+                          : "Leden-update"}
+                      </div>
+                      <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: C.donker, lineHeight: 1.4 }}>
+                        {b.title}
+                      </p>
+                      {b.excerpt && (
+                        <p style={{ margin: "2px 0 0", fontSize: 12, color: C.tekstZacht, lineHeight: 1.4 }}>
+                          {b.excerpt}
+                        </p>
+                      )}
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
 
       {/* 6. Nieuws */}
       <section

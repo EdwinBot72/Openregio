@@ -150,6 +150,9 @@ export const activities = pgTable("activities", {
 
 // Blogs table for public blog posts on homepage
 export const BLOG_STATUS = ["draft", "published", "archived"] as const;
+export const BLOG_AUDIENCE = ["publiek", "leden"] as const;
+export type BlogStatus = typeof BLOG_STATUS[number];
+export type BlogAudience = typeof BLOG_AUDIENCE[number];
 
 export const blogs = pgTable("blogs", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -161,6 +164,7 @@ export const blogs = pgTable("blogs", {
   authorName: text("author_name").notNull(),
   featuredImage: text("featured_image"),
   status: text("status", { enum: BLOG_STATUS }).notNull().default("draft"),
+  audience: text("audience", { enum: BLOG_AUDIENCE }).notNull().default("publiek"),
   publishedAt: timestamp("published_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -558,6 +562,7 @@ export const insertBlogSchema = createInsertSchema(blogs).omit({
   authorName: true,
 }).extend({
   status: z.enum(BLOG_STATUS).optional(),
+  audience: z.enum(BLOG_AUDIENCE).optional(),
   authorId: z.string().optional(),
   authorName: z.string().optional(),
 });

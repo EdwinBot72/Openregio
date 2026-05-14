@@ -3506,9 +3506,10 @@ Maak het verzoek professioneel en juridisch correct.`;
   // =================================
 
   // Public: Get published blogs for homepage (no auth required)
+  // Default returns alleen publieke blogposts; leden-updates worden uitgesloten.
   app.get("/api/blogs/public", async (_req, res) => {
     try {
-      const blogs = await storage.getPublishedBlogs(6);
+      const blogs = await storage.getPublishedBlogs(6, "publiek");
       res.json(blogs);
     } catch (error: any) {
       console.warn("Public blogs: DB unavailable, returning empty list");
@@ -3516,11 +3517,29 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
-  // Public: Get single blog by slug (no auth required)
-  app.get("/api/blogs/public/:slug", async (req, res) => {
+  // Members: Get published leden-updates (auth required)
+  app.get("/api/news/latest", attachUser, requireAuth, async (req, res) => {
+    try {
+      const limitRaw = Number.parseInt(String(req.query.limit ?? "5"), 10);
+      const limit = Number.isFinite(limitRaw) && limitRaw > 0 && limitRaw <= 20 ? limitRaw : 5;
+      const items = await storage.getPublishedBlogs(limit, "leden");
+      res.json(items);
+    } catch (error: any) {
+      console.warn("[News/latest] DB unavailable, returning empty list");
+      res.json([]);
+    }
+  });
+
+  // Public: Get single blog by slug (no auth required for publieke blogs;
+  // leden-updates zijn alleen zichtbaar voor ingelogde leden).
+  app.get("/api/blogs/public/:slug", attachUser, async (req, res) => {
     try {
       const blog = await storage.getBlogBySlug(req.params.slug);
       if (!blog || blog.status !== "published") {
+        return res.status(404).json({ error: "Blog niet gevonden" });
+      }
+      // Leden-updates alleen tonen als gebruiker is ingelogd
+      if (blog.audience === "leden" && !req.user) {
         return res.status(404).json({ error: "Blog niet gevonden" });
       }
       res.json(blog);

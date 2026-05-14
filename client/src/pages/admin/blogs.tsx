@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import { Plus, Edit, Trash2, Eye, Calendar, BookOpen, Image } from "lucide-react";
-import type { Blog, InsertBlog } from "@shared/schema";
+import type { Blog, InsertBlog, BlogStatus, BlogAudience } from "@shared/schema";
 import { PexelsPicker } from "@/components/PexelsPicker";
 
 export default function AdminBlogsPage() {
@@ -24,6 +24,7 @@ export default function AdminBlogsPage() {
     excerpt: "",
     content: "",
     status: "draft",
+    audience: "publiek",
     featuredImage: "",
   });
 
@@ -39,6 +40,7 @@ export default function AdminBlogsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/blogs"] });
       queryClient.invalidateQueries({ queryKey: ["/api/blogs/public"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/news/latest"] });
       toast({ title: "Blog aangemaakt" });
       resetForm();
     },
@@ -55,6 +57,7 @@ export default function AdminBlogsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/blogs"] });
       queryClient.invalidateQueries({ queryKey: ["/api/blogs/public"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/news/latest"] });
       toast({ title: "Blog bijgewerkt" });
       resetForm();
     },
@@ -70,6 +73,7 @@ export default function AdminBlogsPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/blogs"] });
       queryClient.invalidateQueries({ queryKey: ["/api/blogs/public"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/news/latest"] });
       toast({ title: "Blog verwijderd" });
     },
     onError: (error: any) => {
@@ -84,6 +88,7 @@ export default function AdminBlogsPage() {
       excerpt: "",
       content: "",
       status: "draft",
+      audience: "publiek",
       featuredImage: "",
     });
     setEditingBlog(null);
@@ -98,6 +103,7 @@ export default function AdminBlogsPage() {
       excerpt: blog.excerpt,
       content: blog.content,
       status: blog.status,
+      audience: blog.audience ?? "publiek",
       featuredImage: blog.featuredImage || "",
     });
     setIsOpen(true);
@@ -244,21 +250,42 @@ export default function AdminBlogsPage() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="status">Status</Label>
-                <Select
-                  value={formData.status}
-                  onValueChange={(value) => setFormData({ ...formData, status: value as any })}
-                >
-                  <SelectTrigger data-testid="select-blog-status">
-                    <SelectValue placeholder="Selecteer status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="draft">Concept</SelectItem>
-                    <SelectItem value="published">Gepubliceerd</SelectItem>
-                    <SelectItem value="archived">Gearchiveerd</SelectItem>
-                  </SelectContent>
-                </Select>
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="status">Status</Label>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(value: BlogStatus) => setFormData({ ...formData, status: value })}
+                  >
+                    <SelectTrigger data-testid="select-blog-status">
+                      <SelectValue placeholder="Selecteer status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="draft">Concept</SelectItem>
+                      <SelectItem value="published">Gepubliceerd</SelectItem>
+                      <SelectItem value="archived">Gearchiveerd</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="audience">Doelgroep</Label>
+                  <Select
+                    value={formData.audience ?? "publiek"}
+                    onValueChange={(value: BlogAudience) => setFormData({ ...formData, audience: value })}
+                  >
+                    <SelectTrigger data-testid="select-blog-audience">
+                      <SelectValue placeholder="Selecteer doelgroep" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="publiek">Publiek (homepage)</SelectItem>
+                      <SelectItem value="leden">Leden (Vandaag-pagina)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground">
+                    Publieke blogs verschijnen op de openbare homepage. Leden-updates verschijnen alleen op de Vandaag-pagina van ingelogde leden.
+                  </p>
+                </div>
               </div>
 
               <div className="flex gap-2 justify-end pt-4">
@@ -310,8 +337,15 @@ export default function AdminBlogsPage() {
                     </div>
                   )}
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
                       {getStatusBadge(blog.status)}
+                      <Badge
+                        variant={blog.audience === "leden" ? "default" : "outline"}
+                        className="text-xs"
+                        data-testid={`badge-audience-${blog.id}`}
+                      >
+                        {blog.audience === "leden" ? "Leden-update" : "Publiek"}
+                      </Badge>
                       {!blog.featuredImage && (
                         <Badge variant="outline" className="text-xs">
                           <Image className="h-3 w-3 mr-1" />
