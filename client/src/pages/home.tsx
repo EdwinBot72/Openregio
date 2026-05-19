@@ -125,7 +125,7 @@ export default function HomePage() {
               </p>
               <div className="lp-hero-btns">
                 <Link href="/register" className="lp-btn-hero-orange" data-testid="link-hero-start">
-                  <Rocket size={16} /> Gratis beginnen
+                  <Rocket size={16} /> Basis pakket starten
                 </Link>
                 <a href="#pijlers" className="lp-btn-hero-white">
                   <Play size={14} /> Hoe het werkt
@@ -546,7 +546,7 @@ export default function HomePage() {
                 </div>
               </div>
               <Link href="/register" className="lp-btn-off" data-testid="link-offer-start">
-                Gratis beginnen <ArrowRight size={16} />
+                Basis pakket starten <ArrowRight size={16} />
               </Link>
               <div className="lp-off-nohype">
                 <ShieldCheck size={13} /> Geen creditcard nodig · Direct aan de slag
@@ -658,7 +658,7 @@ export default function HomePage() {
             </p>
             <div className="lp-cta-btns">
               <Link href="/register" className="lp-btn-cta-orange" data-testid="link-cta-register">
-                <Rocket size={16} /> Gratis beginnen
+                <Rocket size={16} /> Basis pakket starten
               </Link>
               <Link href="/lidmaatschap" className="lp-btn-cta-ghost" data-testid="link-cta-lidmaatschap">
                 Bekijk lidmaatschappen
