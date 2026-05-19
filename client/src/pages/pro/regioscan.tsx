@@ -6,6 +6,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
+import { exportRegioScanPdf } from "@/lib/regioscan-pdf";
 import {
   Compass,
   AlertTriangle,
@@ -26,6 +27,7 @@ import {
   Calendar,
   FolderOpen,
   RotateCw,
+  Download,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { nl } from "date-fns/locale";
@@ -239,6 +241,16 @@ function ResultaatWeergave({
             </div>
           </div>
           <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button
+              type="button"
+              className="openregio-button openregio-button-outline"
+              onClick={() => exportRegioScanPdf(scan)}
+              data-testid="button-download-pdf"
+              title="Download dit RegioScan-rapport als PDF"
+            >
+              <Download className="h-4 w-4" style={{ marginRight: 6, display: "inline-block" }} />
+              Download als PDF
+            </button>
             <button
               type="button"
               className="openregio-button openregio-button-outline"
