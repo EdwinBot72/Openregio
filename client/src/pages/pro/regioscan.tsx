@@ -34,6 +34,7 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { nl } from "date-fns/locale";
 import type { RegioScan, RegioScanResult, RegioScanItem, RegioScanActie, WooDossier } from "@shared/schema";
+import { regioScanResultSchema } from "@shared/schema";
 
 const PRIO_COLOR: Record<string, { bg: string; fg: string; label: string }> = {
   hoog: { bg: "#fef2f2", fg: "#b91c1c", label: "Hoog" },
@@ -372,7 +373,40 @@ function ResultaatWeergave({
   indienLoading: boolean;
 }) {
   const [copied, setCopied] = useState(false);
-  const result = scan.result as RegioScanResult;
+  const parsed = regioScanResultSchema.safeParse(scan.result);
+  if (!parsed.success) {
+    return (
+      <section className="openregio-public-card" data-testid="resultaat-ongeldig">
+        <h2 style={{ marginTop: 0 }}>
+          <AlertTriangle className="h-5 w-5" style={{ color: "#f59e0b", marginRight: 6, display: "inline-block", verticalAlign: "-3px" }} />
+          Scan kan niet worden weergegeven
+        </h2>
+        <p style={{ fontSize: 14, color: "#374151", lineHeight: 1.6 }}>
+          Deze scan kan niet worden weergegeven, mogelijk doordat het opslagformaat sinds de scan is gewijzigd. Voer een nieuwe scan uit om de resultaten opnieuw te bekijken.
+        </p>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
+          <button
+            type="button"
+            className="openregio-button openregio-button-primary openregio-button-small"
+            onClick={onOpnieuwScannen}
+            disabled={rescanLoading}
+            data-testid="button-ongeldig-opnieuw-scannen"
+          >
+            {rescanLoading ? "Bezig…" : "Voer nieuwe scan uit"}
+          </button>
+          <button
+            type="button"
+            className="openregio-button openregio-button-outline openregio-button-small"
+            onClick={onNieuw}
+            data-testid="button-ongeldig-nieuw"
+          >
+            Nieuwe scan starten
+          </button>
+        </div>
+      </section>
+    );
+  }
+  const result: RegioScanResult = parsed.data;
 
   async function copyConcept() {
     if (!scan.wooConcept) return;
@@ -1046,7 +1080,6 @@ export default function RegioScanProPage() {
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
             {scans.map((s) => {
-              const r = s.result as RegioScanResult;
               const actief = actieveScan?.id === s.id;
               return (
                 <div
