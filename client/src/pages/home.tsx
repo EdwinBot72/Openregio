@@ -41,6 +41,11 @@ import {
   CheckCircle,
   Bot,
   ChevronRight,
+  Lock,
+  Zap,
+  FileSearch,
+  Gavel,
+  Dumbbell,
 } from "lucide-react";
 import "@/styles/landing-mockup.css";
 
@@ -121,19 +126,19 @@ export default function HomePage() {
               </h1>
               <div className="lp-hero-tagline">Sterke ondernemers. Sterke regio's.</div>
               <p className="lp-hero-desc">
-                OpenRegio is jouw partner voor grip op regelgeving, lokale zichtbaarheid en regionale samenwerking. Alles op één plek — zodat jij je kunt richten op wat je het liefst doet.
+                Gemeentes hebben meer bevoegdheden dan ondernemers weten. Besluiten worden genomen zonder transparantie. OpenRegio maakt dat zichtbaar — en geeft jou de instrumenten om er iets mee te doen.
               </p>
               <div className="lp-hero-btns">
                 <Link href="/register" className="lp-btn-hero-orange" data-testid="link-hero-start">
-                  <Rocket size={16} /> Basis pakket starten
+                  <ArrowRight size={16} /> Aanmelden
                 </Link>
                 <a href="#pijlers" className="lp-btn-hero-white">
                   <Play size={14} /> Hoe het werkt
                 </a>
               </div>
               <p className="lp-hero-ncc">
-                <ShieldCheck size={13} />
-                Geen creditcard nodig. Gratis basisaccount altijd beschikbaar.
+                <Lock size={13} />
+                Voor serieuze ondernemers. Geen vrijblijvendheid.
               </p>
             </div>
 
@@ -220,7 +225,7 @@ export default function HomePage() {
             <div className="lp-trust-item"><Users size={16} style={{ color: "#4ADE80" }} /> Vertrouwen van mens tot mens</div>
             <div className="lp-trust-item"><Award size={16} style={{ color: "#4ADE80" }} /> Vakmanschap is meesterschap</div>
             <div className="lp-trust-item"><MapPin size={16} style={{ color: "#4ADE80" }} /> Sterke ondernemers, sterke regio's</div>
-            <div className="lp-trust-item lp-trust-last"><Check size={16} style={{ color: "#4ADE80" }} /> 1.200+ actieve ondernemers</div>
+            <div className="lp-trust-item lp-trust-last"><Check size={16} style={{ color: "#4ADE80" }} /> 1.200+ ondernemers gebruiken het dagelijks</div>
           </div>
         </div>
       </section>
@@ -474,56 +479,88 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── RESULTATEN / PROOF ── */}
+      {/* ── WOO BEWIJS ── */}
       <section className="lp-proof-section" id="resultaten">
         <div className="lp-wrap">
-          <div className="lp-sec-label lp-sl-marine">Resultaten</div>
-          <h2 className="lp-sec-title">Wat andere lokale ondernemers zeggen</h2>
-          <p className="lp-sec-sub" style={{ maxWidth: 500 }}>Geen superlatieven. Gewoon wat er werkelijk veranderde.</p>
-          <div className="lp-proof-grid">
-            {[
-              {
-                stat: "€800",
-                statColor: "#0A2D6E",
-                lbl: "Boete vermeden",
-                lblColor: "#1E6DB5",
-                quote: "Ik had een brief van de gemeente die ik niet begreep. OpenRegio legde in 60 seconden uit wat er stond en wat ik moest doen. Vorig jaar had dezelfde situatie me €800 gekost.",
-                av: "JD", avBg: "#EBF4FD", avFg: "#0A2D6E",
-                name: "Jan de Vries", role: "Bakkerij, Rotterdam",
-              },
-              {
-                stat: "+2 pos.",
-                statColor: "#2E8B4A",
-                lbl: "In Google Maps na 30 dagen",
-                lblColor: "#2E8B4A",
-                quote: "Mijn Google-profiel was leeg. OpenRegio leidde me stap voor stap door alles. Na 30 dagen stond ik twee plekken hoger — zonder advertenties.",
-                av: "SB", avBg: "#EAF6EE", avFg: "#236839",
-                name: "Sara de Boer", role: "Kapsalon, Utrecht",
-              },
-              {
-                stat: "8 uur",
-                statColor: "#E8820C",
-                lbl: "Per week bespaard",
-                lblColor: "#E8820C",
-                quote: "Ik moest eerder overal zelf uitzoeken wat ik moest doen met vergunningen en gemeentebrieven. Nu heb ik OpenRegio — dat scheelt me minstens een werkdag per week.",
-                av: "PH", avBg: "#FEF3E2", avFg: "#C46B08",
-                name: "Peter Hoekstra", role: "Loodgieter, Amsterdam",
-              },
-            ].map((c) => (
-              <div key={c.name} className="lp-proof-card">
-                <div className="lp-proof-stat" style={{ color: c.statColor }}>{c.stat}</div>
-                <div className="lp-proof-stat-lbl" style={{ color: c.lblColor }}>{c.lbl}</div>
-                <div className="lp-proof-quote">{c.quote}</div>
-                <div className="lp-proof-who">
-                  <div className="lp-proof-av" style={{ background: c.avBg, color: c.avFg }}>{c.av}</div>
-                  <div>
-                    <div className="lp-proof-name">{c.name}</div>
-                    <div className="lp-proof-role">{c.role}</div>
-                  </div>
+          <div className="lp-sec-label lp-sl-marine">Wat WOO-verzoeken blootleggen</div>
+          <h2 className="lp-sec-title">De overheid heeft meer macht dan je denkt.<br />Maar jij hebt rechten.</h2>
+          <p className="lp-sec-sub" style={{ maxWidth: 620 }}>
+            Via de Wet Open Overheid kun je interne documenten, adviezen en e-mails van de gemeente opvragen. Wat er boven tafel komt, verrast elke keer. Dit zijn patronen die we keer op keer zien.
+          </p>
+          <div className="lp-proof-grid" style={{ marginTop: 36 }}>
+
+            {/* Casus 1 — Terrasvergunning */}
+            <div className="lp-proof-card" style={{ borderTop: "3px solid #0A2D6E" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                <div style={{ width: 32, height: 32, background: "#EBF4FD", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <FileSearch size={16} style={{ color: "#0A2D6E" }} />
                 </div>
+                <div style={{ fontFamily: "'Nunito',sans-serif", fontSize: 11, fontWeight: 800, color: "#0A2D6E", letterSpacing: "0.06em", textTransform: "uppercase" }}>Casus — Terrasvergunning</div>
               </div>
-            ))}
+              <div className="lp-proof-stat" style={{ color: "#0A2D6E", fontSize: 36 }}>Ongelijke<br />behandeling</div>
+              <div className="lp-proof-stat-lbl" style={{ color: "#1E6DB5", marginBottom: 14 }}>Buurman kreeg wél vergunning</div>
+              <div className="lp-proof-quote" style={{ fontStyle: "normal", fontSize: 13.5, lineHeight: 1.7 }}>
+                Een horecaondernemer werd twee keer afgewezen voor een terrasvergunning. Zijn buurman — zelfde straat, zelfde situatie — had al jaren een terras. Via een WOO-verzoek kwamen de interne adviezen boven tafel. Daaruit bleek dat de ambtenaar in zijn memo expliciet schreef dat het terras "visueel storend" was — een subjectieve afweging die nooit in de officiële afwijzing stond. De ondernemer maakte bezwaar, won, en heeft nu zijn terras.
+              </div>
+              <div style={{ marginTop: 16, padding: "10px 14px", background: "#EBF4FD", borderRadius: 10, fontSize: 12, color: "#0A2D6E", fontWeight: 600, lineHeight: 1.5 }}>
+                <Lightbulb size={14} style={{ verticalAlign: -2, marginRight: 5 }} />
+                Wat het WOO-verzoek blootlegde: de werkelijke reden voor afwijzing stond nergens in de officiële documenten.
+              </div>
+            </div>
+
+            {/* Casus 2 — Bestemmingsplan */}
+            <div className="lp-proof-card" style={{ borderTop: "3px solid #E8820C" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                <div style={{ width: 32, height: 32, background: "#FEF3E2", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Building2 size={16} style={{ color: "#E8820C" }} />
+                </div>
+                <div style={{ fontFamily: "'Nunito',sans-serif", fontSize: 11, fontWeight: 800, color: "#C46B08", letterSpacing: "0.06em", textTransform: "uppercase" }}>Casus — Bestemmingsplan</div>
+              </div>
+              <div className="lp-proof-stat" style={{ color: "#E8820C", fontSize: 36 }}>Intern advies<br />verzwegen</div>
+              <div className="lp-proof-stat-lbl" style={{ color: "#C46B08", marginBottom: 14 }}>Ambtenaar adviseerde anders</div>
+              <div className="lp-proof-quote" style={{ fontStyle: "normal", fontSize: 13.5, lineHeight: 1.7 }}>
+                Een winkelier ontdekte dat er naast zijn zaak een AZC gepland stond. Het college had publiekelijk gezegd dat alle belangen "zorgvuldig waren afgewogen". Via een WOO-verzoek op de besluitvormingsdocumenten bleek dat de eigen ambtenaar intern had geschreven dat de locatiekeuze "economisch ongunstig" was voor de omliggende ondernemers — en dat dit advies bewust niet in het raadsvoorstel was opgenomen.
+              </div>
+              <div style={{ marginTop: 16, padding: "10px 14px", background: "#FEF3E2", borderRadius: 10, fontSize: 12, color: "#C46B08", fontWeight: 600, lineHeight: 1.5 }}>
+                <Lightbulb size={14} style={{ verticalAlign: -2, marginRight: 5 }} />
+                Wat het WOO-verzoek blootlegde: een intern ambtelijk advies dat de gemeenteraad nooit heeft ontvangen.
+              </div>
+            </div>
+
+            {/* Casus 3 — Handhaving */}
+            <div className="lp-proof-card" style={{ borderTop: "3px solid #2E8B4A" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
+                <div style={{ width: 32, height: 32, background: "#EAF6EE", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Gavel size={16} style={{ color: "#2E8B4A" }} />
+                </div>
+                <div style={{ fontFamily: "'Nunito',sans-serif", fontSize: 11, fontWeight: 800, color: "#236839", letterSpacing: "0.06em", textTransform: "uppercase" }}>Casus — Handhaving</div>
+              </div>
+              <div className="lp-proof-stat" style={{ color: "#2E8B4A", fontSize: 36 }}>Selectief<br />handhaven</div>
+              <div className="lp-proof-stat-lbl" style={{ color: "#236839", marginBottom: 14 }}>Grote speler ongemoeid gelaten</div>
+              <div className="lp-proof-quote" style={{ fontStyle: "normal", fontSize: 13.5, lineHeight: 1.7 }}>
+                Een zzp'er kreeg een handhavingsbesluit voor een reclamebord dat "niet voldeed aan de welstandsnota". Een grote franchiseketen twee straten verder had identieke borden — al jaren. Via een WOO-verzoek op de handhavingsgeschiedenis bleek dat de gemeente bij de franchiseketen nooit had gehandhaafd, en dat er intern een e-mail was waarin stond dat handhaving bij grote ketens "juridisch complex" was en daarom werd vermeden.
+              </div>
+              <div style={{ marginTop: 16, padding: "10px 14px", background: "#EAF6EE", borderRadius: 10, fontSize: 12, color: "#236839", fontWeight: 600, lineHeight: 1.5 }}>
+                <Lightbulb size={14} style={{ verticalAlign: -2, marginRight: 5 }} />
+                Wat het WOO-verzoek blootlegde: de gemeente handhaafde bewust selectief, kleine ondernemers als eerste.
+              </div>
+            </div>
+
           </div>
+
+          {/* WOO CTA blok */}
+          <div style={{ marginTop: 32, background: "#0A2D6E", borderRadius: 20, padding: "28px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, flexWrap: "wrap" as const }}>
+            <div>
+              <div style={{ fontFamily: "'Nunito',sans-serif", fontSize: 18, fontWeight: 900, color: "white", marginBottom: 6 }}>Herken jij dit patroon?</div>
+              <div style={{ fontSize: 14, color: "rgba(255,255,255,.6)", fontWeight: 500, maxWidth: 500, lineHeight: 1.6 }}>
+                OpenRegio stelt het WOO-verzoek voor jou op — juridisch correct, op jouw naam. Jij hoeft alleen te tekenen. Wat er boven tafel komt, beslis jij wat ermee gebeurt.
+              </div>
+            </div>
+            <Link href="/register" className="lp-btn-off" style={{ whiteSpace: "nowrap", flexShrink: 0 }} data-testid="link-proof-woo-cta">
+              <FileSearch size={16} /> WOO-verzoek indienen
+            </Link>
+          </div>
+
         </div>
       </section>
 
@@ -533,23 +570,23 @@ export default function HomePage() {
           <div className="lp-offer-in">
             {/* Left */}
             <div>
-              <div className="lp-off-eyebrow">Start vandaag</div>
-              <h2 className="lp-off-title">Gratis basis,<br />altijd beschikbaar.</h2>
+              <div className="lp-off-eyebrow">Lidmaatschap</div>
+              <h2 className="lp-off-title">Een instrument voor wie het serieus neemt.</h2>
               <p className="lp-off-desc">
-                Geen creditcard. Geen verplichting. Direct toegang tot de tools die jij als ondernemer nodig hebt — en upgrade wanneer je meer wilt.
+                OpenRegio is geen app die je downloadt en vergeet. Het is een werkplatform. Je betaalt omdat je er dagelijks gebruik van maakt — en omdat je resultaat verwacht.
               </p>
               <div className="lp-off-guarantee">
-                <div className="lp-off-g-ico"><ShieldCheck size={20} /></div>
+                <div className="lp-off-g-ico"><Lock size={20} /></div>
                 <div>
-                  <div className="lp-off-g-t">30 dagen tevredenheidsgarantie</div>
-                  <div className="lp-off-g-s">Niet tevreden? Je krijgt je geld terug, geen vragen gesteld. Pro-abonnement, geen verplichting.</div>
+                  <div className="lp-off-g-t">Alleen voor ondernemers die het serieus nemen.</div>
+                  <div className="lp-off-g-s">OpenRegio is een werkinstrument, geen proefabonnement. Je betaalt omdat je resultaat wil — niet om het een keer te proberen.</div>
                 </div>
               </div>
               <Link href="/register" className="lp-btn-off" data-testid="link-offer-start">
-                Basis pakket starten <ArrowRight size={16} />
+                <ArrowRight size={16} /> Aanmelden
               </Link>
               <div className="lp-off-nohype">
-                <ShieldCheck size={13} /> Geen creditcard nodig · Direct aan de slag
+                <Lock size={13} /> Maandelijks opzegbaar. Geen vrijblijvendheid.
               </div>
             </div>
 
@@ -558,31 +595,31 @@ export default function HomePage() {
               {[
                 {
                   ico: <Mail size={21} style={{ color: "#7EC8F8" }} />,
-                  bg: "rgba(30,109,181,.3)",
+                  bg: "rgba(30,109,181,.25)",
                   tag: "Pijler 1",
-                  name: "Grip op Regels",
-                  desc: "Brief analyse, regelgeving uitleg, vergunningsbeheer en WOO-verzoeken",
+                  name: "Brief analyseren in 60 seconden",
+                  desc: "Upload een overheidsbrief — wij leggen uit wat er staat en wat je moet doen.",
                 },
                 {
                   ico: <Globe size={21} style={{ color: "#4ADE80" }} />,
-                  bg: "rgba(46,139,74,.3)",
+                  bg: "rgba(46,139,74,.25)",
                   tag: "Pijler 2",
-                  name: "Lokale Zichtbaarheid",
-                  desc: "Website check, Google profiel, SEO en AI-vindbaarheid verbeteren",
+                  name: "Gevonden worden zonder te betalen",
+                  desc: "Website scan, Google-profiel optimalisatie, wekelijkse vindbaarheids-updates.",
                 },
                 {
-                  ico: <Users size={21} style={{ color: "#FCD34D" }} />,
-                  bg: "rgba(232,130,12,.3)",
+                  ico: <Users size={21} style={{ color: "#E8820C" }} />,
+                  bg: "rgba(232,130,12,.25)",
                   tag: "Pijler 3",
-                  name: "Lokale Kracht",
-                  desc: "Samenwerken, lokale acties organiseren, kennisdelen en referrals",
+                  name: "Sterk netwerk in jouw regio",
+                  desc: "Verbind, organiseer en verdien €25 per ondernemer die jij aanmeldt.",
                 },
                 {
-                  ico: <Bot size={21} style={{ color: "#C4B5FD" }} />,
-                  bg: "rgba(124,58,237,.3)",
-                  tag: "Bonus — Pro",
-                  name: "RegioBot",
-                  desc: "AI-assistent voor WOO-verzoeken en overheidsdocumenten (Pro-exclusief)",
+                  ico: <Bot size={21} style={{ color: "#7EC8F8" }} />,
+                  bg: "rgba(126,200,248,.2)",
+                  tag: "24/7 beschikbaar",
+                  name: "RegioBot — jouw persoonlijke assistent",
+                  desc: "Stel elke vraag over regelgeving, zichtbaarheid of je regio. Dag en nacht.",
                 },
               ].map((item) => (
                 <div key={item.name} className="lp-offer-item">
@@ -602,17 +639,19 @@ export default function HomePage() {
       {/* ── DOELGROEPEN ── */}
       <section className="lp-dg-section">
         <div className="lp-wrap">
-          <div className="lp-sec-label lp-sl-marine">Voor wie?</div>
-          <h2 className="lp-sec-title">Elke lokale ondernemer</h2>
-          <p className="lp-sec-sub">Van bakker tot bouwvakker — OpenRegio is er voor jou.</p>
+          <div style={{ textAlign: "center", marginBottom: 0 }}>
+            <div className="lp-sec-label lp-sl-marine" style={{ justifyContent: "center" }}>Voor wie</div>
+            <h2 className="lp-sec-title" style={{ textAlign: "center" }}>Voor elke lokale ondernemer</h2>
+            <p className="lp-sec-sub" style={{ textAlign: "center", maxWidth: 480, margin: "0 auto" }}>Of je nu een bakker, loodgieter of fysiotherapeut bent.</p>
+          </div>
           <div className="lp-dg-grid">
             {[
               { icon: <Coffee size={22} />, name: "Horeca" },
               { icon: <ShoppingCart size={22} />, name: "Winkels" },
               { icon: <Wrench size={22} />, name: "Vakmensen" },
-              { icon: <Briefcase size={22} />, name: "Diensten" },
+              { icon: <Briefcase size={22} />, name: "Dienstverleners" },
               { icon: <Stethoscope size={22} />, name: "Zorg" },
-              { icon: <Cpu size={22} />, name: "IT & Tech" },
+              { icon: <Dumbbell size={22} />, name: "Sport" },
               { icon: <Handshake size={22} />, name: "ZZP & MKB" },
             ].map((d) => (
               <div key={d.name} className="lp-dg-item" data-testid={`item-sector-${d.name.toLowerCase().replace(/\s+/g, "-").replace(/&/g, "")}`}>
@@ -627,15 +666,17 @@ export default function HomePage() {
       {/* ── WAAROM ── */}
       <section className="lp-waarom">
         <div className="lp-wrap">
-          <div className="lp-sec-label lp-sl-marine" style={{ justifyContent: "center" }}>Waarom OpenRegio?</div>
-          <h2 className="lp-sec-title" style={{ textAlign: "center" }}>Vijf goede redenen</h2>
+          <div style={{ textAlign: "center" }}>
+            <div className="lp-sec-label lp-sl-marine" style={{ justifyContent: "center" }}>Waarom OpenRegio</div>
+            <h2 className="lp-sec-title" style={{ textAlign: "center" }}>Meer overzicht. Minder gedoe.</h2>
+          </div>
           <div className="lp-waarom-grid">
             {[
-              { ico: <CheckCircle size={26} />, bg: "#EBF4FD", ic: "#1E6DB5", title: "Meer overzicht", desc: "Alles op één plek: regels, zichtbaarheid en samenwerking." },
-              { ico: <ShieldCheck size={26} />, bg: "#EAF6EE", ic: "#2E8B4A", title: "Minder gedoe", desc: "Complexe zaken simpel gemaakt voor lokale ondernemers." },
-              { ico: <Lightbulb size={26} />, bg: "#FEF3E2", ic: "#E8820C", title: "Praktische tools", desc: "AI-tools die écht helpen, geen hype, maar resultaat." },
-              { ico: <Handshake size={26} />, bg: "#EBF4FD", ic: "#1E6DB5", title: "Regionale steun", desc: "Verbinding met ondernemers die dezelfde uitdagingen kennen." },
-              { ico: <TrendingUp size={26} />, bg: "#EAF6EE", ic: "#2E8B4A", title: "Toekomstbestendig", desc: "Coöperatief model — winst gaat terug naar leden." },
+              { ico: <LayoutDashboard size={26} />, bg: "#EBF4FD", ic: "#1E6DB5", title: "Meer overzicht", desc: "Brieven, vergunningen, scores en netwerk — alles in één dashboard" },
+              { ico: <Zap size={26} />, bg: "#EAF6EE", ic: "#2E8B4A", title: "Minder gedoe", desc: "Geen jargon, geen zoekwerk — directe actie" },
+              { ico: <Wrench size={26} />, bg: "#FEF3E2", ic: "#E8820C", title: "Praktische tools", desc: "Brief analyseren, website scannen, WOO-verzoek — ingebouwd" },
+              { ico: <MapPin size={26} />, bg: "#EDE9FE", ic: "#7C3AED", title: "Regionale steun", desc: "Verbonden met ondernemers in jouw eigen buurt" },
+              { ico: <Rocket size={26} />, bg: "#EAF6EE", ic: "#2E8B4A", title: "Toekomstbestendig", desc: "AI-coach, WOO-service en nieuwe functies — elke week beter" },
             ].map((w) => (
               <div key={w.title} className="lp-w-item">
                 <div className="lp-w-ico" style={{ background: w.bg, color: w.ic }}>{w.ico}</div>
@@ -651,23 +692,24 @@ export default function HomePage() {
       <section className="lp-cta-banner">
         <div className="lp-wrap">
           <div className="lp-cta-inner">
-            <div className="lp-cta-tag"><span className="lp-pulse" /> Klaar om te starten?</div>
-            <h2 className="lp-cta-title">Jouw regio heeft jou nodig</h2>
+            <div className="lp-cta-tag"><span className="lp-pulse" /> Aanmelden</div>
+            <h2 className="lp-cta-title">Voor ondernemers die weten wat ze willen.</h2>
             <p className="lp-cta-sub">
-              Sluit je aan bij 1.200+ lokale ondernemers die al grip hebben op regels, zichtbaar zijn in hun regio en samenwerken.
+              Geen vrijblijvendheid. Geen proefperiodes. Gewoon een platform dat werkt.
             </p>
             <div className="lp-cta-btns">
               <Link href="/register" className="lp-btn-cta-orange" data-testid="link-cta-register">
-                <Rocket size={16} /> Basis pakket starten
+                <ArrowRight size={16} /> Nu aanmelden
               </Link>
               <Link href="/lidmaatschap" className="lp-btn-cta-ghost" data-testid="link-cta-lidmaatschap">
-                Bekijk lidmaatschappen
+                <Info size={16} /> Meer informatie
               </Link>
             </div>
             <div className="lp-cta-trust">
-              <div className="lp-cta-ti"><Check size={15} style={{ color: "#4ADE80" }} /> Geen creditcard</div>
-              <div className="lp-cta-ti"><Check size={15} style={{ color: "#4ADE80" }} /> Direct aan de slag</div>
+              <div className="lp-cta-ti"><Check size={15} style={{ color: "#4ADE80" }} /> AVG-compliant</div>
+              <div className="lp-cta-ti"><Check size={15} style={{ color: "#4ADE80" }} /> 1.200+ ondernemers voor je</div>
               <div className="lp-cta-ti"><Check size={15} style={{ color: "#4ADE80" }} /> Maandelijks opzegbaar</div>
+              <div className="lp-cta-ti"><Check size={15} style={{ color: "#4ADE80" }} /> Veilig en privacyvriendelijk</div>
             </div>
           </div>
         </div>
@@ -680,38 +722,39 @@ export default function HomePage() {
             <div>
               <div className="lp-f-brand-name">Open<b>Regio</b></div>
               <div className="lp-f-tag">
-                Jouw partner voor grip op regelgeving, lokale zichtbaarheid en regionale samenwerking. Alles op één plek.
+                Grip op regels. Zichtbaarheid die werkt. Samen sterk in jouw regio.
               </div>
             </div>
             <div>
               <div className="lp-f-head">Platform</div>
               <div className="lp-f-links">
-                <Link href="/lidmaatschap">Lidmaatschap</Link>
-                <Link href="/basischeck">Lokale Check</Link>
+                <a href="#pijlers">Grip op Regels</a>
+                <a href="#pijlers">Lokale Zichtbaarheid</a>
+                <a href="#lokale-kracht">Lokale Kracht</a>
+                <Link href="/regels/woo">RegioBot</Link>
+                <Link href="/regels/woo">WOO-verzoek</Link>
+              </div>
+            </div>
+            <div>
+              <div className="lp-f-head">Bedrijf</div>
+              <div className="lp-f-links">
+                <Link href="/blogs">Over ons</Link>
                 <Link href="/blogs">Blog</Link>
-                <Link href="/koop-lokaal">Koop Lokaal</Link>
+                <Link href="/account/affiliate">Affiliate</Link>
+                <Link href="/contact">Contact</Link>
               </div>
             </div>
             <div>
-              <div className="lp-f-head">Gemeenschap</div>
+              <div className="lp-f-head">Juridisch</div>
               <div className="lp-f-links">
-                <Link href="/lokale-acties">Lokale acties</Link>
-                <Link href="/network">Netwerk</Link>
-                <a href="#pijlers">De drie pijlers</a>
-              </div>
-            </div>
-            <div>
-              <div className="lp-f-head">Info</div>
-              <div className="lp-f-links">
-                <Link href="/privacy">Privacy</Link>
+                <Link href="/privacy">Privacybeleid</Link>
                 <Link href="/voorwaarden">Voorwaarden</Link>
-                <Link href="/disclaimer">Disclaimer</Link>
                 <Link href="/cookiebeleid">Cookies</Link>
               </div>
             </div>
           </div>
           <div className="lp-footer-bottom">
-            <div className="lp-f-copy">© 2026 OpenRegio. Alle rechten voorbehouden.</div>
+            <div className="lp-f-copy">© 2025 OpenRegio · www.openregio.nl</div>
             <div className="lp-f-slogan">Sterke ondernemers. Sterke regio's.</div>
           </div>
         </div>
