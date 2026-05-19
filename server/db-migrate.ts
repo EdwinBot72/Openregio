@@ -363,6 +363,18 @@ export async function runMigrations(): Promise<void> {
     `);
     console.log("[Migration] ✓ blogs.audience column ensured");
 
+    // Indien-velden voor woo-dossiers (auto-indienen vanuit RegioScan)
+    await db.execute(sql`
+      ALTER TABLE woo_dossiers ADD COLUMN IF NOT EXISTS indien_kanaal VARCHAR(16);
+    `);
+    await db.execute(sql`
+      ALTER TABLE woo_dossiers ADD COLUMN IF NOT EXISTS indien_ontvanger TEXT;
+    `);
+    await db.execute(sql`
+      ALTER TABLE woo_dossiers ADD COLUMN IF NOT EXISTS ingediend_op TIMESTAMPTZ;
+    `);
+    console.log("[Migration] ✓ woo_dossiers indien-kolommen ensured");
+
     // Seed starter-cursussen (idempotent — alleen als tabel leeg is)
     const { rows: courseCount } = await db.execute(sql`SELECT COUNT(*)::int AS n FROM daily_courses`);
     if ((courseCount[0] as any).n === 0) {

@@ -28,10 +28,12 @@ import {
   FolderOpen,
   RotateCw,
   Download,
+  Mail,
+  Send,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { nl } from "date-fns/locale";
-import type { RegioScan, RegioScanResult, RegioScanItem, RegioScanActie } from "@shared/schema";
+import type { RegioScan, RegioScanResult, RegioScanItem, RegioScanActie, WooDossier } from "@shared/schema";
 
 const PRIO_COLOR: Record<string, { bg: string; fg: string; label: string }> = {
   hoog: { bg: "#fef2f2", fg: "#b91c1c", label: "Hoog" },
@@ -188,24 +190,186 @@ function ActieBlok({ acties }: { acties: RegioScanActie[] }) {
   );
 }
 
+function IndienBlok({
+  scan,
+  dossier,
+  defaultEmail,
+  onIndien,
+  loading,
+}: {
+  scan: RegioScan;
+  dossier: WooDossier | undefined;
+  defaultEmail: string;
+  onIndien: (kanaal: "email" | "post", ontvanger: string) => void;
+  loading: boolean;
+}) {
+  const [kanaal, setKanaal] = useState<"email" | "post">("email");
+  const [ontvanger, setOntvanger] = useState<string>("");
+
+  const reedsIngediend = !!dossier?.ingediendOp;
+
+  if (reedsIngediend) {
+    const isEmail = dossier!.indienKanaal === "email";
+    return (
+      <section className="openregio-public-card" data-testid="indien-status-blok" style={{ marginTop: 14, background: "#f0fdf4", borderColor: "#bbf7d0" }}>
+        <h2 style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ display: "inline-flex", width: 32, height: 32, borderRadius: 10, background: "#16a34a1a", alignItems: "center", justifyContent: "center" }}>
+            <Check className="h-4 w-4" style={{ color: "#16a34a" }} />
+          </span>
+          Ingediend bij gemeente {scan.gemeente}
+        </h2>
+        <div style={{ fontSize: 13, color: "#166534", lineHeight: 1.7 }} data-testid="text-indien-status">
+          <div><strong>Kanaal:</strong> {isEmail ? "E-mail" : "Post (zelf versturen)"}</div>
+          <div data-testid="text-indien-ontvanger"><strong>{isEmail ? "Verstuurd naar" : "Ontvanger"}:</strong> {dossier!.indienOntvanger}</div>
+          <div><strong>Datum:</strong> {new Date(dossier!.ingediendOp!).toLocaleString("nl-NL")}</div>
+          {dossier!.deadline && (
+            <div><strong>Wettelijke termijn (28 dagen):</strong> {new Date(dossier!.deadline).toLocaleDateString("nl-NL")}</div>
+          )}
+        </div>
+        <p style={{ fontSize: 12, color: "#475569", margin: "10px 0 0", lineHeight: 1.6 }}>
+          Status en eventuele reactie kun je bijhouden in je <Link href="/regels/woo" className="openregio-link" data-testid="link-woo-bibliotheek-indien">Woo-bibliotheek</Link>.
+          {isEmail && " De gemeente kan rechtstreeks reageren op je eigen e-mailadres (Reply-to)."}
+        </p>
+      </section>
+    );
+  }
+
+  function submit(e: React.FormEvent) {
+    e.preventDefault();
+    const waarde = ontvanger.trim();
+    if (!waarde) return;
+    if (kanaal === "email") {
+      // Veiligheid: e-mailadres van de gemeente is verplicht en mag NOOIT
+      // het eigen e-mailadres van de ingelogde gebruiker zijn — anders
+      // wordt het verzoek per ongeluk naar de ondernemer zelf gestuurd.
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(waarde)) return;
+      if (defaultEmail && waarde.toLowerCase() === defaultEmail.trim().toLowerCase()) {
+        alert("Het e-mailadres mag niet je eigen adres zijn — vul het officiële e-mailadres van de gemeente in.");
+        return;
+      }
+    }
+    onIndien(kanaal, waarde);
+  }
+
+  return (
+    <section className="openregio-public-card" data-testid="indien-blok" style={{ marginTop: 14 }}>
+      <h2 style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ display: "inline-flex", width: 32, height: 32, borderRadius: 10, background: "#1f5fae1a", alignItems: "center", justifyContent: "center" }}>
+          <Send className="h-4 w-4" style={{ color: "#1f5fae" }} />
+        </span>
+        Indienen bij gemeente {scan.gemeente}
+      </h2>
+      <p style={{ fontSize: 13, color: "#475569", margin: "0 0 12px", lineHeight: 1.6 }}>
+        Verstuur het opgeslagen concept Woo-verzoek direct naar de gemeente via e-mail, of registreer dat je het per post verstuurt. We starten daarmee automatisch de wettelijke termijn van 28 dagen in je dossier.
+      </p>
+      <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+          <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "#0b2240", cursor: "pointer" }}>
+            <input
+              type="radio"
+              name="indien-kanaal"
+              value="email"
+              checked={kanaal === "email"}
+              onChange={() => setKanaal("email")}
+              data-testid="radio-kanaal-email"
+            />
+            <Mail className="h-4 w-4" style={{ color: "#1f5fae" }} />
+            E-mail
+          </label>
+          <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "#0b2240", cursor: "pointer" }}>
+            <input
+              type="radio"
+              name="indien-kanaal"
+              value="post"
+              checked={kanaal === "post"}
+              onChange={() => setKanaal("post")}
+              data-testid="radio-kanaal-post"
+            />
+            <FileText className="h-4 w-4" style={{ color: "#1f5fae" }} />
+            Post (zelf versturen)
+          </label>
+        </div>
+        <label style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <span style={{ fontSize: 12, fontWeight: 700, color: "#0b2240" }}>
+            {kanaal === "email"
+              ? `E-mailadres gemeente ${scan.gemeente}`
+              : `Postadres gemeente ${scan.gemeente}`}
+          </span>
+          <input
+            type={kanaal === "email" ? "email" : "text"}
+            value={ontvanger}
+            onChange={(e) => setOntvanger(e.target.value)}
+            placeholder={
+              kanaal === "email"
+                ? `bv. info@${scan.gemeente.toLowerCase().replace(/\s+/g, "")}.nl`
+                : "bv. Gemeente X, Postbus 1, 1234 AB Plaats"
+            }
+            className="openregio-input"
+            style={{ padding: "10px 12px", borderRadius: 10, border: "1px solid #cbd5e1", fontSize: 14 }}
+            data-testid="input-indien-ontvanger"
+            required
+            minLength={3}
+            maxLength={500}
+          />
+          {kanaal === "email" && (
+            <span style={{ fontSize: 11, color: "#64748b" }}>
+              Reacties komen rechtstreeks bij jouw e-mailadres ({defaultEmail || "ingelogde account"}) terecht.
+            </span>
+          )}
+        </label>
+        <div>
+          <button
+            type="submit"
+            className="openregio-button openregio-button-primary"
+            disabled={loading}
+            data-testid="button-indienen-gemeente"
+          >
+            {loading ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" style={{ marginRight: 6, display: "inline-block" }} />
+                {kanaal === "email" ? "Versturen…" : "Registreren…"}
+              </>
+            ) : (
+              <>
+                <Send className="h-4 w-4" style={{ marginRight: 6, display: "inline-block" }} />
+                {kanaal === "email"
+                  ? `Verstuur Woo-verzoek per e-mail`
+                  : `Registreer als per post verzonden`}
+              </>
+            )}
+          </button>
+        </div>
+      </form>
+    </section>
+  );
+}
+
 function ResultaatWeergave({
   scan,
+  dossier,
   onNieuw,
   onOpnieuwScannen,
   onWooConcept,
   onNaarDossier,
+  onIndien,
+  defaultEmail,
   wooLoading,
   dossierLoading,
   rescanLoading,
+  indienLoading,
 }: {
   scan: RegioScan;
+  dossier: WooDossier | undefined;
   onNieuw: () => void;
   onOpnieuwScannen: () => void;
   onWooConcept: () => void;
   onNaarDossier: () => void;
+  onIndien: (kanaal: "email" | "post", ontvanger: string) => void;
+  defaultEmail: string;
   wooLoading: boolean;
   dossierLoading: boolean;
   rescanLoading: boolean;
+  indienLoading: boolean;
 }) {
   const [copied, setCopied] = useState(false);
   const result = scan.result as RegioScanResult;
@@ -457,6 +621,17 @@ function ResultaatWeergave({
           </>
         )}
       </section>
+
+      {/* Indien-blok: zichtbaar zodra een ondernemersdossier is opgeslagen */}
+      {scan.wooDossierId && scan.wooConcept && (
+        <IndienBlok
+          scan={scan}
+          dossier={dossier}
+          defaultEmail={defaultEmail}
+          onIndien={onIndien}
+          loading={indienLoading}
+        />
+      )}
 
       {/* Persistente CTA: altijd naar ondernemersdossier-overzicht */}
       <section
@@ -736,6 +911,36 @@ export default function RegioScanProPage() {
     },
   });
 
+  const dossierId = actieveScan?.wooDossierId ?? null;
+  const { data: dossier } = useQuery<WooDossier>({
+    queryKey: ["/api/woo/dossiers", dossierId],
+    enabled: !!dossierId,
+  });
+
+  const indienMutation = useMutation({
+    mutationFn: async ({ scanId, kanaal, ontvanger }: { scanId: number; kanaal: "email" | "post"; ontvanger: string }) => {
+      const res = await apiRequest("POST", `/api/regioscan/${scanId}/indien`, { kanaal, ontvanger });
+      return (await res.json()) as { ok: true; kanaal: "email" | "post"; ontvanger: string; ingediendOp: string; dossier: WooDossier };
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/woo/dossiers"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/woo/dossiers", data.dossier?.id] });
+      toast({
+        title: data.kanaal === "email" ? "Woo-verzoek verzonden" : "Indiening geregistreerd",
+        description: data.kanaal === "email"
+          ? `Verstuurd naar ${data.ontvanger}. Reacties komen op je eigen e-mailadres binnen.`
+          : `Geregistreerd als per post verzonden naar ${data.ontvanger}.`,
+      });
+    },
+    onError: (err: any) => {
+      toast({
+        title: "Indienen mislukt",
+        description: err?.message ?? "Probeer het later opnieuw.",
+        variant: "destructive",
+      });
+    },
+  });
+
   const verwijderMutation = useMutation({
     mutationFn: async (id: number) => {
       await apiRequest("DELETE", `/api/regioscan/${id}`);
@@ -810,13 +1015,19 @@ export default function RegioScanProPage() {
       {actieveScan && (
         <ResultaatWeergave
           scan={actieveScan}
+          dossier={dossier}
           onNieuw={() => setActieveScan(null)}
           onOpnieuwScannen={() => rescanMutation.mutate(actieveScan)}
           onWooConcept={() => wooConceptMutation.mutate(actieveScan.id)}
           onNaarDossier={() => naarDossierMutation.mutate(actieveScan.id)}
+          onIndien={(kanaal, ontvanger) =>
+            indienMutation.mutate({ scanId: actieveScan.id, kanaal, ontvanger })
+          }
+          defaultEmail={user?.email ?? ""}
           wooLoading={wooConceptMutation.isPending}
           dossierLoading={naarDossierMutation.isPending}
           rescanLoading={rescanMutation.isPending}
+          indienLoading={indienMutation.isPending}
         />
       )}
 

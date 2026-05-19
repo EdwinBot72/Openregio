@@ -273,6 +273,43 @@ export async function sendNewsletterEmail(to: string, subject: string, content: 
   return sendEmail(to, `${subject} - OpenRegio Nieuwsbrief`, html);
 }
 
+export async function sendWooSubmissionEmail(
+  to: string,
+  subject: string,
+  bodyText: string,
+  replyTo?: string,
+): Promise<boolean> {
+  if (!client) {
+    console.error('[Email] Postmark client not initialized');
+    return false;
+  }
+  const safeBody = bodyText
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+  const html = `<!DOCTYPE html><html><body style="font-family:Inter,Arial,sans-serif;line-height:1.6;color:#111;">
+    <pre style="white-space:pre-wrap;font-family:Georgia,'Times New Roman',serif;font-size:14px;color:#111;margin:0;">${safeBody}</pre>
+    <hr style="margin:24px 0;border:none;border-top:1px solid #e5e7eb;" />
+    <p style="font-size:12px;color:#6b7280;">Dit Woo-verzoek is ingediend via het OpenRegio-platform (openregio.nl) namens een aangesloten ondernemer. Reageer rechtstreeks aan de afzender via Reply-to.</p>
+    </body></html>`;
+  try {
+    const result = await client.sendEmail({
+      From: FROM_EMAIL,
+      To: to,
+      Subject: subject,
+      HtmlBody: html,
+      TextBody: bodyText,
+      ReplyTo: replyTo,
+      MessageStream: 'outbound',
+    });
+    console.log(`[Email] Woo-verzoek verzonden naar ${to} (MessageID: ${result.MessageID})`);
+    return true;
+  } catch (error: any) {
+    console.error(`[Email] Woo-verzoek verzenden mislukt naar ${to}:`, error.message || error);
+    return false;
+  }
+}
+
 export async function testEmailConnection(): Promise<boolean> {
   if (!client) {
     console.error('[Email] Postmark client not initialized');

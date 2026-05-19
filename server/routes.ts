@@ -2090,16 +2090,20 @@ Maak een complete, direct bruikbare WOO-brief.`;
         return res.status(409).json({ error: "Dit dossier is al afgerond." });
       }
 
-      // Enforce 28-day wait — wettelijke beslistermijn must have passed
-      if (dossier.createdAt) {
-        const cutoff = new Date(dossier.createdAt);
-        cutoff.setDate(cutoff.getDate() + 28);
-        if (new Date() < cutoff) {
-          const daysLeft = Math.ceil((cutoff.getTime() - Date.now()) / 86400000);
-          return res.status(422).json({
-            error: `De wettelijke beslistermijn van 28 dagen is nog niet verstreken. Nog ${daysLeft} dag${daysLeft !== 1 ? "en" : ""} te gaan.`,
-          });
-        }
+      // Enforce 28-day wait — wettelijke beslistermijn must have passed.
+      // Bron: deadline (gezet bij indienen), anders ingediendOp+28d, anders fallback op createdAt+28d (legacy dossiers).
+      const termijnEind: Date | null = dossier.deadline
+        ? new Date(dossier.deadline)
+        : dossier.ingediendOp
+          ? new Date(new Date(dossier.ingediendOp).getTime() + 28 * 86400000)
+          : dossier.createdAt
+            ? new Date(new Date(dossier.createdAt).getTime() + 28 * 86400000)
+            : null;
+      if (termijnEind && new Date() < termijnEind) {
+        const daysLeft = Math.ceil((termijnEind.getTime() - Date.now()) / 86400000);
+        return res.status(422).json({
+          error: `De wettelijke beslistermijn van 28 dagen is nog niet verstreken. Nog ${daysLeft} dag${daysLeft !== 1 ? "en" : ""} te gaan.`,
+        });
       }
 
       const { decryptField } = await import("./utils/woo-crypto");
@@ -2128,7 +2132,7 @@ ${vandaag}
 
 Geacht bestuur,
 
-Op grond van mijn Woo-verzoek d.d. ${dossier.createdAt ? new Date(dossier.createdAt).toLocaleDateString("nl-NL") : "[datum verzoek]"} inzake ${dossier.subject} had u conform art. 4.4 Wet open overheid uiterlijk binnen vier weken te beslissen.
+Op grond van mijn Woo-verzoek d.d. ${dossier.ingediendOp ? new Date(dossier.ingediendOp).toLocaleDateString("nl-NL") : dossier.createdAt ? new Date(dossier.createdAt).toLocaleDateString("nl-NL") : "[datum verzoek]"} inzake ${dossier.subject} had u conform art. 4.4 Wet open overheid uiterlijk binnen vier weken te beslissen.
 
 Tot op heden heb ik geen beslissing ontvangen. Hiermee bent u in verzuim.
 
@@ -6689,6 +6693,88 @@ Geef alleen de brieftekst terug, zonder commentaar, zonder markdown, zonder JSON
     } catch (err) {
       console.error("[RegioScan] Naar dossier fout:", err);
       res.status(500).json({ error: "Kon dossier niet aanmaken" });
+    }
+  });
+
+  // POST /api/regioscan/:id/indien — verstuur Woo-concept naar gemeente (e-mail of post)
+  const indienSchema = z.object({
+    kanaal: z.enum(["email", "post"]),
+    ontvanger: z.string().trim().min(3).max(500),
+  });
+
+  app.post("/api/regioscan/:id/indien", requireAuth, requirePro, async (req, res) => {
+    try {
+      const user = (req as any).user;
+      const id = parseInt(req.params.id, 10);
+      if (Number.isNaN(id)) return res.status(400).json({ error: "Ongeldig id" });
+
+      const parsed = indienSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Ongeldige invoer", details: parsed.error.flatten() });
+      }
+      const { kanaal, ontvanger } = parsed.data;
+
+      if (kanaal === "email") {
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ontvanger)) {
+          return res.status(400).json({ error: "Geef een geldig e-mailadres op." });
+        }
+        // Veiligheid: voorkom dat het Woo-verzoek per ongeluk naar het eigen
+        // e-mailadres van de ondernemer wordt gestuurd in plaats van naar de
+        // gemeente. Dit zou leiden tot onjuiste tracking en niet-bezorging.
+        if (user.email && ontvanger.toLowerCase() === String(user.email).toLowerCase()) {
+          return res.status(400).json({
+            error: "Het e-mailadres mag niet je eigen adres zijn — vul het officiële e-mailadres van de gemeente in.",
+          });
+        }
+      }
+
+      const scan = await storage.getRegioScan(id, user.id);
+      if (!scan) return res.status(404).json({ error: "RegioScan niet gevonden" });
+      if (!scan.wooConcept) {
+        return res.status(400).json({ error: "Genereer en sla eerst een concept Woo-verzoek op." });
+      }
+      if (!scan.wooDossierId) {
+        return res.status(400).json({ error: "Sla het concept eerst op als ondernemersdossier." });
+      }
+
+      const dossier = await storage.getWooDossier(scan.wooDossierId, user.id);
+      if (!dossier) return res.status(404).json({ error: "Bijbehorend dossier niet gevonden" });
+      if (dossier.ingediendOp) {
+        return res.status(409).json({ error: "Dit dossier is al ingediend.", dossier });
+      }
+
+      const subject = `Woo-verzoek ${scan.branche} — gemeente ${scan.gemeente}`;
+
+      if (kanaal === "email") {
+        const { sendWooSubmissionEmail } = await import("./services/emailService");
+        const ok = await sendWooSubmissionEmail(
+          ontvanger,
+          subject,
+          scan.wooConcept,
+          user.email || undefined,
+        );
+        if (!ok) {
+          return res.status(502).json({
+            error: "E-mail kon niet worden verzonden. Controleer het e-mailadres of probeer het later opnieuw.",
+          });
+        }
+      }
+      // Voor 'post' registreren we alleen de indiening; de ondernemer print en verstuurt zelf.
+
+      const now = new Date();
+      const updated = await storage.updateWooDossier(scan.wooDossierId, user.id, {
+        status: "sent",
+        indienKanaal: kanaal,
+        indienOntvanger: ontvanger,
+        ingediendOp: now,
+        // Wettelijke termijn van 28 dagen na indiening (Woo art. 4.4)
+        deadline: new Date(now.getTime() + 28 * 24 * 60 * 60 * 1000),
+      });
+
+      res.json({ ok: true, kanaal, ontvanger, ingediendOp: now.toISOString(), dossier: updated });
+    } catch (err) {
+      console.error("[RegioScan] Indien fout:", err);
+      res.status(500).json({ error: "Indienen mislukt" });
     }
   });
 

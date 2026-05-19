@@ -189,7 +189,19 @@ type WooDossier = {
   deadline: string | null;
   ingebrekeSentAt: string | null;
   dwangsomContractAcceptedAt: string | null;
+  indienKanaal?: string | null;
+  indienOntvanger?: string | null;
+  ingediendOp?: string | null;
 };
+
+// Bron-of-truth voor termijn-berekeningen: deadline (gezet bij indienen),
+// anders ingediendOp+28d, anders fallback op createdAt+28d (legacy dossiers).
+function dossierDeadline(d: WooDossier): Date | null {
+  if (d.deadline) return new Date(d.deadline);
+  if (d.ingediendOp) return new Date(new Date(d.ingediendOp).getTime() + 28 * 86400000);
+  if (d.createdAt) return new Date(new Date(d.createdAt).getTime() + 28 * 86400000);
+  return null;
+}
 
 function WooDossierPanel({ isPro }: { isPro: boolean }) {
   const { toast } = useToast();
@@ -206,19 +218,14 @@ function WooDossierPanel({ isPro }: { isPro: boolean }) {
 
   const overdue = dossiers.filter((d) => {
     if (["response_received", "closed", "ingebreke_gesteld"].includes(d.status)) return false;
-    if (!d.createdAt) return false;
-    const created = new Date(d.createdAt);
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - 28);
-    return created <= cutoff;
+    const dl = dossierDeadline(d);
+    return !!dl && dl <= new Date();
   });
 
   const pending = dossiers.filter((d) => {
     if (["response_received", "closed", "ingebreke_gesteld"].includes(d.status)) return false;
-    const created = new Date(d.createdAt);
-    const cutoff = new Date();
-    cutoff.setDate(cutoff.getDate() - 28);
-    return created > cutoff;
+    const dl = dossierDeadline(d);
+    return !!dl && dl > new Date();
   });
 
   const ingebrekelMutation = useMutation({
@@ -243,14 +250,13 @@ function WooDossierPanel({ isPro }: { isPro: boolean }) {
   if (dossiers.length === 0) return null;
 
   const daysLeft = (d: WooDossier) => {
-    const deadline = d.deadline ? new Date(d.deadline) : (() => {
-      const t = new Date(d.createdAt);
-      t.setDate(t.getDate() + 28);
-      return t;
-    })();
-    const diff = Math.ceil((deadline.getTime() - Date.now()) / 86400000);
-    return diff;
+    const dl = dossierDeadline(d);
+    if (!dl) return 0;
+    return Math.ceil((dl.getTime() - Date.now()) / 86400000);
   };
+
+  const kanaalLabel = (k?: string | null) =>
+    k === "email" ? "per e-mail" : k === "post" ? "per post" : null;
 
   const statusLabel: Record<string, string> = {
     sent: "Verstuurd",
@@ -289,6 +295,12 @@ function WooDossierPanel({ isPro }: { isPro: boolean }) {
                   <div className="min-w-0">
                     <p className="text-sm font-medium truncate">{d.subject}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">{d.authority}</p>
+                    {d.ingediendOp && (
+                      <p className="text-xs text-muted-foreground mt-0.5" data-testid={`text-indien-${d.id}`}>
+                        Ingediend {kanaalLabel(d.indienKanaal) ?? ""} op {new Date(d.ingediendOp).toLocaleDateString("nl-NL")}
+                        {d.indienOntvanger ? ` · ${d.indienOntvanger}` : ""}
+                      </p>
+                    )}
                   </div>
                   <Button
                     size="sm"
@@ -320,6 +332,12 @@ function WooDossierPanel({ isPro }: { isPro: boolean }) {
                     <div className="min-w-0 flex-1">
                       <p className="text-sm font-medium truncate">{d.subject}</p>
                       <p className="text-xs text-muted-foreground mt-0.5">{d.authority}</p>
+                      {d.ingediendOp && (
+                        <p className="text-xs text-muted-foreground mt-0.5" data-testid={`text-indien-${d.id}`}>
+                          Ingediend {kanaalLabel(d.indienKanaal) ?? ""} op {new Date(d.ingediendOp).toLocaleDateString("nl-NL")}
+                          {d.indienOntvanger ? ` · ${d.indienOntvanger}` : ""}
+                        </p>
+                      )}
                     </div>
                     <div className="flex items-center gap-2 flex-wrap">
                       <div className={`flex items-center gap-1 text-xs ${days <= 7 ? "text-amber-500" : "text-muted-foreground"}`}>

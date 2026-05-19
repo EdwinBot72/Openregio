@@ -877,6 +877,10 @@ export const wooDossiers = pgTable("woo_dossiers", {
   // Ingebrekestelling & dwangsom
   ingebrekeSentAt: timestamp("ingebreke_sent_at", { withTimezone: true }),
   dwangsomContractAcceptedAt: timestamp("dwangsom_contract_accepted_at", { withTimezone: true }),
+  // Indiening bij gemeente / bestuursorgaan
+  indienKanaal: varchar("indien_kanaal", { length: 16 }), // 'email' | 'post'
+  indienOntvanger: text("indien_ontvanger"),
+  ingediendOp: timestamp("ingediend_op", { withTimezone: true }),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 }, (table) => [
   index("idx_woo_dossiers_user").on(table.userId),
