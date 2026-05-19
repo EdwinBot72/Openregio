@@ -82,7 +82,7 @@ export default function HomePage() {
                 Inloggen
               </Link>
               <Link href="/register" className="lp-btn-orange-nav" data-testid="link-nav-register">
-                Gratis starten <ChevronRight size={14} />
+                Abonnement starten <ChevronRight size={14} />
               </Link>
             </div>
 
@@ -104,7 +104,7 @@ export default function HomePage() {
           <a href="#aanbod" className="lp-nav-link" onClick={() => setMobileOpen(false)}>Aanbod</a>
           <div className="lp-mobile-cta">
             <Link href="/login" className="lp-btn-ghost-nav" onClick={() => setMobileOpen(false)}>Inloggen</Link>
-            <Link href="/register" className="lp-btn-orange-nav" onClick={() => setMobileOpen(false)}>Gratis starten</Link>
+            <Link href="/register" className="lp-btn-orange-nav" onClick={() => setMobileOpen(false)}>Abonnement starten</Link>
           </div>
         </div>
       </header>
