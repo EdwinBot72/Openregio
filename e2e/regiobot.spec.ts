@@ -126,4 +126,107 @@ test.describe("RegioBot-pagina", () => {
     await expect(page.getByTestId("message-loading")).toHaveCount(0);
     await expect(textarea).toHaveValue("");
   });
+
+  test("Pro-lid ziet vriendelijke foutmelding wanneer backend faalt en kan daarna opnieuw versturen", async ({
+    page,
+    context,
+    baseURL,
+  }) => {
+    await registerAndAuth(context, baseURL!, "pro", "rb-err");
+
+    // We mocken /api/regiobot zodat het eerste POST-verzoek een 503 teruggeeft
+    // (vergelijkbaar met een ontbrekende OPENAI_API_KEY in productie) en het
+    // tweede verzoek alsnog een geldig fixture-antwoord levert. Zo testen we
+    // zowel het foutpad als dat de gebruiker daarna opnieuw kan submitten.
+    let callCount = 0;
+    await page.route("**/api/regiobot", async (route) => {
+      const request = route.request();
+      if (request.method() !== "POST") {
+        await route.fallback();
+        return;
+      }
+      callCount += 1;
+      // Korte vertraging zodat de loading-indicator zichtbaar wordt.
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      if (callCount === 1) {
+        await route.fulfill({
+          status: 503,
+          contentType: "application/json",
+          body: JSON.stringify({
+            error: "RegioBot is tijdelijk niet beschikbaar (geen AI-key).",
+          }),
+        });
+        return;
+      }
+
+      const body = JSON.parse(request.postData() || "{}");
+      const patched = { ...body, __testFixture: true };
+      await route.continue({
+        postData: JSON.stringify(patched),
+        headers: {
+          ...request.headers(),
+          "content-type": "application/json",
+        },
+      });
+    });
+
+    await page.goto("/regiobot");
+    await waitForReactQuery(page);
+
+    await expect(page.getByTestId("page-regiobot")).toBeVisible();
+
+    // Eerste vraag: zal falen met 503
+    await page.getByTestId("suggestion-mandaat_check").click();
+    const textarea = page.getByTestId("textarea-question");
+    await expect(textarea).not.toHaveValue("");
+
+    const errorResponsePromise = page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/api/regiobot") &&
+        resp.request().method() === "POST",
+    );
+
+    await page.getByTestId("button-submit").click();
+    await expect(page.getByTestId("message-user-1")).toBeVisible();
+    await expect(page.getByTestId("message-loading")).toBeVisible();
+
+    const errorResponse = await errorResponsePromise;
+    expect(errorResponse.status()).toBe(503);
+
+    // De bot toont een vriendelijke foutmelding op index 2 (na intro + user).
+    const botError = page.getByTestId("message-bot-2");
+    await expect(botError).toBeVisible();
+    await expect(botError).toContainText("Er ging iets mis");
+
+    // Loading-indicator verdwijnt en de submit-knop staat weer op "Verstuur"
+    // (niet meer "Bezig..."), zodat de gebruiker opnieuw kan submitten.
+    await expect(page.getByTestId("message-loading")).toHaveCount(0);
+    const submitButton = page.getByTestId("button-submit");
+    await expect(submitButton).toHaveText("Verstuur");
+    await expect(textarea).toHaveValue("");
+
+    // Tweede poging — moet nu wél lukken met een geldig antwoord.
+    await page.getByTestId("suggestion-mandaat_check").click();
+    await expect(textarea).not.toHaveValue("");
+    await expect(submitButton).toBeEnabled();
+
+    const successResponsePromise = page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/api/regiobot") &&
+        resp.request().method() === "POST",
+    );
+
+    await submitButton.click();
+    // Nieuwe gebruikersvraag op index 3 (intro=0, user=1, bot-error=2, user=3)
+    await expect(page.getByTestId("message-user-3")).toBeVisible();
+
+    const successResponse = await successResponsePromise;
+    expect(successResponse.status()).toBe(200);
+
+    const botAnswer = page.getByTestId("message-bot-4");
+    await expect(botAnswer).toBeVisible();
+    await expect(botAnswer).toContainText("Test-antwoord (fixture)");
+    await expect(page.getByTestId("message-loading")).toHaveCount(0);
+  });
 });
