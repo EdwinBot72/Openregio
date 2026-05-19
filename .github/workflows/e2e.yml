@@ -99,3 +99,47 @@ jobs:
           name: server-log
           path: server.log
           retention-days: 7
+
+      - name: Notify Slack on failure
+        if: failure()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_URL secret not configured; skipping Slack notification."
+            exit 0
+          fi
+          RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          REF_NAME="${GITHUB_REF_NAME:-${GITHUB_REF}}"
+          TEXT=":rotating_light: *E2E tests gefaald* op \`${REF_NAME}\` (${GITHUB_EVENT_NAME})\n*Repo:* ${GITHUB_REPOSITORY}\n*Commit:* \`${GITHUB_SHA:0:8}\` door ${GITHUB_ACTOR}\n*Run:* ${RUN_URL}"
+          PAYLOAD=$(jq -n --arg text "$TEXT" '{text: $text}')
+          curl -sS -X POST -H 'Content-Type: application/json' \
+            --data "$PAYLOAD" "$SLACK_WEBHOOK_URL" || echo "Slack notification failed (non-fatal)"
+
+      - name: Notify Slack on recovery (rood -> groen)
+        if: success()
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -z "$SLACK_WEBHOOK_URL" ]; then
+            echo "SLACK_WEBHOOK_URL secret not configured; skipping recovery notification."
+            exit 0
+          fi
+          PREV_STATUS=$(gh run list \
+            --workflow "${GITHUB_WORKFLOW}" \
+            --branch "${GITHUB_REF_NAME}" \
+            --limit 5 \
+            --json databaseId,conclusion,status \
+            --jq "[.[] | select(.status==\"completed\" and (.databaseId|tostring)!=\"${GITHUB_RUN_ID}\")][0].conclusion" 2>/dev/null || echo "")
+          echo "Previous run conclusion on this branch: '${PREV_STATUS}'"
+          if [ "$PREV_STATUS" != "failure" ]; then
+            echo "No prior failure on this branch; skipping recovery notification."
+            exit 0
+          fi
+          RUN_URL="${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          REF_NAME="${GITHUB_REF_NAME:-${GITHUB_REF}}"
+          TEXT=":white_check_mark: *E2E tests weer groen* op \`${REF_NAME}\`\n*Repo:* ${GITHUB_REPOSITORY}\n*Commit:* \`${GITHUB_SHA:0:8}\` door ${GITHUB_ACTOR}\n*Run:* ${RUN_URL}"
+          PAYLOAD=$(jq -n --arg text "$TEXT" '{text: $text}')
+          curl -sS -X POST -H 'Content-Type: application/json' \
+            --data "$PAYLOAD" "$SLACK_WEBHOOK_URL" || echo "Slack notification failed (non-fatal)"
