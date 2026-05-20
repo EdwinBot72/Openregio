@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Shield, Save, AlertCircle } from "lucide-react";
+import LokaleVindbaarheid from "@/components/lokale-vindbaarheid/LokaleVindbaarheid";
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "wouter";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -245,6 +246,12 @@ export default function ProVisibilitySettings() {
               <dd className="text-muted-foreground">Alleen jij kunt dit veld zien. Niemand anders heeft toegang.</dd>
             </div>
           </dl>
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6">
+        <CardContent className="pt-6">
+          <LokaleVindbaarheid />
         </CardContent>
       </Card>
     </div>
