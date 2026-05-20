@@ -76,22 +76,24 @@
   gap: 4px;
 }
 .lp-nav-link {
-  color: white;
+  color: white !important;
   font-size: 14px;
   font-weight: 700;
   padding: 7px 14px;
   border-radius: 8px;
   transition: background .12s, color .12s;
   cursor: pointer;
+  text-decoration: none !important;
 }
 .lp-nav-link:hover {
   background: rgba(255,255,255,.1);
-  color: white;
+  color: white !important;
 }
 .lp-nav-cta { display: flex; gap: 9px; align-items: center; }
 .lp-btn-ghost-nav {
   background: rgba(255,255,255,.1);
-  color: white;
+  color: white !important;
+  text-decoration: none !important;
   border: 1.5px solid rgba(255,255,255,.2);
   padding: 8px 18px;
   border-radius: 9px;
@@ -107,7 +109,8 @@
 .lp-btn-ghost-nav:hover { background: rgba(255,255,255,.18); }
 .lp-btn-orange-nav {
   background: var(--lp-orange);
-  color: white;
+  color: white !important;
+  text-decoration: none !important;
   border: none;
   padding: 9px 20px;
   border-radius: 9px;
