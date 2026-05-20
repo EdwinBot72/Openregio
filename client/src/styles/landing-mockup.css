@@ -1,7 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;500;600;700&display=swap');
-
 .lp-root {
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: 'Inter', sans-serif;
   color: #1A2438;
   background: #F5F8FF;
   -webkit-font-smoothing: antialiased;
@@ -66,7 +64,7 @@
   flex-shrink: 0;
 }
 .lp-brand-name {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 22px;
   font-weight: 900;
   color: white;
@@ -100,7 +98,7 @@
   font-size: 13.5px;
   font-weight: 700;
   cursor: pointer;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   transition: background .12s;
   display: inline-flex;
   align-items: center;
@@ -116,7 +114,7 @@
   font-size: 13.5px;
   font-weight: 800;
   cursor: pointer;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   transition: background .12s, transform .12s;
   box-shadow: 0 4px 14px rgba(232,130,12,.4);
   display: inline-flex;
@@ -187,7 +185,7 @@
   letter-spacing: .07em;
   text-transform: uppercase;
   margin-bottom: 20px;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 .lp-pulse {
   width: 7px;
@@ -203,7 +201,7 @@
   50% { box-shadow: 0 0 0 8px rgba(74,222,128,0); }
 }
 .lp-hero-title {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: clamp(36px, 5vw, 60px);
   font-weight: 900;
   color: white;
@@ -213,7 +211,7 @@
 }
 .lp-hl { color: #7EC8F8; }
 .lp-hero-tagline {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 15px;
   font-weight: 700;
   color: #7EC8F8;
@@ -247,7 +245,7 @@
   font-size: 15px;
   font-weight: 800;
   cursor: pointer;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   transition: background .13s, transform .13s;
   box-shadow: 0 6px 22px rgba(232,130,12,.48);
 }
@@ -264,7 +262,7 @@
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   transition: background .13s;
 }
 .lp-btn-hero-white:hover { background: rgba(255,255,255,.2); }
@@ -325,7 +323,7 @@
   border-radius: 2px;
   padding: 2px 6px;
   margin-bottom: 3px;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 9px;
   font-weight: 900;
 }
@@ -427,7 +425,7 @@
   flex-shrink: 0;
 }
 .lp-ws-val {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 17px;
   font-weight: 900;
   color: var(--lp-ink);
@@ -442,7 +440,7 @@
 
 /* ── SECTION SHARED ── */
 .lp-sec-label {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 11px;
   font-weight: 800;
   letter-spacing: .1em;
@@ -465,7 +463,7 @@
 .lp-sl-orange { color: var(--lp-orange); }
 .lp-sl-orange::before { background: var(--lp-orange); }
 .lp-sec-title {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 36px;
   font-weight: 900;
   color: var(--lp-ink);
@@ -535,7 +533,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 26px;
   font-weight: 900;
   flex-shrink: 0;
@@ -544,7 +542,7 @@
 .lp-pc2 .lp-pc-bignum { background: var(--lp-green); color: white; }
 .lp-pc3 .lp-pc-bignum { background: var(--lp-orange); color: white; }
 .lp-pc-hname {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 20px;
   font-weight: 900;
   letter-spacing: -.2px;
@@ -599,7 +597,7 @@
 .lp-pc2 .lp-pc-illus-main { background: var(--lp-green); }
 .lp-pc3 .lp-pc-illus-main { background: var(--lp-orange); }
 .lp-pc-illus-badge {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 11px;
   font-weight: 800;
   padding: 4px 12px;
@@ -654,7 +652,7 @@
   color: white;
 }
 .lp-pc-foot p {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 13px;
   font-weight: 800;
   color: white;
@@ -668,7 +666,7 @@
   transform: translateX(-50%);
   background: var(--lp-orange);
   color: white;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 11px;
   font-weight: 800;
   padding: 4px 16px;
@@ -703,10 +701,10 @@
   letter-spacing: .06em;
   text-transform: uppercase;
   margin-bottom: 16px;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 .lp-lk-title {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: clamp(32px, 3.5vw, 44px);
   font-weight: 900;
   color: var(--lp-ink);
@@ -765,7 +763,7 @@
   font-size: 15px;
   font-weight: 800;
   cursor: pointer;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   transition: background .13s, transform .13s;
   box-shadow: 0 6px 20px rgba(232,130,12,.35);
 }
@@ -788,7 +786,7 @@
 }
 .lp-lkp-title { font-family: 'Nunito', sans-serif; font-size: 14px; font-weight: 800; color: var(--lp-ink); }
 .lp-lkp-count {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 12px;
   font-weight: 700;
   color: var(--lp-soft);
@@ -814,13 +812,13 @@
   font-size: 12px;
   font-weight: 900;
   flex-shrink: 0;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 .lp-p-info { flex: 1; }
 .lp-p-name { font-size: 13.5px; font-weight: 700; color: var(--lp-ink); }
 .lp-p-type { font-size: 11.5px; color: var(--lp-soft); font-weight: 600; }
 .lp-p-tag-new {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 10px;
   font-weight: 800;
   color: var(--lp-green2);
@@ -838,7 +836,7 @@
   box-shadow: var(--lp-sh);
 }
 .lp-ak-head {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 13px;
   font-weight: 800;
   color: var(--lp-ink);
@@ -870,7 +868,7 @@
 .lp-ak-name { font-size: 13px; font-weight: 700; color: var(--lp-ink); flex: 1; }
 .lp-ak-meta { font-size: 11px; color: var(--lp-soft); font-weight: 600; flex-shrink: 0; }
 .lp-ak-badge {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 10px;
   font-weight: 800;
   padding: 3px 8px;
@@ -888,7 +886,7 @@
   gap: 16px;
 }
 .lp-rp-num {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 30px;
   font-weight: 900;
   color: white;
@@ -920,14 +918,14 @@
   content: '"';
   position: absolute;
   top: 12px; right: 18px;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 64px;
   font-weight: 900;
   color: var(--lp-bd);
   line-height: 1;
 }
 .lp-proof-stat {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 38px;
   font-weight: 900;
   letter-spacing: -1px;
@@ -939,7 +937,7 @@
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: .06em;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   margin-bottom: 16px;
   opacity: .65;
 }
@@ -961,7 +959,7 @@
   justify-content: center;
   font-size: 12px;
   font-weight: 900;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   flex-shrink: 0;
 }
 .lp-proof-name { font-size: 13px; font-weight: 700; color: var(--lp-ink); }
@@ -989,7 +987,7 @@
   align-items: center;
 }
 .lp-off-eyebrow {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 11px;
   font-weight: 800;
   color: #7EC8F8;
@@ -1008,7 +1006,7 @@
   border-radius: 2px;
 }
 .lp-off-title {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 38px;
   font-weight: 900;
   color: white;
@@ -1058,7 +1056,7 @@
   font-size: 15px;
   font-weight: 800;
   cursor: pointer;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   transition: background .13s, transform .13s;
   box-shadow: 0 6px 22px rgba(232,130,12,.5);
 }
@@ -1093,7 +1091,7 @@
   flex-shrink: 0;
 }
 .lp-oi-tag {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 10px;
   font-weight: 800;
   color: rgba(255,255,255,.4);
@@ -1141,7 +1139,7 @@
 }
 .lp-dg-item:hover .lp-dg-ico { background: var(--lp-marine); color: white; }
 .lp-dg-name {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 11px;
   font-weight: 800;
   color: var(--lp-mid);
@@ -1207,10 +1205,10 @@
   letter-spacing: .07em;
   text-transform: uppercase;
   margin-bottom: 18px;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 .lp-cta-title {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 40px;
   font-weight: 900;
   color: white;
@@ -1238,7 +1236,7 @@
   font-size: 15px;
   font-weight: 800;
   cursor: pointer;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   transition: background .13s, transform .13s;
   box-shadow: 0 6px 22px rgba(232,130,12,.45);
 }
@@ -1255,7 +1253,7 @@
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
 }
 .lp-cta-trust { display: flex; align-items: center; justify-content: center; gap: 22px; flex-wrap: wrap; }
 .lp-cta-ti {
@@ -1276,7 +1274,7 @@
   margin-bottom: 32px;
 }
 .lp-f-brand-name {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 22px;
   font-weight: 900;
   color: white;
@@ -1285,7 +1283,7 @@
 .lp-f-brand-name b { color: #7EC8F8; }
 .lp-f-tag { font-size: 13px; color: rgba(255,255,255,.3); font-weight: 500; line-height: 1.6; max-width: 220px; }
 .lp-f-head {
-  font-family: 'Nunito', sans-serif;
+  font-family: 'Inter', sans-serif;
   font-size: 10.5px;
   font-weight: 800;
   color: rgba(255,255,255,.25);
