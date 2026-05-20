@@ -9,7 +9,7 @@ import {
   Globe, Search, CheckCircle2, AlertTriangle, XCircle,
   ArrowRight, Copy, RotateCcw, Lock, ChevronDown, ChevronUp,
   Smartphone, Share2, MapPin, Loader2, TrendingUp,
-  Flame, AlertCircle, Info,
+  Flame, AlertCircle, Info, HelpCircle,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
@@ -58,6 +58,50 @@ function prioriteitStyle(p: string): string {
   if (p === "hoog") return "border-red-100 bg-red-50";
   if (p === "midden") return "border-amber-100 bg-amber-50";
   return "border-blue-100 bg-blue-50";
+}
+
+// Bouw een hulp-engine link vanuit een website-scan uitkomst.
+// Keuze van flow: 'regel-onduidelijk' — een ondernemer wil vaak een leverancier,
+// webbouwer of (lokale) instantie uitleg vragen over wat er moet gebeuren aan
+// de website. Die flow levert een concept-vraag met een open onderwerp + uitleg.
+// We vullen minimaal twee velden voor:
+//  - onderwerp: korte titel ("Online vindbaarheid van <domein>")
+//  - onduidelijk: top-aanbevelingen uit de scan (hoog/midden prioriteit)
+//  - urgentie: 'deadline' bij score<80, anders 'informatief'. We zetten bewust
+//    nooit 'handhaving' — die optie impliceert lopende handhaving/controle en
+//    dat valt niet uit een scan-score af te leiden.
+function bouwHulpEngineHref(r: ScanResult): string {
+  const params = new URLSearchParams();
+
+  let domein = r.url;
+  try {
+    domein = new URL(r.url).hostname.replace(/^www\./, "");
+  } catch {
+    // url zoals ingevoerd zonder protocol — laat ongewijzigd
+  }
+  params.set("onderwerp", `Online vindbaarheid van ${domein}`);
+
+  const top = (r.analysis.aanbevelingen ?? [])
+    .filter((a) => a.prioriteit === "hoog" || a.prioriteit === "midden")
+    .slice(0, 3);
+  const lijst = (top.length > 0 ? top : (r.analysis.aanbevelingen ?? []).slice(0, 3))
+    .map((a, i) => `${i + 1}. ${a.actie}`)
+    .join("\n");
+  const onduidelijk = [
+    `Uit een website-scan van ${domein} (score ${r.analysis.overallScore}/100) komen de volgende punten naar voren:`,
+    lijst,
+    "",
+    "Mijn vraag: hoe pak ik dit het beste aan en wie is hiervoor verantwoordelijk?",
+  ]
+    .filter(Boolean)
+    .join("\n");
+  params.set("onduidelijk", onduidelijk);
+
+  const score = r.analysis.overallScore;
+  const urgentie = score < 80 ? "deadline" : "informatief";
+  params.set("urgentie", urgentie);
+
+  return `/regels/help/regel-onduidelijk?${params.toString()}`;
 }
 
 export default function WebsiteScanPage() {
@@ -354,7 +398,15 @@ export default function WebsiteScanPage() {
           )}
 
           {/* Actions */}
-          <div className="flex gap-3 pt-1">
+          <div className="flex flex-wrap gap-3 pt-1">
+            <Link href={bouwHulpEngineHref(result)}>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700 text-white"
+                data-testid="button-hulp-engine"
+              >
+                <HelpCircle className="w-4 h-4 mr-2" />Reageren met hulp-engine
+              </Button>
+            </Link>
             <Button variant="outline" onClick={copyReport} data-testid="button-copy-report">
               <Copy className="w-4 h-4 mr-2" />Rapport kopiëren
             </Button>
@@ -362,6 +414,10 @@ export default function WebsiteScanPage() {
               <RotateCcw className="w-4 h-4 mr-2" />Nieuwe scan
             </Button>
           </div>
+          <p className="text-xs text-slate-500 -mt-2" data-testid="text-hulp-engine-hint">
+            Geeft de scan-uitkomsten door aan de flow 'Regel of besluit niet duidelijk' zodat je
+            direct een concept-vraag opstelt voor je webbouwer of de gemeente.
+          </p>
         </div>
       )}
     </div>
