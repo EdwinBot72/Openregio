@@ -22,6 +22,7 @@ import {
   Users,
   Settings,
   Compass,
+  BarChart,
 } from "lucide-react";
 
 export type NavSubItem = {
@@ -62,6 +63,7 @@ export const MAIN_NAV: NavSection[] = [
       { title: "Opdrachten", url: "/kansen/opdrachten", icon: Landmark },
       { title: "Subsidies", url: "/kansen/subsidies", icon: Euro },
       { title: "In de buurt", url: "/kansen/in-de-buurt", icon: MapPin },
+      { title: "Marktanalyse", url: "/kansen/marktanalyse", icon: BarChart },
       { title: "Marktplaats (vraag & rommelmarkt)", url: "/lokaal-marktplaats", icon: Handshake },
       { title: "Lokale acties", url: "/lokale-acties", icon: CalendarDays },
       { title: "Samenwerkingen", url: "/network", icon: Users },

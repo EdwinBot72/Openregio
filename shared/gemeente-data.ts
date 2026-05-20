@@ -194,6 +194,94 @@ const SPOED_FACTOR: Record<string, number> = {
   catering: 0.9,
 };
 
+export interface BeroepKans {
+  beroep: string;
+  label: string;
+  vraagScore: number;
+  kansScore: number;
+  competitie: CompetitieNiveau;
+  groeigebied: boolean;
+}
+
+export const BEROEP_LABELS: Record<string, string> = {
+  loodgieter: "Loodgieter",
+  elektricien: "Elektricien",
+  dierenarts: "Dierenarts",
+  dakdekker: "Dakdekker",
+  advocaat: "Advocaat",
+  tandarts: "Tandarts",
+  autogarage: "Autogarage",
+  fysiotherapeut: "Fysiotherapeut",
+  schoonheidsspecialiste: "Schoonheidsspecialiste",
+  kapper: "Kapper",
+  nagelstudio: "Nagelstudio",
+  masseur: "Masseur",
+  bakker: "Bakker",
+  restaurant: "Restaurant",
+  ijssalon: "IJssalon",
+  bloemist: "Bloemist",
+  slager: "Slager",
+  schilder: "Schilder",
+  timmerman: "Timmerman",
+  aannemer: "Aannemer",
+  stukadoor: "Stukadoor",
+  tegelzetter: "Tegelzetter",
+  fietsenmaker: "Fietsenmaker",
+  autorijschool: "Autorijschool",
+  "opticiën": "Opticiën",
+  hoveniersbedrijf: "Hoveniersbedrijf",
+  schoonmaakbedrijf: "Schoonmaakbedrijf",
+  accountant: "Accountant",
+  makelaar: "Makelaar",
+  catering: "Catering",
+};
+
+/** Geeft voor een specifieke gemeente alle beroepen gesorteerd op kansscore (hoog = meeste kans). */
+export function berekenBeroepKansenPerGemeente(gemeenteNaam: string): BeroepKans[] {
+  let gem: Gemeente | undefined;
+  let groeigebied = false;
+
+  for (const prov of PROVINCIES) {
+    const found = prov.gemeentes.find(
+      (g) => g.naam.toLowerCase() === gemeenteNaam.toLowerCase()
+    );
+    if (found) {
+      gem = found;
+      groeigebied = found.groeigebied ?? false;
+      break;
+    }
+  }
+
+  if (!gem) return [];
+
+  const competitie: CompetitieNiveau =
+    gem.inwoners > 150000 ? "hoog" :
+    gem.inwoners > 60000 ? "midden" : "laag";
+
+  const competitieFactor =
+    competitie === "laag" ? 1.6 :
+    competitie === "midden" ? 1.1 : 0.75;
+
+  const result: BeroepKans[] = [];
+
+  for (const [beroep, factor] of Object.entries(SPOED_FACTOR)) {
+    if (beroep === "dakdekker2") continue;
+    const base = gem.inwoners / 10000;
+    const vraagScore = Math.round(base * factor * (groeigebied ? 1.25 : 1.0));
+    const kansScore = Math.round(vraagScore * competitieFactor);
+    result.push({
+      beroep,
+      label: BEROEP_LABELS[beroep] ?? beroep,
+      vraagScore,
+      kansScore,
+      competitie,
+      groeigebied,
+    });
+  }
+
+  return result.sort((a, b) => b.kansScore - a.kansScore);
+}
+
 export function berekenGemeenteScores(beroep: string, spoedScore: number): GemeenteScore[] {
   const factor = SPOED_FACTOR[beroep] ?? 1.0;
   const scores: GemeenteScore[] = [];

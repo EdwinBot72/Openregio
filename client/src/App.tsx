@@ -73,6 +73,7 @@ import LokaleBasischeckPage from "@/pages/lokale-basischeck";
 import LokaalMarktplaatsPage from "@/pages/lokaal-marktplaats";
 import KansenInDeBuurtPage from "@/pages/kansen-in-de-buurt";
 import KansenMarktPage from "@/pages/kansen-markt";
+import KansenMarktanalysePage from "@/pages/kansen-marktanalyse";
 import WetgevingIndienenPage from "@/pages/wetgeving-indienen";
 import WetgevingPublicatiesPage from "@/pages/wetgeving/publicaties";
 import AdminWetgevingPage from "@/pages/admin/wetgeving";
@@ -205,6 +206,7 @@ function AuthenticatedRouter() {
       <Route path="/kansen/opdrachten" component={AanbestedingenPage} />
       <Route path="/kansen/subsidies" component={FinancieringPage} />
       <Route path="/kansen/in-de-buurt" component={KansenInDeBuurtPage} />
+      <Route path="/kansen/marktanalyse" component={KansenMarktanalysePage} />
       <Route path="/kansen/samenwerkingen">
         <Redirect to="/network" />
       </Route>

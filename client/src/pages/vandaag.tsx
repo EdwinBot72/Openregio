@@ -1,5 +1,7 @@
 import type { CSSProperties } from "react";
+import { useMemo } from "react";
 import { Link } from "wouter";
+import { berekenBeroepKansenPerGemeente, PROVINCIES } from "@shared/gemeente-data";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -497,6 +499,23 @@ export default function VandaagPage() {
 
   const isPro = user?.plan === "pro";
   const planLabel = isPro ? "Pro-bijdrager" : "Basic lid";
+
+  // Regio kansen — client-side berekening op basis van user.region
+  const regioKansen = useMemo(() => {
+    if (!user?.region) return [];
+    const regio = user.region.trim();
+    // Probeer directe gemeente-match
+    for (const prov of PROVINCIES) {
+      const gem = prov.gemeentes.find(
+        (g) => g.naam.toLowerCase() === regio.toLowerCase()
+      );
+      if (gem) return berekenBeroepKansenPerGemeente(gem.naam).slice(0, 3);
+    }
+    // Fallback: eerste gemeente van de provincie als naam overeenkomt
+    const prov = PROVINCIES.find((p) => p.naam.toLowerCase() === regio.toLowerCase());
+    if (prov?.gemeentes[0]) return berekenBeroepKansenPerGemeente(prov.gemeentes[0].naam).slice(0, 3);
+    return [];
+  }, [user?.region]);
   const displayFirstName =
     user?.firstName ||
     (profiel?.naam ? profiel.naam.split(" ")[0] : "") ||
@@ -1488,6 +1507,118 @@ export default function VandaagPage() {
           </p>
         ) : (
           <BusinessMapView businesses={bedrijven} heightClass="h-[320px]" />
+        )}
+      </section>
+
+      {/* 5b. Regio kansen — welke diensten ontbreken in jouw gemeente? */}
+      <section
+        className="openregio-card"
+        data-testid="section-regio-kansen"
+        style={{ marginTop: 14, padding: "18px 20px", borderRadius: 18 }}
+      >
+        <SectieKop
+          icon={TrendingUp}
+          tint="oranje"
+          titel="Kansen in jouw regio"
+          subtitel="Diensten met de meeste vraag en minste concurrentie."
+          bekijkAlles="/kansen/marktanalyse"
+          bekijkAllesAriaLabel="Volledige marktanalyse bekijken"
+          bekijkAllesTestId="link-marktanalyse"
+        />
+        {regioKansen.length === 0 ? (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 12,
+              padding: "10px 14px",
+              background: C.oranjeTintBgZacht,
+              border: `1px solid ${C.borderOranje}`,
+              borderRadius: 12,
+              flexWrap: "wrap",
+            }}
+            data-testid="card-regio-kansen-cta"
+          >
+            <p style={{ fontSize: 13, color: C.donker, margin: 0, fontWeight: 600 }}>
+              Vul je gemeente in en zie direct welke diensten er in jouw regio kansen bieden.
+            </p>
+            <Link
+              href="/kansen/marktanalyse"
+              className="openregio-button openregio-button-outline openregio-button-small"
+              data-testid="button-naar-marktanalyse"
+              style={{ flexShrink: 0 }}
+            >
+              Bekijk analyse
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 8 }} data-testid="list-regio-kansen">
+            {regioKansen.map((k, idx) => (
+              <Link
+                key={k.beroep}
+                href="/kansen/marktanalyse"
+                data-testid={`item-regio-kans-${k.beroep}`}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "10px 14px",
+                  background: "#fff",
+                  border: `1px solid ${C.border}`,
+                  borderRadius: 12,
+                  textDecoration: "none",
+                  color: "inherit",
+                }}
+                className="hover-elevate"
+              >
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 26,
+                    height: 26,
+                    borderRadius: 8,
+                    background: C.oranjeTintBg,
+                    color: C.oranjeDiep,
+                    fontSize: 12,
+                    fontWeight: 800,
+                    flexShrink: 0,
+                  }}
+                >
+                  {idx + 1}
+                </span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: C.donker, flex: 1 }}>
+                  {k.label}
+                </span>
+                <span
+                  style={{
+                    fontSize: 11,
+                    fontWeight: 700,
+                    color: C.tekstZacht,
+                    background: C.donkerTintBg,
+                    padding: "3px 8px",
+                    borderRadius: 999,
+                    flexShrink: 0,
+                  }}
+                  data-testid={`text-kans-score-${k.beroep}`}
+                >
+                  score {k.kansScore}
+                </span>
+              </Link>
+            ))}
+            <Link
+              href="/kansen/marktanalyse"
+              className="openregio-button openregio-button-outline openregio-button-small"
+              data-testid="button-alle-kansen"
+              style={{ alignSelf: "flex-start", marginTop: 4 }}
+            >
+              Alle beroepen bekijken
+              <ArrowUpRight className="h-3.5 w-3.5" />
+            </Link>
+          </div>
         )}
       </section>
 
