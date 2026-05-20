@@ -4,9 +4,10 @@ interface Props {
   question: Question;
   value: string;
   onChange: (v: string) => void;
+  isPrefilled?: boolean;
 }
 
-export function QuestionField({ question, value, onChange }: Props) {
+export function QuestionField({ question, value, onChange, isPrefilled }: Props) {
   const id = `q-${question.id}`;
   const testId = `field-${question.id}`;
 
@@ -15,6 +16,14 @@ export function QuestionField({ question, value, onChange }: Props) {
       <label htmlFor={id} className="flow-question-label">
         {question.label}
         {question.required && <span className="flow-question-required"> *</span>}
+        {isPrefilled && (
+          <span
+            className="flow-question-prefilled-badge"
+            data-testid={`badge-prefilled-${question.id}`}
+          >
+            vooringevuld
+          </span>
+        )}
       </label>
       {question.help && <p className="flow-question-help">{question.help}</p>}
 

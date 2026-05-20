@@ -90,6 +90,11 @@ export function FlowRunner({ schema }: Props) {
     [schema, search],
   );
   const [answers, setAnswers] = useState<Answers>(initialAnswers);
+  // IDs van velden die vooringevuld zijn vanuit URL-params (brief-analyse).
+  // Zodra de gebruiker zo'n veld zelf wijzigt, verdwijnt de markering.
+  const [prefilledIds, setPrefilledIds] = useState<Set<string>>(
+    () => new Set(Object.keys(initialAnswers)),
+  );
   // Snapshot van de opgeslagen rendered tekst van het geopende dossier.
   // Wordt vertoond zolang de gebruiker de antwoorden niet wijzigt, zodat
   // historische dossiers stabiel blijven ook al verandert de flow-template later.
@@ -109,6 +114,9 @@ export function FlowRunner({ schema }: Props) {
     const restored = applyDossierAnswers(schema, data.answers);
     if (Object.keys(restored).length === 0) return;
     setAnswers(restored);
+    // Antwoorden komen uit een opgeslagen dossier, niet uit brief-analyse;
+    // markeer geen velden als "vooringevuld vanuit brief-analyse".
+    setPrefilledIds(new Set());
     setSnapshotText(data.renderedText && data.renderedText.length > 0 ? data.renderedText : null);
     // We willen dit alleen draaien wanneer er een nieuw dossier binnenkomt.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -166,7 +174,16 @@ export function FlowRunner({ schema }: Props) {
     // Zodra de gebruiker iets wijzigt, vervalt de opgeslagen snapshot en
     // schakelen we over op de live berekende tekst.
     if (snapshotText !== null) setSnapshotText(null);
+    // De gebruiker heeft dit veld zelf aangepast → niet langer "vooringevuld".
+    setPrefilledIds((prev) => {
+      if (!prev.has(id)) return prev;
+      const next = new Set(prev);
+      next.delete(id);
+      return next;
+    });
   }
+
+  const hasActivePrefill = prefilledIds.size > 0;
 
   return (
     <div className="flow-engine-grid">
@@ -174,6 +191,15 @@ export function FlowRunner({ schema }: Props) {
         <div className="openregio-card">
           <h2>Beantwoord deze vragen</h2>
           <p className="flow-questions-intro">{schema.intro}</p>
+          {hasActivePrefill ? (
+            <div
+              className="flow-prefill-banner"
+              role="status"
+              data-testid="banner-prefill"
+            >
+              Antwoorden vooringevuld vanuit brief-analyse — pas gerust aan.
+            </div>
+          ) : null}
           {dossierId && dossierQuery.isLoading ? (
             <p className="flow-questions-intro" data-testid="text-dossier-loading">
               Eerder dossier wordt geladen…
@@ -204,6 +230,7 @@ export function FlowRunner({ schema }: Props) {
                 question={q}
                 value={answers[q.id] ?? ""}
                 onChange={(v) => setAnswer(q.id, v)}
+                isPrefilled={prefilledIds.has(q.id)}
               />
             ))}
           </div>

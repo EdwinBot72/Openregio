@@ -1703,6 +1703,33 @@
     color: #0b2240;
 }
 .flow-question-required { color: #f28a1a; }
+.flow-question-prefilled-badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 1px 8px;
+    border-radius: 999px;
+    background: #eef4ff;
+    border: 1px solid #c7d7f3;
+    color: #1f5fae;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .03em;
+    vertical-align: middle;
+}
+.flow-prefill-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 14px;
+    padding: 10px 12px;
+    border-radius: 10px;
+    background: #eef4ff;
+    border: 1px solid #c7d7f3;
+    color: #0b2240;
+    font-size: 12px;
+    line-height: 1.5;
+}
 .flow-question-help {
     font-size: 12px;
     color: #64748b;
