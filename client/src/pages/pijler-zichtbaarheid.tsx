@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import { Link, useLocation } from "wouter";
+import LokaleVindbaarheid from "@/components/lokale-vindbaarheid/LokaleVindbaarheid";
 
 function usePageMeta(title: string, description: string) {
   useEffect(() => {
@@ -62,19 +63,6 @@ const FEATURES: Feature[] = [
     ],
     voet: { primair: "🌐 Rapport bekijken →", secundair: "🔄 Opnieuw analyseren" },
     breed: true,
-  },
-  {
-    icon: "🔍",
-    titel: "Lokale vindbaarheid",
-    sub: "Beter gevonden worden in Google en AI-zoekmachines.",
-    status: { label: "✓ Gedaan", af: true },
-    body: "Hoe makkelijk vinden klanten jou via Google, Apple Maps of AI-assistenten? OpenRegio checkt dit en geeft concrete stappen om beter vindbaar te worden in jouw regio.",
-    stappen: [
-      { tekst: "Vindbaarheidsrapport bekeken", af: true },
-      { tekst: "Zoekwoorden voor jouw sector in kaart", af: true },
-      { tekst: "Reviews actief verzamelen van klanten" },
-    ],
-    voet: { primair: "🔍 Vindbaarheid →", secundair: "Rapport openen" },
   },
   {
     icon: "📍",
@@ -222,9 +210,15 @@ export default function PijlerZichtbaarheidPage() {
         </div>
       </div>
 
+      {/* LOKALE VINDBAARHEID — INTERACTIEVE TOOL */}
+      <div className="or-pp-sectie">
+        <div className="or-pp-sectie-titel">Lokale vindbaarheid</div>
+        <LokaleVindbaarheid />
+      </div>
+
       {/* FEATURES */}
       <div className="or-pp-sectie">
-        <div className="or-pp-sectie-titel">De vijf onderdelen van Lokale Zichtbaarheid</div>
+        <div className="or-pp-sectie-titel">De overige onderdelen van Lokale Zichtbaarheid</div>
         <div className="or-pp-features">
           {FEATURES.map((f, i) => (
             <FeatureKaart key={i} feature={f} />

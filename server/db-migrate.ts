@@ -410,6 +410,15 @@ export async function runMigrations(): Promise<void> {
       console.log("[Migration] ✓ daily_courses starter-cursussen geseed");
     }
 
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS seo_checklist (
+        user_id   TEXT PRIMARY KEY,
+        afgevinkt JSONB NOT NULL DEFAULT '[]',
+        updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `);
+    console.log("[Migration] ✓ seo_checklist table ensured");
+
     console.log("[Migration] Database schema is up to date");
   } catch (error) {
     console.error("[Migration] Error running migrations:", error);

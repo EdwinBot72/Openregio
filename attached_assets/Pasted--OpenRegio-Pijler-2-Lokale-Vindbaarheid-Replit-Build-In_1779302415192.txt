@@ -1,0 +1,1102 @@
+# OpenRegio — Pijler 2 Lokale Vindbaarheid (Replit Build Instructies)
+
+## Wat te bouwen
+
+Vervang de huidige Pijler 2 "zichtbaarheid op het platform" sectie door een nieuwe module:
+**"Gevonden worden in jouw regio"** — een interactieve tool die lokale ondernemers leert
+welke zoektermen, websiteteksten en SEO-elementen zij nodig hebben om via Google en
+AI-zoekmachines gevonden te worden in hun regio.
+
+---
+
+## Bestandsstructuur — maak deze bestanden aan
+
+```
+client/src/
+  components/
+    lokale-vindbaarheid/
+      LokaleVindbaarheid.tsx        ← hoofd-component (tabs wrapper)
+      ZoektermenFinder.tsx          ← Tab 1: zoektermen generator
+      WebsiteChecklist.tsx          ← Tab 2: SEO checklist met voortgang
+      GoogleEnAI.tsx                ← Tab 3: Google Bedrijfsprofiel + AI-zoekers
+      VoorbeeldenGalerij.tsx        ← Tab 4: voorbeelden per beroep
+      types.ts                      ← gedeelde TypeScript types
+
+  pages/
+    dashboard/pijler-twee.tsx       ← pagina die LokaleVindbaarheid laadt
+
+server/
+  routes/
+    zoektermen.ts                   ← POST /api/zoektermen/genereer
+    checklist.ts                    ← GET/POST /api/checklist/:userId
+
+shared/
+  seo-data.ts                       ← beroep-data, voorbeeldtermen, tips
+```
+
+---
+
+## 1. `shared/seo-data.ts`
+
+```typescript
+export type Beroep =
+  | "bakker" | "fietsenmaker" | "loodgieter" | "kapper"
+  | "restaurant" | "elektricien" | "fysiotherapeut" | "schilder";
+
+export interface BeroepData {
+  label: string;
+  emoji: string;
+  primaireTermen: string[];
+  longTail: string[];
+  zoekvragen: string[];
+  wijkTip: string;
+  spoedScore: number; // 1-5: hoe belangrijk is spoed voor dit beroep
+}
+
+export const BEROEP_DATA: Record<Beroep, BeroepData> = {
+  bakker: {
+    label: "Bakker",
+    emoji: "🥖",
+    primaireTermen: [
+      "{beroep} {stad}",
+      "brood kopen {stad}",
+      "bakkerij {stad} centrum",
+      "ambachtelijke {beroep} {stad}",
+    ],
+    longTail: [
+      "vers brood zaterdag {stad}",
+      "glutenvrij brood {stad}",
+      "biologische {beroep} {stad} oost",
+      "croissants {stad} centrum",
+      "zuurdesem brood {stad}",
+    ],
+    zoekvragen: [
+      "hoe laat is de bakker open in {stad}?",
+      "waar koop ik zuurdesem in {stad}?",
+      "bakker bezorging aan huis {stad}",
+    ],
+    wijkTip:
+      "Maak een pagina per buurt die je bezorgt. Noem wijknames in productteksten: 'geliefd in Lombok, Zuilen en Overvecht'.",
+    spoedScore: 1,
+  },
+  fietsenmaker: {
+    label: "Fietsenmaker",
+    emoji: "🚲",
+    primaireTermen: [
+      "{beroep} {stad}",
+      "fiets reparatie {stad}",
+      "fiets band plakken {stad}",
+      "{beroep} {stad} noord",
+    ],
+    longTail: [
+      "fiets reparatie {stad} aan huis",
+      "elektrische fiets reparatie {stad}",
+      "{beroep} open zondag {stad}",
+      "goedkope fiets revisie {stad} oost",
+      "fiets ophaalservice {stad}",
+    ],
+    zoekvragen: [
+      "{beroep} in de buurt {stad}?",
+      "fiets ophaalservice {stad}?",
+      "hoeveel kost een fiets revisie {stad}?",
+    ],
+    wijkTip:
+      "Maak een pagina per stadsdeel: /fietsenmaker-{stad}-noord, /fietsenmaker-{stad}-west. Vermeld metrostations en tramhaltes bij jou in de buurt.",
+    spoedScore: 2,
+  },
+  loodgieter: {
+    label: "Loodgieter",
+    emoji: "🔧",
+    primaireTermen: [
+      "{beroep} {stad}",
+      "{beroep} spoed {stad}",
+      "CV ketel storing {stad}",
+      "lekkage reparatie {stad}",
+    ],
+    longTail: [
+      "{beroep} 24 uur {stad}",
+      "{beroep} Scheveningen",
+      "verstopt toilet {stad} centrum",
+      "waterleiding repareren {stad} laak",
+      "erkende installateur {stad}",
+    ],
+    zoekvragen: [
+      "{beroep} met spoed nodig {stad}?",
+      "wat kost een {beroep} in {stad}?",
+      "erkend installateur {stad} wateringse veld?",
+    ],
+    wijkTip:
+      "Spoedtermen scoren het hoogst. Zet 'spoed' en '24 uur' prominent op je homepage. Maak een aparte spoedpagina met je telefoonnummer bovenaan.",
+    spoedScore: 5,
+  },
+  kapper: {
+    label: "Kapper",
+    emoji: "✂️",
+    primaireTermen: [
+      "{beroep} {stad}",
+      "{beroep} {stad} centrum",
+      "heren {beroep} {stad}",
+      "dames {beroep} {stad}",
+    ],
+    longTail: [
+      "{beroep} {stad} kralingen afspraak",
+      "goedkope {beroep} {stad} zuid",
+      "{beroep} open zondag {stad}",
+      "balayage {stad} {beroep}",
+      "{beroep} kind {stad} noord",
+    ],
+    zoekvragen: [
+      "{beroep} zonder afspraak {stad}?",
+      "beste {beroep} {stad} voor krullen?",
+      "{beroep} {stad} avond openingstijden?",
+    ],
+    wijkTip:
+      "Online boeken verlaagt de drempel. Vermeld technieken (balayage, krullencoupe, kinderknippen) als aparte diensten — mensen zoeken hierop.",
+    spoedScore: 1,
+  },
+  restaurant: {
+    label: "Restaurant",
+    emoji: "🍽️",
+    primaireTermen: [
+      "restaurant {stad}",
+      "eten {stad} centrum",
+      "restaurant {stad} reserveren",
+      "diner {stad}",
+    ],
+    longTail: [
+      "romantisch restaurant {stad}",
+      "restaurant {stad} verjaardag",
+      "restaurant {stad} vegetarisch",
+      "lunch {stad} centrum",
+      "terras {stad} zomer",
+    ],
+    zoekvragen: [
+      "goed restaurant {stad} voor vanavond?",
+      "restaurant {stad} open zondag?",
+      "restaurant {stad} kinderen welkom?",
+    ],
+    wijkTip:
+      "Vermeld aanloopstraten en bezienswaardigheden dichtbij: 'op 2 minuten van het station' of 'naast het stadspark'. Dit helpt bij navigatiezoekopdrachten.",
+    spoedScore: 1,
+  },
+  elektricien: {
+    label: "Elektricien",
+    emoji: "⚡",
+    primaireTermen: [
+      "{beroep} {stad}",
+      "electricien {stad}",
+      "elektra storing {stad}",
+      "{beroep} {stad} erkend",
+    ],
+    longTail: [
+      "{beroep} spoed {stad}",
+      "groepenkast vervangen {stad}",
+      "stopcontact plaatsen {stad}",
+      "{beroep} zonnepanelen {stad}",
+      "meterkast uitbreiden {stad}",
+    ],
+    zoekvragen: [
+      "elektra storing {stad} wie bellen?",
+      "erkend {beroep} {stad}?",
+      "{beroep} {stad} particulier?",
+    ],
+    wijkTip:
+      "Vermeld je VCA/ISSO-certificaten en erkend installateur status op elke pagina — dit verhoogt vertrouwen én SEO-relevantie voor professionele zoekopdrachten.",
+    spoedScore: 4,
+  },
+  fysiotherapeut: {
+    label: "Fysiotherapeut",
+    emoji: "🏃",
+    primaireTermen: [
+      "{beroep} {stad}",
+      "fysio {stad}",
+      "{beroep} {stad} centrum",
+      "fysiotherapie {stad}",
+    ],
+    longTail: [
+      "{beroep} {stad} rugklachten",
+      "sportfysio {stad}",
+      "{beroep} {stad} direct toegankelijk",
+      "kinderfysio {stad}",
+      "{beroep} {stad} avond weekend",
+    ],
+    zoekvragen: [
+      "{beroep} zonder verwijzing {stad}?",
+      "beste {beroep} {stad} voor rug?",
+      "{beroep} {stad} zorgverzekering?",
+    ],
+    wijkTip:
+      "Maak specialisatiepagina's: rugklachten, sportblessures, zwangerschapsklachten. Lokale zoekopdrachten zijn vaak specifiek op klacht — niet alleen op beroep.",
+    spoedScore: 2,
+  },
+  schilder: {
+    label: "Schilder",
+    emoji: "🖌️",
+    primaireTermen: [
+      "{beroep} {stad}",
+      "schildersbedrijf {stad}",
+      "{beroep} {stad} binnen",
+      "{beroep} {stad} buiten",
+    ],
+    longTail: [
+      "{beroep} {stad} appartement",
+      "schilderwerk offerte {stad}",
+      "{beroep} {stad} kozijnen",
+      "binnenschilder {stad} betrouwbaar",
+      "{beroep} {stad} snel",
+    ],
+    zoekvragen: [
+      "goede {beroep} {stad}?",
+      "wat kost een {beroep} in {stad}?",
+      "{beroep} {stad} referenties?",
+    ],
+    wijkTip:
+      "Fotogalerij per project met buurtvermelding werkt goed: 'Project Jordaan — voordeur en kozijnen'. Dit genereert organisch lokale zoekwoordcombinaties.",
+    spoedScore: 1,
+  },
+};
+
+export const CHECKLIST_ITEMS = [
+  {
+    id: "titel",
+    titel: "Paginatitel met stad + beroep",
+    uitleg: 'bijv. "Fietsenmaker Amsterdam | Bike Repair Noord"',
+    prioriteit: "hoog" as const,
+  },
+  {
+    id: "meta",
+    titel: "Meta description met locatie",
+    uitleg:
+      'bijv. "Uw fietsenmaker in Amsterdam Noord. Bandenpech, remmen, revisies — snelle service."',
+    prioriteit: "hoog" as const,
+  },
+  {
+    id: "h1",
+    titel: "H1 bevat beroep + plaatsnaam",
+    uitleg: 'bijv. "Bakkerij in Haarlem — ambachtelijk brood sinds 1987"',
+    prioriteit: "hoog" as const,
+  },
+  {
+    id: "adres",
+    titel: "Adres en wijk op elke pagina",
+    uitleg:
+      "Zet straat, stad en wijk in de footer — Google koppelt dit aan lokale zoekopdrachten",
+    prioriteit: "hoog" as const,
+  },
+  {
+    id: "landingspagina",
+    titel: "Regio-specifieke landingspagina",
+    uitleg:
+      "bijv. /loodgieter-tilburg of /kapper-amsterdam-oost — één pagina per kern/wijk",
+    prioriteit: "midden" as const,
+  },
+  {
+    id: "wijkwoorden",
+    titel: "Wijk- en buurtwoorden in je tekst",
+    uitleg:
+      'Noem buurten die je bedient: "ook in de Jordaan, Oud-West en De Pijp"',
+    prioriteit: "midden" as const,
+  },
+  {
+    id: "schema",
+    titel: "Schema markup: LocalBusiness",
+    uitleg:
+      "Voeg JSON-LD toe met naam, adres, openingstijden en geo-coördinaten",
+    prioriteit: "midden" as const,
+  },
+  {
+    id: "reviews",
+    titel: "Klantreviews met plaatsnaam",
+    uitleg:
+      "Vraag klanten hun wijk te vermelden — versterkt lokale relevantie in Google",
+    prioriteit: "midden" as const,
+  },
+  {
+    id: "faq",
+    titel: "FAQ-sectie met lokale vragen",
+    uitleg:
+      'bijv. "Bezorgt u ook in Haarlem Schalkwijk?" of "Kom je ook naar IJburg?"',
+    prioriteit: "laag" as const,
+  },
+  {
+    id: "tel",
+    titel: "Telefoon als klikbare link (mobiel)",
+    uitleg:
+      "tel:-link zodat Google zeker weet dat je een lokaal bedrijf bent met direct contact",
+    prioriteit: "laag" as const,
+  },
+];
+```
+
+---
+
+## 2. `shared/types.ts` (uitbreiden of aanmaken)
+
+```typescript
+export interface ZoektermenRequest {
+  beroep: string;
+  stad: string;
+  wijk?: string;
+}
+
+export interface ZoektermenResponse {
+  primair: string[];
+  longTail: string[];
+  zoekvragen: string[];
+  paginatitel: string;
+  metaDescription: string;
+  h1Suggestie: string;
+  wijkTip: string;
+}
+
+export interface ChecklistVoortgang {
+  userId: string;
+  afgevinkt: string[]; // checklist item IDs
+  updatedAt: Date;
+}
+```
+
+---
+
+## 3. `server/routes/zoektermen.ts`
+
+```typescript
+import { Router } from "express";
+import { BEROEP_DATA } from "../../shared/seo-data";
+import type { ZoektermenRequest, ZoektermenResponse } from "../../shared/types";
+
+const router = Router();
+
+// POST /api/zoektermen/genereer
+router.post("/genereer", (req, res) => {
+  const { beroep, stad, wijk } = req.body as ZoektermenRequest;
+
+  if (!beroep || !stad) {
+    return res.status(400).json({ error: "beroep en stad zijn verplicht" });
+  }
+
+  const data = BEROEP_DATA[beroep as keyof typeof BEROEP_DATA];
+  if (!data) {
+    return res.status(400).json({ error: "onbekend beroep" });
+  }
+
+  const fill = (s: string) =>
+    s
+      .replace(/{beroep}/g, beroep)
+      .replace(/{stad}/g, stad)
+      .replace(/{wijk}/g, wijk ?? stad);
+
+  const response: ZoektermenResponse = {
+    primair: data.primaireTermen.map(fill),
+    longTail: data.longTail.map(fill),
+    zoekvragen: data.zoekvragen.map(fill),
+    paginatitel: `${data.label} ${stad}${wijk ? " " + wijk : ""} | [Jouw bedrijfsnaam]`,
+    metaDescription: `Uw ${beroep} in ${stad}${wijk ? " " + wijk : ""}. ${data.primaireTermen[1] ? fill(data.primaireTermen[1]) : ""} — Bel direct voor een afspraak.`,
+    h1Suggestie: `${data.label} in ${stad} — [Jouw slogan of specialiteit]`,
+    wijkTip: data.wijkTip,
+  };
+
+  res.json(response);
+});
+
+export default router;
+```
+
+---
+
+## 4. `server/routes/checklist.ts`
+
+```typescript
+import { Router } from "express";
+import { db } from "../db"; // gebruik bestaande db connectie
+
+const router = Router();
+
+// GET /api/checklist/:userId
+router.get("/:userId", async (req, res) => {
+  try {
+    const result = await db.query(
+      "SELECT afgevinkt FROM seo_checklist WHERE user_id = $1",
+      [req.params.userId]
+    );
+    res.json({ afgevinkt: result.rows[0]?.afgevinkt ?? [] });
+  } catch {
+    res.json({ afgevinkt: [] });
+  }
+});
+
+// POST /api/checklist/:userId
+router.post("/:userId", async (req, res) => {
+  const { afgevinkt } = req.body as { afgevinkt: string[] };
+  try {
+    await db.query(
+      `INSERT INTO seo_checklist (user_id, afgevinkt, updated_at)
+       VALUES ($1, $2, NOW())
+       ON CONFLICT (user_id) DO UPDATE
+       SET afgevinkt = $2, updated_at = NOW()`,
+      [req.params.userId, JSON.stringify(afgevinkt)]
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ error: "opslaan mislukt" });
+  }
+});
+
+export default router;
+```
+
+---
+
+## 5. Database migratie
+
+Voer dit uit als nieuwe migratie:
+
+```sql
+CREATE TABLE IF NOT EXISTS seo_checklist (
+  user_id   TEXT PRIMARY KEY,
+  afgevinkt JSONB NOT NULL DEFAULT '[]',
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
+```
+
+---
+
+## 6. `client/src/components/lokale-vindbaarheid/types.ts`
+
+```typescript
+export type TabId = "zoektermen" | "website" | "google" | "voorbeelden";
+
+export interface ZoektermenState {
+  beroep: string;
+  stad: string;
+  resultaat: ZoektermenResponse | null;
+  loading: boolean;
+}
+
+export interface ChecklistState {
+  afgevinkt: Set<string>;
+  saving: boolean;
+}
+```
+
+---
+
+## 7. `client/src/components/lokale-vindbaarheid/LokaleVindbaarheid.tsx`
+
+```tsx
+import { useState } from "react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Search, FileText, MapPin, Lightbulb } from "lucide-react";
+import ZoektermenFinder from "./ZoektermenFinder";
+import WebsiteChecklist from "./WebsiteChecklist";
+import GoogleEnAI from "./GoogleEnAI";
+import VoorbeeldenGalerij from "./VoorbeeldenGalerij";
+
+export default function LokaleVindbaarheid() {
+  return (
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-xl font-semibold text-gray-900">
+          Lokale vindbaarheid
+        </h2>
+        <p className="text-sm text-gray-500 mt-1">
+          Ontdek welke zoektermen, websiteteksten en SEO-elementen jij nodig
+          hebt om gevonden te worden in jouw regio.
+        </p>
+      </div>
+
+      <Tabs defaultValue="zoektermen">
+        <TabsList className="grid grid-cols-4 w-full">
+          <TabsTrigger value="zoektermen" className="flex items-center gap-2">
+            <Search className="w-4 h-4" />
+            <span className="hidden sm:inline">Zoektermen</span>
+          </TabsTrigger>
+          <TabsTrigger value="website" className="flex items-center gap-2">
+            <FileText className="w-4 h-4" />
+            <span className="hidden sm:inline">Website</span>
+          </TabsTrigger>
+          <TabsTrigger value="google" className="flex items-center gap-2">
+            <MapPin className="w-4 h-4" />
+            <span className="hidden sm:inline">Google & AI</span>
+          </TabsTrigger>
+          <TabsTrigger value="voorbeelden" className="flex items-center gap-2">
+            <Lightbulb className="w-4 h-4" />
+            <span className="hidden sm:inline">Voorbeelden</span>
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="zoektermen">
+          <ZoektermenFinder />
+        </TabsContent>
+        <TabsContent value="website">
+          <WebsiteChecklist />
+        </TabsContent>
+        <TabsContent value="google">
+          <GoogleEnAI />
+        </TabsContent>
+        <TabsContent value="voorbeelden">
+          <VoorbeeldenGalerij />
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+```
+
+---
+
+## 8. `client/src/components/lokale-vindbaarheid/ZoektermenFinder.tsx`
+
+```tsx
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { BEROEP_DATA, type Beroep } from "@/shared/seo-data";
+import type { ZoektermenResponse } from "@/shared/types";
+
+export default function ZoektermenFinder() {
+  const [gekozenBeroep, setGekozenBeroep] = useState<Beroep | "">("");
+  const [stad, setStad] = useState("");
+  const [resultaat, setResultaat] = useState<ZoektermenResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const beroepen = Object.entries(BEROEP_DATA) as [Beroep, (typeof BEROEP_DATA)[Beroep]][];
+
+  async function genereer() {
+    if (!gekozenBeroep) { setError("Kies eerst een beroep."); return; }
+    if (!stad.trim()) { setError("Vul een stad of regio in."); return; }
+    setError("");
+    setLoading(true);
+    try {
+      const res = await fetch("/api/zoektermen/genereer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ beroep: gekozenBeroep, stad: stad.trim() }),
+      });
+      const data = await res.json();
+      setResultaat(data);
+    } catch {
+      setError("Kon zoektermen niet ophalen. Probeer opnieuw.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="space-y-5 pt-4">
+      {/* Beroep kiezen */}
+      <div>
+        <p className="text-sm font-medium text-gray-700 mb-2">
+          Stap 1 — Wat voor ondernemer ben je?
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {beroepen.map(([key, val]) => (
+            <button
+              key={key}
+              onClick={() => setGekozenBeroep(key)}
+              className={`px-3 py-1.5 rounded-lg border text-sm transition-all ${
+                gekozenBeroep === key
+                  ? "bg-emerald-700 border-emerald-700 text-white font-medium"
+                  : "border-gray-200 text-gray-600 hover:border-emerald-400 hover:text-emerald-700"
+              }`}
+            >
+              {val.emoji} {val.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Stad invullen */}
+      <div>
+        <p className="text-sm font-medium text-gray-700 mb-2">
+          Stap 2 — Jouw stad of regio
+        </p>
+        <div className="flex gap-2 max-w-md">
+          <Input
+            placeholder="bijv. Haarlem, Tilburg, Groningen..."
+            value={stad}
+            onChange={(e) => setStad(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && genereer()}
+          />
+          <Button onClick={genereer} disabled={loading} className="bg-emerald-700 hover:bg-emerald-800">
+            {loading ? "..." : "Genereer"}
+          </Button>
+        </div>
+        {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
+      </div>
+
+      {/* Resultaten */}
+      {resultaat && (
+        <div className="space-y-4">
+          <Card>
+            <CardContent className="pt-4 space-y-4">
+              {/* Paginatitel suggestie */}
+              <div>
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
+                  Aanbevolen paginatitel
+                </p>
+                <p className="text-sm font-mono bg-gray-50 rounded px-3 py-2 border">
+                  {resultaat.paginatitel}
+                </p>
+              </div>
+
+              {/* Meta description */}
+              <div>
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
+                  Meta description
+                </p>
+                <p className="text-sm font-mono bg-gray-50 rounded px-3 py-2 border">
+                  {resultaat.metaDescription}
+                </p>
+              </div>
+
+              {/* H1 */}
+              <div>
+                <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-1">
+                  H1 suggestie
+                </p>
+                <p className="text-sm font-mono bg-gray-50 rounded px-3 py-2 border">
+                  {resultaat.h1Suggestie}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <TermenKaart
+              titel="Primaire zoektermen"
+              termen={resultaat.primair}
+              kleur="emerald"
+            />
+            <TermenKaart
+              titel="Long-tail kansen"
+              termen={resultaat.longTail}
+              kleur="blue"
+            />
+            <TermenKaart
+              titel="Zoekvragen"
+              termen={resultaat.zoekvragen}
+              kleur="amber"
+            />
+          </div>
+
+          {resultaat.wijkTip && (
+            <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-4">
+              <p className="text-sm font-medium text-emerald-800 mb-1">
+                💡 Tip voor jouw beroep
+              </p>
+              <p className="text-sm text-emerald-700">{resultaat.wijkTip}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TermenKaart({
+  titel,
+  termen,
+  kleur,
+}: {
+  titel: string;
+  termen: string[];
+  kleur: "emerald" | "blue" | "amber";
+}) {
+  const kleurMap = {
+    emerald: "bg-emerald-50 text-emerald-700 border-emerald-100",
+    blue: "bg-blue-50 text-blue-700 border-blue-100",
+    amber: "bg-amber-50 text-amber-700 border-amber-100",
+  };
+
+  return (
+    <Card>
+      <CardContent className="pt-4">
+        <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-3">
+          {titel}
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {termen.map((term) => (
+            <span
+              key={term}
+              className={`text-xs px-2 py-1 rounded border ${kleurMap[kleur]}`}
+            >
+              {term}
+            </span>
+          ))}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+```
+
+---
+
+## 9. `client/src/components/lokale-vindbaarheid/WebsiteChecklist.tsx`
+
+```tsx
+import { useState, useEffect } from "react";
+import { CHECKLIST_ITEMS } from "@/shared/seo-data";
+import { useAuth } from "@/hooks/use-auth"; // bestaande auth hook
+import { Badge } from "@/components/ui/badge";
+
+const PRIORITEIT_KLEUR = {
+  hoog: "bg-red-50 text-red-600 border-red-100",
+  midden: "bg-amber-50 text-amber-600 border-amber-100",
+  laag: "bg-gray-50 text-gray-500 border-gray-100",
+};
+
+export default function WebsiteChecklist() {
+  const { user } = useAuth();
+  const [afgevinkt, setAfgevinkt] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!user) return;
+    fetch(`/api/checklist/${user.id}`)
+      .then((r) => r.json())
+      .then((d) => setAfgevinkt(new Set(d.afgevinkt ?? [])));
+  }, [user?.id]);
+
+  async function toggle(id: string) {
+    const nieuw = new Set(afgevinkt);
+    nieuw.has(id) ? nieuw.delete(id) : nieuw.add(id);
+    setAfgevinkt(nieuw);
+    if (user) {
+      await fetch(`/api/checklist/${user.id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ afgevinkt: [...nieuw] }),
+      });
+    }
+  }
+
+  const voortgang = Math.round((afgevinkt.size / CHECKLIST_ITEMS.length) * 100);
+
+  return (
+    <div className="space-y-4 pt-4">
+      {/* Voortgangsbalk */}
+      <div>
+        <div className="flex justify-between text-sm mb-1">
+          <span className="text-gray-500">Voortgang</span>
+          <span className="font-medium text-emerald-700">
+            {afgevinkt.size}/{CHECKLIST_ITEMS.length} punten
+          </span>
+        </div>
+        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-emerald-600 rounded-full transition-all duration-300"
+            style={{ width: `${voortgang}%` }}
+          />
+        </div>
+      </div>
+
+      {/* Checklist */}
+      <div className="space-y-2">
+        {CHECKLIST_ITEMS.map((item) => {
+          const gedaan = afgevinkt.has(item.id);
+          return (
+            <button
+              key={item.id}
+              onClick={() => toggle(item.id)}
+              className={`w-full text-left flex items-start gap-3 p-3 rounded-lg border transition-all ${
+                gedaan
+                  ? "bg-emerald-50 border-emerald-100"
+                  : "bg-white border-gray-100 hover:border-emerald-200"
+              }`}
+            >
+              <div
+                className={`w-5 h-5 rounded-full border-2 flex-shrink-0 mt-0.5 flex items-center justify-center transition-all ${
+                  gedaan
+                    ? "bg-emerald-600 border-emerald-600"
+                    : "border-gray-300"
+                }`}
+              >
+                {gedaan && (
+                  <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 12 12">
+                    <path
+                      d="M2 6l3 3 5-5"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span
+                    className={`text-sm font-medium ${
+                      gedaan ? "line-through text-gray-400" : "text-gray-800"
+                    }`}
+                  >
+                    {item.titel}
+                  </span>
+                  <span
+                    className={`text-xs px-1.5 py-0.5 rounded border ${
+                      PRIORITEIT_KLEUR[item.prioriteit]
+                    }`}
+                  >
+                    {item.prioriteit}
+                  </span>
+                </div>
+                <p
+                  className={`text-xs mt-0.5 ${
+                    gedaan ? "text-gray-300" : "text-gray-400"
+                  }`}
+                >
+                  {item.uitleg}
+                </p>
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+```
+
+---
+
+## 10. `client/src/components/lokale-vindbaarheid/GoogleEnAI.tsx`
+
+```tsx
+import { Card, CardContent } from "@/components/ui/card";
+import { MapPin, Bot, Star, Link } from "lucide-react";
+
+const KAARTEN = [
+  {
+    icon: MapPin,
+    kleur: "emerald",
+    titel: "Google Bedrijfsprofiel",
+    badge: "Gratis",
+    omschrijving:
+      "Het krachtigste lokale SEO-hulpmiddel. Verschijnt in Google Maps én in AI-samenvattingen van Gemini.",
+    acties: [
+      { label: "Profiel tekst schrijven", href: "/ai-coach?vraag=schrijf+google+bedrijfsprofiel" },
+      { label: "Categorieën kiezen", href: "/ai-coach?vraag=google+bedrijfsprofiel+categorieën" },
+    ],
+  },
+  {
+    icon: Bot,
+    kleur: "blue",
+    titel: "ChatGPT & Perplexity",
+    badge: "AI-zoek",
+    omschrijving:
+      "AI-zoekmachines halen info van je website + Google profiel. Consistente tekst is hier cruciaal.",
+    acties: [
+      { label: "AI-strategie bekijken", href: "/ai-coach?vraag=ai+zoekmachines+lokaal" },
+      { label: "Schema markup uitleg", href: "/ai-coach?vraag=localbusiness+schema+markup" },
+    ],
+  },
+  {
+    icon: Star,
+    kleur: "amber",
+    titel: "Reviews strategie",
+    badge: "Reputatie",
+    omschrijving:
+      "Reviews met plaatsnamen en diensten zijn lokale SEO-goud. Vraag er actief om na elke opdracht.",
+    acties: [
+      { label: "Review verzoek schrijven", href: "/ai-coach?vraag=review+verzoek+klant" },
+    ],
+  },
+  {
+    icon: Link,
+    kleur: "purple",
+    titel: "Lokale links",
+    badge: "Autoriteit",
+    omschrijving:
+      "Links van gemeente, lokale krant of ondernemersvereniging versterken je regionale autoriteit.",
+    acties: [
+      { label: "Linkbuilding tips", href: "/ai-coach?vraag=lokale+backlinks+strategie" },
+    ],
+  },
+];
+
+export default function GoogleEnAI() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
+      {KAARTEN.map((kaart) => (
+        <Card key={kaart.titel}>
+          <CardContent className="pt-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <kaart.icon className="w-4 h-4 text-gray-500" />
+              <span className="text-sm font-medium text-gray-800">
+                {kaart.titel}
+              </span>
+              <span className="text-xs px-2 py-0.5 rounded bg-gray-100 text-gray-500 ml-auto">
+                {kaart.badge}
+              </span>
+            </div>
+            <p className="text-xs text-gray-500 leading-relaxed">
+              {kaart.omschrijving}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {kaart.acties.map((actie) => (
+                <a
+                  key={actie.label}
+                  href={actie.href}
+                  className="text-xs px-3 py-1.5 rounded border border-gray-200 text-gray-600 hover:border-emerald-400 hover:text-emerald-700 transition-colors"
+                >
+                  {actie.label} →
+                </a>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+}
+```
+
+---
+
+## 11. `client/src/components/lokale-vindbaarheid/VoorbeeldenGalerij.tsx`
+
+```tsx
+import { useState } from "react";
+import { BEROEP_DATA, type Beroep } from "@/shared/seo-data";
+import { Card, CardContent } from "@/components/ui/card";
+
+export default function VoorbeeldenGalerij() {
+  const [actief, setActief] = useState<Beroep | null>(null);
+  const beroepen = Object.entries(BEROEP_DATA) as [Beroep, (typeof BEROEP_DATA)[Beroep]][];
+
+  const data = actief ? BEROEP_DATA[actief] : null;
+
+  return (
+    <div className="space-y-4 pt-4">
+      <p className="text-sm text-gray-500">
+        Klik op een beroep voor concrete zoekterm-voorbeelden.
+      </p>
+      <div className="flex flex-wrap gap-2">
+        {beroepen.map(([key, val]) => (
+          <button
+            key={key}
+            onClick={() => setActief(key)}
+            className={`px-3 py-1.5 rounded-lg border text-sm transition-all ${
+              actief === key
+                ? "bg-emerald-700 border-emerald-700 text-white font-medium"
+                : "border-gray-200 text-gray-600 hover:border-emerald-400 hover:text-emerald-700"
+            }`}
+          >
+            {val.emoji} {val.label}
+          </button>
+        ))}
+      </div>
+
+      {data && (
+        <Card>
+          <CardContent className="pt-4 space-y-4">
+            <div>
+              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">
+                Primaire termen
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {data.primaireTermen.map((t) => (
+                  <span
+                    key={t}
+                    className="text-xs px-2 py-1 rounded bg-emerald-50 text-emerald-700 border border-emerald-100"
+                  >
+                    {t.replace(/{beroep}/g, actief!).replace(/{stad}/g, "[jouw stad]")}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">
+                Long-tail kansen
+              </p>
+              <div className="flex flex-wrap gap-1.5">
+                {data.longTail.map((t) => (
+                  <span
+                    key={t}
+                    className="text-xs px-2 py-1 rounded bg-blue-50 text-blue-700 border border-blue-100"
+                  >
+                    {t.replace(/{beroep}/g, actief!).replace(/{stad}/g, "[stad]").replace(/{wijk}/g, "[wijk]")}
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs font-medium text-gray-400 uppercase tracking-wide mb-2">
+                Zoekvragen
+              </p>
+              <ul className="space-y-1">
+                {data.zoekvragen.map((v) => (
+                  <li key={v} className="text-sm text-gray-600 flex items-start gap-2">
+                    <span className="text-gray-300 mt-0.5">›</span>
+                    {v.replace(/{beroep}/g, actief!).replace(/{stad}/g, "[stad]")}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            <div className="bg-amber-50 border border-amber-100 rounded-lg p-3">
+              <p className="text-xs font-medium text-amber-700 mb-1">💡 Tip</p>
+              <p className="text-xs text-amber-600">{data.wijkTip}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
+}
+```
+
+---
+
+## 12. Route registratie in `server/index.ts` (of `server/routes.ts`)
+
+Voeg toe aan de bestaande routes registratie:
+
+```typescript
+import zoektermenRouter from "./routes/zoektermen";
+import checklistRouter from "./routes/checklist";
+
+// Voeg toe naast de andere app.use(...) routes:
+app.use("/api/zoektermen", zoektermenRouter);
+app.use("/api/checklist", checklistRouter);
+```
+
+---
+
+## 13. `client/src/pages/dashboard/pijler-twee.tsx`
+
+```tsx
+import LokaleVindbaarheid from "@/components/lokale-vindbaarheid/LokaleVindbaarheid";
+
+export default function PijlerTweePagina() {
+  return (
+    <div className="max-w-3xl mx-auto px-4 py-8">
+      <LokaleVindbaarheid />
+    </div>
+  );
+}
+```
+
+---
+
+## Integratie in bestaande navigatie
+
+Zoek de plek waar Pijler 2 al bestaat in het dashboard/navigatie en vervang de route naar `PijlerTweePagina`.
+Als dat een `<Link>` of `<NavItem>` is, verander de href naar `/dashboard/pijler-twee`.
+
+---
+
+## Checklist voor Replit Agent
+
+- [ ] Maak alle bovenstaande bestanden aan op de juiste paden
+- [ ] Draai de SQL migratie voor `seo_checklist` tabel
+- [ ] Registreer de twee nieuwe API routes
+- [ ] Koppel de pagina aan de bestaande navigatie / routing
+- [ ] Verifieer dat `useAuth()` de juiste user.id levert voor checklist opslag
+- [ ] Test de `/api/zoektermen/genereer` endpoint met Postman of curl
