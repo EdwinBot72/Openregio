@@ -121,12 +121,12 @@ export default function BriefAnalysePage() {
     },
   });
 
-  /** Opslaan in de WOO-documentenbibliotheek */
+  /** Opslaan op de externe opslagserver (212.56.48.106:5001) */
   const opslaanMutation = useMutation({
     mutationFn: async (file: File) => {
       const form = new FormData();
       form.append("file", file);
-      const res = await fetch("/api/rag/documents", {
+      const res = await fetch("/api/brief-analyse/opslaan-extern", {
         method: "POST",
         body: form,
         credentials: "include",
@@ -141,7 +141,7 @@ export default function BriefAnalysePage() {
     onSuccess: (_data, file) => {
       setUploadFeedback({
         type: "success",
-        message: `Bestand '${file.name}' succesvol opgeslagen in je bibliotheek.`,
+        message: `Bestand '${file.name}' succesvol opgeslagen.`,
       });
     },
     onError: (err: Error) => {

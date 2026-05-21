@@ -1574,6 +1574,54 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
     }
   });
 
+  // Proxy: stuur bestand door naar externe opslag-server
+  const EXTERN_UPLOAD_URL = "http://212.56.48.106:5001/upload";
+  app.post("/api/brief-analyse/opslaan-extern", requireAuth, uploadMemory.single('file'), async (req, res) => {
+    try {
+      const file = req.file;
+      if (!file) return res.status(400).json({ error: "Geen bestand ontvangen" });
+
+      const ALLOWED_EXT = ["pdf", "docx", "jpg", "jpeg", "png", "txt"];
+      const ext = (file.originalname || "").split(".").pop()?.toLowerCase() || "";
+      if (!ALLOWED_EXT.includes(ext)) {
+        return res.status(400).json({ error: "Bestandstype niet ondersteund", hint: "Upload een PDF, DOCX, JPG, PNG of TXT." });
+      }
+
+      // Bouw multipart-form voor doorsturen naar externe server
+      const { Blob } = await import("buffer");
+      const boundary = `----FormBoundary${Date.now()}`;
+      const nl = "\r\n";
+      const disposition = `Content-Disposition: form-data; name="file"; filename="${file.originalname}"`;
+      const contentType = `Content-Type: ${file.mimetype}`;
+      const prefix = Buffer.from(
+        `--${boundary}${nl}${disposition}${nl}${contentType}${nl}${nl}`
+      );
+      const suffix = Buffer.from(`${nl}--${boundary}--${nl}`);
+      const body = Buffer.concat([prefix, file.buffer, suffix]);
+
+      const extern = await fetch(EXTERN_UPLOAD_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": `multipart/form-data; boundary=${boundary}`,
+          "Content-Length": String(body.length),
+        },
+        body,
+      });
+
+      const externData = await extern.json().catch(() => ({}));
+      if (!extern.ok) {
+        const msg = (externData as any)?.error || `Externe server fout (${extern.status})`;
+        return res.status(502).json({ error: msg });
+      }
+
+      console.log(`[BriefAnalyse/opslaan-extern] file=${file.originalname} size=${file.size} → ${EXTERN_UPLOAD_URL} status=${extern.status}`);
+      res.json({ ok: true, bestandsnaam: file.originalname, ...(externData as object) });
+    } catch (err: any) {
+      console.error("[BriefAnalyse/opslaan-extern] Error:", err);
+      res.status(502).json({ error: "Kan de externe server niet bereiken", hint: "Controleer of de opslagserver actief is op 212.56.48.106:5001." });
+    }
+  });
+
   // RAG System Routes - Document Upload and Vector Search
   app.post("/api/rag/documents", requireAuth, checkDailyUploadLimit, uploadMemory.single('file'), async (req, res) => {
     try {
