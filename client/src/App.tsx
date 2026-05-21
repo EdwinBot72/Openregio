@@ -87,6 +87,7 @@ import RegelsHelpFlowPage from "@/pages/regels-help-flow";
 import GezondPijlerPage from "@/pages/gezond-pijler";
 import RegioScanProPage from "@/pages/pro/regioscan";
 import LokaleActiesPage from "@/pages/lokale-acties";
+import LedenUpdatesPage from "@/pages/leden-updates";
 import PijlerGripPage from "@/pages/pijler-grip";
 import PijlerZichtbaarheidPage from "@/pages/pijler-zichtbaarheid";
 import PijlerKrachtPage from "@/pages/pijler-kracht";
@@ -186,6 +187,10 @@ function AuthenticatedRouter() {
       <Route path="/vandaag" component={VandaagPage} />
       <Route path="/lokale-acties" component={LokaleActiesPage} />
       <Route path="/nieuws" component={NieuwsPage} />
+      <Route path="/leden-updates" component={LedenUpdatesPage} />
+      <Route path="/leden-updates/:slug">
+        {(params) => <Redirect to={`/blog/${params.slug}`} />}
+      </Route>
       <Route path="/vandaag/updates">
         <Redirect to="/regels/updates" />
       </Route>

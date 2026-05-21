@@ -3548,6 +3548,43 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
+  // Members: Get paginated leden-updates archive with search/date filters
+  app.get("/api/news/leden", attachUser, requireAuth, async (req, res) => {
+    try {
+      const limitRaw = Number.parseInt(String(req.query.limit ?? "10"), 10);
+      const offsetRaw = Number.parseInt(String(req.query.offset ?? "0"), 10);
+      const limit = Number.isFinite(limitRaw) && limitRaw > 0 && limitRaw <= 50 ? limitRaw : 10;
+      const offset = Number.isFinite(offsetRaw) && offsetRaw >= 0 ? offsetRaw : 0;
+      const search = String(req.query.search ?? "").trim().toLowerCase();
+      const fromStr = String(req.query.from ?? "").trim();
+      const toStr = String(req.query.to ?? "").trim();
+      const from = fromStr ? new Date(fromStr) : null;
+      const to = toStr ? new Date(toStr) : null;
+      if (to && !Number.isNaN(to.getTime())) {
+        // include the entire 'to' day
+        to.setHours(23, 59, 59, 999);
+      }
+
+      const all = await storage.getPublishedBlogs(undefined, "leden");
+      const filtered = all.filter((b) => {
+        if (search) {
+          const haystack = `${b.title ?? ""} ${b.excerpt ?? ""} ${b.content ?? ""}`.toLowerCase();
+          if (!haystack.includes(search)) return false;
+        }
+        const dateRef = b.publishedAt ? new Date(b.publishedAt) : new Date(b.createdAt);
+        if (from && !Number.isNaN(from.getTime()) && dateRef < from) return false;
+        if (to && !Number.isNaN(to.getTime()) && dateRef > to) return false;
+        return true;
+      });
+
+      const items = filtered.slice(offset, offset + limit);
+      res.json({ items, total: filtered.length, limit, offset });
+    } catch (error: any) {
+      console.warn("[News/leden] DB unavailable, returning empty list");
+      res.json({ items: [], total: 0, limit: 10, offset: 0 });
+    }
+  });
+
   // Public: Get single blog by slug (no auth required for publieke blogs;
   // leden-updates zijn alleen zichtbaar voor ingelogde leden).
   app.get("/api/blogs/public/:slug", attachUser, async (req, res) => {

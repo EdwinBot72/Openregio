@@ -1634,6 +1634,9 @@ export default function VandaagPage() {
             tint="oranje"
             titel="Leden-updates"
             subtitel="Aankondigingen en nieuws van OpenRegio voor leden."
+            bekijkAlles="/leden-updates"
+            bekijkAllesAriaLabel="Bekijk alle leden-updates"
+            bekijkAllesTestId="link-bekijk-alles-leden-updates"
           />
 
           {ledenUpdatesLoading && (
