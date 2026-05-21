@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   ArrowRight,
   Building2,
+  CheckCircle2,
   Clock,
   FileText,
   Gavel,
@@ -17,9 +18,11 @@ import {
   Loader2,
   Scale,
   ScanText,
+  Save,
   Sparkles,
   Upload,
   X,
+  AlertCircle,
 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -36,6 +39,7 @@ interface AnalyseResultaat {
 }
 
 type Modus = "tekst" | "upload";
+type UploadFeedback = { type: "success" | "error"; message: string } | null;
 
 function detecteerAfzenderEnum(afzender: string): string {
   const t = (afzender || "").toLowerCase();
@@ -81,6 +85,7 @@ export default function BriefAnalysePage() {
   const [tekst, setTekst] = useState("");
   const [bestand, setBestand] = useState<File | null>(null);
   const [resultaat, setResultaat] = useState<AnalyseResultaat | null>(null);
+  const [uploadFeedback, setUploadFeedback] = useState<UploadFeedback>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const tekstMutation = useMutation({
@@ -116,10 +121,40 @@ export default function BriefAnalysePage() {
     },
   });
 
-  const isLoading = tekstMutation.isPending || uploadMutation.isPending;
+  /** Opslaan in de WOO-documentenbibliotheek */
+  const opslaanMutation = useMutation({
+    mutationFn: async (file: File) => {
+      const form = new FormData();
+      form.append("file", file);
+      const res = await fetch("/api/rag/documents", {
+        method: "POST",
+        body: form,
+        credentials: "include",
+      });
+      const data = await res.json().catch(() => ({} as any));
+      if (!res.ok) {
+        const msg = [data?.error, data?.hint].filter(Boolean).join(" — ") || `Opslaan mislukt (${res.status})`;
+        throw new Error(msg);
+      }
+      return data;
+    },
+    onSuccess: (_data, file) => {
+      setUploadFeedback({
+        type: "success",
+        message: `Bestand '${file.name}' succesvol opgeslagen in je bibliotheek.`,
+      });
+    },
+    onError: (err: Error) => {
+      setUploadFeedback({ type: "error", message: err.message });
+    },
+  });
+
+  const isAnalyseren = tekstMutation.isPending || uploadMutation.isPending;
+  const isOpslaan = opslaanMutation.isPending;
 
   const handleAnalyseer = () => {
     setResultaat(null);
+    setUploadFeedback(null);
     if (modus === "tekst") {
       if (!tekst.trim() || tekst.trim().length < 20) {
         toast({ title: "Tekst te kort", description: "Plak de volledige tekst van het document.", variant: "destructive" });
@@ -135,14 +170,22 @@ export default function BriefAnalysePage() {
     }
   };
 
+  const handleOpslaan = () => {
+    if (!bestand) return;
+    setUploadFeedback(null);
+    opslaanMutation.mutate(bestand);
+  };
+
   const handleBestandKiezen = (e: React.ChangeEvent<HTMLInputElement>) => {
     const f = e.target.files?.[0] ?? null;
     setBestand(f);
     setResultaat(null);
+    setUploadFeedback(null);
   };
 
   const handleBestandVerwijderen = () => {
     setBestand(null);
+    setUploadFeedback(null);
     if (fileInputRef.current) fileInputRef.current.value = "";
     setResultaat(null);
   };
@@ -158,6 +201,7 @@ export default function BriefAnalysePage() {
   ];
 
   const kanAnalyseren = modus === "tekst" ? tekst.trim().length >= 20 : bestand !== null;
+  const kanOpslaan = modus === "upload" && bestand !== null;
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8 space-y-6">
@@ -198,7 +242,7 @@ export default function BriefAnalysePage() {
         <Button
           variant={modus === "upload" ? "default" : "outline"}
           size="sm"
-          onClick={() => { setModus("upload"); setResultaat(null); }}
+          onClick={() => { setModus("upload"); setResultaat(null); setUploadFeedback(null); }}
           data-testid="button-modus-upload"
         >
           <Upload className="h-4 w-4 mr-2" />
@@ -207,7 +251,7 @@ export default function BriefAnalysePage() {
         <Button
           variant={modus === "tekst" ? "default" : "outline"}
           size="sm"
-          onClick={() => { setModus("tekst"); setResultaat(null); }}
+          onClick={() => { setModus("tekst"); setResultaat(null); setUploadFeedback(null); }}
           data-testid="button-modus-tekst"
         >
           <FileText className="h-4 w-4 mr-2" />
@@ -218,91 +262,154 @@ export default function BriefAnalysePage() {
       <Card>
         <CardContent className="pt-6 space-y-4">
           {modus === "upload" ? (
-            <div>
-              <label className="text-sm font-medium mb-2 block">
-                Bestand selecteren
-              </label>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,.docx,.jpg,.jpeg,.png,.txt"
-                onChange={handleBestandKiezen}
-                className="hidden"
-                id="brief-file-input"
-                data-testid="input-brief-bestand"
-              />
-              {!bestand ? (
-                <label
-                  htmlFor="brief-file-input"
-                  className="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-muted-foreground/25 rounded-lg p-10 cursor-pointer hover-elevate transition-colors"
-                  data-testid="dropzone-brief"
-                >
-                  <div className="p-3 rounded-full bg-muted">
-                    <Upload className="h-6 w-6 text-muted-foreground" />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm font-medium">Klik om een bestand te kiezen</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">PDF, DOCX, JPG, PNG of TXT — max 10 MB</p>
-                  </div>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block">
+                  Bestand selecteren
                 </label>
-              ) : (
-                <div className="flex items-center gap-3 p-4 rounded-lg border bg-muted/30">
-                  <div className="p-2 rounded-md bg-muted">
-                    <FileText className="h-5 w-5 text-[#1f5fae]" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{bestand.name}</p>
-                    <p className="text-xs text-muted-foreground">{(bestand.size / 1024).toFixed(0)} KB</p>
-                  </div>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    onClick={handleBestandVerwijderen}
-                    data-testid="button-verwijder-bestand"
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".pdf,.docx,.jpg,.jpeg,.png,.txt"
+                  onChange={handleBestandKiezen}
+                  className="hidden"
+                  id="brief-file-input"
+                  data-testid="input-brief-bestand"
+                />
+                {!bestand ? (
+                  <label
+                    htmlFor="brief-file-input"
+                    className="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-muted-foreground/25 rounded-lg p-10 cursor-pointer hover-elevate transition-colors"
+                    data-testid="dropzone-brief"
                   >
-                    <X className="h-4 w-4" />
-                  </Button>
+                    <div className="p-3 rounded-full bg-muted">
+                      <Upload className="h-6 w-6 text-muted-foreground" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm font-medium">Klik om een bestand te kiezen</p>
+                      <p className="text-xs text-muted-foreground mt-0.5">PDF, DOCX, JPG, PNG of TXT — max 10 MB</p>
+                    </div>
+                  </label>
+                ) : (
+                  <div className="flex items-center gap-3 p-4 rounded-lg border bg-muted/30">
+                    <div className="p-2 rounded-md bg-muted">
+                      <FileText className="h-5 w-5 text-[#1f5fae]" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate" data-testid="text-bestandsnaam">{bestand.name}</p>
+                      <p className="text-xs text-muted-foreground">{(bestand.size / 1024).toFixed(0)} KB</p>
+                    </div>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      onClick={handleBestandVerwijderen}
+                      data-testid="button-verwijder-bestand"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {/* Inline succes/fout bericht — stijl als Flask flash messages */}
+              {uploadFeedback && (
+                <div
+                  className={`flex items-start gap-3 rounded-lg px-4 py-3 text-sm border ${
+                    uploadFeedback.type === "success"
+                      ? "bg-green-50 border-green-200 text-green-800"
+                      : "bg-red-50 border-red-200 text-red-800"
+                  }`}
+                  data-testid={`feedback-${uploadFeedback.type}`}
+                >
+                  {uploadFeedback.type === "success" ? (
+                    <CheckCircle2 className="h-4 w-4 mt-0.5 shrink-0 text-green-600" />
+                  ) : (
+                    <AlertCircle className="h-4 w-4 mt-0.5 shrink-0 text-red-600" />
+                  )}
+                  <span>{uploadFeedback.message}</span>
                 </div>
               )}
+
+              {/* Twee actieknoppen naast elkaar */}
+              <div className="flex flex-wrap gap-3">
+                <Button
+                  onClick={handleAnalyseer}
+                  disabled={isAnalyseren || isOpslaan || !kanAnalyseren}
+                  data-testid="button-analyseer"
+                >
+                  {isAnalyseren ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Analyseren…
+                    </>
+                  ) : (
+                    <>
+                      <ScanText className="h-4 w-4 mr-2" />
+                      Analyseer document
+                    </>
+                  )}
+                </Button>
+
+                <Button
+                  variant="outline"
+                  onClick={handleOpslaan}
+                  disabled={isAnalyseren || isOpslaan || !kanOpslaan}
+                  data-testid="button-opslaan-bibliotheek"
+                >
+                  {isOpslaan ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Opslaan…
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4 mr-2" />
+                      Opslaan in bibliotheek
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           ) : (
-            <div>
-              <label className="text-sm font-medium mb-2 block" htmlFor="tekst-input">
-                Tekst van het document
-              </label>
-              <Textarea
-                id="tekst-input"
-                value={tekst}
-                onChange={(e) => setTekst(e.target.value)}
-                placeholder="Plak hier de volledige tekst van de brief of het besluit..."
-                className="min-h-48 text-sm"
-                data-testid="textarea-document-tekst"
-              />
-              <p className="text-xs text-muted-foreground mt-1.5">{tekst.length} / 8000 tekens</p>
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-2 block" htmlFor="tekst-input">
+                  Tekst van het document
+                </label>
+                <Textarea
+                  id="tekst-input"
+                  value={tekst}
+                  onChange={(e) => setTekst(e.target.value)}
+                  placeholder="Plak hier de volledige tekst van de brief of het besluit..."
+                  className="min-h-48 text-sm"
+                  data-testid="textarea-document-tekst"
+                />
+                <p className="text-xs text-muted-foreground mt-1.5">{tekst.length} / 8000 tekens</p>
+              </div>
+
+              <Button
+                onClick={handleAnalyseer}
+                disabled={isAnalyseren || !kanAnalyseren}
+                data-testid="button-analyseer"
+              >
+                {isAnalyseren ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    Analyseren…
+                  </>
+                ) : (
+                  <>
+                    <ScanText className="h-4 w-4 mr-2" />
+                    Analyseer document
+                  </>
+                )}
+              </Button>
             </div>
           )}
-
-          <Button
-            onClick={handleAnalyseer}
-            disabled={isLoading || !kanAnalyseren}
-            data-testid="button-analyseer"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Analyseren…
-              </>
-            ) : (
-              <>
-                <ScanText className="h-4 w-4 mr-2" />
-                Analyseer document
-              </>
-            )}
-          </Button>
         </CardContent>
       </Card>
 
-      {isLoading && (
+      {isAnalyseren && (
         <Card>
           <CardContent className="pt-6 space-y-3">
             <p className="text-sm font-medium text-muted-foreground">Document wordt geanalyseerd…</p>
@@ -366,7 +473,7 @@ export default function BriefAnalysePage() {
             <Lightbulb className="h-5 w-5 text-[#f28a1a] mt-0.5 shrink-0" />
             <p className="text-sm text-muted-foreground">
               <span className="font-medium text-foreground">Tip:</span> Heb je meerdere documenten?
-              Upload ze in de <a href="/woo-bibliotheek" className="text-[#1f5fae] hover:underline font-medium">Documentenbibliotheek</a> zodat
+              Upload ze in de <a href="/regels/woo" className="text-[#1f5fae] hover:underline font-medium">Documentenbibliotheek</a> zodat
               RegioBot er vragen over kan beantwoorden.
             </p>
           </div>
