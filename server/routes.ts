@@ -1457,9 +1457,16 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
       const file = req.file;
       if (!file) return res.status(400).json({ error: "Geen bestand ontvangen" });
 
-      const allowedMimeTypes = ["application/pdf", "image/jpeg", "image/png", "image/jpg", "text/plain"];
-      if (!allowedMimeTypes.includes(file.mimetype)) {
-        return res.status(400).json({ error: "Bestandstype niet ondersteund. Upload een PDF, afbeelding (JPG/PNG) of tekstbestand." });
+      const DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document";
+      const allowedMimeTypes = ["application/pdf", "image/jpeg", "image/png", "image/jpg", "text/plain", DOCX_MIME];
+
+      // Also check file extension as fallback (browsers sometimes send generic mime for docx)
+      const ext = (file.originalname || "").split(".").pop()?.toLowerCase();
+      const isDocxByExt = ext === "docx";
+      const isDocx = file.mimetype === DOCX_MIME || isDocxByExt;
+
+      if (!allowedMimeTypes.includes(file.mimetype) && !isDocxByExt) {
+        return res.status(400).json({ error: "Bestandstype niet ondersteund. Upload een PDF, DOCX, afbeelding (JPG/PNG) of tekstbestand." });
       }
 
       const { extractTextFromPDF } = await import("./rag/extract");
@@ -1469,7 +1476,11 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
       const isImage = file.mimetype.startsWith("image/");
       const isText = file.mimetype === "text/plain";
 
-      if (isImage) {
+      if (isDocx) {
+        const mammoth = await import("mammoth");
+        const result = await mammoth.extractRawText({ buffer: file.buffer });
+        tekst = result.value || "";
+      } else if (isImage) {
         const ocr = await extractTextFromImage(file.buffer);
         tekst = ocr.text;
       } else if (isText) {

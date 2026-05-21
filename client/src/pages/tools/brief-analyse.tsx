@@ -225,7 +225,7 @@ export default function BriefAnalysePage() {
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".pdf,.jpg,.jpeg,.png,.txt"
+                accept=".pdf,.docx,.jpg,.jpeg,.png,.txt"
                 onChange={handleBestandKiezen}
                 className="hidden"
                 id="brief-file-input"
@@ -242,7 +242,7 @@ export default function BriefAnalysePage() {
                   </div>
                   <div className="text-center">
                     <p className="text-sm font-medium">Klik om een bestand te kiezen</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">PDF, JPG, PNG of TXT — max 10 MB</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">PDF, DOCX, JPG, PNG of TXT — max 10 MB</p>
                   </div>
                 </label>
               ) : (
