@@ -3559,6 +3559,60 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
+  // Members: Get unread leden-updates count (badge in sidebar)
+  app.get("/api/news/unread-count", attachUser, requireAuth, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const u = await storage.getUserById(userId);
+      const lastRead = u?.lastNewsReadAt ? new Date(u.lastNewsReadAt) : null;
+      const items = await storage.getPublishedBlogs(undefined, "leden");
+      const count = items.filter((b) => {
+        const dateRef = b.publishedAt ? new Date(b.publishedAt) : new Date(b.createdAt);
+        return !lastRead || dateRef > lastRead;
+      }).length;
+      res.json({ count, lastReadAt: lastRead?.toISOString() ?? null });
+    } catch (error: any) {
+      console.warn("[News/unread-count] DB unavailable");
+      res.json({ count: 0, lastReadAt: null });
+    }
+  });
+
+  // Members: Mark all leden-updates as read (sets lastNewsReadAt = now)
+  app.post("/api/news/mark-read", attachUser, requireAuth, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      await storage.updateUser(userId, { lastNewsReadAt: new Date() });
+      res.json({ ok: true });
+    } catch (error: any) {
+      console.error("[News/mark-read] failed:", error?.message);
+      res.status(500).json({ error: "Kon niet markeren als gelezen" });
+    }
+  });
+
+  // Members: Update notification preferences (e.g. emailNewsDigest opt-out)
+  app.patch("/api/account/notification-settings", attachUser, requireAuth, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const schema = z.object({ emailNewsDigest: z.boolean().optional() });
+      const parsed = schema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Ongeldige instellingen" });
+      }
+      const updates: Record<string, any> = {};
+      if (typeof parsed.data.emailNewsDigest === "boolean") {
+        updates.emailNewsDigest = parsed.data.emailNewsDigest;
+      }
+      if (Object.keys(updates).length === 0) {
+        return res.json({ ok: true });
+      }
+      const updated = await storage.updateUser(userId, updates);
+      res.json({ ok: true, emailNewsDigest: updated?.emailNewsDigest ?? true });
+    } catch (error: any) {
+      console.error("[Notification settings] failed:", error?.message);
+      res.status(500).json({ error: "Kon instellingen niet opslaan" });
+    }
+  });
+
   // Members: Get paginated leden-updates archive with search/date filters
   app.get("/api/news/leden", attachUser, requireAuth, async (req, res) => {
     try {

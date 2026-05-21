@@ -175,6 +175,7 @@ function formatUserResponse(user: User) {
     region: user.region ?? null,
     mustCompleteOnboarding: user.mustCompleteOnboarding,
     isAdmin: user.role === "admin" || user.role === "master",
+    emailNewsDigest: user.emailNewsDigest ?? true,
   };
 }
 

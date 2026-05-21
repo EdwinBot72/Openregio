@@ -273,6 +273,51 @@ export async function sendNewsletterEmail(to: string, subject: string, content: 
   return sendEmail(to, `${subject} - OpenRegio Nieuwsbrief`, html);
 }
 
+export async function sendLedenUpdatesDigestEmail(
+  to: string,
+  firstName: string,
+  items: Array<{ title: string; excerpt?: string | null; slug: string; publishedAt?: Date | string | null }>,
+): Promise<boolean> {
+  if (items.length === 0) return false;
+  const list = items
+    .map(
+      (it) => `
+        <li style="margin: 0 0 14px 0;">
+          <a href="${BASE_URL}/leden-updates/${it.slug}" style="color: #1d4ed8; font-weight: 600; text-decoration: none;">${it.title}</a>
+          ${it.excerpt ? `<p style="margin: 4px 0 0 0; color: #475569; font-size: 14px;">${it.excerpt}</p>` : ''}
+        </li>`,
+    )
+    .join('');
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"></head>
+    <body style="font-family: Inter, Arial, sans-serif; line-height: 1.6; color: #1a1a1a;">
+      <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #c2410c 0%, #9a3412 100%); color: white; padding: 24px; text-align: center; border-radius: 8px 8px 0 0;">
+          <h1 style="margin: 0; font-size: 22px;">Leden-updates van OpenRegio</h1>
+          <p style="margin: 6px 0 0 0; opacity: 0.9; font-size: 13px;">Wekelijkse samenvatting voor leden</p>
+        </div>
+        <div style="background: #ffffff; padding: 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px;">
+          <p>Beste ${firstName || 'ondernemer'},</p>
+          <p>De afgelopen week zijn er ${items.length} nieuwe platform-aankondiging${items.length === 1 ? '' : 'en'} voor leden:</p>
+          <ul style="list-style: none; padding: 0; margin: 18px 0;">${list}</ul>
+          <p style="text-align: center;">
+            <a href="${BASE_URL}/vandaag" style="display: inline-block; background: #c2410c; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Bekijk in je dashboard</a>
+          </p>
+        </div>
+        <div style="text-align: center; padding: 16px; color: #6b7280; font-size: 12px;">
+          <p>Je ontvangt deze e-mail omdat je lid bent van OpenRegio.</p>
+          <p><a href="${BASE_URL}/account/instellingen" style="color: #6b7280;">Schrijf je uit voor deze digest</a></p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+  return sendEmail(to, `Leden-updates van OpenRegio (${items.length})`, html);
+}
+
 export async function sendWooSubmissionEmail(
   to: string,
   subject: string,

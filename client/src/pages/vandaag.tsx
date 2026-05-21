@@ -1,9 +1,10 @@
 import type { CSSProperties } from "react";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { Link } from "wouter";
 import { berekenBeroepKansenPerGemeente, PROVINCIES } from "@shared/gemeente-data";
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -490,6 +491,21 @@ export default function VandaagPage() {
     staleTime: 1000 * 60 * 5,
   });
   const topLedenUpdates = ledenUpdates.slice(0, 3);
+
+  // Markeer leden-updates als gelezen wanneer de gebruiker /vandaag bezoekt
+  // (na het laden van de lijst, ongeacht of er nieuwe updates zijn).
+  const markReadMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/news/mark-read"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/news/unread-count"] });
+    },
+  });
+  useEffect(() => {
+    if (!user || ledenUpdatesLoading) return;
+    if (markReadMutation.isPending || markReadMutation.isSuccess) return;
+    markReadMutation.mutate();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id, ledenUpdatesLoading]);
 
   const { data: bedrijven = [], isLoading: bedrijvenLoading } = useQuery<Bedrijfsprofiel[]>({
     queryKey: ["/api/business-profiles/public"],

@@ -16,6 +16,7 @@ export interface AuthUser {
     region: string | null;
     mustCompleteOnboarding: boolean;
     isAdmin: boolean;
+    emailNewsDigest?: boolean;
   };
   profile?: UserProfile;
 }

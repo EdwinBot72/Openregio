@@ -363,6 +363,15 @@ export async function runMigrations(): Promise<void> {
     `);
     console.log("[Migration] ✓ blogs.audience column ensured");
 
+    // Notificaties voor leden-updates (task #72)
+    await db.execute(sql`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS last_news_read_at TIMESTAMPTZ;
+    `);
+    await db.execute(sql`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS email_news_digest BOOLEAN NOT NULL DEFAULT TRUE;
+    `);
+    console.log("[Migration] ✓ users.last_news_read_at + users.email_news_digest ensured");
+
     // Indien-velden voor woo-dossiers (auto-indienen vanuit RegioScan)
     await db.execute(sql`
       ALTER TABLE woo_dossiers ADD COLUMN IF NOT EXISTS indien_kanaal VARCHAR(16);

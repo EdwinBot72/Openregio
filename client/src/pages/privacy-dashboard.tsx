@@ -6,6 +6,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
@@ -27,6 +28,7 @@ import {
   AlertTriangle,
   CheckCircle,
   ArrowLeft,
+  Bell,
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -110,6 +112,29 @@ export default function PrivacyDashboardPage() {
   const { data: dashboardData, isLoading } = useQuery<PrivacyDashboardData>({
     queryKey: ["/api/privacy/dashboard"],
     enabled: !!user,
+  });
+
+  const emailNewsDigest = user?.emailNewsDigest ?? true;
+  const notificationMutation = useMutation({
+    mutationFn: async (next: boolean) => {
+      return apiRequest("PATCH", "/api/account/notification-settings", {
+        emailNewsDigest: next,
+      });
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      toast({
+        title: "Voorkeuren opgeslagen",
+        description: "Je notificatie-instellingen zijn bijgewerkt.",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Fout",
+        description: "Kon voorkeuren niet opslaan. Probeer opnieuw.",
+        variant: "destructive",
+      });
+    },
   });
 
   const updateVisibilityMutation = useMutation({
@@ -286,6 +311,36 @@ export default function PrivacyDashboardPage() {
                 </span>
               </div>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      <Card data-testid="card-notification-settings">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Bell className="w-5 h-5" />
+            Notificaties
+          </CardTitle>
+          <CardDescription>
+            Bepaal hoe je op de hoogte wordt gehouden van nieuwe leden-updates.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between gap-4 py-2">
+            <div className="min-w-0">
+              <p className="font-medium">Wekelijkse e-mail digest</p>
+              <p className="text-xs text-muted-foreground">
+                Ontvang één keer per week een samenvatting van nieuwe platform-aankondigingen voor leden.
+                Je ziet ongelezen updates altijd in de zijbalk bij &quot;Vandaag&quot;.
+              </p>
+            </div>
+            <Switch
+              checked={emailNewsDigest}
+              disabled={notificationMutation.isPending}
+              onCheckedChange={(v) => notificationMutation.mutate(v)}
+              data-testid="switch-email-news-digest"
+              aria-label="Wekelijkse e-mail digest voor leden-updates"
+            />
           </div>
         </CardContent>
       </Card>

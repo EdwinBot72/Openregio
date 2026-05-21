@@ -51,6 +51,9 @@ export const users = pgTable("users", {
   referralCode: varchar("referral_code").unique(), // Unique code like OR-ABC123
   referredByUserId: varchar("referred_by_user_id"), // User who referred this user
   referredAt: timestamp("referred_at"), // When the referral was made
+  // Notificaties leden-updates (zie task #72)
+  lastNewsReadAt: timestamp("last_news_read_at"), // Wanneer gebruiker voor het laatst leden-updates las
+  emailNewsDigest: boolean("email_news_digest").default(true).notNull(), // Opt-out toggle voor wekelijkse digest-mail
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   deletedAt: timestamp("deleted_at"), // Soft delete for AVG compliance

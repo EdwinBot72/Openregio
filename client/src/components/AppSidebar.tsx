@@ -25,6 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { MAIN_NAV, type NavSection } from "@/config/navigation";
 
@@ -35,11 +36,13 @@ function NavSectionItem({
   currentPath,
   isPro,
   isAdmin,
+  badgeCount,
 }: {
   section: NavSection;
   currentPath: string;
   isPro: boolean;
   isAdmin: boolean;
+  badgeCount?: number;
 }) {
   const isActive =
     section.url
@@ -69,6 +72,15 @@ function NavSectionItem({
           <Link href={section.url} className="flex items-center gap-2">
             <section.icon className="h-4 w-4" />
             <span>{section.title}</span>
+            {badgeCount && badgeCount > 0 ? (
+              <Badge
+                variant="secondary"
+                className="ml-auto text-[10px] px-1.5 py-0 h-4 bg-orange-100 text-orange-700 border-orange-200"
+                data-testid={`badge-unread-${section.id}`}
+              >
+                {badgeCount > 9 ? "9+" : badgeCount}
+              </Badge>
+            ) : null}
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
@@ -156,6 +168,15 @@ export function AppSidebar() {
   const isPro = user?.plan === "pro";
   const isAdmin = user?.role === "master" || user?.role === "admin" || !!user?.isAdmin;
 
+  // Ongelezen leden-updates → badge bij "Vandaag"
+  const { data: unread } = useQuery<{ count: number }>({
+    queryKey: ["/api/news/unread-count"],
+    enabled: !!user,
+    staleTime: 1000 * 60,
+    refetchInterval: 1000 * 60 * 5,
+  });
+  const unreadCount = unread?.count ?? 0;
+
   const getInitials = () => {
     if (user?.firstName || user?.lastName) {
       return `${user.firstName?.[0] || ""}${user.lastName?.[0] || ""}`.toUpperCase();
@@ -208,6 +229,7 @@ export function AppSidebar() {
                     currentPath={location}
                     isPro={isPro}
                     isAdmin={isAdmin}
+                    badgeCount={section.id === "vandaag" ? unreadCount : undefined}
                   />
                 );
               })}
