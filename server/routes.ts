@@ -2624,22 +2624,21 @@ Maak het verzoek professioneel en juridisch correct.`;
       const validatedData = checkoutSchema.parse(req.body);
       const { plan, returnUrl } = validatedData;
 
-      // Get or create user profile
-      const userProfile = await storage.getUserProfile(userId);
-      if (!userProfile) {
-        return res.status(404).json({ error: "User profile not found" });
-      }
+      // Get user record (email is always on req.user, no profile required)
+      const reqUser = req.user as any;
+      const userEmail = reqUser.email as string;
+      const userName = [reqUser.firstName, reqUser.lastName].filter(Boolean).join(" ") || userEmail.split("@")[0];
 
-      // Check if user already has active subscription
+      // Check if user already has an active subscription for the same plan
       const existingSub = await storage.getSubscription(userId);
-      if (existingSub && existingSub.status === "active") {
-        return res.status(400).json({ error: "User already has active subscription" });
+      if (existingSub && existingSub.status === "active" && existingSub.plan === plan) {
+        return res.status(400).json({ error: "Je hebt al een actief abonnement voor dit plan" });
       }
 
       // Create Mollie customer
       const customer = await mollieClient.customers.create({
-        name: userProfile.name,
-        email: userProfile.email,
+        name: userName,
+        email: userEmail,
       });
 
       // Canonical public URL for webhooks and redirects
@@ -2794,6 +2793,12 @@ Maak het verzoek professioneel en juridisch correct.`;
           return res.sendStatus(200);
         }
 
+        // Update user plan in users table so user.plan reflects the new plan
+        if (plan && (plan === "basic" || plan === "pro")) {
+          await storage.updateUserPlan(userId, plan as "basic" | "pro");
+          console.log(`✓ User ${userId} plan updated to ${plan}`);
+        }
+
         // If this is first payment with mandate, create Mollie subscription
         if (payment.sequenceType === "first" && subscription.mollieCustomerId) {
           try {
@@ -2825,6 +2830,14 @@ Maak het verzoek professioneel en juridisch correct.`;
           } catch (subError: any) {
             console.error("Failed to create Mollie subscription:", subError);
           }
+        } else {
+          // Recurring payment — update subscription period
+          const nextMonth = new Date();
+          nextMonth.setMonth(nextMonth.getMonth() + 1);
+          await storage.updateSubscription(subscription.id, {
+            status: "active",
+            currentPeriodEnd: nextMonth
+          });
         }
       } else if (payment.status === "failed") {
         console.log(`Payment ${paymentId} failed for user ${userId}`);

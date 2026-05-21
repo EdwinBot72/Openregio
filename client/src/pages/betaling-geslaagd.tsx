@@ -1,66 +1,18 @@
-import { CheckCircle, Mail, AlertCircle, Loader2 } from "lucide-react";
-import { Link, useLocation } from "wouter";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { useToast } from "@/hooks/use-toast";
+import { CheckCircle, Mail, AlertCircle } from "lucide-react";
+import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-
-const registerSchema = z.object({
-  firstName: z.string().optional(),
-  lastName:  z.string().optional(),
-  email:     z.string().email("Vul een geldig e-mailadres in"),
-  password:  z.string().min(6, "Wachtwoord moet minimaal 6 tekens zijn"),
-  confirmPassword: z.string().min(1, "Bevestig je wachtwoord"),
-}).refine((d) => d.password === d.confirmPassword, {
-  message: "Wachtwoorden komen niet overeen",
-  path: ["confirmPassword"],
-});
-
-type RegisterFormData = z.infer<typeof registerSchema>;
 
 const PLAN_LABELS: Record<string, string> = {
   basic: "Basis-lid",
   pro: "Pro-bijdrager",
 };
 
-function PostPaymentRegisterForm({ plan }: { plan: "basic" | "pro" }) {
-  const [, setLocation] = useLocation();
-  const { toast }       = useToast();
-  const { refetch }     = useAuth();
-
-  const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<RegisterFormData>({
-    resolver: zodResolver(registerSchema),
-    defaultValues: { firstName: "", lastName: "", email: "", password: "", confirmPassword: "" },
-  });
-
-  const onSubmit = async (data: RegisterFormData) => {
-    const { confirmPassword, ...rest } = data;
-    try {
-      const response = await fetch("/api/auth/register-after-payment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...rest, plan }),
-        credentials: "include",
-      });
-      const result = await response.json().catch(() => ({}));
-      if (!response.ok) {
-        toast({ variant: "destructive", title: "Registratie mislukt", description: result.error || "Probeer het opnieuw" });
-        return;
-      }
-      await refetch();
-      toast({ title: "Account aangemaakt!", description: "Je wordt doorgestuurd naar je dashboard…" });
-      setTimeout(() => setLocation("/dashboard"), 500);
-    } catch (err: unknown) {
-      const message = err instanceof Error ? err.message : "Kan geen verbinding maken met de server. Probeer het opnieuw.";
-      toast({ variant: "destructive", title: "Verbindingsfout", description: message });
-    }
-  };
-
+/** Toon succes voor ingelogde gebruikers die een plan-upgrade deden */
+function UpgradeSuccessPage({ plan }: { plan: "basic" | "pro" }) {
+  const planLabel = PLAN_LABELS[plan] ?? plan;
   return (
-    <div className="openregio-page openregio-auth-page" data-testid="card-post-payment-register">
+    <div className="openregio-page openregio-auth-page" data-testid="card-upgrade-success">
       <div className="openregio-auth-center" style={{ maxWidth: 480 }}>
-
         <div className="openregio-auth-logo">
           <Link href="/">
             <span className="openregio-topnav-logo">
@@ -70,79 +22,41 @@ function PostPaymentRegisterForm({ plan }: { plan: "basic" | "pro" }) {
           </Link>
         </div>
 
-        {/* Succes-badge */}
-        <div style={{ textAlign: "center", marginBottom: 20 }}>
-          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#dcfce7", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 12px" }}>
+        <div className="openregio-card openregio-auth-card" style={{ textAlign: "center" }}>
+          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#dcfce7", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
             <CheckCircle size={28} style={{ color: "#059669" }} data-testid="icon-success" />
           </div>
-          <span style={{ display: "inline-block", background: "rgba(31,95,174,.1)", color: "#1f5fae", border: "1px solid rgba(31,95,174,.2)", borderRadius: 20, padding: "4px 14px", fontSize: 12, fontWeight: 700 }}>
-            Betaling geslaagd — {PLAN_LABELS[plan]} actief
+
+          <span style={{ display: "inline-block", background: "rgba(31,95,174,.1)", color: "#1f5fae", border: "1px solid rgba(31,95,174,.2)", borderRadius: 20, padding: "4px 14px", fontSize: 12, fontWeight: 700, marginBottom: 16 }}>
+            {planLabel} actief
           </span>
-        </div>
 
-        <div className="openregio-card openregio-auth-card">
-          <div className="openregio-auth-header">
-            <h1 className="openregio-auth-title">Account aanmaken</h1>
-            <p className="openregio-auth-sub">
-              Jouw betaling is verwerkt. Maak nu je account aan om direct aan de slag te gaan.
-            </p>
-          </div>
-
-          <form onSubmit={handleSubmit(onSubmit)} className="openregio-onboarding-form">
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 16 }}>
-              <div className="openregio-form-group" style={{ marginBottom: 0 }}>
-                <label>Voornaam</label>
-                <input {...register("firstName")} type="text" placeholder="Jan" data-testid="input-first-name" />
-              </div>
-              <div className="openregio-form-group" style={{ marginBottom: 0 }}>
-                <label>Achternaam</label>
-                <input {...register("lastName")} type="text" placeholder="Jansen" data-testid="input-last-name" />
-              </div>
-            </div>
-
-            <div className="openregio-form-group">
-              <label>E-mailadres *</label>
-              <input {...register("email")} type="email" placeholder="jouw@email.nl" data-testid="input-email" />
-              {errors.email && <p style={{ fontSize: 11, color: "#dc2626", marginTop: 4 }}>{errors.email.message}</p>}
-            </div>
-
-            <div className="openregio-form-group">
-              <label>Wachtwoord *</label>
-              <input {...register("password")} type="password" placeholder="Minimaal 6 tekens" data-testid="input-password" />
-              {errors.password && <p style={{ fontSize: 11, color: "#dc2626", marginTop: 4 }}>{errors.password.message}</p>}
-            </div>
-
-            <div className="openregio-form-group">
-              <label>Bevestig wachtwoord *</label>
-              <input {...register("confirmPassword")} type="password" placeholder="Herhaal je wachtwoord" data-testid="input-confirm-password" />
-              {errors.confirmPassword && <p style={{ fontSize: 11, color: "#dc2626", marginTop: 4 }}>{errors.confirmPassword.message}</p>}
-            </div>
-
-            <button
-              type="submit"
-              className="openregio-button openregio-button-primary"
-              disabled={isSubmitting}
-              data-testid="button-create-account"
-              style={{ width: "100%" }}
-            >
-              {isSubmitting && <Loader2 className="h-4 w-4 animate-spin" />}
-              {isSubmitting ? "Account aanmaken…" : "Account aanmaken en inloggen"}
-            </button>
-          </form>
-
-          <p className="openregio-auth-footer">
-            Al een account?{" "}
-            <Link href="/login">
-              <span style={{ color: "#1f5fae", fontWeight: 700, cursor: "pointer" }} data-testid="link-login">Log hier in</span>
-            </Link>
+          <h1 className="openregio-auth-title">Betaling geslaagd!</h1>
+          <p className="openregio-auth-sub" style={{ marginBottom: 20 }}>
+            Je plan is bijgewerkt naar <strong>{planLabel}</strong>. Je hebt nu direct toegang tot alle bijbehorende functies.
           </p>
+
+          <p style={{ fontSize: 12, color: "#94a3b8", marginBottom: 24 }}>
+            Het kan een moment duren voordat de wijziging zichtbaar is. Vernieuw de pagina als je plan nog niet is bijgewerkt.
+          </p>
+
+          <Link href="/vandaag" data-testid="button-go-dashboard">
+            <button className="openregio-button openregio-button-primary" style={{ width: "100%", marginBottom: 10 }}>
+              Naar mijn dashboard
+            </button>
+          </Link>
+          <Link href="/lidmaatschap" data-testid="link-back-membership">
+            <button className="openregio-button openregio-button-outline" style={{ width: "100%" }}>
+              Terug naar lidmaatschap
+            </button>
+          </Link>
         </div>
       </div>
-
     </div>
   );
 }
 
+/** Toon een formulier voor nieuwe gebruikers die na betaling een account aanmaken */
 function EmailCheckPage({ email }: { email: string }) {
   return (
     <div className="openregio-page openregio-auth-page" data-testid="card-payment-success">
@@ -211,15 +125,22 @@ function EmailCheckPage({ email }: { email: string }) {
           </Link>
         </div>
       </div>
-
     </div>
   );
 }
 
 export default function BetalingGeslaagd() {
   const params = new URLSearchParams(window.location.search);
-  const plan   = params.get("plan");
-  const email  = params.get("email") || "";
-  if (plan === "basic" || plan === "pro") return <PostPaymentRegisterForm plan={plan} />;
+  const plan = params.get("plan");
+  const email = params.get("email") || "";
+
+  const { user } = useAuth();
+
+  // Ingelogde gebruiker die plan heeft geüpgraded
+  if ((plan === "basic" || plan === "pro") && user) {
+    return <UpgradeSuccessPage plan={plan} />;
+  }
+
+  // Nieuwe gebruiker: e-mail met onboarding-link ontvangen
   return <EmailCheckPage email={email} />;
 }
