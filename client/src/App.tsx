@@ -11,6 +11,7 @@ import { useContentProtection } from "@/hooks/useContentProtection";
 import { Skeleton } from "@/components/ui/skeleton";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home";
+import UnderConstructionPage from "@/pages/under-construction";
 import LoginPage from "@/pages/login";
 import RegisterPage from "@/pages/register";
 import DashboardPage from "@/pages/dashboard";
@@ -98,7 +99,7 @@ const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/
 function PublicRouter() {
   return (
     <Switch>
-      <Route path="/" component={HomePage} />
+      <Route path="/" component={UnderConstructionPage} />
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />
       <Route path="/start" component={StartPage} />
