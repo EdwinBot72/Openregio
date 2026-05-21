@@ -105,6 +105,10 @@ app.use((req, res, next) => {
   const { startThemaRefreshCron, runThemaRefreshIfEmpty } = await import("./services/themaRefresh");
   startThemaRefreshCron();
 
+  // Start de dagelijkse opschoning van verlopen lokale acties
+  const { startLokaleActiesCron } = await import("./services/lokaleActiesCron");
+  startLokaleActiesCron();
+
   // Global error handler with structured logging
   app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

@@ -96,7 +96,7 @@ import {
 } from "@shared/schema";
 import { randomUUID } from "crypto";
 import { db } from "db";
-import { eq, ilike, or, desc, sql, and, inArray, gt, asc } from "drizzle-orm";
+import { eq, ilike, or, desc, sql, and, inArray, gt, lt, asc } from "drizzle-orm";
 
 // Haversine formula to calculate distance between two lat/lng points in km
 function calculateDistance(lat1: number, lon1: number, lat2: number, lon2: number): number {
@@ -325,6 +325,7 @@ export interface IStorage {
   updateLokaleActie(id: string, userId: string, updates: Partial<InsertLokaleActie>): Promise<LokaleActie | undefined>;
   deleteLokaleActie(id: string, userId: string): Promise<boolean>;
   markLokaleActieVerlopen(id: string, userId: string): Promise<LokaleActie | undefined>;
+  cleanupExpiredLokaleActies(opts?: { hardDeleteAfterDays?: number }): Promise<{ markedVerlopen: number; deletedOld: number }>;
 
   // Ondernemer Thema's
   getOndernemerThemas(): Promise<OndernemerThema[]>;
@@ -1839,6 +1840,9 @@ export class MemStorage implements IStorage {
   async markLokaleActieVerlopen(_id: string, _userId: string): Promise<LokaleActie | undefined> {
     return undefined;
   }
+  async cleanupExpiredLokaleActies(_opts?: { hardDeleteAfterDays?: number }): Promise<{ markedVerlopen: number; deletedOld: number }> {
+    return { markedVerlopen: 0, deletedOld: 0 };
+  }
 
   // Ondernemer Thema's (stubs for MemStorage)
   async getOndernemerThemas(): Promise<OndernemerThema[]> {
@@ -3197,6 +3201,28 @@ class DbStorage implements IStorage {
       .where(and(eq(lokaleActies.id, id), eq(lokaleActies.ownerUserId, userId)))
       .returning();
     return updated;
+  }
+
+  async cleanupExpiredLokaleActies(opts?: { hardDeleteAfterDays?: number }): Promise<{ markedVerlopen: number; deletedOld: number }> {
+    const now = new Date();
+    const marked = await db.update(lokaleActies)
+      .set({ status: "verlopen" })
+      .where(and(
+        eq(lokaleActies.status, "actief"),
+        lt(lokaleActies.expiresAt, now),
+      ))
+      .returning({ id: lokaleActies.id });
+
+    const hardDeleteAfterDays = opts?.hardDeleteAfterDays ?? 180;
+    const cutoff = new Date(now.getTime() - hardDeleteAfterDays * 24 * 60 * 60 * 1000);
+    const deleted = await db.delete(lokaleActies)
+      .where(and(
+        eq(lokaleActies.status, "verlopen"),
+        lt(lokaleActies.expiresAt, cutoff),
+      ))
+      .returning({ id: lokaleActies.id });
+
+    return { markedVerlopen: marked.length, deletedOld: deleted.length };
   }
 
   // Ondernemer Thema's
