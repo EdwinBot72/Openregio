@@ -7,7 +7,7 @@ import {
   Home, Bot, Mail, FileSearch, BookOpen, Globe, TrendingUp,
   Users, CalendarDays, Lightbulb, Euro, MapPin, LogOut,
   Settings, ShieldCheck, BarChart2, Building2, FileText,
-  Bell, Zap, Scale, Handshake, Newspaper, Activity,
+  Bell, Zap, Scale, Handshake, Newspaper, Activity, Shield,
 } from "lucide-react";
 
 type ChipColor = "red" | "orange" | "blue" | "green";
@@ -162,30 +162,23 @@ export function OpenRegioShell({ children }: { children: ReactNode }) {
             {/* Pijler 1: Grip op Regels */}
             <PijlerHeader num="1" name="GRIP OP REGELS" numClass="or-num-p1" />
             <NavItem
-              icon={Mail}
+              icon={Shield}
+              href="/regels/sectorregels"
+              label="Sectorregels"
+              currentPath={location}
+              pijler="p1"
+            />
+            <NavItem
+              icon={Bell}
+              href="/regels/ontwikkelingen"
+              label="Wat komt eraan?"
+              currentPath={location}
+              pijler="p1"
+            />
+            <NavItem
+              icon={FileText}
               href="/regels/documenten"
-              label="Brief analyseren"
-              currentPath={location}
-              pijler="p1"
-            />
-            <NavItem
-              icon={Scale}
-              href="/regels/check"
-              label="Regelcheck"
-              currentPath={location}
-              pijler="p1"
-            />
-            <NavItem
-              icon={FileSearch}
-              href="/regels/woo"
-              label="WOO-verzoek"
-              currentPath={location}
-              pijler="p1"
-            />
-            <NavItem
-              icon={BookOpen}
-              href="/regels/updates"
-              label="Regelgeving"
+              label="Documenten opvragen"
               currentPath={location}
               pijler="p1"
             />

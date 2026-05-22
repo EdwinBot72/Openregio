@@ -28,7 +28,7 @@ const MAIN_CARDS = [
     badge: "7 sectoren",
     title: "Sectorregels",
     description:
-      "Vergunningen, meldingen, verplichtingen en controles — per sector direct inzichtelijk.",
+      "Bekijk welke regels gelden voor jouw sector, per gemeente, en wat de impact is op kosten, verplichtingen, risico's en kansen.",
     cta: "Bekijk sectorregels",
     color: "text-blue-600 dark:text-blue-400",
     bg: "bg-blue-50 dark:bg-blue-950/30",
@@ -40,7 +40,7 @@ const MAIN_CARDS = [
     badge: "Nieuw",
     title: "Wat komt eraan?",
     description:
-      "Nieuwe wetten, Europese regels, subsidies en lokale verordeningen die jouw bedrijf raken.",
+      "Volg aankomende wijzigingen zoals Digital ID, AI Act, AVG, Omgevingswet, subsidies en gemeentelijke besluiten.",
     cta: "Bekijk wat er komt",
     color: "text-amber-600 dark:text-amber-400",
     bg: "bg-amber-50 dark:bg-amber-950/30",
@@ -52,7 +52,7 @@ const MAIN_CARDS = [
     badge: "AI-analyse",
     title: "Documenten opvragen",
     description:
-      "Upload een brief of besluit. AI maakt automatisch een WOO-verzoek of AVG-analyse.",
+      "Stel je vraag of upload een brief. OpenRegio maakt er een AVG-controleslag of WOO-verzoek van met conceptbrief.",
     cta: "Document analyseren",
     color: "text-emerald-600 dark:text-emerald-400",
     bg: "bg-emerald-50 dark:bg-emerald-950/30",
