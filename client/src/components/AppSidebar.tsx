@@ -44,12 +44,14 @@ function NavSectionItem({
   isAdmin: boolean;
   badgeCount?: number;
 }) {
+  // isActive: controleer zowel de sectie-url als alle sub-routes
   const isActive =
-    section.url
-      ? currentPath === section.url
-      : section.sub?.some(
-          (s) => currentPath === s.url || currentPath.startsWith(s.url + "/")
-        ) ?? false;
+    (section.url
+      ? currentPath === section.url || currentPath.startsWith(section.url + "/")
+      : false) ||
+    (section.sub?.some(
+      (s) => currentPath === s.url || currentPath.startsWith(s.url + "/")
+    ) ?? false);
 
   const [open, setOpen] = useState(isActive);
 
@@ -96,22 +98,53 @@ function NavSectionItem({
 
   return (
     <SidebarMenuItem>
-      <SidebarMenuButton
-        isActive={isActive && !open}
-        onClick={() => setOpen((v) => !v)}
-        data-testid={`toggle-nav-${section.id}`}
-        className="w-full justify-between"
-      >
-        <span className="flex items-center gap-2">
-          <section.icon className="h-4 w-4" />
-          <span>{section.title}</span>
-        </span>
-        {open ? (
-          <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-        ) : (
-          <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
-        )}
-      </SidebarMenuButton>
+      {section.url ? (
+        // Sectie met URL: label navigeert, chevron togglet submenu
+        <div className="flex items-center w-full rounded-md">
+          <SidebarMenuButton
+            asChild
+            isActive={isActive}
+            data-testid={`link-nav-${section.id}`}
+            className="flex-1 justify-start"
+            onClick={() => setOpen(true)}
+          >
+            <Link href={section.url} className="flex items-center gap-2">
+              <section.icon className="h-4 w-4" />
+              <span>{section.title}</span>
+            </Link>
+          </SidebarMenuButton>
+          <button
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); setOpen((v) => !v); }}
+            className="flex items-center justify-center h-8 w-7 shrink-0 text-muted-foreground hover:text-foreground rounded-md"
+            data-testid={`toggle-nav-${section.id}`}
+            aria-label="Submenu uitklappen"
+          >
+            {open ? (
+              <ChevronDown className="h-3.5 w-3.5" />
+            ) : (
+              <ChevronRight className="h-3.5 w-3.5" />
+            )}
+          </button>
+        </div>
+      ) : (
+        // Sectie zonder URL: hele knop is een toggle
+        <SidebarMenuButton
+          isActive={isActive && !open}
+          onClick={() => setOpen((v) => !v)}
+          data-testid={`toggle-nav-${section.id}`}
+          className="w-full justify-between"
+        >
+          <span className="flex items-center gap-2">
+            <section.icon className="h-4 w-4" />
+            <span>{section.title}</span>
+          </span>
+          {open ? (
+            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+          ) : (
+            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+          )}
+        </SidebarMenuButton>
+      )}
 
       {open && (
         <SidebarMenuSub>

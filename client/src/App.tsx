@@ -180,7 +180,6 @@ function AuthenticatedRouter() {
       <Route path="/kansen">
         <Redirect to="/kansen/opdrachten" />
       </Route>
-      <Route path="/regels" component={RegelsOverzichtPage} />
       <Route path="/groei">
         <Redirect to="/groei/profiel" />
       </Route>
@@ -222,7 +221,7 @@ function AuthenticatedRouter() {
         <Redirect to="/network" />
       </Route>
 
-      {/* ── Regels (Sectie 3) ─────────────────────────────────────────────── */}
+      {/* ── Regels (Sectie 3) — sub-routes eerst, overzicht als laatste ────── */}
       <Route path="/regels/sectorregels" component={RegelsSectorregelPage} />
       <Route path="/regels/ontwikkelingen" component={RegelsOntwikkelingenPage} />
       <Route path="/regels/updates" component={IntelPage} />
@@ -231,6 +230,7 @@ function AuthenticatedRouter() {
       <Route path="/regels/check" component={CheckSituatiePage} />
       <Route path="/regels/documenten" component={BriefAnalysePage} />
       <Route path="/regels/woo" component={WooBibliotheekPage} />
+      <Route path="/regels" component={RegelsOverzichtPage} />
 
       {/* ── Groei (Sectie 4) ──────────────────────────────────────────────── */}
       <Route path="/groei/zichtbaarheid" component={ProVisibilitySettingsPage} />
