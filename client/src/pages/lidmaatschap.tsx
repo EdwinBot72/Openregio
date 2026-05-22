@@ -68,7 +68,7 @@ const FEATURE_ROWS: FeatureRow[] = [
   { label: "Netwerk",                  basis: FEATURE_ACCESS.netwerk.basis,              pro: FEATURE_ACCESS.netwerk.pro },
   { label: "Lokale acties",            basis: FEATURE_ACCESS.lokale_acties.basis,        pro: FEATURE_ACCESS.lokale_acties.pro },
   { label: "Marktplaats",              basis: FEATURE_ACCESS.marktplaats.basis,          pro: FEATURE_ACCESS.marktplaats.pro },
-  { label: "Blog",                     basis: FEATURE_ACCESS.blog.basis,                 pro: FEATURE_ACCESS.blog.pro },
+  { label: "Blog",                     basis: FEATURE_ACCESS.blog_lezen.basis,           pro: FEATURE_ACCESS.blog_lezen.pro },
 ];
 
 function AccessBadge({ level }: { level: AccessLevel }) {
