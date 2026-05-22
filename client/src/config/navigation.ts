@@ -44,6 +44,7 @@ export type NavSection = {
   url?: string;
   sub?: NavSubItem[];
   adminOnly?: boolean;
+  pijler?: number;
 };
 
 /** Definitieve hoofdnavigatie — 5 secties + Beheer (admin) */
@@ -72,12 +73,13 @@ export const MAIN_NAV: NavSection[] = [
     ],
   },
 
-  // 3 ── Regels
+  // 3 ── Grip op Regels (Pijler 1)
   {
     id: "regels",
-    title: "Regels",
+    title: "Grip op Regels",
     icon: Scale,
     url: "/regels",
+    pijler: 1,
     sub: [
       { title: "Overzicht", url: "/regels", icon: Scale },
       { title: "Sectorregels", url: "/regels/sectorregels", icon: Shield },

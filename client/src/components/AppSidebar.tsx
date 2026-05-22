@@ -96,6 +96,22 @@ function NavSectionItem({
     (s) => (!s.proOnly || isPro || isAdmin) && (!s.adminOnly || isAdmin)
   );
 
+  // Gedeeld icoon-element: pijler-cirkel of gewoon icoon
+  const SectionIcon = () =>
+    section.pijler != null ? (
+      <span
+        className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold shrink-0 ${
+          isActive
+            ? "bg-primary text-primary-foreground"
+            : "bg-muted-foreground/30 text-sidebar-foreground"
+        }`}
+      >
+        {section.pijler}
+      </span>
+    ) : (
+      <section.icon className="h-4 w-4 shrink-0" />
+    );
+
   return (
     <SidebarMenuItem>
       {section.url ? (
@@ -109,7 +125,7 @@ function NavSectionItem({
             onClick={() => setOpen(true)}
           >
             <Link href={section.url} className="flex items-center gap-2">
-              <section.icon className="h-4 w-4" />
+              <SectionIcon />
               <span>{section.title}</span>
             </Link>
           </SidebarMenuButton>
@@ -135,7 +151,7 @@ function NavSectionItem({
           className="w-full justify-between"
         >
           <span className="flex items-center gap-2">
-            <section.icon className="h-4 w-4" />
+            <SectionIcon />
             <span>{section.title}</span>
           </span>
           {open ? (
