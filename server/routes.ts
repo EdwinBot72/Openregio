@@ -217,6 +217,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           currency: "EUR"
         },
         customerId: customer.id,
+        sequenceType: "first" as any,
         description,
         redirectUrl: `${baseUrl}/betaling-geslaagd?email=${encodeURIComponent(email)}`,
         webhookUrl: `${webhookBaseUrl}/api/mollie/webhook`,
@@ -228,7 +229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           referrerUserId: referrerUserId || undefined,
           referralCode: ref || undefined
         }
-      });
+      } as any);
       
       console.log(`✓ Mollie payment created: ${payment.id} for ${email} (${plan})`);
       
@@ -248,188 +249,187 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // POST /api/mollie/webhook - Handle Mollie payment status updates
+  // POST /api/mollie/webhook — Unified handler voor eerste én terugkerende betalingen
   app.post("/api/mollie/webhook", async (req, res) => {
+    // Mollie verwacht altijd 200 — stuur direct terug zodat Mollie niet herhaalt
+    res.status(200).send("OK");
+
     try {
-      const baseUrl = process.env.PUBLIC_BASE_URL || getBaseUrl(req);
       const paymentId = req.body.id;
-      
-      if (!paymentId) {
-        console.error("Webhook ontvangen zonder payment ID");
-        return res.status(400).send("Missing payment ID");
-      }
-      
-      if (!mollieClient) {
-        console.error("Mollie API key niet geconfigureerd");
-        return res.status(500).send("Mollie client not configured");
-      }
-      
-      // Fetch payment details from Mollie
-      const payment = await mollieClient.payments.get(paymentId);
-      
-      console.log(`Webhook ontvangen voor payment ${paymentId}: status=${payment.status}`);
-      
-      // Only process paid payments
-      if (payment.status === "paid") {
-        const { email, plan, referrerUserId, mollieCustomerId } = payment.metadata as { 
-          email: string; 
-          plan: string; 
-          referrerUserId?: string;
-          mollieCustomerId?: string;
-        };
-        
-        if (!email || !plan) {
-          console.error("Payment metadata incomplete:", payment.metadata);
-          return res.status(200).send("OK");
+      if (!paymentId) { console.error("[Mollie] Webhook zonder payment ID"); return; }
+      if (!mollieClient) { console.error("[Mollie] Client niet geconfigureerd"); return; }
+
+      const payment: any = await mollieClient.payments.get(paymentId);
+      const status: string = payment.status;
+      const sequenceType: string = payment.sequenceType || "oneoff";
+      const meta: any = payment.metadata || {};
+      const baseUrl = process.env.PUBLIC_BASE_URL || getBaseUrl(req);
+
+      console.log(`[Mollie] payment=${paymentId} status=${status} sequenceType=${sequenceType}`);
+
+      // ── TERUGKERENDE BETALING (maandelijkse verlenging) ────────────────────
+      if (sequenceType === "recurring") {
+        if (status === "paid") {
+          const mollieSubId: string | null = payment.subscriptionId || null;
+          let subscription = mollieSubId
+            ? await storage.getSubscriptionByMollieSubscriptionId(mollieSubId)
+            : undefined;
+
+          if (!subscription && meta.userId) {
+            subscription = await storage.getActiveSubscription(meta.userId);
+          }
+
+          if (subscription) {
+            const nextPeriodEnd = new Date();
+            nextPeriodEnd.setMonth(nextPeriodEnd.getMonth() + 1);
+            await storage.updateSubscription(subscription.id, {
+              status: "active",
+              currentPeriodEnd: nextPeriodEnd,
+            });
+            console.log(`[Mollie] Verlenging OK: sub=${subscription.id} volgende periode=${nextPeriodEnd.toISOString().split("T")[0]}`);
+          } else {
+            console.error(`[Mollie] Terugkerende betaling: geen abonnement gevonden voor subscriptionId=${mollieSubId}`);
+          }
+        } else if (status === "failed") {
+          const mollieSubId: string | null = payment.subscriptionId || null;
+          if (mollieSubId) {
+            const sub = await storage.getSubscriptionByMollieSubscriptionId(mollieSubId);
+            if (sub) {
+              await storage.updateSubscription(sub.id, { status: "past_due" as any });
+              console.warn(`[Mollie] Terugkerende betaling MISLUKT: sub=${sub.id}`);
+            }
+          }
         }
-        
-        console.log(`✓ Payment PAID for ${email} (${plan})`);
-        
-        // Idempotency check: skip if this payment was already processed
-        const existingSub = await storage.getSubscriptionByMolliePaymentId(paymentId);
-        if (existingSub) {
-          console.log(`⚠ Payment ${paymentId} already processed (subscription ${existingSub.id}) - skipping`);
-          return res.status(200).send("OK");
+        return;
+      }
+
+      // ── EERSTE / EENMALIGE BETALING (activatie gebruiker) ─────────────────
+      if (status !== "paid") {
+        console.log(`[Mollie] Payment ${paymentId} status=${status} — geen actie`);
+        return;
+      }
+
+      // Idempotentie: al-verwerkte betalingen overslaan
+      const existingSub = await storage.getSubscriptionByMolliePaymentId(paymentId);
+      if (existingSub) {
+        console.log(`[Mollie] Reeds verwerkt: payment=${paymentId} → overslaan`);
+        return;
+      }
+
+      const plan: string = meta.plan || "basic";
+      const mollieCustomerId: string | null = meta.mollieCustomerId || payment.customerId || null;
+      let user: any = null;
+
+      if (meta.userId) {
+        // Bestaande gebruiker (flow via /api/billing/create-checkout)
+        user = await storage.getUserById(meta.userId);
+        if (!user) { console.error(`[Mollie] Gebruiker niet gevonden: ${meta.userId}`); return; }
+        if (user.plan !== plan) {
+          await storage.updateUserPlan(user.id, plan as "basic" | "pro");
+          console.log(`[Mollie] Plan bijgewerkt: ${user.plan} → ${plan}`);
         }
-        
-        // Check if user already exists
-        let user = await storage.getUserByEmail(email);
-        
+
+      } else if (meta.email) {
+        // Nieuwe gebruiker (flow via /start)
+        user = await storage.getUserByEmail(meta.email);
+
         if (!user) {
           const tempPassword = generateRandomPassword();
           const onboardingToken = generateOnboardingToken();
           const referralCode = generateReferralCode();
           const passwordHash = await bcrypt.hash(tempPassword, 10);
-          
+
           user = await storage.createUser({
-            email,
+            email: meta.email,
             passwordHash,
             plan: plan as "basic" | "pro",
             role: "member",
             mustCompleteOnboarding: true,
             onboardingToken,
             referralCode,
-            referredByUserId: referrerUserId || null,
-            referredAt: referrerUserId ? new Date() : null,
+            referredByUserId: meta.referrerUserId || null,
+            referredAt: meta.referrerUserId ? new Date() : null,
           });
-          
+
           const expiresAt = new Date();
           expiresAt.setDate(expiresAt.getDate() + 7);
-          
-          await storage.createOnboardingToken({
-            userId: user.id,
-            token: onboardingToken,
-            expiresAt,
-          });
-          
-          console.log(`✓ User created: ${user.id} (${email})`);
+          await storage.createOnboardingToken({ userId: user.id, token: onboardingToken, expiresAt });
+
           const onboardingLink = `${baseUrl}/first-login?token=${onboardingToken}`;
-          console.log(`  Onboarding link: ${onboardingLink}`);
-          
-          const emailSent = await sendOnboardingEmail(email, tempPassword, onboardingLink, plan);
-          if (emailSent) {
-            console.log(`✓ Onboarding email sent to ${email}`);
-          } else {
-            console.error(`✗ Failed to send onboarding email to ${email}`);
-          }
-          
+          const emailSent = await sendOnboardingEmail(meta.email, tempPassword, onboardingLink, plan);
+          console.log(`[Mollie] Nieuwe gebruiker: ${user.id} (${meta.email}) email=${emailSent ? "verzonden" : "mislukt"}`);
         } else {
-          console.log(`✓ User already exists: ${user.id} (${email})`);
-          
-          if (user.plan !== plan) {
-            await storage.updateUserPlan(user.id, plan as "basic" | "pro");
-            console.log(`  Updated plan: ${user.plan} → ${plan}`);
-          }
+          if (user.plan !== plan) await storage.updateUserPlan(user.id, plan as "basic" | "pro");
+          console.log(`[Mollie] Bestaande gebruiker gevonden: ${user.id}`);
         }
-        
-        // Create subscription record with Mollie customer ID for recurring billing
-        const subscription = await storage.createSubscription({
-          userId: user.id,
-          molliePaymentId: payment.id,
-          mollieCustomerId: mollieCustomerId || null,
-          plan: plan as "basic" | "pro",
-          status: "active",
-        });
-        
-        console.log(`✓ Subscription created: ${subscription.id}`);
-        
-        if (mollieCustomerId && mollieClient) {
-          try {
-            const mandatesPage: any = await mollieClient.customerMandates.page({ customerId: mollieCustomerId });
-            const mandatesList = mandatesPage?.length ? Array.from(mandatesPage) : [];
-            const hasValidMandate = mandatesList.length > 0 && mandatesList.some((m: any) => m.status === "valid" || m.status === "pending");
-            
-            if (hasValidMandate) {
-              const mollieSubscription = await mollieClient.customerSubscriptions.create({
-                customerId: mollieCustomerId,
-                amount: {
-                  currency: "EUR",
-                  value: getPlanPrice(plan)
-                },
-                interval: "1 month",
-                description: `${getPlanDisplayName(plan)} - Maandelijks abonnement`,
-                webhookUrl: `${baseUrl}/api/mollie/webhook`
-              });
-              
-              const nextMonth = new Date();
-              nextMonth.setMonth(nextMonth.getMonth() + 1);
-              
-              await storage.updateSubscription(subscription.id, {
-                mollieSubscriptionId: mollieSubscription.id,
-                currentPeriodEnd: nextMonth
-              });
-              
-              console.log(`✓ Mollie recurring subscription created: ${mollieSubscription.id} (maandelijks €${getPlanPrice(plan)})`);
-            } else {
-              console.log(`ℹ No valid mandate found for customer ${mollieCustomerId} - recurring subscription will need to be set up separately`);
-              
-              const nextMonth = new Date();
-              nextMonth.setMonth(nextMonth.getMonth() + 1);
-              await storage.updateSubscription(subscription.id, {
-                currentPeriodEnd: nextMonth
-              });
-            }
-          } catch (subError: any) {
-            console.error(`⚠ Failed to create Mollie recurring subscription:`, subError);
-            const nextMonth = new Date();
-            nextMonth.setMonth(nextMonth.getMonth() + 1);
-            await storage.updateSubscription(subscription.id, {
-              currentPeriodEnd: nextMonth
-            });
-          }
+      } else {
+        console.error(`[Mollie] Geen userId of email in metadata voor payment ${paymentId}`);
+        return;
+      }
+
+      // Abonnement aanmaken in database
+      const subscription = await storage.createSubscription({
+        userId: user.id,
+        molliePaymentId: payment.id,
+        mollieCustomerId,
+        plan: plan as "basic" | "pro",
+        status: "active",
+      });
+
+      console.log(`[Mollie] Abonnement aangemaakt: ${subscription.id} voor gebruiker ${user.id}`);
+
+      // Mollie recurring subscription aanmaken (alleen na eerste betaling met mandate)
+      const nextMonth = new Date();
+      nextMonth.setMonth(nextMonth.getMonth() + 1);
+
+      if (mollieCustomerId && sequenceType === "first") {
+        try {
+          const startDate = nextMonth.toISOString().split("T")[0]; // YYYY-MM-DD
+          const mollieSubscription: any = await (mollieClient.customerSubscriptions.create as any)({
+            customerId: mollieCustomerId,
+            amount: { currency: "EUR", value: getPlanPrice(plan) },
+            interval: "1 month",
+            startDate,
+            description: `OpenRegio ${plan === "pro" ? "Pro" : "Basic"} - Maandelijks abonnement`,
+            webhookUrl: `${baseUrl}/api/mollie/webhook`,
+          });
+
+          await storage.updateSubscription(subscription.id, {
+            mollieSubscriptionId: mollieSubscription.id,
+            currentPeriodEnd: nextMonth,
+          });
+
+          console.log(`[Mollie] Terugkerend abonnement aangemaakt: ${mollieSubscription.id} — start ${startDate}`);
+        } catch (subErr: any) {
+          console.error(`[Mollie] Kon terugkerend abonnement niet aanmaken:`, subErr.message);
+          await storage.updateSubscription(subscription.id, { currentPeriodEnd: nextMonth });
         }
-        
-        // Create commission for referrer if applicable
-        if (referrerUserId) {
-          // 25% (Basis) of 35% (Pro) over eerste 3 maanden
+      } else {
+        await storage.updateSubscription(subscription.id, { currentPeriodEnd: nextMonth });
+      }
+
+      // Commissie voor affiliate referral
+      if (meta.referrerUserId) {
+        try {
           const { calculateAffiliatePayout } = await import("@shared/pricing");
           const planKey = plan === "pro" ? "pro" : "basis";
           const commissionAmount = calculateAffiliatePayout(planKey).totalPayoutExVat;
-          
-          try {
-            const commission = await storage.createCommission({
-              affiliateUserId: referrerUserId,
-              referredUserId: user.id,
-              subscriptionId: subscription.id,
-              molliePaymentId: payment.id,
-              plan: plan as "basic" | "pro",
-              amount: commissionAmount,
-              status: "pending",
-            });
-            
-            console.log(`✓ Commission created: ${commission.id} (€${commissionAmount.toFixed(2)} for ${referrerUserId})`);
-          } catch (commissionError: any) {
-            console.error(`⚠ Failed to create commission:`, commissionError);
-          }
+          await storage.createCommission({
+            affiliateUserId: meta.referrerUserId,
+            referredUserId: user.id,
+            subscriptionId: subscription.id,
+            molliePaymentId: payment.id,
+            plan: plan as "basic" | "pro",
+            amount: commissionAmount,
+            status: "pending",
+          });
+          console.log(`[Mollie] Commissie aangemaakt voor referrer ${meta.referrerUserId}`);
+        } catch (commErr: any) {
+          console.error(`[Mollie] Commissie aanmaken mislukt:`, commErr);
         }
       }
-      
-      // Always return 200 OK to acknowledge webhook
-      res.status(200).send("OK");
-    } catch (error: any) {
-      console.error("Fout in Mollie webhook:", error);
-      // Still return 200 to prevent Mollie from retrying
-      res.status(200).send("OK");
+    } catch (err: any) {
+      console.error("[Mollie] Onverwachte fout in webhook:", err);
     }
   });
 
@@ -2776,37 +2776,32 @@ Maak het verzoek professioneel en juridisch correct.`;
       // Canonical public URL for webhooks and redirects
       const publicUrl = process.env.PUBLIC_BASE_URL || getBaseUrl(req);
 
-      // Create first payment to establish mandate
-      const firstPayment = await mollieClient.payments.create({
+      // Create first payment to establish mandate for recurring billing
+      const firstPayment: any = await (mollieClient.payments.create as any)({
         amount: {
           currency: "EUR",
           value: getPlanPrice(plan)
         },
         customerId: customer.id,
-        sequenceType: "first" as any,
-        description: `OpenRegio ${plan === "pro" ? "Pro" : "Basic"} lidmaatschap`,
-        redirectUrl: returnUrl || `${publicUrl}/lidmaatschap`,
-        webhookUrl: `${publicUrl}/api/webhooks/mollie`,
+        sequenceType: "first",
+        description: `OpenRegio ${plan === "pro" ? "Pro" : "Basic"} - Maandelijks abonnement`,
+        redirectUrl: returnUrl || `${publicUrl}/betaling-geslaagd`,
+        webhookUrl: `${publicUrl}/api/mollie/webhook`,
         metadata: {
           userId,
-          plan
-        } as any
+          plan,
+          mollieCustomerId: customer.id,
+        },
       });
 
-      // Create subscription record in database (status: trialing until first payment)
-      const subscription = await storage.createSubscription({
-        userId,
-        mollieCustomerId: customer.id,
-        mollieSubscriptionId: null,
-        status: "trialing",
-        plan,
-        currentPeriodEnd: null
-      });
+      const checkoutUrl: string = firstPayment.getCheckoutUrl?.() || firstPayment._links?.checkout?.href || "";
+      if (!checkoutUrl) {
+        return res.status(500).json({ error: "Kon checkout URL niet genereren" });
+      }
 
       res.json({
-        checkoutUrl: (firstPayment as any)._links?.checkout?.href || "",
+        checkoutUrl,
         paymentId: firstPayment.id,
-        subscriptionId: subscription.id
       });
     } catch (error: any) {
       console.error("Create checkout error:", error);
@@ -2892,95 +2887,11 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
-  app.post("/api/webhooks/mollie", async (req, res) => {
-    try {
-      if (!mollieClient) {
-        return res.sendStatus(503);
-      }
-
-      const paymentId = req.body.id;
-      
-      if (!paymentId) {
-        return res.status(400).json({ error: "Payment ID required" });
-      }
-
-      // Fetch payment details from Mollie
-      const payment: any = await mollieClient.payments.get(paymentId);
-      
-      const userId = payment.metadata?.userId;
-      const plan = payment.metadata?.plan;
-
-      if (!userId) {
-        console.error("Webhook: No userId in payment metadata");
-        return res.sendStatus(200);
-      }
-
-      if (payment.status === "paid") {
-        console.log(`Payment ${paymentId} paid for user ${userId}`);
-        
-        // Get subscription
-        const subscription = await storage.getSubscription(userId);
-        if (!subscription) {
-          console.error("Webhook: Subscription not found for user", userId);
-          return res.sendStatus(200);
-        }
-
-        // Update user plan in users table so user.plan reflects the new plan
-        if (plan && (plan === "basic" || plan === "pro")) {
-          await storage.updateUserPlan(userId, plan as "basic" | "pro");
-          console.log(`✓ User ${userId} plan updated to ${plan}`);
-        }
-
-        // If this is first payment with mandate, create Mollie subscription
-        if (payment.sequenceType === "first" && subscription.mollieCustomerId) {
-          try {
-            // Use PUBLIC_BASE_URL env var or construct from request
-            const baseUrl = process.env.PUBLIC_BASE_URL || getBaseUrl(req);
-            
-            const mollieSubscription = await mollieClient.customerSubscriptions.create({
-              customerId: subscription.mollieCustomerId,
-              amount: {
-                currency: "EUR",
-                value: getPlanPrice(plan)
-              },
-              interval: "1 month",
-              description: `OpenRegio ${plan === "pro" ? "Pro" : "Basic"} lidmaatschap`,
-              webhookUrl: `${baseUrl}/api/webhooks/mollie`
-            });
-
-            // Update subscription to active
-            const nextMonth = new Date();
-            nextMonth.setMonth(nextMonth.getMonth() + 1);
-            
-            await storage.updateSubscription(subscription.id, {
-              mollieSubscriptionId: mollieSubscription.id,
-              status: "active",
-              currentPeriodEnd: nextMonth
-            });
-
-            console.log(`Subscription activated for user ${userId}`);
-          } catch (subError: any) {
-            console.error("Failed to create Mollie subscription:", subError);
-          }
-        } else {
-          // Recurring payment — update subscription period
-          const nextMonth = new Date();
-          nextMonth.setMonth(nextMonth.getMonth() + 1);
-          await storage.updateSubscription(subscription.id, {
-            status: "active",
-            currentPeriodEnd: nextMonth
-          });
-        }
-      } else if (payment.status === "failed") {
-        console.log(`Payment ${paymentId} failed for user ${userId}`);
-        // Handle failed payment (could update subscription status)
-      }
-
-      res.sendStatus(200);
-    } catch (error: any) {
-      console.error("Webhook error:", error);
-      res.sendStatus(500);
-    }
+  // POST /api/webhooks/mollie — legacy URL, delegeert naar de master webhook handler
+  app.post("/api/webhooks/mollie", (req, res, next) => {
+    // Stuur door naar de unified handler via interne re-route
+    req.url = "/api/mollie/webhook";
+    (req.app as any).handle(req, res, next);
   });
 
   // ===============================

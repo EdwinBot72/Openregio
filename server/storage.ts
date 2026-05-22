@@ -174,6 +174,7 @@ export interface IStorage {
   getActiveSubscription(userId: string): Promise<Subscription | undefined>;
   getSubscriptionById(id: string): Promise<Subscription | undefined>;
   getSubscriptionByMolliePaymentId(molliePaymentId: string): Promise<Subscription | undefined>;
+  getSubscriptionByMollieSubscriptionId(mollieSubscriptionId: string): Promise<Subscription | undefined>;
   createSubscription(subscription: InsertSubscription): Promise<Subscription>;
   updateSubscription(id: string, subscription: Partial<InsertSubscription>): Promise<Subscription | undefined>;
   cancelSubscription(id: string): Promise<Subscription | undefined>;
@@ -1214,6 +1215,10 @@ export class MemStorage implements IStorage {
 
   async getSubscriptionByMolliePaymentId(molliePaymentId: string): Promise<Subscription | undefined> {
     return Array.from(this.subscriptions.values()).find(s => s.molliePaymentId === molliePaymentId);
+  }
+
+  async getSubscriptionByMollieSubscriptionId(mollieSubscriptionId: string): Promise<Subscription | undefined> {
+    return Array.from(this.subscriptions.values()).find(s => s.mollieSubscriptionId === mollieSubscriptionId);
   }
 
   async createSubscription(subscription: InsertSubscription): Promise<Subscription> {
@@ -2330,6 +2335,11 @@ class DbStorage implements IStorage {
 
   async getSubscriptionByMolliePaymentId(molliePaymentId: string): Promise<Subscription | undefined> {
     const results = await db.select().from(subscriptions).where(eq(subscriptions.molliePaymentId, molliePaymentId));
+    return results[0];
+  }
+
+  async getSubscriptionByMollieSubscriptionId(mollieSubscriptionId: string): Promise<Subscription | undefined> {
+    const results = await db.select().from(subscriptions).where(eq(subscriptions.mollieSubscriptionId, mollieSubscriptionId));
     return results[0];
   }
 
