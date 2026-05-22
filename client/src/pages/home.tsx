@@ -3,10 +3,7 @@ import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import {
   MapPin,
-  Rocket,
   Play,
-  ShieldCheck,
-  TrendingUp,
   Mail,
   Users,
   Award,
@@ -18,32 +15,24 @@ import {
   ArrowRight,
   Globe,
   Search,
-  LayoutDashboard,
   Star,
   Calendar,
   Lightbulb,
-  Heart,
-  ShoppingBag,
-  Mic,
   Building2,
-  Target,
   Menu,
   X,
   Handshake,
-  Briefcase,
-  Stethoscope,
-  Cpu,
-  ShoppingCart,
-  Wrench,
-  Coffee,
-  CheckCircle,
-  Bot,
   ChevronRight,
   Lock,
-  Zap,
   FileSearch,
   Gavel,
-  Dumbbell,
+  Bot,
+  Upload,
+  Zap,
+  TrendingUp,
+  Bell,
+  ShieldCheck,
+  LayoutDashboard,
 } from "lucide-react";
 import "@/styles/landing-mockup.css";
 
@@ -60,47 +49,38 @@ export default function HomePage() {
         <div className="lp-wrap">
           <div className="lp-nav-in">
             <a href="#top" className="lp-brand" data-testid="link-home-brand">
-              <div className="lp-brand-pin">
-                <MapPin size={20} />
-              </div>
-              <div className="lp-brand-name">
-                Open<b>Regio</b>
-              </div>
+              <div className="lp-brand-pin"><MapPin size={20} /></div>
+              <div className="lp-brand-name">Open<b>Regio</b></div>
             </a>
 
             <nav className="lp-nav-links">
-              <a href="#pijlers" className="lp-nav-link">Hoe het werkt</a>
+              <a href="#pijlers" className="lp-nav-link">De drie pijlers</a>
               <a href="#woo" className="lp-nav-link">WOO-check</a>
+              <a href="#regiobot" className="lp-nav-link">RegioBot</a>
               <a href="#aanbod" className="lp-nav-link">Aanbod</a>
             </nav>
 
             <div className="lp-nav-cta">
-              <Link href="/login" className="lp-btn-ghost-nav" data-testid="link-nav-login">
-                Inloggen
-              </Link>
+              <Link href="/login" className="lp-btn-ghost-nav" data-testid="link-nav-login">Inloggen</Link>
               <Link href="/register" className="lp-btn-orange-nav" data-testid="link-nav-register">
-                Abonnement starten <ChevronRight size={14} />
+                Gratis starten <ChevronRight size={14} />
               </Link>
             </div>
 
-            <button
-              className="lp-nav-mobile-toggle"
-              onClick={() => setMobileOpen(!mobileOpen)}
-              aria-label="Menu openen"
-              data-testid="button-mobile-menu"
-            >
+            <button className="lp-nav-mobile-toggle" onClick={() => setMobileOpen(!mobileOpen)} aria-label="Menu openen" data-testid="button-mobile-menu">
               {mobileOpen ? <X size={22} /> : <Menu size={22} />}
             </button>
           </div>
         </div>
 
         <div className={`lp-mobile-menu${mobileOpen ? " open" : ""}`}>
-          <a href="#pijlers" className="lp-nav-link" onClick={() => setMobileOpen(false)}>Hoe het werkt</a>
+          <a href="#pijlers" className="lp-nav-link" onClick={() => setMobileOpen(false)}>De drie pijlers</a>
           <a href="#woo" className="lp-nav-link" onClick={() => setMobileOpen(false)}>WOO-check</a>
+          <a href="#regiobot" className="lp-nav-link" onClick={() => setMobileOpen(false)}>RegioBot</a>
           <a href="#aanbod" className="lp-nav-link" onClick={() => setMobileOpen(false)}>Aanbod</a>
           <div className="lp-mobile-cta">
             <Link href="/login" className="lp-btn-ghost-nav" onClick={() => setMobileOpen(false)}>Inloggen</Link>
-            <Link href="/register" className="lp-btn-orange-nav" onClick={() => setMobileOpen(false)}>Abonnement starten</Link>
+            <Link href="/register" className="lp-btn-orange-nav" onClick={() => setMobileOpen(false)}>Gratis starten</Link>
           </div>
         </div>
       </header>
@@ -113,28 +93,27 @@ export default function HomePage() {
             <div className="lp-hero-left">
               <div className="lp-hero-tagline-pre">
                 <span className="lp-pulse" />
-                De praktische toolkit voor lokale ondernemers
+                Gezond ondernemen
               </div>
               <h1 className="lp-hero-title">
                 Grip op regels.<br />
-                <span className="lp-hl">Zichtbaarheid</span> die werkt.<br />
-                Samen sterk.
+                <span className="lp-hl">Meer klanten.</span><br />
+                Sterkere lokale verbindingen.
               </h1>
-              <div className="lp-hero-tagline">Sterke ondernemers. Sterke regio's.</div>
               <p className="lp-hero-desc">
-                Gemeentes hebben meer bevoegdheden dan ondernemers weten. Besluiten worden genomen zonder transparantie. OpenRegio maakt dat zichtbaar — en geeft jou de instrumenten om er iets mee te doen.
+                De praktische toolkit voor ondernemers die hun bedrijf willen beschermen, laten groeien en lokaal sterker willen staan.
               </p>
               <div className="lp-hero-btns">
                 <Link href="/register" className="lp-btn-hero-orange" data-testid="link-hero-start">
-                  <ArrowRight size={16} /> Aanmelden
+                  <ArrowRight size={16} /> Gratis starten
                 </Link>
                 <a href="#pijlers" className="lp-btn-hero-white">
-                  <Play size={14} /> Hoe het werkt
+                  <Play size={14} /> Bekijk de drie pijlers
                 </a>
               </div>
               <p className="lp-hero-ncc">
                 <Lock size={13} />
-                Voor serieuze ondernemers. Geen vrijblijvendheid.
+                Geen verborgen kosten. Maandelijks opzegbaar.
               </p>
             </div>
 
@@ -142,18 +121,13 @@ export default function HomePage() {
             <div className="lp-hero-visual">
               <div className="lp-town-scene">
                 <div className="lp-town-buildings">
-                  {/* Clouds */}
                   <div className="lp-cloud" style={{ width: 60, height: 22, top: 18, left: 20, boxShadow: "30px 0 0 22px white, -30px 0 0 18px white" }} />
                   <div className="lp-cloud" style={{ width: 40, height: 18, top: 12, right: 40, boxShadow: "22px 0 0 16px white, -18px 0 0 14px white" }} />
-
-                  {/* Tree left */}
                   <div className="lp-tree">
                     <div style={{ width: 0, height: 0, borderLeft: "16px solid transparent", borderRight: "16px solid transparent", borderBottom: "28px solid #2E8B4A" }} />
                     <div style={{ width: 0, height: 0, borderLeft: "20px solid transparent", borderRight: "20px solid transparent", borderBottom: "28px solid #2E8B4A", marginTop: -10 }} />
                     <div style={{ width: 8, height: 14, background: "#8B5E3C", marginTop: -2 }} />
                   </div>
-
-                  {/* BAKKER */}
                   <div className="lp-building">
                     <div className="lp-b-sign" style={{ color: "#0A2D6E" }}>BAKKER</div>
                     <div className="lp-b-body" style={{ width: 70, height: 100, background: "#EBF4FD", border: "1.5px solid #BFDBFE", borderRadius: "6px 6px 0 0" }}>
@@ -167,8 +141,6 @@ export default function HomePage() {
                       <div className="lp-b-door" style={{ width: 22, height: 32, background: "rgba(30,109,181,.25)", borderRadius: "3px 3px 0 0" }} />
                     </div>
                   </div>
-
-                  {/* KAPSALON */}
                   <div className="lp-building">
                     <div className="lp-b-sign" style={{ color: "#236839" }}>KAPSALON</div>
                     <div className="lp-b-body" style={{ width: 80, height: 120, background: "#EAF6EE", border: "1.5px solid #A7F3D0", borderRadius: "6px 6px 0 0" }}>
@@ -182,8 +154,6 @@ export default function HomePage() {
                       <div className="lp-b-door" style={{ width: 24, height: 36, background: "rgba(46,139,74,.25)", borderRadius: "3px 3px 0 0" }} />
                     </div>
                   </div>
-
-                  {/* CAFÉ */}
                   <div className="lp-building">
                     <div className="lp-b-sign" style={{ color: "#C46B08" }}>CAFÉ</div>
                     <div className="lp-b-body" style={{ width: 68, height: 90, background: "#FEF3E2", border: "1.5px solid #FDE68A", borderRadius: "6px 6px 0 0" }}>
@@ -195,16 +165,10 @@ export default function HomePage() {
                       <div className="lp-b-door" style={{ width: 20, height: 28, background: "rgba(232,130,12,.3)", borderRadius: "3px 3px 0 0" }} />
                     </div>
                   </div>
-
-                  {/* Kerk / toren */}
                   <div className="lp-building">
                     <div className="lp-church-spire" />
-                    <div className="lp-church-body">
-                      <div className="lp-church-window" />
-                    </div>
+                    <div className="lp-church-body"><div className="lp-church-window" /></div>
                   </div>
-
-                  {/* Tree right */}
                   <div className="lp-tree">
                     <div style={{ width: 0, height: 0, borderLeft: "14px solid transparent", borderRight: "14px solid transparent", borderBottom: "24px solid #2E8B4A" }} />
                     <div style={{ width: 0, height: 0, borderLeft: "18px solid transparent", borderRight: "18px solid transparent", borderBottom: "24px solid #2E8B4A", marginTop: -8 }} />
@@ -226,31 +190,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── HERKEN JE DIT? ── */}
-      <div style={{ background: "#fff8f0", borderTop: "1px solid #fde68a", borderBottom: "1px solid #fde68a", padding: "40px 0" }}>
-        <div className="lp-wrap">
-          <div style={{ textAlign: "center", marginBottom: 28 }}>
-            <div style={{ fontFamily: "'Nunito',sans-serif", fontSize: 13, fontWeight: 800, color: "#C46B08", letterSpacing: "0.08em", textTransform: "uppercase", marginBottom: 8 }}>Herken je dit?</div>
-            <h2 style={{ fontSize: 22, fontWeight: 900, color: "#0f2942", margin: 0 }}>Regels veranderen. Besluiten worden genomen.<br /><span style={{ color: "#E8820C" }}>Maar jij hoort het als laatste.</span></h2>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 16 }}>
-            {[
-              { ico: "🍺", bg: "#EBF4FD", border: "#BFDBFE", title: "Je terras moet ineens weg", desc: "Gemeente herziet een vergunning, maar de echte reden staat nergens. Via WOO haal je de interne adviezen boven tafel." },
-              { ico: "📄", bg: "#FEF3E2", border: "#FDE68A", title: "Je krijgt een brief die je niet begrijpt", desc: "Juridisch taalgebruik, verwijzingen naar artikelnummers. OpenRegio legt uit wat er van jou verwacht wordt." },
-              { ico: "⚖️", bg: "#EAF6EE", border: "#A7F3D0", title: "Jij wordt gehandhaafd, je buurman niet", desc: "Selectief handhaven is vaker regel dan uitzondering. WOO legt bloot of de gemeente consistent optreedt." },
-              { ico: "📍", bg: "#EDE9FE", border: "#DDD6FE", title: "Nieuwe regel geldt ook voor jou", desc: "Een nieuw bestemmingsplan of maatregel raakt jouw bedrijf. Begrijp tijdig wat de impact is — en wat je kunt doen." },
-            ].map((s) => (
-              <div key={s.title} style={{ background: s.bg, border: `1.5px solid ${s.border}`, borderRadius: 14, padding: "18px 16px" }}>
-                <div style={{ fontSize: 28, marginBottom: 10 }}>{s.ico}</div>
-                <div style={{ fontSize: 13, fontWeight: 800, color: "#0f2942", marginBottom: 6 }}>{s.title}</div>
-                <div style={{ fontSize: 12.5, color: "#475569", lineHeight: 1.6 }}>{s.desc}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* ── PIJLERS ── */}
+      {/* ── DRIE PIJLERS ── */}
       <section className="lp-pijlers-section" id="pijlers">
         <div className="lp-wrap">
           <div className="lp-pijlers-top">
@@ -285,11 +225,11 @@ export default function HomePage() {
               </div>
               <div className="lp-pc-feats">
                 {[
-                  { icon: <Mail size={13} />, t: "Brieven begrijpen", s: "Overheidsbrieven helder uitgelegd" },
-                  { icon: <Scale size={13} />, t: "Regels uitleggen", s: "Wat betekent het voor jouw bedrijf?" },
+                  { icon: <Mail size={13} />, t: "Brief analyseren", s: "Overheidsbrieven direct uitgelegd" },
+                  { icon: <Scale size={13} />, t: "Regelcheck", s: "Wat betekent het voor jouw bedrijf?" },
                   { icon: <FileCheck size={13} />, t: "Vergunningen volgen", s: "Status, deadlines, automatische alerts" },
                   { icon: <Info size={13} />, t: "WOO-check door OpenRegio", s: "Stuur je brief op — wij doen de rest" },
-                  { icon: <ArrowRight size={13} />, t: "Praktische vervolgstappen", s: "Wat kun je doen en wanneer?" },
+                  { icon: <ShieldCheck size={13} />, t: "AVG controle", s: "Jouw privacy en verplichtingen" },
                 ].map((f) => (
                   <div key={f.t} className="lp-pc-feat">
                     <div className="lp-pcf-ico">{f.icon}</div>
@@ -299,8 +239,8 @@ export default function HomePage() {
               </div>
               <div className="lp-pc-foot">
                 <div className="lp-pc-foot-inner">
-                  <div className="lp-pcf-target"><Target size={14} /></div>
-                  <p>Weet wat er speelt en wat je moet doen</p>
+                  <div className="lp-pcf-target"><ArrowRight size={14} /></div>
+                  <Link href={dashHref} style={{ color: "inherit", textDecoration: "none" }}>Meer over Grip op Regels</Link>
                 </div>
               </div>
             </div>
@@ -325,11 +265,11 @@ export default function HomePage() {
               </div>
               <div className="lp-pc-feats">
                 {[
-                  { icon: <Globe size={13} />, t: "Website check", s: "Sterk, snel en klantvriendelijk?" },
-                  { icon: <Search size={13} />, t: "Lokale vindbaarheid", s: "Google én AI-zoekmachines" },
-                  { icon: <Star size={13} />, t: "Google-profiel optimaliseren", s: "Stap voor stap, in 15 minuten" },
-                  { icon: <LayoutDashboard size={13} />, t: "Online basis op orde", s: "Techniek, inhoud en uitstraling" },
-                  { icon: <TrendingUp size={13} />, t: "Minder afhankelijkheid", s: "Minder betalen aan advertenties" },
+                  { icon: <Globe size={13} />, t: "Website scan", s: "Sterk, snel en klantvriendelijk?" },
+                  { icon: <Search size={13} />, t: "Google profiel", s: "Stap voor stap geoptimaliseerd" },
+                  { icon: <TrendingUp size={13} />, t: "Vindbaarheid", s: "Google én AI-zoekmachines" },
+                  { icon: <LayoutDashboard size={13} />, t: "Online verbeterplan", s: "Techniek, inhoud en uitstraling" },
+                  { icon: <Zap size={13} />, t: "AI zoekmachines", s: "Ook gevonden via ChatGPT en Gemini" },
                 ].map((f) => (
                   <div key={f.t} className="lp-pc-feat">
                     <div className="lp-pcf-ico">{f.icon}</div>
@@ -339,8 +279,8 @@ export default function HomePage() {
               </div>
               <div className="lp-pc-foot">
                 <div className="lp-pc-foot-inner">
-                  <div className="lp-pcf-target"><Target size={14} /></div>
-                  <p>Zorg dat klanten je lokaal blijven vinden</p>
+                  <div className="lp-pcf-target"><ArrowRight size={14} /></div>
+                  <Link href={dashHref} style={{ color: "inherit", textDecoration: "none" }}>Verbeter mijn zichtbaarheid</Link>
                 </div>
               </div>
             </div>
@@ -366,11 +306,11 @@ export default function HomePage() {
               </div>
               <div className="lp-pc-feats">
                 {[
-                  { icon: <Users size={13} />, t: "Samenwerken", s: "Verbind met ondernemers in jouw buurt" },
-                  { icon: <Calendar size={13} />, t: "Lokale acties organiseren", s: "Events, workshops en buurtacties" },
-                  { icon: <Lightbulb size={13} />, t: "Personeel & kennis delen", s: "Leer van anderen in jouw sector" },
-                  { icon: <Heart size={13} />, t: "Klantenbinding", s: "Meer terugkerende klanten" },
-                  { icon: <Star size={13} />, t: "Elkaar versterken", s: "Samen de regio aantrekkelijker maken" },
+                  { icon: <Users size={13} />, t: "Netwerk", s: "Verbind met ondernemers in jouw buurt" },
+                  { icon: <Calendar size={13} />, t: "Lokale acties", s: "Events, workshops en buurtacties" },
+                  { icon: <Star size={13} />, t: "Marktplaats", s: "Zoek of bied — direct in de regio" },
+                  { icon: <Lightbulb size={13} />, t: "Workshops", s: "Leer van anderen in jouw sector" },
+                  { icon: <Handshake size={13} />, t: "Blog", s: "Kennis delen met de regio" },
                 ].map((f) => (
                   <div key={f.t} className="lp-pc-feat">
                     <div className="lp-pcf-ico">{f.icon}</div>
@@ -380,8 +320,8 @@ export default function HomePage() {
               </div>
               <div className="lp-pc-foot">
                 <div className="lp-pc-foot-inner">
-                  <div className="lp-pcf-target"><Target size={14} /></div>
-                  <p>Samen maak je de regio sterker</p>
+                  <div className="lp-pcf-target"><ArrowRight size={14} /></div>
+                  <Link href={dashHref} style={{ color: "inherit", textDecoration: "none" }}>Ontdek lokale kansen</Link>
                 </div>
               </div>
             </div>
@@ -390,14 +330,12 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── WOO TRANSPARANTIE SECTIE ── */}
+      {/* ── WOO TRANSPARANTIE ── */}
       <section id="woo" style={{ background: "#0A2D6E", padding: "72px 0", position: "relative", overflow: "hidden" }}>
-        {/* Decoratieve achtergrond-blokken */}
         <div style={{ position: "absolute", top: -40, right: -60, width: 280, height: 280, background: "rgba(255,255,255,.04)", borderRadius: "50%", pointerEvents: "none" }} />
         <div style={{ position: "absolute", bottom: -60, left: -40, width: 200, height: 200, background: "rgba(255,255,255,.03)", borderRadius: "50%", pointerEvents: "none" }} />
 
         <div className="lp-wrap">
-          {/* Koptekst */}
           <div style={{ textAlign: "center", marginBottom: 48 }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,.1)", borderRadius: 20, padding: "4px 14px", marginBottom: 16 }}>
               <Gavel size={13} style={{ color: "#FDE68A" }} />
@@ -412,43 +350,16 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Scenario-illustratie: stap voor stap */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 20, marginBottom: 40 }}>
             {[
-              {
-                step: "1",
-                accent: "#FDE68A",
-                icon: <Mail size={28} style={{ color: "#FDE68A" }} />,
-                title: "Jij stuurt ons de brief",
-                desc: "Ontvang je een brief van de gemeente die je niet begrijpt, of klinkt een besluit niet eerlijk? Stuur hem op naar OpenRegio.",
-              },
-              {
-                step: "2",
-                accent: "#6EE7B7",
-                icon: <FileSearch size={28} style={{ color: "#6EE7B7" }} />,
-                title: "OpenRegio doet de WOO-check",
-                desc: "Wij beoordelen de brief en voeren waar nodig een WOO-check uit op de interne adviezen, memo's en e-mails van de gemeente.",
-              },
-              {
-                step: "3",
-                accent: "#93C5FD",
-                icon: <Lightbulb size={28} style={{ color: "#93C5FD" }} />,
-                title: "De echte reden komt boven tafel",
-                desc: "Wat de gemeente intern besprak maar niet aan jou vertelde. Jij weet nu wat er werkelijk speelt achter het officiële besluit.",
-              },
-              {
-                step: "4",
-                accent: "#F9A8D4",
-                icon: <Gavel size={28} style={{ color: "#F9A8D4" }} />,
-                title: "Jij beslist wat je doet",
-                desc: "Bezwaar maken, publiceren of gewoon beter begrijpen — de keuze is aan jou. Wij leveren de feiten, jij bepaalt de volgende stap.",
-              },
+              { step: "1", accent: "#FDE68A", icon: <Mail size={28} style={{ color: "#FDE68A" }} />, title: "Jij stuurt ons de brief", desc: "Ontvang je een brief van de gemeente die je niet begrijpt, of klinkt een besluit niet eerlijk? Stuur hem op." },
+              { step: "2", accent: "#6EE7B7", icon: <FileSearch size={28} style={{ color: "#6EE7B7" }} />, title: "OpenRegio doet de WOO-check", desc: "Wij beoordelen de brief en voeren waar nodig een WOO-check uit op interne adviezen en e-mails van de gemeente." },
+              { step: "3", accent: "#93C5FD", icon: <Lightbulb size={28} style={{ color: "#93C5FD" }} />, title: "De echte reden komt boven tafel", desc: "Wat de gemeente intern besprak maar niet aan jou vertelde. Jij weet nu wat er werkelijk achter het besluit speelt." },
+              { step: "4", accent: "#F9A8D4", icon: <Gavel size={28} style={{ color: "#F9A8D4" }} />, title: "Jij beslist wat je doet", desc: "Bezwaar maken, publiceren of beter begrijpen — de keuze is aan jou. Wij leveren de feiten." },
             ].map((s) => (
-              <div key={s.step} style={{ background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.12)", borderRadius: 16, padding: "24px 20px", position: "relative" }}>
+              <div key={s.step} style={{ background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.12)", borderRadius: 16, padding: "24px 20px" }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-                  <div style={{ width: 36, height: 36, background: s.accent + "22", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    {s.icon}
-                  </div>
+                  <div style={{ width: 36, height: 36, background: s.accent + "22", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{s.icon}</div>
                   <div style={{ fontSize: 11, fontWeight: 900, color: s.accent, letterSpacing: "0.08em", textTransform: "uppercase" }}>Stap {s.step}</div>
                 </div>
                 <div style={{ fontSize: 14, fontWeight: 800, color: "white", marginBottom: 8, lineHeight: 1.35 }}>{s.title}</div>
@@ -457,54 +368,169 @@ export default function HomePage() {
             ))}
           </div>
 
-          {/* Concreet voorbeeld — terras */}
-          <div style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(253,230,138,.25)", borderRadius: 18, padding: "28px 32px", display: "flex", gap: 28, flexWrap: "wrap" as const, alignItems: "flex-start" }}>
-            {/* Mini town-illustratie */}
-            <div style={{ flexShrink: 0, display: "flex", flexDirection: "column" as const, alignItems: "center", gap: 4 }}>
-              <div style={{ display: "flex", gap: 6, alignItems: "flex-end" }}>
-                {/* Café gebouw */}
-                <div style={{ textAlign: "center" as const }}>
-                  <div style={{ fontSize: 9, fontWeight: 800, color: "#FDE68A", marginBottom: 2, letterSpacing: "0.05em" }}>CAFÉ</div>
-                  <div style={{ width: 54, height: 70, background: "#1E3D7A", border: "1.5px solid #2E5DA0", borderRadius: "5px 5px 0 0", position: "relative", display: "flex", flexDirection: "column" as const, alignItems: "center", paddingTop: 6 }}>
-                    <div style={{ width: "100%", height: 8, background: "repeating-linear-gradient(90deg,#E8820C 0,#E8820C 6px,rgba(255,255,255,.15) 6px,rgba(255,255,255,.15) 12px)", marginBottom: 8 }} />
-                    <div style={{ display: "flex", gap: 5 }}>
-                      <div style={{ width: 14, height: 14, background: "rgba(232,130,12,.3)", borderRadius: 2 }} />
-                      <div style={{ width: 14, height: 14, background: "rgba(232,130,12,.3)", borderRadius: 2 }} />
-                    </div>
-                    <div style={{ width: 18, height: 24, background: "rgba(232,130,12,.25)", borderRadius: "2px 2px 0 0", marginTop: "auto" }} />
-                  </div>
-                </div>
-                {/* Terras */}
-                <div style={{ display: "flex", flexDirection: "column" as const, alignItems: "center", gap: 3 }}>
-                  <div style={{ fontSize: 16 }}>☂</div>
-                  <div style={{ display: "flex", gap: 4 }}>
-                    <div style={{ width: 16, height: 12, background: "#2E5DA0", borderRadius: 3 }} />
-                    <div style={{ width: 16, height: 12, background: "#2E5DA0", borderRadius: 3 }} />
-                  </div>
-                  <div style={{ width: 52, height: 4, background: "#1A3D6E", borderRadius: 2 }} />
-                </div>
-              </div>
-              <div style={{ width: 110, height: 6, background: "#1A3D6E", borderRadius: 2 }} />
-              <div style={{ fontSize: 10, color: "rgba(255,255,255,.4)", marginTop: 4, fontStyle: "italic" }}>Terras teruggedraaid</div>
-            </div>
-
-            {/* Tekst */}
+          <div style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(253,230,138,.25)", borderRadius: 18, padding: "28px 32px", display: "flex", gap: 28, flexWrap: "wrap" as const, alignItems: "center", justifyContent: "space-between" }}>
             <div style={{ flex: 1, minWidth: 220 }}>
               <div style={{ fontSize: 11, fontWeight: 800, color: "#FDE68A", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 8 }}>Voorbeeld — Terrasvergunning</div>
-              <div style={{ fontSize: 16, fontWeight: 800, color: "white", marginBottom: 10, lineHeight: 1.35 }}>Je terras moet weg. Maar waarom eigenlijk?</div>
-              <p style={{ fontSize: 13, color: "rgba(255,255,255,.65)", lineHeight: 1.7, margin: "0 0 16px" }}>
-                Een horecaondernemer moest zijn terras inleveren na een gemeentebesluit. De officiële brief noemde "verkeersveiligheid". Via een WOO-verzoek kwamen de interne adviezen boven tafel — waaruit bleek dat de werkelijke reden een subjectieve beoordeling van een ambtenaar was die nooit openbaar was gemaakt. De ondernemer maakte bezwaar en kreeg zijn terras terug.
+              <div style={{ fontSize: 16, fontWeight: 800, color: "white", marginBottom: 10 }}>Je terras moet weg. Maar waarom eigenlijk?</div>
+              <p style={{ fontSize: 13, color: "rgba(255,255,255,.65)", lineHeight: 1.7, margin: 0 }}>
+                Een horecaondernemer moest zijn terras inleveren na een gemeentebesluit. Via de WOO-check kwamen de interne adviezen boven tafel — de werkelijke reden stond nergens in de officiële documenten. De ondernemer maakte bezwaar en kreeg zijn terras terug.
               </p>
-              <Link href="/register" style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "#FDE68A", color: "#0A2D6E", fontWeight: 800, fontSize: 13, padding: "10px 18px", borderRadius: 10, textDecoration: "none" }} data-testid="link-woo-transparantie-cta">
-                <Mail size={15} /> Stuur je brief op
+            </div>
+            <Link href="/register" style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "#FDE68A", color: "#0A2D6E", fontWeight: 800, fontSize: 13, padding: "12px 22px", borderRadius: 10, textDecoration: "none", flexShrink: 0 }} data-testid="link-woo-cta">
+              <Mail size={15} /> Stuur je brief op
+            </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── DASHBOARD VOORBEELD ── */}
+      <section style={{ background: "#f8fafc", padding: "72px 0" }} id="dashboard">
+        <div className="lp-wrap">
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 56, alignItems: "center" }}>
+            {/* Links — uitleg */}
+            <div>
+              <div className="lp-sec-label lp-sl-marine">Wat je krijgt</div>
+              <h2 className="lp-sec-title">Direct zien wat er speelt<br />in jouw regio</h2>
+              <p style={{ fontSize: 15, color: "#475569", lineHeight: 1.75, marginBottom: 28 }}>
+                Na aanmelding zie je meteen het dagelijkse overzicht: subsidies, samenwerkingen, nieuwe documenten en lokale acties — gefilterd op jouw regio en sector.
+              </p>
+              <div style={{ display: "flex", flexDirection: "column" as const, gap: 14 }}>
+                {[
+                  { ico: <Bell size={16} style={{ color: "#1E6DB5" }} />, bg: "#EBF4FD", t: "Signalen uit jouw regio", s: "Nieuwe subsidies, regelwijzigingen en kansen" },
+                  { ico: <FileText size={16} style={{ color: "#7C3AED" }} />, bg: "#EDE9FE", t: "Documenten klaar voor analyse", s: "Upload een brief of vergunning, ontvang direct uitleg" },
+                  { ico: <Users size={16} style={{ color: "#2E8B4A" }} />, bg: "#EAF6EE", t: "Ondernemers zoeken contact", s: "Zie wie er in jouw buurt actief is" },
+                ].map((item) => (
+                  <div key={item.t} style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
+                    <div style={{ width: 32, height: 32, background: item.bg, borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{item.ico}</div>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: "#0f2942" }}>{item.t}</div>
+                      <div style={{ fontSize: 13, color: "#64748b" }}>{item.s}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <Link href="/register" style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "#0A2D6E", color: "white", fontWeight: 700, fontSize: 14, padding: "11px 22px", borderRadius: 10, textDecoration: "none", marginTop: 28 }} data-testid="link-dashboard-cta">
+                <LayoutDashboard size={15} /> Bekijk het dashboard
               </Link>
+            </div>
+
+            {/* Rechts — mockup */}
+            <div style={{ background: "white", borderRadius: 16, border: "1px solid #e2e8f0", overflow: "hidden", boxShadow: "0 4px 24px rgba(0,0,0,.08)" }}>
+              {/* Balk bovenin */}
+              <div style={{ background: "#0A2D6E", padding: "12px 20px", display: "flex", alignItems: "center", gap: 8 }}>
+                <div style={{ width: 10, height: 10, borderRadius: "50%", background: "rgba(255,255,255,.3)" }} />
+                <div style={{ width: 10, height: 10, borderRadius: "50%", background: "rgba(255,255,255,.3)" }} />
+                <div style={{ width: 10, height: 10, borderRadius: "50%", background: "rgba(255,255,255,.3)" }} />
+                <div style={{ marginLeft: 8, fontSize: 12, fontWeight: 700, color: "rgba(255,255,255,.8)" }}>Vandaag in jouw regio</div>
+              </div>
+              {/* Feed-items */}
+              <div style={{ padding: "16px 20px", display: "flex", flexDirection: "column" as const, gap: 10 }}>
+                {[
+                  { dot: "#1E6DB5", text: "Nieuwe subsidieregeling voor mkb — Noord-Holland", tag: "Subsidie" },
+                  { dot: "#2E8B4A", text: "3 ondernemers zoeken samenwerking in Rotterdam", tag: "Netwerk" },
+                  { dot: "#7C3AED", text: "Website scan beschikbaar voor jouw bedrijf", tag: "Tool" },
+                  { dot: "#E8820C", text: "Nieuwe lokale actie geplaatst in jouw regio", tag: "Actie" },
+                  { dot: "#0A2D6E", text: "2 documenten wachten op analyse", tag: "Documenten" },
+                ].map((item, i) => (
+                  <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: "#f8fafc", borderRadius: 8, border: "1px solid #f1f5f9" }}>
+                    <div style={{ width: 8, height: 8, borderRadius: "50%", background: item.dot, flexShrink: 0 }} />
+                    <div style={{ flex: 1, fontSize: 12.5, color: "#334155" }}>{item.text}</div>
+                    <div style={{ fontSize: 10, fontWeight: 700, color: item.dot, background: item.dot + "15", padding: "2px 8px", borderRadius: 10, whiteSpace: "nowrap" as const }}>{item.tag}</div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ padding: "0 20px 16px", textAlign: "center" as const }}>
+                <Link href="/register" style={{ fontSize: 12, color: "#0A2D6E", fontWeight: 700, textDecoration: "none" }}>
+                  Aanmelden om alles te zien <ArrowRight size={12} style={{ display: "inline", verticalAlign: -2 }} />
+                </Link>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
+      {/* ── REGIOBOT ── */}
+      <section id="regiobot" style={{ background: "white", padding: "72px 0", borderTop: "1px solid #f1f5f9" }}>
+        <div className="lp-wrap">
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 56, alignItems: "center" }}>
+            {/* Links — mockup */}
+            <div style={{ background: "#0A2D6E", borderRadius: 16, overflow: "hidden", boxShadow: "0 4px 24px rgba(10,45,110,.2)" }}>
+              {/* Header */}
+              <div style={{ padding: "20px 24px", borderBottom: "1px solid rgba(255,255,255,.1)", display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 36, height: 36, background: "#1E6DB5", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Bot size={20} style={{ color: "white" }} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 14, fontWeight: 800, color: "white" }}>RegioBot</div>
+                  <div style={{ fontSize: 11, color: "rgba(255,255,255,.5)" }}>AI-assistent voor ondernemers</div>
+                </div>
+              </div>
+              {/* Upload area */}
+              <div style={{ padding: "20px 24px 12px" }}>
+                <div style={{ border: "1.5px dashed rgba(255,255,255,.2)", borderRadius: 12, padding: "20px", textAlign: "center" as const, marginBottom: 16 }}>
+                  <Upload size={28} style={{ color: "rgba(255,255,255,.4)", marginBottom: 8 }} />
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,.7)", marginBottom: 4 }}>Upload een document</div>
+                  <div style={{ fontSize: 11, color: "rgba(255,255,255,.4)" }}>Brief · Contract · Vergunning · PDF</div>
+                </div>
+                {/* Output */}
+                <div style={{ display: "flex", flexDirection: "column" as const, gap: 8 }}>
+                  {[
+                    { ico: <FileText size={13} />, label: "Samenvatting", color: "#FDE68A" },
+                    { ico: <ShieldCheck size={13} />, label: "Risico's in kaart", color: "#6EE7B7" },
+                    { ico: <Zap size={13} />, label: "Actiepunten", color: "#93C5FD" },
+                    { ico: <Mail size={13} />, label: "Voorstelbrief opgesteld", color: "#F9A8D4" },
+                  ].map((r) => (
+                    <div key={r.label} style={{ display: "flex", alignItems: "center", gap: 10, background: "rgba(255,255,255,.06)", borderRadius: 8, padding: "9px 12px" }}>
+                      <div style={{ color: r.color }}>{r.ico}</div>
+                      <div style={{ fontSize: 12.5, color: "rgba(255,255,255,.8)", fontWeight: 600 }}>{r.label}</div>
+                      <div style={{ marginLeft: "auto", width: 18, height: 18, background: r.color + "33", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                        <Check size={10} style={{ color: r.color }} />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div style={{ padding: "12px 24px 20px" }}>
+                <Link href="/register" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "#FDE68A", color: "#0A2D6E", fontWeight: 800, fontSize: 13, padding: "11px", borderRadius: 10, textDecoration: "none" }} data-testid="link-regiobot-cta">
+                  <Bot size={15} /> Probeer RegioBot
+                </Link>
+              </div>
+            </div>
 
-      {/* ── ACCOUNTVERGELIJKING ── */}
+            {/* Rechts — uitleg */}
+            <div>
+              <div className="lp-sec-label lp-sl-marine">RegioBot</div>
+              <h2 className="lp-sec-title">Upload een document.<br />Ontvang direct inzicht.</h2>
+              <p style={{ fontSize: 15, color: "#475569", lineHeight: 1.75, marginBottom: 28 }}>
+                RegioBot analyseert overheidsbrieven, vergunningen en contracten in gewone taal. Geen juridisch jargon meer — gewoon begrijpen wat er van je verwacht wordt.
+              </p>
+              <div style={{ display: "flex", flexDirection: "column" as const, gap: 14 }}>
+                {[
+                  { t: "Upload een brief", s: "PDF, foto of tekst — RegioBot leest het" },
+                  { t: "Upload een contract", s: "Zit er iets in wat je moet weten? RegioBot signaleert het" },
+                  { t: "Upload een vergunning", s: "Wat zijn jouw rechten en verplichtingen?" },
+                ].map((item) => (
+                  <div key={item.t} style={{ display: "flex", alignItems: "flex-start", gap: 10 }}>
+                    <Check size={16} style={{ color: "#2E8B4A", flexShrink: 0, marginTop: 2 }} />
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: "#0f2942" }}>{item.t}</div>
+                      <div style={{ fontSize: 13, color: "#64748b" }}>{item.s}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ marginTop: 24, padding: "14px 18px", background: "#EAF6EE", borderRadius: 12, display: "flex", alignItems: "flex-start", gap: 10 }}>
+                <Lightbulb size={16} style={{ color: "#2E8B4A", flexShrink: 0, marginTop: 1 }} />
+                <p style={{ margin: 0, fontSize: 13, color: "#236839", lineHeight: 1.6 }}>
+                  RegioBot is beschikbaar voor Pro-leden. Met een Basis-abonnement kun je alvast kennismaken via de briefanalyse.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── AANBOD ── */}
       <section style={{ background: "#f0f4fb", padding: "72px 0" }} id="aanbod">
         <div className="lp-wrap">
           <div style={{ textAlign: "center", marginBottom: 48 }}>
@@ -515,70 +541,28 @@ export default function HomePage() {
             </p>
           </div>
 
-          {/* Plankaarten */}
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20, maxWidth: 720, margin: "0 auto 48px" }}>
             {[
               {
                 id: "basis", name: "Basis", price: "€14,95", period: "excl. btw / mnd",
                 tagline: "Meekijken, profiel aanmaken en lokaal meedoen.",
-                color: "#1E6DB5", badge: "BASIS",
-                highlight: false,
-                perks: [
-                  "Sectorregels bekijken",
-                  "Brief analyseren",
-                  "Website-scan (basis)",
-                  "Bedrijfsprofiel aanmaken",
-                  "Netwerk bekijken",
-                  "Lokale acties plaatsen",
-                  "Marktplaats: reageren",
-                  "Blog lezen",
-                ],
+                color: "#1E6DB5", badge: "BASIS", highlight: false,
+                perks: ["Sectorregels bekijken", "Brief analyseren", "Website-scan (basis)", "Bedrijfsprofiel aanmaken", "Netwerk bekijken", "Lokale acties bekijken", "Marktplaats: reageren", "Blog lezen"],
               },
               {
                 id: "pro", name: "Pro", price: "€59", period: "excl. btw / mnd",
                 tagline: "Alle tools, onbeperkt gebruik en maximale zichtbaarheid.",
-                color: "#7C3AED", badge: "PRO",
-                highlight: true,
-                perks: [
-                  "Alles van Basis",
-                  "Wat komt eraan? — volledig",
-                  "Vindbaarheid & SEO-tools",
-                  "RegioBot onbeperkt",
-                  "WOO-bibliotheek",
-                  "Netwerk: volledig deelnemen",
-                  "Marktplaats: zelf plaatsen",
-                  "Prioriteit ondersteuning",
-                ],
+                color: "#7C3AED", badge: "PRO", highlight: true,
+                perks: ["Alles van Basis", "RegioBot onbeperkt", "Vindbaarheid & SEO-tools", "WOO-bibliotheek", "Document upload", "AI-assistenten", "Netwerk: volledig deelnemen", "Marktplaats: zelf plaatsen"],
               },
             ].map((plan) => (
-              <div
-                key={plan.id}
-                data-testid={`card-plan-${plan.id}-home`}
-                style={{
-                  background: "white",
-                  borderRadius: 16,
-                  border: plan.highlight ? `2px solid ${plan.color}` : "2px solid #e2e8f0",
-                  padding: "28px 24px",
-                  position: "relative",
-                  boxShadow: plan.highlight ? `0 4px 24px ${plan.color}22` : "0 1px 6px rgba(0,0,0,.06)",
-                }}
-              >
+              <div key={plan.id} data-testid={`card-plan-${plan.id}-home`} style={{ background: "white", borderRadius: 16, border: plan.highlight ? `2px solid ${plan.color}` : "2px solid #e2e8f0", padding: "28px 24px", position: "relative", boxShadow: plan.highlight ? `0 4px 24px ${plan.color}22` : "0 1px 6px rgba(0,0,0,.06)" }}>
                 {plan.highlight && (
-                  <div style={{
-                    position: "absolute", top: -13, left: "50%", transform: "translateX(-50%)",
-                    background: plan.color, color: "white", fontSize: 10, fontWeight: 900,
-                    padding: "3px 16px", borderRadius: 20, letterSpacing: "0.1em", whiteSpace: "nowrap",
-                  }}>
+                  <div style={{ position: "absolute", top: -13, left: "50%", transform: "translateX(-50%)", background: plan.color, color: "white", fontSize: 10, fontWeight: 900, padding: "3px 16px", borderRadius: 20, letterSpacing: "0.1em", whiteSpace: "nowrap" }}>
                     MEEST GEKOZEN
                   </div>
                 )}
-                <div style={{
-                  display: "inline-block", background: plan.color + "15", color: plan.color,
-                  fontSize: 10, fontWeight: 900, padding: "3px 12px", borderRadius: 20,
-                  letterSpacing: "0.08em", marginBottom: 12,
-                }}>
-                  {plan.badge}
-                </div>
+                <div style={{ display: "inline-block", background: plan.color + "15", color: plan.color, fontSize: 10, fontWeight: 900, padding: "3px 12px", borderRadius: 20, letterSpacing: "0.08em", marginBottom: 12 }}>{plan.badge}</div>
                 <div style={{ fontSize: 32, fontWeight: 900, color: "#0f2942", lineHeight: 1, marginBottom: 4 }}>{plan.price}</div>
                 <div style={{ fontSize: 12, color: "#64748b", marginBottom: 10 }}>{plan.period}</div>
                 <div style={{ fontSize: 13, color: "#475569", marginBottom: 18, lineHeight: 1.5 }}>{plan.tagline}</div>
@@ -588,131 +572,20 @@ export default function HomePage() {
                 <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
                   {plan.perks.map((p, i) => (
                     <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 13, color: "#334155", marginBottom: 7 }}>
-                      <Check size={14} style={{ color: plan.color, flexShrink: 0, marginTop: 1 }} />
-                      {p}
+                      <Check size={14} style={{ color: plan.color, flexShrink: 0, marginTop: 1 }} />{p}
                     </li>
                   ))}
                 </ul>
-                <Link
-                  href={`/lidmaatschap?plan=${plan.id}`}
-                  data-testid={`link-plan-${plan.id}-start`}
-                  style={{
-                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-                    marginTop: 24, padding: "11px 0", borderRadius: 10, fontWeight: 700, fontSize: 14,
-                    background: plan.color, color: "white", textDecoration: "none",
-                  }}
-                >
+                <Link href={`/lidmaatschap?plan=${plan.id}`} data-testid={`link-plan-${plan.id}-start`} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 24, padding: "11px 0", borderRadius: 10, fontWeight: 700, fontSize: 14, background: plan.color, color: "white", textDecoration: "none" }}>
                   <ArrowRight size={15} /> Start met {plan.name}
                 </Link>
               </div>
             ))}
           </div>
 
-          {/* Vergelijkingstabel */}
-          <div style={{ background: "white", borderRadius: 14, border: "1px solid #e2e8f0", maxWidth: 720, margin: "0 auto", overflow: "hidden" }}>
-            <div style={{ padding: "14px 20px", borderBottom: "1px solid #f1f5f9" }}>
-              <p style={{ fontSize: 14, fontWeight: 700, color: "#0f2942", margin: 0 }}>Wat zit er precies in?</p>
-            </div>
-            <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-                <thead>
-                  <tr style={{ background: "#f8fafc" }}>
-                    <th style={{ padding: "10px 16px", textAlign: "left", color: "#64748b", fontWeight: 600, fontSize: 12, width: "50%" }}>Functie</th>
-                    <th style={{ padding: "10px 12px", textAlign: "center", color: "#1E6DB5", fontWeight: 800, fontSize: 12 }}>Basis</th>
-                    <th style={{ padding: "10px 12px", textAlign: "center", color: "#7C3AED", fontWeight: 800, fontSize: 12 }}>Pro</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[
-                    { label: "Sectorregels",        basis: true,  pro: true,  basisLabel: "Bekijken",        proLabel: "Bekijken" },
-                    { label: "Wat komt eraan?",     basis: false, pro: true,  basisLabel: "Teaser",          proLabel: "Volledig" },
-                    { label: "Brief analyseren",    basis: true,  pro: true,  basisLabel: "Volledig",        proLabel: "Volledig" },
-                    { label: "Website-scan",        basis: true,  pro: true,  basisLabel: "Basis scan",      proLabel: "Volledig" },
-                    { label: "Vindbaarheid",        basis: false, pro: true,  basisLabel: "—",               proLabel: "Volledig" },
-                    { label: "Bedrijfsprofiel",     basis: true,  pro: true,  basisLabel: "Aanmaken",        proLabel: "Uitgebreid" },
-                    { label: "Netwerk",             basis: true,  pro: true,  basisLabel: "Alleen bekijken", proLabel: "Volledig" },
-                    { label: "Lokale acties",       basis: true,  pro: true,  basisLabel: "Plaatsen",        proLabel: "Plaatsen" },
-                    { label: "Marktplaats",         basis: true,  pro: true,  basisLabel: "Reageren",        proLabel: "Plaatsen" },
-                    { label: "Blog",                basis: true,  pro: true,  basisLabel: "Lezen",           proLabel: "Lezen" },
-                    { label: "RegioBot",            basis: false, pro: true,  basisLabel: "—",               proLabel: "Onbeperkt" },
-                    { label: "WOO-bibliotheek",     basis: false, pro: true,  basisLabel: "—",               proLabel: "Volledig" },
-                  ].map((row, i) => (
-                    <tr key={row.label} style={{ borderTop: "1px solid #f1f5f9", background: i % 2 === 0 ? "white" : "#fafbfd" }}>
-                      <td style={{ padding: "9px 16px", color: "#334155", fontWeight: 500 }}>{row.label}</td>
-                      <td style={{ padding: "9px 12px", textAlign: "center" }}>
-                        {row.basis
-                          ? <span style={{ color: "#16a34a", fontSize: 12, fontWeight: 600 }}>{row.basisLabel}</span>
-                          : <span style={{ color: "#9333ea", fontSize: 12, fontWeight: 600 }}>Pro nodig</span>
-                        }
-                      </td>
-                      <td style={{ padding: "9px 12px", textAlign: "center" }}>
-                        <span style={{ color: "#7C3AED", fontSize: 12, fontWeight: 700 }}>{row.proLabel}</span>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-
-          <div style={{ textAlign: "center", marginTop: 28 }}>
+          <div style={{ textAlign: "center" }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "#64748b" }}>
               <Lock size={12} /> Maandelijks opzegbaar · Veilige betaling via Mollie
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── DOELGROEPEN ── */}
-      <section className="lp-dg-section">
-        <div className="lp-wrap">
-          <div style={{ textAlign: "center", marginBottom: 0 }}>
-            <div className="lp-sec-label lp-sl-marine" style={{ justifyContent: "center" }}>Voor wie</div>
-            <h2 className="lp-sec-title" style={{ textAlign: "center" }}>Voor elke lokale ondernemer</h2>
-            <p className="lp-sec-sub" style={{ textAlign: "center", maxWidth: 480, margin: "0 auto" }}>Of je nu een bakker, loodgieter of fysiotherapeut bent.</p>
-          </div>
-          <div className="lp-dg-grid">
-            {[
-              { icon: <Coffee size={22} />, name: "Horeca" },
-              { icon: <ShoppingCart size={22} />, name: "Winkels" },
-              { icon: <Wrench size={22} />, name: "Vakmensen" },
-              { icon: <Briefcase size={22} />, name: "Dienstverleners" },
-              { icon: <Stethoscope size={22} />, name: "Zorg" },
-              { icon: <Dumbbell size={22} />, name: "Sport" },
-              { icon: <Handshake size={22} />, name: "ZZP & MKB" },
-            ].map((d) => (
-              <div key={d.name} className="lp-dg-item" data-testid={`item-sector-${d.name.toLowerCase().replace(/\s+/g, "-").replace(/&/g, "")}`}>
-                <div className="lp-dg-ico">{d.icon}</div>
-                <div className="lp-dg-name">{d.name}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-
-      {/* ── CTA BANNER ── */}
-      <section className="lp-cta-banner">
-        <div className="lp-wrap">
-          <div className="lp-cta-inner">
-            <div className="lp-cta-tag"><span className="lp-pulse" /> Aanmelden</div>
-            <h2 className="lp-cta-title">Voor ondernemers die weten wat ze willen.</h2>
-            <p className="lp-cta-sub">
-              Geen vrijblijvendheid. Geen proefperiodes. Gewoon een platform dat werkt.
-            </p>
-            <div className="lp-cta-btns">
-              <Link href="/register" className="lp-btn-cta-orange" data-testid="link-cta-register">
-                <ArrowRight size={16} /> Nu aanmelden
-              </Link>
-              <Link href="/lidmaatschap" className="lp-btn-cta-ghost" data-testid="link-cta-lidmaatschap">
-                <Info size={16} /> Meer informatie
-              </Link>
-            </div>
-            <div className="lp-cta-trust">
-              <div className="lp-cta-ti"><Check size={15} style={{ color: "#4ADE80" }} /> AVG-compliant</div>
-              <div className="lp-cta-ti"><Check size={15} style={{ color: "#4ADE80" }} /> Opgericht door lokale ondernemers</div>
-              <div className="lp-cta-ti"><Check size={15} style={{ color: "#4ADE80" }} /> Maandelijks opzegbaar</div>
-              <div className="lp-cta-ti"><Check size={15} style={{ color: "#4ADE80" }} /> Veilig en privacyvriendelijk</div>
             </div>
           </div>
         </div>
@@ -724,18 +597,16 @@ export default function HomePage() {
           <div className="lp-footer-top">
             <div>
               <div className="lp-f-brand-name">Open<b>Regio</b></div>
-              <div className="lp-f-tag">
-                Grip op regels. Zichtbaarheid die werkt. Samen sterk in jouw regio.
-              </div>
+              <div className="lp-f-tag">Grip op regels. Zichtbaarheid die werkt. Samen sterk in jouw regio.</div>
             </div>
             <div>
               <div className="lp-f-head">Platform</div>
               <div className="lp-f-links">
                 <a href="#pijlers">Grip op Regels</a>
                 <a href="#pijlers">Lokale Zichtbaarheid</a>
-                <a href="#lokale-kracht">Lokale Kracht</a>
-                <Link href="/regels/woo">RegioBot</Link>
-                <Link href="/regels/woo">WOO-verzoek</Link>
+                <a href="#pijlers">Lokale Kracht</a>
+                <a href="#regiobot">RegioBot</a>
+                <a href="#woo">WOO-check</a>
               </div>
             </div>
             <div>
