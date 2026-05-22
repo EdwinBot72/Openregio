@@ -290,7 +290,7 @@ export default function HomePage() {
                   { icon: <Mail size={13} />, t: "Brieven begrijpen", s: "Overheidsbrieven helder uitgelegd" },
                   { icon: <Scale size={13} />, t: "Regels uitleggen", s: "Wat betekent het voor jouw bedrijf?" },
                   { icon: <FileCheck size={13} />, t: "Vergunningen volgen", s: "Status, deadlines, automatische alerts" },
-                  { icon: <Info size={13} />, t: "WOO-verzoek indienen", s: "Wij stellen het op, jij tekent" },
+                  { icon: <Info size={13} />, t: "WOO-check door OpenRegio", s: "Stuur je brief op — wij doen de rest" },
                   { icon: <ArrowRight size={13} />, t: "Praktische vervolgstappen", s: "Wat kun je doen en wanneer?" },
                 ].map((f) => (
                   <div key={f.t} className="lp-pc-feat">
@@ -410,7 +410,7 @@ export default function HomePage() {
               <span style={{ color: "#FDE68A" }}>Wij maken zichtbaar waarom.</span>
             </h2>
             <p style={{ fontSize: 15, color: "rgba(255,255,255,.65)", maxWidth: 540, margin: "0 auto", lineHeight: 1.7 }}>
-              Soms moet je ineens je terras inleveren, sluit een straat voor verkeer of vervalt een vergunning. De officiële brief geeft zelden de echte reden. Via een WOO-verzoek halen wij de interne documenten, adviezen en e-mails van de gemeente boven tafel.
+              Soms moet je ineens je terras inleveren, sluit een straat voor verkeer of vervalt een vergunning. De officiële brief geeft zelden de echte reden. <strong style={{ color: "rgba(255,255,255,.85)" }}>Jij stuurt ons de brief. OpenRegio doet de WOO-check</strong> — wij halen de interne documenten, adviezen en e-mails van de gemeente boven tafel.
             </p>
           </div>
 
@@ -420,30 +420,30 @@ export default function HomePage() {
               {
                 step: "1",
                 accent: "#FDE68A",
-                icon: <FileText size={28} style={{ color: "#FDE68A" }} />,
-                title: "Jij ontvangt een besluit",
-                desc: "Een brief van de gemeente: je terras mag niet meer, de vergunning vervalt, of er gelden ineens nieuwe eisen.",
+                icon: <Mail size={28} style={{ color: "#FDE68A" }} />,
+                title: "Jij stuurt ons de brief",
+                desc: "Ontvang je een brief van de gemeente die je niet begrijpt, of klinkt een besluit niet eerlijk? Stuur hem op naar OpenRegio.",
               },
               {
                 step: "2",
                 accent: "#6EE7B7",
                 icon: <FileSearch size={28} style={{ color: "#6EE7B7" }} />,
-                title: "Wij dienen het WOO-verzoek in",
-                desc: "OpenRegio stelt het verzoek juridisch correct op — gericht op de interne adviezen, memo's en mailwisseling van de gemeente.",
+                title: "OpenRegio doet de WOO-check",
+                desc: "Wij beoordelen de brief en voeren waar nodig een WOO-check uit op de interne adviezen, memo's en e-mails van de gemeente.",
               },
               {
                 step: "3",
                 accent: "#93C5FD",
                 icon: <Lightbulb size={28} style={{ color: "#93C5FD" }} />,
                 title: "De echte reden komt boven tafel",
-                desc: "Wat de gemeente intern besprak, maar niet aan jou vertelde. Ongeacht de uitkomst: jij weet nu wat er werkelijk speelt.",
+                desc: "Wat de gemeente intern besprak maar niet aan jou vertelde. Jij weet nu wat er werkelijk speelt achter het officiële besluit.",
               },
               {
                 step: "4",
                 accent: "#F9A8D4",
                 icon: <Gavel size={28} style={{ color: "#F9A8D4" }} />,
                 title: "Jij beslist wat je doet",
-                desc: "Bezwaar maken, publiceren of gewoon beter begrijpen wat er speelt — de keuze is aan jou. Wij leveren de feiten.",
+                desc: "Bezwaar maken, publiceren of gewoon beter begrijpen — de keuze is aan jou. Wij leveren de feiten, jij bepaalt de volgende stap.",
               },
             ].map((s) => (
               <div key={s.step} style={{ background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.12)", borderRadius: 16, padding: "24px 20px", position: "relative" }}>
@@ -498,7 +498,7 @@ export default function HomePage() {
                 Een horecaondernemer moest zijn terras inleveren na een gemeentebesluit. De officiële brief noemde "verkeersveiligheid". Via een WOO-verzoek kwamen de interne adviezen boven tafel — waaruit bleek dat de werkelijke reden een subjectieve beoordeling van een ambtenaar was die nooit openbaar was gemaakt. De ondernemer maakte bezwaar en kreeg zijn terras terug.
               </p>
               <Link href="/register" style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "#FDE68A", color: "#0A2D6E", fontWeight: 800, fontSize: 13, padding: "10px 18px", borderRadius: 10, textDecoration: "none" }} data-testid="link-woo-transparantie-cta">
-                <FileSearch size={15} /> WOO-verzoek laten opstellen
+                <Mail size={15} /> Stuur je brief op
               </Link>
             </div>
           </div>
@@ -662,11 +662,11 @@ export default function HomePage() {
             <div>
               <div style={{ fontFamily: "'Nunito',sans-serif", fontSize: 18, fontWeight: 900, color: "white", marginBottom: 6 }}>Herken jij dit patroon?</div>
               <div style={{ fontSize: 14, color: "rgba(255,255,255,.6)", fontWeight: 500, maxWidth: 500, lineHeight: 1.6 }}>
-                OpenRegio stelt het WOO-verzoek voor jou op — juridisch correct, op jouw naam. Jij hoeft alleen te tekenen. Wat er boven tafel komt, beslis jij wat ermee gebeurt.
+                Stuur ons de brief die je hebt ontvangen. OpenRegio doet de WOO-check — jij hoeft verder niets te regelen. Wat er boven tafel komt, beslis jij wat ermee gebeurt.
               </div>
             </div>
             <Link href="/register" className="lp-btn-off" style={{ whiteSpace: "nowrap", flexShrink: 0 }} data-testid="link-proof-woo-cta">
-              <FileSearch size={16} /> WOO-verzoek indienen
+              <Mail size={16} /> Stuur je brief op
             </Link>
           </div>
 
