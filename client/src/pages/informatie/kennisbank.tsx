@@ -56,18 +56,18 @@ export default function KennisbankPage() {
       <header className="space-y-3">
         <div className="flex flex-wrap items-center gap-3">
           <BookMarked className="h-7 w-7 text-[#1f5fae]" />
-          <h1 className="text-2xl md:text-3xl font-bold" data-testid="heading-kennisbank">
-            Kennisbank
+          <h1 className="text-2xl md:text-3xl font-bold" data-testid="heading-blog">
+            Blog
           </h1>
           <Badge variant="secondary" data-testid="badge-binnenkort">Binnenkort beschikbaar</Badge>
         </div>
         <p className="text-muted-foreground">
-          Begrijp overheidsbrieven, besluiten en regelgeving. Gratis kennis voor iedere ondernemer.
+          Begrijp overheidsbrieven, besluiten en regelgeving. Praktische kennis voor iedere ondernemer.
         </p>
       </header>
 
       <section className="space-y-4">
-        <h2 className="font-semibold text-lg">Kennisartikelen</h2>
+        <h2 className="font-semibold text-lg">Blogartikelen</h2>
         <div className="space-y-3">
           {ARTIKELEN.map((artikel, i) => {
             const IconComp = artikel.icon;

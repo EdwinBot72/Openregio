@@ -1,0 +1,110 @@
+Ja, maar alleen als Replit niet alleen de homepage aanpast. De prijzen, affiliate-vergoedingen en rechten moeten op meerdere plekken gelijk worden gezet.
+
+Geef Replit deze opdracht:
+
+```txt
+Voer een projectbrede wijziging uit voor de accountstructuur.
+
+Nieuwe pakketten:
+
+BASIS
+Prijs: €14,95 ex. btw per maand
+Affiliate vergoeding: €4,95 per nieuwe klant
+
+PRO
+Prijs: €59 ex. btw per maand
+Affiliate vergoeding: €9 per nieuwe klant
+
+BEHEERDER
+Intern account
+
+Pas dit overal aan:
+
+1. Homepage
+2. Pricing pagina
+3. Abonnementen pagina
+4. Registratiepagina
+5. Upgrade pagina
+6. Dashboard badges
+7. Accountoverzicht
+8. Facturatiepagina
+9. Affiliate pagina
+10. Permissie-configuratie
+11. Database seed-data
+12. API responses met abonnementsinformatie
+13. Landing pages
+14. Vergelijkingstabellen
+15. E-mails waarin pakketinformatie wordt genoemd
+
+Nieuwe rechten:
+
+BASIS
+- Sectorregels bekijken
+- Wat komt eraan? preview
+- Document uploaden
+- Basis website-scan
+- Bedrijfsprofiel beheren
+- Netwerk bekijken
+- Lokale actie plaatsen
+- Reageren op marktplaats
+- Blog lezen
+
+PRO
+- Alles van Basis
+- Sectorregels volledig
+- Wat komt eraan volledig
+- AVG-controleslagen
+- WOO-verzoeken
+- Briefanalyse
+- RegelAgent
+- Vindbaarheid
+- SEO-tools
+- Marktplaats plaatsen
+- Blog publiceren
+- Alle upload- en analysefuncties
+- Alle lokale kracht functies
+
+BEHEERDER
+- Alles van Pro
+- Gebruikersbeheer
+- Rollenbeheer
+- Gemeentebeheer
+- Contentbeheer
+- Affiliatebeheer
+- Platforminstellingen
+
+Zoek projectbreed op:
+
+14.95
+49
+59
+4.95
+9
+Basis
+Pro
+Premium
+Subscription
+Membership
+Pricing
+Plan
+Package
+
+Werk alle verwijzingen bij zodat overal dezelfde prijzen, affiliate-vergoedingen en rechten worden gebruikt vanuit één centrale configuratie.
+```
+
+Nog beter is om Replit één centraal bestand te laten maken, bijvoorbeeld:
+
+```txt
+shared/plans.ts
+```
+
+met:
+
+```ts
+BASIS = €14,95
+PRO = €59
+BASIS_AFFILIATE = €4,95
+PRO_AFFILIATE = €9
+```
+
+Dan hoef je toekomstige prijswijzigingen maar op één plek aan te passen in plaats van op 20 verschillende pagina's.

@@ -244,7 +244,7 @@ export default function HomePage() {
             </div>
             <div className="lp-ws-item">
               <div className="lp-ws-ico" style={{ background: "#FEF3C7" }}><Euro size={19} style={{ color: "#E8820C" }} /></div>
-              <div><div className="lp-ws-val">€25</div><div className="lp-ws-lbl">per referral verdiend</div></div>
+              <div><div className="lp-ws-val">€4,95</div><div className="lp-ws-lbl">affiliate per klant</div></div>
             </div>
             <div className="lp-ws-item">
               <div className="lp-ws-ico" style={{ background: "#EDE9FE" }}><Mail size={19} style={{ color: "#7C3AED" }} /></div>
@@ -369,7 +369,7 @@ export default function HomePage() {
                 <Users size={72} className="lp-pc-illus-icon" />
                 <div className="lp-pc-illus-center">
                   <div className="lp-pc-illus-main"><Users size={30} /></div>
-                  <div className="lp-pc-illus-badge">€25 per referral verdiend</div>
+                  <div className="lp-pc-illus-badge">€4,95 affiliate per klant</div>
                 </div>
               </div>
               <div className="lp-pc-feats">
@@ -413,7 +413,7 @@ export default function HomePage() {
                 {[
                   { icon: <MapPin size={19} />, t: "Ondernemers bij jou in de buurt", s: "Zie wie actief is in jouw regio, maak contact, werk samen" },
                   { icon: <Calendar size={19} />, t: "Lokale acties die klanten trekken", s: "Koopzondag, workshop of buurtactie — wij helpen promoten" },
-                  { icon: <Euro size={19} />, t: "€25 per referral, geen limiet", s: "Verwijs een collega — zodra die Pro-lid wordt, ontvang jij €25" },
+                  { icon: <Euro size={19} />, t: "€4,95 affiliate per aangebrachte klant", s: "Verwijs een collega ondernemer — bij aanmelding ontvang jij €4,95 per maand" },
                 ].map((f) => (
                   <div key={f.t} className="lp-lk-feat">
                     <div className="lp-lk-feat-ico">{f.icon}</div>
@@ -468,9 +468,9 @@ export default function HomePage() {
               </div>
 
               <div className="lp-referral-pill">
-                <div className="lp-rp-num">€25</div>
+                <div className="lp-rp-num">€4,95</div>
                 <div>
-                  <div className="lp-rp-t">Per geslaagde referral</div>
+                  <div className="lp-rp-t">Affiliate per aangebrachte klant</div>
                   <div className="lp-rp-s">Maandelijks uitbetaald. Geen maximum. Geen gedoe.</div>
                 </div>
               </div>
@@ -564,73 +564,160 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── AANBOD / OFFER ── */}
-      <section className="lp-offer-section" id="aanbod">
+      {/* ── ACCOUNTVERGELIJKING ── */}
+      <section style={{ background: "#f0f4fb", padding: "72px 0" }} id="aanbod">
         <div className="lp-wrap">
-          <div className="lp-offer-in">
-            {/* Left */}
-            <div>
-              <div className="lp-off-eyebrow">Lidmaatschap</div>
-              <h2 className="lp-off-title">Een instrument voor wie het serieus neemt.</h2>
-              <p className="lp-off-desc">
-                OpenRegio is geen app die je downloadt en vergeet. Het is een werkplatform. Je betaalt omdat je er dagelijks gebruik van maakt — en omdat je resultaat verwacht.
-              </p>
-              <div className="lp-off-guarantee">
-                <div className="lp-off-g-ico"><Lock size={20} /></div>
-                <div>
-                  <div className="lp-off-g-t">Alleen voor ondernemers die het serieus nemen.</div>
-                  <div className="lp-off-g-s">OpenRegio is een werkinstrument, geen proefabonnement. Je betaalt omdat je resultaat wil — niet om het een keer te proberen.</div>
-                </div>
-              </div>
-              <Link href="/register" className="lp-btn-off" data-testid="link-offer-start">
-                <ArrowRight size={16} /> Aanmelden
-              </Link>
-              <div className="lp-off-nohype">
-                <Lock size={13} /> Maandelijks opzegbaar. Geen vrijblijvendheid.
-              </div>
-            </div>
+          <div style={{ textAlign: "center", marginBottom: 48 }}>
+            <div className="lp-sec-label lp-sl-marine" style={{ justifyContent: "center" }}>Lidmaatschap</div>
+            <h2 className="lp-sec-title" style={{ textAlign: "center" }}>Kies jouw account</h2>
+            <p className="lp-sec-sub" style={{ textAlign: "center", maxWidth: 480, margin: "0 auto" }}>
+              Twee plannen. Helder verschil. Beide maandelijks opzegbaar.
+            </p>
+          </div>
 
-            {/* Right — feature stack */}
-            <div className="lp-offer-stack">
-              {[
-                {
-                  ico: <Mail size={21} style={{ color: "#7EC8F8" }} />,
-                  bg: "rgba(30,109,181,.25)",
-                  tag: "Pijler 1",
-                  name: "Brief analyseren in 60 seconden",
-                  desc: "Upload een overheidsbrief — wij leggen uit wat er staat en wat je moet doen.",
-                },
-                {
-                  ico: <Globe size={21} style={{ color: "#4ADE80" }} />,
-                  bg: "rgba(46,139,74,.25)",
-                  tag: "Pijler 2",
-                  name: "Gevonden worden zonder te betalen",
-                  desc: "Website scan, Google-profiel optimalisatie, wekelijkse vindbaarheids-updates.",
-                },
-                {
-                  ico: <Users size={21} style={{ color: "#E8820C" }} />,
-                  bg: "rgba(232,130,12,.25)",
-                  tag: "Pijler 3",
-                  name: "Sterk netwerk in jouw regio",
-                  desc: "Verbind, organiseer en verdien €25 per ondernemer die jij aanmeldt.",
-                },
-                {
-                  ico: <Bot size={21} style={{ color: "#7EC8F8" }} />,
-                  bg: "rgba(126,200,248,.2)",
-                  tag: "24/7 beschikbaar",
-                  name: "RegioBot — jouw persoonlijke assistent",
-                  desc: "Stel elke vraag over regelgeving, zichtbaarheid of je regio. Dag en nacht.",
-                },
-              ].map((item) => (
-                <div key={item.name} className="lp-offer-item">
-                  <div className="lp-oi-ico" style={{ background: item.bg }}>{item.ico}</div>
-                  <div>
-                    <div className="lp-oi-tag">{item.tag}</div>
-                    <div className="lp-oi-name">{item.name}</div>
-                    <div className="lp-oi-desc">{item.desc}</div>
+          {/* Plankaarten */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20, maxWidth: 720, margin: "0 auto 48px" }}>
+            {[
+              {
+                id: "basis", name: "Basis", price: "€14,95", period: "excl. btw / mnd",
+                tagline: "Meekijken, profiel aanmaken en lokaal meedoen.",
+                color: "#1E6DB5", badge: "BASIS",
+                highlight: false,
+                perks: [
+                  "Sectorregels bekijken",
+                  "Brief analyseren",
+                  "Website-scan (basis)",
+                  "Bedrijfsprofiel aanmaken",
+                  "Netwerk bekijken",
+                  "Lokale acties plaatsen",
+                  "Marktplaats: reageren",
+                  "Blog lezen",
+                ],
+              },
+              {
+                id: "pro", name: "Pro", price: "€49", period: "excl. btw / mnd",
+                tagline: "Alle tools, onbeperkt gebruik en maximale zichtbaarheid.",
+                color: "#7C3AED", badge: "PRO",
+                highlight: true,
+                perks: [
+                  "Alles van Basis",
+                  "Wat komt eraan? — volledig",
+                  "Vindbaarheid & SEO-tools",
+                  "RegioBot onbeperkt",
+                  "WOO-bibliotheek",
+                  "Netwerk: volledig deelnemen",
+                  "Marktplaats: zelf plaatsen",
+                  "Prioriteit ondersteuning",
+                ],
+              },
+            ].map((plan) => (
+              <div
+                key={plan.id}
+                data-testid={`card-plan-${plan.id}-home`}
+                style={{
+                  background: "white",
+                  borderRadius: 16,
+                  border: plan.highlight ? `2px solid ${plan.color}` : "2px solid #e2e8f0",
+                  padding: "28px 24px",
+                  position: "relative",
+                  boxShadow: plan.highlight ? `0 4px 24px ${plan.color}22` : "0 1px 6px rgba(0,0,0,.06)",
+                }}
+              >
+                {plan.highlight && (
+                  <div style={{
+                    position: "absolute", top: -13, left: "50%", transform: "translateX(-50%)",
+                    background: plan.color, color: "white", fontSize: 10, fontWeight: 900,
+                    padding: "3px 16px", borderRadius: 20, letterSpacing: "0.1em", whiteSpace: "nowrap",
+                  }}>
+                    MEEST GEKOZEN
                   </div>
+                )}
+                <div style={{
+                  display: "inline-block", background: plan.color + "15", color: plan.color,
+                  fontSize: 10, fontWeight: 900, padding: "3px 12px", borderRadius: 20,
+                  letterSpacing: "0.08em", marginBottom: 12,
+                }}>
+                  {plan.badge}
                 </div>
-              ))}
+                <div style={{ fontSize: 32, fontWeight: 900, color: "#0f2942", lineHeight: 1, marginBottom: 4 }}>{plan.price}</div>
+                <div style={{ fontSize: 12, color: "#64748b", marginBottom: 10 }}>{plan.period}</div>
+                <div style={{ fontSize: 13, color: "#475569", marginBottom: 18, lineHeight: 1.5 }}>{plan.tagline}</div>
+                <div style={{ display: "flex", alignItems: "center", gap: 5, background: "#f0fdf4", color: "#16a34a", fontSize: 11, fontWeight: 700, padding: "4px 10px", borderRadius: 20, marginBottom: 20, width: "fit-content" }}>
+                  <Euro size={11} /> €4,95 affiliate per klant
+                </div>
+                <ul style={{ margin: 0, padding: 0, listStyle: "none" }}>
+                  {plan.perks.map((p, i) => (
+                    <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 8, fontSize: 13, color: "#334155", marginBottom: 7 }}>
+                      <Check size={14} style={{ color: plan.color, flexShrink: 0, marginTop: 1 }} />
+                      {p}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href={`/lidmaatschap?plan=${plan.id}`}
+                  data-testid={`link-plan-${plan.id}-start`}
+                  style={{
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+                    marginTop: 24, padding: "11px 0", borderRadius: 10, fontWeight: 700, fontSize: 14,
+                    background: plan.color, color: "white", textDecoration: "none",
+                  }}
+                >
+                  <ArrowRight size={15} /> Start met {plan.name}
+                </Link>
+              </div>
+            ))}
+          </div>
+
+          {/* Vergelijkingstabel */}
+          <div style={{ background: "white", borderRadius: 14, border: "1px solid #e2e8f0", maxWidth: 720, margin: "0 auto", overflow: "hidden" }}>
+            <div style={{ padding: "14px 20px", borderBottom: "1px solid #f1f5f9" }}>
+              <p style={{ fontSize: 14, fontWeight: 700, color: "#0f2942", margin: 0 }}>Wat zit er precies in?</p>
+            </div>
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <thead>
+                  <tr style={{ background: "#f8fafc" }}>
+                    <th style={{ padding: "10px 16px", textAlign: "left", color: "#64748b", fontWeight: 600, fontSize: 12, width: "50%" }}>Functie</th>
+                    <th style={{ padding: "10px 12px", textAlign: "center", color: "#1E6DB5", fontWeight: 800, fontSize: 12 }}>Basis</th>
+                    <th style={{ padding: "10px 12px", textAlign: "center", color: "#7C3AED", fontWeight: 800, fontSize: 12 }}>Pro</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {[
+                    { label: "Sectorregels",        basis: true,  pro: true,  basisLabel: "Bekijken",        proLabel: "Bekijken" },
+                    { label: "Wat komt eraan?",     basis: false, pro: true,  basisLabel: "Teaser",          proLabel: "Volledig" },
+                    { label: "Brief analyseren",    basis: true,  pro: true,  basisLabel: "Volledig",        proLabel: "Volledig" },
+                    { label: "Website-scan",        basis: true,  pro: true,  basisLabel: "Basis scan",      proLabel: "Volledig" },
+                    { label: "Vindbaarheid",        basis: false, pro: true,  basisLabel: "—",               proLabel: "Volledig" },
+                    { label: "Bedrijfsprofiel",     basis: true,  pro: true,  basisLabel: "Aanmaken",        proLabel: "Uitgebreid" },
+                    { label: "Netwerk",             basis: true,  pro: true,  basisLabel: "Alleen bekijken", proLabel: "Volledig" },
+                    { label: "Lokale acties",       basis: true,  pro: true,  basisLabel: "Plaatsen",        proLabel: "Plaatsen" },
+                    { label: "Marktplaats",         basis: true,  pro: true,  basisLabel: "Reageren",        proLabel: "Plaatsen" },
+                    { label: "Blog",                basis: true,  pro: true,  basisLabel: "Lezen",           proLabel: "Lezen" },
+                    { label: "RegioBot",            basis: false, pro: true,  basisLabel: "—",               proLabel: "Onbeperkt" },
+                    { label: "WOO-bibliotheek",     basis: false, pro: true,  basisLabel: "—",               proLabel: "Volledig" },
+                  ].map((row, i) => (
+                    <tr key={row.label} style={{ borderTop: "1px solid #f1f5f9", background: i % 2 === 0 ? "white" : "#fafbfd" }}>
+                      <td style={{ padding: "9px 16px", color: "#334155", fontWeight: 500 }}>{row.label}</td>
+                      <td style={{ padding: "9px 12px", textAlign: "center" }}>
+                        {row.basis
+                          ? <span style={{ color: "#16a34a", fontSize: 12, fontWeight: 600 }}>{row.basisLabel}</span>
+                          : <span style={{ color: "#9333ea", fontSize: 12, fontWeight: 600 }}>Pro nodig</span>
+                        }
+                      </td>
+                      <td style={{ padding: "9px 12px", textAlign: "center" }}>
+                        <span style={{ color: "#7C3AED", fontSize: 12, fontWeight: 700 }}>{row.proLabel}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <div style={{ textAlign: "center", marginTop: 28 }}>
+            <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, color: "#64748b" }}>
+              <Lock size={12} /> Maandelijks opzegbaar · Veilige betaling via Mollie
             </div>
           </div>
         </div>

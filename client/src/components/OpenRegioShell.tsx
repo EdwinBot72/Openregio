@@ -237,7 +237,7 @@ export function OpenRegioShell({ children }: { children: ReactNode }) {
             <NavItem
               icon={Newspaper}
               href="/blogs"
-              label="Kennisbank"
+              label="Blog"
               currentPath={location}
               pijler="p3"
             />
