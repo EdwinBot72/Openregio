@@ -67,6 +67,39 @@ const mollieClient = process.env.MOLLIE_API_KEY
   ? createMollieClient({ apiKey: process.env.MOLLIE_API_KEY }) 
   : null;
 
+// Tijdelijke diagnostische test-route — verwijder na bevestiging
+// GET /api/mollie-test
+function registerMollieTestRoute(app: Express) {
+  app.get("/api/mollie-test", async (_req, res) => {
+    const key = process.env.MOLLIE_API_KEY;
+    if (!key) {
+      return res.status(500).json({
+        success: false,
+        keyLoaded: false,
+        error: "MOLLIE_API_KEY ontbreekt in Secrets",
+      });
+    }
+    try {
+      // Doe een echte API-call om te valideren dat de key werkt
+      const methods = await mollieClient!.methods.list();
+      return res.json({
+        success: true,
+        keyLoaded: true,
+        mode: key.startsWith("live_") ? "live" : "test",
+        publicBaseUrl: process.env.PUBLIC_BASE_URL || "(niet ingesteld — webhook kan falen bij live!)",
+        availableMethods: methods.map((m: any) => m.id),
+      });
+    } catch (err: any) {
+      return res.status(500).json({
+        success: false,
+        keyLoaded: true,
+        mode: key.startsWith("live_") ? "live" : "test",
+        error: err?.message || String(err),
+      });
+    }
+  });
+}
+
 // Helper to get base URL for redirects/webhooks
 function getBaseUrl(req: any): string {
   const host = req.get('host') || 'localhost:5000';
@@ -105,6 +138,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/health", (_req, res) => {
     res.json({ ok: true, ts: Date.now() });
   });
+
+  // Mollie diagnostics (tijdelijk — verwijder na bevestiging)
+  registerMollieTestRoute(app);
 
   // Initialize JWT auth with rate limiting (production-ready, stateless)
   setupJwtAuth(app);
