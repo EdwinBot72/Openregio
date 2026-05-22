@@ -80,6 +80,11 @@ export const MAIN_NAV: NavSection[] = [
     icon: Scale,
     url: "/regels",
     pijler: 1,
+    sub: [
+      { title: "Sectorregels", url: "/regels/sectorregels", icon: Shield },
+      { title: "Wat komt eraan?", url: "/regels/ontwikkelingen", icon: Bell },
+      { title: "Documenten opvragen", url: "/regels/documenten", icon: FileText },
+    ],
   },
 
   // 4 ── Groei
