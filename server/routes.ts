@@ -397,6 +397,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // POST /api/lead — aanmeldingsformulier van de landingspagina
+  app.post("/api/lead", async (req, res) => {
+    try {
+      const { leads, insertLeadSchema } = await import("@shared/schema");
+      const parsed = insertLeadSchema.safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Ongeldige invoer", details: parsed.error.flatten() });
+      }
+      await db.insert(leads).values(parsed.data);
+      res.json({ ok: true });
+    } catch (err: any) {
+      console.error("[/api/lead] Error:", err);
+      res.status(500).json({ error: "Opslaan mislukt" });
+    }
+  });
+
+  // GET /api/notifications/unread-count — ongelezen meldingen teller
+  app.get("/api/notifications/unread-count", requireAuth, async (req, res) => {
+    try {
+      // Toekomstige notificatietabel; nu altijd 0
+      res.json({ count: 0 });
+    } catch (err: any) {
+      console.error("[/api/notifications/unread-count] Error:", err);
+      res.status(500).json({ count: 0 });
+    }
+  });
+
   // GET /first-login - Onboarding flow: validate token and show form
   app.get("/api/first-login/validate", async (req, res) => {
     try {

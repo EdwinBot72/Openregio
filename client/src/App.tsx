@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home";
 import UnderConstructionPage from "@/pages/under-construction";
+import LandingPage from "@/pages/landing";
 import LoginPage from "@/pages/login";
 import RegisterPage from "@/pages/register";
 import DashboardPage from "@/pages/dashboard";
@@ -94,12 +95,13 @@ import PijlerZichtbaarheidPage from "@/pages/pijler-zichtbaarheid";
 import PijlerKrachtPage from "@/pages/pijler-kracht";
 
 // Routes that should NOT have the sidebar/header layout
-const PUBLIC_ROUTES = ["/", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse", "/koop-lokaal", "/gezond/:slug"];
+const PUBLIC_ROUTES = ["/", "/landing", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse", "/koop-lokaal", "/gezond/:slug"];
 
 function PublicRouter() {
   return (
     <Switch>
-      <Route path="/" component={UnderConstructionPage} />
+      <Route path="/" component={HomePage} />
+      <Route path="/landing" component={LandingPage} />
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />
       <Route path="/start" component={StartPage} />
