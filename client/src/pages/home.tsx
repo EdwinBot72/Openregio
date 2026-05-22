@@ -18,7 +18,6 @@ import {
   Star,
   Calendar,
   Lightbulb,
-  Building2,
   Menu,
   X,
   Handshake,
