@@ -69,9 +69,8 @@ export default function HomePage() {
             </a>
 
             <nav className="lp-nav-links">
-              <a href="#pijlers" className="lp-nav-link">De drie pijlers</a>
-              <a href="#lokale-kracht" className="lp-nav-link">Lokale kracht</a>
-              <a href="#resultaten" className="lp-nav-link">Resultaten</a>
+              <a href="#pijlers" className="lp-nav-link">Hoe het werkt</a>
+              <a href="#woo" className="lp-nav-link">WOO-check</a>
               <a href="#aanbod" className="lp-nav-link">Aanbod</a>
             </nav>
 
@@ -96,9 +95,8 @@ export default function HomePage() {
         </div>
 
         <div className={`lp-mobile-menu${mobileOpen ? " open" : ""}`}>
-          <a href="#pijlers" className="lp-nav-link" onClick={() => setMobileOpen(false)}>De drie pijlers</a>
-          <a href="#lokale-kracht" className="lp-nav-link" onClick={() => setMobileOpen(false)}>Lokale kracht</a>
-          <a href="#resultaten" className="lp-nav-link" onClick={() => setMobileOpen(false)}>Resultaten</a>
+          <a href="#pijlers" className="lp-nav-link" onClick={() => setMobileOpen(false)}>Hoe het werkt</a>
+          <a href="#woo" className="lp-nav-link" onClick={() => setMobileOpen(false)}>WOO-check</a>
           <a href="#aanbod" className="lp-nav-link" onClick={() => setMobileOpen(false)}>Aanbod</a>
           <div className="lp-mobile-cta">
             <Link href="/login" className="lp-btn-ghost-nav" onClick={() => setMobileOpen(false)}>Inloggen</Link>
@@ -393,7 +391,7 @@ export default function HomePage() {
       </section>
 
       {/* ── WOO TRANSPARANTIE SECTIE ── */}
-      <section style={{ background: "#0A2D6E", padding: "72px 0", position: "relative", overflow: "hidden" }}>
+      <section id="woo" style={{ background: "#0A2D6E", padding: "72px 0", position: "relative", overflow: "hidden" }}>
         {/* Decoratieve achtergrond-blokken */}
         <div style={{ position: "absolute", top: -40, right: -60, width: 280, height: 280, background: "rgba(255,255,255,.04)", borderRadius: "50%", pointerEvents: "none" }} />
         <div style={{ position: "absolute", bottom: -60, left: -40, width: 200, height: 200, background: "rgba(255,255,255,.03)", borderRadius: "50%", pointerEvents: "none" }} />
@@ -505,173 +503,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── LOKALE KRACHT SPOTLIGHT ── */}
-      <section className="lp-lk-section" id="lokale-kracht">
-        <div className="lp-wrap">
-          <div className="lp-lk-in">
-            {/* Left */}
-            <div>
-              <div className="lp-lk-badge"><Star size={13} /> Pijler 3 — uitgelicht</div>
-              <h2 className="lp-lk-title">Samen sta je <span className="lp-lk-accent">sterker</span> dan alleen</h2>
-              <p className="lp-lk-desc">
-                Grote ketens winnen niet omdat ze beter zijn — ze winnen omdat ze georganiseerd zijn. OpenRegio geeft lokale ondernemers dezelfde kracht, zonder de keten-nadelen.
-              </p>
-              <div className="lp-lk-feats">
-                {[
-                  { icon: <MapPin size={19} />, t: "Ondernemers bij jou in de buurt", s: "Zie wie actief is in jouw regio, maak contact, werk samen" },
-                  { icon: <Calendar size={19} />, t: "Lokale acties die klanten trekken", s: "Koopzondag, workshop of buurtactie — wij helpen promoten" },
-                  { icon: <Handshake size={19} />, t: "Verwijs een collega ondernemer", s: "Ken je iemand die ook baat heeft bij OpenRegio? Stuur ze door." },
-                ].map((f) => (
-                  <div key={f.t} className="lp-lk-feat">
-                    <div className="lp-lk-feat-ico">{f.icon}</div>
-                    <div><div className="lp-lk-feat-t">{f.t}</div><div className="lp-lk-feat-s">{f.s}</div></div>
-                  </div>
-                ))}
-              </div>
-              <Link href={dashHref} className="lp-btn-lk" data-testid="link-lk-cta">
-                <Users size={16} /> Bekijk jouw regio
-              </Link>
-            </div>
-
-            {/* Right — mock cards */}
-            <div className="lp-lk-visual">
-              <div className="lp-lk-people-card">
-                <div className="lp-lkp-head">
-                  <div className="lp-lkp-title">Ondernemers in Rotterdam-Noord</div>
-                  <div className="lp-lkp-count">24 actief</div>
-                </div>
-                {[
-                  { init: "MV", bg: "#D1FAE5", fg: "#065F46", name: "Marianne Visser", type: "Schildersbedrijf", tag: "Nieuw" as const },
-                  { init: "PH", bg: "#DBEAFE", fg: "#1E40AF", name: "Peter Hoekstra", type: "Loodgieter", tag: "Nieuw" as const },
-                  { init: "SD", bg: "#FEF3C7", fg: "#92400E", name: "Sara de Boer", type: "Kapsalon", dist: "0.8 km" },
-                  { init: "TK", bg: "#EDE9FE", fg: "#5B21B6", name: "Tom Koster", type: "Elektricien", dist: "3.1 km" },
-                ].map((p) => (
-                  <div key={p.name} className="lp-people-row">
-                    <div className="lp-pav" style={{ background: p.bg, color: p.fg }}>{p.init}</div>
-                    <div className="lp-p-info">
-                      <div className="lp-p-name">{p.name}</div>
-                      <div className="lp-p-type">{p.type}</div>
-                    </div>
-                    {p.tag && <div className="lp-p-tag-new">{p.tag}</div>}
-                    {p.dist && <div className="lp-p-dist"><MapPin size={13} style={{ color: "#E8820C" }} />{p.dist}</div>}
-                  </div>
-                ))}
-              </div>
-
-              <div className="lp-akties-card">
-                <div className="lp-ak-head"><Calendar size={16} /> Acties in jouw regio</div>
-                {[
-                  { icon: <ShoppingBag size={14} />, name: "Koopzondag Rotterdam-Noord", meta: "1 jun · gratis", badge: "Open" },
-                  { icon: <Mic size={14} />, name: "Workshop: Google profiel", meta: "28 mei · online", badge: "12 plekken" },
-                  { icon: <Building2 size={14} />, name: "Maandelijks ondernemersoverleg", meta: "5 jun · café", badge: "Open" },
-                ].map((a) => (
-                  <div key={a.name} className="lp-ak-row">
-                    <div className="lp-ak-ico">{a.icon}</div>
-                    <div className="lp-ak-name">{a.name}</div>
-                    <div className="lp-ak-meta">{a.meta}</div>
-                    <div className="lp-ak-badge">{a.badge}</div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="lp-referral-pill">
-                <div style={{ width: 40, height: 40, background: "#EAF6EE", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Handshake size={20} style={{ color: "#2E8B4A" }} />
-                </div>
-                <div>
-                  <div className="lp-rp-t">Affiliate-programma</div>
-                  <div className="lp-rp-s">Verwijs collega-ondernemers en ontvang een commissie. Details in jouw dashboard.</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ── WOO BEWIJS ── */}
-      <section className="lp-proof-section" id="resultaten">
-        <div className="lp-wrap">
-          <div className="lp-sec-label lp-sl-marine">Wat WOO-verzoeken blootleggen</div>
-          <h2 className="lp-sec-title">De overheid heeft meer macht dan je denkt.<br />Maar jij hebt rechten.</h2>
-          <p className="lp-sec-sub" style={{ maxWidth: 620 }}>
-            Via de Wet Open Overheid kun je interne documenten, adviezen en e-mails van de gemeente opvragen. Wat er boven tafel komt, verrast elke keer. Dit zijn patronen die we keer op keer zien.
-          </p>
-          <div className="lp-proof-grid" style={{ marginTop: 36 }}>
-
-            {/* Casus 1 — Terrasvergunning */}
-            <div className="lp-proof-card" style={{ borderTop: "3px solid #0A2D6E" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-                <div style={{ width: 32, height: 32, background: "#EBF4FD", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <FileSearch size={16} style={{ color: "#0A2D6E" }} />
-                </div>
-                <div style={{ fontFamily: "'Nunito',sans-serif", fontSize: 11, fontWeight: 800, color: "#0A2D6E", letterSpacing: "0.06em", textTransform: "uppercase" }}>Casus — Terrasvergunning</div>
-              </div>
-              <div className="lp-proof-stat" style={{ color: "#0A2D6E", fontSize: 36 }}>Ongelijke<br />behandeling</div>
-              <div className="lp-proof-stat-lbl" style={{ color: "#1E6DB5", marginBottom: 14 }}>Buurman kreeg wél vergunning</div>
-              <div className="lp-proof-quote" style={{ fontStyle: "normal", fontSize: 13.5, lineHeight: 1.7 }}>
-                Een horecaondernemer werd twee keer afgewezen voor een terrasvergunning. Zijn buurman — zelfde straat, zelfde situatie — had al jaren een terras. Via een WOO-verzoek kwamen de interne adviezen boven tafel. Daaruit bleek dat de ambtenaar in zijn memo expliciet schreef dat het terras "visueel storend" was — een subjectieve afweging die nooit in de officiële afwijzing stond. De ondernemer maakte bezwaar, won, en heeft nu zijn terras.
-              </div>
-              <div style={{ marginTop: 16, padding: "10px 14px", background: "#EBF4FD", borderRadius: 10, fontSize: 12, color: "#0A2D6E", fontWeight: 600, lineHeight: 1.5 }}>
-                <Lightbulb size={14} style={{ verticalAlign: -2, marginRight: 5 }} />
-                Wat het WOO-verzoek blootlegde: de werkelijke reden voor afwijzing stond nergens in de officiële documenten.
-              </div>
-            </div>
-
-            {/* Casus 2 — Bestemmingsplan */}
-            <div className="lp-proof-card" style={{ borderTop: "3px solid #E8820C" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-                <div style={{ width: 32, height: 32, background: "#FEF3E2", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Building2 size={16} style={{ color: "#E8820C" }} />
-                </div>
-                <div style={{ fontFamily: "'Nunito',sans-serif", fontSize: 11, fontWeight: 800, color: "#C46B08", letterSpacing: "0.06em", textTransform: "uppercase" }}>Casus — Bestemmingsplan</div>
-              </div>
-              <div className="lp-proof-stat" style={{ color: "#E8820C", fontSize: 36 }}>Intern advies<br />verzwegen</div>
-              <div className="lp-proof-stat-lbl" style={{ color: "#C46B08", marginBottom: 14 }}>Ambtenaar adviseerde anders</div>
-              <div className="lp-proof-quote" style={{ fontStyle: "normal", fontSize: 13.5, lineHeight: 1.7 }}>
-                Een winkelier ontdekte dat er naast zijn zaak een AZC gepland stond. Het college had publiekelijk gezegd dat alle belangen "zorgvuldig waren afgewogen". Via een WOO-verzoek op de besluitvormingsdocumenten bleek dat de eigen ambtenaar intern had geschreven dat de locatiekeuze "economisch ongunstig" was voor de omliggende ondernemers — en dat dit advies bewust niet in het raadsvoorstel was opgenomen.
-              </div>
-              <div style={{ marginTop: 16, padding: "10px 14px", background: "#FEF3E2", borderRadius: 10, fontSize: 12, color: "#C46B08", fontWeight: 600, lineHeight: 1.5 }}>
-                <Lightbulb size={14} style={{ verticalAlign: -2, marginRight: 5 }} />
-                Wat het WOO-verzoek blootlegde: een intern ambtelijk advies dat de gemeenteraad nooit heeft ontvangen.
-              </div>
-            </div>
-
-            {/* Casus 3 — Handhaving */}
-            <div className="lp-proof-card" style={{ borderTop: "3px solid #2E8B4A" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14 }}>
-                <div style={{ width: 32, height: 32, background: "#EAF6EE", borderRadius: 8, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Gavel size={16} style={{ color: "#2E8B4A" }} />
-                </div>
-                <div style={{ fontFamily: "'Nunito',sans-serif", fontSize: 11, fontWeight: 800, color: "#236839", letterSpacing: "0.06em", textTransform: "uppercase" }}>Casus — Handhaving</div>
-              </div>
-              <div className="lp-proof-stat" style={{ color: "#2E8B4A", fontSize: 36 }}>Selectief<br />handhaven</div>
-              <div className="lp-proof-stat-lbl" style={{ color: "#236839", marginBottom: 14 }}>Grote speler ongemoeid gelaten</div>
-              <div className="lp-proof-quote" style={{ fontStyle: "normal", fontSize: 13.5, lineHeight: 1.7 }}>
-                Een zzp'er kreeg een handhavingsbesluit voor een reclamebord dat "niet voldeed aan de welstandsnota". Een grote franchiseketen twee straten verder had identieke borden — al jaren. Via een WOO-verzoek op de handhavingsgeschiedenis bleek dat de gemeente bij de franchiseketen nooit had gehandhaafd, en dat er intern een e-mail was waarin stond dat handhaving bij grote ketens "juridisch complex" was en daarom werd vermeden.
-              </div>
-              <div style={{ marginTop: 16, padding: "10px 14px", background: "#EAF6EE", borderRadius: 10, fontSize: 12, color: "#236839", fontWeight: 600, lineHeight: 1.5 }}>
-                <Lightbulb size={14} style={{ verticalAlign: -2, marginRight: 5 }} />
-                Wat het WOO-verzoek blootlegde: de gemeente handhaafde bewust selectief, kleine ondernemers als eerste.
-              </div>
-            </div>
-
-          </div>
-
-          {/* WOO CTA blok */}
-          <div style={{ marginTop: 32, background: "#0A2D6E", borderRadius: 20, padding: "28px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, flexWrap: "wrap" as const }}>
-            <div>
-              <div style={{ fontFamily: "'Nunito',sans-serif", fontSize: 18, fontWeight: 900, color: "white", marginBottom: 6 }}>Herken jij dit patroon?</div>
-              <div style={{ fontSize: 14, color: "rgba(255,255,255,.6)", fontWeight: 500, maxWidth: 500, lineHeight: 1.6 }}>
-                Stuur ons de brief die je hebt ontvangen. OpenRegio doet de WOO-check — jij hoeft verder niets te regelen. Wat er boven tafel komt, beslis jij wat ermee gebeurt.
-              </div>
-            </div>
-            <Link href="/register" className="lp-btn-off" style={{ whiteSpace: "nowrap", flexShrink: 0 }} data-testid="link-proof-woo-cta">
-              <Mail size={16} /> Stuur je brief op
-            </Link>
-          </div>
-
-        </div>
-      </section>
 
       {/* ── ACCOUNTVERGELIJKING ── */}
       <section style={{ background: "#f0f4fb", padding: "72px 0" }} id="aanbod">
@@ -859,30 +690,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── WAAROM ── */}
-      <section className="lp-waarom">
-        <div className="lp-wrap">
-          <div style={{ textAlign: "center" }}>
-            <div className="lp-sec-label lp-sl-marine" style={{ justifyContent: "center" }}>Waarom OpenRegio</div>
-            <h2 className="lp-sec-title" style={{ textAlign: "center" }}>Meer overzicht. Minder gedoe.</h2>
-          </div>
-          <div className="lp-waarom-grid">
-            {[
-              { ico: <LayoutDashboard size={26} />, bg: "#EBF4FD", ic: "#1E6DB5", title: "Meer overzicht", desc: "Brieven, vergunningen, scores en netwerk — alles in één dashboard" },
-              { ico: <Zap size={26} />, bg: "#EAF6EE", ic: "#2E8B4A", title: "Minder gedoe", desc: "Geen jargon, geen zoekwerk — directe actie" },
-              { ico: <Wrench size={26} />, bg: "#FEF3E2", ic: "#E8820C", title: "Praktische tools", desc: "Brief analyseren, website scannen, WOO-verzoek — ingebouwd" },
-              { ico: <MapPin size={26} />, bg: "#EDE9FE", ic: "#7C3AED", title: "Regionale steun", desc: "Verbonden met ondernemers in jouw eigen buurt" },
-              { ico: <Rocket size={26} />, bg: "#EAF6EE", ic: "#2E8B4A", title: "Toekomstbestendig", desc: "AI-coach, WOO-service en nieuwe functies — elke week beter" },
-            ].map((w) => (
-              <div key={w.title} className="lp-w-item">
-                <div className="lp-w-ico" style={{ background: w.bg, color: w.ic }}>{w.ico}</div>
-                <div className="lp-w-title">{w.title}</div>
-                <div className="lp-w-desc">{w.desc}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* ── CTA BANNER ── */}
       <section className="lp-cta-banner">
