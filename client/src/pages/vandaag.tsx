@@ -1461,7 +1461,7 @@ export default function VandaagPage() {
             {topActies.map((a) => (
               <Link
                 key={a.id}
-                href="/lokale-acties"
+                href={`/lokale-acties/${a.id}`}
                 data-testid={`item-actie-${a.id}`}
                 style={{
                   display: "flex", flexDirection: "column", gap: 6,

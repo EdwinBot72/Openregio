@@ -92,6 +92,7 @@ import RegelsOntwikkelingenPage from "@/pages/regels-ontwikkelingen";
 import GezondPijlerPage from "@/pages/gezond-pijler";
 import RegioScanProPage from "@/pages/pro/regioscan";
 import LokaleActiesPage from "@/pages/lokale-acties";
+import LokaleActieDetailPage from "@/pages/lokale-actie-detail";
 import LedenUpdatesPage from "@/pages/leden-updates";
 import PijlerGripPage from "@/pages/pijler-grip";
 import PijlerZichtbaarheidPage from "@/pages/pijler-zichtbaarheid";
@@ -190,6 +191,7 @@ function AuthenticatedRouter() {
       {/* ── Vandaag (Sectie 1) — alles op één overzichtspagina ─────────── */}
       <Route path="/vandaag" component={VandaagPage} />
       <Route path="/lokale-acties" component={LokaleActiesPage} />
+      <Route path="/lokale-acties/:id" component={LokaleActieDetailPage} />
       <Route path="/nieuws" component={NieuwsPage} />
       <Route path="/leden-updates" component={LedenUpdatesPage} />
       <Route path="/leden-updates/:slug">

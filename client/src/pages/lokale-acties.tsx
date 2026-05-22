@@ -30,7 +30,7 @@ import {
   Form, FormControl, FormField, FormItem, FormLabel, FormMessage,
 } from "@/components/ui/form";
 import {
-  CalendarDays, MapPin, Users, ExternalLink, Mail, Plus, Pencil, Trash2,
+  CalendarDays, MapPin, Users, Plus, Pencil, Trash2,
   Search, Sparkles, Building2, Lock, ArrowRight, CheckCircle2, Clock,
 } from "lucide-react";
 import type { LokaleActie } from "@shared/schema";
@@ -99,7 +99,6 @@ export default function LokaleActiesPage() {
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<LokaleActie | null>(null);
   const [confirmDelete, setConfirmDelete] = useState<LokaleActie | null>(null);
-  const [detail, setDetail] = useState<LokaleActie | null>(null);
   const [zoek, setZoek] = useState("");
   const [filterDoelgroep, setFilterDoelgroep] = useState("alle");
   const [filterRegio, setFilterRegio] = useState("");
@@ -351,16 +350,7 @@ export default function LokaleActiesPage() {
             return (
               <Card
                 key={actie.id}
-                className="hover-elevate cursor-pointer"
-                role="button"
-                tabIndex={0}
-                onClick={() => setDetail(actie)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" || e.key === " ") {
-                    e.preventDefault();
-                    setDetail(actie);
-                  }
-                }}
+                className="hover-elevate"
                 data-testid={`card-actie-${actie.id}`}
               >
                 <CardContent className="p-4 space-y-3">
@@ -378,11 +368,11 @@ export default function LokaleActiesPage() {
                       )}
                     </div>
                     {isEigen && (
-                      <div className="flex items-center gap-1" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center gap-1">
                         <Button
                           size="icon"
                           variant="ghost"
-                          onClick={(e) => { e.stopPropagation(); openBewerken(actie); }}
+                          onClick={() => openBewerken(actie)}
                           data-testid={`button-bewerk-${actie.id}`}
                           aria-label="Bewerk actie"
                         >
@@ -391,7 +381,7 @@ export default function LokaleActiesPage() {
                         <Button
                           size="icon"
                           variant="ghost"
-                          onClick={(e) => { e.stopPropagation(); verlopenMutation.mutate(actie.id); }}
+                          onClick={() => verlopenMutation.mutate(actie.id)}
                           disabled={verlopenMutation.isPending}
                           data-testid={`button-verlopen-${actie.id}`}
                           aria-label="Markeer als verlopen"
@@ -401,7 +391,7 @@ export default function LokaleActiesPage() {
                         <Button
                           size="icon"
                           variant="ghost"
-                          onClick={(e) => { e.stopPropagation(); setConfirmDelete(actie); }}
+                          onClick={() => setConfirmDelete(actie)}
                           data-testid={`button-verwijder-${actie.id}`}
                           aria-label="Verwijder actie"
                         >
@@ -411,45 +401,45 @@ export default function LokaleActiesPage() {
                     )}
                   </div>
 
-                  <div>
-                    <p className="font-semibold text-base mb-1" data-testid={`text-titel-${actie.id}`}>
-                      {actie.titel}
-                    </p>
-                    <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
-                      {actie.beschrijving}
-                    </p>
-                  </div>
-
-                  <div className="space-y-1.5 text-xs text-muted-foreground">
-                    {actie.datum && (
-                      <div className="flex items-center gap-1.5">
-                        <Clock className="h-3 w-3 shrink-0" />
-                        <span>{formatDatum(actie.datum)}</span>
-                      </div>
-                    )}
-                    <div className="flex items-center gap-1.5">
-                      <MapPin className="h-3 w-3 shrink-0" />
-                      <span>{actie.locatie} — {actie.regio}</span>
+                  <Link
+                    href={`/lokale-acties/${actie.id}`}
+                    className="block space-y-3"
+                    data-testid={`link-detail-${actie.id}`}
+                  >
+                    <div>
+                      <p className="font-semibold text-base mb-1" data-testid={`text-titel-${actie.id}`}>
+                        {actie.titel}
+                      </p>
+                      <p className="text-xs text-muted-foreground leading-relaxed line-clamp-3">
+                        {actie.beschrijving}
+                      </p>
                     </div>
-                    {actie.bedrijfsnaam && (
-                      <div className="flex items-center gap-1.5">
-                        <Building2 className="h-3 w-3 shrink-0" />
-                        <span>{actie.bedrijfsnaam}</span>
-                      </div>
-                    )}
-                  </div>
 
-                  <div className="border-t pt-3 flex items-center justify-between gap-2 flex-wrap">
-                    <span className="text-xs text-muted-foreground">Klik voor meer info</span>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={(e) => { e.stopPropagation(); setDetail(actie); }}
-                      data-testid={`button-detail-${actie.id}`}
-                    >
-                      Bekijk details <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
-                    </Button>
-                  </div>
+                    <div className="space-y-1.5 text-xs text-muted-foreground">
+                      {actie.datum && (
+                        <div className="flex items-center gap-1.5">
+                          <Clock className="h-3 w-3 shrink-0" />
+                          <span>{formatDatum(actie.datum)}</span>
+                        </div>
+                      )}
+                      <div className="flex items-center gap-1.5">
+                        <MapPin className="h-3 w-3 shrink-0" />
+                        <span>{actie.locatie} — {actie.regio}</span>
+                      </div>
+                      {actie.bedrijfsnaam && (
+                        <div className="flex items-center gap-1.5">
+                          <Building2 className="h-3 w-3 shrink-0" />
+                          <span>{actie.bedrijfsnaam}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="border-t pt-3 flex items-center justify-end gap-2 flex-wrap">
+                      <span className="text-xs text-primary inline-flex items-center">
+                        Bekijk details <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
+                      </span>
+                    </div>
+                  </Link>
                 </CardContent>
               </Card>
             );
@@ -662,112 +652,6 @@ export default function LokaleActiesPage() {
               </div>
             </form>
           </Form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Detail-modal */}
-      <Dialog open={!!detail} onOpenChange={(o) => !o && setDetail(null)}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto" data-testid="dialog-detail-actie">
-          {detail && (
-            <>
-              <DialogHeader>
-                <DialogTitle data-testid="text-detail-titel">{detail.titel}</DialogTitle>
-                <DialogDescription>
-                  {detail.bedrijfsnaam ?? "Lokale actie"} — {detail.regio}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Badge variant="secondary">
-                    <Users className="mr-1 h-3 w-3" />
-                    {DOELGROEP_LABELS[detail.doelgroep] ?? detail.doelgroep}
-                  </Badge>
-                  {detail.datum && (
-                    <Badge variant="outline">
-                      <CalendarDays className="mr-1 h-3 w-3" />
-                      {formatDatumKort(detail.datum)}
-                    </Badge>
-                  )}
-                </div>
-                <p className="text-sm leading-relaxed whitespace-pre-line" data-testid="text-detail-beschrijving">
-                  {detail.beschrijving}
-                </p>
-                <div className="space-y-1.5 text-sm text-muted-foreground border-t pt-3">
-                  {detail.datum && (
-                    <div className="flex items-center gap-2">
-                      <Clock className="h-4 w-4 shrink-0" />
-                      <span>{formatDatum(detail.datum)}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2">
-                    <MapPin className="h-4 w-4 shrink-0" />
-                    <span>{detail.locatie} — {detail.regio}</span>
-                  </div>
-                  {detail.bedrijfsnaam && (
-                    <div className="flex items-center gap-2">
-                      <Building2 className="h-4 w-4 shrink-0" />
-                      <span>{detail.bedrijfsnaam}</span>
-                    </div>
-                  )}
-                </div>
-                {(detail.externeLink || detail.contactEmail) && (
-                  <div className="flex flex-wrap gap-2 border-t pt-3">
-                    {detail.externeLink && (
-                      <a
-                        href={detail.externeLink}
-                        target="_blank"
-                        rel="noreferrer noopener"
-                        data-testid="link-detail-extern"
-                      >
-                        <Button size="sm" variant="outline">
-                          <ExternalLink className="mr-1.5 h-3 w-3" /> Meer info
-                        </Button>
-                      </a>
-                    )}
-                    {detail.contactEmail && (
-                      <a
-                        href={`mailto:${detail.contactEmail}`}
-                        data-testid="link-detail-email"
-                      >
-                        <Button size="sm" variant="outline">
-                          <Mail className="mr-1.5 h-3 w-3" /> Contact opnemen
-                        </Button>
-                      </a>
-                    )}
-                  </div>
-                )}
-                {user?.id && detail.ownerUserId === user.id && (
-                  <div className="flex flex-wrap gap-2 border-t pt-3" data-testid="detail-owner-acties">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => { const d = detail; setDetail(null); openBewerken(d); }}
-                      data-testid="button-detail-bewerk"
-                    >
-                      <Pencil className="mr-1.5 h-3 w-3" /> Bewerken
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => { verlopenMutation.mutate(detail.id); setDetail(null); }}
-                      disabled={verlopenMutation.isPending}
-                      data-testid="button-detail-verlopen"
-                    >
-                      <CheckCircle2 className="mr-1.5 h-3 w-3" /> Markeer verlopen
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => { const d = detail; setDetail(null); setConfirmDelete(d); }}
-                      data-testid="button-detail-verwijder"
-                    >
-                      <Trash2 className="mr-1.5 h-3 w-3" /> Verwijderen
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
         </DialogContent>
       </Dialog>
 
