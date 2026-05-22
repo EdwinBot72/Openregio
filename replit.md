@@ -108,3 +108,43 @@ De vier OpenRegio-pagina's (Vandaag, Netwerk, RegioBot, Lidmaatschap) hebben Pla
 - Helpers: `e2e/helpers.ts` (registreert + logt een gebruiker in via /api/auth en injecteert cookies)
 - Spec-bestanden: `e2e/lidmaatschap.spec.ts`, `e2e/network.spec.ts`, `e2e/regiobot.spec.ts`, `e2e/vandaag.spec.ts`
 - Server: in non-production zijn de auth rate-limiters opgehoogd zodat tests veel registraties achter elkaar kunnen doen (zie `server/jwtAuth.ts` E2E_BYPASS_RATE_LIMITS).
+
+## CI Slack-meldingen activeren
+
+De GitHub Actions workflow (`.github/workflows/e2e.yml`) stuurt automatisch een Slack-bericht wanneer de e2e-tests falen of herstellen. Dit werkt alleen als het secret `SLACK_WEBHOOK_URL` in de GitHub-repo is ingesteld.
+
+### Stap 1 — Maak een Slack Incoming Webhook aan
+
+1. Ga naar [api.slack.com/apps](https://api.slack.com/apps) en klik op **Create New App → From scratch**.
+2. Geef de app een naam (bv. *OpenRegio CI*) en kies de gewenste workspace.
+3. Ga in het linkermenu naar **Incoming Webhooks** en zet de schakelaar op **On**.
+4. Klik op **Add New Webhook to Workspace**, kies het kanaal waar meldingen naartoe moeten (bv. `#dev-alerts`) en klik op **Allow**.
+5. Kopieer de gegenereerde Webhook URL (begint met `https://hooks.slack.com/services/...`).
+
+### Stap 2 — Voeg het secret toe aan de GitHub-repo
+
+1. Ga naar de GitHub-repo → **Settings → Secrets and variables → Actions**.
+2. Klik op **New repository secret**.
+3. Naam: `SLACK_WEBHOOK_URL`
+4. Waarde: de gekopieerde webhook URL uit stap 1.
+5. Klik op **Add secret**.
+
+Vanaf de volgende push stuurt de workflow Slack-berichten bij een mislukte of herstelde run. Als `SLACK_WEBHOOK_URL` niet is ingesteld, slaat de workflow de notificatie stil over (geen fout).
+
+### Stap 3 — Verifieer de melding handmatig
+
+Om te controleren of de koppeling werkt zonder te wachten op een echte fout:
+
+1. Open een van de spec-bestanden, bv. `e2e/vandaag.spec.ts`.
+2. Voeg tijdelijk een altijd-falende assertion toe:
+   ```ts
+   test('force-fail voor Slack-test', async () => {
+     expect(true).toBe(false);
+   });
+   ```
+3. Commit en push naar een branch — de run faalt en je ontvangt een Slack-melding.
+4. Verwijder de tijdelijke test, commit en push opnieuw — de run slaagt en je ontvangt de herstelmelding.
+
+### Herstelmelding (rood → groen)
+
+De "weer groen"-melding wordt **alleen** verstuurd als de vorige voltooide run op **dezelfde branch** de conclusie `failure` had. Bij een eerste groene run op een nieuwe branch, of als de vorige run al geslaagd was, wordt geen herstelmelding verzonden.
