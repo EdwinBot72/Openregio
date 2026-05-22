@@ -81,13 +81,10 @@ export const MAIN_NAV: NavSection[] = [
     url: "/regels",
     pijler: 1,
     sub: [
-      { title: "Overzicht", url: "/regels", icon: Scale },
-      { title: "Sectorregels", url: "/regels/sectorregels", icon: Shield },
-      { title: "Wat komt eraan?", url: "/regels/ontwikkelingen", icon: Bell },
-      { title: "Updates", url: "/regels/updates", icon: Newspaper },
-      { title: "Hulp bij regels", url: "/regels/help", icon: HelpCircle },
-      { title: "Document analyseren", url: "/regels/documenten", icon: Upload },
-      { title: "Woo-bibliotheek", url: "/regels/woo", icon: Library, proOnly: true },
+      { title: "Brief analyseren", url: "/regels/documenten", icon: FileText },
+      { title: "Regelcheck", url: "/regels/check", icon: Scale },
+      { title: "WOO-verzoek", url: "/regels/woo", icon: Library, proOnly: true },
+      { title: "Regelgeving", url: "/regels/sectorregels", icon: Shield },
     ],
   },
 

@@ -26,7 +26,7 @@ const MAIN_CARDS = [
     href: "/regels/sectorregels",
     icon: Shield,
     badge: "7 sectoren",
-    title: "Welke regels gelden voor jouw bedrijf?",
+    title: "Sectorregels",
     description:
       "Vergunningen, meldingen, verplichtingen en controles — per sector direct inzichtelijk.",
     cta: "Bekijk sectorregels",
@@ -38,7 +38,7 @@ const MAIN_CARDS = [
     href: "/regels/ontwikkelingen",
     icon: Bell,
     badge: "Nieuw",
-    title: "Welke veranderingen komen eraan?",
+    title: "Wat komt eraan?",
     description:
       "Nieuwe wetten, Europese regels, subsidies en lokale verordeningen die jouw bedrijf raken.",
     cta: "Bekijk wat er komt",
@@ -50,7 +50,7 @@ const MAIN_CARDS = [
     href: "/regels/documenten",
     icon: FileSearch,
     badge: "AI-analyse",
-    title: "Openbaar maken en controleren",
+    title: "Documenten opvragen",
     description:
       "Upload een brief of besluit. AI maakt automatisch een WOO-verzoek of AVG-analyse.",
     cta: "Document analyseren",
