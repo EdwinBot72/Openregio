@@ -11,7 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, UserPlus, Copy, Check, ArrowLeft, RefreshCw,
-  Trash2, Search, Users, ChevronDown, ChevronUp, AlertTriangle,
+  Trash2, Search, Users, ChevronDown, ChevronUp, AlertTriangle, UserCog,
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -93,6 +93,52 @@ function DeleteConfirm({ user, onDone }: { user: AdminUser; onDone: () => void }
 
 // ─── Gebruikersrij ────────────────────────────────────────────────────────────
 
+function SetPlanButton({ user }: { user: AdminUser }) {
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+  const [newPlan, setNewPlan] = useState(user.plan);
+
+  const mut = useMutation({
+    mutationFn: () => apiRequest("PATCH", `/api/admin/users/${user.id}/set-plan`, { plan: newPlan }),
+    onSuccess: () => {
+      toast({ title: "Plan bijgewerkt", description: `${user.email} is nu ${newPlan}.` });
+      qc.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      setOpen(false);
+    },
+    onError: (e: any) => toast({ variant: "destructive", title: "Fout", description: e.message || "Plan wijzigen mislukt" }),
+  });
+
+  if (!open) {
+    return (
+      <Button size="icon" variant="ghost" className="h-8 w-8 text-muted-foreground" onClick={() => setOpen(true)} data-testid={`button-set-plan-${user.id}`} title="Plan wijzigen">
+        <UserCog className="h-3.5 w-3.5" />
+      </Button>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <Select value={newPlan} onValueChange={setNewPlan}>
+        <SelectTrigger className="h-7 text-xs w-28" data-testid={`select-new-plan-${user.id}`}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="basic">Basis</SelectItem>
+          <SelectItem value="pro">Pro</SelectItem>
+          <SelectItem value="coaching">Coaching</SelectItem>
+        </SelectContent>
+      </Select>
+      <Button size="sm" variant="default" className="h-7 px-2 text-xs" onClick={() => mut.mutate()} disabled={mut.isPending || newPlan === user.plan} data-testid={`button-confirm-plan-${user.id}`}>
+        {mut.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Opslaan"}
+      </Button>
+      <Button size="sm" variant="ghost" className="h-7 px-2 text-xs" onClick={() => setOpen(false)} data-testid={`button-cancel-plan-${user.id}`}>
+        Annuleer
+      </Button>
+    </div>
+  );
+}
+
 function UserRow({ user }: { user: AdminUser }) {
   const [expanded, setExpanded] = useState(false);
   const name = [user.firstName, user.lastName].filter(Boolean).join(" ") || "—";
@@ -121,8 +167,12 @@ function UserRow({ user }: { user: AdminUser }) {
 
         {/* Badges */}
         <div className="flex items-center gap-2 flex-wrap shrink-0">
-          <Badge variant={user.plan === "pro" ? "default" : "secondary"} className="text-[10px]" data-testid={`badge-plan-${user.id}`}>
-            {user.plan === "pro" ? "Pro" : "Basis"}
+          <Badge
+            variant={user.plan === "pro" ? "default" : user.plan === "coaching" ? "outline" : "secondary"}
+            className={`text-[10px] ${user.plan === "coaching" ? "border-cyan-600 text-cyan-700" : ""}`}
+            data-testid={`badge-plan-${user.id}`}
+          >
+            {user.plan === "pro" ? "Pro" : user.plan === "coaching" ? "Coaching" : "Basis"}
           </Badge>
           {user.role === "admin" || user.role === "master" ? (
             <Badge variant="outline" className="text-[10px] border-amber-400 text-amber-600">Admin</Badge>
@@ -137,6 +187,7 @@ function UserRow({ user }: { user: AdminUser }) {
 
         {/* Acties */}
         <div className="flex items-center gap-1 shrink-0">
+          {!isDeleted && <SetPlanButton user={user} />}
           <Button
             size="icon"
             variant="ghost"
@@ -201,7 +252,7 @@ export default function AdminUsersPage() {
 
   // ── Zoek + filter ──
   const [zoek, setZoek] = useState("");
-  const [filterPlan, setFilterPlan] = useState<"all" | "basic" | "pro">("all");
+  const [filterPlan, setFilterPlan] = useState<"all" | "basic" | "pro" | "coaching">("all");
   const [toonVerwijderd, setToonVerwijderd] = useState(false);
 
   // ── Data ──
@@ -262,6 +313,7 @@ export default function AdminUsersPage() {
 
   const aantalActief = (data?.users ?? []).filter((u) => !u.deletedAt).length;
   const aantalPro = (data?.users ?? []).filter((u) => !u.deletedAt && u.plan === "pro").length;
+  const aantalCoaching = (data?.users ?? []).filter((u) => !u.deletedAt && u.plan === "coaching").length;
 
   return (
     <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
@@ -290,6 +342,10 @@ export default function AdminUsersPage() {
           <span className="text-sm font-semibold text-foreground" data-testid="text-count-pro">{aantalPro}</span>
           <span className="text-xs text-muted-foreground">Pro-leden</span>
         </div>
+        <div className="rounded-xl border border-cyan-200 bg-card px-4 py-2.5 flex items-center gap-2">
+          <span className="text-sm font-semibold text-cyan-700" data-testid="text-count-coaching">{aantalCoaching}</span>
+          <span className="text-xs text-muted-foreground">Coaching-leden</span>
+        </div>
       </div>
 
       {/* ── Gebruikerslijst ── */}
@@ -316,6 +372,7 @@ export default function AdminUsersPage() {
                   <SelectItem value="all">Alle plannen</SelectItem>
                   <SelectItem value="basic">Basis</SelectItem>
                   <SelectItem value="pro">Pro</SelectItem>
+                  <SelectItem value="coaching">Coaching</SelectItem>
                 </SelectContent>
               </Select>
               <Button
@@ -382,6 +439,7 @@ export default function AdminUsersPage() {
                 <SelectContent>
                   <SelectItem value="basic">Basis</SelectItem>
                   <SelectItem value="pro">Pro (alle functies)</SelectItem>
+                  <SelectItem value="coaching">Coaching (handmatig)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

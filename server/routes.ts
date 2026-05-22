@@ -4074,6 +4074,26 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
+  // Admin: PATCH /api/admin/users/:id/set-plan — handmatig plan instellen (bijv. coaching)
+  app.patch("/api/admin/users/:id/set-plan", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { plan } = req.body;
+      if (!plan || !["basic", "pro", "coaching"].includes(plan)) {
+        return res.status(400).json({ error: "Plan moet 'basic', 'pro' of 'coaching' zijn" });
+      }
+      const user = await storage.updateUserPlan(id, plan as "basic" | "pro" | "coaching");
+      if (!user) {
+        return res.status(404).json({ error: "Gebruiker niet gevonden" });
+      }
+      console.log(`[Admin] Plan bijgewerkt: ${id} → ${plan} door admin ${req.user!.id}`);
+      return res.json({ success: true, plan: user.plan });
+    } catch (err) {
+      console.error("[Admin] Fout bij instellen plan:", err);
+      return res.status(500).json({ error: "Kon plan niet bijwerken" });
+    }
+  });
+
   // Admin: POST /api/admin/create-user - Create user without payment (backdoor for friends/family)
   app.post("/api/admin/create-user", requireAdmin, async (req, res) => {
     try {
@@ -4083,8 +4103,8 @@ Maak het verzoek professioneel en juridisch correct.`;
         return res.status(400).json({ error: "Email en plan zijn verplicht" });
       }
 
-      if (!["basic", "pro"].includes(plan)) {
-        return res.status(400).json({ error: "Plan moet 'basic' of 'pro' zijn" });
+      if (!["basic", "pro", "coaching"].includes(plan)) {
+        return res.status(400).json({ error: "Plan moet 'basic', 'pro' of 'coaching' zijn" });
       }
 
       const existing = await storage.getUserByEmail(email);

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Link, useSearch } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
-import { Loader2, AlertCircle, Check, X, Eye, MessageSquare, Zap, Euro, Lock } from "lucide-react";
+import { Loader2, AlertCircle, Check, Eye, MessageSquare, Zap, Euro, Lock, Mail } from "lucide-react";
 import { BADGE_LABELS, BADGE_COLORS, FEATURE_ACCESS, type FeatureKey, type AccessLevel } from "@/config/featureAccess";
 
 type PlanId = "basis" | "pro";
@@ -50,6 +50,20 @@ const PLANS = {
     color: "#7C3AED",
     highlight: true,
   },
+};
+
+const COACHING_PLAN = {
+  name: "Coaching",
+  tagline: "Persoonlijke 1-op-1 begeleiding, op maat samengesteld.",
+  badge: "Coaching",
+  color: "#0e7490",
+  benefits: [
+    "Alles van Pro",
+    "1-op-1 persoonlijke begeleiding",
+    "Maatwerk ondersteuning voor jouw situatie",
+    "Directe toegang tot een vaste coach",
+    "Prijs op maat — samen besproken",
+  ],
 };
 
 type FeatureRow = {
@@ -195,7 +209,7 @@ export default function LidmaatschapPage() {
         </p>
 
         {/* ── Plankaarten ─────────────────────────────────────────── */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20, marginBottom: 40 }}>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20, marginBottom: 40 }}>
           {(Object.values(PLANS) as typeof PLANS[PlanId][]).map((plan) => {
             const isActive = selected === plan.id;
             return (
@@ -255,6 +269,61 @@ export default function LidmaatschapPage() {
               </div>
             );
           })}
+
+          {/* ── Coaching-kaart (apart — geen Mollie) ─── */}
+          <div
+            data-testid="card-plan-coaching"
+            style={{
+              background: "white",
+              borderRadius: 14,
+              border: "2px solid #cffafe",
+              boxShadow: "0 1px 4px rgba(0,0,0,.06)",
+              padding: "24px 22px",
+              position: "relative",
+            }}
+          >
+            <div style={{
+              position: "absolute", top: -12, left: "50%", transform: "translateX(-50%)",
+              background: COACHING_PLAN.color, color: "white", fontSize: 11, fontWeight: 800,
+              padding: "3px 14px", borderRadius: 20, letterSpacing: "0.07em", whiteSpace: "nowrap",
+            }}>
+              PERSOONLIJK
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 4 }}>
+              <span style={{
+                background: COACHING_PLAN.color + "18", color: COACHING_PLAN.color,
+                fontSize: 11, fontWeight: 800, padding: "2px 10px", borderRadius: 20,
+                letterSpacing: "0.06em",
+              }}>
+                {COACHING_PLAN.badge}
+              </span>
+            </div>
+            <div style={{ fontSize: 22, fontWeight: 900, color: "#0f2942", marginBottom: 2 }}>
+              Op maat
+            </div>
+            <div style={{ fontSize: 12, color: "#64748b", marginBottom: 10 }}>prijs in overleg</div>
+            <div style={{ fontSize: 13, color: "#334155", marginBottom: 14 }}>{COACHING_PLAN.tagline}</div>
+            <ul style={{ margin: 0, padding: 0, listStyle: "none", marginBottom: 16 }}>
+              {COACHING_PLAN.benefits.map((b, i) => (
+                <li key={i} style={{ display: "flex", alignItems: "flex-start", gap: 7, fontSize: 13, color: "#334155", marginBottom: 6 }}>
+                  <Check size={13} style={{ color: COACHING_PLAN.color, flexShrink: 0, marginTop: 2 }} />
+                  {b}
+                </li>
+              ))}
+            </ul>
+            <a
+              href="mailto:info@openregio.nl?subject=Interesse%20in%20Coaching-plan"
+              data-testid="button-coaching-contact"
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+                background: COACHING_PLAN.color, color: "white",
+                borderRadius: 10, padding: "10px 18px", fontSize: 13, fontWeight: 700,
+                textDecoration: "none", width: "100%", boxSizing: "border-box",
+              }}
+            >
+              <Mail size={14} /> Neem contact op
+            </a>
+          </div>
         </div>
 
         {/* ── Vergelijkingstabel ───────────────────────────────────── */}

@@ -1,10 +1,10 @@
-export type PlanKey = "basis" | "pro";
+export type PlanKey = "basis" | "pro" | "coaching";
 
 export interface PlanConfig {
   key: PlanKey;
   name: string;
-  priceExVatMonthly: number;
-  affiliateAmount: number;
+  priceExVatMonthly: number | null;
+  affiliateAmount: number | null;
 }
 
 export const PRICING: Record<PlanKey, PlanConfig> = {
@@ -20,6 +20,12 @@ export const PRICING: Record<PlanKey, PlanConfig> = {
     priceExVatMonthly: 59,
     affiliateAmount: 9,
   },
+  coaching: {
+    key: "coaching",
+    name: "Coaching",
+    priceExVatMonthly: null,
+    affiliateAmount: null,
+  },
 };
 
 export function calculateAffiliatePayout(plan: PlanKey) {
@@ -32,13 +38,16 @@ export function calculateAffiliatePayout(plan: PlanKey) {
   };
 }
 
-export function getPlanPrice(plan: PlanKey | string): number {
-  const key = plan === "pro" ? "pro" : "basis";
-  return PRICING[key].priceExVatMonthly;
+export function getPlanPrice(plan: PlanKey | string): string {
+  if (plan === "pro") return "59.00";
+  if (plan === "basic" || plan === "basis") return "14.95";
+  return "0.00";
 }
 
 export function getPlanDisplayName(plan: string): string {
-  return plan === "pro" ? "Pro" : "Basis";
+  if (plan === "pro") return "Pro";
+  if (plan === "coaching") return "Coaching";
+  return "Basis";
 }
 
 export function addVat(amountExVat: number, vatRate = 21): number {
@@ -46,6 +55,7 @@ export function addVat(amountExVat: number, vatRate = 21): number {
 }
 
 export const PLAN_DISPLAY: Record<PlanKey, { label: string; priceLabel: string; affiliateLabel: string }> = {
-  basis: { label: "Basis", priceLabel: "€14,95 ex. btw/maand", affiliateLabel: "€4,95 per nieuwe klant" },
-  pro:   { label: "Pro",   priceLabel: "€59 ex. btw/maand",    affiliateLabel: "€9 per nieuwe klant" },
+  basis:    { label: "Basis",    priceLabel: "€14,95 ex. btw/maand", affiliateLabel: "€4,95 per nieuwe klant" },
+  pro:      { label: "Pro",      priceLabel: "€59 ex. btw/maand",    affiliateLabel: "€9 per nieuwe klant" },
+  coaching: { label: "Coaching", priceLabel: "Op maat",              affiliateLabel: "" },
 };

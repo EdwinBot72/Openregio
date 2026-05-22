@@ -1,4 +1,4 @@
-export type Plan = "basis" | "pro" | "admin";
+export type Plan = "basis" | "pro" | "coaching" | "admin";
 
 export type AccessLevel =
   | "volledig"
@@ -43,34 +43,34 @@ type FeatureRow = Record<Plan, AccessLevel>;
 
 export const FEATURE_ACCESS: Record<FeatureKey, FeatureRow> = {
   // Pijler 1
-  sectorregels:         { basis: "volledig",       pro: "volledig",  admin: "volledig" },
-  wat_komt_eraan:       { basis: "preview",         pro: "volledig",  admin: "volledig" },
-  documenten_opvragen:  { basis: "volledig",        pro: "volledig",  admin: "volledig" },
-  avg_controleslagen:   { basis: "geen",            pro: "volledig",  admin: "volledig" },
-  woo_verzoeken:        { basis: "geen",            pro: "volledig",  admin: "volledig" },
-  brief_analyse:        { basis: "geen",            pro: "volledig",  admin: "volledig" },
-  regel_agent:          { basis: "geen",            pro: "volledig",  admin: "volledig" },
-  conceptbrieven:       { basis: "geen",            pro: "volledig",  admin: "volledig" },
+  sectorregels:         { basis: "volledig",       pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  wat_komt_eraan:       { basis: "preview",         pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  documenten_opvragen:  { basis: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  avg_controleslagen:   { basis: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  woo_verzoeken:        { basis: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  brief_analyse:        { basis: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  regel_agent:          { basis: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  conceptbrieven:       { basis: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
   // Pijler 2
-  website_scan:         { basis: "volledig",        pro: "volledig",  admin: "volledig" },
-  vindbaarheid:         { basis: "geen",            pro: "volledig",  admin: "volledig" },
-  bedrijfsprofiel:      { basis: "volledig",        pro: "volledig",  admin: "volledig" },
-  seo_tools:            { basis: "geen",            pro: "volledig",  admin: "volledig" },
+  website_scan:         { basis: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  vindbaarheid:         { basis: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  bedrijfsprofiel:      { basis: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  seo_tools:            { basis: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
   // Pijler 3
-  netwerk:              { basis: "alleen_bekijken", pro: "volledig",  admin: "volledig" },
-  lokale_acties:        { basis: "plaatsen",        pro: "plaatsen",  admin: "plaatsen" },
-  marktplaats:          { basis: "reageren",        pro: "plaatsen",  admin: "plaatsen" },
-  blog_lezen:           { basis: "volledig",        pro: "volledig",  admin: "volledig" },
-  blog_publiceren:      { basis: "geen",            pro: "plaatsen",  admin: "plaatsen" },
+  netwerk:              { basis: "alleen_bekijken", pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  lokale_acties:        { basis: "plaatsen",        pro: "plaatsen",  coaching: "plaatsen",  admin: "plaatsen" },
+  marktplaats:          { basis: "reageren",        pro: "plaatsen",  coaching: "plaatsen",  admin: "plaatsen" },
+  blog_lezen:           { basis: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  blog_publiceren:      { basis: "geen",            pro: "plaatsen",  coaching: "plaatsen",  admin: "plaatsen" },
   // Extra
-  ai_ondersteuning:     { basis: "geen",            pro: "volledig",  admin: "volledig" },
-  regio_updates:        { basis: "volledig",        pro: "volledig",  admin: "volledig" },
-  dossiers_opslaan:     { basis: "geen",            pro: "volledig",  admin: "volledig" },
+  ai_ondersteuning:     { basis: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  regio_updates:        { basis: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  dossiers_opslaan:     { basis: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
   // Beheer
-  gebruikersbeheer:     { basis: "geen",            pro: "geen",      admin: "volledig" },
-  contentbeheer:        { basis: "geen",            pro: "geen",      admin: "volledig" },
-  gemeentebeheer:       { basis: "geen",            pro: "geen",      admin: "volledig" },
-  affiliatebeheer:      { basis: "geen",            pro: "geen",      admin: "volledig" },
+  gebruikersbeheer:     { basis: "geen",            pro: "geen",      coaching: "geen",      admin: "volledig" },
+  contentbeheer:        { basis: "geen",            pro: "geen",      coaching: "geen",      admin: "volledig" },
+  gemeentebeheer:       { basis: "geen",            pro: "geen",      coaching: "geen",      admin: "volledig" },
+  affiliatebeheer:      { basis: "geen",            pro: "geen",      coaching: "geen",      admin: "volledig" },
 };
 
 export const BADGE_LABELS: Record<AccessLevel, string> = {
