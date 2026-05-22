@@ -1638,7 +1638,7 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
   });
 
   // Proxy: stuur bestand door naar externe opslag-server
-  const EXTERN_UPLOAD_URL = "http://212.56.48.106:5001/upload";
+  const EXTERN_UPLOAD_URL = process.env.BACKEND_UPLOAD_URL ?? "http://212.56.48.106:5001/upload";
   app.post("/api/brief-analyse/opslaan-extern", requireAuth, uploadMemory.single('file'), async (req, res) => {
     try {
       const file = req.file;
