@@ -86,6 +86,9 @@ import NieuwsPage from "@/pages/nieuws";
 import SamenAanpakkenPage from "@/pages/samen-aanpakken";
 import RegelsHelpPage from "@/pages/regels-help";
 import RegelsHelpFlowPage from "@/pages/regels-help-flow";
+import RegelsOverzichtPage from "@/pages/regels-overzicht";
+import RegelsSectorregelPage from "@/pages/regels-sectorregels";
+import RegelsOntwikkelingenPage from "@/pages/regels-ontwikkelingen";
 import GezondPijlerPage from "@/pages/gezond-pijler";
 import RegioScanProPage from "@/pages/pro/regioscan";
 import LokaleActiesPage from "@/pages/lokale-acties";
@@ -176,9 +179,7 @@ function AuthenticatedRouter() {
       <Route path="/kansen">
         <Redirect to="/kansen/opdrachten" />
       </Route>
-      <Route path="/regels">
-        <Redirect to="/regels/updates" />
-      </Route>
+      <Route path="/regels" component={RegelsOverzichtPage} />
       <Route path="/groei">
         <Redirect to="/groei/profiel" />
       </Route>
@@ -220,6 +221,8 @@ function AuthenticatedRouter() {
       </Route>
 
       {/* ── Regels (Sectie 3) ─────────────────────────────────────────────── */}
+      <Route path="/regels/sectorregels" component={RegelsSectorregelPage} />
+      <Route path="/regels/ontwikkelingen" component={RegelsOntwikkelingenPage} />
       <Route path="/regels/updates" component={IntelPage} />
       <Route path="/regels/help" component={RegelsHelpPage} />
       <Route path="/regels/help/:flowId" component={RegelsHelpFlowPage} />

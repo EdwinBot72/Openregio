@@ -1,0 +1,408 @@
+Ja. Dit zou ik letterlijk aan Replit Agent geven zodat hij de hele module opnieuw opbouwt.
+
+# OpenRegio – Grip op Regels 2.0
+
+## Doel
+
+Maak van "Grip op Regels" een praktische ondernemersmodule.
+
+Geen juridisch jargon.
+
+Ondernemers willen drie dingen weten:
+
+1. Welke regels gelden voor mijn bedrijf?
+2. Welke veranderingen komen eraan?
+3. Hoe vraag ik documenten op of controleer ik een besluit?
+
+De pagina moet voelen als een ondernemers-dashboard.
+
+---
+
+# Structuur
+
+Maak drie hoofdkaarten.
+
+```txt
+┌─────────────────────────┐
+│ Sectorregels            │
+└─────────────────────────┘
+
+┌─────────────────────────┐
+│ Wat komt eraan?         │
+└─────────────────────────┘
+
+┌─────────────────────────┐
+│ Documenten opvragen     │
+└─────────────────────────┘
+```
+
+---
+
+# Blok 1: Sectorregels
+
+Titel:
+
+```txt
+Welke regels gelden voor jouw bedrijf?
+```
+
+Subtekst:
+
+```txt
+Bekijk direct welke vergunningen,
+meldingen, verplichtingen en controles
+voor jouw sector gelden.
+```
+
+Sectoren:
+
+```txt
+Horeca
+Detailhandel
+Techniek
+Bouw
+Agrarisch
+Zorg & Welzijn
+Dienstverlening
+```
+
+Per sector tonen:
+
+```txt
+Vergunningen
+
+Belastingen
+
+Gemeentelijke regels
+
+Milieu-eisen
+
+Personeel & veiligheid
+
+Aankomende wijzigingen
+```
+
+Voorbeeldkaart:
+
+```txt
+Horeca
+
+✓ Exploitatievergunning
+
+✓ Terrasregels
+
+✓ Alcoholwet
+
+✓ Brandveiligheid
+
+✓ Afvalverwerking
+
+2 wijzigingen op komst
+```
+
+CTA:
+
+```txt
+Bekijk sector
+```
+
+Route:
+
+```txt
+/regels/sector/:id
+```
+
+---
+
+# Blok 2: Wat komt eraan?
+
+Titel:
+
+```txt
+Welke veranderingen komen eraan?
+```
+
+Subtekst:
+
+```txt
+Nieuwe wetten, subsidies,
+Digital ID, Europese regels
+en lokale ontwikkelingen.
+```
+
+Kaarten:
+
+```txt
+Digital Identity Wallet
+
+AI Act
+
+AVG wijzigingen
+
+CSRD rapportage
+
+Nieuwe subsidies
+
+Gemeentelijke verordeningen
+
+Milieuregels
+
+Belastingwijzigingen
+```
+
+Per item tonen:
+
+```txt
+Wat verandert?
+
+Wie raakt dit?
+
+Wanneer?
+
+Wat moet je doen?
+```
+
+Urgentie badges:
+
+```txt
+Nu actie nodig
+
+Binnen 6 maanden
+
+Volgend jaar
+
+In onderzoek
+```
+
+Route:
+
+```txt
+/regels/ontwikkelingen
+```
+
+---
+
+# Blok 3: Documenten opvragen
+
+Titel:
+
+```txt
+Openbaar maken en controleren
+```
+
+Subtekst:
+
+```txt
+Stuur een vraag, brief of document.
+OpenRegio maakt automatisch een
+AVG-controleslag of WOO-verzoek.
+```
+
+Workflow visualiseren:
+
+```txt
+Vraag stellen
+
+↓
+
+AI analyse
+
+↓
+
+AVG controle
+of
+WOO verzoek
+
+↓
+
+Conceptbrief
+
+↓
+
+Menselijke controle
+
+↓
+
+Verzenden
+```
+
+Knoppen:
+
+```txt
+AVG-controleslag starten
+
+WOO-verzoek maken
+
+Document uploaden
+```
+
+Routes:
+
+```txt
+/regels/avg
+
+/regels/woo
+
+/regels/upload
+```
+
+---
+
+# Uploadfunctie
+
+Ondersteunen:
+
+```txt
+PDF
+
+DOCX
+
+Afbeeldingen
+
+TXT
+```
+
+Max:
+
+```txt
+25 MB
+```
+
+Flow:
+
+```txt
+Upload document
+
+↓
+
+OCR uitlezen
+
+↓
+
+AI analyse
+
+↓
+
+Risico's herkennen
+
+↓
+
+AVG controle voorstellen
+
+↓
+
+WOO verzoek voorstellen
+
+↓
+
+Brief genereren
+```
+
+---
+
+# AI Agent
+
+Nieuwe naam:
+
+```txt
+RegelAgent
+```
+
+Taken:
+
+```txt
+Analyseert brieven
+
+Analyseert besluiten
+
+Analyseert vergunningen
+
+Analyseert contracten
+
+Analyseert gemeentelijke documenten
+
+Maakt AVG verzoeken
+
+Maakt WOO verzoeken
+
+Maakt bezwaren
+```
+
+Resultaatkaart:
+
+```txt
+Samenvatting
+
+Belangrijkste punten
+
+Risico's
+
+Mogelijke vervolgstappen
+
+Conceptbrief
+```
+
+---
+
+# Database modellen
+
+Maak tabellen:
+
+```txt
+sector_rules
+
+sector_updates
+
+avg_requests
+
+woo_requests
+
+uploaded_documents
+
+agent_analyses
+```
+
+---
+
+# Dashboardmenu
+
+Vervang huidig menu door:
+
+```txt
+Grip op Regels
+
+├─ Sectorregels
+
+├─ Wat komt eraan
+
+├─ AVG-controleslag
+
+├─ WOO-verzoek
+
+├─ Upload document
+
+└─ RegelAgent
+```
+
+---
+
+# Design
+
+Gebruik dezelfde stijl als de huidige OpenRegio dashboardkaarten:
+
+```txt
+grote iconen
+
+duidelijke CTA's
+
+maximaal 3 regels tekst
+
+veel witruimte
+
+mobiel eerst
+
+geen juridische taal
+```
+
+Doel: een ondernemer moet binnen 10 seconden begrijpen:
+**"Welke regels gelden voor mij, wat verandert er binnenkort en hoe vraag ik documenten op?"**

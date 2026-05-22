@@ -23,6 +23,8 @@ import {
   Settings,
   Compass,
   BarChart,
+  Shield,
+  Upload,
 } from "lucide-react";
 
 export type NavSubItem = {
@@ -75,11 +77,14 @@ export const MAIN_NAV: NavSection[] = [
     id: "regels",
     title: "Regels",
     icon: Scale,
+    url: "/regels",
     sub: [
+      { title: "Overzicht", url: "/regels", icon: Scale },
+      { title: "Sectorregels", url: "/regels/sectorregels", icon: Shield },
+      { title: "Wat komt eraan?", url: "/regels/ontwikkelingen", icon: Bell },
       { title: "Updates", url: "/regels/updates", icon: Newspaper },
       { title: "Hulp bij regels", url: "/regels/help", icon: HelpCircle },
-      { title: "Raakt dit mijn bedrijf?", url: "/regels/check", icon: HelpCircle },
-      { title: "Documenten", url: "/regels/documenten", icon: FileText },
+      { title: "Document analyseren", url: "/regels/documenten", icon: Upload },
       { title: "Woo-bibliotheek", url: "/regels/woo", icon: Library, proOnly: true },
     ],
   },
