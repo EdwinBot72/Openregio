@@ -80,12 +80,6 @@ export const MAIN_NAV: NavSection[] = [
     icon: Scale,
     url: "/regels",
     pijler: 1,
-    sub: [
-      { title: "Brief analyseren", url: "/regels/documenten", icon: FileText },
-      { title: "Regelcheck", url: "/regels/check", icon: Scale },
-      { title: "WOO-verzoek", url: "/regels/woo", icon: Library, proOnly: true },
-      { title: "Regelgeving", url: "/regels/updates", icon: Newspaper },
-    ],
   },
 
   // 4 ── Groei
