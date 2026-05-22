@@ -115,11 +115,10 @@ export default function PrivacyDashboardPage() {
   });
 
   const emailNewsDigest = user?.emailNewsDigest ?? true;
+  const emailLokaleActiesDigest = user?.emailLokaleActiesDigest ?? true;
   const notificationMutation = useMutation({
-    mutationFn: async (next: boolean) => {
-      return apiRequest("PATCH", "/api/account/notification-settings", {
-        emailNewsDigest: next,
-      });
+    mutationFn: async (payload: { emailNewsDigest?: boolean; emailLokaleActiesDigest?: boolean }) => {
+      return apiRequest("PATCH", "/api/account/notification-settings", payload);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
@@ -337,9 +336,25 @@ export default function PrivacyDashboardPage() {
             <Switch
               checked={emailNewsDigest}
               disabled={notificationMutation.isPending}
-              onCheckedChange={(v) => notificationMutation.mutate(v)}
+              onCheckedChange={(v) => notificationMutation.mutate({ emailNewsDigest: v })}
               data-testid="switch-email-news-digest"
               aria-label="Wekelijkse e-mail digest voor leden-updates"
+            />
+          </div>
+          <div className="flex items-center justify-between gap-4 py-2 border-t pt-4">
+            <div className="min-w-0">
+              <p className="font-medium">Nieuwe lokale acties in jouw regio</p>
+              <p className="text-xs text-muted-foreground">
+                Ontvang elke maandagochtend een e-mail met nieuwe lokale acties die in jouw regio zijn
+                aangemaakt. Je krijgt alleen een mail als er die week iets nieuws is.
+              </p>
+            </div>
+            <Switch
+              checked={emailLokaleActiesDigest}
+              disabled={notificationMutation.isPending}
+              onCheckedChange={(v) => notificationMutation.mutate({ emailLokaleActiesDigest: v })}
+              data-testid="switch-email-lokale-acties-digest"
+              aria-label="Wekelijkse e-mail over nieuwe lokale acties in jouw regio"
             />
           </div>
         </CardContent>

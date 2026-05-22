@@ -319,7 +319,7 @@ export interface IStorage {
   deleteLokaalAanbod(id: string, userId: string): Promise<boolean>;
 
   // Lokale Acties (evenementen door Pro-leden)
-  getLokaleActies(opts?: { regio?: string; doelgroep?: string; includeVerlopen?: boolean }): Promise<LokaleActie[]>;
+  getLokaleActies(opts?: { regio?: string; doelgroep?: string; includeVerlopen?: boolean; createdSince?: Date }): Promise<LokaleActie[]>;
   getLokaleActieById(id: string): Promise<LokaleActie | undefined>;
   getLokaleActiesByUser(userId: string): Promise<LokaleActie[]>;
   createLokaleActie(input: InsertLokaleActie & { ownerUserId: string }): Promise<LokaleActie>;
@@ -3126,7 +3126,7 @@ class DbStorage implements IStorage {
   }
 
   // ─── Lokale Acties ────────────────────────────────────────────────────
-  async getLokaleActies(opts?: { regio?: string; doelgroep?: string; includeVerlopen?: boolean }): Promise<LokaleActie[]> {
+  async getLokaleActies(opts?: { regio?: string; doelgroep?: string; includeVerlopen?: boolean; createdSince?: Date }): Promise<LokaleActie[]> {
     const conditions = [];
     if (!opts?.includeVerlopen) {
       conditions.push(eq(lokaleActies.status, "actief"));
@@ -3137,6 +3137,9 @@ class DbStorage implements IStorage {
     }
     if (opts?.doelgroep) {
       conditions.push(eq(lokaleActies.doelgroep, opts.doelgroep as typeof LOKALE_ACTIE_DOELGROEPEN[number]));
+    }
+    if (opts?.createdSince) {
+      conditions.push(gt(lokaleActies.createdAt, opts.createdSince));
     }
     const query = db.select().from(lokaleActies);
     const filtered = conditions.length > 0 ? query.where(and(...conditions)) : query;

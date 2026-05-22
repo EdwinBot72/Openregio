@@ -17,6 +17,7 @@ export interface AuthUser {
     mustCompleteOnboarding: boolean;
     isAdmin: boolean;
     emailNewsDigest?: boolean;
+    emailLokaleActiesDigest?: boolean;
   };
   profile?: UserProfile;
 }

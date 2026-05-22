@@ -109,6 +109,12 @@ app.use((req, res, next) => {
   const { startLokaleActiesCron } = await import("./services/lokaleActiesCron");
   startLokaleActiesCron();
 
+  // Start de wekelijkse notificatie-cron voor nieuwe lokale acties per regio (task #77)
+  const { startLokaleActiesNotificationsCron } = await import(
+    "./services/lokaleActiesNotificationsCron"
+  );
+  startLokaleActiesNotificationsCron();
+
   // Global error handler with structured logging
   app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

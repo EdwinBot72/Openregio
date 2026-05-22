@@ -176,6 +176,7 @@ function formatUserResponse(user: User) {
     mustCompleteOnboarding: user.mustCompleteOnboarding,
     isAdmin: user.role === "admin" || user.role === "master",
     emailNewsDigest: user.emailNewsDigest ?? true,
+    emailLokaleActiesDigest: user.emailLokaleActiesDigest ?? true,
   };
 }
 

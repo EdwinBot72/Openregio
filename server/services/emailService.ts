@@ -318,6 +318,80 @@ export async function sendLedenUpdatesDigestEmail(
   return sendEmail(to, `Leden-updates van OpenRegio (${items.length})`, html);
 }
 
+export async function sendLokaleActiesDigestEmail(
+  to: string,
+  firstName: string,
+  regio: string,
+  items: Array<{
+    id: string;
+    titel: string;
+    beschrijving: string;
+    locatie: string;
+    regio: string;
+    datum?: Date | string | null;
+    doelgroep?: string | null;
+  }>,
+): Promise<boolean> {
+  if (items.length === 0) return false;
+
+  const formatDatum = (d?: Date | string | null) => {
+    if (!d) return 'Geen datum';
+    try {
+      const dt = new Date(d);
+      return dt.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+    } catch {
+      return 'Geen datum';
+    }
+  };
+
+  const truncate = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
+
+  const list = items
+    .map(
+      (it) => `
+        <li style="margin: 0 0 16px 0; padding: 12px 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+          <a href="${BASE_URL}/lokale-acties?id=${it.id}" style="color: #1d4ed8; font-weight: 600; text-decoration: none; font-size: 16px;">${it.titel}</a>
+          <div style="margin-top: 4px; color: #475569; font-size: 13px;">
+            ${formatDatum(it.datum)} &middot; ${it.locatie}, ${it.regio}${it.doelgroep && it.doelgroep !== 'iedereen' ? ` &middot; ${it.doelgroep}` : ''}
+          </div>
+          <p style="margin: 8px 0 0 0; color: #334155; font-size: 14px;">${truncate(it.beschrijving, 220)}</p>
+        </li>`,
+    )
+    .join('');
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"></head>
+    <body style="font-family: Inter, Arial, sans-serif; line-height: 1.6; color: #1a1a1a;">
+      <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; padding: 24px; text-align: center; border-radius: 8px 8px 0 0;">
+          <h1 style="margin: 0; font-size: 22px;">Nieuwe lokale acties in ${regio}</h1>
+          <p style="margin: 6px 0 0 0; opacity: 0.9; font-size: 13px;">Wekelijkse update uit jouw regio</p>
+        </div>
+        <div style="background: #ffffff; padding: 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px;">
+          <p>Beste ${firstName || 'ondernemer'},</p>
+          <p>De afgelopen week ${items.length === 1 ? 'is er 1 nieuwe lokale actie' : `zijn er ${items.length} nieuwe lokale acties`} in jouw regio <strong>${regio}</strong> gepubliceerd:</p>
+          <ul style="list-style: none; padding: 0; margin: 18px 0;">${list}</ul>
+          <p style="text-align: center;">
+            <a href="${BASE_URL}/lokale-acties" style="display: inline-block; background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Bekijk alle acties</a>
+          </p>
+        </div>
+        <div style="text-align: center; padding: 16px; color: #6b7280; font-size: 12px;">
+          <p>Je ontvangt deze e-mail omdat je lid bent van OpenRegio en lokale-acties-notificaties hebt aanstaan.</p>
+          <p><a href="${BASE_URL}/account/instellingen" style="color: #6b7280;">Schrijf je uit voor deze notificaties</a></p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+  return sendEmail(
+    to,
+    `${items.length} nieuwe lokale ${items.length === 1 ? 'actie' : 'acties'} in ${regio}`,
+    html,
+  );
+}
+
 export async function sendWooSubmissionEmail(
   to: string,
   subject: string,

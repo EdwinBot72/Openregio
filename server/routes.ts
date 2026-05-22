@@ -3625,7 +3625,10 @@ Maak het verzoek professioneel en juridisch correct.`;
   app.patch("/api/account/notification-settings", attachUser, requireAuth, async (req, res) => {
     try {
       const userId = req.user!.id;
-      const schema = z.object({ emailNewsDigest: z.boolean().optional() });
+      const schema = z.object({
+        emailNewsDigest: z.boolean().optional(),
+        emailLokaleActiesDigest: z.boolean().optional(),
+      });
       const parsed = schema.safeParse(req.body);
       if (!parsed.success) {
         return res.status(400).json({ error: "Ongeldige instellingen" });
@@ -3634,11 +3637,18 @@ Maak het verzoek professioneel en juridisch correct.`;
       if (typeof parsed.data.emailNewsDigest === "boolean") {
         updates.emailNewsDigest = parsed.data.emailNewsDigest;
       }
+      if (typeof parsed.data.emailLokaleActiesDigest === "boolean") {
+        updates.emailLokaleActiesDigest = parsed.data.emailLokaleActiesDigest;
+      }
       if (Object.keys(updates).length === 0) {
         return res.json({ ok: true });
       }
       const updated = await storage.updateUser(userId, updates);
-      res.json({ ok: true, emailNewsDigest: updated?.emailNewsDigest ?? true });
+      res.json({
+        ok: true,
+        emailNewsDigest: updated?.emailNewsDigest ?? true,
+        emailLokaleActiesDigest: updated?.emailLokaleActiesDigest ?? true,
+      });
     } catch (error: any) {
       console.error("[Notification settings] failed:", error?.message);
       res.status(500).json({ error: "Kon instellingen niet opslaan" });
