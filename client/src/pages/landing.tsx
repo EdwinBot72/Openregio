@@ -386,8 +386,8 @@ function PricingSignup() {
           </div>
 
           <div className="mt-3 sm:mt-0 flex gap-2">
-            <Badge>€19 Basis-lid excl. BTW</Badge>
-            <Badge>€49 Pro-bijdrager excl. BTW</Badge>
+            <Badge>€14,95 Basis excl. BTW</Badge>
+            <Badge>€59 Pro excl. BTW</Badge>
           </div>
         </div>
 

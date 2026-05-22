@@ -121,7 +121,7 @@ export default function AffiliatePage() {
       <div>
         <h1 className="text-2xl font-bold" data-testid="heading-affiliate">Affiliate Programma</h1>
         <p className="text-muted-foreground">
-          Verdien commissie voor elke ondernemer die je doorverwijst: {stats?.commissionRates?.basicPercent || 25}% over de eerste {stats?.commissionRates?.months || 3} maanden — tot €{stats?.commissionRates?.basic?.toFixed(2) || "14,25"} per Basis-lid of €{stats?.commissionRates?.pro?.toFixed(2) || "51,45"} per Pro-bijdrager.
+          Verdien een vaste vergoeding voor elke ondernemer die je aanmeldt via jouw link: €{stats?.commissionRates?.basic?.toFixed(2) ?? "4,95"} per Basis-lid of €{stats?.commissionRates?.pro?.toFixed(2) ?? "9,00"} per Pro-lid.
         </p>
       </div>
 

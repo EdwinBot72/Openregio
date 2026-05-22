@@ -1955,7 +1955,7 @@ export default function VandaagPage() {
             className="openregio-button openregio-button-pro openregio-button-small"
             style={{ flexShrink: 0 }}
           >
-            €19,95/mnd
+            €59/mnd
             <ArrowUpRight className="h-3.5 w-3.5" />
           </Link>
         </div>

@@ -595,7 +595,7 @@ export default function HomePage() {
                 ],
               },
               {
-                id: "pro", name: "Pro", price: "€49", period: "excl. btw / mnd",
+                id: "pro", name: "Pro", price: "€59", period: "excl. btw / mnd",
                 tagline: "Alle tools, onbeperkt gebruik en maximale zichtbaarheid.",
                 color: "#7C3AED", badge: "PRO",
                 highlight: true,

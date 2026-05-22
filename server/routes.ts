@@ -159,7 +159,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Register object storage routes for user file uploads
   registerObjectStorageRoutes(app, requireAuth);
   
-  // BLOK 2: Mollie Payment Flow (Basic €19 / Pro €49 ex btw)
+  // BLOK 2: Mollie Payment Flow (Basis €14,95 / Pro €59 ex btw)
   
   // POST /start - Create Mollie payment for plan subscription
   app.post("/start", async (req, res) => {
@@ -3807,11 +3807,10 @@ Maak het verzoek professioneel en juridisch correct.`;
         pendingCommission: stats.pendingCommission,
         paidCommission: stats.paidCommission,
         commissionRates: {
-          basic: 14.25,
-          pro: 51.45,
-          basicPercent: 25,
-          proPercent: 35,
-          months: 3,
+          basic: 4.95,
+          pro: 9,
+          basicAmount: 4.95,
+          proAmount: 9,
         },
       });
     } catch (error: any) {

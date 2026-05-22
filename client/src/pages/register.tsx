@@ -67,7 +67,7 @@ export default function RegisterPage() {
         {/* Plan badge */}
         <div style={{ textAlign: "center", marginBottom: 20 }}>
           <span style={{ display: "inline-block", background: selectedPlan === "pro" ? "rgba(242,138,26,.12)" : "rgba(31,95,174,.1)", color: selectedPlan === "pro" ? "#f28a1a" : "#1f5fae", border: `1px solid ${selectedPlan === "pro" ? "rgba(242,138,26,.3)" : "rgba(31,95,174,.2)"}`, borderRadius: 20, padding: "5px 16px", fontSize: 12, fontWeight: 700 }}>
-            {selectedPlan === "pro" ? "Pro-bijdrager · €49/mnd" : "Basis-lid · €19/mnd"}
+            {selectedPlan === "pro" ? "Pro · €59/mnd" : "Basis · €14,95/mnd"}
           </span>
         </div>
 
