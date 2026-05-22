@@ -11,6 +11,9 @@ import {
   Library,
   Newspaper,
   ArrowRight,
+  Eye,
+  Users,
+  BookMarked,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -65,6 +68,33 @@ const QUICK_LINKS = [
   { href: "/regels/help", icon: BookOpen, label: "Dossiers" },
 ];
 
+const PIJLERS = [
+  {
+    num: "1",
+    label: "Grip op Regels",
+    href: "/regels",
+    icon: BookMarked,
+    active: true,
+    description: "Vergunningen, WOO, wetgeving",
+  },
+  {
+    num: "2",
+    label: "Zichtbaarheid",
+    href: "/groei/zichtbaarheid",
+    icon: Eye,
+    active: false,
+    description: "Profiel, website, vindbaar",
+  },
+  {
+    num: "3",
+    label: "Samenwerken",
+    href: "/network",
+    icon: Users,
+    active: false,
+    description: "Netwerk, opdrachten, deals",
+  },
+];
+
 export default function RegelsOverzichtPage() {
   usePageTitle("Grip op Regels – OpenRegio");
 
@@ -78,10 +108,36 @@ export default function RegelsOverzichtPage() {
           className="absolute inset-0 w-full h-full object-cover opacity-20 select-none pointer-events-none"
           aria-hidden="true"
         />
-        <div className="relative z-10 px-6 py-12 md:py-16 max-w-5xl mx-auto">
-          <Badge className="mb-4 bg-white/10 text-white border-white/20 hover:bg-white/10">
-            Sectie 3 — Regels
-          </Badge>
+        <div className="relative z-10 px-6 py-10 md:py-14 max-w-5xl mx-auto">
+          {/* Pijler-context */}
+          <div className="flex flex-wrap items-center gap-2 mb-5">
+            {PIJLERS.map((p) => {
+              const Icon = p.icon;
+              return (
+                <Link key={p.num} href={p.href}>
+                  <div
+                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium transition-colors ${
+                      p.active
+                        ? "bg-white text-slate-900"
+                        : "bg-white/10 text-white/70 hover:bg-white/20 hover:text-white"
+                    }`}
+                    data-testid={`link-pijler-${p.num}`}
+                  >
+                    <span
+                      className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
+                        p.active ? "bg-primary text-white" : "bg-white/20 text-white"
+                      }`}
+                    >
+                      {p.num}
+                    </span>
+                    <Icon className="w-3.5 h-3.5 shrink-0" />
+                    <span>{p.label}</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-3">
             Grip op Regels
           </h1>
@@ -129,6 +185,56 @@ export default function RegelsOverzichtPage() {
           })}
         </div>
 
+        {/* ── Drie pijlers blok ─────────────────────────────────────────── */}
+        <div className="rounded-xl border bg-card p-6 md:p-8">
+          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">
+            De drie pijlers van OpenRegio
+          </p>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            {PIJLERS.map((p) => {
+              const Icon = p.icon;
+              return (
+                <Link key={p.num} href={p.href}>
+                  <div
+                    className={`flex flex-col gap-3 p-4 rounded-lg border transition-colors cursor-pointer ${
+                      p.active
+                        ? "border-primary/40 bg-primary/5"
+                        : "border-border hover-elevate"
+                    }`}
+                    data-testid={`card-pijler-${p.num}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${
+                          p.active
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-muted text-muted-foreground"
+                        }`}
+                      >
+                        {p.num}
+                      </div>
+                      <div>
+                        <div className={`font-semibold text-sm ${p.active ? "text-primary" : ""}`}>
+                          {p.label}
+                        </div>
+                        {p.active && (
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0 h-4 mt-0.5">
+                            Je bent hier
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <Icon className="w-3.5 h-3.5 shrink-0" />
+                      <span>{p.description}</span>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </div>
+
         {/* ── Uitleg sectie ────────────────────────────────────────────── */}
         <div className="rounded-xl border bg-muted/40 p-6 md:p-8">
           <div className="flex flex-col md:flex-row gap-8 items-start">
@@ -152,13 +258,6 @@ export default function RegelsOverzichtPage() {
                   </div>
                 ))}
               </div>
-            </div>
-            <div className="shrink-0">
-              <img
-                src="/regels-hero.png"
-                alt="OpenRegio infographic"
-                className="w-full max-w-xs rounded-lg border shadow-sm object-cover"
-              />
             </div>
           </div>
         </div>
