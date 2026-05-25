@@ -1,7 +1,8 @@
+import { useState } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Link, useLocation, useSearch } from "wouter";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2 } from "lucide-react";
+import { Loader2, Eye, EyeOff } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -25,6 +26,8 @@ export default function RegisterPage() {
   const selectedPlan  = planParam === "pro" ? "pro" : "basic";
   const [, setLocation] = useLocation();
   const { toast }       = useToast();
+  const [showPw, setShowPw]         = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<RegisterFormData>({
     resolver: zodResolver(registerFormSchema),
@@ -51,6 +54,12 @@ export default function RegisterPage() {
     pro:   ["RegioBot: WOO & regelgeving AI", "Persoonlijke WOO-bibliotheek", "Printbare overzichten", "Prioriteit ondersteuning"],
   };
 
+  const eyeBtn: React.CSSProperties = {
+    position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
+    background: "none", border: "none", cursor: "pointer", color: "#64748b",
+    display: "flex", alignItems: "center", padding: 4,
+  };
+
   return (
     <div className="openregio-page openregio-auth-page" data-testid="page-register">
       <div className="openregio-auth-center" style={{ maxWidth: 520 }}>
@@ -64,7 +73,6 @@ export default function RegisterPage() {
           </Link>
         </div>
 
-        {/* Plan badge */}
         <div style={{ textAlign: "center", marginBottom: 20 }}>
           <span style={{ display: "inline-block", background: selectedPlan === "pro" ? "rgba(242,138,26,.12)" : "rgba(31,95,174,.1)", color: selectedPlan === "pro" ? "#f28a1a" : "#1f5fae", border: `1px solid ${selectedPlan === "pro" ? "rgba(242,138,26,.3)" : "rgba(31,95,174,.2)"}`, borderRadius: 20, padding: "5px 16px", fontSize: 12, fontWeight: 700 }}>
             {selectedPlan === "pro" ? "Pro · €59/mnd" : "Basis · €14,95/mnd"}
@@ -97,17 +105,38 @@ export default function RegisterPage() {
 
             <div className="openregio-form-group">
               <label>Wachtwoord *</label>
-              <input {...register("password")} type="password" placeholder="Minimaal 6 tekens" data-testid="input-password" />
+              <div style={{ position: "relative" }}>
+                <input
+                  {...register("password")}
+                  type={showPw ? "text" : "password"}
+                  placeholder="Minimaal 6 tekens"
+                  data-testid="input-password"
+                  style={{ paddingRight: 38 }}
+                />
+                <button type="button" style={eyeBtn} onClick={() => setShowPw(v => !v)} aria-label={showPw ? "Verberg wachtwoord" : "Toon wachtwoord"} data-testid="button-toggle-password">
+                  {showPw ? <EyeOff size={17} /> : <Eye size={17} />}
+                </button>
+              </div>
               {errors.password && <p style={{ fontSize: 11, color: "#dc2626", marginTop: 4 }}>{errors.password.message}</p>}
             </div>
 
             <div className="openregio-form-group">
               <label>Bevestig wachtwoord *</label>
-              <input {...register("confirmPassword")} type="password" placeholder="Herhaal je wachtwoord" data-testid="input-confirm-password" />
+              <div style={{ position: "relative" }}>
+                <input
+                  {...register("confirmPassword")}
+                  type={showConfirm ? "text" : "password"}
+                  placeholder="Herhaal je wachtwoord"
+                  data-testid="input-confirm-password"
+                  style={{ paddingRight: 38 }}
+                />
+                <button type="button" style={eyeBtn} onClick={() => setShowConfirm(v => !v)} aria-label={showConfirm ? "Verberg wachtwoord" : "Toon wachtwoord"} data-testid="button-toggle-confirm-password">
+                  {showConfirm ? <EyeOff size={17} /> : <Eye size={17} />}
+                </button>
+              </div>
               {errors.confirmPassword && <p style={{ fontSize: 11, color: "#dc2626", marginTop: 4 }}>{errors.confirmPassword.message}</p>}
             </div>
 
-            {/* Wat je krijgt */}
             <div style={{ background: "#f4f6fb", borderRadius: 12, padding: "14px 16px", marginBottom: 18 }}>
               <p style={{ fontSize: 11, fontWeight: 700, color: "#475569", marginBottom: 8, textTransform: "uppercase" as const, letterSpacing: ".4px" }}>Wat je krijgt</p>
               {planFeats[selectedPlan].map((f, i) => (
@@ -139,7 +168,6 @@ export default function RegisterPage() {
           </p>
         </div>
       </div>
-
     </div>
   );
 }
