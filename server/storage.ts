@@ -422,7 +422,8 @@ export class MemStorage implements IStorage {
     const user: User = {
       id,
       email: userData.email!,
-      passwordHash: userData.passwordHash || null,
+      // Only overwrite passwordHash when explicitly provided; never wipe an existing hash
+      passwordHash: userData.passwordHash !== undefined ? userData.passwordHash : (existing?.passwordHash || null),
       plan: (userData.plan as "basic" | "pro") || "basic",
       role: (userData.role as "member" | "master" | "admin") || existing?.role || "member",
       firstName: userData.firstName || null,
@@ -1969,7 +1970,8 @@ class DbStorage implements IStorage {
         target: users.id,
         set: {
           email: userData.email!,
-          passwordHash: userData.passwordHash || null,
+          // Only update passwordHash when explicitly provided; never wipe an existing hash
+          ...(userData.passwordHash !== undefined ? { passwordHash: userData.passwordHash } : {}),
           plan: userData.plan || "basic",
           role: userData.role || "member",
           firstName: userData.firstName || null,
