@@ -12,6 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, UserPlus, Copy, Check, ArrowLeft, RefreshCw,
   Trash2, Search, Users, ChevronDown, ChevronUp, AlertTriangle, UserCog,
+  RotateCcw, ShieldAlert,
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -84,6 +85,128 @@ function DeleteConfirm({ user, onDone }: { user: AdminUser; onDone: () => void }
         className="h-7 px-2 text-xs"
         onClick={() => setOpen(false)}
         data-testid={`button-cancel-delete-${user.id}`}
+      >
+        Annuleer
+      </Button>
+    </div>
+  );
+}
+
+// ─── Herstel bevestiging ──────────────────────────────────────────────────────
+
+function RestoreConfirm({ user, onDone }: { user: AdminUser; onDone: () => void }) {
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+
+  const mut = useMutation({
+    mutationFn: () => apiRequest("POST", `/api/admin/users/${user.id}/restore`),
+    onSuccess: () => {
+      toast({ title: "Account hersteld", description: `${user.email} is weer actief.` });
+      qc.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      setOpen(false);
+      onDone();
+    },
+    onError: (e: any) => {
+      toast({ variant: "destructive", title: "Fout", description: e.message || "Herstellen mislukt" });
+    },
+  });
+
+  if (!open) {
+    return (
+      <Button
+        size="sm"
+        variant="outline"
+        className="h-7 px-2 text-xs gap-1"
+        onClick={() => setOpen(true)}
+        data-testid={`button-restore-${user.id}`}
+      >
+        <RotateCcw className="h-3 w-3" />
+        Herstellen
+      </Button>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-xs text-muted-foreground font-medium">Account terugzetten?</span>
+      <Button
+        size="sm"
+        variant="default"
+        className="h-7 px-2 text-xs"
+        onClick={() => mut.mutate()}
+        disabled={mut.isPending}
+        data-testid={`button-confirm-restore-${user.id}`}
+      >
+        {mut.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Ja, herstellen"}
+      </Button>
+      <Button
+        size="sm"
+        variant="ghost"
+        className="h-7 px-2 text-xs"
+        onClick={() => setOpen(false)}
+        data-testid={`button-cancel-restore-${user.id}`}
+      >
+        Annuleer
+      </Button>
+    </div>
+  );
+}
+
+// ─── Permanent verwijderen ─────────────────────────────────────────────────────
+
+function PermanentDeleteConfirm({ user, onDone }: { user: AdminUser; onDone: () => void }) {
+  const { toast } = useToast();
+  const qc = useQueryClient();
+  const [open, setOpen] = useState(false);
+
+  const mut = useMutation({
+    mutationFn: () => apiRequest("DELETE", `/api/admin/users/${user.id}/permanent`),
+    onSuccess: () => {
+      toast({ title: "Account definitief verwijderd", description: `${user.email} is permanent verwijderd.` });
+      qc.invalidateQueries({ queryKey: ["/api/admin/users"] });
+      setOpen(false);
+      onDone();
+    },
+    onError: (e: any) => {
+      toast({ variant: "destructive", title: "Fout", description: e.message || "Permanent verwijderen mislukt" });
+    },
+  });
+
+  if (!open) {
+    return (
+      <Button
+        size="sm"
+        variant="ghost"
+        className="h-7 px-2 text-xs gap-1 text-destructive hover:text-destructive"
+        onClick={() => setOpen(true)}
+        data-testid={`button-permanent-delete-${user.id}`}
+      >
+        <ShieldAlert className="h-3 w-3" />
+        Permanent weg
+      </Button>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      <span className="text-xs text-destructive font-semibold">Niet terug te draaien!</span>
+      <Button
+        size="sm"
+        variant="destructive"
+        className="h-7 px-2 text-xs"
+        onClick={() => mut.mutate()}
+        disabled={mut.isPending}
+        data-testid={`button-confirm-permanent-delete-${user.id}`}
+      >
+        {mut.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Definitief verwijderen"}
+      </Button>
+      <Button
+        size="sm"
+        variant="ghost"
+        className="h-7 px-2 text-xs"
+        onClick={() => setOpen(false)}
+        data-testid={`button-cancel-permanent-delete-${user.id}`}
       >
         Annuleer
       </Button>
@@ -186,7 +309,7 @@ function UserRow({ user }: { user: AdminUser }) {
         </div>
 
         {/* Acties */}
-        <div className="flex items-center gap-1 shrink-0">
+        <div className="flex items-center gap-1 shrink-0 flex-wrap">
           {!isDeleted && <SetPlanButton user={user} />}
           <Button
             size="icon"
@@ -203,25 +326,40 @@ function UserRow({ user }: { user: AdminUser }) {
 
       {/* Uitklap-detail */}
       {expanded && (
-        <div className="border-t border-border bg-muted/30 px-4 py-3 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
-          <div>
-            <p className="text-muted-foreground mb-0.5">Sector</p>
-            <p className="font-medium text-foreground">{user.sector ?? "—"}</p>
+        <div className="border-t border-border bg-muted/30 px-4 py-3 space-y-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div>
+              <p className="text-muted-foreground mb-0.5">Sector</p>
+              <p className="font-medium text-foreground">{user.sector ?? "—"}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground mb-0.5">Regio</p>
+              <p className="font-medium text-foreground">{user.region ?? "—"}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground mb-0.5">Aangemeld</p>
+              <p className="font-medium text-foreground">
+                {user.createdAt ? new Date(user.createdAt).toLocaleDateString("nl-NL") : "—"}
+              </p>
+            </div>
+            <div>
+              <p className="text-muted-foreground mb-0.5">ID</p>
+              <p className="font-mono text-[10px] text-muted-foreground truncate">{user.id}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-muted-foreground mb-0.5">Regio</p>
-            <p className="font-medium text-foreground">{user.region ?? "—"}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground mb-0.5">Aangemeld</p>
-            <p className="font-medium text-foreground">
-              {user.createdAt ? new Date(user.createdAt).toLocaleDateString("nl-NL") : "—"}
-            </p>
-          </div>
-          <div>
-            <p className="text-muted-foreground mb-0.5">ID</p>
-            <p className="font-mono text-[10px] text-muted-foreground truncate">{user.id}</p>
-          </div>
+
+          {/* Acties voor verwijderde accounts */}
+          {isDeleted && (
+            <div className="pt-1 border-t border-border flex items-center gap-3 flex-wrap">
+              <p className="text-xs text-muted-foreground">
+                Verwijderd op {user.deletedAt ? new Date(user.deletedAt).toLocaleDateString("nl-NL") : "—"}
+              </p>
+              <div className="flex items-center gap-2 flex-wrap ml-auto">
+                <RestoreConfirm user={user} onDone={() => setExpanded(false)} />
+                <PermanentDeleteConfirm user={user} onDone={() => setExpanded(false)} />
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

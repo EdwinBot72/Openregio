@@ -213,6 +213,8 @@ export interface IStorage {
   getConsentLogs(userId: string, limit?: number): Promise<ConsentLog[]>;
   createConsentLog(log: InsertConsentLog): Promise<ConsentLog>;
   softDeleteUser(userId: string): Promise<boolean>;
+  restoreUser(userId: string): Promise<boolean>;
+  permanentDeleteUser(userId: string): Promise<boolean>;
   exportUserData(userId: string): Promise<{
     profile: User;
     bedrijfsprofiel: Bedrijfsprofiel | null;
@@ -1450,6 +1452,19 @@ export class MemStorage implements IStorage {
     return false;
   }
 
+  async restoreUser(userId: string): Promise<boolean> {
+    const user = this.users.get(userId);
+    if (user) {
+      user.deletedAt = null;
+      return true;
+    }
+    return false;
+  }
+
+  async permanentDeleteUser(userId: string): Promise<boolean> {
+    return this.users.delete(userId);
+  }
+
   async exportUserData(userId: string): Promise<{
     profile: User;
     bedrijfsprofiel: Bedrijfsprofiel | null;
@@ -2552,6 +2567,21 @@ class DbStorage implements IStorage {
   async softDeleteUser(userId: string): Promise<boolean> {
     const results = await db.update(users)
       .set({ deletedAt: new Date() })
+      .where(eq(users.id, userId))
+      .returning();
+    return results.length > 0;
+  }
+
+  async restoreUser(userId: string): Promise<boolean> {
+    const results = await db.update(users)
+      .set({ deletedAt: null })
+      .where(eq(users.id, userId))
+      .returning();
+    return results.length > 0;
+  }
+
+  async permanentDeleteUser(userId: string): Promise<boolean> {
+    const results = await db.delete(users)
       .where(eq(users.id, userId))
       .returning();
     return results.length > 0;

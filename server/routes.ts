@@ -4074,6 +4074,42 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
+  // Admin: POST /api/admin/users/:id/restore — herstel zacht-verwijderd account
+  app.post("/api/admin/users/:id/restore", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const restored = await storage.restoreUser(id);
+      if (!restored) {
+        return res.status(404).json({ error: "Gebruiker niet gevonden." });
+      }
+      console.log(`[Admin] Account hersteld: ${id} door admin ${req.user!.id}`);
+      return res.json({ success: true });
+    } catch (err) {
+      console.error("[Admin] Fout bij herstellen gebruiker:", err);
+      return res.status(500).json({ error: "Kon account niet herstellen" });
+    }
+  });
+
+  // Admin: DELETE /api/admin/users/:id/permanent — definitief verwijderen
+  app.delete("/api/admin/users/:id/permanent", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      if (id === req.user!.id) {
+        return res.status(400).json({ error: "Je kunt je eigen account niet verwijderen." });
+      }
+      const deleted = await storage.permanentDeleteUser(id);
+      if (!deleted) {
+        return res.status(404).json({ error: "Gebruiker niet gevonden." });
+      }
+      await revokeAllUserTokens(id);
+      console.log(`[Admin] Account permanent verwijderd: ${id} door admin ${req.user!.id}`);
+      return res.json({ success: true });
+    } catch (err) {
+      console.error("[Admin] Fout bij permanent verwijderen gebruiker:", err);
+      return res.status(500).json({ error: "Kon account niet permanent verwijderen" });
+    }
+  });
+
   // Admin: PATCH /api/admin/users/:id/set-plan — handmatig plan instellen (bijv. coaching)
   app.patch("/api/admin/users/:id/set-plan", requireAdmin, async (req, res) => {
     try {
