@@ -12,7 +12,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Loader2, UserPlus, Copy, Check, ArrowLeft, RefreshCw,
   Trash2, Search, Users, ChevronDown, ChevronUp, AlertTriangle, UserCog,
-  RotateCcw, ShieldAlert,
+  RotateCcw, ShieldAlert, Mail, MailCheck,
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -383,6 +383,7 @@ export default function AdminUsersPage() {
     emailSent: boolean;
   } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [mailSent, setMailSent] = useState(false);
 
   const [resendEmail, setResendEmail] = useState("");
   const [resendResult, setResendResult] = useState<{ onboardingLink: string; emailSent: boolean } | null>(null);
@@ -422,6 +423,7 @@ export default function AdminUsersPage() {
     },
     onSuccess: (d) => {
       setResult(d);
+      setMailSent(d.emailSent); // al verstuurd bij aanmaken? markeer dan direct
       toast({ title: "Gebruiker aangemaakt", description: `${d.user.email} is aangemaakt.` });
       setEmail(""); setFirstName(""); setLastName("");
       qc.invalidateQueries({ queryKey: ["/api/admin/users"] });
@@ -436,6 +438,22 @@ export default function AdminUsersPage() {
     },
     onSuccess: (d) => { setResendResult(d); },
     onError: (e: any) => toast({ variant: "destructive", title: "Fout", description: e.message || "Kon activatielink niet versturen" }),
+  });
+
+  const sendToNewUserMutation = useMutation({
+    mutationFn: async (email: string) => {
+      const res = await apiRequest("POST", "/api/admin/resend-activation", { email });
+      return res.json();
+    },
+    onSuccess: (d) => {
+      setMailSent(true);
+      if (d.emailSent) {
+        toast({ title: "Activatiemail verstuurd", description: `De activatielink is verstuurd naar ${result?.user.email}.` });
+      } else {
+        toast({ variant: "destructive", title: "E-mail niet verstuurd", description: "Controleer de SMTP-instellingen." });
+      }
+    },
+    onError: (e: any) => toast({ variant: "destructive", title: "Fout", description: e.message || "Kon mail niet versturen" }),
   });
 
   const copyLink = async () => {
@@ -592,8 +610,39 @@ export default function AdminUsersPage() {
       {result && (
         <Alert data-testid="alert-success">
           <AlertDescription className="space-y-3">
-            <p className="font-medium">Account aangemaakt voor {result.user.email} ({result.user.plan})</p>
-            {!result.emailSent && <p className="text-sm text-muted-foreground">Email kon niet worden verstuurd. Deel de link hieronder.</p>}
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <p className="font-medium">Account aangemaakt voor {result.user.email}</p>
+              <Badge variant="secondary" className="text-[10px]">{result.user.plan}</Badge>
+            </div>
+
+            {/* Activatiemail sturen */}
+            <div className="flex items-center gap-2">
+              {mailSent ? (
+                <div className="flex items-center gap-1.5 text-sm text-green-700 font-medium">
+                  <MailCheck className="h-4 w-4" />
+                  Activatiemail verstuurd naar {result.user.email}
+                </div>
+              ) : (
+                <>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    className="gap-1.5"
+                    onClick={() => sendToNewUserMutation.mutate(result.user.email)}
+                    disabled={sendToNewUserMutation.isPending}
+                    data-testid="button-send-activation-email"
+                  >
+                    {sendToNewUserMutation.isPending
+                      ? <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      : <Mail className="h-3.5 w-3.5" />}
+                    Stuur activatiemail
+                  </Button>
+                  <span className="text-xs text-muted-foreground">of kopieer de link hieronder</span>
+                </>
+              )}
+            </div>
+
+            {/* Link kopiëren */}
             <div className="flex items-center gap-2">
               <Input readOnly value={result.onboardingLink} className="text-xs font-mono" data-testid="input-onboarding-link" />
               <Button variant="outline" size="icon" onClick={copyLink} data-testid="button-copy-link">
