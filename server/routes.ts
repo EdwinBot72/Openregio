@@ -4200,6 +4200,47 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
+  // Admin: POST /api/admin/get-activation-link — genereer link zonder mail te sturen
+  app.post("/api/admin/get-activation-link", requireAdmin, async (req, res) => {
+    try {
+      const { email } = req.body;
+      if (!email) return res.status(400).json({ error: "Email is verplicht" });
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) return res.status(404).json({ error: "Gebruiker niet gevonden" });
+
+      if (!user.mustCompleteOnboarding) {
+        return res.status(400).json({ error: "Deze gebruiker heeft de onboarding al voltooid" });
+      }
+
+      const tempPassword = generateRandomPassword();
+      const onboardingToken = generateOnboardingToken();
+      const passwordHash = await bcrypt.hash(tempPassword, 10);
+
+      await storage.upsertUser({
+        id: user.id,
+        email: user.email,
+        passwordHash,
+        plan: user.plan as "basic" | "pro",
+        role: user.role as "member" | "master" | "admin",
+        mustCompleteOnboarding: true,
+      });
+
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 30);
+      await storage.createOnboardingToken({ userId: user.id, token: onboardingToken, expiresAt });
+
+      const baseUrl = process.env.PUBLIC_BASE_URL || getBaseUrl(req);
+      const onboardingLink = `${baseUrl}/first-login?token=${onboardingToken}`;
+
+      console.log(`[Admin] Activation link generated (no email) by ${req.user!.email}: ${email}`);
+      res.json({ onboardingLink });
+    } catch (error: any) {
+      console.error("Error generating activation link:", error);
+      res.status(500).json({ error: "Kon activatielink niet genereren" });
+    }
+  });
+
   app.post("/api/admin/resend-activation", requireAdmin, async (req, res) => {
     try {
       const { email } = req.body;

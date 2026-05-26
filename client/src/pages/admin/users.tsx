@@ -265,14 +265,17 @@ function SetPlanButton({ user }: { user: AdminUser }) {
 function SendActivationButton({ user }: { user: AdminUser }) {
   const { toast } = useToast();
   const [sent, setSent] = useState(false);
+  const [link, setLink] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
 
-  const mut = useMutation({
+  const sendMut = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", "/api/admin/resend-activation", { email: user.email });
       return res.json();
     },
     onSuccess: (d) => {
       setSent(true);
+      setLink(d.onboardingLink);
       if (d.emailSent) {
         toast({ title: "Activatiemail verstuurd", description: `De activatielink is verstuurd naar ${user.email}.` });
       } else {
@@ -282,27 +285,82 @@ function SendActivationButton({ user }: { user: AdminUser }) {
     onError: (e: any) => toast({ variant: "destructive", title: "Fout", description: e.message || "Kon mail niet versturen" }),
   });
 
-  if (sent) {
-    return (
-      <div className="flex items-center gap-1.5 text-xs text-green-700 font-medium">
-        <MailCheck className="h-3.5 w-3.5" />
-        Activatiemail verstuurd
-      </div>
-    );
-  }
+  const linkMut = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/admin/get-activation-link", { email: user.email });
+      return res.json();
+    },
+    onSuccess: (d) => setLink(d.onboardingLink),
+    onError: (e: any) => toast({ variant: "destructive", title: "Fout", description: e.message || "Kon link niet ophalen" }),
+  });
+
+  const copyLink = async () => {
+    if (!link) return;
+    await navigator.clipboard.writeText(link);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
-    <Button
-      size="sm"
-      variant="outline"
-      className="h-7 gap-1.5 text-xs"
-      onClick={() => mut.mutate()}
-      disabled={mut.isPending}
-      data-testid={`button-send-activation-${user.id}`}
-    >
-      {mut.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mail className="h-3 w-3" />}
-      Stuur activatiemail
-    </Button>
+    <div className="space-y-2 w-full">
+      <div className="flex items-center gap-2 flex-wrap">
+        {/* Mail sturen */}
+        {sent ? (
+          <div className="flex items-center gap-1.5 text-xs text-green-700 font-medium">
+            <MailCheck className="h-3.5 w-3.5" />
+            Activatiemail verstuurd
+          </div>
+        ) : (
+          <Button
+            size="sm"
+            variant="outline"
+            className="h-7 gap-1.5 text-xs"
+            onClick={() => sendMut.mutate()}
+            disabled={sendMut.isPending || linkMut.isPending}
+            data-testid={`button-send-activation-${user.id}`}
+          >
+            {sendMut.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mail className="h-3 w-3" />}
+            Stuur activatiemail
+          </Button>
+        )}
+
+        {/* Link ophalen (zonder mail) */}
+        {!link && (
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-7 gap-1.5 text-xs text-muted-foreground"
+            onClick={() => linkMut.mutate()}
+            disabled={linkMut.isPending || sendMut.isPending}
+            data-testid={`button-get-link-${user.id}`}
+          >
+            {linkMut.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Copy className="h-3 w-3" />}
+            Toon link
+          </Button>
+        )}
+      </div>
+
+      {/* Link zichtbaar + kopiëren */}
+      {link && (
+        <div className="flex items-center gap-2">
+          <Input
+            readOnly
+            value={link}
+            className="text-[11px] font-mono h-7"
+            data-testid={`input-activation-link-${user.id}`}
+          />
+          <Button
+            size="icon"
+            variant="outline"
+            className="h-7 w-7 shrink-0"
+            onClick={copyLink}
+            data-testid={`button-copy-link-${user.id}`}
+          >
+            {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+          </Button>
+        </div>
+      )}
+    </div>
   );
 }
 
