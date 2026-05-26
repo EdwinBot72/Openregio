@@ -198,6 +198,8 @@ test.describe("RegioBot-pagina", () => {
     const botError = page.getByTestId("message-bot-2");
     await expect(botError).toBeVisible();
     await expect(botError).toContainText("Er ging iets mis");
+    // De specifieke backend-melding uit de 503-response moet ook zichtbaar zijn.
+    await expect(botError).toContainText("RegioBot is tijdelijk niet beschikbaar (geen AI-key).");
 
     // Loading-indicator verdwijnt en de submit-knop staat weer op "Verstuur"
     // (niet meer "Bezig..."), zodat de gebruiker opnieuw kan submitten.

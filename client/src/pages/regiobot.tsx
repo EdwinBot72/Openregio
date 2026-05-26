@@ -124,15 +124,38 @@ export default function RegioBotPage() {
         { role: "bot", text: data.answer, citations: data.citations },
       ]);
     },
-    onError: () => {
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "bot",
-          text:
-            "Er ging iets mis bij het verwerken. Probeer het opnieuw of selecteer eerst een dossier.",
-        },
-      ]);
+    onError: (error: Error) => {
+      let userMessage =
+        "Er ging iets mis bij het verwerken. Probeer het opnieuw of selecteer eerst een dossier.";
+
+      const match = error.message.match(/^(\d{3}):\s*([\s\S]*)/);
+      if (match) {
+        const status = parseInt(match[1], 10);
+        const body = match[2]?.trim() ?? "";
+
+        let backendMsg: string | null = null;
+        try {
+          const parsed = JSON.parse(body);
+          backendMsg =
+            (typeof parsed.error === "string" ? parsed.error : null) ??
+            (typeof parsed.message === "string" ? parsed.message : null);
+        } catch {
+          if (body && body.length < 300) backendMsg = body;
+        }
+
+        if (status === 503) {
+          userMessage = `Er ging iets mis: de service is tijdelijk niet beschikbaar.${backendMsg ? ` ${backendMsg}` : ""}`;
+        } else if (status === 429) {
+          userMessage =
+            "Er ging iets mis: te veel aanvragen. Wacht even en probeer het opnieuw.";
+        } else if (status === 400) {
+          userMessage = `Er ging iets mis: de vraag is te kort of ongeldig.${backendMsg ? ` ${backendMsg}` : ""}`;
+        } else if (backendMsg) {
+          userMessage = `Er ging iets mis: ${backendMsg}`;
+        }
+      }
+
+      setMessages((prev) => [...prev, { role: "bot", text: userMessage }]);
     },
   });
 
