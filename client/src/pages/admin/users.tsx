@@ -262,6 +262,50 @@ function SetPlanButton({ user }: { user: AdminUser }) {
   );
 }
 
+function SendActivationButton({ user }: { user: AdminUser }) {
+  const { toast } = useToast();
+  const [sent, setSent] = useState(false);
+
+  const mut = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/admin/resend-activation", { email: user.email });
+      return res.json();
+    },
+    onSuccess: (d) => {
+      setSent(true);
+      if (d.emailSent) {
+        toast({ title: "Activatiemail verstuurd", description: `De activatielink is verstuurd naar ${user.email}.` });
+      } else {
+        toast({ variant: "destructive", title: "E-mail niet verstuurd", description: "Controleer de SMTP-instellingen." });
+      }
+    },
+    onError: (e: any) => toast({ variant: "destructive", title: "Fout", description: e.message || "Kon mail niet versturen" }),
+  });
+
+  if (sent) {
+    return (
+      <div className="flex items-center gap-1.5 text-xs text-green-700 font-medium">
+        <MailCheck className="h-3.5 w-3.5" />
+        Activatiemail verstuurd
+      </div>
+    );
+  }
+
+  return (
+    <Button
+      size="sm"
+      variant="outline"
+      className="h-7 gap-1.5 text-xs"
+      onClick={() => mut.mutate()}
+      disabled={mut.isPending}
+      data-testid={`button-send-activation-${user.id}`}
+    >
+      {mut.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <Mail className="h-3 w-3" />}
+      Stuur activatiemail
+    </Button>
+  );
+}
+
 function UserRow({ user }: { user: AdminUser }) {
   const [expanded, setExpanded] = useState(false);
   const name = [user.firstName, user.lastName].filter(Boolean).join(" ") || "—";
@@ -347,6 +391,13 @@ function UserRow({ user }: { user: AdminUser }) {
               <p className="font-mono text-[10px] text-muted-foreground truncate">{user.id}</p>
             </div>
           </div>
+
+          {/* Activatiemail sturen */}
+          {!isDeleted && (
+            <div className="pt-1 border-t border-border flex items-center gap-3 flex-wrap">
+              <SendActivationButton user={user} />
+            </div>
+          )}
 
           {/* Acties voor verwijderde accounts */}
           {isDeleted && (
