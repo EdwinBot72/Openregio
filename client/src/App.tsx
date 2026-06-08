@@ -232,7 +232,6 @@ function AuthenticatedRouter() {
       <Route path="/regels/help/:flowId" component={RegelsHelpFlowPage} />
       <Route path="/regels/check" component={CheckSituatiePage} />
       <Route path="/regels/documenten" component={BriefAnalysePage} />
-      <Route path="/regels/woo" component={WooBibliotheekPage} />
       <Route path="/regels" component={RegelsOverzichtPage} />
 
       {/* ── Groei (Sectie 4) ──────────────────────────────────────────────── */}
