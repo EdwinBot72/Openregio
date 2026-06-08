@@ -67,37 +67,29 @@ const mollieClient = process.env.MOLLIE_API_KEY
   ? createMollieClient({ apiKey: process.env.MOLLIE_API_KEY }) 
   : null;
 
-// Tijdelijke diagnostische test-route — verwijder na bevestiging
-// GET /api/mollie-test
-function registerMollieTestRoute(app: Express) {
-  app.get("/api/mollie-test", requireAdmin, async (_req, res) => {
-    const key = process.env.MOLLIE_API_KEY;
-    if (!key) {
-      return res.status(500).json({
-        success: false,
-        keyLoaded: false,
-        error: "MOLLIE_API_KEY ontbreekt in Secrets",
-      });
-    }
-    try {
-      // Doe een echte API-call om te valideren dat de key werkt
-      const methods = await mollieClient!.methods.list();
-      return res.json({
-        success: true,
-        keyLoaded: true,
-        mode: key.startsWith("live_") ? "live" : "test",
-        publicBaseUrl: process.env.PUBLIC_BASE_URL || "(niet ingesteld — webhook kan falen bij live!)",
-        availableMethods: methods.map((m: any) => m.id),
-      });
-    } catch (err: any) {
-      return res.status(500).json({
-        success: false,
-        keyLoaded: true,
-        mode: key.startsWith("live_") ? "live" : "test",
-        error: err?.message || String(err),
-      });
-    }
-  });
+// ── Server-side pending-payment store (plan niet vertrouwen uit webhook metadata) ──
+// Slaat { email, plan, referrerUserId, referralCode } op gekoppeld aan Mollie paymentId.
+// TTL: 24 uur — wordt opgeruimd bij ophalen.
+const pendingPayments = new Map<string, {
+  email: string;
+  plan: string;
+  referrerUserId: string | null;
+  referralCode: string | undefined;
+  createdAt: number;
+}>();
+
+function storePendingPayment(paymentId: string, data: { email: string; plan: string; referrerUserId: string | null; referralCode: string | undefined }) {
+  pendingPayments.set(paymentId, { ...data, createdAt: Date.now() });
+}
+
+function consumePendingPayment(paymentId: string) {
+  const entry = pendingPayments.get(paymentId);
+  if (!entry) return null;
+  // Verwijder na ophalen (eenmalig gebruik)
+  pendingPayments.delete(paymentId);
+  // Verouderde entries (> 24 uur) worden genegeerd
+  if (Date.now() - entry.createdAt > 24 * 60 * 60 * 1000) return null;
+  return entry;
 }
 
 // Helper to get base URL for redirects/webhooks
@@ -152,9 +144,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Attach user to all requests (makes req.user available)
   app.use(attachUser);
-
-  // Mollie diagnostics — alleen toegankelijk voor admins (na attachUser)
-  registerMollieTestRoute(app);
 
   // Register object storage routes for user file uploads
   registerObjectStorageRoutes(app, requireAuth);
@@ -235,7 +224,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } as any);
       
       console.log(`✓ Mollie payment created: ${payment.id} for ${email} (${plan})`);
-      
+
+      // #10 — sla plan server-side op zodat webhook niet op metadata hoeft te vertrouwen
+      storePendingPayment(payment.id, { email, plan, referrerUserId, referralCode: ref || undefined });
+
       // Redirect to Mollie checkout
       const checkoutUrl = payment.getCheckoutUrl();
       if (!checkoutUrl) {
@@ -322,7 +314,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return;
       }
 
-      const plan: string = meta.plan || "basic";
+      // #10 — gebruik server-opgeslagen plan (niet metadata van Mollie)
+      const serverStored = consumePendingPayment(paymentId);
+      const plan: string = serverStored?.plan ?? meta.plan ?? "basic";
       const mollieCustomerId: string | null = meta.mollieCustomerId || payment.customerId || null;
       let user: any = null;
 
@@ -335,9 +329,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log(`[Mollie] Plan bijgewerkt: ${user.plan} → ${plan}`);
         }
 
-      } else if (meta.email) {
+      } else {
         // Nieuwe gebruiker (flow via /start)
-        user = await storage.getUserByEmail(meta.email);
+        // Gebruik server-opgeslagen email; val terug op metadata als noodoplossing
+        const resolvedEmail: string | undefined = serverStored?.email ?? meta.email;
+        if (!resolvedEmail) {
+          console.error(`[Mollie] Geen userId of email voor payment ${paymentId}`);
+          return;
+        }
+
+        const resolvedReferrer: string | null = serverStored?.referrerUserId ?? meta.referrerUserId ?? null;
+
+        user = await storage.getUserByEmail(resolvedEmail);
 
         if (!user) {
           const tempPassword = generateRandomPassword();
@@ -346,15 +349,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const passwordHash = await bcrypt.hash(tempPassword, 10);
 
           user = await storage.createUser({
-            email: meta.email,
+            email: resolvedEmail,
             passwordHash,
             plan: plan as "basic" | "pro",
             role: "member",
             mustCompleteOnboarding: true,
             onboardingToken,
             referralCode,
-            referredByUserId: meta.referrerUserId || null,
-            referredAt: meta.referrerUserId ? new Date() : null,
+            referredByUserId: resolvedReferrer,
+            referredAt: resolvedReferrer ? new Date() : null,
           });
 
           const expiresAt = new Date();
@@ -362,16 +365,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
           await storage.createOnboardingToken({ userId: user.id, token: onboardingToken, expiresAt });
 
           const onboardingLink = `${baseUrl}/first-login?token=${onboardingToken}`;
-          const emailSent = await sendOnboardingEmail(meta.email, tempPassword, onboardingLink, plan);
-          console.log(`[Mollie] Nieuwe gebruiker: ${user.id} (${meta.email}) email=${emailSent ? "verzonden" : "mislukt"}`);
+          const emailSent = await sendOnboardingEmail(resolvedEmail, tempPassword, onboardingLink, plan);
+          console.log(`[Mollie] Nieuwe gebruiker: ${user.id} (${resolvedEmail}) email=${emailSent ? "verzonden" : "mislukt"}`);
         } else {
           if (user.plan !== plan) await storage.updateUserPlan(user.id, plan as "basic" | "pro");
           console.log(`[Mollie] Bestaande gebruiker gevonden: ${user.id}`);
         }
-      } else {
-        console.error(`[Mollie] Geen userId of email in metadata voor payment ${paymentId}`);
-        return;
-      }
+      } // einde else (nieuwe gebruiker flow)
 
       // Abonnement aanmaken in database
       const subscription = await storage.createSubscription({
@@ -1524,7 +1524,7 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
   });
 
   // Brief Analyse — bestand uploaden (PDF / afbeelding / tekst)
-  app.post("/api/brief-analyse/upload", requireAuth, uploadMemory.single('file'), async (req, res) => {
+  app.post("/api/brief-analyse/upload", requirePro, uploadMemory.single('file'), async (req, res) => {
     try {
       const file = req.file;
       if (!file) return res.status(400).json({ error: "Geen bestand ontvangen" });
@@ -1648,7 +1648,7 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
 
   // Proxy: stuur bestand door naar externe opslag-server
   const EXTERN_UPLOAD_URL = process.env.BACKEND_UPLOAD_URL ?? "http://212.56.48.106:5001/upload";
-  app.post("/api/brief-analyse/opslaan-extern", requireAuth, uploadMemory.single('file'), async (req, res) => {
+  app.post("/api/brief-analyse/opslaan-extern", requirePro, uploadMemory.single('file'), async (req, res) => {
     try {
       const file = req.file;
       if (!file) return res.status(400).json({ error: "Geen bestand ontvangen" });
@@ -2107,7 +2107,7 @@ Maak een complete, direct bruikbare WOO-brief.`;
   });
 
   // WOO Dossiers - save and retrieve generated WOO letters
-  app.post("/api/woo/dossiers", requireAuth, async (req, res) => {
+  app.post("/api/woo/dossiers", requirePro, async (req, res) => {
     try {
       const { authority, subject, context, requestedDocuments, generatedLetter, checklist, status,
               senderName, senderAddress, senderPostcode } = req.body;
@@ -2207,7 +2207,7 @@ Maak een complete, direct bruikbare WOO-brief.`;
   });
 
   // POST /api/woo/dossiers/:id/ingebreke — dwangsom contract accepteren + ingebrekestelling brief genereren
-  app.post("/api/woo/dossiers/:id/ingebreke", requireAuth, async (req, res) => {
+  app.post("/api/woo/dossiers/:id/ingebreke", requirePro, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
@@ -2305,7 +2305,7 @@ ${senderName}`;
   });
 
   // WOO Wizard Step 1: Create intake dossier
-  app.post("/api/woo/wizard/intake", requireAuth, async (req, res) => {
+  app.post("/api/woo/wizard/intake", requirePro, async (req, res) => {
     try {
       const { authority, subject, uploadedDocument, location, purpose, userQuestion } = req.body;
 
@@ -2332,7 +2332,7 @@ ${senderName}`;
   });
 
   // WOO Wizard Step 2: Extract data from document
-  app.post("/api/woo/wizard/extract", requireAuth, async (req, res) => {
+  app.post("/api/woo/wizard/extract", requirePro, async (req, res) => {
     try {
       const { dossierId, documentText } = req.body;
 
@@ -2388,7 +2388,7 @@ Wees nauwkeurig en beknopt. Als informatie niet gevonden kan worden, geef dan "N
   });
 
   // WOO Wizard Step 3: Generate document list (vraagset)
-  app.post("/api/woo/wizard/questions", requireAuth, async (req, res) => {
+  app.post("/api/woo/wizard/questions", requirePro, async (req, res) => {
     try {
       const { dossierId, extractedData, purpose, userQuestion } = req.body;
 
@@ -2448,7 +2448,7 @@ Pas de documentenlijst aan op basis van het specifieke onderwerp en doel.`;
   });
 
   // WOO Wizard Step 4: Generate complete WOO letter
-  app.post("/api/woo/wizard/generate", requireAuth, async (req, res) => {
+  app.post("/api/woo/wizard/generate", requirePro, async (req, res) => {
     try {
       const { dossierId, authority, subject, extractedData, documentList, location } = req.body;
 
@@ -2528,7 +2528,7 @@ Maak het verzoek professioneel en juridisch correct.`;
   });
 
   // Update WOO dossier status
-  app.patch("/api/woo/dossiers/:id", requireAuth, async (req, res) => {
+  app.patch("/api/woo/dossiers/:id", requirePro, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
