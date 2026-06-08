@@ -1203,6 +1203,84 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
     }
   });
 
+  // ── RegioBot Route — AI-routeplanner voor ondernemers ────────────────────
+  // Rate: Basic = 3/dag, Pro/Coaching = 50/mnd, Admin/Master = onbeperkt
+  const routePlannerUsage = new Map<string, { count: number; resetAt: number }>();
+
+  app.post("/api/regiobot/route", requireAuth, async (req: any, res) => {
+    try {
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({ error: "AI-service is tijdelijk niet beschikbaar." });
+      }
+
+      const userId: string = req.user.userId;
+      const userRecord = await storage.getUserById(userId);
+      if (!userRecord) return res.status(401).json({ error: "Niet ingelogd" });
+
+      const isAdmin = userRecord.role === "admin" || userRecord.role === "master";
+      const isPro = userRecord.plan === "pro" || userRecord.plan === "coaching";
+
+      // Rate limiting
+      if (!isAdmin) {
+        const now = Date.now();
+        const window = isPro ? 30 * 24 * 60 * 60 * 1000 : 24 * 60 * 60 * 1000; // 30 dagen vs 1 dag
+        const maxReqs = isPro ? 50 : 3;
+        const key = `${userId}:${isPro ? "pro" : "basic"}`;
+        const entry = routePlannerUsage.get(key);
+        if (entry && now < entry.resetAt) {
+          if (entry.count >= maxReqs) {
+            const resetIn = Math.ceil((entry.resetAt - now) / 3600000);
+            return res.status(429).json({
+              error: isPro
+                ? `Je hebt je maandlimiet van ${maxReqs} routes bereikt. Reset over ${resetIn} uur.`
+                : `Je hebt je daglimiet van ${maxReqs} routes bereikt. Probeer het morgen opnieuw of upgrade naar Pro.`,
+            });
+          }
+          entry.count++;
+        } else {
+          routePlannerUsage.set(key, { count: 1, resetAt: now + window });
+        }
+      }
+
+      const { message, businessType, city } = req.body;
+      if (!message || typeof message !== "string") {
+        return res.status(400).json({ error: "Bericht ontbreekt." });
+      }
+      if (message.length > 2000) {
+        return res.status(400).json({ error: "Bericht is te lang (max 2000 tekens)." });
+      }
+
+      const { detectRegioBotIntent } = await import("./services/regiobot-intent");
+      const { getToolsForIntent, buildRegioBotRoutePrompt } = await import("./services/regiobot-prompt");
+
+      const intent = detectRegioBotIntent(message);
+      const tools = getToolsForIntent(intent);
+      const prompt = buildRegioBotRoutePrompt({
+        message,
+        businessType: typeof businessType === "string" ? businessType.slice(0, 100) : undefined,
+        city: typeof city === "string" ? city.slice(0, 100) : undefined,
+        intent,
+        tools,
+      });
+
+      const OpenAI = (await import("openai")).default;
+      const openai = new OpenAI();
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [{ role: "user", content: prompt }],
+        max_tokens: 1200,
+        temperature: 0.7,
+      });
+
+      const answer = completion.choices[0]?.message?.content ?? "Geen antwoord ontvangen.";
+
+      return res.json({ intent, tools, answer });
+    } catch (err: any) {
+      console.error("[RegioBot/route] error:", err?.message ?? err);
+      return res.status(500).json({ error: "RegioBot kon geen route maken. Probeer opnieuw." });
+    }
+  });
+
   // Rate limiter for public RegioBot endpoint (5 requests per IP per minute)
   const buurmanRateLimit = new Map<string, { count: number; resetAt: number }>();
   const BUURMAN_RATE_WINDOW = 60_000;
