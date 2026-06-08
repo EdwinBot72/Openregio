@@ -555,6 +555,37 @@ export function setupJwtAuth(app: Express) {
     }
   });
   
+  // POST /api/auth/change-password — ingelogde gebruiker wijzigt eigen wachtwoord
+  app.post("/api/auth/change-password", requireAuth, async (req: Request, res: Response) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      if (!currentPassword || !newPassword) {
+        return res.status(400).json({ error: "Huidig en nieuw wachtwoord zijn verplicht" });
+      }
+      if (newPassword.length < 8) {
+        return res.status(400).json({ error: "Nieuw wachtwoord moet minimaal 8 tekens bevatten" });
+      }
+
+      const user = await storage.getUserById((req as any).user.userId);
+      if (!user || !user.passwordHash) {
+        return res.status(404).json({ error: "Gebruiker niet gevonden" });
+      }
+
+      const isValid = await bcrypt.compare(currentPassword, user.passwordHash);
+      if (!isValid) {
+        return res.status(400).json({ error: "Huidig wachtwoord klopt niet" });
+      }
+
+      const newHash = await bcrypt.hash(newPassword, SALT_ROUNDS);
+      await storage.updateUserPassword(user.id, newHash);
+
+      res.json({ message: "Wachtwoord succesvol gewijzigd" });
+    } catch (error) {
+      console.error("Change password error:", error);
+      res.status(500).json({ error: "Er is een fout opgetreden" });
+    }
+  });
+
   app.get("/api/auth/user", async (req: Request, res: Response) => {
     const accessToken = req.cookies?.accessToken || req.headers.authorization?.replace("Bearer ", "");
     

@@ -36,6 +36,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { Eye as EyeIcon, EyeOff } from "lucide-react";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 
@@ -108,6 +109,12 @@ export default function PrivacyDashboardPage() {
   const [, navigate] = useLocation();
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [showCurrentPw, setShowCurrentPw] = useState(false);
+  const [showNewPw, setShowNewPw] = useState(false);
+  const [showConfirmPw, setShowConfirmPw] = useState(false);
 
   const { data: dashboardData, isLoading } = useQuery<PrivacyDashboardData>({
     queryKey: ["/api/privacy/dashboard"],
@@ -175,6 +182,37 @@ export default function PrivacyDashboardPage() {
       });
     },
   });
+
+  const changePasswordMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest("POST", "/api/auth/change-password", { currentPassword, newPassword });
+    },
+    onSuccess: () => {
+      setCurrentPassword("");
+      setNewPassword("");
+      setConfirmPassword("");
+      toast({ title: "Wachtwoord gewijzigd", description: "Je nieuwe wachtwoord is opgeslagen." });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Fout",
+        description: error?.message || "Kon wachtwoord niet wijzigen.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleChangePassword = () => {
+    if (newPassword !== confirmPassword) {
+      toast({ title: "Fout", description: "Nieuwe wachtwoorden komen niet overeen.", variant: "destructive" });
+      return;
+    }
+    if (newPassword.length < 8) {
+      toast({ title: "Fout", description: "Nieuw wachtwoord moet minimaal 8 tekens bevatten.", variant: "destructive" });
+      return;
+    }
+    changePasswordMutation.mutate();
+  };
 
   const handleExport = async () => {
     try {
@@ -311,6 +349,97 @@ export default function PrivacyDashboardPage() {
               </div>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      <Card data-testid="card-change-password">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Lock className="w-5 h-5" />
+            Wachtwoord wijzigen
+          </CardTitle>
+          <CardDescription>Stel een nieuw wachtwoord in voor je account.</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="current-password">Huidig wachtwoord</Label>
+            <div className="relative">
+              <Input
+                id="current-password"
+                type={showCurrentPw ? "text" : "password"}
+                value={currentPassword}
+                onChange={(e) => setCurrentPassword(e.target.value)}
+                placeholder="Voer huidig wachtwoord in"
+                data-testid="input-current-password"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowCurrentPw((v) => !v)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                data-testid="button-toggle-current-password"
+                aria-label={showCurrentPw ? "Verberg wachtwoord" : "Toon wachtwoord"}
+                tabIndex={-1}
+              >
+                {showCurrentPw ? <EyeOff className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="new-password">Nieuw wachtwoord</Label>
+            <div className="relative">
+              <Input
+                id="new-password"
+                type={showNewPw ? "text" : "password"}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                placeholder="Minimaal 8 tekens"
+                data-testid="input-new-password"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowNewPw((v) => !v)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                data-testid="button-toggle-new-password"
+                aria-label={showNewPw ? "Verberg wachtwoord" : "Toon wachtwoord"}
+                tabIndex={-1}
+              >
+                {showNewPw ? <EyeOff className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="confirm-password">Bevestig nieuw wachtwoord</Label>
+            <div className="relative">
+              <Input
+                id="confirm-password"
+                type={showConfirmPw ? "text" : "password"}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                placeholder="Herhaal nieuw wachtwoord"
+                data-testid="input-confirm-password"
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPw((v) => !v)}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground"
+                data-testid="button-toggle-confirm-password"
+                aria-label={showConfirmPw ? "Verberg wachtwoord" : "Toon wachtwoord"}
+                tabIndex={-1}
+              >
+                {showConfirmPw ? <EyeOff className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
+              </button>
+            </div>
+          </div>
+          <Button
+            onClick={handleChangePassword}
+            disabled={changePasswordMutation.isPending || !currentPassword || !newPassword || !confirmPassword}
+            data-testid="button-change-password"
+          >
+            {changePasswordMutation.isPending ? "Opslaan..." : "Wachtwoord opslaan"}
+          </Button>
         </CardContent>
       </Card>
 
