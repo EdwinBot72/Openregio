@@ -167,7 +167,10 @@ function AuthenticatedRouter() {
         <Redirect to="/regels/check" />
       </Route>
       <Route path="/woo-bibliotheek">
-        <Redirect to="/regels/woo" />
+        <Redirect to="/regiobot" />
+      </Route>
+      <Route path="/regels/woo">
+        <Redirect to="/regiobot" />
       </Route>
       <Route path="/cursussen">
         <Redirect to="/vandaag/acties" />
