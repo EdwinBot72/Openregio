@@ -146,8 +146,6 @@ export default function RegisterPage() {
               ))}
             </div>
 
-            <input {...register("plan")} type="hidden" value={selectedPlan} />
-
             <button
               type="submit"
               className="openregio-button openregio-button-primary"
