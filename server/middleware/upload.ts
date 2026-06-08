@@ -30,7 +30,7 @@ function hasDangerousExtension(filename: string): boolean {
 
   for (const ext of dangerousExtensions) {
     const idx = lowerFilename.indexOf(ext);
-    if (idx !== -1 && idx + ext.length < lowerFilename.length) {
+    if (idx !== -1) {
       return true;
     }
   }

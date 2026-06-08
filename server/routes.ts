@@ -70,7 +70,7 @@ const mollieClient = process.env.MOLLIE_API_KEY
 // Tijdelijke diagnostische test-route — verwijder na bevestiging
 // GET /api/mollie-test
 function registerMollieTestRoute(app: Express) {
-  app.get("/api/mollie-test", async (_req, res) => {
+  app.get("/api/mollie-test", requireAdmin, async (_req, res) => {
     const key = process.env.MOLLIE_API_KEY;
     if (!key) {
       return res.status(500).json({
@@ -139,9 +139,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ ok: true, ts: Date.now() });
   });
 
-  // Mollie diagnostics (tijdelijk — verwijder na bevestiging)
-  registerMollieTestRoute(app);
-
   // Initialize JWT auth with rate limiting (production-ready, stateless)
   setupJwtAuth(app);
   
@@ -155,7 +152,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Attach user to all requests (makes req.user available)
   app.use(attachUser);
-  
+
+  // Mollie diagnostics — alleen toegankelijk voor admins (na attachUser)
+  registerMollieTestRoute(app);
+
   // Register object storage routes for user file uploads
   registerObjectStorageRoutes(app, requireAuth);
   
@@ -198,8 +198,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      const baseUrl = getBaseUrl(req);
-      const webhookBaseUrl = process.env.PUBLIC_BASE_URL || baseUrl;
+      const publicUrl = process.env.PUBLIC_BASE_URL;
+      if (!publicUrl) {
+        console.error("[/start] PUBLIC_BASE_URL niet ingesteld — betaalflow kan mislukken");
+        return res.status(500).json({ error: "Betaalconfiguratie onvolledig. Neem contact op met info@openregio.nl." });
+      }
       const amount = getPlanPrice(plan);
       const description = `${getPlanDisplayName(plan)} - Maandelijks abonnement`;
       
@@ -219,8 +222,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         customerId: customer.id,
         sequenceType: "first" as any,
         description,
-        redirectUrl: `${baseUrl}/betaling-geslaagd?email=${encodeURIComponent(email)}`,
-        webhookUrl: `${webhookBaseUrl}/api/mollie/webhook`,
+        redirectUrl: `${publicUrl}/betaling-geslaagd?plan=${encodeURIComponent(plan)}`,
+        webhookUrl: `${publicUrl}/api/mollie/webhook`,
         metadata: {
           email,
           plan,
@@ -251,13 +254,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // POST /api/mollie/webhook — Unified handler voor eerste én terugkerende betalingen
   app.post("/api/mollie/webhook", async (req, res) => {
-    // Mollie verwacht altijd 200 — stuur direct terug zodat Mollie niet herhaalt
-    res.status(200).send("OK");
-
     try {
       const paymentId = req.body.id;
-      if (!paymentId) { console.error("[Mollie] Webhook zonder payment ID"); return; }
-      if (!mollieClient) { console.error("[Mollie] Client niet geconfigureerd"); return; }
+      if (!paymentId) {
+        console.error("[Mollie] Webhook zonder payment ID");
+        return res.status(200).send("OK"); // geen herhaling nodig, payload ongeldig
+      }
+      if (!mollieClient) {
+        console.error("[Mollie] Client niet geconfigureerd");
+        return res.status(503).send("Service unavailable");
+      }
 
       const payment: any = await mollieClient.payments.get(paymentId);
       const status: string = payment.status;
@@ -428,8 +434,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error(`[Mollie] Commissie aanmaken mislukt:`, commErr);
         }
       }
+      res.status(200).send("OK");
     } catch (err: any) {
       console.error("[Mollie] Onverwachte fout in webhook:", err);
+      // 500 zodat Mollie de webhook herprobeert bij een verwerkingsfout
+      if (!res.headersSent) res.status(500).send("Internal error");
     }
   });
 
@@ -636,7 +645,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/entrepreneurs", async (req, res) => {
+  app.post("/api/entrepreneurs", requireAuth, requireAdmin, async (req, res) => {
     try {
       const validatedData = strictEntrepreneurSchema.parse(req.body);
       const entrepreneur = await storage.createEntrepreneur(validatedData);
@@ -649,7 +658,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.put("/api/entrepreneurs/:id", async (req, res) => {
+  app.put("/api/entrepreneurs/:id", requireAuth, requireAdmin, async (req, res) => {
     try {
       const validatedData = insertEntrepreneurSchema.partial().parse(req.body);
       const entrepreneur = await storage.updateEntrepreneur(req.params.id, validatedData);
@@ -665,7 +674,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.delete("/api/entrepreneurs/:id", async (req, res) => {
+  app.delete("/api/entrepreneurs/:id", requireAuth, requireAdmin, async (req, res) => {
     try {
       const success = await storage.deleteEntrepreneur(req.params.id);
       if (!success) {
@@ -1835,7 +1844,7 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
     }
   });
 
-  app.post("/api/rag/ask", requireAuth, authenticatedAiRateLimit, async (req, res) => {
+  app.post("/api/rag/ask", requirePro, authenticatedAiRateLimit, async (req, res) => {
     try {
       const user = req.user;
       if (!user?.id) return res.status(401).json({ error: "Niet ingelogd" });
