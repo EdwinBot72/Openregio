@@ -152,7 +152,7 @@ export function OpenRegioShell({ children }: { children: ReactNode }) {
             />
             <NavItem
               icon={Bot}
-              href="/regels/woo"
+              href="/regiobot"
               label="RegioBot"
               currentPath={location}
             />
