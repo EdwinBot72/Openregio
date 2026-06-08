@@ -30,6 +30,7 @@ interface Message {
   role: "bot" | "user";
   text: string;
   citations?: Citation[];
+  isError?: boolean;
 }
 
 const TASK_LABELS: Record<Task, string> = {
@@ -80,6 +81,7 @@ export default function RegioBotPage() {
   const [task, setTask] = useState<Task>("analyse_besluit");
   const [question, setQuestion] = useState("");
   const [messages, setMessages] = useState<Message[]>([INTRO_MESSAGE]);
+  const [lastQuestion, setLastQuestion] = useState<string>("");
   const [selectedRegion, setSelectedRegion] = useState<string>("all");
   const [selectedAuthority, setSelectedAuthority] = useState<string>("all");
   const [selectedDossierId, setSelectedDossierId] = useState<string>("none");
@@ -155,7 +157,7 @@ export default function RegioBotPage() {
         }
       }
 
-      setMessages((prev) => [...prev, { role: "bot", text: userMessage }]);
+      setMessages((prev) => [...prev, { role: "bot", text: userMessage, isError: true }]);
     },
   });
 
@@ -167,9 +169,19 @@ export default function RegioBotPage() {
   const handleSubmit = () => {
     const final = question.trim();
     if (final.length < 3 && selectedDossierId === "none") return;
+    setLastQuestion(final);
     setMessages((prev) => [...prev, { role: "user", text: final || `(${TASK_LABELS[task]})` }]);
     setQuestion("");
     askMutation.mutate(final);
+  };
+
+  const handleRetry = () => {
+    if (!lastQuestion && selectedDossierId === "none") return;
+    setMessages((prev) => [
+      ...prev,
+      { role: "user", text: lastQuestion || `(${TASK_LABELS[task]})` },
+    ]);
+    askMutation.mutate(lastQuestion);
   };
 
   // Pro-gate
@@ -296,6 +308,17 @@ export default function RegioBotPage() {
                     </div>
                   ))}
                 </div>
+              )}
+              {m.isError && (
+                <button
+                  onClick={handleRetry}
+                  disabled={askMutation.isPending}
+                  data-testid={`button-retry-${idx}`}
+                  className="openregio-button openregio-button-secondary"
+                  style={{ marginTop: 8 }}
+                >
+                  Probeer opnieuw
+                </button>
               )}
             </div>
           ))}

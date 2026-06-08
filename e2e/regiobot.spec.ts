@@ -231,4 +231,89 @@ test.describe("RegioBot-pagina", () => {
     await expect(botAnswer).toContainText("Test-antwoord (fixture)");
     await expect(page.getByTestId("message-loading")).toHaveCount(0);
   });
+
+  test("'Probeer opnieuw'-knop op fout-bericht herverstuurt de laatste vraag", async ({
+    page,
+    context,
+    baseURL,
+  }) => {
+    await registerAndAuth(context, baseURL!, "pro", "rb-retry-btn");
+
+    let callCount = 0;
+    await page.route("**/api/regiobot", async (route) => {
+      const request = route.request();
+      if (request.method() !== "POST") {
+        await route.fallback();
+        return;
+      }
+      callCount += 1;
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
+      if (callCount === 1) {
+        await route.fulfill({
+          status: 503,
+          contentType: "application/json",
+          body: JSON.stringify({ error: "Tijdelijke storing." }),
+        });
+        return;
+      }
+
+      const body = JSON.parse(request.postData() || "{}");
+      const patched = { ...body, __testFixture: true };
+      await route.continue({
+        postData: JSON.stringify(patched),
+        headers: { ...request.headers(), "content-type": "application/json" },
+      });
+    });
+
+    await page.goto("/regiobot");
+    await waitForReactQuery(page);
+
+    await expect(page.getByTestId("page-regiobot")).toBeVisible();
+
+    // Eerste vraag — stelt een vraag via suggestie en submit
+    await page.getByTestId("suggestion-analyse_besluit").click();
+    const textarea = page.getByTestId("textarea-question");
+    await expect(textarea).not.toHaveValue("");
+
+    const errorResponsePromise = page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/api/regiobot") && resp.request().method() === "POST",
+    );
+
+    await page.getByTestId("button-submit").click();
+    await expect(page.getByTestId("message-user-1")).toBeVisible();
+
+    const errorResponse = await errorResponsePromise;
+    expect(errorResponse.status()).toBe(503);
+
+    // Fout-bericht op index 2 met "Probeer opnieuw"-knop
+    const botError = page.getByTestId("message-bot-2");
+    await expect(botError).toBeVisible();
+    await expect(botError).toContainText("Er ging iets mis");
+
+    const retryButton = page.getByTestId("button-retry-2");
+    await expect(retryButton).toBeVisible();
+    await expect(retryButton).toHaveText("Probeer opnieuw");
+
+    // Klik op de knop — herstelt en herverstuurt de vraag
+    const successResponsePromise = page.waitForResponse(
+      (resp) =>
+        resp.url().includes("/api/regiobot") && resp.request().method() === "POST",
+    );
+
+    await retryButton.click();
+
+    // De herhaalde gebruikersvraag verschijnt op index 3
+    await expect(page.getByTestId("message-user-3")).toBeVisible();
+
+    const successResponse = await successResponsePromise;
+    expect(successResponse.status()).toBe(200);
+
+    // Succesvol antwoord op index 4
+    const botAnswer = page.getByTestId("message-bot-4");
+    await expect(botAnswer).toBeVisible();
+    await expect(botAnswer).toContainText("Test-antwoord (fixture)");
+    await expect(page.getByTestId("message-loading")).toHaveCount(0);
+  });
 });
