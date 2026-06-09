@@ -1259,7 +1259,7 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
 
       const intent = detectRegioBotIntent(message);
       const tools = getToolsForIntent(intent);
-      const prompt = buildRegioBotRoutePrompt({
+      const { system, user: userMsg } = buildRegioBotRoutePrompt({
         message,
         businessType: typeof businessType === "string" ? businessType.slice(0, 100) : undefined,
         city: typeof city === "string" ? city.slice(0, 100) : undefined,
@@ -1270,10 +1270,13 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
       const OpenAI = (await import("openai")).default;
       const openai = new OpenAI();
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 1200,
-        temperature: 0.7,
+        model: "gpt-4o",
+        messages: [
+          { role: "system", content: system },
+          { role: "user", content: userMsg },
+        ],
+        max_tokens: 2000,
+        temperature: 0.65,
       });
 
       const answer = completion.choices[0]?.message?.content ?? "Geen antwoord ontvangen.";
