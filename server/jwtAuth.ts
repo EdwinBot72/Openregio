@@ -65,7 +65,7 @@ const registerLimiter = new RateLimiterMemory({
 });
 
 const emailLimiter = new RateLimiterMemory({
-  points: E2E_BYPASS_RATE_LIMITS ? 100_000 : 5,
+  points: E2E_BYPASS_RATE_LIMITS ? 100_000 : 15,
   duration: 15 * 60,
 });
 
