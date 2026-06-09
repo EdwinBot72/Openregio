@@ -145,6 +145,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Attach user to all requests (makes req.user available)
   app.use(attachUser);
 
+  // Server-side redirects voor hernoemde/verplaatste pagina's
+  app.get("/regels/woo", (_req, res) => res.redirect(301, "/regiobot"));
+  app.get("/woo-bibliotheek", (_req, res) => res.redirect(301, "/regiobot"));
+
   // Register object storage routes for user file uploads
   registerObjectStorageRoutes(app, requireAuth);
   
