@@ -1217,7 +1217,7 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
         return res.status(503).json({ error: "AI-service is tijdelijk niet beschikbaar." });
       }
 
-      const userId: string = req.user.userId;
+      const userId: string = req.user.id;
       const userRecord = await storage.getUserById(userId);
       if (!userRecord) return res.status(401).json({ error: "Niet ingelogd" });
 
