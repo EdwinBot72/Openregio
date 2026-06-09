@@ -21,12 +21,12 @@ export async function seedMasterAccount() {
     const existingMaster = await storage.getUserByEmail(masterEmail);
 
     if (existingMaster) {
+      const passwordHash = await bcrypt.hash(masterPassword, SALT_ROUNDS);
+      await storage.updateUserPassword(existingMaster.id, passwordHash);
       if (existingMaster.plan !== "pro" || existingMaster.role !== "master") {
         await storage.updateUser(existingMaster.id, { plan: "pro", role: "master" });
-        console.log("✓ Master account bijgewerkt naar pro/master:", existingMaster.email);
-      } else {
-        console.log("✓ Master account bestaat al:", existingMaster.email);
       }
+      console.log("✓ Master account wachtwoord bijgewerkt:", existingMaster.email);
       return;
     }
 
