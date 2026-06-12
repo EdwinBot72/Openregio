@@ -107,9 +107,39 @@ async function getOrCreateUserProfileId(req: any): Promise<string> {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Health check endpoint (before auth middleware)
+  // Legacy health check (simple)
   app.get("/health", (_req, res) => {
     res.json({ ok: true, ts: Date.now() });
+  });
+
+  // Production healthcheck — safe, no secrets exposed
+  app.get("/api/healthz", async (_req, res) => {
+    const startTs = Date.now();
+    let dbStatus = "ok";
+    try {
+      await db.execute(sql`SELECT 1`);
+    } catch {
+      dbStatus = "error";
+    }
+
+    const mollieConfigured = !!(process.env.MOLLIE_API_KEY || process.env.MOLLIE_TEST_KEY);
+    const aiConfigured = !!(
+      process.env.OPENAI_API_KEY ||
+      process.env.AI_INTEGRATIONS_OPENAI_API_KEY ||
+      process.env.GEMINI_API_KEY ||
+      process.env.AI_INTEGRATIONS_GEMINI_API_KEY
+    );
+
+    const status = dbStatus === "ok" ? 200 : 503;
+    res.status(status).json({
+      ok: dbStatus === "ok",
+      database: dbStatus,
+      mollie: mollieConfigured ? "configured" : "not_configured",
+      ai: aiConfigured ? "configured" : "not_configured",
+      time: new Date().toISOString(),
+      version: "1.0.0",
+      latencyMs: Date.now() - startTs,
+    });
   });
 
   // Initialize JWT auth with rate limiting (production-ready, stateless)
@@ -5489,7 +5519,7 @@ Geef een JSON-object terug in exact dit formaat:
     status: string;
   }
 
-  app.post("/api/tools/google-places-check", async (req, res) => {
+  app.post("/api/tools/google-places-check", requireAuth, async (req, res) => {
     const { bedrijfsnaam, stad } = req.body as { bedrijfsnaam?: string; stad?: string };
     if (!bedrijfsnaam?.trim() || !stad?.trim()) {
       return res.status(400).json({ error: "bedrijfsnaam en stad zijn vereist" });
