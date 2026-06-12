@@ -67,30 +67,10 @@ const mollieClient = process.env.MOLLIE_API_KEY
   ? createMollieClient({ apiKey: process.env.MOLLIE_API_KEY }) 
   : null;
 
-// ── Server-side pending-payment store (plan niet vertrouwen uit webhook metadata) ──
-// Slaat { email, plan, referrerUserId, referralCode } op gekoppeld aan Mollie paymentId.
-// TTL: 24 uur — wordt opgeruimd bij ophalen.
-const pendingPayments = new Map<string, {
-  email: string;
-  plan: string;
-  referrerUserId: string | null;
-  referralCode: string | undefined;
-  createdAt: number;
-}>();
-
-function storePendingPayment(paymentId: string, data: { email: string; plan: string; referrerUserId: string | null; referralCode: string | undefined }) {
-  pendingPayments.set(paymentId, { ...data, createdAt: Date.now() });
-}
-
-function consumePendingPayment(paymentId: string) {
-  const entry = pendingPayments.get(paymentId);
-  if (!entry) return null;
-  // Verwijder na ophalen (eenmalig gebruik)
-  pendingPayments.delete(paymentId);
-  // Verouderde entries (> 24 uur) worden genegeerd
-  if (Date.now() - entry.createdAt > 24 * 60 * 60 * 1000) return null;
-  return entry;
-}
+// ── Mollie webhook vertrouwt metadata die wij zelf hebben meegegeven bij payment.create().
+// De payment wordt altijd opnieuw opgehaald via mollieClient.payments.get(paymentId),
+// dus de metadata komt rechtstreeks van Mollie's servers — niet van de webhook-body.
+// Alle benodigde velden (email, plan, userId, referrerUserId) zitten in de metadata.
 
 // Helper to get base URL for redirects/webhooks
 function getBaseUrl(req: any): string {
@@ -229,9 +209,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       console.log(`✓ Mollie payment created: ${payment.id} for ${email} (${plan})`);
 
-      // #10 — sla plan server-side op zodat webhook niet op metadata hoeft te vertrouwen
-      storePendingPayment(payment.id, { email, plan, referrerUserId, referralCode: ref || undefined });
-
       // Redirect to Mollie checkout
       const checkoutUrl = payment.getCheckoutUrl();
       if (!checkoutUrl) {
@@ -302,32 +279,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
         }
-        return;
+        // Altijd 200 teruggeven — Mollie mag niet opnieuw proberen
+        return res.status(200).send("OK");
       }
 
       // ── EERSTE / EENMALIGE BETALING (activatie gebruiker) ─────────────────
       if (status !== "paid") {
+        // open, expired, canceled, etc. — geen actie nodig, 200 om retries te stoppen
         console.log(`[Mollie] Payment ${paymentId} status=${status} — geen actie`);
-        return;
+        return res.status(200).send("OK");
       }
 
       // Idempotentie: al-verwerkte betalingen overslaan
       const existingSub = await storage.getSubscriptionByMolliePaymentId(paymentId);
       if (existingSub) {
         console.log(`[Mollie] Reeds verwerkt: payment=${paymentId} → overslaan`);
-        return;
+        return res.status(200).send("OK");
       }
 
-      // #10 — gebruik server-opgeslagen plan (niet metadata van Mollie)
-      const serverStored = consumePendingPayment(paymentId);
-      const plan: string = serverStored?.plan ?? meta.plan ?? "basic";
+      // Lees plan en metadata uit de geverifieerde Mollie-betaling.
+      // De payment is opgehaald via mollieClient.payments.get() — metadata is betrouwbaar.
+      // Bedragen: excl. 21% btw (B2B — basic €14,95 / pro €59,00).
+      const plan: string = meta.plan ?? "basic";
       const mollieCustomerId: string | null = meta.mollieCustomerId || payment.customerId || null;
       let user: any = null;
 
       if (meta.userId) {
         // Bestaande gebruiker (flow via /api/billing/create-checkout)
         user = await storage.getUserById(meta.userId);
-        if (!user) { console.error(`[Mollie] Gebruiker niet gevonden: ${meta.userId}`); return; }
+        if (!user) {
+          console.error(`[Mollie] Gebruiker niet gevonden: ${meta.userId}`);
+          return res.status(200).send("OK"); // 200 — retries helpen niet bij ontbrekende user
+        }
         if (user.plan !== plan) {
           await storage.updateUserPlan(user.id, plan as "basic" | "pro");
           console.log(`[Mollie] Plan bijgewerkt: ${user.plan} → ${plan}`);
@@ -335,14 +318,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       } else {
         // Nieuwe gebruiker (flow via /start)
-        // Gebruik server-opgeslagen email; val terug op metadata als noodoplossing
-        const resolvedEmail: string | undefined = serverStored?.email ?? meta.email;
+        // Email en referrer komen uit de payment metadata (gezet bij payment.create)
+        const resolvedEmail: string | undefined = meta.email;
         if (!resolvedEmail) {
           console.error(`[Mollie] Geen userId of email voor payment ${paymentId}`);
-          return;
+          return res.status(200).send("OK"); // 200 — retries helpen niet bij ontbrekende email
         }
 
-        const resolvedReferrer: string | null = serverStored?.referrerUserId ?? meta.referrerUserId ?? null;
+        const resolvedReferrer: string | null = meta.referrerUserId ?? null;
 
         user = await storage.getUserByEmail(resolvedEmail);
 
@@ -400,7 +383,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             amount: { currency: "EUR", value: getPlanPrice(plan) },
             interval: "1 month",
             startDate,
-            description: `OpenRegio ${plan === "pro" ? "Pro" : "Basic"} - Maandelijks abonnement`,
+            description: `OpenRegio ${plan === "pro" ? "Pro" : "Basis"} - Maandelijks abonnement`,
             webhookUrl: `${baseUrl}/api/mollie/webhook`,
           });
 
@@ -2871,6 +2854,7 @@ Maak het verzoek professioneel en juridisch correct.`;
       const publicUrl = process.env.PUBLIC_BASE_URL || getBaseUrl(req);
 
       // Create first payment to establish mandate for recurring billing
+      // Bedragen excl. 21% btw (B2B — basic €14,95 / pro €59,00)
       const firstPayment: any = await (mollieClient.payments.create as any)({
         amount: {
           currency: "EUR",
@@ -2878,11 +2862,12 @@ Maak het verzoek professioneel en juridisch correct.`;
         },
         customerId: customer.id,
         sequenceType: "first",
-        description: `OpenRegio ${plan === "pro" ? "Pro" : "Basic"} - Maandelijks abonnement`,
-        redirectUrl: returnUrl || `${publicUrl}/betaling-geslaagd`,
+        description: `OpenRegio ${plan === "pro" ? "Pro" : "Basis"} - Maandelijks abonnement`,
+        redirectUrl: returnUrl || `${publicUrl}/betaling-geslaagd?plan=${encodeURIComponent(plan)}`,
         webhookUrl: `${publicUrl}/api/mollie/webhook`,
         metadata: {
           userId,
+          email: userEmail,
           plan,
           mollieCustomerId: customer.id,
         },
@@ -2981,11 +2966,17 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
-  // POST /api/webhooks/mollie — legacy URL, delegeert naar de master webhook handler
-  app.post("/api/webhooks/mollie", (req, res, next) => {
-    // Stuur door naar de unified handler via interne re-route
+  // POST /api/webhooks/mollie — legacy URL, zelfde handler als /api/mollie/webhook.
+  // Houd beide paden actief totdat Mollie-dashboard is bijgewerkt naar /api/mollie/webhook.
+  // Voer ALTIJD beide URL's in als alias — geen req.url hack nodig.
+  app.post("/api/webhooks/mollie", async (req, res) => {
+    // Delegeer direct naar de geregistreerde /api/mollie/webhook handler via next-app.
+    // Gebruik forward ipv req.url mutatie om stack-overflow te voorkomen.
     req.url = "/api/mollie/webhook";
-    (req.app as any).handle(req, res, next);
+    (req.app as any).handle(req, res, () => {
+      // Als de handler de request niet afhandelt (bijv. geen match), stuur 200
+      if (!res.headersSent) res.status(200).send("OK");
+    });
   });
 
   // ===============================
