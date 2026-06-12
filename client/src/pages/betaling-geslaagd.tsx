@@ -3,12 +3,13 @@ import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 
 const PLAN_LABELS: Record<string, string> = {
-  basic: "Basis-lid",
-  pro: "Pro-bijdrager",
+  basic: "Basis",
+  pro: "Pro",
+  coaching: "1-op-1 coaching",
 };
 
 /** Toon succes voor ingelogde gebruikers die een plan-upgrade deden */
-function UpgradeSuccessPage({ plan }: { plan: "basic" | "pro" }) {
+function UpgradeSuccessPage({ plan }: { plan: "basic" | "pro" | "coaching" }) {
   const planLabel = PLAN_LABELS[plan] ?? plan;
   return (
     <div className="openregio-page openregio-auth-page" data-testid="card-upgrade-success">
@@ -137,8 +138,8 @@ export default function BetalingGeslaagd() {
   const { user } = useAuth();
 
   // Ingelogde gebruiker die plan heeft geüpgraded
-  if ((plan === "basic" || plan === "pro") && user) {
-    return <UpgradeSuccessPage plan={plan} />;
+  if ((plan === "basic" || plan === "pro" || plan === "coaching") && user) {
+    return <UpgradeSuccessPage plan={plan as "basic" | "pro" | "coaching"} />;
   }
 
   // Nieuwe gebruiker: e-mail met onboarding-link ontvangen

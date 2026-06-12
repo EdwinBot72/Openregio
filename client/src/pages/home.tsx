@@ -543,7 +543,7 @@ export default function HomePage() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 20, maxWidth: 720, margin: "0 auto 48px" }}>
             {[
               {
-                id: "basis", name: "Basis", price: "€14,95", period: "excl. btw / mnd",
+                id: "basic", name: "Basis", price: "€14,95", period: "excl. btw / mnd",
                 tagline: "Meekijken, profiel aanmaken en lokaal meedoen.",
                 color: "#1E6DB5", badge: "BASIS", highlight: false,
                 perks: ["Sectorregels bekijken", "Brief analyseren", "Website-scan (basis)", "Bedrijfsprofiel aanmaken", "Netwerk bekijken", "Lokale acties bekijken", "Marktplaats: reageren", "Blog lezen"],

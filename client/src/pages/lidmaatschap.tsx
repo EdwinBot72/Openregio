@@ -5,11 +5,11 @@ import { useAuth } from "@/hooks/useAuth";
 import { Loader2, AlertCircle, Check, Eye, MessageSquare, Zap, Euro, Lock, Mail } from "lucide-react";
 import { BADGE_LABELS, BADGE_COLORS, FEATURE_ACCESS, type FeatureKey, type AccessLevel } from "@/config/featureAccess";
 
-type PlanId = "basis" | "pro";
+type PlanId = "basic" | "pro";
 
 const PLANS = {
-  basis: {
-    id: "basis" as PlanId,
+  basic: {
+    id: "basic" as PlanId,
     name: "Basis",
     price: "€14,95",
     period: "excl. btw per maand",
@@ -68,21 +68,21 @@ const COACHING_PLAN = {
 
 type FeatureRow = {
   label: string;
-  basis: AccessLevel;
+  basic: AccessLevel;
   pro: AccessLevel;
 };
 
 const FEATURE_ROWS: FeatureRow[] = [
-  { label: "Sectorregels",             basis: FEATURE_ACCESS.sectorregels.basis,        pro: FEATURE_ACCESS.sectorregels.pro },
-  { label: "Wat komt eraan?",          basis: FEATURE_ACCESS.wat_komt_eraan.basis,       pro: FEATURE_ACCESS.wat_komt_eraan.pro },
-  { label: "Documenten opvragen",      basis: FEATURE_ACCESS.documenten_opvragen.basis,  pro: FEATURE_ACCESS.documenten_opvragen.pro },
-  { label: "Website-scan",             basis: FEATURE_ACCESS.website_scan.basis,         pro: FEATURE_ACCESS.website_scan.pro },
-  { label: "Vindbaarheid",             basis: FEATURE_ACCESS.vindbaarheid.basis,         pro: FEATURE_ACCESS.vindbaarheid.pro },
-  { label: "Bedrijfsprofiel",          basis: FEATURE_ACCESS.bedrijfsprofiel.basis,      pro: FEATURE_ACCESS.bedrijfsprofiel.pro },
-  { label: "Netwerk",                  basis: FEATURE_ACCESS.netwerk.basis,              pro: FEATURE_ACCESS.netwerk.pro },
-  { label: "Lokale acties",            basis: FEATURE_ACCESS.lokale_acties.basis,        pro: FEATURE_ACCESS.lokale_acties.pro },
-  { label: "Marktplaats",              basis: FEATURE_ACCESS.marktplaats.basis,          pro: FEATURE_ACCESS.marktplaats.pro },
-  { label: "Blog",                     basis: FEATURE_ACCESS.blog_lezen.basis,           pro: FEATURE_ACCESS.blog_lezen.pro },
+  { label: "Sectorregels",             basic: FEATURE_ACCESS.sectorregels.basic,        pro: FEATURE_ACCESS.sectorregels.pro },
+  { label: "Wat komt eraan?",          basic: FEATURE_ACCESS.wat_komt_eraan.basic,       pro: FEATURE_ACCESS.wat_komt_eraan.pro },
+  { label: "Documenten opvragen",      basic: FEATURE_ACCESS.documenten_opvragen.basic,  pro: FEATURE_ACCESS.documenten_opvragen.pro },
+  { label: "Website-scan",             basic: FEATURE_ACCESS.website_scan.basic,         pro: FEATURE_ACCESS.website_scan.pro },
+  { label: "Vindbaarheid",             basic: FEATURE_ACCESS.vindbaarheid.basic,         pro: FEATURE_ACCESS.vindbaarheid.pro },
+  { label: "Bedrijfsprofiel",          basic: FEATURE_ACCESS.bedrijfsprofiel.basic,      pro: FEATURE_ACCESS.bedrijfsprofiel.pro },
+  { label: "Netwerk",                  basic: FEATURE_ACCESS.netwerk.basic,              pro: FEATURE_ACCESS.netwerk.pro },
+  { label: "Lokale acties",            basic: FEATURE_ACCESS.lokale_acties.basic,        pro: FEATURE_ACCESS.lokale_acties.pro },
+  { label: "Marktplaats",              basic: FEATURE_ACCESS.marktplaats.basic,          pro: FEATURE_ACCESS.marktplaats.pro },
+  { label: "Blog",                     basic: FEATURE_ACCESS.blog_lezen.basic,           pro: FEATURE_ACCESS.blog_lezen.pro },
 ];
 
 function AccessBadge({ level }: { level: AccessLevel }) {
@@ -99,13 +99,6 @@ function AccessBadge({ level }: { level: AccessLevel }) {
     return (
       <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 700, color }}>
         <Check size={12} /> {label}
-      </span>
-    );
-  }
-  if (level === "teaser") {
-    return (
-      <span style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 11, fontWeight: 600, color: "#9333ea" }}>
-        <Zap size={11} /> Pro nodig
       </span>
     );
   }
@@ -135,13 +128,13 @@ export default function LidmaatschapPage() {
   const urlPlan = params.get("plan");
 
   const { user } = useAuth();
-  const [selected, setSelected] = useState<PlanId>(urlPlan === "pro" ? "pro" : "basis");
+  const [selected, setSelected] = useState<PlanId>(urlPlan === "pro" ? "pro" : "basic");
   const [email, setEmail] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (urlPlan === "pro" || urlPlan === "basis") setSelected(urlPlan);
+    if (urlPlan === "pro" || urlPlan === "basic") setSelected(urlPlan as PlanId);
   }, [urlPlan]);
 
   const active = PLANS[selected];
@@ -347,7 +340,7 @@ export default function LidmaatschapPage() {
                   <tr key={row.label} style={{ borderTop: "1px solid #f1f5f9", background: i % 2 === 0 ? "white" : "#fafbfc" }}>
                     <td style={{ padding: "10px 16px", color: "#334155", fontWeight: 500 }}>{row.label}</td>
                     <td style={{ padding: "10px 12px", textAlign: "center" }}>
-                      <AccessBadge level={row.basis} />
+                      <AccessBadge level={row.basic} />
                     </td>
                     <td style={{ padding: "10px 12px", textAlign: "center" }}>
                       <AccessBadge level={row.pro} />
@@ -411,7 +404,7 @@ export default function LidmaatschapPage() {
           )}
 
           <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-            {(["basis", "pro"] as PlanId[]).map((id) => (
+            {(["basic", "pro"] as PlanId[]).map((id) => (
               <button
                 key={id}
                 type="button"

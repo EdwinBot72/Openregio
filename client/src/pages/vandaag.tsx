@@ -514,7 +514,7 @@ export default function VandaagPage() {
   });
 
   const isPro = user?.plan === "pro";
-  const planLabel = isPro ? "Pro-bijdrager" : "Basic lid";
+  const planLabel = (user as any)?.plan === "coaching" ? "1-op-1 coaching" : isPro ? "Pro" : "Basis";
 
   // Regio kansen — client-side berekening op basis van user.region
   const regioKansen = useMemo(() => {

@@ -144,10 +144,10 @@ const faqs = [
 
 const PLANS = [
   {
-    id: "basis",
-    name: "Basis-lid",
-    price: "19",
-    period: "/ maand excl. BTW",
+    id: "basic",
+    name: "Basis",
+    price: "14,95",
+    period: "/ maand excl. btw",
     desc: "Volwaardig lid: netwerk, stem mee, word weerbaar.",
     bullets: [
       "Profiel + regio + categorie",
@@ -160,9 +160,9 @@ const PLANS = [
   },
   {
     id: "pro",
-    name: "Pro-bijdrager",
-    price: "49",
-    period: "/ maand excl. BTW",
+    name: "Pro",
+    price: "59",
+    period: "/ maand excl. btw",
     highlight: true,
     desc: "Draag extra bij en krijg krachtige tools erbij.",
     bullets: [

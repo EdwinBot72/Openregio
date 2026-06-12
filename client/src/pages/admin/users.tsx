@@ -397,7 +397,7 @@ function UserRow({ user }: { user: AdminUser }) {
             className={`text-[10px] ${user.plan === "coaching" ? "border-cyan-600 text-cyan-700" : ""}`}
             data-testid={`badge-plan-${user.id}`}
           >
-            {user.plan === "pro" ? "Pro" : user.plan === "coaching" ? "Coaching" : "Basis"}
+            {user.plan === "pro" ? "Pro" : user.plan === "coaching" ? "1-op-1 coaching" : "Basis"}
           </Badge>
           {user.role === "admin" || user.role === "master" ? (
             <Badge variant="outline" className="text-[10px] border-amber-400 text-amber-600">Admin</Badge>

@@ -1,4 +1,4 @@
-export type Plan = "basis" | "pro" | "coaching" | "admin";
+export type Plan = "basic" | "pro" | "coaching" | "admin";
 
 export type AccessLevel =
   | "volledig"
@@ -43,34 +43,34 @@ type FeatureRow = Record<Plan, AccessLevel>;
 
 export const FEATURE_ACCESS: Record<FeatureKey, FeatureRow> = {
   // Pijler 1
-  sectorregels:         { basis: "volledig",       pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  wat_komt_eraan:       { basis: "preview",         pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  documenten_opvragen:  { basis: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  avg_controleslagen:   { basis: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  woo_verzoeken:        { basis: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  brief_analyse:        { basis: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  regel_agent:          { basis: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  conceptbrieven:       { basis: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  sectorregels:         { basic: "volledig",       pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  wat_komt_eraan:       { basic: "preview",         pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  documenten_opvragen:  { basic: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  avg_controleslagen:   { basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  woo_verzoeken:        { basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  brief_analyse:        { basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  regel_agent:          { basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  conceptbrieven:       { basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
   // Pijler 2
-  website_scan:         { basis: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  vindbaarheid:         { basis: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  bedrijfsprofiel:      { basis: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  seo_tools:            { basis: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  website_scan:         { basic: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  vindbaarheid:         { basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  bedrijfsprofiel:      { basic: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  seo_tools:            { basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
   // Pijler 3
-  netwerk:              { basis: "alleen_bekijken", pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  lokale_acties:        { basis: "plaatsen",        pro: "plaatsen",  coaching: "plaatsen",  admin: "plaatsen" },
-  marktplaats:          { basis: "reageren",        pro: "plaatsen",  coaching: "plaatsen",  admin: "plaatsen" },
-  blog_lezen:           { basis: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  blog_publiceren:      { basis: "geen",            pro: "plaatsen",  coaching: "plaatsen",  admin: "plaatsen" },
+  netwerk:              { basic: "alleen_bekijken", pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  lokale_acties:        { basic: "plaatsen",        pro: "plaatsen",  coaching: "plaatsen",  admin: "plaatsen" },
+  marktplaats:          { basic: "reageren",        pro: "plaatsen",  coaching: "plaatsen",  admin: "plaatsen" },
+  blog_lezen:           { basic: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  blog_publiceren:      { basic: "geen",            pro: "plaatsen",  coaching: "plaatsen",  admin: "plaatsen" },
   // Extra
-  ai_ondersteuning:     { basis: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  regio_updates:        { basis: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  dossiers_opslaan:     { basis: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  ai_ondersteuning:     { basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  regio_updates:        { basic: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  dossiers_opslaan:     { basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
   // Beheer
-  gebruikersbeheer:     { basis: "geen",            pro: "geen",      coaching: "geen",      admin: "volledig" },
-  contentbeheer:        { basis: "geen",            pro: "geen",      coaching: "geen",      admin: "volledig" },
-  gemeentebeheer:       { basis: "geen",            pro: "geen",      coaching: "geen",      admin: "volledig" },
-  affiliatebeheer:      { basis: "geen",            pro: "geen",      coaching: "geen",      admin: "volledig" },
+  gebruikersbeheer:     { basic: "geen",            pro: "geen",      coaching: "geen",      admin: "volledig" },
+  contentbeheer:        { basic: "geen",            pro: "geen",      coaching: "geen",      admin: "volledig" },
+  gemeentebeheer:       { basic: "geen",            pro: "geen",      coaching: "geen",      admin: "volledig" },
+  affiliatebeheer:      { basic: "geen",            pro: "geen",      coaching: "geen",      admin: "volledig" },
 };
 
 export const BADGE_LABELS: Record<AccessLevel, string> = {
@@ -92,7 +92,7 @@ export const BADGE_COLORS: Record<AccessLevel, string> = {
 };
 
 export function getAccessLevel(plan: Plan | undefined, feature: FeatureKey): AccessLevel {
-  const p: Plan = plan ?? "basis";
+  const p: Plan = plan ?? "basic";
   return FEATURE_ACCESS[feature]?.[p] ?? "geen";
 }
 

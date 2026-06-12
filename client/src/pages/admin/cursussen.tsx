@@ -96,9 +96,9 @@ const SECTORS = [
 ];
 
 const PLANS = [
-  { value: "basis", label: "Basis" },
+  { value: "basic", label: "Basis" },
   { value: "pro", label: "Pro" },
-  { value: "all", label: "Iedereen (basis + pro)" },
+  { value: "all", label: "Iedereen (Basis + Pro)" },
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -449,7 +449,7 @@ function CourseForm({
       slug: existing?.slug ?? "",
       category: existing?.category ?? "zichtbaarheid",
       sector: existing?.sector ?? "algemeen",
-      plan: existing?.plan ?? "basis",
+      plan: existing?.plan ?? "basic",
       status: existing?.status ?? "draft",
       postedAt: defaultPostedAt,
       expiresAt: defaultExpiresAt,

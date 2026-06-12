@@ -422,8 +422,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (meta.referrerUserId) {
         try {
           const { calculateAffiliatePayout } = await import("@shared/pricing");
-          const planKey = plan === "pro" ? "pro" : "basis";
-          const commissionAmount = calculateAffiliatePayout(planKey).totalPayoutExVat;
+          const planKey = plan === "pro" ? "pro" : "basic";
+          const commissionAmount = calculateAffiliatePayout(planKey).totalPayoutExVat ?? 0;
           await storage.createCommission({
             affiliateUserId: meta.referrerUserId,
             referredUserId: user.id,
@@ -7134,10 +7134,10 @@ Geef alleen de brieftekst terug, zonder commentaar, zonder markdown, zonder JSON
     expiresAt: z.coerce.date(),
   });
 
-  // Normalize user plan values: "basic" (legacy) and "basis" (NL) both map to "basis" for course plan matching
-  function normalizePlan(plan: string | null | undefined): "basis" | "pro" {
+  // Normalize user plan to internal value; "basic" is canonical, "pro" stays "pro"
+  function normalizePlan(plan: string | null | undefined): "basic" | "pro" {
     if (plan === "pro") return "pro";
-    return "basis";
+    return "basic";
   }
 
   // GET /api/cursussen — actieve items voor ingelogde gebruiker
@@ -7149,8 +7149,8 @@ Geef alleen de brieftekst terug, zonder commentaar, zonder markdown, zonder JSON
       const userPlan = normalizePlan(user.plan);
       const userSector = user.sector ?? null;
 
-      // Plan filter: basis ziet basis + all; pro ziet basis + pro + all
-      const allowedPlans = userPlan === "pro" ? ["basis", "pro", "all"] : ["basis", "all"];
+      // Plan filter: basic ziet basic + all; pro ziet basic + pro + all
+      const allowedPlans = userPlan === "pro" ? ["basic", "pro", "all"] : ["basic", "all"];
 
       // Haal actieve cursussen op
       const courses = await db
@@ -7166,7 +7166,7 @@ Geef alleen de brieftekst terug, zonder commentaar, zonder markdown, zonder JSON
         .orderBy(sql`${dailyCourses.sortOrder} ASC, ${dailyCourses.postedAt} DESC`);
 
       // Filter op plan
-      const planFiltered = courses.filter((c) => allowedPlans.includes(c.plan ?? "basis"));
+      const planFiltered = courses.filter((c) => allowedPlans.includes(c.plan ?? "basic"));
 
       // Filter op sector (algemeen = voor iedereen; anders alleen voor die sector)
       const sectorFiltered = planFiltered.filter((c) => {
@@ -7220,8 +7220,8 @@ Geef alleen de brieftekst terug, zonder commentaar, zonder markdown, zonder JSON
 
       // Controleer plan-toegang
       const userPlan = normalizePlan(user.plan);
-      const allowedPlans = userPlan === "pro" ? ["basis", "pro", "all"] : ["basis", "all"];
-      if (!allowedPlans.includes(course.plan ?? "basis")) {
+      const allowedPlans = userPlan === "pro" ? ["basic", "pro", "all"] : ["basic", "all"];
+      if (!allowedPlans.includes(course.plan ?? "basic")) {
         return res.status(403).json({ error: "Geen toegang tot deze actie" });
       }
 

@@ -88,7 +88,7 @@ export function OpenRegioTopNav() {
 
   const isPro = user?.plan === "pro";
   const isAdmin = user?.role === "admin" || user?.role === "master";
-  const planLabel = isPro ? "Pro" : "Basic";
+  const planLabel = user?.plan === "coaching" ? "1-op-1 coaching" : isPro ? "Pro" : "Basis";
   const displayName =
     [user?.firstName, user?.lastName].filter(Boolean).join(" ") ||
     profile?.name ||

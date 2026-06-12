@@ -1335,7 +1335,7 @@ export type WetgevingInzending = typeof wetgevingInzendingen.$inferSelect;
 export const COURSE_CATEGORIES = ["zichtbaarheid", "financieel", "marketing", "operatie", "wetgeving", "netwerk"] as const;
 export type CourseCategoryType = typeof COURSE_CATEGORIES[number];
 
-export const COURSE_PLAN_TYPES = ["basis", "pro", "all"] as const;
+export const COURSE_PLAN_TYPES = ["basic", "pro", "all"] as const;
 export type CoursePlanType = typeof COURSE_PLAN_TYPES[number];
 
 export const COURSE_STATUS = ["draft", "published"] as const;
@@ -1346,7 +1346,7 @@ export const dailyCourses = pgTable("daily_courses", {
   slug: varchar("slug", { length: 255 }).notNull().unique(),
   category: varchar("category", { enum: COURSE_CATEGORIES }).notNull(),
   sector: varchar("sector").notNull().default("algemeen"),
-  plan: varchar("plan", { enum: COURSE_PLAN_TYPES }).notNull().default("basis"),
+  plan: varchar("plan", { enum: COURSE_PLAN_TYPES }).notNull().default("basic"),
   status: varchar("status", { enum: COURSE_STATUS }).notNull().default("draft"),
   postedAt: timestamp("posted_at", { withTimezone: true }).notNull(),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),

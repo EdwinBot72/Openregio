@@ -1,0 +1,1 @@
+- [Plan naming convention](plan-naming.md) — internal DB value is always "basic" (not "basis"); display is "Basis"; coaching displays as "1-op-1 coaching"
