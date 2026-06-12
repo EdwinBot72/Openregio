@@ -108,7 +108,7 @@ export default function WebsiteScanPage() {
   usePageTitle("Website Scan");
   const { user } = useAuth();
   const { toast } = useToast();
-  const isPro = (user as any)?.plan === "pro" || (user as any)?.role === "admin" || (user as any)?.role === "master";
+  const isPro = user?.plan === "pro" || user?.plan === "coaching" || user?.role === "admin" || user?.role === "master";
 
   const [url, setUrl] = useState("");
   const [loading, setLoading] = useState(false);

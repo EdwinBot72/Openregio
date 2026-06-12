@@ -140,6 +140,14 @@ export default function LidmaatschapPage() {
   const active = PLANS[selected];
   const isLoggedIn = !!user;
 
+  // Plan-status van de ingelogde gebruiker
+  const currentPlan = user?.plan as "basic" | "pro" | "coaching" | undefined;
+  const isCoaching = currentPlan === "coaching";
+  const isAlreadyPro = currentPlan === "pro" || currentPlan === "coaching";
+  // Downgrade-bescherming: geselecteerde plan is hetzelfde of lager dan huidig
+  const isAlreadyOnSelected = currentPlan === selected;
+  const isDowngrade = (currentPlan === "pro" || currentPlan === "coaching") && selected === "basic";
+
   async function handleBetaling() {
     setError(null);
     setIsLoading(true);
@@ -352,103 +360,194 @@ export default function LidmaatschapPage() {
           </div>
         </div>
 
-        {/* ── Checkout ─────────────────────────────────────────────── */}
-        <div className="openregio-upgrade-card" data-testid={`card-upgrade-${active.id}`} style={{ maxWidth: 420, margin: "0 auto" }}>
-          <span className="openregio-upgrade-badge" data-testid="badge-plan">
-            {active.badge}
-          </span>
-          <h2 data-testid="text-plan-name">{active.name}</h2>
-          <div className="openregio-upgrade-price">
-            <p className="openregio-price-amount" data-testid="text-plan-price">{active.price}</p>
-            <span className="openregio-price-period">{active.period}</span>
-          </div>
-          <p style={{ fontSize: 12, color: "#16a34a", fontWeight: 600, margin: "4px 0 14px" }}>
-            <Euro size={11} style={{ display: "inline", marginRight: 3 }} />
-            {active.affiliate}
-          </p>
+        {/* ── Checkout / Plan-status ────────────────────────────────── */}
 
-          {!isLoggedIn && (
-            <div className="openregio-form-group" style={{ marginBottom: 12 }}>
-              <label style={{ fontSize: 13, fontWeight: 600, color: "#475569", marginBottom: 6, display: "block" }}>
-                E-mailadres
-              </label>
-              <input
-                type="email"
-                placeholder="jouw@email.nl"
-                value={email}
-                onChange={(e) => { setEmail(e.target.value); setError(null); }}
-                data-testid="input-email"
-                style={{
-                  width: "100%", padding: "10px 14px", borderRadius: 10,
-                  border: "1px solid #d1d5db", fontSize: 14, outline: "none", boxSizing: "border-box",
-                }}
-                disabled={isLoading}
-                onKeyDown={(e) => e.key === "Enter" && handleBetaling()}
-              />
-            </div>
-          )}
-
-          {error && (
-            <div
-              style={{
-                display: "flex", alignItems: "flex-start", gap: 8,
-                background: "#fef2f2", border: "1px solid #fecaca",
-                borderRadius: 10, padding: "10px 14px", marginBottom: 12,
-                fontSize: 13, color: "#dc2626",
-              }}
-              data-testid="text-payment-error"
-            >
-              <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 2 }} />
-              {error}
-            </div>
-          )}
-
-          <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
-            {(["basic", "pro"] as PlanId[]).map((id) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => { setSelected(id); setError(null); }}
-                data-testid={`button-select-${id}`}
-                className={`openregio-button openregio-button-small ${
-                  selected === id
-                    ? id === "pro" ? "openregio-button-pro" : "openregio-button-basic"
-                    : "openregio-button-outline"
-                }`}
-                style={{ flex: 1 }}
-              >
-                {PLANS[id].name}
-              </button>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            onClick={handleBetaling}
-            disabled={isLoading}
-            data-testid="button-payment-link"
-            className={`openregio-button ${active.id === "pro" ? "openregio-button-pro" : "openregio-button-basic"}`}
-            style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
-          >
-            {isLoading && <Loader2 size={16} className="animate-spin" />}
-            {isLoading
-              ? "Betaling starten…"
-              : isLoggedIn
-                ? `Upgrade naar ${active.name} (${active.price}/mnd)`
-                : `Ga naar betaling (${active.price}/mnd)`}
-          </button>
-
-          <p className="openregio-upgrade-note">
-            <Lock size={11} style={{ display: "inline", marginRight: 4 }} />
-            Veilige betaling via Mollie · maandelijks opzegbaar
-          </p>
-
-          {!isLoggedIn && (
-            <p style={{ fontSize: 12, color: "#94a3b8", textAlign: "center", marginTop: 8 }}>
-              Na betaling ontvang je een e-mail om je account te activeren.
+        {/* Coaching-gebruiker: hoogste plan — geen betaalknop */}
+        {isLoggedIn && isCoaching ? (
+          <div className="openregio-upgrade-card" data-testid="card-coaching-active" style={{ maxWidth: 420, margin: "0 auto", textAlign: "center" }}>
+            <span className="openregio-upgrade-badge" style={{ background: "#0e7490", color: "white" }}>
+              1-op-1 coaching
+            </span>
+            <h2 style={{ marginTop: 12 }}>Je hebt het beste plan</h2>
+            <p style={{ fontSize: 13, color: "#475569", marginBottom: 16 }}>
+              Je maakt al gebruik van 1-op-1 coaching. Heb je vragen of wil je iets aanpassen? Neem direct contact op.
             </p>
-          )}
-        </div>
+            <a
+              href="mailto:info@openregio.nl?subject=Coaching%20plan%20beheren"
+              className="openregio-button openregio-button-primary"
+              style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 7, textDecoration: "none" }}
+              data-testid="button-coaching-beheer"
+            >
+              <Mail size={14} /> Contact opnemen
+            </a>
+            <Link href="/vandaag" style={{ display: "block", fontSize: 12, color: "#64748b", marginTop: 12 }}>
+              Terug naar dashboard
+            </Link>
+          </div>
+        ) : (
+          <div className="openregio-upgrade-card" data-testid={`card-upgrade-${active.id}`} style={{ maxWidth: 420, margin: "0 auto" }}>
+            {/* Huidig plan banner voor ingelogde leden */}
+            {isLoggedIn && currentPlan && (
+              <div style={{
+                display: "flex", alignItems: "center", gap: 7,
+                background: "#f0f9ff", border: "1px solid #bae6fd",
+                borderRadius: 10, padding: "8px 12px", marginBottom: 14,
+                fontSize: 12, color: "#0369a1",
+              }} data-testid="banner-current-plan">
+                <Check size={13} style={{ flexShrink: 0 }} />
+                <span>
+                  Huidig plan: <strong>
+                    {currentPlan === "coaching" ? "1-op-1 coaching" : currentPlan === "pro" ? "Pro" : "Basis"}
+                  </strong>
+                </span>
+                {isAlreadyPro && (
+                  <span style={{ marginLeft: "auto", color: "#475569" }}>
+                    Upgrade mogelijk
+                  </span>
+                )}
+              </div>
+            )}
+
+            <span className="openregio-upgrade-badge" data-testid="badge-plan">
+              {active.badge}
+            </span>
+            <h2 data-testid="text-plan-name">{active.name}</h2>
+            <div className="openregio-upgrade-price">
+              <p className="openregio-price-amount" data-testid="text-plan-price">{active.price}</p>
+              <span className="openregio-price-period">{active.period}</span>
+            </div>
+            <p style={{ fontSize: 12, color: "#16a34a", fontWeight: 600, margin: "4px 0 14px" }}>
+              <Euro size={11} style={{ display: "inline", marginRight: 3 }} />
+              {active.affiliate}
+            </p>
+
+            {!isLoggedIn && (
+              <div className="openregio-form-group" style={{ marginBottom: 12 }}>
+                <label style={{ fontSize: 13, fontWeight: 600, color: "#475569", marginBottom: 6, display: "block" }}>
+                  E-mailadres
+                </label>
+                <input
+                  type="email"
+                  placeholder="jouw@email.nl"
+                  value={email}
+                  onChange={(e) => { setEmail(e.target.value); setError(null); }}
+                  data-testid="input-email"
+                  style={{
+                    width: "100%", padding: "10px 14px", borderRadius: 10,
+                    border: "1px solid #d1d5db", fontSize: 14, outline: "none", boxSizing: "border-box",
+                  }}
+                  disabled={isLoading}
+                  onKeyDown={(e) => e.key === "Enter" && handleBetaling()}
+                />
+              </div>
+            )}
+
+            {error && (
+              <div
+                style={{
+                  display: "flex", alignItems: "flex-start", gap: 8,
+                  background: "#fef2f2", border: "1px solid #fecaca",
+                  borderRadius: 10, padding: "10px 14px", marginBottom: 12,
+                  fontSize: 13, color: "#dc2626",
+                }}
+                data-testid="text-payment-error"
+              >
+                <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 2 }} />
+                {error}
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: 8, marginBottom: 8 }}>
+              {(["basic", "pro"] as PlanId[]).map((id) => (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => { setSelected(id); setError(null); }}
+                  data-testid={`button-select-${id}`}
+                  className={`openregio-button openregio-button-small ${
+                    selected === id
+                      ? id === "pro" ? "openregio-button-pro" : "openregio-button-basic"
+                      : "openregio-button-outline"
+                  }`}
+                  style={{ flex: 1 }}
+                >
+                  {PLANS[id].name}
+                  {currentPlan === id && (
+                    <span style={{ marginLeft: 5, fontSize: 10, opacity: 0.8 }}>(actief)</span>
+                  )}
+                </button>
+              ))}
+            </div>
+
+            {/* Blokeer downgrade of "al actief" */}
+            {isLoggedIn && isAlreadyOnSelected ? (
+              <div style={{
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 7,
+                background: "#f0fdf4", border: "1px solid #bbf7d0",
+                borderRadius: 10, padding: "11px 16px",
+                fontSize: 13, color: "#15803d", fontWeight: 600,
+              }} data-testid="text-already-active">
+                <Check size={14} />
+                Je hebt dit plan al actief
+              </div>
+            ) : isLoggedIn && isDowngrade ? (
+              <div style={{
+                display: "flex", alignItems: "flex-start", gap: 7,
+                background: "#fffbeb", border: "1px solid #fde68a",
+                borderRadius: 10, padding: "11px 16px",
+                fontSize: 13, color: "#92400e",
+              }} data-testid="text-downgrade-warning">
+                <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 1 }} />
+                Downgraden is momenteel niet mogelijk via dit formulier. Neem contact op via{" "}
+                <a href="mailto:info@openregio.nl" style={{ color: "#1d4ed8" }}>info@openregio.nl</a>.
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={handleBetaling}
+                disabled={isLoading}
+                data-testid="button-payment-link"
+                className={`openregio-button ${active.id === "pro" ? "openregio-button-pro" : "openregio-button-basic"}`}
+                style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}
+              >
+                {isLoading && <Loader2 size={16} className="animate-spin" />}
+                {isLoading
+                  ? "Betaling starten…"
+                  : isLoggedIn
+                    ? `Upgrade naar ${active.name} (${active.price}/mnd)`
+                    : `Ga naar betaling (${active.price}/mnd)`}
+              </button>
+            )}
+
+            <p className="openregio-upgrade-note">
+              <Lock size={11} style={{ display: "inline", marginRight: 4 }} />
+              Veilige betaling via Mollie · maandelijks opzegbaar
+            </p>
+
+            {!isLoggedIn && (
+              <p style={{ fontSize: 12, color: "#94a3b8", textAlign: "center", marginTop: 8 }}>
+                Na betaling ontvang je een e-mail om je account te activeren.
+              </p>
+            )}
+
+            {/* Pro-gebruiker: coaching upgrade hint */}
+            {isLoggedIn && currentPlan === "pro" && selected === "pro" && (
+              <div style={{
+                marginTop: 14, padding: "10px 14px", borderRadius: 10,
+                background: "#f0fdfa", border: "1px solid #99f6e4",
+                fontSize: 12, color: "#0f766e", textAlign: "center",
+              }} data-testid="banner-coaching-hint">
+                Wil je persoonlijke 1-op-1 begeleiding?{" "}
+                <a
+                  href="mailto:info@openregio.nl?subject=Interesse%20in%20Coaching-plan"
+                  style={{ color: "#0e7490", fontWeight: 700 }}
+                >
+                  Vraag coaching aan
+                </a>
+              </div>
+            )}
+          </div>
+        )}
 
         <div style={{ textAlign: "center", marginTop: 24 }}>
           <Link href="/" data-testid="link-back-home" style={{ fontSize: 13, color: "#64748b" }}>

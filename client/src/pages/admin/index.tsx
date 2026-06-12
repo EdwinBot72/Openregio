@@ -8,9 +8,10 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Users, Gavel, MapPin, TrendingUp, ArrowRight,
   FileText, BarChart2, ShieldCheck, Landmark, Building2, BookOpen,
-  TrendingDown, Euro, Activity, Sparkles,
+  TrendingDown, Euro, Activity, Sparkles, Lock,
 } from "lucide-react";
 import { Link } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 import {
   AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from "recharts";
@@ -153,9 +154,42 @@ function SparklineCard({
 
 export default function AdminIndexPage() {
   usePageTitle("Admin Cockpit");
+  const { user, isLoading: authLoading } = useAuth();
+
   const { data: stats, isLoading } = useQuery<AdminStats>({
     queryKey: ["/api/admin/stats"],
+    enabled: !authLoading && (user?.role === "admin" || user?.role === "master" || !!user?.isAdmin),
   });
+
+  const isAdmin = user?.role === "admin" || user?.role === "master" || !!user?.isAdmin;
+
+  if (authLoading) {
+    return (
+      <div className="max-w-5xl mx-auto px-1 py-8 space-y-4">
+        <Skeleton className="h-32 w-full rounded-xl" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="max-w-2xl mx-auto px-4 py-20 text-center space-y-4" data-testid="page-admin-gate">
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-destructive/10 mx-auto">
+          <Lock className="h-8 w-8 text-destructive" />
+        </div>
+        <h1 className="text-2xl font-bold">Geen toegang</h1>
+        <p className="text-muted-foreground">
+          Deze pagina is alleen toegankelijk voor platformbeheerders.
+        </p>
+        <Button asChild>
+          <Link href="/vandaag">Terug naar dashboard</Link>
+        </Button>
+      </div>
+    );
+  }
 
   const proCount = stats?.users.byPlan?.pro ?? 0;
   const basicCount = stats?.users.byPlan?.basic ?? 0;

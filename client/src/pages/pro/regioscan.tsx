@@ -870,7 +870,7 @@ export default function RegioScanProPage() {
   const { toast } = useToast();
   const [actieveScan, setActieveScan] = useState<RegioScan | null>(null);
 
-  const isPro = user?.plan === "pro";
+  const isPro = user?.plan === "pro" || user?.plan === "coaching";
 
   const { data: scans = [], isLoading: scansLoading } = useQuery<RegioScan[]>({
     queryKey: ["/api/regioscan"],

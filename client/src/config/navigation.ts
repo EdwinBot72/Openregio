@@ -93,9 +93,9 @@ export const MAIN_NAV: NavSection[] = [
     title: "Groei",
     icon: BarChart3,
     sub: [
-      { title: "Zichtbaarheid", url: "/groei/zichtbaarheid", icon: Eye, proOnly: true },
+      { title: "Zichtbaarheid", url: "/groei/zichtbaarheid", icon: Eye, proLocked: true },
       { title: "Profiel", url: "/groei/profiel", icon: Building2 },
-      { title: "Website-check", url: "/groei/website-check", icon: Globe, proOnly: true },
+      { title: "Website-check", url: "/groei/website-check", icon: Globe, proLocked: true },
       { title: "RegioScan", url: "/pro/regioscan", icon: Compass, proLocked: true },
     ],
   },
