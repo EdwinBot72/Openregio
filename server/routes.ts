@@ -12,6 +12,7 @@ import { sendOnboardingEmail, sendNotificationEmail } from "./services/emailServ
 import bcrypt from "bcrypt";
 import { uploadMemory, getDocumentType } from "./middleware/upload";
 import { publicAiRateLimit, authenticatedAiRateLimit } from "./middleware/aiRateLimit";
+import { mollieStartRateLimit, contactFormRateLimit } from "./middleware/rateLimits";
 import { objectStorageClient } from "./replit_integrations/object_storage";
 import { randomUUID, createHash } from "crypto";
 import { runRegioBot } from "./regiobot";
@@ -135,7 +136,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // BLOK 2: Mollie Payment Flow (Basis €14,95 / Pro €59 ex btw)
   
   // POST /start - Create Mollie payment for plan subscription
-  app.post("/start", async (req, res) => {
+  app.post("/start", mollieStartRateLimit, async (req, res) => {
     try {
       const { email, plan, ref } = req.body;
       
@@ -430,7 +431,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // POST /api/lead — aanmeldingsformulier van de landingspagina
-  app.post("/api/lead", async (req, res) => {
+  app.post("/api/lead", contactFormRateLimit, async (req, res) => {
     try {
       const { leads, insertLeadSchema } = await import("@shared/schema");
       const parsed = insertLeadSchema.safeParse(req.body);
@@ -958,7 +959,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // RegioBot chat route with mode support: general, legal, marketing (Pro-only)
-  app.post("/api/regiobot/chat", requirePro, async (req, res) => {
+  app.post("/api/regiobot/chat", requirePro, authenticatedAiRateLimit, async (req, res) => {
     try {
       // Early check for OpenAI API key
       if (!process.env.OPENAI_API_KEY) {
@@ -1155,7 +1156,7 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
   });
 
   // WOO RegioBot - searches WOO requests/documents and provides AI answers
-  app.post("/api/regiobot", async (req, res) => {
+  app.post("/api/regiobot", publicAiRateLimit, async (req, res) => {
     try {
       const payload = req.body ?? {};
       const isTestFixture =
@@ -1271,32 +1272,9 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
     }
   });
 
-  // Rate limiter for public RegioBot endpoint (5 requests per IP per minute)
-  const buurmanRateLimit = new Map<string, { count: number; resetAt: number }>();
-  const BUURMAN_RATE_WINDOW = 60_000;
-  const BUURMAN_RATE_MAX = 5;
-
-  // Digitale Buurman - quick RegioBot for dashboard (public, no auth needed)
-  app.post("/api/regiobot/buurman", async (req, res) => {
+  // Digitale Buurman - quick RegioBot for dashboard (public, rate-limited)
+  app.post("/api/regiobot/buurman", publicAiRateLimit, async (req, res) => {
     try {
-      const ip = req.ip || req.socket.remoteAddress || "unknown";
-      const now = Date.now();
-      const entry = buurmanRateLimit.get(ip);
-      if (entry && now < entry.resetAt) {
-        if (entry.count >= BUURMAN_RATE_MAX) {
-          return res.status(429).json({ error: "Te veel verzoeken. Probeer het over een minuut opnieuw." });
-        }
-        entry.count++;
-      } else {
-        buurmanRateLimit.set(ip, { count: 1, resetAt: now + BUURMAN_RATE_WINDOW });
-      }
-      // Clean old entries periodically
-      if (buurmanRateLimit.size > 1000) {
-        for (const [key, val] of buurmanRateLimit) {
-          if (now > val.resetAt) buurmanRateLimit.delete(key);
-        }
-      }
-
       const { beroep, stad, vraag } = req.body;
       if (!beroep || !stad || typeof beroep !== "string" || typeof stad !== "string") {
         return res.status(400).json({ error: "Beroep en stad zijn verplicht" });
@@ -1391,30 +1369,9 @@ Schrijf in het Nederlands. Toon: scherp, concreet, als een insider die de regio 
     }
   });
 
-  // Regelgeving-check - publieke endpoint voor homepage (rate-limited)
-  const regelgevingRateLimit = new Map<string, { count: number; resetAt: number }>();
-  const REGELGEVING_RATE_WINDOW = 60_000;
-  const REGELGEVING_RATE_MAX = 5;
-
-  app.post("/api/regelgeving/check", async (req, res) => {
+  // Regelgeving-check - publieke endpoint voor homepage (rate-limited via middleware)
+  app.post("/api/regelgeving/check", publicAiRateLimit, async (req, res) => {
     try {
-      const ip = req.ip || req.socket.remoteAddress || "unknown";
-      const now = Date.now();
-      const entry = regelgevingRateLimit.get(ip);
-      if (entry && now < entry.resetAt) {
-        if (entry.count >= REGELGEVING_RATE_MAX) {
-          return res.status(429).json({ error: "Te veel verzoeken. Probeer het over een minuut opnieuw." });
-        }
-        entry.count++;
-      } else {
-        regelgevingRateLimit.set(ip, { count: 1, resetAt: now + REGELGEVING_RATE_WINDOW });
-      }
-      if (regelgevingRateLimit.size > 1000) {
-        for (const [key, val] of regelgevingRateLimit) {
-          if (now > val.resetAt) regelgevingRateLimit.delete(key);
-        }
-      }
-
       const { branche, onderwerp } = req.body;
       if (!branche || !onderwerp || typeof branche !== "string" || typeof onderwerp !== "string") {
         return res.status(400).json({ error: "Branche en onderwerp zijn verplicht" });
@@ -1715,8 +1672,12 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
   });
 
   // Proxy: stuur bestand door naar externe opslag-server
-  const EXTERN_UPLOAD_URL = process.env.BACKEND_UPLOAD_URL ?? "http://212.56.48.106:5001/upload";
+  // BACKEND_UPLOAD_URL moet expliciet zijn ingesteld — geen hardcoded fallback
   app.post("/api/brief-analyse/opslaan-extern", requirePro, uploadMemory.single('file'), async (req, res) => {
+    const EXTERN_UPLOAD_URL = process.env.BACKEND_UPLOAD_URL;
+    if (!EXTERN_UPLOAD_URL) {
+      return res.status(503).json({ error: "Deze functie is tijdelijk niet geconfigureerd. Neem contact op via info@openregio.nl." });
+    }
     try {
       const file = req.file;
       if (!file) return res.status(400).json({ error: "Geen bestand ontvangen" });
@@ -1754,11 +1715,11 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
         return res.status(502).json({ error: msg });
       }
 
-      console.log(`[BriefAnalyse/opslaan-extern] file=${file.originalname} size=${file.size} → ${EXTERN_UPLOAD_URL} status=${extern.status}`);
+      console.log(`[BriefAnalyse/opslaan-extern] file=${file.originalname} size=${file.size} status=${extern.status}`);
       res.json({ ok: true, bestandsnaam: file.originalname, ...(externData as object) });
     } catch (err: any) {
       console.error("[BriefAnalyse/opslaan-extern] Error:", err);
-      res.status(502).json({ error: "Kan de externe server niet bereiken", hint: "Controleer of de opslagserver actief is op 212.56.48.106:5001." });
+      res.status(502).json({ error: "Kan de externe opslagserver niet bereiken. Probeer het later opnieuw." });
     }
   });
 
@@ -2887,7 +2848,7 @@ Maak het verzoek professioneel en juridisch correct.`;
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: error.errors });
       }
-      res.status(500).json({ error: error.message || "Failed to create checkout session" });
+      res.status(500).json({ error: "Kon checkout-sessie niet aanmaken. Probeer het later opnieuw." });
     }
   });
 
@@ -4803,7 +4764,7 @@ Maak het verzoek professioneel en juridisch correct.`;
       res.json({ success: true, nieuwSignalen: count });
     } catch (err: any) {
       console.error("Intel fetch fout:", err);
-      res.status(500).json({ error: "Fetch mislukt", detail: err.message });
+      res.status(500).json({ error: "Ophalen van signalen mislukt. Probeer het later opnieuw." });
     }
   });
 
@@ -7522,10 +7483,12 @@ Geef alleen de brieftekst terug, zonder commentaar, zonder markdown, zonder JSON
   // ─────────────────────────────────────────────────────────────────────
   // SEO CHECKLIST (opslaan voortgang per gebruiker)
   // ─────────────────────────────────────────────────────────────────────
+  // IDOR-fix: userId komt altijd uit de sessie, nooit uit de URL-parameter
   app.get("/api/seo-checklist/:userId", requireAuth, async (req, res) => {
+    const sessionUserId = (req.user as any).id as string;
     try {
       const { rows } = await db.execute(
-        sql`SELECT afgevinkt FROM seo_checklist WHERE user_id = ${req.params.userId}`
+        sql`SELECT afgevinkt FROM seo_checklist WHERE user_id = ${sessionUserId}`
       );
       res.json({ afgevinkt: (rows[0] as any)?.afgevinkt ?? [] });
     } catch {
@@ -7534,11 +7497,12 @@ Geef alleen de brieftekst terug, zonder commentaar, zonder markdown, zonder JSON
   });
 
   app.post("/api/seo-checklist/:userId", requireAuth, async (req, res) => {
+    const sessionUserId = (req.user as any).id as string;
     const { afgevinkt } = req.body as { afgevinkt: string[] };
     try {
       await db.execute(sql`
         INSERT INTO seo_checklist (user_id, afgevinkt, updated_at)
-        VALUES (${req.params.userId}, ${JSON.stringify(afgevinkt)}::jsonb, NOW())
+        VALUES (${sessionUserId}, ${JSON.stringify(afgevinkt)}::jsonb, NOW())
         ON CONFLICT (user_id) DO UPDATE
         SET afgevinkt = ${JSON.stringify(afgevinkt)}::jsonb, updated_at = NOW()
       `);
