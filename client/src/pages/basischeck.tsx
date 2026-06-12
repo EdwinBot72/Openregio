@@ -38,7 +38,7 @@ function urgentieKleur(u: string) {
 }
 
 export default function BasischeckPage() {
-  usePageTitle("Gratis Basischeck — OpenRegio");
+  usePageTitle("Lokale Basischeck — OpenRegio");
   const { isAuthenticated } = useAuth();
 
   const [activeTab, setActiveTab] = useState<AnalyseType>("regio-analyse");
@@ -125,7 +125,7 @@ export default function BasischeckPage() {
               marginBottom: 14,
             }}
           >
-            <Star className="h-3 w-3" /> Gratis Basischeck
+            <Star className="h-3 w-3" /> Lokale Basischeck
           </span>
           <h1 className="openregio-public-title" style={{ fontSize: 34 }}>
             Zie direct wat er speelt in <span style={{ color: "#1f5fae" }}>jouw regio.</span>
@@ -447,7 +447,7 @@ export default function BasischeckPage() {
       {!resultaat && !loading && (
         <div className="openregio-public-content" style={{ maxWidth: 1000, paddingTop: 0 }}>
           <div style={{ textAlign: "center", marginBottom: 20 }}>
-            <h2 style={{ fontSize: 22, fontWeight: 800, color: "#0b2240", margin: "0 0 4px" }}>Wat je gratis krijgt</h2>
+            <h2 style={{ fontSize: 22, fontWeight: 800, color: "#0b2240", margin: "0 0 4px" }}>Wat je krijgt</h2>
             <p style={{ fontSize: 13, color: "#64748b", margin: 0 }}>Direct inzicht, zonder registratie</p>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 14 }}>

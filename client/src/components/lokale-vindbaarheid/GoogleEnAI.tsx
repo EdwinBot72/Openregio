@@ -6,7 +6,7 @@ const KAARTEN = [
   {
     Icon: MapPin,
     titel: "Google Bedrijfsprofiel",
-    badge: "Gratis",
+    badge: "Kosteloos",
     omschrijving:
       "Het krachtigste lokale SEO-hulpmiddel. Verschijnt in Google Maps en in AI-samenvattingen van Gemini.",
     acties: [

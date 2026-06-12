@@ -127,7 +127,7 @@ const THEMA_STIJL: Record<string, ThemaStijl> = {
     fallbackSamenvatting:
       "De energieprijzen blijven volatiel en de EU-doelstellingen uit Agenda 2030 verplichten ondernemers stapsgewijs te verduurzamen. Energiekosten zijn voor veel mkb-bedrijven nu de grootste kostenpost na personeel.",
     fallbackActies: [
-      "Vraag een energie-audit aan via RVO — gratis voor mkb",
+      "Vraag een energie-audit aan via RVO — kosteloos voor mkb",
       "Dien vóór de deadline subsidie aan voor zonnepanelen of isolatie (ISDE-regeling)",
       "Check of jouw pand voldoet aan energielabel C-verplichting voor kantoren (2023+)",
     ],
@@ -171,7 +171,7 @@ const THEMA_STIJL: Record<string, ThemaStijl> = {
     fallbackActies: [
       "Identificeer 1-3 processen in je bedrijf waarbij AI direct tijd bespaart",
       "Check of jouw AI-toepassingen onder de 'hoog-risico' categorie van de AI Act vallen",
-      "Volg de gratis AI-cursussen via Digitaliseringshulp.nl (KVK-initiatief)",
+      "Volg de AI-cursussen via Digitaliseringshulp.nl (KVK-initiatief)",
     ],
   },
   circulair: {

@@ -109,7 +109,7 @@ export default function WebsiteOnderhoudPage() {
             <CardHeader className="pb-2">
               <div className="flex items-center gap-2">
                 <CardTitle className="text-sm">Basis lid</CardTitle>
-                <Badge variant="secondary" className="text-xs">Gratis</Badge>
+                <Badge variant="secondary" className="text-xs">Inbegrepen</Badge>
               </div>
             </CardHeader>
             <CardContent className="space-y-2">

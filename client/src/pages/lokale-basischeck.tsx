@@ -56,7 +56,7 @@ const CATEGORIEEN: Categorie[] = [
         id: "kvk",
         titel: "Is je KvK-inschrijving volledig actueel?",
         toelichting: "Adres, activiteiten, rechtsvorm — klopt dit allemaal nog met je huidige situatie?",
-        tip: "Log in op kvk.nl en controleer je gegevens. Aanpassen is gratis en wettelijk verplicht.",
+        tip: "Log in op kvk.nl en controleer je gegevens. Aanpassen is kosteloos en wettelijk verplicht.",
         href: "/intel",
         hrefLabel: "Bekijk regelgeving-updates",
       },
@@ -72,7 +72,7 @@ const CATEGORIEEN: Categorie[] = [
         id: "avg",
         titel: "Heb je een actueel privacybeleid (AVG) voor je klanten?",
         toelichting: "Verwerk je klantgegevens, e-mailadressen of betaalgegevens? Dan ben je verplicht een privacyverklaring te hebben.",
-        tip: "De AP (Autoriteit Persoonsgegevens) heeft gratis modellen. Voeg een privacy-link toe aan je website en kassabon.",
+        tip: "De AP (Autoriteit Persoonsgegevens) heeft kant-en-klare modellen. Voeg een privacy-link toe aan je website en kassabon.",
         href: "/tools/brief-analyse",
         hrefLabel: "Laat een AVG-brief checken",
       },
@@ -154,7 +154,7 @@ const CATEGORIEEN: Categorie[] = [
         id: "marketing_lokaal",
         titel: "Promoot je je bedrijf actief via lokale kanalen?",
         toelichting: "Lokale krant, buurtapp, gemeentelijke nieuwsbrief, lokale Facebook-groepen of een sticker in je etalage.",
-        tip: "Vraag of je in de gemeentelijke ondernemersnewsletter kunt worden vermeld. Dit is gratis en bereikt honderden lokale kopers.",
+        tip: "Vraag of je in de gemeentelijke ondernemersnewsletter kunt worden vermeld. Dit bereikt honderden lokale kopers.",
       },
     ],
   },
@@ -178,7 +178,7 @@ const CATEGORIEEN: Categorie[] = [
         id: "aanbestedingen",
         titel: "Monitor je aanbestedingen van gemeenten en provincies?",
         toelichting: "Overheidsaanbestedingen zijn openbaar. Bedrijven tot €150.000 omzet kunnen al meedingen bij meervoudig onderhands.",
-        tip: "Maak een gratis account op TenderNed of gebruik OpenRegio om regionale aanbestedingen te volgen.",
+        tip: "Maak een account op TenderNed of gebruik OpenRegio om regionale aanbestedingen te volgen.",
         href: "/kansen/aanbestedingen",
         hrefLabel: "Bekijk aanbestedingen",
       },
@@ -194,7 +194,7 @@ const CATEGORIEEN: Categorie[] = [
         id: "ondernemersloket",
         titel: "Heb je contact gehad met het Ondernemersloket van je gemeente?",
         toelichting: "Gemeenten hebben speciale loketten voor ondernemers met informatie over vergunningen, subsidies en regelgeving.",
-        tip: "Vraag een gratis gesprek aan bij het Ondernemersloket. Zij kennen lokale regelingen die je online niet makkelijk vindt.",
+        tip: "Vraag een gesprek aan bij het Ondernemersloket. Zij kennen lokale regelingen die je online niet makkelijk vindt.",
       },
     ],
   },
@@ -334,7 +334,7 @@ export default function LokaleBasischeckPage() {
           <div className="flex items-center gap-4 mt-5 flex-wrap">
             <span className="text-xs text-white/60">{totaalVragen} vragen</span>
             <span className="text-xs text-white/60">~10 minuten</span>
-            <span className="text-xs text-white/60">Gratis voor leden</span>
+            <span className="text-xs text-white/60">Inbegrepen voor leden</span>
           </div>
         </div>
 

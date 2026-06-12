@@ -69,7 +69,7 @@ const FEATURES: Feature[] = [
     titel: "Google-profiel",
     sub: "Maximaal profiteren van je Google-vermelding.",
     status: { label: "✓ Compleet", af: true },
-    body: "Je Google-bedrijfsprofiel is gratis maar enorm krachtig. OpenRegio helpt je om alle onderdelen volledig in te vullen en bij te houden.",
+    body: "Je Google-bedrijfsprofiel is kosteloos maar enorm krachtig. OpenRegio helpt je om alle onderdelen volledig in te vullen en bij te houden.",
     stappen: [
       { tekst: "Google-profiel volledig ingevuld", af: true },
       { tekst: "Foto's en openingstijden actueel", af: true },

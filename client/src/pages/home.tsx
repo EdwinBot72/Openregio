@@ -62,7 +62,7 @@ export default function HomePage() {
             <div className="lp-nav-cta">
               <Link href="/login" className="lp-btn-ghost-nav" data-testid="link-nav-login">Inloggen</Link>
               <Link href="/register" className="lp-btn-orange-nav" data-testid="link-nav-register">
-                Gratis starten <ChevronRight size={14} />
+                Word lid <ChevronRight size={14} />
               </Link>
             </div>
 
@@ -79,7 +79,7 @@ export default function HomePage() {
           <a href="#aanbod" className="lp-nav-link" onClick={() => setMobileOpen(false)}>Aanbod</a>
           <div className="lp-mobile-cta">
             <Link href="/login" className="lp-btn-ghost-nav" onClick={() => setMobileOpen(false)}>Inloggen</Link>
-            <Link href="/register" className="lp-btn-orange-nav" onClick={() => setMobileOpen(false)}>Gratis starten</Link>
+            <Link href="/register" className="lp-btn-orange-nav" onClick={() => setMobileOpen(false)}>Word lid</Link>
           </div>
         </div>
       </header>
@@ -104,7 +104,7 @@ export default function HomePage() {
               </p>
               <div className="lp-hero-btns">
                 <Link href="/register" className="lp-btn-hero-orange" data-testid="link-hero-start">
-                  <ArrowRight size={16} /> Gratis starten
+                  <ArrowRight size={16} /> Word lid
                 </Link>
                 <a href="#pijlers" className="lp-btn-hero-white">
                   <Play size={14} /> Bekijk de drie pijlers

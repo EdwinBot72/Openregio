@@ -39,7 +39,7 @@ const TIPS: Tip[] = [
       "Je hebt geen demonstratie nodig om gehoord te worden. De Wet open overheid, inspraakavonden en burgerinitiatieven zijn er juist voor.",
     stappen: [
       "Dien een Woo-verzoek in als een gemeente onduidelijk is over besluitvorming — werkt vaak beter dan publieke kritiek.",
-      "Maak gebruik van de inspreekmogelijkheid bij raads- en commissievergaderingen (5 minuten per persoon, gratis).",
+      "Maak gebruik van de inspreekmogelijkheid bij raads- en commissievergaderingen (5 minuten per persoon, kosteloos).",
       "Verzamel handtekeningen voor een burgerinitiatief — afhankelijk van de gemeente vaak al vanaf 25–250 stemmen.",
     ],
   },

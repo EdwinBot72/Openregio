@@ -378,7 +378,7 @@ export default function FinancieringPage() {
                 >
                   KVK Financieringsdesk
                 </a>{" "}
-                helpen je gratis bij het vinden en aanvragen van passende financiering.
+                helpen je bij het vinden en aanvragen van passende financiering.
               </p>
             </div>
           </CardContent>

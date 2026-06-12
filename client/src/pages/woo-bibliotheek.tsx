@@ -229,7 +229,7 @@ export default function WooBibliotheekPage() {
         {!isPro && (
           <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 rounded-md p-3" data-testid="text-upload-limit-info">
             <AlertCircle className="h-4 w-4 shrink-0" />
-            <span>Gratis toegang: 1 document per dag. Extra uploads beschikbaar voor leden met uitgebreide toegang.</span>
+            <span>Basis-toegang: 1 document per dag. Extra uploads beschikbaar voor leden met uitgebreide toegang.</span>
           </div>
         )}
       </header>
@@ -267,7 +267,7 @@ export default function WooBibliotheekPage() {
           <div className="flex items-center gap-1.5 pl-8">
             <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
             <span className="text-xs text-muted-foreground">
-              Gratis leden kunnen 1 document per dag uploaden. Pro-leden uploaden onbeperkt.
+              Basis-leden kunnen 1 document per dag uploaden. Pro-leden uploaden onbeperkt.
             </span>
           </div>
         </CardContent>
