@@ -53,7 +53,7 @@ export default function RegelgevingVerkennerPage() {
   usePageTitle("Wetgeving & Regelgeving");
   const { user } = useAuth();
   const { toast } = useToast();
-  const isPro = (user as any)?.plan === "pro" || (user as any)?.role === "admin" || (user as any)?.role === "master";
+  const isPro = user?.plan === "pro" || user?.plan === "coaching" || user?.role === "admin" || user?.role === "master";
 
   const [query, setQuery] = useState("");
   const [activeQuery, setActiveQuery] = useState("");

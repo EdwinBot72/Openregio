@@ -75,7 +75,7 @@ export default function BedrijfsprofielPage() {
     canceledAt?: string | null;
   }>({
     queryKey: ["/api/billing/subscription"],
-    enabled: user?.plan === "pro",
+    enabled: user?.plan === "pro" || user?.plan === "coaching",
     retry: false,
   });
 
@@ -426,8 +426,8 @@ export default function BedrijfsprofielPage() {
         </CardContent>
       </Card>
 
-      {/* Lidmaatschap sectie — alleen zichtbaar voor Pro-leden */}
-      {user?.plan === "pro" && (
+      {/* Lidmaatschap sectie — zichtbaar voor Pro en coaching-leden */}
+      {(user?.plan === "pro" || user?.plan === "coaching") && (
         <Card className="mt-8">
           <CardHeader>
             <div className="flex items-center gap-3">
@@ -443,7 +443,7 @@ export default function BedrijfsprofielPage() {
               <div className="flex flex-col gap-1">
                 <div className="flex items-center gap-3">
                   <Badge variant="secondary" data-testid="badge-plan">
-                    Pro
+                    {user?.plan === "coaching" ? "1-op-1 coaching" : "Pro"}
                   </Badge>
                   <span className="text-sm text-muted-foreground">
                     {subscription?.status === "cancelled" ? "Opgezegd" : "Actief abonnement"}

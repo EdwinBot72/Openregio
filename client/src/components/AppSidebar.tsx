@@ -214,7 +214,7 @@ export function AppSidebar() {
     }
   };
 
-  const isPro = user?.plan === "pro";
+  const isPro = user?.plan === "pro" || user?.plan === "coaching";
   const isAdmin = user?.role === "master" || user?.role === "admin" || !!user?.isAdmin;
 
   // Ongelezen leden-updates → badge bij "Vandaag"

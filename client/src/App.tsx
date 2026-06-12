@@ -46,6 +46,7 @@ import AdminIndexPage from "@/pages/admin/index";
 import AdminWooPage from "@/pages/admin/woo";
 import AdminRegiosPage from "@/pages/admin/regios";
 import AdminInzichtPage from "@/pages/admin/inzicht";
+import { AdminGate } from "@/components/AdminGate";
 import AffiliatePage from "@/pages/affiliate";
 import LedenPage from "@/pages/leden";
 import ForgotPasswordPage from "@/pages/forgot-password";
@@ -255,18 +256,18 @@ function AuthenticatedRouter() {
       <Route path="/account/affiliate" component={AffiliatePage} />
 
       {/* ── Beheer (admin) ────────────────────────────────────────────────── */}
-      <Route path="/admin" component={AdminIndexPage} />
-      <Route path="/admin/woo" component={AdminWooPage} />
-      <Route path="/admin/regios" component={AdminRegiosPage} />
-      <Route path="/admin/inzicht" component={AdminInzichtPage} />
-      <Route path="/admin/blogs" component={AdminBlogsPage} />
-      <Route path="/admin/commissions" component={AdminCommissionsPage} />
-      <Route path="/admin/users" component={AdminUsersPage} />
-      <Route path="/admin/regio-deals" component={RegiodealsAdminPage} />
-      <Route path="/admin/ondernemers" component={AdminOndernemersPage} />
-      <Route path="/admin/intel" component={AdminIntelPage} />
-      <Route path="/admin/wetgeving" component={AdminWetgevingPage} />
-      <Route path="/admin/cursussen" component={AdminCursussenPage} />
+      <Route path="/admin"><AdminGate><AdminIndexPage /></AdminGate></Route>
+      <Route path="/admin/woo"><AdminGate><AdminWooPage /></AdminGate></Route>
+      <Route path="/admin/regios"><AdminGate><AdminRegiosPage /></AdminGate></Route>
+      <Route path="/admin/inzicht"><AdminGate><AdminInzichtPage /></AdminGate></Route>
+      <Route path="/admin/blogs"><AdminGate><AdminBlogsPage /></AdminGate></Route>
+      <Route path="/admin/commissions"><AdminGate><AdminCommissionsPage /></AdminGate></Route>
+      <Route path="/admin/users"><AdminGate><AdminUsersPage /></AdminGate></Route>
+      <Route path="/admin/regio-deals"><AdminGate><RegiodealsAdminPage /></AdminGate></Route>
+      <Route path="/admin/ondernemers"><AdminGate><AdminOndernemersPage /></AdminGate></Route>
+      <Route path="/admin/intel"><AdminGate><AdminIntelPage /></AdminGate></Route>
+      <Route path="/admin/wetgeving"><AdminGate><AdminWetgevingPage /></AdminGate></Route>
+      <Route path="/admin/cursussen"><AdminGate><AdminCursussenPage /></AdminGate></Route>
 
       {/* ── Overige authenticeerde routes (intern / deeplink) ─────────────── */}
       <Route path="/onboarding" component={OnboardingPage} />

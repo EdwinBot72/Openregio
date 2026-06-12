@@ -321,8 +321,8 @@ export default function PrivacyDashboardPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-sm text-muted-foreground">Lidmaatschap</span>
-                <Badge variant={dashboardData?.profile?.plan === "pro" ? "default" : "outline"}>
-                  {dashboardData?.profile?.plan === "pro" ? "Pro" : "Basis"}
+                <Badge variant={dashboardData?.profile?.plan === "pro" || dashboardData?.profile?.plan === "coaching" ? "default" : "outline"}>
+                  {dashboardData?.profile?.plan === "coaching" ? "1-op-1 coaching" : dashboardData?.profile?.plan === "pro" ? "Pro" : "Basis"}
                 </Badge>
               </div>
             </div>

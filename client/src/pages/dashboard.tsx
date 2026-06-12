@@ -638,7 +638,7 @@ export default function DashboardPage() {
     );
   }
 
-  const isPro = user.plan === "pro";
+  const isPro = user.plan === "pro" || user.plan === "coaching";
   const isAdmin = user.isAdmin || false;
   const isMaster = user.role === "master" || user.role === "admin";
   const hasSector = !!user.sector;
@@ -707,7 +707,7 @@ export default function DashboardPage() {
               className="inline-flex items-center gap-1.5 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white/90"
               data-testid="badge-plan"
             >
-              {isPro ? "Pro-lid" : "Basis-lid"}
+              {user.plan === "coaching" ? "Coaching-lid" : isPro ? "Pro-lid" : "Basis-lid"}
             </span>
             {sectorConfig && (
               <span
@@ -781,7 +781,7 @@ export default function DashboardPage() {
                 </span>
               )}
               <Badge variant="secondary" className="text-[10px]" data-testid="badge-pakket">
-                {isPro ? "Pro" : "Basis"}
+                {user.plan === "coaching" ? "Coaching" : isPro ? "Pro" : "Basis"}
               </Badge>
             </div>
             {(bedrijfsprofiel?.regio || user.region) && (

@@ -137,7 +137,7 @@ function saveChecklist(data: Record<string, boolean>) {
 export default function AanDeSlagPage() {
   usePageTitle("Aan de slag");
   const { user } = useAuth();
-  const isPro = user?.plan === "pro" || (user as any)?.role === "admin" || (user as any)?.role === "master";
+  const isPro = user?.plan === "pro" || user?.plan === "coaching" || user?.role === "admin" || user?.role === "master";
 
   const [checklist, setChecklist] = useState<Record<string, boolean>>(loadChecklist);
   const greeting = getGreeting();

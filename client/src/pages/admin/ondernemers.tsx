@@ -277,10 +277,10 @@ export default function AdminOndernemersPage() {
                       <td className="px-4 py-3 text-muted-foreground">{row.region}</td>
                       <td className="px-4 py-3">
                         <Badge
-                          variant={row.plan === "pro" ? "default" : "secondary"}
+                          variant={row.plan === "pro" || row.plan === "coaching" ? "default" : "secondary"}
                           data-testid={`badge-plan-${row.id}`}
                         >
-                          {row.plan === "pro" ? "Pro" : "Basis"}
+                          {row.plan === "coaching" ? "Coaching" : row.plan === "pro" ? "Pro" : "Basis"}
                         </Badge>
                       </td>
                       <td className="px-4 py-3 text-muted-foreground">

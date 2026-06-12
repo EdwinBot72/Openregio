@@ -7,9 +7,11 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Send, FileText, ExternalLink, AlertCircle, Copy, Download, Check, Save } from "lucide-react";
+import { Loader2, Send, FileText, ExternalLink, AlertCircle, Copy, Download, Check, Save, Lock } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
+import { Link } from "wouter";
 
 interface Citation {
   sourceNo: number;
@@ -63,6 +65,7 @@ const AVAILABLE_TAGS = [
 ];
 
 export default function WooBotPage() {
+  const { user, isLoading: authLoading } = useAuth();
   const { toast } = useToast();
   const [question, setQuestion] = useState("");
   const [selectedRegion, setSelectedRegion] = useState<string>("");
@@ -217,6 +220,49 @@ export default function WooBotPage() {
       description: "Tekstbestand opgeslagen.",
     });
   };
+
+  const isPro = user?.plan === "pro" || user?.plan === "coaching" || user?.role === "admin" || user?.role === "master";
+
+  if (authLoading) {
+    return (
+      <div className="container mx-auto py-8 px-4 max-w-4xl space-y-4">
+        <div className="h-8 w-48 bg-muted animate-pulse rounded" />
+        <div className="h-64 w-full bg-muted animate-pulse rounded-xl" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="container mx-auto py-16 px-4 max-w-lg text-center space-y-4" data-testid="page-woo-bot-login">
+        <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 mx-auto">
+          <Lock className="h-7 w-7 text-primary" />
+        </div>
+        <h1 className="text-2xl font-bold">Inloggen vereist</h1>
+        <p className="text-muted-foreground">Log in of maak een account aan om de regelgeving-assistent te gebruiken.</p>
+        <div className="flex gap-3 justify-center">
+          <Button asChild><Link href="/login">Inloggen</Link></Button>
+          <Button variant="outline" asChild><Link href="/register">Registreren</Link></Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isPro) {
+    return (
+      <div className="container mx-auto py-16 px-4 max-w-lg text-center space-y-4" data-testid="page-woo-bot-gate">
+        <div className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-primary/10 mx-auto">
+          <Lock className="h-7 w-7 text-primary" />
+        </div>
+        <h1 className="text-2xl font-bold">Pro-functie</h1>
+        <p className="text-muted-foreground">
+          De regelgeving-assistent en WOO-brievengenerator zijn beschikbaar voor Pro-leden en hoger.
+        </p>
+        <Button asChild><Link href="/lidmaatschap?plan=pro">Upgrade naar Pro — €59/mnd</Link></Button>
+        <p className="text-xs text-muted-foreground">excl. btw · maandelijks opzegbaar</p>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto py-8 px-4 max-w-4xl">

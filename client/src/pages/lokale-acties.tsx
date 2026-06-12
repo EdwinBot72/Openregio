@@ -94,7 +94,7 @@ export default function LokaleActiesPage() {
   usePageTitle("Lokale acties");
   const { user } = useAuth();
   const { toast } = useToast();
-  const isPro = user?.plan === "pro";
+  const isPro = user?.plan === "pro" || user?.plan === "coaching";
 
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<LokaleActie | null>(null);

@@ -242,7 +242,7 @@ function GemeenteCombobox({ value, onChange, dark = false }: GemeenteComboboxPro
 export default function KansenInDeBuurtPage() {
   usePageTitle("Kansen in de buurt");
   const { user } = useAuth();
-  const isPro = user?.plan === "pro" || user?.plan === "master";
+  const isPro = user?.plan === "pro" || user?.plan === "coaching";
 
   const { data: profiel } = useQuery<{ regio?: string } | null>({
     queryKey: ["/api/business-profile/me"],

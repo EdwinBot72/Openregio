@@ -39,7 +39,7 @@ interface RagDocument {
 
 export default function WooBibliotheekPage() {
   const { user, isLoading: authLoading } = useAuth();
-  const isPro = user?.plan === "pro";
+  const isPro = user?.plan === "pro" || user?.plan === "coaching";
   const { toast } = useToast();
 
   const [dragActive, setDragActive] = useState(false);
