@@ -44,13 +44,14 @@ export function generateOnboardingToken(): string {
 }
 
 /**
- * Calculate the plan price in euros (ex btw)
- * Pricing: Basis €19 / Pro €49
+ * Calculate the plan price in euros (excl. BTW)
+ * Pricing: Basis €14,95 / Pro €59,00
+ * Incl. BTW (21%): Basis €18,09 / Pro €71,39
  * @param plan Plan name (basic or pro)
- * @returns Price as string in format "19.00" or "49.00"
+ * @returns Price as string excl. BTW, e.g. "14.95" or "59.00"
  */
 export function getPlanPrice(plan: string): string {
-  return plan === "pro" ? "49.00" : "19.00";
+  return plan === "pro" ? "59.00" : "14.95";
 }
 
 /**

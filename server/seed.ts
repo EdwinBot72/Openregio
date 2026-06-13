@@ -94,7 +94,7 @@ export async function seedTestAccounts() {
       }
 
       const passwordHash = await bcrypt.hash(account.password, SALT_ROUNDS);
-      await storage.createUser({
+      const newUser = await storage.createUser({
         email: account.email,
         passwordHash,
         plan: account.plan,
@@ -102,6 +102,12 @@ export async function seedTestAccounts() {
         firstName: account.firstName,
         lastName: account.lastName,
         mustCompleteOnboarding: false,
+      });
+      // Maak een actief abonnement aan zodat requireBasic ook werkt voor testaccounts
+      await storage.createSubscription({
+        userId: newUser.id,
+        status: "active",
+        plan: account.plan,
       });
       console.log(`[TestSeed] ✓ Aangemaakt: ${account.email} (${account.plan}/${account.role})`);
     } catch (error) {

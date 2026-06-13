@@ -6,7 +6,7 @@ declare global {
       user?: {
         id: string;
         email: string;
-        plan: string;
+        plan: string | null;
         role: string;
         firstName: string | null;
         lastName: string | null;
@@ -546,7 +546,7 @@ function toAuthUser(user: User) {
   return {
     id: user.id,
     email: user.email,
-    plan: user.plan || "basic",
+    plan: user.plan ?? null,
     role: user.role,
     firstName: user.firstName,
     lastName: user.lastName,
@@ -621,13 +621,94 @@ export async function requirePro(req: Request, res: Response, next: NextFunction
       return res.status(401).json({ error: "Gebruiker niet gevonden" });
     }
     
-    if (user.plan !== "pro") {
+    if (user.plan !== "pro" && user.plan !== "coaching") {
       return res.status(403).json({ 
         error: "PRO-abonnement vereist",
-        upgradeUrl: "/upgrade" 
+        upgradeUrl: "/lidmaatschap" 
       });
     }
     
+    req.user = toAuthUser(user);
+    next();
+  } catch (error) {
+    if ((error as jwt.JsonWebTokenError).name === "TokenExpiredError") {
+      return res.status(401).json({ error: "Token verlopen", code: "TOKEN_EXPIRED" });
+    }
+    res.status(401).json({ error: "Ongeldige token" });
+  }
+}
+
+export async function requireBasic(req: Request, res: Response, next: NextFunction) {
+  const accessToken = req.cookies?.accessToken || req.headers.authorization?.replace("Bearer ", "");
+
+  if (!accessToken) {
+    return res.status(401).json({ error: "Authenticatie vereist" });
+  }
+
+  try {
+    const decoded = jwt.verify(accessToken, JWT_SECRET) as { userId: string; email: string };
+    const user = await storage.getUserById(decoded.userId);
+
+    if (!user) {
+      return res.status(401).json({ error: "Gebruiker niet gevonden" });
+    }
+
+    // Admins/masters krijgen altijd toegang
+    if (user.role === "admin" || user.role === "master") {
+      req.user = toAuthUser(user);
+      return next();
+    }
+
+    // Plan moet basic, pro of coaching zijn
+    const paidPlans = ["basic", "pro", "coaching"] as const;
+    if (!paidPlans.includes(user.plan as typeof paidPlans[number])) {
+      return res.status(403).json({
+        error: "Actief lidmaatschap vereist",
+        upgradeUrl: "/lidmaatschap",
+      });
+    }
+
+    // Abonnement moet actief zijn (betaling bevestigd via Mollie)
+    const subscription = await storage.getActiveSubscription(user.id);
+    if (!subscription || subscription.status !== "active") {
+      return res.status(403).json({
+        error: "Geen actief abonnement gevonden. Activeer je lidmaatschap om toegang te krijgen.",
+        upgradeUrl: "/lidmaatschap",
+      });
+    }
+
+    req.user = toAuthUser(user);
+    next();
+  } catch (error) {
+    if ((error as jwt.JsonWebTokenError).name === "TokenExpiredError") {
+      return res.status(401).json({ error: "Token verlopen", code: "TOKEN_EXPIRED" });
+    }
+    res.status(401).json({ error: "Ongeldige token" });
+  }
+}
+
+export async function requireCoaching(req: Request, res: Response, next: NextFunction) {
+  const accessToken = req.cookies?.accessToken || req.headers.authorization?.replace("Bearer ", "");
+
+  if (!accessToken) {
+    return res.status(401).json({ error: "Authenticatie vereist" });
+  }
+
+  try {
+    const decoded = jwt.verify(accessToken, JWT_SECRET) as { userId: string; email: string };
+    const user = await storage.getUserById(decoded.userId);
+
+    if (!user) {
+      return res.status(401).json({ error: "Gebruiker niet gevonden" });
+    }
+
+    if (user.plan !== "coaching") {
+      return res.status(403).json({
+        error: "Coaching-abonnement vereist",
+        upgradeUrl: "/lidmaatschap",
+      });
+    }
+
     req.user = toAuthUser(user);
     next();
   } catch (error) {

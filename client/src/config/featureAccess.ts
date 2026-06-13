@@ -91,8 +91,9 @@ export const BADGE_COLORS: Record<AccessLevel, string> = {
   geen:            "#9333ea",
 };
 
-export function getAccessLevel(plan: Plan | undefined, feature: FeatureKey): AccessLevel {
-  const p: Plan = plan ?? "basic";
+export function getAccessLevel(plan: Plan | undefined | null, feature: FeatureKey): AccessLevel {
+  if (!plan) return "geen";
+  const p: Plan = plan;
   return FEATURE_ACCESS[feature]?.[p] ?? "geen";
 }
 

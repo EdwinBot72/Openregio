@@ -5,7 +5,7 @@ import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchem
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { createMollieClient } from "@mollie/api-client";
-import { setupJwtAuth, attachUser, requireAuth, requireAdmin, requirePro, issueTokensForUser, clearTokenCookies, revokeAllUserTokens } from "./jwtAuth";
+import { setupJwtAuth, attachUser, requireAuth, requireBasic, requireAdmin, requirePro, requireCoaching, issueTokensForUser, clearTokenCookies, revokeAllUserTokens } from "./jwtAuth";
 import { seedMasterAccount, seedTestAccounts } from "./seed";
 import { generateRandomPassword, generateOnboardingToken, getPlanPrice, getPlanDisplayName, generateReferralCode } from "./utils/auth";
 import { sendOnboardingEmail, sendNotificationEmail } from "./services/emailService";
@@ -1114,8 +1114,8 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
     }
   });
 
-  // BLOK 5: RegioBot document upload endpoint (Pro-only)
-  app.post("/api/regiobot/upload", requireAuth, checkDailyUploadLimit, uploadMemory.single('file'), async (req, res) => {
+  // BLOK 5: RegioBot document upload endpoint (Basic+)
+  app.post("/api/regiobot/upload", requireBasic, checkDailyUploadLimit, uploadMemory.single('file'), async (req, res) => {
     try {
       if (!req.user) {
         return res.status(401).json({ error: "Niet geauthenticeerd" });
@@ -1171,7 +1171,7 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
   });
 
   // Get user's uploaded documents
-  app.get("/api/regiobot/documents", requireAuth, async (req, res) => {
+  app.get("/api/regiobot/documents", requireBasic, async (req, res) => {
     try {
       if (!req.user) {
         return res.status(401).json({ error: "Niet geauthenticeerd" });
@@ -1225,7 +1225,7 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
   // Rate: Basic = 3/dag, Pro/Coaching = 50/mnd, Admin/Master = onbeperkt
   const routePlannerUsage = new Map<string, { count: number; resetAt: number }>();
 
-  app.post("/api/regiobot/route", requireAuth, async (req: any, res) => {
+  app.post("/api/regiobot/route", requireBasic, async (req: any, res) => {
     try {
       if (!process.env.OPENAI_API_KEY) {
         return res.status(503).json({ error: "AI-service is tijdelijk niet beschikbaar." });
@@ -1489,8 +1489,8 @@ Schrijf in het Nederlands. Toon: helder, gezaghebbend, praktisch. Geef geen juri
     }
   });
 
-  // Brief Analyse - gestructureerde analyse van overheidsbrieven
-  app.post("/api/brief-analyse", requireAuth, authenticatedAiRateLimit, async (req, res) => {
+  // Brief Analyse - gestructureerde analyse van overheidsbrieven (Basic+)
+  app.post("/api/brief-analyse", requireBasic, authenticatedAiRateLimit, async (req, res) => {
     try {
       const { tekst } = req.body;
       if (!tekst || typeof tekst !== "string" || tekst.trim().length < 20) {
@@ -1753,8 +1753,8 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
     }
   });
 
-  // RAG System Routes - Document Upload and Vector Search
-  app.post("/api/rag/documents", requireAuth, checkDailyUploadLimit, uploadMemory.single('file'), async (req, res) => {
+  // RAG System Routes - Document Upload and Vector Search (Pro)
+  app.post("/api/rag/documents", requirePro, checkDailyUploadLimit, uploadMemory.single('file'), async (req, res) => {
     try {
       const user = req.user;
       if (!user?.id) return res.status(401).json({ error: "Niet ingelogd" });
@@ -1927,7 +1927,7 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
     }
   });
 
-  app.get("/api/rag/documents", requireAuth, async (req, res) => {
+  app.get("/api/rag/documents", requirePro, async (req, res) => {
     try {
       const user = req.user;
       if (!user?.id) return res.status(401).json({ error: "Niet ingelogd" });
@@ -1947,7 +1947,7 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
     }
   });
 
-  app.delete("/api/rag/documents/:id", requireAuth, async (req, res) => {
+  app.delete("/api/rag/documents/:id", requirePro, async (req, res) => {
     try {
       const user = req.user;
       if (!user?.id) return res.status(401).json({ error: "Niet ingelogd" });
@@ -2215,7 +2215,7 @@ Maak een complete, direct bruikbare WOO-brief.`;
     }
   });
 
-  app.get("/api/woo/dossiers", requireAuth, async (req, res) => {
+  app.get("/api/woo/dossiers", requirePro, async (req, res) => {
     try {
       const { decryptField } = await import("./utils/woo-crypto");
       const dossiers = await storage.getWooDossiers(req.user!.id);
@@ -2236,7 +2236,7 @@ Maak een complete, direct bruikbare WOO-brief.`;
     }
   });
 
-  app.get("/api/woo/dossiers/:id", requireAuth, async (req, res) => {
+  app.get("/api/woo/dossiers/:id", requirePro, async (req, res) => {
     try {
       const id = parseInt(req.params.id);
       if (isNaN(id)) {
@@ -5519,7 +5519,7 @@ Geef een JSON-object terug in exact dit formaat:
     status: string;
   }
 
-  app.post("/api/tools/google-places-check", requireAuth, async (req, res) => {
+  app.post("/api/tools/google-places-check", requirePro, async (req, res) => {
     const { bedrijfsnaam, stad } = req.body as { bedrijfsnaam?: string; stad?: string };
     if (!bedrijfsnaam?.trim() || !stad?.trim()) {
       return res.status(400).json({ error: "bedrijfsnaam en stad zijn vereist" });
