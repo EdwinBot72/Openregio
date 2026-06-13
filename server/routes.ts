@@ -5,7 +5,7 @@ import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchem
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { createMollieClient } from "@mollie/api-client";
-import { setupJwtAuth, attachUser, requireAuth, requireBasic, requireAdmin, requirePro, requireCoaching, issueTokensForUser, clearTokenCookies, revokeAllUserTokens } from "./jwtAuth";
+import { setupJwtAuth, attachUser, requireAuth, requireBasic, requireAdmin, requirePro, issueTokensForUser, clearTokenCookies, revokeAllUserTokens } from "./jwtAuth";
 import { seedMasterAccount, seedTestAccounts } from "./seed";
 import { generateRandomPassword, generateOnboardingToken, getPlanPrice, getPlanDisplayName, generateReferralCode } from "./utils/auth";
 import { sendOnboardingEmail, sendNotificationEmail } from "./services/emailService";

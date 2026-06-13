@@ -11,7 +11,6 @@ import { useContentProtection } from "@/hooks/useContentProtection";
 import { Skeleton } from "@/components/ui/skeleton";
 import NotFound from "@/pages/not-found";
 import HomePage from "@/pages/home";
-import UnderConstructionPage from "@/pages/under-construction";
 import LandingPage from "@/pages/landing";
 import LoginPage from "@/pages/login";
 import RegisterPage from "@/pages/register";
