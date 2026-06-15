@@ -1186,7 +1186,7 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
   });
 
   // WOO RegioBot - searches WOO requests/documents and provides AI answers
-  app.post("/api/regiobot", publicAiRateLimit, async (req, res) => {
+  app.post("/api/regiobot", requirePro, authenticatedAiRateLimit, async (req, res) => {
     try {
       const payload = req.body ?? {};
       const isTestFixture =
@@ -1302,8 +1302,8 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
     }
   });
 
-  // Digitale Buurman - quick RegioBot for dashboard (public, rate-limited)
-  app.post("/api/regiobot/buurman", publicAiRateLimit, async (req, res) => {
+  // Digitale Buurman - quick RegioBot for dashboard (requireBasic)
+  app.post("/api/regiobot/buurman", requireBasic, authenticatedAiRateLimit, async (req, res) => {
     try {
       const { beroep, stad, vraag } = req.body;
       if (!beroep || !stad || typeof beroep !== "string" || typeof stad !== "string") {
@@ -1399,8 +1399,8 @@ Schrijf in het Nederlands. Toon: scherp, concreet, als een insider die de regio 
     }
   });
 
-  // Regelgeving-check - publieke endpoint voor homepage (rate-limited via middleware)
-  app.post("/api/regelgeving/check", publicAiRateLimit, async (req, res) => {
+  // Regelgeving-check (requireBasic)
+  app.post("/api/regelgeving/check", requireBasic, authenticatedAiRateLimit, async (req, res) => {
     try {
       const { branche, onderwerp } = req.body;
       if (!branche || !onderwerp || typeof branche !== "string" || typeof onderwerp !== "string") {
@@ -2070,7 +2070,7 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
   });
 
   // WOO Template Generator - generates ready-to-use WOO request letters
-  app.post("/api/woo/generate", publicAiRateLimit, async (req, res) => {
+  app.post("/api/woo/generate", requirePro, authenticatedAiRateLimit, async (req, res) => {
     try {
       // Early check for OpenAI API key
       if (!process.env.OPENAI_API_KEY) {
@@ -2904,9 +2904,9 @@ Maak het verzoek professioneel en juridisch correct.`;
       const user = (req as any).user;
       const userId = user.id as string;
 
-      // Alleen Pro-leden kunnen opzeggen
-      if (user.plan !== "pro") {
-        return res.status(403).json({ error: "Alleen Pro-leden kunnen een abonnement opzeggen" });
+      // Alleen Pro- of Coaching-leden kunnen opzeggen
+      if (user.plan !== "pro" && user.plan !== "coaching") {
+        return res.status(403).json({ error: "Alleen Pro- of Coaching-leden kunnen een abonnement opzeggen" });
       }
 
       // Haal het laatste actieve abonnement op
@@ -2936,15 +2936,15 @@ Maak het verzoek professioneel en juridisch correct.`;
       // Markeer abonnement als gecanceld in de database
       await storage.cancelSubscription(subscription.id);
 
-      // Zet plan terug naar basic
-      await storage.updateUserPlan(userId, "basic");
+      // Plan terugzetten naar pending — geen toegang meer tot betaalde functies
+      await storage.updateUserPlan(userId, "pending");
 
       // Stuur bevestigingsmail
       const firstName = user.firstName || user.email.split("@")[0];
       await sendNotificationEmail(
         user.email,
-        "Je Pro-abonnement is opgezegd",
-        `Je hebt je Pro-abonnement bij OpenRegio opgezegd. Je Pro-toegang is per direct beëindigd en je account is omgezet naar het Basis-abonnement.\n\nWil je later opnieuw upgraden? Dat kan altijd via openregio.nl/lidmaatschap.\n\nHeb je vragen? Neem dan contact op via info@openregio.nl.`,
+        "Je abonnement is opgezegd",
+        `Je hebt je abonnement bij OpenRegio opgezegd. Je toegang tot betaalde functies is per direct beëindigd.\n\nWil je later opnieuw een abonnement afsluiten? Dat kan altijd via openregio.nl/lidmaatschap.\n\nHeb je vragen? Neem dan contact op via info@openregio.nl.`,
         firstName
       );
 
@@ -6637,11 +6637,11 @@ Antwoord ALLEEN met JSON, exact deze structuur:
     }
   });
 
-  // ─── PUBLIC: POST /api/basischeck/analyse — AI-analyse voor gratis check ─
+  // ─── POST /api/basischeck/analyse — AI-analyse (requireBasic) ───────────
 
   const basischeckCache = new Map<string, { data: object; ts: number }>();
 
-  app.post("/api/basischeck/analyse", async (req, res) => {
+  app.post("/api/basischeck/analyse", requireBasic, authenticatedAiRateLimit, async (req, res) => {
     const { beroep, gemeente, bedrijfsnaam, type } = req.body as {
       beroep?: string;
       gemeente?: string;
@@ -7486,7 +7486,7 @@ Geef alleen de brieftekst terug, zonder commentaar, zonder markdown, zonder JSON
   // ─────────────────────────────────────────────────────────────────────
   // SEO ZOEKTERMEN GENERATOR
   // ─────────────────────────────────────────────────────────────────────
-  app.post("/api/zoektermen/genereer", (req, res) => {
+  app.post("/api/zoektermen/genereer", requireBasic, (req, res) => {
     const { beroep, stad, wijk } = req.body as { beroep: string; stad: string; wijk?: string };
     if (!beroep || !stad) {
       return res.status(400).json({ error: "beroep en stad zijn verplicht" });

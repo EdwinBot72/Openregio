@@ -120,7 +120,7 @@ export interface IStorage {
   upsertUser(user: UpsertUser): Promise<User>;
   createUser(user: { email: string; passwordHash: string; plan?: "pending" | "basic" | "pro" | "coaching"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null; mustCompleteOnboarding?: boolean; onboardingToken?: string | null; referralCode?: string | null; referredByUserId?: string | null; referredAt?: Date | null }): Promise<User>;
   updateUser(id: string, updates: Partial<Omit<User, "id" | "createdAt">>): Promise<User | undefined>;
-  updateUserPlan(userId: string, plan: "basic" | "pro" | "coaching"): Promise<User | undefined>;
+  updateUserPlan(userId: string, plan: "pending" | "basic" | "pro" | "coaching"): Promise<User | undefined>;
   updateUserPassword(userId: string, passwordHash: string): Promise<User | undefined>;
   getUserProfileByReplitUserId(replitUserId: string): Promise<UserProfile | undefined>;
   
@@ -460,7 +460,7 @@ export class MemStorage implements IStorage {
     return updatedUser;
   }
 
-  async updateUserPlan(userId: string, plan: "basic" | "pro" | "coaching"): Promise<User | undefined> {
+  async updateUserPlan(userId: string, plan: "pending" | "basic" | "pro" | "coaching"): Promise<User | undefined> {
     const user = this.users.get(userId);
     if (!user) {
       return undefined;
@@ -2000,7 +2000,7 @@ class DbStorage implements IStorage {
     return user;
   }
 
-  async updateUserPlan(userId: string, plan: "basic" | "pro" | "coaching"): Promise<User | undefined> {
+  async updateUserPlan(userId: string, plan: "pending" | "basic" | "pro" | "coaching"): Promise<User | undefined> {
     const [user] = await db
       .update(users)
       .set({ plan, updatedAt: new Date() })
