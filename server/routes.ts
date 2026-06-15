@@ -80,24 +80,51 @@ async function getMollieProfileId(): Promise<string | null> {
     if (items.length > 0) {
       _mollieProfileId = items[0].id;
       console.log(`[Mollie] Website profiel gevonden: ${items[0].id} (${items[0].name})`);
-      return _mollieProfileId;
-    }
-    // Geen profiel — aanmaken via API
-    console.log(`[Mollie] Geen profiel gevonden — wordt automatisch aangemaakt`);
-    const newProfile: any = await (mollieClient as any).profiles.create({
-      name: "OpenRegio",
-      website: process.env.PUBLIC_BASE_URL || "https://www.openregio.nl",
-      email: "info@openregio.nl",
-      phone: "+31850602020",
-      categoryCode: 5399, // General merchandise / software services
-    });
-    if (newProfile?.id) {
-      _mollieProfileId = newProfile.id;
-      console.log(`[Mollie] Nieuw website profiel aangemaakt: ${newProfile.id}`);
+    } else {
+      // Geen profiel — aanmaken via API
+      console.log(`[Mollie] Geen profiel — wordt automatisch aangemaakt`);
+      const newProfile: any = await (mollieClient as any).profiles.create({
+        name: "OpenRegio",
+        website: process.env.PUBLIC_BASE_URL || "https://www.openregio.nl",
+        email: "info@openregio.nl",
+        phone: "+31850602020",
+        categoryCode: 5399,
+      });
+      if (newProfile?.id) {
+        _mollieProfileId = newProfile.id;
+        console.log(`[Mollie] Nieuw profiel aangemaakt: ${newProfile.id}`);
+      }
     }
   } catch (e: any) {
     console.warn(`[Mollie] Profielfout:`, e?.message, e?.statusCode, e?.detail);
   }
+
+  // Betaalmethoden inschakelen via Mollie REST API (iDEAL + creditcard voor recurring)
+  if (_mollieProfileId && process.env.MOLLIE_API_KEY) {
+    for (const method of ["ideal", "creditcard"]) {
+      try {
+        const resp = await fetch(
+          `https://api.mollie.com/v2/profiles/${_mollieProfileId}/methods/${method}`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${process.env.MOLLIE_API_KEY}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        const body: any = await resp.json();
+        if (resp.ok) {
+          console.log(`[Mollie] Betaalmethode ingeschakeld: ${method}`);
+        } else {
+          console.log(`[Mollie] ${method}: ${body?.detail ?? body?.title ?? resp.status}`);
+        }
+      } catch (me: any) {
+        console.log(`[Mollie] ${method} fout: ${me?.message}`);
+      }
+    }
+  }
+
   return _mollieProfileId;
 }
 
@@ -140,6 +167,14 @@ async function getOrCreateUserProfileId(req: any): Promise<string> {
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Mollie initialisatie bij serverstart — profiel ophalen + betaalmethoden activeren
+  // zodat ze al actief zijn vóór de eerste betaalpoging
+  if (mollieClient) {
+    getMollieProfileId().then(pid => {
+      if (pid) console.log(`[Mollie] Klaar voor betalingen: profiel ${pid}`);
+    }).catch(() => {});
+  }
+
   // Legacy health check (simple)
   app.get("/health", (_req, res) => {
     res.json({ ok: true, ts: Date.now() });
