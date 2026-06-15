@@ -78,7 +78,7 @@ integrations = ["javascript_openai_ai_integrations:1.0.0", "javascript_mem_db:1.
 
 [userenv.shared]
 PUBLIC_BASE_URL = "https://www.openregio.nl"
-APP_BASE_URL = "https://open-regio.replit.app"
+APP_BASE_URL = "https://www.openregio.nl"
 SMTP_HOST = "mail.mijndomein.nl"
 SMTP_PORT = "587"
 SMTP_USER = "info@openregio.nl"

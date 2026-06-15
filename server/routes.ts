@@ -248,7 +248,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ checkoutUrl });
     } catch (error: any) {
-      console.error("Fout bij aanmaken Mollie payment:", error);
+      console.error("Fout bij aanmaken Mollie payment:", JSON.stringify({ status: error?.statusCode, message: error?.message, detail: error?.detail }));
       const userMessage = error?.statusCode === 422 
         ? "Geen geschikte betaalmethoden beschikbaar. Neem contact op met info@openregio.nl."
         : "Kon betaling niet aanmaken. Probeer het later opnieuw.";
