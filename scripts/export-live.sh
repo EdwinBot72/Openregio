@@ -10,15 +10,17 @@ OUT="$ROOT/openregio-live.zip"
 
 echo "Exporteren vanuit: $ROOT"
 
+export ROOT OUT
 python3 - <<'PYEOF'
 import zipfile, os, sys
 
-src = os.environ.get('ROOT', os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-out = os.path.join(src, 'openregio-live.zip')
+src = os.environ['ROOT']
+out  = os.environ['OUT']
 
 EXCLUDE_DIRS = {
     '.git', 'node_modules', '.local', '.cache',
-    'dist', 'artifacts', 'uploads'
+    'dist', 'artifacts', 'uploads',
+    'attached_assets', '.agents', '.pythonlibs',
 }
 EXCLUDE_EXTS = {'.zip', '.log'}
 EXCLUDE_FILES = {'.env', '.env.local', '.env.production'}
@@ -26,7 +28,7 @@ EXCLUDE_FILES = {'.env', '.env.local', '.env.production'}
 added = 0
 with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED, compresslevel=6) as zf:
     for root, dirs, files in os.walk(src):
-        dirs[:] = [d for d in dirs if d not in EXCLUDE_DIRS]
+        dirs[:] = [d for d in sorted(dirs) if d not in EXCLUDE_DIRS]
         for fname in files:
             if any(fname.endswith(e) for e in EXCLUDE_EXTS):
                 continue
@@ -38,9 +40,8 @@ with zipfile.ZipFile(out, 'w', zipfile.ZIP_DEFLATED, compresslevel=6) as zf:
                 zf.write(fpath, arcname)
                 added += 1
             except Exception as e:
-                print(f'Skip {arcname}: {e}', file=sys.stderr)
+                print(f'  Skip {arcname}: {e}', file=sys.stderr)
 
 size_mb = os.path.getsize(out) / 1024 / 1024
-print(f'Klaar: {added} bestanden — {size_mb:.1f} MB -> {out}')
+print(f'Klaar: {added} bestanden — {size_mb:.1f} MB  →  {out}')
 PYEOF
-ENDSCRIPT
