@@ -620,11 +620,31 @@ export async function requirePro(req: Request, res: Response, next: NextFunction
     if (!user) {
       return res.status(401).json({ error: "Gebruiker niet gevonden" });
     }
-    
+
+    // Admins/masters krijgen altijd toegang
+    if (user.role === "admin" || user.role === "master") {
+      req.user = toAuthUser(user);
+      return next();
+    }
+
+    // Plan moet pro of coaching zijn
     if (user.plan !== "pro" && user.plan !== "coaching") {
       return res.status(403).json({ 
         error: "PRO-abonnement vereist",
         upgradeUrl: "/lidmaatschap" 
+      });
+    }
+
+    // Abonnement moet actief zijn met pro of coaching plan
+    const subscription = await storage.getActiveSubscription(user.id);
+    if (
+      !subscription ||
+      subscription.status !== "active" ||
+      (subscription.plan !== "pro" && subscription.plan !== "coaching")
+    ) {
+      return res.status(403).json({
+        error: "Geen actief Pro-abonnement gevonden. Activeer je Pro-lidmaatschap om toegang te krijgen.",
+        upgradeUrl: "/lidmaatschap",
       });
     }
     
