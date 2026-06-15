@@ -68,6 +68,39 @@ const mollieClient = process.env.MOLLIE_API_KEY
   ? createMollieClient({ apiKey: process.env.MOLLIE_API_KEY }) 
   : null;
 
+// Cache voor Mollie website profiel ID — wordt één keer opgehaald en hergebruikt
+let _mollieProfileId: string | null = null;
+async function getMollieProfileId(): Promise<string | null> {
+  if (_mollieProfileId) return _mollieProfileId;
+  if (!mollieClient) return null;
+  try {
+    // Probeer bestaand profiel op te halen
+    const profiles: any = await (mollieClient as any).profiles.list({ limit: 1 });
+    const items: any[] = Array.isArray(profiles) ? profiles : (profiles?._embedded?.profiles ?? []);
+    if (items.length > 0) {
+      _mollieProfileId = items[0].id;
+      console.log(`[Mollie] Website profiel gevonden: ${items[0].id} (${items[0].name})`);
+      return _mollieProfileId;
+    }
+    // Geen profiel — aanmaken via API
+    console.log(`[Mollie] Geen profiel gevonden — wordt automatisch aangemaakt`);
+    const newProfile: any = await (mollieClient as any).profiles.create({
+      name: "OpenRegio",
+      website: process.env.PUBLIC_BASE_URL || "https://www.openregio.nl",
+      email: "info@openregio.nl",
+      phone: "+31850602020",
+      categoryCode: 5399, // General merchandise / software services
+    });
+    if (newProfile?.id) {
+      _mollieProfileId = newProfile.id;
+      console.log(`[Mollie] Nieuw website profiel aangemaakt: ${newProfile.id}`);
+    }
+  } catch (e: any) {
+    console.warn(`[Mollie] Profielfout:`, e?.message, e?.statusCode, e?.detail);
+  }
+  return _mollieProfileId;
+}
+
 // ── Mollie webhook vertrouwt metadata die wij zelf hebben meegegeven bij payment.create().
 // De payment wordt altijd opnieuw opgehaald via mollieClient.payments.get(paymentId),
 // dus de metadata komt rechtstreeks van Mollie's servers — niet van de webhook-body.
@@ -217,6 +250,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       
       console.log(`✓ Mollie customer created: ${customer.id} for ${email}`);
+
+      const profileId = await getMollieProfileId();
       
       const payment = await mollieClient.payments.create({
         amount: {
@@ -225,9 +260,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         customerId: customer.id,
         sequenceType: "first" as any,
+        method: ["ideal", "creditcard", "bancontact"] as any,
         description,
         redirectUrl: `${publicUrl}/betaling-geslaagd?plan=${encodeURIComponent(plan)}`,
         webhookUrl: `${publicUrl}/api/mollie/webhook`,
+        ...(profileId ? { profileId } : {}),
         metadata: {
           email,
           plan,
@@ -2856,6 +2893,7 @@ Maak het verzoek professioneel en juridisch correct.`;
 
       // Create first payment to establish mandate for recurring billing
       // Bedragen: incl. 21% btw — basic €18,09 / pro €71,39 (excl. btw: €14,95 / €59,00)
+      const profileId = await getMollieProfileId();
       const firstPayment: any = await (mollieClient.payments.create as any)({
         amount: {
           currency: "EUR",
@@ -2863,9 +2901,11 @@ Maak het verzoek professioneel en juridisch correct.`;
         },
         customerId: customer.id,
         sequenceType: "first",
+        method: ["ideal", "creditcard", "bancontact"],
         description: `OpenRegio ${plan === "pro" ? "Pro" : "Basis"} - Maandelijks abonnement`,
         redirectUrl: returnUrl || `${publicUrl}/betaling-geslaagd?plan=${encodeURIComponent(plan)}`,
         webhookUrl: `${publicUrl}/api/mollie/webhook`,
+        ...(profileId ? { profileId } : {}),
         metadata: {
           userId,
           email: userEmail,
