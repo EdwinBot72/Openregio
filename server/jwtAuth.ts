@@ -560,32 +560,72 @@ function toAuthUser(user: User) {
   };
 }
 
-export function requireAdmin(req: Request, res: Response, next: NextFunction) {
+// ─── Shared auth helpers ────────────────────────────────────────────────────
+
+/** Extract and verify JWT; throws on failure. */
+function verifyToken(req: Request): { userId: string; email: string } {
   const token = req.cookies?.accessToken || req.headers.authorization?.replace("Bearer ", "");
   if (!token) {
-    return res.status(401).json({ error: "Authenticatie vereist" });
+    const err = Object.assign(new Error("Authenticatie vereist"), { status: 401, code: "NO_TOKEN" });
+    throw err;
   }
-  if (!req.user?.isAdmin) {
-    return res.status(403).json({ error: "Alleen admin heeft toegang" });
+  try {
+    return jwt.verify(token, JWT_SECRET) as { userId: string; email: string };
+  } catch (e) {
+    const isExpired = (e as jwt.JsonWebTokenError).name === "TokenExpiredError";
+    const err = Object.assign(
+      new Error(isExpired ? "Token verlopen" : "Ongeldige token"),
+      { status: 401, code: isExpired ? "TOKEN_EXPIRED" : "INVALID_TOKEN" }
+    );
+    throw err;
   }
-  next();
 }
 
-export function requireAuth(req: Request, res: Response, next: NextFunction) {
-  const accessToken = req.cookies?.accessToken || req.headers.authorization?.replace("Bearer ", "");
-  
-  if (!accessToken) {
-    return res.status(401).json({ error: "Authenticatie vereist" });
+/** Load user from DB; 401 if not found, 403 if soft-deleted. */
+async function loadUser(userId: string): Promise<User> {
+  const user = await storage.getUserById(userId);
+  if (!user) {
+    throw Object.assign(new Error("Gebruiker niet gevonden"), { status: 401 });
   }
-  
+  if (user.deletedAt) {
+    throw Object.assign(new Error("Account is verwijderd"), { status: 403 });
+  }
+  return user;
+}
+
+/** Handle auth errors thrown by helpers above. */
+function handleAuthError(err: unknown, res: Response) {
+  const e = err as { status?: number; code?: string; message?: string };
+  res.status(e.status ?? 401).json({
+    error: e.message ?? "Authenticatie mislukt",
+    ...(e.code ? { code: e.code } : {}),
+  });
+}
+
+// ─── Middleware ──────────────────────────────────────────────────────────────
+
+export async function requireAuth(req: Request, res: Response, next: NextFunction) {
   try {
-    jwt.verify(accessToken, JWT_SECRET) as { userId: string; email: string };
+    const decoded = verifyToken(req);
+    const user = await loadUser(decoded.userId);
+    req.user = toAuthUser(user);
     next();
-  } catch (error) {
-    if ((error as jwt.JsonWebTokenError).name === "TokenExpiredError") {
-      return res.status(401).json({ error: "Token verlopen", code: "TOKEN_EXPIRED" });
+  } catch (err) {
+    handleAuthError(err, res);
+  }
+}
+
+export async function requireAdmin(req: Request, res: Response, next: NextFunction) {
+  try {
+    const decoded = verifyToken(req);
+    const user = await loadUser(decoded.userId);
+    if (user.role !== "admin" && user.role !== "master") {
+      return res.status(403).json({ error: "Alleen admin heeft toegang" });
     }
-    res.status(401).json({ error: "Ongeldige token" });
+    req.user = toAuthUser(user);
+    next();
+  } catch (err) {
+    handleAuthError(err, res);
   }
 }
 
@@ -607,35 +647,17 @@ export async function attachUser(req: Request, res: Response, next: NextFunction
 }
 
 export async function requirePro(req: Request, res: Response, next: NextFunction) {
-  const accessToken = req.cookies?.accessToken || req.headers.authorization?.replace("Bearer ", "");
-  
-  if (!accessToken) {
-    return res.status(401).json({ error: "Authenticatie vereist" });
-  }
-  
   try {
-    const decoded = jwt.verify(accessToken, JWT_SECRET) as { userId: string; email: string };
-    const user = await storage.getUserById(decoded.userId);
-    
-    if (!user) {
-      return res.status(401).json({ error: "Gebruiker niet gevonden" });
-    }
+    const decoded = verifyToken(req);
+    const user = await loadUser(decoded.userId);
 
-    // Admins/masters krijgen altijd toegang
+    // Admins/masters: altijd toegang
     if (user.role === "admin" || user.role === "master") {
       req.user = toAuthUser(user);
       return next();
     }
 
-    // Plan moet pro of coaching zijn
-    if (user.plan !== "pro" && user.plan !== "coaching") {
-      return res.status(403).json({ 
-        error: "PRO-abonnement vereist",
-        upgradeUrl: "/lidmaatschap" 
-      });
-    }
-
-    // Abonnement moet actief zijn met pro of coaching plan
+    // Check uitsluitend de subscriptions-tabel — niet user.plan
     const subscription = await storage.getActiveSubscription(user.id);
     if (
       !subscription ||
@@ -647,50 +669,32 @@ export async function requirePro(req: Request, res: Response, next: NextFunction
         upgradeUrl: "/lidmaatschap",
       });
     }
-    
+
     req.user = toAuthUser(user);
     next();
-  } catch (error) {
-    if ((error as jwt.JsonWebTokenError).name === "TokenExpiredError") {
-      return res.status(401).json({ error: "Token verlopen", code: "TOKEN_EXPIRED" });
-    }
-    res.status(401).json({ error: "Ongeldige token" });
+  } catch (err) {
+    handleAuthError(err, res);
   }
 }
 
 export async function requireBasic(req: Request, res: Response, next: NextFunction) {
-  const accessToken = req.cookies?.accessToken || req.headers.authorization?.replace("Bearer ", "");
-
-  if (!accessToken) {
-    return res.status(401).json({ error: "Authenticatie vereist" });
-  }
-
   try {
-    const decoded = jwt.verify(accessToken, JWT_SECRET) as { userId: string; email: string };
-    const user = await storage.getUserById(decoded.userId);
+    const decoded = verifyToken(req);
+    const user = await loadUser(decoded.userId);
 
-    if (!user) {
-      return res.status(401).json({ error: "Gebruiker niet gevonden" });
-    }
-
-    // Admins/masters krijgen altijd toegang
+    // Admins/masters: altijd toegang
     if (user.role === "admin" || user.role === "master") {
       req.user = toAuthUser(user);
       return next();
     }
 
-    // Plan moet basic, pro of coaching zijn
-    const paidPlans = ["basic", "pro", "coaching"] as const;
-    if (!paidPlans.includes(user.plan as typeof paidPlans[number])) {
-      return res.status(403).json({
-        error: "Actief lidmaatschap vereist",
-        upgradeUrl: "/lidmaatschap",
-      });
-    }
-
-    // Abonnement moet actief zijn (betaling bevestigd via Mollie)
+    // Check uitsluitend de subscriptions-tabel — niet user.plan
     const subscription = await storage.getActiveSubscription(user.id);
-    if (!subscription || subscription.status !== "active") {
+    if (
+      !subscription ||
+      subscription.status !== "active" ||
+      !["basic", "pro", "coaching"].includes(subscription.plan)
+    ) {
       return res.status(403).json({
         error: "Geen actief abonnement gevonden. Activeer je lidmaatschap om toegang te krijgen.",
         upgradeUrl: "/lidmaatschap",
@@ -699,30 +703,29 @@ export async function requireBasic(req: Request, res: Response, next: NextFuncti
 
     req.user = toAuthUser(user);
     next();
-  } catch (error) {
-    if ((error as jwt.JsonWebTokenError).name === "TokenExpiredError") {
-      return res.status(401).json({ error: "Token verlopen", code: "TOKEN_EXPIRED" });
-    }
-    res.status(401).json({ error: "Ongeldige token" });
+  } catch (err) {
+    handleAuthError(err, res);
   }
 }
 
 export async function requireCoaching(req: Request, res: Response, next: NextFunction) {
-  const accessToken = req.cookies?.accessToken || req.headers.authorization?.replace("Bearer ", "");
-
-  if (!accessToken) {
-    return res.status(401).json({ error: "Authenticatie vereist" });
-  }
-
   try {
-    const decoded = jwt.verify(accessToken, JWT_SECRET) as { userId: string; email: string };
-    const user = await storage.getUserById(decoded.userId);
+    const decoded = verifyToken(req);
+    const user = await loadUser(decoded.userId);
 
-    if (!user) {
-      return res.status(401).json({ error: "Gebruiker niet gevonden" });
+    // Admins/masters: altijd toegang
+    if (user.role === "admin" || user.role === "master") {
+      req.user = toAuthUser(user);
+      return next();
     }
 
-    if (user.plan !== "coaching") {
+    // Check uitsluitend de subscriptions-tabel — niet user.plan
+    const subscription = await storage.getActiveSubscription(user.id);
+    if (
+      !subscription ||
+      subscription.status !== "active" ||
+      subscription.plan !== "coaching"
+    ) {
       return res.status(403).json({
         error: "Coaching-abonnement vereist",
         upgradeUrl: "/lidmaatschap",
@@ -731,11 +734,8 @@ export async function requireCoaching(req: Request, res: Response, next: NextFun
 
     req.user = toAuthUser(user);
     next();
-  } catch (error) {
-    if ((error as jwt.JsonWebTokenError).name === "TokenExpiredError") {
-      return res.status(401).json({ error: "Token verlopen", code: "TOKEN_EXPIRED" });
-    }
-    res.status(401).json({ error: "Ongeldige token" });
+  } catch (err) {
+    handleAuthError(err, res);
   }
 }
 
