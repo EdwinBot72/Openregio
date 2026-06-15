@@ -15,7 +15,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Link } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
-import heroImg from "@assets/optimized/website-scan-hero.webp";
 
 type Categorie = {
   naam: string;
@@ -192,7 +191,7 @@ export default function WebsiteScanPage() {
     <div className="max-w-2xl mx-auto px-6 py-10">
       {/* Hero */}
       <div className="relative rounded-2xl overflow-hidden mb-8" style={{ height: "220px" }}>
-        <img src={heroImg} alt="Website analyse & SEO" className="w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
+        <img src="/img/zichtbaarheid.webp" alt="Website analyse & SEO" className="w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
         <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(15,42,78,0.88) 0%, rgba(15,42,78,0.55) 60%, rgba(15,42,78,0.2) 100%)" }} />
         <div className="absolute inset-0 flex flex-col justify-end p-7">
           <div className="flex items-center gap-2 mb-2">

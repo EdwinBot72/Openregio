@@ -13,7 +13,6 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
-import heroImg from "@assets/optimized/regelgeving-hero.webp";
 
 type RegelgevingItem = {
   id: string;
@@ -120,7 +119,7 @@ export default function RegelgevingVerkennerPage() {
     <div className="max-w-4xl mx-auto px-6 py-10">
       {/* Hero */}
       <div className="relative rounded-2xl overflow-hidden mb-8" style={{ height: "220px" }}>
-        <img src={heroImg} alt="Regelgeving verkenner" className="w-full h-full object-cover" style={{ objectPosition: "center 40%" }} />
+        <img src="/img/hero-bg.webp" alt="Regelgeving verkenner" className="w-full h-full object-cover" style={{ objectPosition: "center 40%" }} />
         <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(15,42,78,0.90) 0%, rgba(15,42,78,0.60) 55%, rgba(15,42,78,0.2) 100%)" }} />
         <div className="absolute inset-0 flex flex-col justify-end p-7">
           <div className="flex items-center gap-2 mb-2">

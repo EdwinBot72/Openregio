@@ -1,13 +1,12 @@
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Users, Bot, Building2 } from "lucide-react";
-import heroImage from "@assets/generated_images/Dutch_entrepreneurs_collaborating_together_2ad5d49a.png";
 
 export function HeroSection() {
   return (
     <div className="relative min-h-[600px] flex items-center justify-center overflow-hidden">
       <div
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${heroImage})` }}
+        style={{ backgroundImage: "url(/img/hero-bg.webp)" }}
       >
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/60 to-black/50" />
       </div>
