@@ -1,0 +1,329 @@
+Ja. Bij Mollie werkt een terugkerend abonnement **niet** als “maak gewoon betaalverzoek elke maand”. Je moet dit doen:
+
+**Flow: klant → eerste betaling → mandate → subscription.**
+
+Mollie vereist voor recurring payments eerst toestemming van de klant via een eerste betaling. Daarna ontstaat er een **mandate** en pas daarna kan Mollie automatisch incasseren via subscription. ([Mollie Documentation][1])
+
+## De juiste Mollie-flow
+
+### 1. Maak klant aan in Mollie
+
+```js
+const customer = await mollieClient.customers.create({
+  name: user.name,
+  email: user.email,
+});
+```
+
+Opslaan in je database:
+
+```txt
+user.mollieCustomerId = customer.id
+```
+
+Mollie koppelt recurring mandates en subscriptions aan een customer. ([Mollie Documentation][2])
+
+---
+
+### 2. Laat klant eerste betaling doen
+
+Bijvoorbeeld voor OpenRegio:
+
+```js
+const payment = await mollieClient.customerPayments.create({
+  customerId: customer.id,
+  amount: {
+    currency: "EUR",
+    value: "14.95",
+  },
+  description: "OpenRegio Basic eerste betaling",
+  sequenceType: "first",
+  redirectUrl: "https://www.openregio.nl/betaling-gelukt",
+  webhookUrl: "https://www.openregio.nl/api/mollie/webhook",
+});
+```
+
+Belangrijk is dit:
+
+```js
+sequenceType: "first"
+```
+
+Daarmee geeft de klant toestemming voor toekomstige automatische betalingen. ([Mollie Documentation][3])
+
+Daarna stuur je de klant naar:
+
+```js
+payment._links.checkout.href
+```
+
+---
+
+### 3. Webhook controleert of eerste betaling betaald is
+
+```js
+app.post("/api/mollie/webhook", async (req, res) => {
+  const paymentId = req.body.id;
+
+  const payment = await mollieClient.payments.get(paymentId);
+
+  if (payment.status === "paid" && payment.sequenceType === "first") {
+    // Nu mag je subscription aanmaken
+  }
+
+  res.status(200).send("ok");
+});
+```
+
+---
+
+### 4. Check of er een geldige mandate is
+
+```js
+const mandates = await mollieClient.customerMandates.page({
+  customerId: payment.customerId,
+});
+
+const validMandate = mandates.find(
+  mandate => mandate.status === "valid"
+);
+```
+
+Recurring betalingen kunnen alleen als er een mandate beschikbaar is. ([Mollie Documentation][3])
+
+---
+
+### 5. Maak het abonnement aan
+
+Voor jouw model:
+
+**Basic: €14,95 per maand ex btw**
+**Pro: €59,00 per maand ex btw**
+**Coaching: handmatig/contact, geen vast bedrag**
+
+Inclusief 21% btw wordt dat:
+
+```txt
+Basic: €18,09 incl. btw
+Pro:   €71,39 incl. btw
+```
+
+Mollie rekent meestal met het bedrag dat je daadwerkelijk int. Dus als jij consumenten laat betalen, zet je meestal het **incl. btw-bedrag** in Mollie.
+
+```js
+const subscription = await mollieClient.customerSubscriptions.create({
+  customerId: payment.customerId,
+  amount: {
+    currency: "EUR",
+    value: "18.09",
+  },
+  interval: "1 month",
+  description: "OpenRegio Basic abonnement",
+  webhookUrl: "https://www.openregio.nl/api/mollie/subscription-webhook",
+});
+```
+
+Voor Pro:
+
+```js
+const subscription = await mollieClient.customerSubscriptions.create({
+  customerId: payment.customerId,
+  amount: {
+    currency: "EUR",
+    value: "71.39",
+  },
+  interval: "1 month",
+  description: "OpenRegio Pro abonnement",
+  webhookUrl: "https://www.openregio.nl/api/mollie/subscription-webhook",
+});
+```
+
+Mollie subscriptions worden aangemaakt via:
+
+```txt
+POST /v2/customers/{customerId}/subscriptions
+```
+
+Daarmee plan je automatische betalingen met een bedrag en interval, bijvoorbeeld maandelijks. ([Mollie Documentation][4])
+
+---
+
+## Database moet dit opslaan
+
+Minimaal:
+
+```txt
+users
+- id
+- email
+- plan
+- mollieCustomerId
+- mollieSubscriptionId
+- subscriptionStatus
+- subscriptionCurrentPeriodStart
+- subscriptionCurrentPeriodEnd
+```
+
+Bij abonnement actief:
+
+```txt
+plan = "basic" of "pro"
+subscriptionStatus = "active"
+```
+
+Bij opzegging:
+
+```txt
+plan = null
+subscriptionStatus = "canceled"
+```
+
+Niet terugzetten naar `"basic"` als iemand opzegt. Dat gaf bij jouw app juist risico op rare betaalstatussen.
+
+---
+
+## Routes die je nodig hebt
+
+Voor OpenRegio zou ik dit strak houden:
+
+```txt
+POST /api/billing/create-checkout
+POST /api/mollie/webhook
+POST /api/billing/cancel
+GET  /api/billing/status
+```
+
+### Checkout route
+
+Payload:
+
+```json
+{
+  "plan": "basic"
+}
+```
+
+Server bepaalt prijs. Nooit prijs uit frontend vertrouwen.
+
+```js
+const PLANS = {
+  basic: {
+    amount: "18.09",
+    label: "OpenRegio Basic abonnement",
+  },
+  pro: {
+    amount: "71.39",
+    label: "OpenRegio Pro abonnement",
+  },
+};
+```
+
+---
+
+## Opzeggen
+
+Opzeggen doe je via Mollie subscription cancel:
+
+```js
+await mollieClient.customerSubscriptions.cancel(
+  user.mollieSubscriptionId,
+  { customerId: user.mollieCustomerId }
+);
+```
+
+Of via API:
+
+```txt
+DELETE /v2/customers/{customerId}/subscriptions/{subscriptionId}
+```
+
+Mollie meldt dat cancelen van een subscription niet automatisch het mandate verwijdert. ([Mollie Documentation][5])
+
+Daarna lokaal:
+
+```js
+await storage.updateUserPlan(userId, null);
+await storage.updateSubscriptionStatus(userId, "canceled");
+```
+
+---
+
+## Belangrijk voor jouw live app
+
+Je `requirePro` middleware moet niet alleen naar `user.plan` kijken.
+
+Fout:
+
+```js
+if (user.plan !== "pro") {
+  return res.status(403).json({ error: "Pro required" });
+}
+```
+
+Goed:
+
+```js
+if (
+  user.role !== "admin" &&
+  !(
+    user.plan === "pro" &&
+    user.subscriptionStatus === "active" &&
+    user.mollieSubscriptionId
+  )
+) {
+  return res.status(403).json({ error: "Active Pro subscription required" });
+}
+```
+
+Voor Basic:
+
+```js
+if (
+  user.role !== "admin" &&
+  !(
+    ["basic", "pro"].includes(user.plan) &&
+    user.subscriptionStatus === "active" &&
+    user.mollieSubscriptionId
+  )
+) {
+  return res.status(403).json({ error: "Active subscription required" });
+}
+```
+
+## Kort gezegd
+
+Voor Mollie recurring heb je dit nodig:
+
+```txt
+1. Customer aanmaken
+2. Eerste betaling met sequenceType: "first"
+3. Mandate laten ontstaan
+4. Subscription aanmaken
+5. Webhooks verwerken
+6. Plan alleen actief houden bij subscriptionStatus = active
+7. Bij opzeggen plan = null
+```
+
+Voor jouw OpenRegio is dit de beste commerciële structuur:
+
+```txt
+Geen gratis account
+Basic: €14,95 ex btw / maand
+Pro: €59 ex btw / maand
+Coaching: aanvraag / gesprek / offerte
+```
+
+Dus in Mollie:
+
+```txt
+Basic incasso: €18,09
+Pro incasso: €71,39
+```
+
+Dat is de correcte route. Niet knutselen met losse maandelijkse betaalverzoeken. Dan krijg je chaos in toegang, verlopen accounts en supportgedoe.
+
+[1]: https://docs.mollie.com/docs/recurring-payments?utm_source=chatgpt.com "Recurring payments"
+[2]: https://docs.mollie.com/reference/create-customer?utm_source=chatgpt.com "Create customer"
+[3]: https://docs.mollie.com/reference/create-customer-payment?utm_source=chatgpt.com "Create customer payment"
+[4]: https://docs.mollie.com/reference/create-subscription?utm_source=chatgpt.com "Create subscription"
+[5]: https://docs.mollie.com/reference/cancel-subscription?utm_source=chatgpt.com "Cancel subscription"

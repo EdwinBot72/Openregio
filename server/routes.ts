@@ -402,28 +402,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       console.log(`[Mollie] Abonnement aangemaakt: ${subscription.id} voor gebruiker ${user.id}`);
 
-      // Mollie recurring subscription aanmaken (alleen na eerste betaling met mandate)
+      // Mollie recurring subscription aanmaken (alleen na eerste betaling mét geldige mandate)
       const nextMonth = new Date();
       nextMonth.setMonth(nextMonth.getMonth() + 1);
 
       if (mollieCustomerId && sequenceType === "first") {
         try {
-          const startDate = nextMonth.toISOString().split("T")[0]; // YYYY-MM-DD
-          const mollieSubscription: any = await (mollieClient.customerSubscriptions.create as any)({
-            customerId: mollieCustomerId,
-            amount: { currency: "EUR", value: getPlanPrice(plan) },
-            interval: "1 month",
-            startDate,
-            description: `OpenRegio ${plan === "pro" ? "Pro" : "Basis"} - Maandelijks abonnement`,
-            webhookUrl: `${baseUrl}/api/mollie/webhook`,
-          });
+          // Stap 4: mandate-verificatie — recurring kan alleen bij geldige mandate
+          const mandates: any = await (mollieClient.customerMandates as any).page({ customerId: mollieCustomerId });
+          const validMandate = mandates.find((m: any) => m.status === "valid");
 
-          await storage.updateSubscription(subscription.id, {
-            mollieSubscriptionId: mollieSubscription.id,
-            currentPeriodEnd: nextMonth,
-          });
+          if (!validMandate) {
+            console.error(`[Mollie] Geen geldige mandate voor ${mollieCustomerId} — subscription niet aangemaakt`);
+            await storage.updateSubscription(subscription.id, { currentPeriodEnd: nextMonth });
+          } else {
+            // Stap 5: subscription aanmaken
+            const startDate = nextMonth.toISOString().split("T")[0]; // YYYY-MM-DD
+            const mollieSubscription: any = await (mollieClient.customerSubscriptions.create as any)({
+              customerId: mollieCustomerId,
+              amount: { currency: "EUR", value: getPlanPrice(plan) },
+              interval: "1 month",
+              startDate,
+              description: `OpenRegio ${plan === "pro" ? "Pro" : "Basis"} - Maandelijks abonnement`,
+              webhookUrl: `${baseUrl}/api/mollie/webhook`,
+            });
 
-          console.log(`[Mollie] Terugkerend abonnement aangemaakt: ${mollieSubscription.id} — start ${startDate}`);
+            await storage.updateSubscription(subscription.id, {
+              mollieSubscriptionId: mollieSubscription.id,
+              currentPeriodEnd: nextMonth,
+            });
+
+            console.log(`[Mollie] Mandate OK (${validMandate.id}) — terugkerend abonnement aangemaakt: ${mollieSubscription.id} start ${startDate}`);
+          }
         } catch (subErr: any) {
           console.error(`[Mollie] Kon terugkerend abonnement niet aanmaken:`, subErr.message);
           await storage.updateSubscription(subscription.id, { currentPeriodEnd: nextMonth });
@@ -2885,7 +2895,6 @@ Maak het verzoek professioneel en juridisch correct.`;
   app.get("/api/billing/subscription", requireAuth, async (req, res) => {
     try {
       const userId = (req.user as any).id;
-      // Haal het laatste actieve abonnement op voor deterministische resultaten
       const subscription = await storage.getActiveSubscription(userId);
       
       if (!subscription) {
@@ -2898,21 +2907,38 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
+  // GET /api/billing/status — compacte statusweergave voor frontend-checks
+  app.get("/api/billing/status", requireAuth, async (req, res) => {
+    try {
+      const userId = (req.user as any).id;
+      const subscription = await storage.getActiveSubscription(userId);
+
+      if (!subscription) {
+        return res.json({ active: false, plan: null, status: "none" });
+      }
+
+      res.json({
+        active: subscription.status === "active",
+        plan: subscription.plan,
+        status: subscription.status,
+        currentPeriodEnd: subscription.currentPeriodEnd,
+        mollieSubscriptionId: subscription.mollieSubscriptionId ?? null,
+      });
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch billing status" });
+    }
+  });
+
   // POST /api/subscription/cancel — Zelfbediening opzeggen (requireAuth)
   app.post("/api/subscription/cancel", requireAuth, async (req, res) => {
     try {
       const user = (req as any).user;
       const userId = user.id as string;
 
-      // Alleen Pro- of Coaching-leden kunnen opzeggen
-      if (user.plan !== "pro" && user.plan !== "coaching") {
-        return res.status(403).json({ error: "Alleen Pro- of Coaching-leden kunnen een abonnement opzeggen" });
-      }
-
-      // Haal het laatste actieve abonnement op
+      // Haal het actieve abonnement op — niet user.plan controleren
       const subscription = await storage.getActiveSubscription(userId);
 
-      if (!subscription) {
+      if (!subscription || subscription.status !== "active") {
         return res.status(404).json({ error: "Geen actief abonnement gevonden" });
       }
 
