@@ -103,7 +103,7 @@ export default function RegelsOverzichtPage() {
       {/* ── Hero ─────────────────────────────────────────────────────── */}
       <div className="relative overflow-hidden bg-gradient-to-br from-slate-800 to-slate-900">
         <img
-          src="/regels-hero.png"
+          src="/regels-hero.webp"
           alt=""
           className="absolute inset-0 w-full h-full object-cover opacity-20 select-none pointer-events-none"
           aria-hidden="true"

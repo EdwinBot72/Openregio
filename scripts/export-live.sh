@@ -21,6 +21,7 @@ EXCLUDE_DIRS = {
     '.git', 'node_modules', '.local', '.cache',
     'dist', 'artifacts', 'uploads',
     'attached_assets', '.agents', '.pythonlibs',
+    'wordpress-plugin', 'public',
 }
 EXCLUDE_EXTS = {'.zip', '.log'}
 EXCLUDE_FILES = {'.env', '.env.local', '.env.production'}
