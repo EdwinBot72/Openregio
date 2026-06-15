@@ -44,14 +44,15 @@ export function generateOnboardingToken(): string {
 }
 
 /**
- * Calculate the plan price in euros (excl. BTW)
- * Pricing: Basis €14,95 / Pro €59,00
- * Incl. BTW (21%): Basis €18,09 / Pro €71,39
+ * Calculate the plan price in euros (incl. 21% BTW)
+ * Excl. BTW: Basis €14,95 / Pro €59,00
+ * Incl. BTW: Basis €18,09 / Pro €71,39
+ * Mollie rekent altijd incl. BTW af; frontend toont excl. BTW.
  * @param plan Plan name (basic or pro)
- * @returns Price as string excl. BTW, e.g. "14.95" or "59.00"
+ * @returns Price as string incl. BTW, e.g. "18.09" or "71.39"
  */
 export function getPlanPrice(plan: string): string {
-  return plan === "pro" ? "59.00" : "14.95";
+  return plan === "pro" ? "71.39" : "18.09";
 }
 
 /**

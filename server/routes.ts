@@ -330,7 +330,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Lees plan en metadata uit de geverifieerde Mollie-betaling.
       // De payment is opgehaald via mollieClient.payments.get() — metadata is betrouwbaar.
-      // Bedragen: excl. 21% btw (B2B — basic €14,95 / pro €59,00).
+      // Bedragen: incl. 21% btw — basic €18,09 / pro €71,39 (excl. btw: €14,95 / €59,00).
       const plan: string = meta.plan ?? "basic";
       const mollieCustomerId: string | null = meta.mollieCustomerId || payment.customerId || null;
       let user: any = null;
@@ -2845,7 +2845,7 @@ Maak het verzoek professioneel en juridisch correct.`;
       const publicUrl = process.env.PUBLIC_BASE_URL || getBaseUrl(req);
 
       // Create first payment to establish mandate for recurring billing
-      // Bedragen excl. 21% btw (B2B — basic €14,95 / pro €59,00)
+      // Bedragen: incl. 21% btw — basic €18,09 / pro €71,39 (excl. btw: €14,95 / €59,00)
       const firstPayment: any = await (mollieClient.payments.create as any)({
         amount: {
           currency: "EUR",

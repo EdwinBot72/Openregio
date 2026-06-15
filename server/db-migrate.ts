@@ -434,6 +434,13 @@ export async function runMigrations(): Promise<void> {
     `);
     console.log("[Migration] ✓ seo_checklist table ensured");
 
+    // Zet DB-default van users.plan van 'basic' naar 'pending'
+    // Nieuwe gebruikers zonder expliciete plan krijgen nu 'pending' totdat Mollie bevestigt
+    await db.execute(sql`
+      ALTER TABLE users ALTER COLUMN plan SET DEFAULT 'pending';
+    `);
+    console.log("[Migration] ✓ users.plan default set to 'pending'");
+
     console.log("[Migration] Database schema is up to date");
   } catch (error) {
     console.error("[Migration] Error running migrations:", error);

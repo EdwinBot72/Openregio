@@ -34,7 +34,7 @@ export const users = pgTable("users", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   email: varchar("email").unique().notNull(),
   passwordHash: varchar("password_hash"),
-  plan: varchar("plan", { enum: SUBSCRIPTION_PLANS }).default("basic"),
+  plan: varchar("plan", { enum: SUBSCRIPTION_PLANS }).default("pending"),
   role: varchar("role", { enum: USER_ROLES }).default("member").notNull(),
   firstName: varchar("first_name"),
   lastName: varchar("last_name"),
