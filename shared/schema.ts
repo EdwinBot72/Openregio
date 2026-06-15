@@ -17,7 +17,7 @@ export const sessions = pgTable(
 
 // Shared constants for subscriptions (must be defined before users table)
 export const SUBSCRIPTION_STATUS = ["active", "trialing", "cancelled", "past_due"] as const;
-export const SUBSCRIPTION_PLANS = ["basic", "pro", "coaching"] as const;
+export const SUBSCRIPTION_PLANS = ["pending", "basic", "pro", "coaching"] as const;
 export const USER_ROLES = ["member", "master", "admin"] as const;
 
 // Users table - supports both Replit Auth and email/password auth

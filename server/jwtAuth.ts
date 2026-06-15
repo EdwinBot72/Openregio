@@ -206,7 +206,7 @@ export function setupJwtAuth(app: Express) {
         return res.status(400).json({ error: errorMessage });
       }
       
-      // Destructure — plan intentionally ignored: registratie geeft altijd "basic"
+      // plan intentionally niet overgenomen uit het verzoek — altijd "pending" tot betaling
       const { email, password, firstName, lastName } = validationResult.data;
       
       const existingUser = await storage.getUserByEmail(email);
@@ -219,7 +219,7 @@ export function setupJwtAuth(app: Express) {
       const user = await storage.createUser({
         email,
         passwordHash,
-        plan: "basic", // plan wordt nooit overgenomen uit het verzoek
+        plan: "pending", // plan blijft pending totdat Mollie webhook bevestigt
         firstName: firstName || null,
         lastName: lastName || null,
       });
@@ -292,7 +292,7 @@ export function setupJwtAuth(app: Express) {
           id: user.id,
           email: user.email,
           mustCompleteOnboarding: false,
-          plan: user.plan as "basic" | "pro",
+          plan: user.plan as "pending" | "basic" | "pro" | "coaching",
           role: user.role as "member" | "master" | "admin",
         });
         await storage.deleteOnboardingTokensByUserId(user.id);

@@ -1,4 +1,4 @@
-export type Plan = "basic" | "pro" | "coaching" | "admin";
+export type Plan = "pending" | "basic" | "pro" | "coaching" | "admin";
 
 export type AccessLevel =
   | "volledig"
@@ -43,34 +43,34 @@ type FeatureRow = Record<Plan, AccessLevel>;
 
 export const FEATURE_ACCESS: Record<FeatureKey, FeatureRow> = {
   // Pijler 1
-  sectorregels:         { basic: "volledig",       pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  wat_komt_eraan:       { basic: "preview",         pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  documenten_opvragen:  { basic: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  avg_controleslagen:   { basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  woo_verzoeken:        { basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  brief_analyse:        { basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  regel_agent:          { basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  conceptbrieven:       { basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  sectorregels:         { pending: "geen", basic: "volledig",       pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  wat_komt_eraan:        { pending: "geen", basic: "preview",         pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  documenten_opvragen:  { pending: "geen", basic: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  avg_controleslagen:   { pending: "geen", basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  woo_verzoeken:        { pending: "geen", basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  brief_analyse:        { pending: "geen", basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  regel_agent:          { pending: "geen", basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  conceptbrieven:       { pending: "geen", basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
   // Pijler 2
-  website_scan:         { basic: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  vindbaarheid:         { basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  bedrijfsprofiel:      { basic: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  seo_tools:            { basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  website_scan:         { pending: "geen", basic: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  vindbaarheid:         { pending: "geen", basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  bedrijfsprofiel:      { pending: "geen", basic: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  seo_tools:            { pending: "geen", basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
   // Pijler 3
-  netwerk:              { basic: "alleen_bekijken", pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  lokale_acties:        { basic: "plaatsen",        pro: "plaatsen",  coaching: "plaatsen",  admin: "plaatsen" },
-  marktplaats:          { basic: "reageren",        pro: "plaatsen",  coaching: "plaatsen",  admin: "plaatsen" },
-  blog_lezen:           { basic: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  blog_publiceren:      { basic: "geen",            pro: "plaatsen",  coaching: "plaatsen",  admin: "plaatsen" },
+  netwerk:              { pending: "geen", basic: "alleen_bekijken", pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  lokale_acties:        { pending: "geen", basic: "plaatsen",        pro: "plaatsen",  coaching: "plaatsen",  admin: "plaatsen" },
+  marktplaats:          { pending: "geen", basic: "reageren",        pro: "plaatsen",  coaching: "plaatsen",  admin: "plaatsen" },
+  blog_lezen:           { pending: "geen", basic: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  blog_publiceren:      { pending: "geen", basic: "geen",            pro: "plaatsen",  coaching: "plaatsen",  admin: "plaatsen" },
   // Extra
-  ai_ondersteuning:     { basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  regio_updates:        { basic: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
-  dossiers_opslaan:     { basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  ai_ondersteuning:     { pending: "geen", basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  regio_updates:        { pending: "geen", basic: "volledig",        pro: "volledig",  coaching: "volledig",  admin: "volledig" },
+  dossiers_opslaan:     { pending: "geen", basic: "geen",            pro: "volledig",  coaching: "volledig",  admin: "volledig" },
   // Beheer
-  gebruikersbeheer:     { basic: "geen",            pro: "geen",      coaching: "geen",      admin: "volledig" },
-  contentbeheer:        { basic: "geen",            pro: "geen",      coaching: "geen",      admin: "volledig" },
-  gemeentebeheer:       { basic: "geen",            pro: "geen",      coaching: "geen",      admin: "volledig" },
-  affiliatebeheer:      { basic: "geen",            pro: "geen",      coaching: "geen",      admin: "volledig" },
+  gebruikersbeheer:     { pending: "geen", basic: "geen",            pro: "geen",      coaching: "geen",      admin: "volledig" },
+  contentbeheer:        { pending: "geen", basic: "geen",            pro: "geen",      coaching: "geen",      admin: "volledig" },
+  gemeentebeheer:       { pending: "geen", basic: "geen",            pro: "geen",      coaching: "geen",      admin: "volledig" },
+  affiliatebeheer:      { pending: "geen", basic: "geen",            pro: "geen",      coaching: "geen",      admin: "volledig" },
 };
 
 export const BADGE_LABELS: Record<AccessLevel, string> = {
@@ -92,7 +92,7 @@ export const BADGE_COLORS: Record<AccessLevel, string> = {
 };
 
 export function getAccessLevel(plan: Plan | undefined | null, feature: FeatureKey): AccessLevel {
-  if (!plan) return "geen";
+  if (!plan || plan === "pending") return "geen";
   const p: Plan = plan;
   return FEATURE_ACCESS[feature]?.[p] ?? "geen";
 }

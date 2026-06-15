@@ -627,7 +627,7 @@ export default function IntelPage() {
       </section>
 
       {/* ── CTA upgrade ──────────────────────────────────────────────────────── */}
-      {user && user.plan === "basic" && (
+      {user && (user.plan === "basic" || user.plan === "pending" || !user.plan) && (
         <div className="rounded-3xl bg-card border p-6" data-testid="section-upgrade-cta">
           <div className="flex items-start gap-4">
             <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center shrink-0">

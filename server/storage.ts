@@ -118,7 +118,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   getAllUsers(): Promise<User[]>;
   upsertUser(user: UpsertUser): Promise<User>;
-  createUser(user: { email: string; passwordHash: string; plan?: "basic" | "pro"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null; mustCompleteOnboarding?: boolean; onboardingToken?: string | null; referralCode?: string | null; referredByUserId?: string | null; referredAt?: Date | null }): Promise<User>;
+  createUser(user: { email: string; passwordHash: string; plan?: "pending" | "basic" | "pro" | "coaching"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null; mustCompleteOnboarding?: boolean; onboardingToken?: string | null; referralCode?: string | null; referredByUserId?: string | null; referredAt?: Date | null }): Promise<User>;
   updateUser(id: string, updates: Partial<Omit<User, "id" | "createdAt">>): Promise<User | undefined>;
   updateUserPlan(userId: string, plan: "basic" | "pro" | "coaching"): Promise<User | undefined>;
   updateUserPassword(userId: string, passwordHash: string): Promise<User | undefined>;
@@ -384,13 +384,13 @@ export class MemStorage implements IStorage {
     return Array.from(this.users.values());
   }
 
-  async createUser(userData: { email: string; passwordHash: string; plan?: "basic" | "pro"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null; mustCompleteOnboarding?: boolean; onboardingToken?: string | null; referralCode?: string | null; referredByUserId?: string | null; referredAt?: Date | null }): Promise<User> {
+  async createUser(userData: { email: string; passwordHash: string; plan?: "pending" | "basic" | "pro" | "coaching"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null; mustCompleteOnboarding?: boolean; onboardingToken?: string | null; referralCode?: string | null; referredByUserId?: string | null; referredAt?: Date | null }): Promise<User> {
     const id = randomUUID();
     const user: User = {
       id,
       email: userData.email,
       passwordHash: userData.passwordHash,
-      plan: userData.plan || "basic",
+      plan: userData.plan ?? "pending",
       role: userData.role || "member",
       firstName: userData.firstName || null,
       lastName: userData.lastName || null,
@@ -1927,13 +1927,13 @@ class DbStorage implements IStorage {
     return await db.select().from(users).orderBy(desc(users.createdAt));
   }
 
-  async createUser(userData: { email: string; passwordHash: string; plan?: "basic" | "pro"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null; mustCompleteOnboarding?: boolean; onboardingToken?: string | null; referralCode?: string | null; referredByUserId?: string | null; referredAt?: Date | null }): Promise<User> {
+  async createUser(userData: { email: string; passwordHash: string; plan?: "pending" | "basic" | "pro" | "coaching"; role?: "member" | "master" | "admin"; firstName?: string | null; lastName?: string | null; mustCompleteOnboarding?: boolean; onboardingToken?: string | null; referralCode?: string | null; referredByUserId?: string | null; referredAt?: Date | null }): Promise<User> {
     const [user] = await db
       .insert(users)
       .values({
         email: userData.email,
         passwordHash: userData.passwordHash,
-        plan: userData.plan || "basic",
+        plan: userData.plan ?? "pending",
         role: userData.role || "member",
         firstName: userData.firstName || null,
         lastName: userData.lastName || null,

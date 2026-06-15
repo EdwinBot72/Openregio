@@ -500,7 +500,7 @@ export default function RegioBotPage() {
                   )}
                 </Button>
 
-                {!user?.plan || user.plan === "basic" ? (
+                {!user?.plan || user.plan === "basic" || user.plan === "pending" ? (
                   <p className="text-xs text-center text-muted-foreground">
                     Basis: 3 routes per dag &nbsp;·&nbsp;{" "}
                     <Link href="/lidmaatschap?plan=pro" className="text-primary hover:underline">
