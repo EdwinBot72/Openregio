@@ -93,13 +93,15 @@ import GezondPijlerPage from "@/pages/gezond-pijler";
 import RegioScanProPage from "@/pages/pro/regioscan";
 import LokaleActiesPage from "@/pages/lokale-acties";
 import LokaleActieDetailPage from "@/pages/lokale-actie-detail";
+import ActiesPage from "@/pages/acties";
+import ActieDetailPage from "@/pages/actie-detail";
 import LedenUpdatesPage from "@/pages/leden-updates";
 import PijlerGripPage from "@/pages/pijler-grip";
 import PijlerZichtbaarheidPage from "@/pages/pijler-zichtbaarheid";
 import PijlerKrachtPage from "@/pages/pijler-kracht";
 
 // Routes that should NOT have the sidebar/header layout
-const PUBLIC_ROUTES = ["/", "/landing", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse", "/koop-lokaal", "/gezond/:slug"];
+const PUBLIC_ROUTES = ["/", "/landing", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse", "/koop-lokaal", "/gezond/:slug", "/acties", "/acties/:id"];
 
 function PublicRouter() {
   return (
@@ -124,6 +126,8 @@ function PublicRouter() {
       <Route path="/regio-analyse" component={RegioAnalysePage} />
       <Route path="/koop-lokaal" component={KoopLokaalPage} />
       <Route path="/gezond/:slug" component={GezondPijlerPage} />
+      <Route path="/acties" component={ActiesPage} />
+      <Route path="/acties/:id" component={ActieDetailPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -348,11 +352,13 @@ function AppContent() {
   const [isRegioAnalysePage] = useRoute("/regio-analyse");
   const [isKoopLokaalPage] = useRoute("/koop-lokaal");
   const [isGezondPijlerPage] = useRoute("/gezond/:slug");
+  const [isActiesPage] = useRoute("/acties");
+  const [isActieDetailPage] = useRoute("/acties/:id");
 
   // /lidmaatschap krijgt de top-nav, maar blijft publiek bereikbaar.
   // Daarom NIET in PUBLIC_ROUTES en NIET in AuthGuard, maar in een eigen
   // layout-tak hieronder.
-  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage || isBlogsPage || isForgotPasswordPage || isResetPasswordPage || isDisclaimerPage || isCookiebeleidPage || isRegioAnalysePage || isKoopLokaalPage || isGezondPijlerPage;
+  const isPublicRoute = isHomePage || isLoginPage || isRegisterPage || isStartPage || isPaymentSuccessPage || isFirstLoginPage || isPrivacyPage || isVoorwaardenPage || isBasischeckPage || isBlogDetailPage || isBlogsPage || isForgotPasswordPage || isResetPasswordPage || isDisclaimerPage || isCookiebeleidPage || isRegioAnalysePage || isKoopLokaalPage || isGezondPijlerPage || isActiesPage || isActieDetailPage;
 
   if (isPublicRoute) {
     return <PublicRouter />;

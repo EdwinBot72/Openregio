@@ -57,6 +57,7 @@ export default function HomePage() {
               <a href="#woo" className="lp-nav-link">WOO-check</a>
               <a href="#regiobot" className="lp-nav-link">RegioBot</a>
               <a href="#aanbod" className="lp-nav-link">Aanbod</a>
+              <Link href="/acties" className="lp-nav-link" data-testid="link-nav-acties">Lokale acties</Link>
             </nav>
 
             <div className="lp-nav-cta">
@@ -77,6 +78,7 @@ export default function HomePage() {
           <a href="#woo" className="lp-nav-link" onClick={() => setMobileOpen(false)}>WOO-check</a>
           <a href="#regiobot" className="lp-nav-link" onClick={() => setMobileOpen(false)}>RegioBot</a>
           <a href="#aanbod" className="lp-nav-link" onClick={() => setMobileOpen(false)}>Aanbod</a>
+          <Link href="/acties" className="lp-nav-link" onClick={() => setMobileOpen(false)}>Lokale acties</Link>
           <div className="lp-mobile-cta">
             <Link href="/login" className="lp-btn-ghost-nav" onClick={() => setMobileOpen(false)}>Inloggen</Link>
             <Link href="/register" className="lp-btn-orange-nav" onClick={() => setMobileOpen(false)}>Word lid</Link>
@@ -606,6 +608,7 @@ export default function HomePage() {
                 <a href="#pijlers">Lokale Kracht</a>
                 <a href="#regiobot">RegioBot</a>
                 <a href="#woo">WOO-check</a>
+                <Link href="/acties">Lokale acties</Link>
               </div>
             </div>
             <div>

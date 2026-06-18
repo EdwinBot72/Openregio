@@ -5903,6 +5903,33 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
     }
   });
 
+  // GET /api/lokale-acties/public — publieke lijst (geen auth vereist)
+  app.get("/api/lokale-acties/public", async (req, res) => {
+    try {
+      const { regio, doelgroep } = req.query as Record<string, string>;
+      const items = await storage.getLokaleActies({
+        regio: regio || undefined,
+        doelgroep: doelgroep || undefined,
+      });
+      return res.json(items);
+    } catch (err) {
+      console.error("[LokaleActies] fout bij ophalen publiek:", err);
+      return res.status(500).json({ error: "Fout bij ophalen lokale acties" });
+    }
+  });
+
+  // GET /api/lokale-acties/public/:id — publieke detail (geen auth vereist)
+  app.get("/api/lokale-acties/public/:id", async (req, res) => {
+    try {
+      const item = await storage.getLokaleActieById(req.params.id);
+      if (!item || item.status === "verlopen") return res.status(404).json({ error: "Niet gevonden" });
+      return res.json(item);
+    } catch (err) {
+      console.error("[LokaleActies] fout bij ophalen publiek detail:", err);
+      return res.status(500).json({ error: "Fout bij ophalen actie" });
+    }
+  });
+
   // GET /api/lokale-acties/me — eigen acties (Pro-eigenaar)
   app.get("/api/lokale-acties/me", requireAuth, async (req, res) => {
     try {
