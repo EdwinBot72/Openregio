@@ -3,6 +3,9 @@ import { Link, useParams, useLocation } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
+import { MapContainer, TileLayer, Marker } from "react-leaflet";
+import { Icon } from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -20,6 +23,119 @@ import {
   ArrowLeft, Share2, Copy, CheckCircle2, Pencil, Trash2,
 } from "lucide-react";
 import type { LokaleActie } from "@shared/schema";
+
+const markerIcon = new Icon({
+  iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+  iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+  shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+
+type GeoState =
+  | { status: "idle" }
+  | { status: "loading" }
+  | { status: "ok"; lat: number; lng: number }
+  | { status: "error" };
+
+function MiniKaart({
+  locatie,
+  regio,
+  mapsLink,
+}: {
+  locatie: string;
+  regio: string;
+  mapsLink: string;
+}) {
+  const [geo, setGeo] = useState<GeoState>({ status: "idle" });
+
+  useEffect(() => {
+    let cancelled = false;
+    setGeo({ status: "loading" });
+    const query = encodeURIComponent(`${locatie}, ${regio}, Nederland`);
+    fetch(
+      `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`,
+      { headers: { "Accept-Language": "nl" } },
+    )
+      .then((r) => r.json())
+      .then((data: Array<{ lat: string; lon: string }>) => {
+        if (cancelled) return;
+        if (data.length > 0) {
+          setGeo({ status: "ok", lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
+        } else {
+          setGeo({ status: "error" });
+        }
+      })
+      .catch(() => {
+        if (!cancelled) setGeo({ status: "error" });
+      });
+    return () => { cancelled = true; };
+  }, [locatie, regio]);
+
+  if (geo.status === "loading") {
+    return (
+      <div className="h-52 w-full bg-muted/40 animate-pulse rounded-md flex items-center justify-center text-xs text-muted-foreground" data-testid="kaart-loading">
+        Kaart laden…
+      </div>
+    );
+  }
+
+  if (geo.status === "ok") {
+    const center: [number, number] = [geo.lat, geo.lng];
+    return (
+      <div className="relative" data-testid="kaart-container">
+        <div className="h-52 w-full overflow-hidden rounded-md">
+          <MapContainer
+            center={center}
+            zoom={15}
+            className="h-full w-full"
+            scrollWheelZoom={false}
+            zoomControl={true}
+            attributionControl={true}
+          >
+            <TileLayer
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            <Marker position={center} icon={markerIcon} />
+          </MapContainer>
+        </div>
+        <a
+          href={mapsLink}
+          target="_blank"
+          rel="noreferrer noopener"
+          className="absolute bottom-2 right-2 z-[1000] bg-background/90 text-xs text-muted-foreground px-2 py-1 rounded-md border inline-flex items-center gap-1 hover:bg-background"
+          data-testid="link-kaart-extern"
+        >
+          Open in kaart <ExternalLink className="h-3 w-3" />
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <a
+      href={mapsLink}
+      target="_blank"
+      rel="noreferrer noopener"
+      className="block bg-muted/40 p-4 hover-elevate rounded-md"
+      data-testid="link-kaart-extern"
+    >
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div className="flex items-center gap-2 text-sm">
+          <MapPin className="h-4 w-4 text-muted-foreground" />
+          <span className="font-medium">{locatie}</span>
+          <span className="text-muted-foreground">— {regio}</span>
+        </div>
+        <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
+          Open in kaart <ExternalLink className="h-3 w-3" />
+        </span>
+      </div>
+    </a>
+  );
+}
 
 const DOELGROEP_LABELS: Record<string, string> = {
   iedereen: "Iedereen",
@@ -260,25 +376,13 @@ export default function LokaleActieDetailPage() {
       </Card>
 
       <Card data-testid="card-kaart">
-        <CardContent className="p-0 overflow-hidden rounded-md">
-          <a
-            href={mapsLink}
-            target="_blank"
-            rel="noreferrer noopener"
-            className="block bg-muted/40 p-4 hover-elevate"
-            data-testid="link-kaart-extern"
-          >
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-              <div className="flex items-center gap-2 text-sm">
-                <MapPin className="h-4 w-4 text-muted-foreground" />
-                <span className="font-medium">{actie.locatie}</span>
-                <span className="text-muted-foreground">— {actie.regio}</span>
-              </div>
-              <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
-                Open in kaart <ExternalLink className="h-3 w-3" />
-              </span>
-            </div>
-          </a>
+        <CardContent className="p-4 space-y-2">
+          <div className="flex items-center gap-2 text-sm">
+            <MapPin className="h-4 w-4 text-muted-foreground shrink-0" />
+            <span className="font-medium">{actie.locatie}</span>
+            <span className="text-muted-foreground">— {actie.regio}</span>
+          </div>
+          <MiniKaart locatie={actie.locatie} regio={actie.regio} mapsLink={mapsLink} />
         </CardContent>
       </Card>
 
