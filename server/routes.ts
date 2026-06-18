@@ -6093,6 +6093,33 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
     }
   });
 
+  // GET /api/lokale-acties/unread-count — ongelezen nieuwe acties in eigen regio (badge)
+  app.get("/api/lokale-acties/unread-count", attachUser, requireAuth, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const u = await storage.getUserById(userId);
+      const lastSeen = u?.lastLokaleActiesSeenAt ? new Date(u.lastLokaleActiesSeenAt) : null;
+      const regio = u?.region || undefined;
+      const items = await storage.getLokaleActies({ regio, createdSince: lastSeen ?? undefined });
+      res.json({ count: items.length, lastSeenAt: lastSeen?.toISOString() ?? null });
+    } catch (err) {
+      console.warn("[LokaleActies/unread-count] DB unavailable");
+      res.json({ count: 0, lastSeenAt: null });
+    }
+  });
+
+  // POST /api/lokale-acties/mark-seen — stel lastLokaleActiesSeenAt in op nu
+  app.post("/api/lokale-acties/mark-seen", attachUser, requireAuth, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      await storage.updateUser(userId, { lastLokaleActiesSeenAt: new Date() });
+      res.json({ ok: true });
+    } catch (err) {
+      console.error("[LokaleActies/mark-seen] failed:", err);
+      res.status(500).json({ error: "Kon niet markeren als gezien" });
+    }
+  });
+
   // GET /api/lokale-acties/:id — detail (alle ingelogde leden)
   app.get("/api/lokale-acties/:id", requireAuth, async (req, res) => {
     try {

@@ -461,6 +461,12 @@ export async function runMigrations(): Promise<void> {
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lokale_acties_rsvp_user ON lokale_acties_rsvp(user_id);`);
     console.log("[Migration] ✓ lokale_acties_rsvp table ensured");
 
+    // Add last_lokale_acties_seen_at column to users table if not exists (task #100)
+    await db.execute(sql`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS last_lokale_acties_seen_at TIMESTAMP;
+    `);
+    console.log("[Migration] ✓ users.last_lokale_acties_seen_at column ensured");
+
     console.log("[Migration] Database schema is up to date");
   } catch (error) {
     console.error("[Migration] Error running migrations:", error);

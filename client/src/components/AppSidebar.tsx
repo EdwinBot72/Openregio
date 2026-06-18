@@ -37,12 +37,14 @@ function NavSectionItem({
   isPro,
   isAdmin,
   badgeCount,
+  subBadges,
 }: {
   section: NavSection;
   currentPath: string;
   isPro: boolean;
   isAdmin: boolean;
   badgeCount?: number;
+  subBadges?: Record<string, number>;
 }) {
   // isActive: controleer zowel de sectie-url als alle sub-routes
   const isActive =
@@ -154,11 +156,22 @@ function NavSectionItem({
             <SectionIcon />
             <span>{section.title}</span>
           </span>
-          {open ? (
-            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
-          ) : (
-            <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
-          )}
+          <span className="flex items-center gap-1">
+            {!open && badgeCount && badgeCount > 0 ? (
+              <Badge
+                variant="secondary"
+                className="text-[10px] px-1.5 py-0 h-4 bg-orange-100 text-orange-700 border-orange-200"
+                data-testid={`badge-unread-${section.id}`}
+              >
+                {badgeCount > 9 ? "9+" : badgeCount}
+              </Badge>
+            ) : null}
+            {open ? (
+              <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+            ) : (
+              <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+            )}
+          </span>
         </SidebarMenuButton>
       )}
 
@@ -168,6 +181,7 @@ function NavSectionItem({
             const subActive =
               currentPath === sub.url || currentPath.startsWith(sub.url + "/");
             const showProBadge = sub.proLocked && !isPro && !isAdmin;
+            const subBadgeCount = subBadges?.[sub.url] ?? 0;
             return (
               <SidebarMenuSubItem key={`${sub.url}-${sub.title}`}>
                 <SidebarMenuSubButton
@@ -185,6 +199,15 @@ function NavSectionItem({
                         data-testid={`badge-pro-${sub.url.replace(/\//g, "-").replace(/^-/, "")}`}
                       >
                         Pro
+                      </Badge>
+                    )}
+                    {!showProBadge && subBadgeCount > 0 && (
+                      <Badge
+                        variant="secondary"
+                        className="ml-auto text-[9px] px-1.5 py-0 h-4 bg-orange-100 text-orange-700 border-orange-200"
+                        data-testid={`badge-unread-sub-${sub.url.replace(/\//g, "-").replace(/^-/, "")}`}
+                      >
+                        {subBadgeCount > 9 ? "9+" : subBadgeCount}
                       </Badge>
                     )}
                   </Link>
@@ -225,6 +248,15 @@ export function AppSidebar() {
     refetchInterval: 1000 * 60 * 5,
   });
   const unreadCount = unread?.count ?? 0;
+
+  // Ongelezen lokale acties → badge bij "Kansen" en sub-item "Lokale acties"
+  const { data: unreadActies } = useQuery<{ count: number }>({
+    queryKey: ["/api/lokale-acties/unread-count"],
+    enabled: !!user,
+    staleTime: 1000 * 60,
+    refetchInterval: 1000 * 60 * 5,
+  });
+  const unreadActiesCount = unreadActies?.count ?? 0;
 
   const getInitials = () => {
     if (user?.firstName || user?.lastName) {
@@ -278,7 +310,18 @@ export function AppSidebar() {
                     currentPath={location}
                     isPro={isPro}
                     isAdmin={isAdmin}
-                    badgeCount={section.id === "vandaag" ? unreadCount : undefined}
+                    badgeCount={
+                      section.id === "vandaag"
+                        ? unreadCount
+                        : section.id === "kansen"
+                        ? unreadActiesCount
+                        : undefined
+                    }
+                    subBadges={
+                      section.id === "kansen" && unreadActiesCount > 0
+                        ? { "/lokale-acties": unreadActiesCount }
+                        : undefined
+                    }
                   />
                 );
               })}

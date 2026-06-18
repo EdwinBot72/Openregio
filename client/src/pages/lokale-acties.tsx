@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -95,6 +95,14 @@ export default function LokaleActiesPage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const isPro = user?.plan === "pro" || user?.plan === "coaching";
+
+  // Markeer lokale acties als gezien zodra de pagina wordt bezocht → zet badge op nul
+  useEffect(() => {
+    if (!user) return;
+    apiRequest("POST", "/api/lokale-acties/mark-seen").then(() => {
+      queryClient.invalidateQueries({ queryKey: ["/api/lokale-acties/unread-count"] });
+    }).catch(() => {});
+  }, [user]);
 
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<LokaleActie | null>(null);
