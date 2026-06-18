@@ -7825,6 +7825,29 @@ Geef alleen de brieftekst terug, zonder commentaar, zonder markdown, zonder JSON
 
   // ─────────────────────────────────────────────────────────────────────
 
+  // Admin: GET /api/admin/lokale-acties-cleanup-log — opschoning-log ringbuffer
+  app.get("/api/admin/lokale-acties-cleanup-log", requireAuth, requireAdmin, async (_req, res) => {
+    try {
+      const { getCleanupLog } = await import("./services/lokaleActiesCron");
+      res.json(getCleanupLog());
+    } catch (err) {
+      console.error("[Admin] cleanup-log error:", err);
+      res.status(500).json({ error: "Kon log niet ophalen" });
+    }
+  });
+
+  // Admin: POST /api/admin/lokale-acties-cleanup — handmatig opschonen
+  app.post("/api/admin/lokale-acties-cleanup", requireAuth, requireAdmin, async (_req, res) => {
+    try {
+      const { runLokaleActiesCleanup } = await import("./services/lokaleActiesCron");
+      const result = await runLokaleActiesCleanup("manual");
+      res.json(result);
+    } catch (err) {
+      console.error("[Admin] manual cleanup error:", err);
+      res.status(500).json({ error: "Opschoning mislukt" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

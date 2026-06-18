@@ -94,6 +94,7 @@ import GezondPijlerPage from "@/pages/gezond-pijler";
 import RegioScanProPage from "@/pages/pro/regioscan";
 import LokaleActiesPage from "@/pages/lokale-acties";
 import LokaleActieDetailPage from "@/pages/lokale-actie-detail";
+import AdminLokaleActiesPage from "@/pages/admin/lokale-acties";
 import ActiesPage from "@/pages/acties";
 import ActieDetailPage from "@/pages/actie-detail";
 import LedenUpdatesPage from "@/pages/leden-updates";
@@ -273,6 +274,7 @@ function AuthenticatedRouter() {
       <Route path="/admin/wetgeving"><AdminGate><AdminWetgevingPage /></AdminGate></Route>
       <Route path="/admin/cursussen"><AdminGate><AdminCursussenPage /></AdminGate></Route>
       <Route path="/admin/betalingen"><AdminGate><AdminBetalingenPage /></AdminGate></Route>
+      <Route path="/admin/lokale-acties"><AdminGate><AdminLokaleActiesPage /></AdminGate></Route>
 
       {/* ── Overige authenticeerde routes (intern / deeplink) ─────────────── */}
       <Route path="/onboarding" component={OnboardingPage} />

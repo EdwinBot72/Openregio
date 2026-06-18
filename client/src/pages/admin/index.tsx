@@ -8,7 +8,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Users, Gavel, MapPin, TrendingUp, ArrowRight,
   FileText, BarChart2, ShieldCheck, Landmark, Building2, BookOpen,
-  TrendingDown, Euro, Activity, Sparkles, Lock,
+  TrendingDown, Euro, Activity, Sparkles, Lock, Trash2,
 } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
@@ -58,6 +58,7 @@ const sections = [
   { id: "ondernemers", href: "/admin/ondernemers", icon: Building2, title: "Ondernemers", description: "Leden met activiteits- en planstatus.", color: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400" },
   { id: "wetgeving", href: "/admin/wetgeving", icon: BookOpen, title: "Wetgeving Inzendingen", description: "Verwerk brieven van leden.", color: "bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400" },
   { id: "betalingen", href: "/admin/betalingen", icon: Euro, title: "Betalingen", description: "Mollie-subscriptions en betalingsstatus.", color: "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400" },
+  { id: "lokale-acties", href: "/admin/lokale-acties", icon: Trash2, title: "Lokale acties opschoning", description: "Log en handmatig uitvoeren van opschoning.", color: "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400" },
 ];
 
 function KpiCard({
