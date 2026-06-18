@@ -55,6 +55,7 @@ export const users = pgTable("users", {
   lastNewsReadAt: timestamp("last_news_read_at"), // Wanneer gebruiker voor het laatst leden-updates las
   emailNewsDigest: boolean("email_news_digest").default(true).notNull(), // Opt-out toggle voor wekelijkse digest-mail
   emailLokaleActiesDigest: boolean("email_lokale_acties_digest").default(true).notNull(), // Opt-out toggle voor wekelijkse "nieuwe lokale acties in jouw regio"-mail (task #77)
+  lastDigestSentAt: timestamp("last_digest_sent_at"), // Wanneer de wekelijkse leden-updates digest voor het laatst is verstuurd (idempotentie)
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
   deletedAt: timestamp("deleted_at"), // Soft delete for AVG compliance

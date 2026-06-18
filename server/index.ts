@@ -115,6 +115,10 @@ app.use((req, res, next) => {
   );
   startLokaleActiesNotificationsCron();
 
+  // Start de wekelijkse leden-updates digest-cron (task #94)
+  const { startLedenUpdatesCron } = await import("./services/ledenUpdatesCron");
+  startLedenUpdatesCron();
+
   // Global error handler with structured logging
   app.use((err: any, req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

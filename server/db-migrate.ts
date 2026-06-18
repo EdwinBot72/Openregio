@@ -378,6 +378,12 @@ export async function runMigrations(): Promise<void> {
     `);
     console.log("[Migration] ✓ users.email_lokale_acties_digest ensured");
 
+    // Wekelijkse leden-updates digest idempotentie (task #94)
+    await db.execute(sql`
+      ALTER TABLE users ADD COLUMN IF NOT EXISTS last_digest_sent_at TIMESTAMPTZ;
+    `);
+    console.log("[Migration] ✓ users.last_digest_sent_at ensured");
+
     // Indien-velden voor woo-dossiers (auto-indienen vanuit RegioScan)
     await db.execute(sql`
       ALTER TABLE woo_dossiers ADD COLUMN IF NOT EXISTS indien_kanaal VARCHAR(16);
