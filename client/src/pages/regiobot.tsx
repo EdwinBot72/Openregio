@@ -32,6 +32,7 @@ import {
   Building2,
   RotateCcw,
   Trash2,
+  AlertTriangle,
 } from "lucide-react";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -786,13 +787,22 @@ export default function RegioBotPage() {
                   <div
                     key={idx}
                     className={`rounded-md px-3 py-2 text-sm ${
-                      m.role === "bot"
-                        ? "bg-muted text-foreground"
-                        : "bg-primary/10 text-foreground ml-8"
+                      m.role === "user"
+                        ? "bg-primary/10 text-foreground ml-8"
+                        : m.isError
+                        ? "bg-destructive/10 border border-destructive/40 text-foreground"
+                        : "bg-muted text-foreground"
                     }`}
                     data-testid={`message-${m.role}-${idx}`}
                   >
-                    <p className="whitespace-pre-wrap">{m.text}</p>
+                    {m.isError ? (
+                      <div className="flex items-start gap-2">
+                        <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-destructive" aria-hidden="true" />
+                        <p className="whitespace-pre-wrap">{m.text}</p>
+                      </div>
+                    ) : (
+                      <p className="whitespace-pre-wrap">{m.text}</p>
+                    )}
                     {m.citations && m.citations.length > 0 && (
                       <div className="mt-2 space-y-0.5 text-xs text-muted-foreground border-t pt-2">
                         {m.citations.map((c) => (
