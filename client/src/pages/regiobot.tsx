@@ -31,6 +31,7 @@ import {
   ShoppingBag,
   Building2,
   RotateCcw,
+  Trash2,
 } from "lucide-react";
 
 // ── Types ────────────────────────────────────────────────────────────────────
@@ -79,6 +80,38 @@ interface Message {
   text: string;
   citations?: Citation[];
   isError?: boolean;
+}
+
+const INITIAL_WOO_MESSAGE: Message = {
+  role: "bot",
+  text: "Hoi! Ik ben de WOO-analysemodule. Ik help je met WOO-verzoeken, mandaatchecks en analyses van besluiten — altijd met bronvermelding. Kies een taak of stel direct je vraag.",
+};
+
+const MAX_STORED_MESSAGES = 100;
+
+function getStorageKey(userId: number | string) {
+  return `regiobot_woo_messages_${userId}`;
+}
+
+function loadMessages(userId: number | string): Message[] {
+  try {
+    const raw = localStorage.getItem(getStorageKey(userId));
+    if (!raw) return [INITIAL_WOO_MESSAGE];
+    const parsed = JSON.parse(raw) as Message[];
+    if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+  } catch {
+    // ignore parse errors
+  }
+  return [INITIAL_WOO_MESSAGE];
+}
+
+function saveMessages(userId: number | string, messages: Message[]) {
+  try {
+    const toStore = messages.slice(-MAX_STORED_MESSAGES);
+    localStorage.setItem(getStorageKey(userId), JSON.stringify(toStore));
+  } catch {
+    // ignore storage errors (e.g. quota exceeded)
+  }
 }
 
 const TASK_LABELS: Record<Task, string> = {
@@ -196,10 +229,8 @@ export default function RegioBotPage() {
   // WOO state
   const [task, setTask] = useState<Task>("analyse_besluit");
   const [question, setQuestion] = useState("");
-  const [messages, setMessages] = useState<Message[]>([{
-    role: "bot",
-    text: "Hoi! Ik ben de WOO-analysemodule. Ik help je met WOO-verzoeken, mandaatchecks en analyses van besluiten — altijd met bronvermelding. Kies een taak of stel direct je vraag.",
-  }]);
+  const [messages, setMessages] = useState<Message[]>([INITIAL_WOO_MESSAGE]);
+  const [messagesLoaded, setMessagesLoaded] = useState(false);
   const [lastQuestion, setLastQuestion] = useState("");
   const [selectedRegion, setSelectedRegion] = useState("all");
   const [selectedAuthority, setSelectedAuthority] = useState("all");
@@ -231,6 +262,20 @@ export default function RegioBotPage() {
     if (dossier) { setSelectedDossierId(dossier); setMode("woo"); }
     if (t && t in TASK_LABELS) { setTask(t); setMode("woo"); }
   }, [searchString]);
+
+  // Load persisted WOO messages from localStorage once user is known
+  useEffect(() => {
+    if (!user || messagesLoaded) return;
+    const stored = loadMessages(user.id);
+    setMessages(stored);
+    setMessagesLoaded(true);
+  }, [user, messagesLoaded]);
+
+  // Persist WOO messages to localStorage whenever they change
+  useEffect(() => {
+    if (!user || !messagesLoaded) return;
+    saveMessages(user.id, messages);
+  }, [messages, user, messagesLoaded]);
 
   // Route planner mutation
   const routeMutation = useMutation({
@@ -305,6 +350,13 @@ export default function RegioBotPage() {
     setRouteResult(null);
     setRouteError(null);
     setRouteMessage("");
+  };
+
+  const handleClearWooChat = () => {
+    setMessages([INITIAL_WOO_MESSAGE]);
+    if (user) {
+      try { localStorage.removeItem(getStorageKey(user.id)); } catch { /* ignore */ }
+    }
   };
 
   // ── Auth gate ─────────────────────────────────────────────────────────────
@@ -712,7 +764,20 @@ export default function RegioBotPage() {
 
           {/* Chat */}
           <Card data-testid="card-chat">
-            <CardContent className="pt-4 space-y-3">
+            <CardHeader className="pb-2 pt-4 flex flex-row items-center justify-between gap-2 flex-wrap">
+              <CardTitle className="text-base">Gesprek</CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClearWooChat}
+                disabled={messages.length <= 1}
+                data-testid="button-clear-chat"
+              >
+                <Trash2 className="w-3 h-3 mr-1" />
+                Wis gesprek
+              </Button>
+            </CardHeader>
+            <CardContent className="pt-0 space-y-3">
               <div
                 className="space-y-3 max-h-96 overflow-y-auto pr-1"
                 data-testid="chat-messages"
