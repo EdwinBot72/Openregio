@@ -5922,7 +5922,10 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
   app.get("/api/lokale-acties/public/:id", async (req, res) => {
     try {
       const item = await storage.getLokaleActieById(req.params.id);
-      if (!item || item.status === "verlopen") return res.status(404).json({ error: "Niet gevonden" });
+      const now = new Date();
+      if (!item || item.status === "verlopen" || item.expiresAt <= now) {
+        return res.status(404).json({ error: "Niet gevonden" });
+      }
       return res.json(item);
     } catch (err) {
       console.error("[LokaleActies] fout bij ophalen publiek detail:", err);

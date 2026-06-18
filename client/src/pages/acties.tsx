@@ -13,7 +13,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
 import {
-  CalendarDays, MapPin, Users, Search, ArrowRight, Clock, Building2, ChevronRight,
+  CalendarDays, MapPin, Users, Search, ArrowRight, Clock, Building2, ChevronRight, ExternalLink,
 } from "lucide-react";
 import type { LokaleActie } from "@shared/schema";
 import { LOKALE_ACTIE_DOELGROEPEN } from "@shared/schema";
@@ -235,6 +235,14 @@ export default function ActiesPage() {
                         <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
                           <Building2 size={12} />
                           <span>{actie.bedrijfsnaam}</span>
+                        </div>
+                      )}
+                      {actie.externeLink && (
+                        <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+                          <ExternalLink size={12} />
+                          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: 200 }}>
+                            {actie.externeLink.replace(/^https?:\/\//, "")}
+                          </span>
                         </div>
                       )}
                     </div>
