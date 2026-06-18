@@ -123,6 +123,32 @@ export const getQueryFn: <T>(options: {
     return await res.json();
   };
 
+/**
+ * Extracts a human-readable message from API errors thrown by apiRequest.
+ * Errors follow the format "<status>: <body>" where body may be JSON.
+ */
+export function parseApiError(err: unknown, fallback = "Er ging iets mis. Probeer het opnieuw."): string {
+  const raw = err instanceof Error ? err.message : String(err ?? "");
+  const match = raw.match(/^(\d{3}):\s*([\s\S]*)/);
+  if (!match) return raw || fallback;
+
+  const status = parseInt(match[1], 10);
+
+  if (status === 429) return "Te veel aanvragen. Wacht even en probeer het opnieuw.";
+  if (status === 503) {
+    let extra = "";
+    try { extra = JSON.parse(match[2])?.error ?? ""; } catch { extra = match[2] ?? ""; }
+    return `Service tijdelijk niet beschikbaar.${extra ? ` ${extra}` : ""}`;
+  }
+
+  try {
+    const parsed = JSON.parse(match[2]);
+    return parsed?.error ?? parsed?.message ?? fallback;
+  } catch {
+    return match[2] || fallback;
+  }
+}
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

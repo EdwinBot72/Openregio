@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useSearch } from "wouter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -247,12 +247,7 @@ export default function RegioBotPage() {
       setRouteError(null);
     },
     onError: (err: any) => {
-      const match = err?.message?.match(/^(\d{3}):\s*([\s\S]*)/);
-      let msg = "Er ging iets mis. Probeer het opnieuw.";
-      if (match) {
-        try { msg = JSON.parse(match[2])?.error ?? msg; } catch { msg = match[2] ?? msg; }
-      }
-      setRouteError(msg);
+      setRouteError(parseApiError(err));
       setRouteResult(null);
     },
   });
@@ -274,19 +269,7 @@ export default function RegioBotPage() {
       setMessages((prev) => [...prev, { role: "bot", text: data.answer, citations: data.citations }]);
     },
     onError: (err: any) => {
-      let msg = "Er ging iets mis. Probeer het opnieuw.";
-      const match = err?.message?.match(/^(\d{3}):\s*([\s\S]*)/);
-      if (match) {
-        const status = parseInt(match[1], 10);
-        try {
-          const parsed = JSON.parse(match[2]);
-          const bMsg = parsed.error ?? parsed.message;
-          if (status === 503) msg = `Service tijdelijk niet beschikbaar.${bMsg ? ` ${bMsg}` : ""}`;
-          else if (status === 429) msg = "Te veel aanvragen. Wacht even en probeer opnieuw.";
-          else if (bMsg) msg = bMsg;
-        } catch { /* ignore */ }
-      }
-      setMessages((prev) => [...prev, { role: "bot", text: msg, isError: true }]);
+      setMessages((prev) => [...prev, { role: "bot", text: parseApiError(err), isError: true }]);
     },
   });
 

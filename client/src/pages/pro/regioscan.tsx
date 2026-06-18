@@ -3,7 +3,7 @@ import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient, apiRequest, parseApiError } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Skeleton } from "@/components/ui/skeleton";
 import { exportRegioScanPdf } from "@/lib/regioscan-pdf";
@@ -733,7 +733,7 @@ function ScanFormulier({
     onError: (err: any) => {
       toast({
         title: "Scan mislukt",
-        description: err?.message ?? "Probeer het later opnieuw.",
+        description: parseApiError(err),
         variant: "destructive",
       });
     },
@@ -890,7 +890,7 @@ export default function RegioScanProPage() {
     onError: (err: any) => {
       toast({
         title: "Genereren mislukt",
-        description: err?.message ?? "Probeer het later opnieuw.",
+        description: parseApiError(err),
         variant: "destructive",
       });
     },
@@ -916,7 +916,7 @@ export default function RegioScanProPage() {
     onError: (err: any) => {
       toast({
         title: "Opslaan mislukt",
-        description: err?.message ?? "Probeer het later opnieuw.",
+        description: parseApiError(err),
         variant: "destructive",
       });
     },
@@ -939,7 +939,7 @@ export default function RegioScanProPage() {
     onError: (err: any) => {
       toast({
         title: "Opnieuw scannen mislukt",
-        description: err?.message ?? "Probeer het later opnieuw.",
+        description: parseApiError(err),
         variant: "destructive",
       });
     },
@@ -969,7 +969,7 @@ export default function RegioScanProPage() {
     onError: (err: any) => {
       toast({
         title: "Indienen mislukt",
-        description: err?.message ?? "Probeer het later opnieuw.",
+        description: parseApiError(err),
         variant: "destructive",
       });
     },
@@ -988,7 +988,7 @@ export default function RegioScanProPage() {
     onError: (err: any) => {
       toast({
         title: "Verwijderen mislukt",
-        description: err?.message ?? "Probeer het later opnieuw.",
+        description: parseApiError(err),
         variant: "destructive",
       });
     },

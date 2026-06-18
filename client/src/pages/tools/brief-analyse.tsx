@@ -26,7 +26,7 @@ import {
 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 interface AnalyseResultaat {
@@ -155,7 +155,7 @@ export default function BriefAnalysePage() {
     onSuccess: (data) => setResultaat(data),
     onError: (err: Error) => {
       setStappen({ analyse: "fout", verstuur: "wachten" });
-      toast({ title: "Analyse mislukt", description: err.message, variant: "destructive" });
+      toast({ title: "Analyse mislukt", description: parseApiError(err), variant: "destructive" });
     },
   });
 

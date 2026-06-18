@@ -9,7 +9,7 @@ import { nl } from "date-fns/locale";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { queryClient, apiRequest, parseApiError } from "@/lib/queryClient";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -188,10 +188,9 @@ export default function LokaleActiesPage() {
       });
     },
     onError: (err: unknown) => {
-      const message = err instanceof Error ? err.message : "Kon actie niet opslaan.";
       toast({
         title: "Fout",
-        description: message,
+        description: parseApiError(err, "Kon actie niet opslaan."),
         variant: "destructive",
       });
     },
