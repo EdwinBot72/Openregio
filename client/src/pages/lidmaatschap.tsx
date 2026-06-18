@@ -168,6 +168,9 @@ export default function LidmaatschapPage() {
         }
         if (data.checkoutUrl) {
           window.location.href = data.checkoutUrl;
+        } else if (data.redirectUrl) {
+          // Direct upgrade via bestaand mandaat — geen nieuwe betaling nodig
+          window.location.href = data.redirectUrl;
         } else {
           setError("Kon checkout-URL niet ophalen. Probeer het opnieuw.");
         }

@@ -1252,6 +1252,7 @@ export class MemStorage implements IStorage {
 
     const updated: Subscription = {
       ...existing,
+      ...(subscription.molliePaymentId !== undefined && { molliePaymentId: subscription.molliePaymentId }),
       ...(subscription.mollieCustomerId !== undefined && { mollieCustomerId: subscription.mollieCustomerId }),
       ...(subscription.mollieSubscriptionId !== undefined && { mollieSubscriptionId: subscription.mollieSubscriptionId }),
       ...(subscription.status !== undefined && { status: subscription.status }),
@@ -2369,6 +2370,7 @@ class DbStorage implements IStorage {
 
   async updateSubscription(id: string, subscription: Partial<InsertSubscription>): Promise<Subscription | undefined> {
     const updates: any = {};
+    if (subscription.molliePaymentId !== undefined) updates.molliePaymentId = subscription.molliePaymentId;
     if (subscription.mollieCustomerId !== undefined) updates.mollieCustomerId = subscription.mollieCustomerId;
     if (subscription.mollieSubscriptionId !== undefined) updates.mollieSubscriptionId = subscription.mollieSubscriptionId;
     if (subscription.status !== undefined) updates.status = subscription.status;

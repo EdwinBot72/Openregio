@@ -463,16 +463,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       } // einde else (nieuwe gebruiker flow)
 
-      // Abonnement aanmaken in database
-      const subscription = await storage.createSubscription({
-        userId: user.id,
-        molliePaymentId: payment.id,
-        mollieCustomerId,
-        plan: plan as "basic" | "pro",
-        status: "active",
-      });
-
-      console.log(`[Mollie] Abonnement aangemaakt: ${subscription.id} voor gebruiker ${user.id}`);
+      // Abonnement aanmaken of bijwerken in database
+      // Bij een upgrade (bestaande gebruiker) hergebruiken we het bestaande record
+      const existingUserSub = meta.userId ? await storage.getSubscription(user.id) : undefined;
+      let subscription: any;
+      if (existingUserSub) {
+        subscription = await storage.updateSubscription(existingUserSub.id, {
+          molliePaymentId: payment.id,
+          mollieCustomerId: mollieCustomerId ?? existingUserSub.mollieCustomerId,
+          plan: plan as "basic" | "pro",
+          status: "active",
+        });
+        console.log(`[Mollie] Bestaand abonnement bijgewerkt: ${existingUserSub.id} voor gebruiker ${user.id}`);
+      } else {
+        subscription = await storage.createSubscription({
+          userId: user.id,
+          molliePaymentId: payment.id,
+          mollieCustomerId,
+          plan: plan as "basic" | "pro",
+          status: "active",
+        });
+        console.log(`[Mollie] Abonnement aangemaakt: ${subscription.id} voor gebruiker ${user.id}`);
+      }
 
       // Mollie recurring subscription aanmaken (alleen na eerste betaling mét geldige mandate)
       const nextMonth = new Date();
@@ -2917,16 +2929,101 @@ Maak het verzoek professioneel en juridisch correct.`;
         return res.status(400).json({ error: "Je hebt al een actief abonnement voor dit plan" });
       }
 
-      // Create Mollie customer
-      const customer = await mollieClient.customers.create({
-        name: userName,
-        email: userEmail,
-      });
-
       // Canonical public URL for webhooks and redirects
       const publicUrl = process.env.PUBLIC_BASE_URL || getBaseUrl(req);
 
-      // Create first payment to establish mandate for recurring billing
+      // Reuse existing Mollie customer if available, otherwise create a new one
+      let mollieCustomerId: string;
+      if (existingSub?.mollieCustomerId) {
+        mollieCustomerId = existingSub.mollieCustomerId;
+        console.log(`[Billing] Hergebruik bestaande Mollie-klant: ${mollieCustomerId} voor gebruiker ${userId}`);
+      } else {
+        const customer = await mollieClient.customers.create({
+          name: userName,
+          email: userEmail,
+        });
+        mollieCustomerId = customer.id;
+        console.log(`[Billing] Nieuwe Mollie-klant aangemaakt: ${mollieCustomerId} voor gebruiker ${userId}`);
+      }
+
+      // Check for valid mandate — if present we can upgrade directly without a new first payment
+      let validMandate: any = null;
+      try {
+        const mandates: any = await (mollieClient.customerMandates as any).page({ customerId: mollieCustomerId });
+        validMandate = mandates.find((m: any) => m.status === "valid") ?? null;
+      } catch (mandateErr: any) {
+        console.warn(`[Billing] Mandates ophalen mislukt voor ${mollieCustomerId}:`, mandateErr.message);
+      }
+
+      if (validMandate && existingSub) {
+        // Direct upgrade path — order matters to prevent dual-active subscriptions:
+        // Step 1: cancel old sub → Step 2: create new sub → Step 3: persist DB.
+        // Hard-fail at each step before proceeding to the next.
+        const nextPeriodEnd = new Date();
+        nextPeriodEnd.setMonth(nextPeriodEnd.getMonth() + 1);
+        const startDate = nextPeriodEnd.toISOString().split("T")[0];
+
+        // Step 1: Cancel old Mollie subscription before creating a new one.
+        // This prevents two active subscriptions from running simultaneously.
+        // "Not found" / already-cancelled responses are treated as success.
+        // Any other error is a hard failure — safe to retry (nothing changed yet).
+        if (existingSub.mollieSubscriptionId && existingSub.mollieCustomerId) {
+          try {
+            await (mollieClient.customerSubscriptions as any).delete({
+              customerId: existingSub.mollieCustomerId,
+              id: existingSub.mollieSubscriptionId,
+            });
+            console.log(`[Billing] Oud abonnement opgezegd bij Mollie: ${existingSub.mollieSubscriptionId}`);
+          } catch (cancelErr: any) {
+            const statusCode: number = cancelErr?.statusCode ?? 0;
+            if (statusCode === 404 || cancelErr?.message?.includes("not found")) {
+              // Already cancelled or never existed — safe to continue
+              console.warn(`[Billing] Oud abonnement niet gevonden (al opgezegd?): ${existingSub.mollieSubscriptionId}`);
+            } else {
+              console.error(`[Billing] Oud abonnement opzeggen mislukt:`, cancelErr.message);
+              return res.status(502).json({ error: "Kon het bestaande abonnement niet opzeggen bij Mollie. Probeer het later opnieuw." });
+            }
+          }
+        }
+
+        // Step 2: Create new Mollie recurring subscription.
+        // If this fails the old subscription has already been cancelled; we return
+        // a clear error message so the user can contact support.
+        let newMollieSubId: string;
+        try {
+          const newMollieSub: any = await (mollieClient.customerSubscriptions as any).create({
+            customerId: mollieCustomerId,
+            amount: { currency: "EUR", value: getPlanPrice(plan) },
+            interval: "1 month",
+            startDate,
+            description: `OpenRegio ${plan === "pro" ? "Pro" : "Basis"} - Maandelijks abonnement`,
+            webhookUrl: `${publicUrl}/api/mollie/webhook`,
+          });
+          newMollieSubId = newMollieSub.id;
+          console.log(`[Billing] Nieuw terugkerend abonnement aangemaakt: ${newMollieSubId} start ${startDate}`);
+        } catch (subErr: any) {
+          console.error(`[Billing] Nieuw terugkerend abonnement aanmaken mislukt (oud al opgezegd!):`, subErr.message);
+          return res.status(502).json({
+            error: "Het bestaande abonnement is opgezegd maar het nieuwe kon niet worden aangemaakt. Neem contact op met info@openregio.nl.",
+          });
+        }
+
+        // Step 3: Persist plan and subscription — only reached after both Mollie operations succeeded.
+        await storage.updateUserPlan(userId, plan as "basic" | "pro");
+        await storage.updateSubscription(existingSub.id, {
+          plan: plan as "basic" | "pro",
+          mollieCustomerId,
+          mollieSubscriptionId: newMollieSubId,
+          status: "active",
+          currentPeriodEnd: nextPeriodEnd,
+        });
+
+        console.log(`[Billing] Directe upgrade geslaagd: gebruiker ${userId} → ${plan}`);
+        const redirectUrl = returnUrl || `${publicUrl}/betaling-geslaagd?plan=${encodeURIComponent(plan)}`;
+        return res.json({ redirectUrl, upgraded: true });
+      }
+
+      // No valid mandate — create a first payment to establish mandate for recurring billing
       // Bedragen: incl. 21% btw — basic €18,09 / pro €71,39 (excl. btw: €14,95 / €59,00)
       const profileId = await getMollieProfileId();
       const firstPayment: any = await (mollieClient.payments.create as any)({
@@ -2934,7 +3031,7 @@ Maak het verzoek professioneel en juridisch correct.`;
           currency: "EUR",
           value: getPlanPrice(plan)
         },
-        customerId: customer.id,
+        customerId: mollieCustomerId,
         sequenceType: "first",
         method: ["ideal", "creditcard", "bancontact"],
         description: `OpenRegio ${plan === "pro" ? "Pro" : "Basis"} - Maandelijks abonnement`,
@@ -2945,7 +3042,7 @@ Maak het verzoek professioneel en juridisch correct.`;
           userId,
           email: userEmail,
           plan,
-          mollieCustomerId: customer.id,
+          mollieCustomerId,
         },
       });
 
