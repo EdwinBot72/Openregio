@@ -1,7 +1,7 @@
 import cron from "node-cron";
 import { storage } from "../storage";
 
-const HARD_DELETE_AFTER_DAYS = 180;
+const HARD_DELETE_AFTER_DAYS = 1;
 
 export async function runLokaleActiesCleanup(): Promise<{ markedVerlopen: number; deletedOld: number }> {
   console.log("[LokaleActiesCron] Opschoning gestart");
