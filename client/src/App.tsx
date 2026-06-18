@@ -81,6 +81,7 @@ import WetgevingPublicatiesPage from "@/pages/wetgeving/publicaties";
 import AdminWetgevingPage from "@/pages/admin/wetgeving";
 import CursussenPage from "@/pages/cursussen";
 import AdminCursussenPage from "@/pages/admin/cursussen";
+import AdminBetalingenPage from "@/pages/admin/betalingen";
 import BinnenkortPage from "@/pages/binnenkort";
 import NieuwsPage from "@/pages/nieuws";
 import SamenAanpakkenPage from "@/pages/samen-aanpakken";
@@ -271,6 +272,7 @@ function AuthenticatedRouter() {
       <Route path="/admin/intel"><AdminGate><AdminIntelPage /></AdminGate></Route>
       <Route path="/admin/wetgeving"><AdminGate><AdminWetgevingPage /></AdminGate></Route>
       <Route path="/admin/cursussen"><AdminGate><AdminCursussenPage /></AdminGate></Route>
+      <Route path="/admin/betalingen"><AdminGate><AdminBetalingenPage /></AdminGate></Route>
 
       {/* ── Overige authenticeerde routes (intern / deeplink) ─────────────── */}
       <Route path="/onboarding" component={OnboardingPage} />

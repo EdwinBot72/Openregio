@@ -57,6 +57,7 @@ const sections = [
   { id: "regio-deals", href: "/admin/regio-deals", icon: Landmark, title: "Regio Deals", description: "Collectieve deals voor leden.", color: "bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400" },
   { id: "ondernemers", href: "/admin/ondernemers", icon: Building2, title: "Ondernemers", description: "Leden met activiteits- en planstatus.", color: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400" },
   { id: "wetgeving", href: "/admin/wetgeving", icon: BookOpen, title: "Wetgeving Inzendingen", description: "Verwerk brieven van leden.", color: "bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400" },
+  { id: "betalingen", href: "/admin/betalingen", icon: Euro, title: "Betalingen", description: "Mollie-subscriptions en betalingsstatus.", color: "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400" },
 ];
 
 function KpiCard({

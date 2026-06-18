@@ -178,6 +178,7 @@ export interface IStorage {
   createSubscription(subscription: InsertSubscription): Promise<Subscription>;
   updateSubscription(id: string, subscription: Partial<InsertSubscription>): Promise<Subscription | undefined>;
   cancelSubscription(id: string): Promise<Subscription | undefined>;
+  getAllSubscriptions(limit?: number): Promise<Array<Subscription & { email: string }>>;
 
   // Onboarding Tokens
   createOnboardingToken(token: InsertOnboardingToken): Promise<OnboardingToken>;
@@ -1276,6 +1277,16 @@ export class MemStorage implements IStorage {
     };
     this.subscriptions.set(id, updated);
     return updated;
+  }
+
+  async getAllSubscriptions(limit = 50): Promise<Array<Subscription & { email: string }>> {
+    const all = Array.from(this.subscriptions.values())
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, limit);
+    return all.map(s => {
+      const user = Array.from(this.users.values()).find(u => u.id === s.userId);
+      return { ...s, email: user?.email ?? "onbekend" };
+    });
   }
 
   async createOnboardingToken(token: InsertOnboardingToken): Promise<OnboardingToken> {
@@ -2400,6 +2411,28 @@ class DbStorage implements IStorage {
       .where(eq(subscriptions.id, id))
       .returning();
     return results[0];
+  }
+
+  async getAllSubscriptions(limit = 50): Promise<Array<Subscription & { email: string }>> {
+    const results = await db.select({
+      id: subscriptions.id,
+      userId: subscriptions.userId,
+      email: users.email,
+      plan: subscriptions.plan,
+      status: subscriptions.status,
+      molliePaymentId: subscriptions.molliePaymentId,
+      mollieCustomerId: subscriptions.mollieCustomerId,
+      mollieSubscriptionId: subscriptions.mollieSubscriptionId,
+      currentPeriodEnd: subscriptions.currentPeriodEnd,
+      canceledAt: subscriptions.canceledAt,
+      createdAt: subscriptions.createdAt,
+      updatedAt: subscriptions.updatedAt,
+    })
+      .from(subscriptions)
+      .leftJoin(users, eq(subscriptions.userId, users.id))
+      .orderBy(desc(subscriptions.createdAt))
+      .limit(limit);
+    return results.map(r => ({ ...r, email: r.email ?? "onbekend" }));
   }
 
   async createOnboardingToken(token: InsertOnboardingToken): Promise<OnboardingToken> {

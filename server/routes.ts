@@ -4404,6 +4404,44 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
+  // Admin: GET /api/admin/subscriptions - overzicht van alle betalingen/subscriptions
+  app.get("/api/admin/subscriptions", requireAdmin, async (req, res) => {
+    try {
+      const limit = Math.min(parseInt(req.query.limit as string) || 100, 500);
+      const rows = await storage.getAllSubscriptions(limit);
+      return res.json(rows);
+    } catch (err) {
+      console.error("[Admin] Fout bij ophalen subscriptions:", err);
+      return res.status(500).json({ error: "Kon betalingsoverzicht niet laden" });
+    }
+  });
+
+  // Admin: PATCH /api/admin/subscriptions/:id/force-plan - noodhulp plan-update voor gebruiker
+  app.patch("/api/admin/subscriptions/:id/force-plan", requireAdmin, async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { plan } = req.body;
+      if (!plan || !["basic", "pro", "coaching"].includes(plan)) {
+        return res.status(400).json({ error: "Plan moet 'basic', 'pro' of 'coaching' zijn" });
+      }
+      const sub = await storage.getSubscriptionById(id);
+      if (!sub) {
+        return res.status(404).json({ error: "Subscription niet gevonden" });
+      }
+      // Update both user plan and subscription record
+      const user = await storage.updateUserPlan(sub.userId, plan as "basic" | "pro" | "coaching");
+      if (!user) {
+        return res.status(404).json({ error: "Gebruiker niet gevonden" });
+      }
+      await storage.updateSubscription(id, { plan, status: "active" });
+      console.log(`[Admin] Noodhulp plan-update: subscription ${id} (user ${sub.userId}) → ${plan} door admin ${req.user!.id}`);
+      return res.json({ success: true, plan, userId: sub.userId });
+    } catch (err) {
+      console.error("[Admin] Fout bij force-plan:", err);
+      return res.status(500).json({ error: "Kon plan niet bijwerken" });
+    }
+  });
+
   // Admin: POST /api/admin/create-user - Create user without payment (backdoor for friends/family)
   app.post("/api/admin/create-user", requireAdmin, async (req, res) => {
     try {
