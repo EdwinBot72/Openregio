@@ -1291,6 +1291,23 @@ export const insertLokaleActieSchema = createInsertSchema(lokaleActies).omit({
 export type InsertLokaleActie = z.infer<typeof insertLokaleActieSchema>;
 export type LokaleActie = typeof lokaleActies.$inferSelect;
 
+// ── Lokale Acties RSVP ───────────────────────────────────────────────────────
+export const lokaleActiesRsvp = pgTable("lokale_acties_rsvp", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  actieId: varchar("actie_id").notNull().references(() => lokaleActies.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => ({
+  uniqRsvp: unique().on(table.actieId, table.userId),
+}));
+
+export const insertLokaleActieRsvpSchema = createInsertSchema(lokaleActiesRsvp).omit({
+  id: true,
+  createdAt: true,
+});
+export type InsertLokaleActieRsvp = z.infer<typeof insertLokaleActieRsvpSchema>;
+export type LokaleActieRsvp = typeof lokaleActiesRsvp.$inferSelect;
+
 // ── Ondernemer Thema's (AI-gegenereerde wekelijkse updates) ──────────────────
 export const ondernemerThemas = pgTable("ondernemer_themas", {
   id: serial("id").primaryKey(),

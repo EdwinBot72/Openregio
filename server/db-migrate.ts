@@ -447,6 +447,20 @@ export async function runMigrations(): Promise<void> {
     `);
     console.log("[Migration] ✓ users.plan default set to 'pending'");
 
+    // RSVP-tabel voor lokale acties
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS lokale_acties_rsvp (
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+        actie_id VARCHAR NOT NULL REFERENCES lokale_acties(id) ON DELETE CASCADE,
+        user_id VARCHAR NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        UNIQUE (actie_id, user_id)
+      );
+    `);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lokale_acties_rsvp_actie ON lokale_acties_rsvp(actie_id);`);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lokale_acties_rsvp_user ON lokale_acties_rsvp(user_id);`);
+    console.log("[Migration] ✓ lokale_acties_rsvp table ensured");
+
     console.log("[Migration] Database schema is up to date");
   } catch (error) {
     console.error("[Migration] Error running migrations:", error);

@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   CalendarDays, MapPin, Users, ExternalLink, Mail, Clock, Building2,
-  ArrowLeft, Share2, Copy, CheckCircle2, Pencil, Trash2,
+  ArrowLeft, Share2, Copy, CheckCircle2, Pencil, Trash2, UserCheck, UserMinus,
 } from "lucide-react";
 import type { LokaleActie } from "@shared/schema";
 
@@ -188,11 +188,21 @@ function useShareMeta(actie: LokaleActie | undefined) {
     tags.push(setMeta(`meta[name="twitter:description"]`, "name", "twitter:description", desc));
 
     return () => {
-      // Reset description but leave OG tags (they will be overwritten by next page).
       const descEl = document.head.querySelector<HTMLMetaElement>(`meta[name="description"]`);
       if (descEl) descEl.setAttribute("content", "");
     };
   }, [actie]);
+}
+
+type RsvpInfo = {
+  count: number;
+  hasRsvp: boolean;
+  attendees?: Array<{ id: string; firstName: string | null; lastName: string | null; bedrijfsnaam: string | null }>;
+};
+
+function attendeeName(a: { firstName: string | null; lastName: string | null; bedrijfsnaam: string | null }): string {
+  const name = [a.firstName, a.lastName].filter(Boolean).join(" ").trim();
+  return name || a.bedrijfsnaam || "Lid";
 }
 
 export default function LokaleActieDetailPage() {
@@ -206,6 +216,12 @@ export default function LokaleActieDetailPage() {
   const { data: actie, isLoading, isError } = useQuery<LokaleActie>({
     queryKey: ["/api/lokale-acties", params.id],
     enabled: !!params.id && !!user,
+  });
+
+  const { data: rsvpInfo, isLoading: rsvpLoading } = useQuery<RsvpInfo>({
+    queryKey: ["/api/lokale-acties", params.id, "rsvp"],
+    queryFn: () => fetch(`/api/lokale-acties/${params.id}/rsvp`, { credentials: "include" }).then((r) => r.json()),
+    enabled: !!params.id && !!user && !!actie,
   });
 
   usePageTitle(actie ? actie.titel : "Lokale actie");
@@ -229,6 +245,25 @@ export default function LokaleActieDetailPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/lokale-acties"] });
       queryClient.invalidateQueries({ queryKey: ["/api/lokale-acties", params.id] });
       toast({ title: "Verlopen", description: "Je actie is gemarkeerd als verlopen." });
+    },
+  });
+
+  const rsvpMutation = useMutation({
+    mutationFn: (hasRsvp: boolean) =>
+      hasRsvp
+        ? apiRequest("DELETE", `/api/lokale-acties/${params.id}/rsvp`)
+        : apiRequest("POST", `/api/lokale-acties/${params.id}/rsvp`),
+    onSuccess: (_data, hadRsvp) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/lokale-acties", params.id, "rsvp"] });
+      toast({
+        title: hadRsvp ? "Afgemeld" : "Aangemeld",
+        description: hadRsvp
+          ? "Je bent afgemeld voor deze actie."
+          : "Je bent aangemeld voor deze actie!",
+      });
+    },
+    onError: () => {
+      toast({ title: "Fout", description: "Kon aanmelding niet verwerken.", variant: "destructive" });
     },
   });
 
@@ -287,11 +322,14 @@ export default function LokaleActieDetailPage() {
 
   const isEigen = user?.id === actie.ownerUserId;
   const mapsQuery = encodeURIComponent(`${actie.locatie}, ${actie.regio}, Nederland`);
-  const osmEmbedSrc = `https://www.openstreetmap.org/export/embed.html?bbox=&layer=mapnik&marker=&query=${mapsQuery}`;
   const mapsLink = `https://www.openstreetmap.org/search?query=${mapsQuery}`;
   const whatsappText = encodeURIComponent(
     `${actie.titel} — lokale actie in ${actie.regio}\n${window.location.href}`,
   );
+
+  const hasRsvp = rsvpInfo?.hasRsvp ?? false;
+  const rsvpCount = rsvpInfo?.count ?? 0;
+  const isActief = actie.status === "actief";
 
   return (
     <div className="max-w-3xl mx-auto py-8 px-4 space-y-6" data-testid="page-actie-detail">
@@ -317,6 +355,12 @@ export default function LokaleActieDetailPage() {
           )}
           {actie.status === "verlopen" && (
             <Badge variant="outline" data-testid="badge-verlopen">Verlopen</Badge>
+          )}
+          {!rsvpLoading && rsvpCount > 0 && (
+            <Badge variant="outline" data-testid="badge-rsvp-count">
+              <UserCheck className="mr-1 h-3 w-3" />
+              {rsvpCount} {rsvpCount === 1 ? "aanmelding" : "aanmeldingen"}
+            </Badge>
           )}
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold" data-testid="text-titel">{actie.titel}</h1>
@@ -374,6 +418,93 @@ export default function LokaleActieDetailPage() {
           </div>
         </CardContent>
       </Card>
+
+      {/* RSVP card — voor alle leden, maar niet voor de eigenaar zelf */}
+      {!isEigen && (
+        <Card data-testid="card-rsvp">
+          <CardContent className="p-5 space-y-3">
+            <div className="flex items-center gap-2">
+              <UserCheck className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-semibold">Aanmelden voor deze actie</span>
+            </div>
+            {rsvpLoading ? (
+              <Skeleton className="h-9 w-36" />
+            ) : (
+              <div className="flex items-center gap-3 flex-wrap">
+                <Button
+                  size="sm"
+                  variant={hasRsvp ? "outline" : "default"}
+                  disabled={rsvpMutation.isPending || !isActief}
+                  onClick={() => rsvpMutation.mutate(hasRsvp)}
+                  data-testid={hasRsvp ? "button-rsvp-afmelden" : "button-rsvp-aanmelden"}
+                >
+                  {hasRsvp ? (
+                    <>
+                      <UserMinus className="mr-1.5 h-3.5 w-3.5" /> Afmelden
+                    </>
+                  ) : (
+                    <>
+                      <UserCheck className="mr-1.5 h-3.5 w-3.5" /> Ik kom
+                    </>
+                  )}
+                </Button>
+                {rsvpCount > 0 && (
+                  <span className="text-sm text-muted-foreground" data-testid="text-rsvp-teller">
+                    {rsvpCount} {rsvpCount === 1 ? "persoon" : "personen"} aangemeld
+                  </span>
+                )}
+                {!isActief && (
+                  <span className="text-xs text-muted-foreground">Aanmelden is niet meer mogelijk</span>
+                )}
+              </div>
+            )}
+            {hasRsvp && (
+              <p className="text-xs text-muted-foreground" data-testid="text-rsvp-bevestiging">
+                Je bent aangemeld. Je kunt je afmelden door op "Afmelden" te klikken.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* RSVP overzicht voor de eigenaar */}
+      {isEigen && (
+        <Card data-testid="card-rsvp-overzicht">
+          <CardContent className="p-5 space-y-3">
+            <div className="flex items-center justify-between gap-2 flex-wrap">
+              <div className="flex items-center gap-2">
+                <UserCheck className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-semibold">Aanmeldingen</span>
+              </div>
+              {!rsvpLoading && (
+                <Badge variant="secondary" data-testid="badge-aanmeldingen-totaal">
+                  {rsvpCount} {rsvpCount === 1 ? "aanmelding" : "aanmeldingen"}
+                </Badge>
+              )}
+            </div>
+            {rsvpLoading ? (
+              <Skeleton className="h-12 w-full" />
+            ) : rsvpCount === 0 ? (
+              <p className="text-sm text-muted-foreground" data-testid="text-geen-aanmeldingen">
+                Nog niemand aangemeld.
+              </p>
+            ) : (
+              <ul className="space-y-1" data-testid="list-aanmeldingen">
+                {rsvpInfo?.attendees?.map((a) => (
+                  <li
+                    key={a.id}
+                    className="text-sm text-muted-foreground flex items-center gap-1.5"
+                    data-testid={`item-aanmelding-${a.id}`}
+                  >
+                    <UserCheck className="h-3.5 w-3.5 shrink-0 opacity-60" />
+                    {attendeeName(a)}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </CardContent>
+        </Card>
+      )}
 
       <Card data-testid="card-kaart">
         <CardContent className="p-4 space-y-2">

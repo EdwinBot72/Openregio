@@ -89,6 +89,8 @@ import {
   type LokaleActie,
   type InsertLokaleActie,
   lokaleActies,
+  type LokaleActieRsvp,
+  lokaleActiesRsvp,
   LOKALE_ACTIE_DOELGROEPEN,
   type OndernemerThema,
   type InsertOndernemerThema,
@@ -330,6 +332,13 @@ export interface IStorage {
   deleteLokaleActie(id: string, userId: string): Promise<boolean>;
   markLokaleActieVerlopen(id: string, userId: string): Promise<LokaleActie | undefined>;
   cleanupExpiredLokaleActies(opts?: { hardDeleteAfterDays?: number }): Promise<{ markedVerlopen: number; deletedOld: number }>;
+
+  // Lokale Acties RSVP
+  getRsvpForActie(actieId: string): Promise<(LokaleActieRsvp & { firstName: string | null; lastName: string | null; bedrijfsnaam: string | null })[]>;
+  getRsvpCountForActie(actieId: string): Promise<number>;
+  hasUserRsvp(actieId: string, userId: string): Promise<boolean>;
+  createRsvp(actieId: string, userId: string): Promise<LokaleActieRsvp>;
+  deleteRsvp(actieId: string, userId: string): Promise<boolean>;
 
   // Ondernemer Thema's
   getOndernemerThemas(): Promise<OndernemerThema[]>;
@@ -1879,6 +1888,23 @@ export class MemStorage implements IStorage {
     return { markedVerlopen: 0, deletedOld: 0 };
   }
 
+  // Lokale Acties RSVP (stubs for MemStorage)
+  async getRsvpForActie(_actieId: string): Promise<(LokaleActieRsvp & { firstName: string | null; lastName: string | null; bedrijfsnaam: string | null })[]> {
+    return [];
+  }
+  async getRsvpCountForActie(_actieId: string): Promise<number> {
+    return 0;
+  }
+  async hasUserRsvp(_actieId: string, _userId: string): Promise<boolean> {
+    return false;
+  }
+  async createRsvp(_actieId: string, _userId: string): Promise<LokaleActieRsvp> {
+    return { id: randomUUID(), actieId: _actieId, userId: _userId, createdAt: new Date() };
+  }
+  async deleteRsvp(_actieId: string, _userId: string): Promise<boolean> {
+    return false;
+  }
+
   // Ondernemer Thema's (stubs for MemStorage)
   async getOndernemerThemas(): Promise<OndernemerThema[]> {
     return [];
@@ -3305,6 +3331,65 @@ class DbStorage implements IStorage {
       .returning({ id: lokaleActies.id });
 
     return { markedVerlopen: marked.length, deletedOld: deleted.length };
+  }
+
+  // ─── Lokale Acties RSVP ─────────────────────────────────────────────────────
+  async getRsvpForActie(actieId: string): Promise<(LokaleActieRsvp & { firstName: string | null; lastName: string | null; bedrijfsnaam: string | null })[]> {
+    const rows = await db
+      .select({
+        id: lokaleActiesRsvp.id,
+        actieId: lokaleActiesRsvp.actieId,
+        userId: lokaleActiesRsvp.userId,
+        createdAt: lokaleActiesRsvp.createdAt,
+        firstName: users.firstName,
+        lastName: users.lastName,
+        bedrijfsnaam: users.businessName,
+      })
+      .from(lokaleActiesRsvp)
+      .innerJoin(users, eq(lokaleActiesRsvp.userId, users.id))
+      .where(eq(lokaleActiesRsvp.actieId, actieId))
+      .orderBy(asc(lokaleActiesRsvp.createdAt));
+    return rows;
+  }
+
+  async getRsvpCountForActie(actieId: string): Promise<number> {
+    const [row] = await db
+      .select({ count: sql<number>`cast(count(*) as int)` })
+      .from(lokaleActiesRsvp)
+      .where(eq(lokaleActiesRsvp.actieId, actieId));
+    return row?.count ?? 0;
+  }
+
+  async hasUserRsvp(actieId: string, userId: string): Promise<boolean> {
+    const [row] = await db
+      .select({ id: lokaleActiesRsvp.id })
+      .from(lokaleActiesRsvp)
+      .where(and(eq(lokaleActiesRsvp.actieId, actieId), eq(lokaleActiesRsvp.userId, userId)));
+    return !!row;
+  }
+
+  async createRsvp(actieId: string, userId: string): Promise<LokaleActieRsvp> {
+    const [created] = await db
+      .insert(lokaleActiesRsvp)
+      .values({ actieId, userId })
+      .onConflictDoNothing()
+      .returning();
+    if (!created) {
+      const [existing] = await db
+        .select()
+        .from(lokaleActiesRsvp)
+        .where(and(eq(lokaleActiesRsvp.actieId, actieId), eq(lokaleActiesRsvp.userId, userId)));
+      return existing;
+    }
+    return created;
+  }
+
+  async deleteRsvp(actieId: string, userId: string): Promise<boolean> {
+    const result = await db
+      .delete(lokaleActiesRsvp)
+      .where(and(eq(lokaleActiesRsvp.actieId, actieId), eq(lokaleActiesRsvp.userId, userId)))
+      .returning();
+    return result.length > 0;
   }
 
   // Ondernemer Thema's

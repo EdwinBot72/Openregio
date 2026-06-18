@@ -6235,6 +6235,61 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
     }
   });
 
+  // GET /api/lokale-acties/:id/rsvp — RSVP-info voor een actie (ingelogd)
+  // Geeft { count, hasRsvp, attendees } — attendees alleen zichtbaar voor de eigenaar
+  app.get("/api/lokale-acties/:id/rsvp", requireAuth, async (req, res) => {
+    try {
+      const actie = await storage.getLokaleActieById(req.params.id);
+      if (!actie) return res.status(404).json({ error: "Actie niet gevonden" });
+      const [count, hasRsvp] = await Promise.all([
+        storage.getRsvpCountForActie(req.params.id),
+        storage.hasUserRsvp(req.params.id, req.user!.id),
+      ]);
+      const isOwner = actie.ownerUserId === req.user!.id;
+      let attendees: Array<{ id: string; firstName: string | null; lastName: string | null; bedrijfsnaam: string | null }> | undefined;
+      if (isOwner) {
+        const rows = await storage.getRsvpForActie(req.params.id);
+        attendees = rows.map((r) => ({
+          id: r.userId,
+          firstName: r.firstName,
+          lastName: r.lastName,
+          bedrijfsnaam: r.bedrijfsnaam,
+        }));
+      }
+      return res.json({ count, hasRsvp, attendees });
+    } catch (err) {
+      console.error("[LokaleActies] fout bij ophalen RSVP:", err);
+      return res.status(500).json({ error: "Fout bij ophalen RSVP" });
+    }
+  });
+
+  // POST /api/lokale-acties/:id/rsvp — aanmelden (alle ingelogde leden)
+  app.post("/api/lokale-acties/:id/rsvp", requireAuth, async (req, res) => {
+    try {
+      const actie = await storage.getLokaleActieById(req.params.id);
+      if (!actie) return res.status(404).json({ error: "Actie niet gevonden" });
+      if (actie.status !== "actief") return res.status(400).json({ error: "Actie is niet meer actief" });
+      await storage.createRsvp(req.params.id, req.user!.id);
+      const count = await storage.getRsvpCountForActie(req.params.id);
+      return res.json({ success: true, hasRsvp: true, count });
+    } catch (err) {
+      console.error("[LokaleActies] fout bij RSVP:", err);
+      return res.status(500).json({ error: "Fout bij aanmelden" });
+    }
+  });
+
+  // DELETE /api/lokale-acties/:id/rsvp — afmelden (alle ingelogde leden)
+  app.delete("/api/lokale-acties/:id/rsvp", requireAuth, async (req, res) => {
+    try {
+      await storage.deleteRsvp(req.params.id, req.user!.id);
+      const count = await storage.getRsvpCountForActie(req.params.id);
+      return res.json({ success: true, hasRsvp: false, count });
+    } catch (err) {
+      console.error("[LokaleActies] fout bij RSVP afmelden:", err);
+      return res.status(500).json({ error: "Fout bij afmelden" });
+    }
+  });
+
   // ─── Kansen (gedeelde types + caches) ────────────────────────────────
   type KansKaartAI = {
     titel: string;
