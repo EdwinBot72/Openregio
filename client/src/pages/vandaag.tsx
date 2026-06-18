@@ -1,5 +1,5 @@
 import type { CSSProperties } from "react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { Link } from "wouter";
 import { berekenBeroepKansenPerGemeente, PROVINCIES } from "@shared/gemeente-data";
 import { useAuth } from "@/hooks/useAuth";
@@ -441,7 +441,58 @@ function Chip({
 
 export default function VandaagPage() {
   usePageTitle("Vandaag");
-  const { user, isLoading: authLoading } = useAuth();
+  const { user, isLoading: authLoading, refetch: refetchAuth } = useAuth();
+
+  // Plan-pending banner: toon als URL ?plan_pending=1 bevat
+  const [planPending, setPlanPending] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("plan_pending") === "1";
+  });
+  // expected_plan: het plan waar de gebruiker naar toe wil upgraden
+  const expectedPlanRef = useRef<string | null>(
+    new URLSearchParams(window.location.search).get("expected_plan")
+  );
+  const pendingTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pendingPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Ruim query-params op uit de URL (zonder page reload) zodra de banner start
+  useEffect(() => {
+    if (!planPending) return;
+    const url = new URL(window.location.href);
+    url.searchParams.delete("plan_pending");
+    url.searchParams.delete("expected_plan");
+    window.history.replaceState({}, "", url.toString());
+
+    // Verberg de banner na 30 seconden (fallback)
+    pendingTimerRef.current = setTimeout(() => {
+      setPlanPending(false);
+    }, 30_000);
+
+    // Poll elke 5 seconden of het plan al is bijgewerkt
+    pendingPollRef.current = setInterval(() => {
+      refetchAuth();
+    }, 5_000);
+
+    return () => {
+      if (pendingTimerRef.current) clearTimeout(pendingTimerRef.current);
+      if (pendingPollRef.current) clearInterval(pendingPollRef.current);
+    };
+  }, [planPending]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Verberg de banner zodra user.plan overeenkomt met het verwachte plan,
+  // of — als expected_plan onbekend is — zodra het plan überhaupt is geladen.
+  useEffect(() => {
+    if (!planPending) return;
+    if (!user?.plan) return;
+    const expected = expectedPlanRef.current;
+    if (expected) {
+      // Webhook verwerkt: plan is al bijgewerkt naar het verwachte plan
+      if (user.plan === expected) {
+        setPlanPending(false);
+      }
+    }
+    // Geen expected_plan? Dan is de 30s-timer de enige stop-conditie.
+  }, [user?.plan, planPending]);
 
   const { data: profiel } = useQuery<ProfielData | null>({
     queryKey: ["/api/business-profile/me"],
@@ -637,6 +688,64 @@ export default function VandaagPage() {
 
   return (
     <div className="openregio-dashboard" data-testid="page-vandaag">
+      {/* Betaling-in-behandeling banner */}
+      {planPending && (
+        <div
+          data-testid="banner-plan-pending"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 12,
+            background: C.blauwTintBg,
+            border: `1px solid ${C.borderBlauw}`,
+            borderRadius: 10,
+            padding: "12px 16px",
+            marginBottom: 20,
+          }}
+        >
+          <span
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: "50%",
+              background: C.blauw,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <CheckCircle2 size={16} style={{ color: "#fff" }} />
+          </span>
+          <div style={{ minWidth: 0, flex: 1 }}>
+            <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: C.donker }}>
+              Je betaling wordt verwerkt
+            </p>
+            <p style={{ margin: "2px 0 0", fontSize: 12, color: C.tekst }}>
+              Je plan wordt bijgewerkt zodra we bevestiging ontvangen van de betaalprovider. Dit duurt meestal
+              maar even.
+            </p>
+          </div>
+          <button
+            data-testid="button-dismiss-plan-pending"
+            onClick={() => setPlanPending(false)}
+            style={{
+              background: "none",
+              border: "none",
+              cursor: "pointer",
+              color: C.tekstZacht,
+              padding: 4,
+              flexShrink: 0,
+              fontSize: 16,
+              lineHeight: 1,
+            }}
+            aria-label="Banner sluiten"
+          >
+            ×
+          </button>
+        </div>
+      )}
+
       {/* Begroeting — geen emoji meer, compacter */}
       <div className="openregio-greeting">
         <div style={{ minWidth: 0 }}>

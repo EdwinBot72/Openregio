@@ -41,7 +41,7 @@ function UpgradeSuccessPage({ plan }: { plan: "basic" | "pro" | "coaching" }) {
             Het kan een moment duren voordat de wijziging zichtbaar is. Vernieuw de pagina als je plan nog niet is bijgewerkt.
           </p>
 
-          <Link href="/vandaag" data-testid="button-go-dashboard">
+          <Link href={`/vandaag?plan_pending=1&expected_plan=${plan}`} data-testid="button-go-dashboard">
             <button className="openregio-button openregio-button-primary" style={{ width: "100%", marginBottom: 10 }}>
               Naar mijn dashboard
             </button>
