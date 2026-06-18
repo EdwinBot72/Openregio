@@ -1,26 +1,20 @@
 import { useEffect, useState } from "react";
-import { Link, useParams, useLocation } from "wouter";
-import { useQuery, useMutation } from "@tanstack/react-query";
+import { Link, useParams } from "wouter";
+import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import { Icon } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { useAuth } from "@/hooks/useAuth";
-import { useToast } from "@/hooks/use-toast";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { queryClient, apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
-  AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
-  AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import {
   CalendarDays, MapPin, Users, ExternalLink, Mail, Clock, Building2,
-  ArrowLeft, Share2, Copy, CheckCircle2, Pencil, Trash2, UserCheck, UserMinus,
+  Share2, Copy, CheckCircle2, LogIn,
 } from "lucide-react";
 import type { LokaleActie } from "@shared/schema";
 
@@ -76,7 +70,7 @@ function MiniKaart({
 
   if (geo.status === "loading") {
     return (
-      <div className="h-52 w-full bg-muted/40 animate-pulse rounded-md flex items-center justify-center text-xs text-muted-foreground" data-testid="kaart-loading">
+      <div className="h-52 w-full bg-muted/40 animate-pulse rounded-md flex items-center justify-center text-xs text-muted-foreground">
         Kaart laden…
       </div>
     );
@@ -85,7 +79,7 @@ function MiniKaart({
   if (geo.status === "ok") {
     const center: [number, number] = [geo.lat, geo.lng];
     return (
-      <div className="relative" data-testid="kaart-container">
+      <div className="relative">
         <div className="h-52 w-full overflow-hidden rounded-md">
           <MapContainer
             center={center}
@@ -107,7 +101,6 @@ function MiniKaart({
           target="_blank"
           rel="noreferrer noopener"
           className="absolute bottom-2 right-2 z-[1000] bg-background/90 text-xs text-muted-foreground px-2 py-1 rounded-md border inline-flex items-center gap-1 hover:bg-background"
-          data-testid="link-kaart-extern"
         >
           Open in kaart <ExternalLink className="h-3 w-3" />
         </a>
@@ -121,7 +114,6 @@ function MiniKaart({
       target="_blank"
       rel="noreferrer noopener"
       className="block bg-muted/40 p-4 hover-elevate rounded-md"
-      data-testid="link-kaart-extern"
     >
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2 text-sm">
@@ -194,78 +186,24 @@ function useShareMeta(actie: LokaleActie | undefined) {
   }, [actie]);
 }
 
-type RsvpInfo = {
-  count: number;
-  hasRsvp: boolean;
-  attendees?: Array<{ id: string; firstName: string | null; lastName: string | null; bedrijfsnaam: string | null }>;
-};
-
-function attendeeName(a: { firstName: string | null; lastName: string | null; bedrijfsnaam: string | null }): string {
-  const name = [a.firstName, a.lastName].filter(Boolean).join(" ").trim();
-  return name || a.bedrijfsnaam || "Lid";
-}
-
-export default function LokaleActieDetailPage() {
+export default function PubliekeLokaleActiePage() {
   const params = useParams<{ id: string }>();
-  const [, setLocation] = useLocation();
-  const { user } = useAuth();
   const { toast } = useToast();
-  const [confirmDelete, setConfirmDelete] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const { data: actie, isLoading, isError } = useQuery<LokaleActie>({
-    queryKey: ["/api/lokale-acties", params.id],
-    enabled: !!params.id && !!user,
-  });
-
-  const { data: rsvpInfo, isLoading: rsvpLoading } = useQuery<RsvpInfo>({
-    queryKey: ["/api/lokale-acties", params.id, "rsvp"],
-    queryFn: () => fetch(`/api/lokale-acties/${params.id}/rsvp`, { credentials: "include" }).then((r) => r.json()),
-    enabled: !!params.id && !!user && !!actie,
+    queryKey: ["/api/lokale-acties/public", params.id],
+    queryFn: () =>
+      fetch(`/api/lokale-acties/public/${params.id}`).then((r) => {
+        if (!r.ok) throw new Error("not found");
+        return r.json();
+      }),
+    enabled: !!params.id,
+    retry: false,
   });
 
   usePageTitle(actie ? actie.titel : "Lokale actie");
   useShareMeta(actie);
-
-  const verwijderenMutation = useMutation({
-    mutationFn: (id: string) => apiRequest("DELETE", `/api/lokale-acties/${id}`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/lokale-acties"] });
-      toast({ title: "Verwijderd", description: "Je actie is verwijderd." });
-      setLocation("/lokale-acties");
-    },
-    onError: () => {
-      toast({ title: "Fout", description: "Kon actie niet verwijderen.", variant: "destructive" });
-    },
-  });
-
-  const verlopenMutation = useMutation({
-    mutationFn: (id: string) => apiRequest("POST", `/api/lokale-acties/${id}/verlopen`),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/lokale-acties"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/lokale-acties", params.id] });
-      toast({ title: "Verlopen", description: "Je actie is gemarkeerd als verlopen." });
-    },
-  });
-
-  const rsvpMutation = useMutation({
-    mutationFn: (hasRsvp: boolean) =>
-      hasRsvp
-        ? apiRequest("DELETE", `/api/lokale-acties/${params.id}/rsvp`)
-        : apiRequest("POST", `/api/lokale-acties/${params.id}/rsvp`),
-    onSuccess: (_data, hadRsvp) => {
-      queryClient.invalidateQueries({ queryKey: ["/api/lokale-acties", params.id, "rsvp"] });
-      toast({
-        title: hadRsvp ? "Afgemeld" : "Aangemeld",
-        description: hadRsvp
-          ? "Je bent afgemeld voor deze actie."
-          : "Je bent aangemeld voor deze actie!",
-      });
-    },
-    onError: () => {
-      toast({ title: "Fout", description: "Kon aanmelding niet verwerken.", variant: "destructive" });
-    },
-  });
 
   const publicUrl = typeof window !== "undefined"
     ? `${window.location.origin}/p/lokale-acties/${params.id}`
@@ -298,7 +236,7 @@ export default function LokaleActieDetailPage() {
 
   if (isLoading) {
     return (
-      <div className="max-w-3xl mx-auto py-8 px-4 space-y-4" data-testid="page-actie-detail-loading">
+      <div className="max-w-3xl mx-auto py-8 px-4 space-y-4" data-testid="page-publieke-actie-loading">
         <Skeleton className="h-8 w-2/3" />
         <Skeleton className="h-4 w-1/3" />
         <Skeleton className="h-40 w-full" />
@@ -308,38 +246,37 @@ export default function LokaleActieDetailPage() {
 
   if (isError || !actie) {
     return (
-      <div className="max-w-3xl mx-auto py-12 px-4 text-center space-y-4" data-testid="page-actie-detail-error">
+      <div className="max-w-3xl mx-auto py-12 px-4 text-center space-y-4" data-testid="page-publieke-actie-error">
         <CalendarDays className="h-10 w-10 mx-auto opacity-30" />
         <h1 className="text-xl font-semibold">Lokale actie niet gevonden</h1>
         <p className="text-sm text-muted-foreground">
           Deze actie bestaat niet meer of is inmiddels verlopen.
         </p>
-        <Link href="/lokale-acties">
-          <Button variant="outline" data-testid="button-terug-overzicht">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Terug naar lokale acties
+        <Link href="/login">
+          <Button variant="outline" data-testid="button-naar-login">
+            <LogIn className="mr-2 h-4 w-4" /> Inloggen op OpenRegio
           </Button>
         </Link>
       </div>
     );
   }
 
-  const isEigen = user?.id === actie.ownerUserId;
   const mapsQuery = encodeURIComponent(`${actie.locatie}, ${actie.regio}, Nederland`);
   const mapsLink = `https://www.openstreetmap.org/search?query=${mapsQuery}`;
   const whatsappText = encodeURIComponent(
     `${actie.titel} — lokale actie in ${actie.regio}\n${publicUrl}`,
   );
 
-  const hasRsvp = rsvpInfo?.hasRsvp ?? false;
-  const rsvpCount = rsvpInfo?.count ?? 0;
-  const isActief = actie.status === "actief";
-
   return (
-    <div className="max-w-3xl mx-auto py-8 px-4 space-y-6" data-testid="page-actie-detail">
-      <div>
-        <Link href="/lokale-acties">
-          <Button variant="ghost" size="sm" data-testid="link-terug">
-            <ArrowLeft className="mr-1.5 h-4 w-4" /> Lokale acties
+    <div className="max-w-3xl mx-auto py-8 px-4 space-y-6" data-testid="page-publieke-actie">
+      {/* OpenRegio CTA banner */}
+      <div className="bg-muted/50 border rounded-md px-4 py-3 flex items-center justify-between gap-3 flex-wrap" data-testid="banner-openregio">
+        <p className="text-sm text-muted-foreground">
+          Gedeeld via <span className="font-semibold text-foreground">OpenRegio</span> — platform voor lokale ondernemers
+        </p>
+        <Link href="/register">
+          <Button size="sm" data-testid="button-aanmelden-cta">
+            <LogIn className="mr-1.5 h-3.5 w-3.5" /> Gratis aanmelden
           </Button>
         </Link>
       </div>
@@ -358,12 +295,6 @@ export default function LokaleActieDetailPage() {
           )}
           {actie.status === "verlopen" && (
             <Badge variant="outline" data-testid="badge-verlopen">Verlopen</Badge>
-          )}
-          {!rsvpLoading && rsvpCount > 0 && (
-            <Badge variant="outline" data-testid="badge-rsvp-count">
-              <UserCheck className="mr-1 h-3 w-3" />
-              {rsvpCount} {rsvpCount === 1 ? "aanmelding" : "aanmeldingen"}
-            </Badge>
           )}
         </div>
         <h1 className="text-2xl sm:text-3xl font-bold" data-testid="text-titel">{actie.titel}</h1>
@@ -421,93 +352,6 @@ export default function LokaleActieDetailPage() {
           </div>
         </CardContent>
       </Card>
-
-      {/* RSVP card — voor alle leden, maar niet voor de eigenaar zelf */}
-      {!isEigen && (
-        <Card data-testid="card-rsvp">
-          <CardContent className="p-5 space-y-3">
-            <div className="flex items-center gap-2">
-              <UserCheck className="h-4 w-4 text-muted-foreground" />
-              <span className="text-sm font-semibold">Aanmelden voor deze actie</span>
-            </div>
-            {rsvpLoading ? (
-              <Skeleton className="h-9 w-36" />
-            ) : (
-              <div className="flex items-center gap-3 flex-wrap">
-                <Button
-                  size="sm"
-                  variant={hasRsvp ? "outline" : "default"}
-                  disabled={rsvpMutation.isPending || !isActief}
-                  onClick={() => rsvpMutation.mutate(hasRsvp)}
-                  data-testid={hasRsvp ? "button-rsvp-afmelden" : "button-rsvp-aanmelden"}
-                >
-                  {hasRsvp ? (
-                    <>
-                      <UserMinus className="mr-1.5 h-3.5 w-3.5" /> Afmelden
-                    </>
-                  ) : (
-                    <>
-                      <UserCheck className="mr-1.5 h-3.5 w-3.5" /> Ik kom
-                    </>
-                  )}
-                </Button>
-                {rsvpCount > 0 && (
-                  <span className="text-sm text-muted-foreground" data-testid="text-rsvp-teller">
-                    {rsvpCount} {rsvpCount === 1 ? "persoon" : "personen"} aangemeld
-                  </span>
-                )}
-                {!isActief && (
-                  <span className="text-xs text-muted-foreground">Aanmelden is niet meer mogelijk</span>
-                )}
-              </div>
-            )}
-            {hasRsvp && (
-              <p className="text-xs text-muted-foreground" data-testid="text-rsvp-bevestiging">
-                Je bent aangemeld. Je kunt je afmelden door op "Afmelden" te klikken.
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* RSVP overzicht voor de eigenaar */}
-      {isEigen && (
-        <Card data-testid="card-rsvp-overzicht">
-          <CardContent className="p-5 space-y-3">
-            <div className="flex items-center justify-between gap-2 flex-wrap">
-              <div className="flex items-center gap-2">
-                <UserCheck className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-semibold">Aanmeldingen</span>
-              </div>
-              {!rsvpLoading && (
-                <Badge variant="secondary" data-testid="badge-aanmeldingen-totaal">
-                  {rsvpCount} {rsvpCount === 1 ? "aanmelding" : "aanmeldingen"}
-                </Badge>
-              )}
-            </div>
-            {rsvpLoading ? (
-              <Skeleton className="h-12 w-full" />
-            ) : rsvpCount === 0 ? (
-              <p className="text-sm text-muted-foreground" data-testid="text-geen-aanmeldingen">
-                Nog niemand aangemeld.
-              </p>
-            ) : (
-              <ul className="space-y-1" data-testid="list-aanmeldingen">
-                {rsvpInfo?.attendees?.map((a) => (
-                  <li
-                    key={a.id}
-                    className="text-sm text-muted-foreground flex items-center gap-1.5"
-                    data-testid={`item-aanmelding-${a.id}`}
-                  >
-                    <UserCheck className="h-3.5 w-3.5 shrink-0 opacity-60" />
-                    {attendeeName(a)}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
-      )}
 
       <Card data-testid="card-kaart">
         <CardContent className="p-4 space-y-2">
@@ -584,57 +428,28 @@ export default function LokaleActieDetailPage() {
         </CardContent>
       </Card>
 
-      {isEigen && (
-        <Card data-testid="card-eigenaar-acties">
-          <CardContent className="p-5 space-y-3">
-            <div className="text-sm font-semibold">Beheer je actie</div>
-            <div className="flex flex-wrap gap-2">
-              <Link href="/lokale-acties">
-                <Button size="sm" variant="outline" data-testid="button-bewerken">
-                  <Pencil className="mr-1.5 h-3.5 w-3.5" /> Bewerken
-                </Button>
-              </Link>
-              <Button
-                size="sm"
-                variant="outline"
-                disabled={verlopenMutation.isPending || actie.status === "verlopen"}
-                onClick={() => verlopenMutation.mutate(actie.id)}
-                data-testid="button-verlopen"
-              >
-                <CheckCircle2 className="mr-1.5 h-3.5 w-3.5" /> Markeer verlopen
+      {/* CTA to sign up / log in */}
+      <Card className="bg-muted/30" data-testid="card-aanmelden-cta">
+        <CardContent className="p-5 space-y-3">
+          <div className="text-sm font-semibold">Meedoen met deze actie?</div>
+          <p className="text-sm text-muted-foreground">
+            Maak een gratis account aan op OpenRegio om je aan te melden voor lokale acties,
+            op de hoogte te blijven van wat er speelt in jouw regio en meer.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            <Link href="/register">
+              <Button size="sm" data-testid="button-aanmelden-footer">
+                <LogIn className="mr-1.5 h-3.5 w-3.5" /> Gratis aanmelden
               </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={() => setConfirmDelete(true)}
-                data-testid="button-verwijder"
-              >
-                <Trash2 className="mr-1.5 h-3.5 w-3.5" /> Verwijderen
+            </Link>
+            <Link href="/login">
+              <Button size="sm" variant="outline" data-testid="button-inloggen-footer">
+                Al een account? Inloggen
               </Button>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Actie verwijderen?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Deze actie wordt permanent verwijderd en is niet meer zichtbaar voor andere leden.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel data-testid="button-annuleer-verwijderen">Annuleren</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => verwijderenMutation.mutate(actie.id)}
-              data-testid="button-bevestig-verwijderen"
-            >
-              Verwijderen
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Link>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
