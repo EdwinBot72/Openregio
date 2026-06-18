@@ -4,12 +4,40 @@ import { sendLokaleActiesDigestEmail } from "./emailService";
 
 const LOOKBACK_DAYS = 7;
 const MAX_ITEMS_PER_MAIL = 10;
+const RING_BUFFER_MAX = 20;
 
 function normalizeRegio(value: string | null | undefined): string {
   return (value ?? "").trim().toLowerCase();
 }
 
-export async function runLokaleActiesNotifications(): Promise<{
+export type NotificationLogEntry = {
+  timestamp: string;
+  triggeredBy: "cron" | "manual";
+  scanned: number;
+  sent: number;
+  skippedNoMatch: number;
+  skippedOptOut: number;
+  skippedNoRegion: number;
+  skippedNoEmail: number;
+  failed: number;
+};
+
+const notificationLog: NotificationLogEntry[] = [];
+
+export function getNotificationLog(): NotificationLogEntry[] {
+  return [...notificationLog].reverse();
+}
+
+function appendLog(entry: NotificationLogEntry) {
+  notificationLog.push(entry);
+  if (notificationLog.length > RING_BUFFER_MAX) {
+    notificationLog.splice(0, notificationLog.length - RING_BUFFER_MAX);
+  }
+}
+
+export async function runLokaleActiesNotifications(
+  triggeredBy: "cron" | "manual" = "cron",
+): Promise<{
   scanned: number;
   sent: number;
   skippedNoMatch: number;
@@ -19,7 +47,7 @@ export async function runLokaleActiesNotifications(): Promise<{
   failed: number;
 }> {
   const since = new Date(Date.now() - LOOKBACK_DAYS * 24 * 60 * 60 * 1000);
-  console.log(`[LokaleActiesNotify] Wekelijkse notificatie-ronde gestart — sinds ${since.toISOString()}`);
+  console.log(`[LokaleActiesNotify] Wekelijkse notificatie-ronde gestart (${triggeredBy}) — sinds ${since.toISOString()}`);
 
   const stats = {
     scanned: 0,
@@ -35,6 +63,7 @@ export async function runLokaleActiesNotifications(): Promise<{
   const recenteActies = await storage.getLokaleActies({ createdSince: since });
   if (recenteActies.length === 0) {
     console.log("[LokaleActiesNotify] Geen nieuwe acties in de afgelopen 7 dagen — niets te versturen");
+    appendLog({ timestamp: new Date().toISOString(), triggeredBy, ...stats });
     return stats;
   }
 
@@ -125,6 +154,7 @@ export async function runLokaleActiesNotifications(): Promise<{
   console.log(
     `[LokaleActiesNotify] Klaar — ${stats.sent} verstuurd, ${stats.skippedNoMatch} zonder match, ${stats.skippedOptOut} opt-out, ${stats.skippedNoRegion} zonder regio, ${stats.failed} mislukt`,
   );
+  appendLog({ timestamp: new Date().toISOString(), triggeredBy, ...stats });
   return stats;
 }
 
@@ -134,7 +164,7 @@ export function startLokaleActiesNotificationsCron() {
     "0 7 * * 1",
     async () => {
       try {
-        await runLokaleActiesNotifications();
+        await runLokaleActiesNotifications("cron");
       } catch (err) {
         console.error("[LokaleActiesNotify] Onverwachte fout:", err);
       }

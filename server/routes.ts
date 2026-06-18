@@ -7930,6 +7930,29 @@ Geef alleen de brieftekst terug, zonder commentaar, zonder markdown, zonder JSON
     }
   });
 
+  // Admin: GET /api/admin/lokale-acties-notification-log — notificatie-cron log ringbuffer
+  app.get("/api/admin/lokale-acties-notification-log", requireAuth, requireAdmin, async (_req, res) => {
+    try {
+      const { getNotificationLog } = await import("./services/lokaleActiesNotificationsCron");
+      res.json(getNotificationLog());
+    } catch (err) {
+      console.error("[Admin] notification-log error:", err);
+      res.status(500).json({ error: "Kon log niet ophalen" });
+    }
+  });
+
+  // Admin: POST /api/admin/lokale-acties-notifications — handmatig triggeren
+  app.post("/api/admin/lokale-acties-notifications", requireAuth, requireAdmin, async (_req, res) => {
+    try {
+      const { runLokaleActiesNotifications } = await import("./services/lokaleActiesNotificationsCron");
+      const result = await runLokaleActiesNotifications("manual");
+      res.json(result);
+    } catch (err) {
+      console.error("[Admin] manual notification error:", err);
+      res.status(500).json({ error: "Notificatie-ronde mislukt" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

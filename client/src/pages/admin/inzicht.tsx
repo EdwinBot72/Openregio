@@ -1,13 +1,15 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { ArrowLeft, BarChart2, TrendingUp, Users, Gavel, PieChart as PieIcon } from "lucide-react";
+import { ArrowLeft, BarChart2, TrendingUp, Users, Gavel, PieChart as PieIcon, Mail, Play, CheckCircle2, XCircle, UserX, UserMinus, Clock } from "lucide-react";
 import { Link } from "wouter";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 import {
   AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend,
+  XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
 
 type InzichtData = {
@@ -15,6 +17,18 @@ type InzichtData = {
   wooGrowth: { month: string; cnt: number }[];
   topWooCategories: { name: string; cnt: number }[];
   planDistribution: { plan: string; cnt: number }[];
+};
+
+type NotificationLogEntry = {
+  timestamp: string;
+  triggeredBy: "cron" | "manual";
+  scanned: number;
+  sent: number;
+  skippedNoMatch: number;
+  skippedOptOut: number;
+  skippedNoRegion: number;
+  skippedNoEmail: number;
+  failed: number;
 };
 
 const PLAN_COLORS = ["#3b82f6", "#f97316"];
@@ -31,12 +45,36 @@ function CustomTooltip({ active, payload, label }: any) {
   );
 }
 
+function formatTimestamp(iso: string) {
+  const d = new Date(iso);
+  return d.toLocaleString("nl-NL", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
 export default function AdminInzichtPage() {
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
+
   const { data, isLoading } = useQuery<InzichtData>({
     queryKey: ["/api/admin/inzicht"],
   });
 
+  const { data: notifLog, isLoading: notifLogLoading } = useQuery<NotificationLogEntry[]>({
+    queryKey: ["/api/admin/lokale-acties-notification-log"],
+  });
+
+  const triggerMutation = useMutation({
+    mutationFn: () => apiRequest("POST", "/api/admin/lokale-acties-notifications"),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/admin/lokale-acties-notification-log"] });
+      toast({ title: "Notificatie-ronde gestart", description: "De mails worden nu verstuurd. Ververs de pagina over een moment voor de stats." });
+    },
+    onError: () => {
+      toast({ title: "Fout", description: "Kon de notificatie-ronde niet starten.", variant: "destructive" });
+    },
+  });
+
   const totalUsers = data?.planDistribution.reduce((a, b) => a + b.cnt, 0) || 0;
+  const lastRun = notifLog?.[0];
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 px-1">
@@ -56,6 +94,130 @@ export default function AdminInzichtPage() {
           <p className="text-sm text-muted-foreground">Gebruikersgroei, Woo-trends en ondernemersproblematiek.</p>
         </div>
       </div>
+
+      {/* Lokale Acties notificatie-stats */}
+      <Card data-testid="card-notification-stats">
+        <CardHeader className="pb-2 pt-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <div className="rounded-lg p-1.5 bg-sky-100 dark:bg-sky-950/50 text-sky-600">
+                <Mail className="h-3.5 w-3.5" />
+              </div>
+              <CardTitle className="text-sm font-semibold">Lokale Acties notificatie-mails</CardTitle>
+            </div>
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => triggerMutation.mutate()}
+              disabled={triggerMutation.isPending}
+              data-testid="button-trigger-notifications"
+            >
+              <Play className="h-3.5 w-3.5 mr-1.5" />
+              Nu versturen
+            </Button>
+          </div>
+          <p className="text-xs text-muted-foreground mt-1">
+            Wordt wekelijks automatisch verstuurd (maandag 07:00). Laatste {notifLog?.length ?? 0} runs opgeslagen.
+          </p>
+        </CardHeader>
+        <CardContent className="pb-4 space-y-4">
+          {notifLogLoading ? (
+            <Skeleton className="h-24 w-full" />
+          ) : !notifLog?.length ? (
+            <div className="flex items-center justify-center py-6">
+              <p className="text-xs text-muted-foreground">Nog geen notificatie-ronde uitgevoerd.</p>
+            </div>
+          ) : (
+            <>
+              {/* Last run summary */}
+              {lastRun && (
+                <div className="rounded-md border p-3 space-y-3" data-testid="last-run-summary">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-semibold text-foreground">Laatste run</span>
+                    <Badge variant="secondary" className="text-[10px]">
+                      {lastRun.triggeredBy === "manual" ? "Handmatig" : "Automatisch"}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      {formatTimestamp(lastRun.timestamp)}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div className="flex flex-col gap-0.5" data-testid="stat-sent">
+                      <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+                        <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
+                        <span className="text-xs font-medium">Verstuurd</span>
+                      </div>
+                      <span className="text-lg font-bold pl-5">{lastRun.sent}</span>
+                    </div>
+                    <div className="flex flex-col gap-0.5" data-testid="stat-no-region">
+                      <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+                        <UserX className="h-3.5 w-3.5 shrink-0" />
+                        <span className="text-xs font-medium">Zonder regio</span>
+                      </div>
+                      <span className="text-lg font-bold pl-5">{lastRun.skippedNoRegion}</span>
+                    </div>
+                    <div className="flex flex-col gap-0.5" data-testid="stat-opt-out">
+                      <div className="flex items-center gap-1.5 text-muted-foreground">
+                        <UserMinus className="h-3.5 w-3.5 shrink-0" />
+                        <span className="text-xs font-medium">Opt-out</span>
+                      </div>
+                      <span className="text-lg font-bold pl-5">{lastRun.skippedOptOut}</span>
+                    </div>
+                    <div className="flex flex-col gap-0.5" data-testid="stat-failed">
+                      <div className="flex items-center gap-1.5 text-destructive">
+                        <XCircle className="h-3.5 w-3.5 shrink-0" />
+                        <span className="text-xs font-medium">Mislukt</span>
+                      </div>
+                      <span className="text-lg font-bold pl-5">{lastRun.failed}</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {lastRun.scanned} leden gescand — {lastRun.skippedNoMatch} zonder passende acties in hun regio.
+                  </p>
+                </div>
+              )}
+
+              {/* History table */}
+              {notifLog.length > 1 && (
+                <div className="space-y-1">
+                  <p className="text-xs font-medium text-muted-foreground">Geschiedenis</p>
+                  <div className="rounded-md border overflow-hidden">
+                    <table className="w-full text-xs">
+                      <thead>
+                        <tr className="bg-muted/50 border-b">
+                          <th className="text-left px-3 py-2 font-medium text-muted-foreground">Tijdstip</th>
+                          <th className="text-center px-3 py-2 font-medium text-muted-foreground">Verstuurd</th>
+                          <th className="text-center px-3 py-2 font-medium text-muted-foreground">Opt-out</th>
+                          <th className="text-center px-3 py-2 font-medium text-muted-foreground">Geen regio</th>
+                          <th className="text-center px-3 py-2 font-medium text-muted-foreground">Mislukt</th>
+                          <th className="text-center px-3 py-2 font-medium text-muted-foreground">Hoe</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {notifLog.slice(1).map((entry, idx) => (
+                          <tr key={idx} className="border-b last:border-0 hover-elevate" data-testid={`notif-log-row-${idx}`}>
+                            <td className="px-3 py-2 text-muted-foreground">{formatTimestamp(entry.timestamp)}</td>
+                            <td className="px-3 py-2 text-center font-medium text-emerald-600 dark:text-emerald-400">{entry.sent}</td>
+                            <td className="px-3 py-2 text-center text-muted-foreground">{entry.skippedOptOut}</td>
+                            <td className="px-3 py-2 text-center text-amber-600 dark:text-amber-400">{entry.skippedNoRegion}</td>
+                            <td className="px-3 py-2 text-center text-destructive">{entry.failed}</td>
+                            <td className="px-3 py-2 text-center">
+                              <Badge variant="secondary" className="text-[10px]">
+                                {entry.triggeredBy === "manual" ? "Handmatig" : "Auto"}
+                              </Badge>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Growth charts side by side */}
       <div className="grid sm:grid-cols-2 gap-4">
