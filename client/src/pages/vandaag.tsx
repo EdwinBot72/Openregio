@@ -7,6 +7,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import {
   Bell,
   TrendingUp,
@@ -536,7 +537,7 @@ export default function VandaagPage() {
   });
   const topNieuws = (nieuwsData?.items ?? []).slice(0, 3);
 
-  const { data: ledenUpdates = [], isLoading: ledenUpdatesLoading } = useQuery<Blog[]>({
+  const { data: ledenUpdates = [], isLoading: ledenUpdatesLoading } = useQuery<(Blog & { isUnread?: boolean })[]>({
     queryKey: ["/api/news/latest"],
     enabled: !!user,
     staleTime: 1000 * 60 * 5,
@@ -1793,10 +1794,20 @@ export default function VandaagPage() {
                   >
                     <StatusIcon icon={Megaphone} tint="oranje" />
                     <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ fontSize: 11, color: C.tekstHeelZacht, textTransform: "uppercase", letterSpacing: ".5px", fontWeight: 700, marginBottom: 2 }}>
-                        {b.publishedAt
-                          ? new Date(b.publishedAt).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })
-                          : "Leden-update"}
+                      <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 11, color: C.tekstHeelZacht, textTransform: "uppercase", letterSpacing: ".5px", fontWeight: 700, marginBottom: 2, flexWrap: "wrap" }}>
+                        <span>
+                          {b.publishedAt
+                            ? new Date(b.publishedAt).toLocaleDateString("nl-NL", { day: "numeric", month: "short" })
+                            : "Leden-update"}
+                        </span>
+                        {b.isUnread && (
+                          <Badge
+                            data-testid={`badge-nieuw-vandaag-${b.id}`}
+                            style={{ fontSize: 10, padding: "1px 7px", background: "#c2410c", color: "#fff", textTransform: "uppercase", letterSpacing: ".5px", borderRadius: 6 }}
+                          >
+                            Nieuw
+                          </Badge>
+                        )}
                       </div>
                       <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: C.donker, lineHeight: 1.4 }}>
                         {b.title}

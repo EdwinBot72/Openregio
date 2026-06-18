@@ -3857,7 +3857,14 @@ Maak het verzoek professioneel en juridisch correct.`;
     try {
       const limitRaw = Number.parseInt(String(req.query.limit ?? "5"), 10);
       const limit = Number.isFinite(limitRaw) && limitRaw > 0 && limitRaw <= 20 ? limitRaw : 5;
-      const items = await storage.getPublishedBlogs(limit, "leden");
+      const userId = req.user!.id;
+      const u = await storage.getUserById(userId);
+      const lastRead = u?.lastNewsReadAt ? new Date(u.lastNewsReadAt) : null;
+      const rawItems = await storage.getPublishedBlogs(limit, "leden");
+      const items = rawItems.map((b) => {
+        const dateRef = b.publishedAt ? new Date(b.publishedAt) : new Date(b.createdAt);
+        return { ...b, isUnread: !lastRead || dateRef > lastRead };
+      });
       res.json(items);
     } catch (error: any) {
       console.warn("[News/latest] DB unavailable, returning empty list");
@@ -3958,7 +3965,14 @@ Maak het verzoek professioneel en juridisch correct.`;
         return true;
       });
 
-      const items = filtered.slice(offset, offset + limit);
+      const userId = req.user!.id;
+      const u = await storage.getUserById(userId);
+      const lastRead = u?.lastNewsReadAt ? new Date(u.lastNewsReadAt) : null;
+      const sliced = filtered.slice(offset, offset + limit);
+      const items = sliced.map((b) => {
+        const dateRef = b.publishedAt ? new Date(b.publishedAt) : new Date(b.createdAt);
+        return { ...b, isUnread: !lastRead || dateRef > lastRead };
+      });
       res.json({ items, total: filtered.length, limit, offset });
     } catch (error: any) {
       console.warn("[News/leden] DB unavailable, returning empty list");

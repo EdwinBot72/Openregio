@@ -4,12 +4,15 @@ import { useQuery } from "@tanstack/react-query";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Megaphone, Search, ChevronLeft, ChevronRight, X, Calendar } from "lucide-react";
 import type { Blog } from "@shared/schema";
 
+type LedenUpdateItem = Blog & { isUnread?: boolean };
+
 type LedenUpdatesResponse = {
-  items: Blog[];
+  items: LedenUpdateItem[];
   total: number;
   limit: number;
   offset: number;
@@ -219,7 +222,7 @@ export default function LedenUpdatesPage() {
                     <Megaphone className="h-4 w-4" />
                   </span>
                   <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: "#94a3b8", textTransform: "uppercase", letterSpacing: ".5px", fontWeight: 700, marginBottom: 4 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 11, color: "#94a3b8", textTransform: "uppercase", letterSpacing: ".5px", fontWeight: 700, marginBottom: 4, flexWrap: "wrap" }}>
                       <Calendar className="h-3 w-3" />
                       <span>{formatDate(b.publishedAt) || formatDate(b.createdAt)}</span>
                       {b.authorName && (
@@ -227,6 +230,14 @@ export default function LedenUpdatesPage() {
                           <span style={{ opacity: 0.5 }}>·</span>
                           <span style={{ textTransform: "none", letterSpacing: 0, fontWeight: 600 }}>{b.authorName}</span>
                         </>
+                      )}
+                      {b.isUnread && (
+                        <Badge
+                          data-testid={`badge-nieuw-${b.id}`}
+                          style={{ fontSize: 10, padding: "1px 7px", background: "#c2410c", color: "#fff", textTransform: "uppercase", letterSpacing: ".5px", borderRadius: 6 }}
+                        >
+                          Nieuw
+                        </Badge>
                       )}
                     </div>
                     <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: "#0b2240", lineHeight: 1.4 }}>
