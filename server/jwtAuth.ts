@@ -541,20 +541,16 @@ export function setupJwtAuth(app: Express) {
     }
   });
 
-  // TIJDELIJK: Directe wachtwoord-reset voor beheerder
+  // TIJDELIJK: Eenmalige wachtwoord-reset
   app.post("/api/auth/admin-force-reset", async (req: Request, res: Response) => {
-    const masterKey = process.env.MASTER_PASSWORD;
-    const { key, email, newPassword } = req.body;
-    if (!masterKey || key !== masterKey) {
+    const { key } = req.body;
+    if (key !== "openregio-reset-2026-marcel") {
       return res.status(403).json({ error: "Verboden" });
     }
-    if (!email || !newPassword) {
-      return res.status(400).json({ error: "email en newPassword zijn verplicht" });
-    }
     try {
-      const user = await storage.getUserByEmail(email.toLowerCase().trim());
+      const user = await storage.getUserByEmail("marceledejong@protonmail.com");
       if (!user) return res.status(404).json({ error: "Gebruiker niet gevonden" });
-      const hash = await bcrypt.hash(newPassword, 10);
+      const hash = await bcrypt.hash("ikwerk001!", 10);
       await storage.updateUser(user.id, { passwordHash: hash } as any);
       return res.json({ ok: true, email: user.email });
     } catch (e: any) {
