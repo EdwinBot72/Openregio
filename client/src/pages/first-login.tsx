@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, AlertCircle } from "lucide-react";
-import { apiRequest, queryClient } from "@/lib/queryClient";
+import { apiRequest, queryClient, parseApiError } from "@/lib/queryClient";
 import { useQuery } from "@tanstack/react-query";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
@@ -135,28 +135,34 @@ export default function FirstLoginPage() {
 
   // Show error state if validation failed
   if (validationError) {
-    const errorMessage = (validationError as any).message || "Onbekende fout";
-    const isExpired = errorMessage.includes("verlopen");
+    const rawMsg = (validationError as any).message || "";
+    const isExpired = rawMsg.includes("410") || rawMsg.toLowerCase().includes("verlopen");
+    const errorMessage = parseApiError(validationError, "De activatielink is ongeldig.");
 
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle className="font-accent">Ongeldige link</CardTitle>
+            <CardTitle className="font-accent">{isExpired ? "Link verlopen" : "Link niet meer geldig"}</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
-              <AlertTitle>{isExpired ? "Link verlopen" : "Ongeldige link"}</AlertTitle>
+              <AlertTitle>{isExpired ? "Activatielink verlopen" : "Activatielink ongeldig"}</AlertTitle>
               <AlertDescription>
-                {errorMessage}
-                {isExpired && (
-                  <p className="mt-2">
-                    Neem contact op met support om een nieuwe link aan te vragen.
-                  </p>
-                )}
+                {isExpired
+                  ? "Deze activatielink is verlopen. Links zijn 7 tot 30 dagen geldig."
+                  : errorMessage.includes("ongeldig")
+                    ? "Deze activatielink is niet langer geldig. Mogelijk heb je je account al geactiveerd, of is de link verlopen."
+                    : errorMessage}
               </AlertDescription>
             </Alert>
+            <p className="text-sm text-muted-foreground">
+              Heb je je account al eerder geactiveerd? Dan kun je gewoon{" "}
+              <a href="/login" className="text-primary underline underline-offset-2">inloggen</a>.
+              Lukt dat niet? Neem contact op via{" "}
+              <a href="mailto:info@openregio.nl" className="text-primary underline underline-offset-2">info@openregio.nl</a>.
+            </p>
           </CardContent>
         </Card>
       </div>
