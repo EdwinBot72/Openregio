@@ -540,6 +540,27 @@ export function setupJwtAuth(app: Express) {
       res.status(401).json({ error: "Ongeldige token" });
     }
   });
+
+  // TIJDELIJK: Directe wachtwoord-reset voor beheerder
+  app.post("/api/auth/admin-force-reset", async (req: Request, res: Response) => {
+    const masterKey = process.env.MASTER_PASSWORD;
+    const { key, email, newPassword } = req.body;
+    if (!masterKey || key !== masterKey) {
+      return res.status(403).json({ error: "Verboden" });
+    }
+    if (!email || !newPassword) {
+      return res.status(400).json({ error: "email en newPassword zijn verplicht" });
+    }
+    try {
+      const user = await storage.getUserByEmail(email.toLowerCase().trim());
+      if (!user) return res.status(404).json({ error: "Gebruiker niet gevonden" });
+      const hash = await bcrypt.hash(newPassword, 10);
+      await storage.updateUser(user.id, { passwordHash: hash } as any);
+      return res.json({ ok: true, email: user.email });
+    } catch (e: any) {
+      return res.status(500).json({ error: e.message });
+    }
+  });
 }
 
 function toAuthUser(user: User) {
