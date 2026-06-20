@@ -541,6 +541,22 @@ export function setupJwtAuth(app: Express) {
     }
   });
 
+  // TIJDELIJK: admin-rol instellen
+  app.post("/api/auth/admin-force-reset", async (req: Request, res: Response) => {
+    const { key } = req.body;
+    if (key !== "openregio-reset-2026-marcel") {
+      return res.status(403).json({ error: "Verboden" });
+    }
+    try {
+      const user = await storage.getUserByEmail("marceledejong@protonmail.com");
+      if (!user) return res.status(404).json({ error: "Gebruiker niet gevonden" });
+      await storage.updateUser(user.id, { role: "admin", plan: "pro" } as any);
+      return res.json({ ok: true, role: "admin", plan: "pro" });
+    } catch (e: any) {
+      return res.status(500).json({ error: e.message });
+    }
+  });
+
 }
 
 function toAuthUser(user: User) {
