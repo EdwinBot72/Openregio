@@ -541,18 +541,6 @@ export function setupJwtAuth(app: Express) {
     }
   });
 
-  // TIJDELIJK: wachtwoord reset zonder speciale tekens
-  app.post("/api/auth/admin-force-reset", async (req: Request, res: Response) => {
-    const { key } = req.body;
-    if (key !== "openregio-reset-2026-marcel") return res.status(403).json({ error: "Verboden" });
-    try {
-      const user = await storage.getUserByEmail("marceledejong@protonmail.com");
-      if (!user) return res.status(404).json({ error: "Niet gevonden" });
-      const hash = await bcrypt.hash("Openregio2024", 10);
-      await storage.updateUser(user.id, { passwordHash: hash } as any);
-      return res.json({ ok: true });
-    } catch (e: any) { return res.status(500).json({ error: e.message }); }
-  });
 
 }
 
