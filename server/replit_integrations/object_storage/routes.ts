@@ -180,11 +180,23 @@ export function registerObjectStorageRoutes(app: Express, requireAuth: any): voi
   });
 
   /**
-   * Serve uploaded objects (public access for objects with public ACL).
+   * Serve uploaded objects. Public objects are accessible without auth;
+   * private objects require the requester to be the authenticated owner.
    */
   app.get("/objects/:objectPath(*)", async (req, res) => {
     try {
       const objectFile = await objectStorageService.getObjectEntityFile(req.path);
+
+      const userId = (req as any).user?.id;
+      const canAccess = await objectStorageService.canAccessObjectEntity({
+        userId,
+        objectFile,
+      });
+
+      if (!canAccess) {
+        return res.status(403).json({ error: "Toegang geweigerd" });
+      }
+
       await objectStorageService.downloadObject(objectFile, res);
     } catch (error) {
       console.error("Error serving object:", error);
