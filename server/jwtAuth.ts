@@ -44,7 +44,7 @@ if (!process.env.SESSION_SECRET) {
 const JWT_SECRET = process.env.SESSION_SECRET;
 
 const isProduction = process.env.NODE_ENV === "production";
-const cookieSameSite: "strict" | "lax" = isProduction ? "strict" : "lax";
+const cookieSameSite: "strict" | "lax" = "lax";
 
 // Rate-limiters: relaxed outside of production so local dev / e2e test runs
 // don't exhaust the 5-per-hour register cap. Set E2E_BYPASS_RATE_LIMITS=true
