@@ -156,23 +156,24 @@ export default function HomePage() {
           </div>
 
           {/* Right — image */}
-          <div className="or-hero-right" style={{ position: "relative", minHeight: 480, overflow: "hidden", background: BLAUW }}>
+          <div className="or-hero-right" style={{ position: "relative", minHeight: 480, overflow: "hidden" }}>
+            {/* Fallback gradient behind image */}
+            <div style={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${BLAUW} 0%, #1a3a5c 100%)`, zIndex: -1 }} />
             <img
-              src="/images/hero.png"
-              alt="Lokale ondernemers"
-              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", position: "absolute", inset: 0 }}
+              src="/images/openregio_foto_03.png"
+              alt="Lokale ondernemers in gesprek"
+              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block", position: "absolute", inset: 0 }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
             />
+            {/* Brush-stroke style text overlay — edge-to-edge across bottom */}
             <div style={{
-              position: "absolute", bottom: 0, left: 0, right: 0,
-              background: "rgba(11,34,64,0.88)",
-              padding: "20px 24px 24px",
+              position: "absolute", bottom: 32, left: -20, right: 0,
+              background: "rgba(11,34,64,0.90)",
+              padding: "18px 28px 18px 36px",
+              borderRadius: "0 12px 12px 0",
             }}>
-              <p style={{ margin: "0 0 6px", fontSize: 15, fontStyle: "italic", color: "#fff", lineHeight: 1.6, fontWeight: 500 }}>
-                "Via OpenRegio vonden we sneller de juiste mensen en kregen we direct meer grip."
-              </p>
-              <p style={{ margin: 0, fontSize: 12, color: ORANJE, fontWeight: 700, letterSpacing: "0.04em" }}>
-                — Lokaal ondernemer
+              <p style={{ margin: 0, fontSize: 15, fontStyle: "italic", color: "#fff", lineHeight: 1.65, fontWeight: 500 }}>
+                "Vertrouwen ontstaat door contact.<br />Groei ontstaat door samenwerking."
               </p>
             </div>
           </div>
