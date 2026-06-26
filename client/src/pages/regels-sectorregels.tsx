@@ -329,8 +329,8 @@ export default function RegelsSectorregelPage() {
           </Link>
           <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 20, flexWrap: "wrap" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eaf6ee", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <BookOpen style={{ width: 24, height: 24, color: "#1a6b3a" }} />
+              <div style={{ width: 52, height: 52, borderRadius: 14, background: "#f3e8ff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <BookOpen style={{ width: 24, height: 24, color: "#6d28d9" }} />
               </div>
               <div>
                 <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }}>Sectorregels</h1>

@@ -13,8 +13,8 @@ import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { formatDistanceToNow } from "date-fns";
 import { nl } from "date-fns/locale";
-import { useSearch } from "wouter";
-import { Loader2 } from "lucide-react";
+import { useSearch, Link } from "wouter";
+import { Loader2, Users, ArrowLeft } from "lucide-react";
 import { PROVINCES_REGIONS, PROVINCES } from "@shared/schema";
 import type { Post, Bedrijfsprofiel } from "@shared/schema";
 
@@ -351,10 +351,16 @@ export default function NetworkPage() {
   return (
     <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }} data-testid="page-network">
       <div style={{ maxWidth: 1060, margin: "0 auto" }}>
+      <Link href="/vandaag">
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 600, color: "#64748b", marginBottom: 18, cursor: "pointer" }}>
+          <ArrowLeft style={{ width: 15, height: 15 }} />
+          Terug naar dashboard
+        </div>
+      </Link>
       <div style={{ marginBottom: 28 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eaf6ee", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <Users style={{ width: 24, height: 24, color: "#1a6b3a" }} />
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#fff8ef", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Users style={{ width: 24, height: 24, color: "#f28a1a" }} />
           </div>
           <div>
             <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="text-page-title">Netwerk</h1>

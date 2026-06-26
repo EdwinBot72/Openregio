@@ -13,6 +13,7 @@ import {
   Users,
   Zap,
   ArrowRight,
+  ArrowLeft,
   MapPin,
   Star,
   Lightbulb,
@@ -276,11 +277,17 @@ export default function KansenInDeBuurtPage() {
 
   return (
     <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
-      <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      <Link href="/vandaag">
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 600, color: "#64748b", marginBottom: 18, cursor: "pointer" }}>
+          <ArrowLeft style={{ width: 15, height: 15 }} />
+          Terug naar dashboard
+        </div>
+      </Link>
       {/* ── Header ── */}
       <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
-        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#fff8ef", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <MapPin style={{ width: 24, height: 24, color: "#f28a1a" }} />
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eaf6ee", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <MapPin style={{ width: 24, height: 24, color: "#1a6b3a" }} />
         </div>
         <div>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }}>Kansen in de buurt</h1>
@@ -296,29 +303,28 @@ export default function KansenInDeBuurtPage() {
         {/* Gemeente-selectie */}
         <div className="mt-6 flex flex-col sm:flex-row gap-3 items-start sm:items-end">
           <div>
-            <label className="text-xs font-medium text-white/70 mb-1.5 block">
+            <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
               Kies een gemeente
             </label>
             <GemeenteCombobox
               value={actieveGemeente}
               onChange={setGemeente}
-              dark
             />
           </div>
 
           {actieveGemeente && (
-            <div className="flex items-center gap-2 text-white/80 text-sm pb-0.5 flex-wrap">
+            <div className="flex items-center gap-2 text-muted-foreground text-sm pb-0.5 flex-wrap">
               <MapPin className="h-4 w-4 shrink-0" />
               <span data-testid="text-actieve-gemeente">{actieveGemeente}</span>
               {data?.cached && !laden && (
-                <Badge variant="outline" className="text-white/60 border-white/20 text-xs">
+                <Badge variant="outline" className="text-xs">
                   vandaag
                 </Badge>
               )}
               {!laden && (
                 <button
                   onClick={handleRefresh}
-                  className="flex items-center gap-1 text-white/70 hover:text-white text-xs transition-colors"
+                  className="flex items-center gap-1 text-muted-foreground hover:text-foreground text-xs transition-colors"
                   data-testid="button-refresh-kansen"
                   title="Andere kansen genereren"
                 >
@@ -327,7 +333,7 @@ export default function KansenInDeBuurtPage() {
                 </button>
               )}
               {laden && refreshCount > 0 && (
-                <span className="text-xs text-white/60 flex items-center gap-1">
+                <span className="text-xs text-muted-foreground flex items-center gap-1">
                   <RefreshCw className="h-3 w-3 animate-spin" />
                   Nieuwe kansen laden…
                 </span>

@@ -12,6 +12,7 @@ import {
   Banknote,
   Bell,
   ArrowRight,
+  ArrowLeft,
   Clock,
   ExternalLink,
   AlertTriangle,
@@ -26,6 +27,7 @@ import {
   Bot,
   Building2,
   RefreshCw,
+  Newspaper,
   type LucideIcon,
 } from "lucide-react";
 import { Link } from "wouter";
@@ -384,43 +386,25 @@ export default function IntelPage() {
     });
 
   return (
-    <div className="space-y-6">
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 900, margin: "0 auto" }}>
 
-      {/* ── Hero ─────────────────────────────────────────────────────────────── */}
-      <div
-        className="rounded-3xl bg-gradient-to-br from-primary via-primary/90 to-primary/70 p-7 text-white shadow-lg md:p-9"
-        data-testid="section-intel-hero"
-      >
-        <div className="flex items-center gap-2 mb-4">
-          <Landmark className="h-4 w-4 opacity-75" />
-          <span className="text-xs font-semibold uppercase tracking-widest text-white/80">
-            OpenRegio Intel
-          </span>
+      <Link href="/regels">
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 600, color: "#64748b", marginBottom: 18, cursor: "pointer" }}>
+          <ArrowLeft style={{ width: 15, height: 15 }} />
+          Terug naar Regels
         </div>
-        <h1 className="text-2xl font-black leading-tight tracking-tight md:text-4xl text-white">
-          Wat speelt er voor ondernemers?
-        </h1>
-        <p className="mt-3 max-w-2xl text-sm text-white/75 md:text-base">
-          Grote trends en beleidswijzigingen vertaald naar concrete impact voor jouw bedrijf — van energietransitie en EU-regelgeving tot arbeidsmarkt en digitalisering.
-        </p>
-        <div className="mt-6 flex flex-wrap gap-3">
-          <Link href="/regiobot">
-            <button
-              className="rounded-2xl bg-white px-5 py-2.5 text-sm font-semibold text-slate-900 shadow-md transition hover:opacity-90 active:scale-95"
-              data-testid="button-intel-regiobot"
-            >
-              Stel een vraag via RegioBot
-              <ArrowRight className="inline ml-2 h-4 w-4" />
-            </button>
-          </Link>
-          <Link href="/woo-wizard">
-            <button
-              className="rounded-2xl border border-white/25 bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-white/20 active:scale-95"
-              data-testid="button-intel-woo"
-            >
-              Woo-verzoek opstellen
-            </button>
-          </Link>
+      </Link>
+
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#f3e8ff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <Newspaper style={{ width: 24, height: 24, color: "#6d28d9" }} />
+        </div>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="text-page-title">Regelgeving Updates</h1>
+          <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+            Actuele wijzigingen en ontwikkelingen die jouw bedrijf raken.
+          </p>
         </div>
       </div>
 
@@ -648,6 +632,7 @@ export default function IntelPage() {
           </div>
         </div>
       )}
+      </div>
     </div>
   );
 }

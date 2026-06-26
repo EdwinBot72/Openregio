@@ -29,7 +29,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Building2, Loader2, Save, MapPin, CreditCard, AlertTriangle } from "lucide-react";
+import { Building2, Loader2, Save, MapPin, CreditCard, AlertTriangle, ArrowLeft } from "lucide-react";
+import { Link } from "wouter";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -165,6 +166,12 @@ export default function BedrijfsprofielPage() {
   return (
     <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
       <div style={{ maxWidth: 860, margin: "0 auto" }}>
+      <Link href="/vandaag">
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 600, color: "#64748b", marginBottom: 18, cursor: "pointer" }}>
+          <ArrowLeft style={{ width: 15, height: 15 }} />
+          Terug naar dashboard
+        </div>
+      </Link>
       <div style={{ marginBottom: 28 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eef2f9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>

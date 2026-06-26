@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RegionSelect } from "@/components/region-select";
-import { ExternalLink, Calendar, Info, Building2, AlertCircle, Lightbulb, Briefcase } from "lucide-react";
+import { ExternalLink, Calendar, Info, Building2, AlertCircle, Lightbulb, Briefcase, ArrowLeft } from "lucide-react";
+import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 
 interface Aanbesteding {
@@ -88,9 +89,15 @@ export default function AanbestedingenPage() {
   return (
     <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }} data-testid="page-aanbestedingen">
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      <Link href="/vandaag">
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 600, color: "#64748b", marginBottom: 18, cursor: "pointer" }}>
+          <ArrowLeft style={{ width: 15, height: 15 }} />
+          Terug naar dashboard
+        </div>
+      </Link>
       <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
-        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#ecfeff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <Briefcase style={{ width: 24, height: 24, color: "#0891b2" }} />
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eaf6ee", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <Briefcase style={{ width: 24, height: 24, color: "#1a6b3a" }} />
         </div>
         <div>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="text-page-title">Opdrachten &amp; Aanbestedingen</h1>

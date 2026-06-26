@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ExternalLink, Search, Info, Euro, Users, X } from "lucide-react";
+import { ExternalLink, Search, Info, Euro, Users, X, ArrowLeft } from "lucide-react";
+import { Link } from "wouter";
 
 type Categorie = "Alle" | "Crowdfunding" | "Lening" | "EU-fonds" | "Regionaal" | "Subsidie";
 
@@ -230,6 +231,12 @@ export default function FinancieringPage() {
   return (
     <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }} data-testid="page-financiering">
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      <Link href="/kansen/opdrachten">
+        <div style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 600, color: "#64748b", marginBottom: 18, cursor: "pointer" }}>
+          <ArrowLeft style={{ width: 15, height: 15 }} />
+          Terug naar Opdrachten
+        </div>
+      </Link>
       <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
         <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eaf6ee", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
           <Euro style={{ width: 24, height: 24, color: "#1a6b3a" }} />
