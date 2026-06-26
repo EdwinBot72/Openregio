@@ -8,6 +8,7 @@ import {
   Users, CalendarDays, Lightbulb, Euro, MapPin, LogOut,
   Settings, ShieldCheck, BarChart2, Building2, FileText,
   Bell, Zap, Scale, Handshake, Newspaper, Activity, Shield,
+  Star, FileCheck,
 } from "lucide-react";
 
 type ChipColor = "red" | "orange" | "blue" | "green";
@@ -89,7 +90,7 @@ export function OpenRegioShell({ children }: { children: ReactNode }) {
     return `${sector} · ${region}`;
   }, [user]);
 
-  const isPro = (user as any)?.plan === "pro" || (user as any)?.subscription === "pro";
+  const isPro = user?.role === "admin" || user?.role === "master" || (user as any)?.plan === "pro" || (user as any)?.plan === "coaching";
   const isAdmin = user?.role === "admin" || user?.role === "master" || (user as any)?.isAdmin;
 
   const { data: meldingenData } = useQuery<{ count: number }>({
@@ -150,17 +151,18 @@ export function OpenRegioShell({ children }: { children: ReactNode }) {
               chipLabel={notifCount > 0 ? notifCount : undefined}
               chipColor="red"
             />
-            <NavItem
-              icon={Bot}
-              href="/regiobot"
-              label="RegioBot"
-              currentPath={location}
-            />
 
             <div className="or-sb-div" />
 
             {/* Pijler 1: Grip op Regels */}
             <PijlerHeader num="1" name="GRIP OP REGELS" numClass="or-num-p1" />
+            <NavItem
+              icon={Mail}
+              href="/regels/documenten"
+              label="Brief analyseren"
+              currentPath={location}
+              pijler="p1"
+            />
             <NavItem
               icon={Shield}
               href="/regels/sectorregels"
@@ -177,8 +179,8 @@ export function OpenRegioShell({ children }: { children: ReactNode }) {
             />
             <NavItem
               icon={FileText}
-              href="/regels/documenten"
-              label="Documenten opvragen"
+              href="/regels/help"
+              label="Vergunning & regels"
               currentPath={location}
               pijler="p1"
             />
@@ -240,6 +242,39 @@ export function OpenRegioShell({ children }: { children: ReactNode }) {
               label="Blog"
               currentPath={location}
               pijler="p3"
+            />
+
+            <div className="or-sb-div" />
+
+            {/* AI Agents */}
+            <PijlerHeader
+              num={<Bot size={11} />}
+              name="AI AGENTS"
+              numClass="or-num-p1"
+            />
+            <NavItem
+              icon={Mail}
+              href="/agents/brievenagent"
+              label="Brievenagent"
+              currentPath={location}
+            />
+            <NavItem
+              icon={FileCheck}
+              href="/agents/contractagent"
+              label="Contractagent"
+              currentPath={location}
+            />
+            <NavItem
+              icon={Star}
+              href="/agents/secretaresse"
+              label="Secretaresse"
+              currentPath={location}
+            />
+            <NavItem
+              icon={Bot}
+              href="/regiobot"
+              label="RegioBot"
+              currentPath={location}
             />
 
             <div className="or-sb-div" />

@@ -329,7 +329,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // POST /api/mollie/webhook — Unified handler voor eerste én terugkerende betalingen
-  app.post("/api/mollie/webhook", async (req, res) => {
+  const mollieWebhookHandler = async (req: any, res: any) => {
     try {
       const paymentId = req.body.id;
       if (!paymentId) {
@@ -378,7 +378,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const sub = await storage.getSubscriptionByMollieSubscriptionId(mollieSubId);
             if (sub) {
               await storage.updateSubscription(sub.id, { status: "past_due" as any });
-              console.warn(`[Mollie] Terugkerende betaling MISLUKT: sub=${sub.id}`);
+              await storage.updateUserPlan(sub.userId, "pending");
+              console.warn(`[Mollie] Terugkerende betaling MISLUKT: sub=${sub.id} — gebruiker ${sub.userId} teruggezet naar pending`);
             }
           }
         }
@@ -552,7 +553,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // 500 zodat Mollie de webhook herprobeert bij een verwerkingsfout
       if (!res.headersSent) res.status(500).send("Internal error");
     }
-  });
+  };
+  app.post("/api/mollie/webhook", mollieWebhookHandler);
 
   // POST /api/lead — aanmeldingsformulier van de landingspagina
   app.post("/api/lead", contactFormRateLimit, async (req, res) => {
@@ -3155,18 +3157,8 @@ Maak het verzoek professioneel en juridisch correct.`;
     }
   });
 
-  // POST /api/webhooks/mollie — legacy URL, zelfde handler als /api/mollie/webhook.
-  // Houd beide paden actief totdat Mollie-dashboard is bijgewerkt naar /api/mollie/webhook.
-  // Voer ALTIJD beide URL's in als alias — geen req.url hack nodig.
-  app.post("/api/webhooks/mollie", async (req, res) => {
-    // Delegeer direct naar de geregistreerde /api/mollie/webhook handler via next-app.
-    // Gebruik forward ipv req.url mutatie om stack-overflow te voorkomen.
-    req.url = "/api/mollie/webhook";
-    (req.app as any).handle(req, res, () => {
-      // Als de handler de request niet afhandelt (bijv. geen match), stuur 200
-      if (!res.headersSent) res.status(200).send("OK");
-    });
-  });
+  // POST /api/webhooks/mollie — legacy alias, gedeelde handler
+  app.post("/api/webhooks/mollie", mollieWebhookHandler);
 
   // ===============================
   // ADMIN EXPORT ROUTES

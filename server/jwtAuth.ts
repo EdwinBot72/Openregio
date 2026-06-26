@@ -495,7 +495,7 @@ export function setupJwtAuth(app: Express) {
         return res.status(400).json({ error: "Nieuw wachtwoord moet minimaal 8 tekens bevatten" });
       }
 
-      const user = await storage.getUserById((req as any).user.userId);
+      const user = await storage.getUserById(req.user!.id);
       if (!user || !user.passwordHash) {
         return res.status(404).json({ error: "Gebruiker niet gevonden" });
       }

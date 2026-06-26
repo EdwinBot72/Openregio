@@ -54,7 +54,7 @@ export default function HomePage() {
 
             <nav className="lp-nav-links">
               <a href="#pijlers" className="lp-nav-link">De drie pijlers</a>
-              <a href="#woo" className="lp-nav-link">WOO-check</a>
+              <a href="#agents" className="lp-nav-link">AI agents</a>
               <a href="#regiobot" className="lp-nav-link">RegioBot</a>
               <a href="#aanbod" className="lp-nav-link">Aanbod</a>
               <Link href="/acties" className="lp-nav-link" data-testid="link-nav-acties">Lokale acties</Link>
@@ -75,7 +75,7 @@ export default function HomePage() {
 
         <div className={`lp-mobile-menu${mobileOpen ? " open" : ""}`}>
           <a href="#pijlers" className="lp-nav-link" onClick={() => setMobileOpen(false)}>De drie pijlers</a>
-          <a href="#woo" className="lp-nav-link" onClick={() => setMobileOpen(false)}>WOO-check</a>
+          <a href="#agents" className="lp-nav-link" onClick={() => setMobileOpen(false)}>AI agents</a>
           <a href="#regiobot" className="lp-nav-link" onClick={() => setMobileOpen(false)}>RegioBot</a>
           <a href="#aanbod" className="lp-nav-link" onClick={() => setMobileOpen(false)}>Aanbod</a>
           <Link href="/acties" className="lp-nav-link" onClick={() => setMobileOpen(false)}>Lokale acties</Link>
@@ -331,55 +331,70 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── WOO TRANSPARANTIE ── */}
-      <section id="woo" style={{ background: "#0A2D6E", padding: "72px 0", position: "relative", overflow: "hidden" }}>
+      {/* ── AI AGENTS ── */}
+      <section id="agents" style={{ background: "#0b2240", padding: "72px 0", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: -40, right: -60, width: 280, height: 280, background: "rgba(255,255,255,.04)", borderRadius: "50%", pointerEvents: "none" }} />
         <div style={{ position: "absolute", bottom: -60, left: -40, width: 200, height: 200, background: "rgba(255,255,255,.03)", borderRadius: "50%", pointerEvents: "none" }} />
 
         <div className="lp-wrap">
           <div style={{ textAlign: "center", marginBottom: 48 }}>
             <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,.1)", borderRadius: 20, padding: "4px 14px", marginBottom: 16 }}>
-              <Gavel size={13} style={{ color: "#FDE68A" }} />
-              <span style={{ fontSize: 12, fontWeight: 800, color: "#FDE68A", letterSpacing: "0.07em", textTransform: "uppercase" }}>WOO-transparantie</span>
+              <Bot size={13} style={{ color: "#FDE68A" }} />
+              <span style={{ fontSize: 12, fontWeight: 800, color: "#FDE68A", letterSpacing: "0.07em", textTransform: "uppercase" }}>Pijler 1 — Grip op Regels</span>
             </div>
             <h2 style={{ fontSize: 30, fontWeight: 900, color: "white", margin: "0 0 12px", lineHeight: 1.25 }}>
-              Regels worden teruggedraaid.<br />
-              <span style={{ color: "#FDE68A" }}>Wij maken zichtbaar waarom.</span>
+              Drie AI-agenten voor<br />
+              <span style={{ color: "#FDE68A" }}>jouw administratie en documenten.</span>
             </h2>
             <p style={{ fontSize: 15, color: "rgba(255,255,255,.65)", maxWidth: 540, margin: "0 auto", lineHeight: 1.7 }}>
-              Soms moet je ineens je terras inleveren, sluit een straat voor verkeer of vervalt een vergunning. De officiële brief geeft zelden de echte reden. <strong style={{ color: "rgba(255,255,255,.85)" }}>Jij stuurt ons de brief. OpenRegio doet de WOO-check</strong> — wij halen de interne documenten, adviezen en e-mails van de gemeente boven tafel.
+              Van brieven begrijpen tot contracten doorlichten en vergaderingen samenvatten — slimme hulp voor ondernemers die hun tijd beter willen besteden.
             </p>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 20, marginBottom: 40 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 20, marginBottom: 40 }}>
             {[
-              { step: "1", accent: "#FDE68A", icon: <Mail size={28} style={{ color: "#FDE68A" }} />, title: "Jij stuurt ons de brief", desc: "Ontvang je een brief van de gemeente die je niet begrijpt, of klinkt een besluit niet eerlijk? Stuur hem op." },
-              { step: "2", accent: "#6EE7B7", icon: <FileSearch size={28} style={{ color: "#6EE7B7" }} />, title: "OpenRegio doet de WOO-check", desc: "Wij beoordelen de brief en voeren waar nodig een WOO-check uit op interne adviezen en e-mails van de gemeente." },
-              { step: "3", accent: "#93C5FD", icon: <Lightbulb size={28} style={{ color: "#93C5FD" }} />, title: "De echte reden komt boven tafel", desc: "Wat de gemeente intern besprak maar niet aan jou vertelde. Jij weet nu wat er werkelijk achter het besluit speelt." },
-              { step: "4", accent: "#F9A8D4", icon: <Gavel size={28} style={{ color: "#F9A8D4" }} />, title: "Jij beslist wat je doet", desc: "Bezwaar maken, publiceren of beter begrijpen — de keuze is aan jou. Wij leveren de feiten." },
-            ].map((s) => (
-              <div key={s.step} style={{ background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.12)", borderRadius: 16, padding: "24px 20px" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
-                  <div style={{ width: 36, height: 36, background: s.accent + "22", borderRadius: 10, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{s.icon}</div>
-                  <div style={{ fontSize: 11, fontWeight: 900, color: s.accent, letterSpacing: "0.08em", textTransform: "uppercase" }}>Stap {s.step}</div>
+              {
+                accent: "#60a5fa",
+                icon: <Mail size={28} style={{ color: "#60a5fa" }} />,
+                title: "Brievenagent",
+                sub: "Pijler 1 — Grip op Regels",
+                desc: "Upload een overheidsbrief of plak de tekst. De agent legt uit wat de afzender wil, wat de juridische basis is en welke actie je moet ondernemen.",
+                href: "/agents/brievenagent",
+              },
+              {
+                accent: "#6ee7b7",
+                icon: <Star size={28} style={{ color: "#6ee7b7" }} />,
+                title: "Secretaresse-agent",
+                sub: "Pijler 1 — Grip op Regels",
+                desc: "Vergaderingen samenvatten, takenlijsten opstellen, e-mails schrijven of een planning maken — jouw digitale secretaresse regelt het.",
+                href: "/agents/secretaresse",
+              },
+              {
+                accent: "#a78bfa",
+                icon: <FileCheck size={28} style={{ color: "#a78bfa" }} />,
+                title: "Contractagent",
+                sub: "Pijler 1 — Grip op Regels",
+                desc: "Laat een contract doorlichten op contracttype, partijen, looptijd en aandachtspunten. Snel inzicht zonder juridisch jargon.",
+                href: "/agents/contractagent",
+              },
+            ].map((agent) => (
+              <div key={agent.title} style={{ background: "rgba(255,255,255,.07)", border: "1px solid rgba(255,255,255,.12)", borderRadius: 16, padding: "24px 20px", display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <div style={{ width: 44, height: 44, background: agent.accent + "22", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{agent.icon}</div>
+                  <div>
+                    <div style={{ fontSize: 15, fontWeight: 800, color: "white", lineHeight: 1.25 }}>{agent.title}</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: agent.accent, letterSpacing: "0.05em", marginTop: 2 }}>{agent.sub}</div>
+                  </div>
                 </div>
-                <div style={{ fontSize: 14, fontWeight: 800, color: "white", marginBottom: 8, lineHeight: 1.35 }}>{s.title}</div>
-                <div style={{ fontSize: 12.5, color: "rgba(255,255,255,.6)", lineHeight: 1.6 }}>{s.desc}</div>
+                <div style={{ fontSize: 13, color: "rgba(255,255,255,.65)", lineHeight: 1.65, flex: 1 }}>{agent.desc}</div>
+                <div style={{ fontSize: 11, color: "rgba(255,255,255,.35)", lineHeight: 1.5, borderTop: "1px solid rgba(255,255,255,.08)", paddingTop: 10 }}>
+                  Geen vervanging voor professioneel juridisch advies.
+                </div>
+                <Link href="/register" style={{ display: "inline-flex", alignItems: "center", gap: 6, background: agent.accent + "22", color: agent.accent, fontWeight: 700, fontSize: 13, padding: "9px 14px", borderRadius: 8, textDecoration: "none", border: `1px solid ${agent.accent}33` }} data-testid={`link-agent-cta-${agent.title.toLowerCase().replace(/\s/g, "-")}`}>
+                  <ArrowRight size={14} /> Probeer gratis
+                </Link>
               </div>
             ))}
-          </div>
-
-          <div style={{ background: "rgba(255,255,255,.06)", border: "1px solid rgba(253,230,138,.25)", borderRadius: 18, padding: "28px 32px", display: "flex", gap: 28, flexWrap: "wrap" as const, alignItems: "center", justifyContent: "space-between" }}>
-            <div style={{ flex: 1, minWidth: 220 }}>
-              <div style={{ fontSize: 11, fontWeight: 800, color: "#FDE68A", letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: 8 }}>Voorbeeld — Terrasvergunning</div>
-              <div style={{ fontSize: 16, fontWeight: 800, color: "white", marginBottom: 10 }}>Je terras moet weg. Maar waarom eigenlijk?</div>
-              <p style={{ fontSize: 13, color: "rgba(255,255,255,.65)", lineHeight: 1.7, margin: 0 }}>
-                Een horecaondernemer moest zijn terras inleveren na een gemeentebesluit. Via de WOO-check kwamen de interne adviezen boven tafel — de werkelijke reden stond nergens in de officiële documenten. De ondernemer maakte bezwaar en kreeg zijn terras terug.
-              </p>
-            </div>
-            <Link href="/register" style={{ display: "inline-flex", alignItems: "center", gap: 7, background: "#FDE68A", color: "#0A2D6E", fontWeight: 800, fontSize: 13, padding: "12px 22px", borderRadius: 10, textDecoration: "none", flexShrink: 0 }} data-testid="link-woo-cta">
-              <Mail size={15} /> Stuur je brief op
-            </Link>
           </div>
         </div>
       </section>
@@ -554,7 +569,7 @@ export default function HomePage() {
                 id: "pro", name: "Pro", price: "€59", period: "excl. btw / mnd",
                 tagline: "Alle tools, onbeperkt gebruik en maximale zichtbaarheid.",
                 color: "#7C3AED", badge: "PRO", highlight: true,
-                perks: ["Alles van Basis", "RegioBot onbeperkt", "Vindbaarheid & SEO-tools", "WOO-bibliotheek", "Document upload", "AI-assistenten", "Netwerk: volledig deelnemen", "Marktplaats: zelf plaatsen"],
+                perks: ["Alles van Basis", "RegioBot onbeperkt", "Vindbaarheid & SEO-tools", "Brievenagent + Contractagent", "Document upload", "AI-assistenten", "Netwerk: volledig deelnemen", "Marktplaats: zelf plaatsen"],
               },
             ].map((plan) => (
               <div key={plan.id} data-testid={`card-plan-${plan.id}-home`} style={{ background: "white", borderRadius: 16, border: plan.highlight ? `2px solid ${plan.color}` : "2px solid #e2e8f0", padding: "28px 24px", position: "relative", boxShadow: plan.highlight ? `0 4px 24px ${plan.color}22` : "0 1px 6px rgba(0,0,0,.06)" }}>
@@ -607,7 +622,7 @@ export default function HomePage() {
                 <a href="#pijlers">Lokale Zichtbaarheid</a>
                 <a href="#pijlers">Lokale Kracht</a>
                 <a href="#regiobot">RegioBot</a>
-                <a href="#woo">WOO-check</a>
+                <a href="#agents">AI agents</a>
                 <Link href="/acties">Lokale acties</Link>
               </div>
             </div>

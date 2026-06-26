@@ -14,7 +14,9 @@ import HomePage from "@/pages/home";
 import LandingPage from "@/pages/landing";
 import LoginPage from "@/pages/login";
 import RegisterPage from "@/pages/register";
-import DashboardPage from "@/pages/dashboard";
+import BrievenagentPage from "@/pages/agents/brievenagent";
+import ContractagentPage from "@/pages/agents/contractagent";
+import SecretaressePage from "@/pages/agents/secretaresse";
 import VandaagPage from "@/pages/vandaag";
 import NetworkPage from "@/pages/network";
 import CommunityPage from "@/pages/community";
@@ -286,8 +288,11 @@ function AuthenticatedRouter() {
       <Route path="/chat" component={ChatPage} />
       <Route path="/regiobot" component={RegioBotPage} />
       <Route path="/cooperative" component={CooperativePage} />
-      <Route path="/woo-bot" component={WooBotPage} />
-      <Route path="/woo-wizard" component={WooWizardPage} />
+      <Route path="/woo-bot"><Redirect to="/regiobot" /></Route>
+      <Route path="/woo-wizard"><Redirect to="/regiobot" /></Route>
+      <Route path="/agents/brievenagent" component={BrievenagentPage} />
+      <Route path="/agents/contractagent" component={ContractagentPage} />
+      <Route path="/agents/secretaresse" component={SecretaressePage} />
       <Route path="/regiocrew" component={RegioCrewPage} />
       <Route path="/leden" component={LedenPage} />
       <Route path="/beleidsmonitor" component={BeleidsmonitorPage} />
