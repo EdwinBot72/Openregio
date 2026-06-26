@@ -4,10 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import {
   MapPin,
-  Handshake,
   Users,
-  ShieldCheck,
-  TrendingUp,
   Mail,
   FileCheck,
   Star,
@@ -15,6 +12,10 @@ import {
   Menu,
   X,
   ArrowRight,
+  Bell,
+  Briefcase,
+  Brain,
+  Megaphone,
   Heart,
 } from "lucide-react";
 
@@ -120,26 +121,20 @@ export default function HomePage() {
       </header>
 
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
-      <section style={{ background: "#f8f7f4" }}>
-        <div className="or-hero-grid" style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "58fr 42fr", minHeight: 540, alignItems: "stretch" }}>
+      <section id="features" style={{ background: "#f8f7f4", padding: "0 0 0 0" }}>
+        {/* Top: headline + photo */}
+        <div className="or-hero-grid" style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "55fr 45fr", minHeight: 500, alignItems: "stretch" }}>
 
-          {/* Left */}
-          <div className="or-hero-left" style={{ padding: "60px 48px 60px 24px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: ORANJE, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 20 }}>
-              OpenRegio — Platform voor lokale ondernemers
-            </div>
-            <h1 style={{ fontSize: 52, fontWeight: 900, color: BLAUW, lineHeight: 1.05, margin: "0 0 4px", textTransform: "uppercase", letterSpacing: "-0.01em" }}>
-              VERTROUW IN ELKAAR.
+          {/* Left — text */}
+          <div className="or-hero-left" style={{ padding: "60px 48px 48px 24px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+            <h1 style={{ fontSize: 54, fontWeight: 900, color: BLAUW, lineHeight: 1.02, margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "-0.01em" }}>
+              DIT KRIJG JE BIJ<br />OPENREGIO
             </h1>
-            <h1 style={{ fontSize: 52, fontWeight: 900, color: ORANJE, lineHeight: 1.05, margin: "0 0 24px", textTransform: "uppercase" }}>
-              SAMEN STAAN WE STERKER.
-            </h1>
-            <div style={{ width: 80, height: 3, background: ORANJE, borderRadius: 2, marginBottom: 24 }} />
-            <p style={{ fontSize: 18, fontWeight: 600, color: BLAUW, margin: "0 0 12px", lineHeight: 1.5 }}>
-              Lokale ondernemers die elkaar kennen, begrijpen en versterken.
-            </p>
-            <p style={{ fontSize: 15, color: "#475569", lineHeight: 1.75, margin: "0 0 34px", maxWidth: 460 }}>
-              OpenRegio is het platform waar ondernemers elkaar vinden, kennis delen en samen grip krijgen op regels, kansen en zichtbaarheid in de regio.
+            <h2 style={{ fontSize: 32, fontWeight: 900, color: ORANJE, lineHeight: 1.1, margin: "0 0 28px", textTransform: "uppercase" }}>
+              TOOLS, NETWERK EN ZICHTBAARHEID.
+            </h2>
+            <p style={{ fontSize: 15, color: "#334155", lineHeight: 1.8, margin: "0 0 34px", maxWidth: 480 }}>
+              Als lid van OpenRegio krijg je toegang tot <strong>kennis</strong>, <strong>mensen</strong> en <strong>middelen</strong> die je verder helpen. Alles wat je nodig hebt om <strong>grip</strong> te houden op regels, <strong>kansen</strong> te benutten en samen te <strong>groeien</strong> in jouw regio.
             </p>
             <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
               <Link href={dashHref}>
@@ -147,58 +142,97 @@ export default function HomePage() {
                   Gratis aanmelden <ArrowRight style={{ width: 16, height: 16 }} />
                 </button>
               </Link>
-              <a href="#features">
+              <a href="#pricing">
                 <button style={{ padding: "12px 26px", borderRadius: 8, fontSize: 15, fontWeight: 700, background: "transparent", color: BLAUW, border: `2px solid ${BLAUW}`, cursor: "pointer" }}>
-                  Meer ontdekken
+                  Bekijk lidmaatschap
                 </button>
               </a>
             </div>
           </div>
 
-          {/* Right — image */}
-          <div className="or-hero-right" style={{ position: "relative", minHeight: 480, overflow: "hidden" }}>
-            {/* Fallback gradient behind image */}
+          {/* Right — photo */}
+          <div className="or-hero-right" style={{ position: "relative", minHeight: 460, overflow: "hidden" }}>
             <div style={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${BLAUW} 0%, #1a3a5c 100%)`, zIndex: -1 }} />
             <img
-              src="/images/openregio_foto_03.png"
-              alt="Lokale ondernemers in gesprek"
+              src="/images/openregio_foto_06.png"
+              alt="Lokale ondernemers samenwerken"
               style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block", position: "absolute", inset: 0 }}
               onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
             />
-            {/* Brush-stroke style text overlay — edge-to-edge across bottom */}
+            {/* Brush-stroke quote — bleeds past left boundary */}
             <div style={{
-              position: "absolute", bottom: 32, left: -20, right: 0,
-              background: "rgba(11,34,64,0.90)",
-              padding: "18px 28px 18px 36px",
-              borderRadius: "0 12px 12px 0",
+              position: "absolute", bottom: 40, left: -24, right: 0,
+              background: "rgba(11,34,64,0.92)",
+              padding: "16px 28px 16px 36px",
+              borderRadius: "0 10px 10px 0",
             }}>
-              <p style={{ margin: 0, fontSize: 15, fontStyle: "italic", color: "#fff", lineHeight: 1.65, fontWeight: 500 }}>
-                "Vertrouwen ontstaat door contact.<br />Groei ontstaat door samenwerking."
+              <p style={{ margin: 0, fontSize: 16, fontStyle: "italic", color: "#fff", lineHeight: 1.55, fontWeight: 600 }}>
+                Samen weet je meer dan alleen.
               </p>
             </div>
           </div>
         </div>
-      </section>
 
-      {/* ── 4 VALUE BLOCKS ────────────────────────────────────────────────── */}
-      <section id="features" style={{ background: "#fff", padding: "64px 24px" }}>
-        <div className="or-values-grid" style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 36 }}>
-          {[
-            { Icon: Handshake, title: "PERSOONLIJK CONTACT", body: "Echte gesprekken. Echte mensen.", accent: " Echte relaties." },
-            { Icon: Users, title: "ELKAAR VERSTERKEN", body: "Kennis delen. Ervaring benutten.", accent: " Samen verder komen." },
-            { Icon: ShieldCheck, title: "OP ELKAAR BOUWEN", body: "Afspraak is afspraak. Duidelijk en eerlijk.", accent: " Dat geeft rust." },
-            { Icon: TrendingUp, title: "SAMEN GROEIEN", body: "Sterke bedrijven. Sterke regio's.", accent: " Sterkere toekomst." },
-          ].map(({ Icon, title, body, accent }) => (
-            <div key={title} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <div style={{ width: 52, height: 52, borderRadius: "50%", background: BLAUW, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                <Icon style={{ width: 24, height: 24, color: "#fff" }} />
+        {/* Bottom: 6 feature blocks */}
+        <div style={{ background: "#fff", padding: "52px 24px 60px" }}>
+          <div className="or-features-grid" style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "36px 48px" }}>
+            {[
+              {
+                Icon: Bell,
+                title: "REGIO UPDATES",
+                body: "Blijf ",
+                accent: "op de hoogte",
+                body2: " van belangrijke ontwikkelingen, regels en initiatieven in jouw regio.",
+              },
+              {
+                Icon: Briefcase,
+                title: "PRAKTISCHE TOOLS",
+                body: "Direct toepasbare templates, checklists en stappenplannen die je ",
+                accent: "tijd besparen",
+                body2: " en verder helpen.",
+              },
+              {
+                Icon: Brain,
+                title: "AI ONDERSTEUNING",
+                body: "Slimme AI-tools die je helpen informatie te vinden, teksten te verbeteren en ",
+                accent: "sneller",
+                body2: " beslissingen te nemen.",
+              },
+              {
+                Icon: Users,
+                title: "NETWERK",
+                body: "",
+                accent: "Verbind",
+                body2: " met ondernemers, experts en partners in de regio en leer van elkaar.",
+              },
+              {
+                Icon: MapPin,
+                title: "LOKALE KANSEN",
+                body: "Ontdek samenwerkingen, projecten en ",
+                accent: "kansen",
+                body2: " die passen bij jouw bedrijf en ambities.",
+              },
+              {
+                Icon: Megaphone,
+                title: "ZICHTBAARHEID",
+                body: "Laat zien wie je bent en wat je doet. Vergroot je ",
+                accent: "zichtbaarheid",
+                body2: " bij collega's, partners en klanten.",
+              },
+            ].map(({ Icon, title, body, accent, body2 }) => (
+              <div key={title} style={{ display: "flex", gap: 18, alignItems: "flex-start" }}>
+                <div style={{ width: 52, height: 52, borderRadius: "50%", background: BLAUW, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Icon style={{ width: 22, height: 22, color: ORANJE }} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: BLAUW, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>{title}</div>
+                  <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.75 }}>
+                    {body}<span style={{ color: ORANJE, fontWeight: 700 }}>{accent}</span>{body2}
+                  </div>
+                </div>
               </div>
-              <div style={{ fontSize: 12, fontWeight: 800, color: BLAUW, textTransform: "uppercase", letterSpacing: "0.07em" }}>{title}</div>
-              <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.7 }}>
-                {body}<span style={{ color: ORANJE, fontWeight: 700 }}>{accent}</span>
-              </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
