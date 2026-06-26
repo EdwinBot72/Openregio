@@ -229,7 +229,7 @@ export default function HomePage() {
                   { icon: <Mail size={13} />, t: "Brief analyseren", s: "Overheidsbrieven direct uitgelegd" },
                   { icon: <Scale size={13} />, t: "Regelcheck", s: "Wat betekent het voor jouw bedrijf?" },
                   { icon: <FileCheck size={13} />, t: "Vergunningen volgen", s: "Status, deadlines, automatische alerts" },
-                  { icon: <Info size={13} />, t: "WOO-check door OpenRegio", s: "Stuur je brief op — wij doen de rest" },
+                  { icon: <Info size={13} />, t: "AI agents door OpenRegio", s: "Brieven, contracten en taken automatisch verwerkt" },
                   { icon: <ShieldCheck size={13} />, t: "AVG controle", s: "Jouw privacy en verplichtingen" },
                 ].map((f) => (
                   <div key={f.t} className="lp-pc-feat">

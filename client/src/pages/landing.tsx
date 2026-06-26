@@ -168,7 +168,7 @@ const PLANS = [
     bullets: [
       "Alles van Basis-lid",
       "RegioBot: WOO & regelgeving AI",
-      "Persoonlijke WOO-bibliotheek",
+      "Brievenagent + Contractagent",
       "Prioriteit ondersteuning",
       "Bouw mee aan nieuwe features",
     ],
@@ -713,7 +713,7 @@ export default function LandingPage() {
             </p>
 
             <p className="mt-3 max-w-xl text-base text-white/70">
-              Ondersteund door een gezamenlijke WOO-bibliotheek en RegioBot die documenten leest zoals ze bedoeld zijn.
+              Ondersteund door AI-agenten en RegioBot die documenten lezen zoals ze bedoeld zijn.
             </p>
 
             <p className="mt-3 max-w-xl text-sm font-medium text-white/90">
@@ -795,7 +795,7 @@ export default function LandingPage() {
           </p>
 
           <p className="mt-3 max-w-2xl text-base text-white/70">
-            Ondersteund door een gezamenlijke WOO-bibliotheek
+            Ondersteund door AI-agenten
             en RegioBot dat documenten leest zoals ze bedoeld zijn.
           </p>
 

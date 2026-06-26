@@ -41,7 +41,7 @@ const PLANS = {
       "Wat komt eraan? — volledig overzicht",
       "Vindbaarheid & SEO-tools",
       "RegioBot: WOO & regelgeving AI (onbeperkt)",
-      "Persoonlijke WOO-bibliotheek",
+      "Brievenagent + Contractagent",
       "Netwerk: volledig deelnemen",
       "Marktplaats: zelf aanbod plaatsen",
       "Prioriteit ondersteuning",

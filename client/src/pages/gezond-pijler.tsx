@@ -82,7 +82,7 @@ const PIJLERS: Record<string, Pijler> = {
     modules: [
       { href: "/regiobot", label: "RegioBot", description: "Stel je vraag over regels en beleid." },
       { href: "/regels/help", label: "Hulp bij regels", description: "Stap-voor-stap hulp bij jouw situatie." },
-      { href: "/regels/woo", label: "WOO-bibliotheek & wizard", description: "Vraag openbare documenten op bij de gemeente." },
+      { href: "/regiobot", label: "RegioBot", description: "Vraag openbare documenten op bij de gemeente." },
     ],
   },
   mentaal: {

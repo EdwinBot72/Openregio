@@ -63,7 +63,7 @@ const QUICK_LINKS = [
   { href: "/regels/updates", icon: Newspaper, label: "Regel-updates" },
   { href: "/regels/help", icon: HelpCircle, label: "Hulp bij regels" },
   { href: "/regels/check", icon: Scale, label: "Raakt dit mij?" },
-  { href: "/regels/woo", icon: Library, label: "WOO-bibliotheek" },
+  { href: "/regiobot", icon: Library, label: "RegioBot" },
   { href: "/regels/documenten", icon: Upload, label: "Upload document" },
   { href: "/regels/help", icon: BookOpen, label: "Dossiers" },
 ];

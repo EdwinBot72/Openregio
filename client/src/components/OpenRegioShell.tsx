@@ -320,6 +320,7 @@ export function OpenRegioShell({ children }: { children: ReactNode }) {
 
           {/* FOOTER: Health bar + Logout */}
           <div className="or-sb-foot">
+            {/* TODO: vervang hardcoded score door dynamische waarde via GET /api/user-profile/:id of een dedicated health-score endpoint */}
             <div className="or-health-block">
               <div className="or-health-top">
                 <span className="or-health-lbl">Bedrijfsgezondheid</span>

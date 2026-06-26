@@ -675,9 +675,9 @@ export default function RegioBotPage() {
         <Card data-testid="card-woo-upgrade">
           <CardContent className="pt-6 pb-6 text-center space-y-3">
             <HelpCircle className="w-10 h-10 mx-auto text-muted-foreground" />
-            <h3 className="font-semibold">WOO-analyse is beschikbaar voor Pro-leden</h3>
+            <h3 className="font-semibold">Uitgebreide analyse is beschikbaar voor Pro-leden</h3>
             <p className="text-sm text-muted-foreground">
-              Krijg toegang tot de WOO-bibliotheek, dossieranalyse en mandaatchecks.
+              Krijg toegang tot de AI-agenten, dossieranalyse en mandaatchecks.
             </p>
             <Link href="/lidmaatschap?plan=pro">
               <Button data-testid="button-upgrade-pro">Upgrade naar Pro</Button>

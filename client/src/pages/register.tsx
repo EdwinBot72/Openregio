@@ -51,7 +51,7 @@ export default function RegisterPage() {
 
   const planFeats = {
     basic: ["Bedrijfsprofiel in lokaal netwerk", "Ontdek en ontmoet ondernemers", "Volledig stemrecht in de coöperatie", "Basischeck & weerbaarheidsbadges"],
-    pro:   ["RegioBot: WOO & regelgeving AI", "Persoonlijke WOO-bibliotheek", "Printbare overzichten", "Prioriteit ondersteuning"],
+    pro:   ["RegioBot: regelgeving AI", "Brievenagent + Contractagent", "Printbare overzichten", "Prioriteit ondersteuning"],
   };
 
   const eyeBtn: React.CSSProperties = {

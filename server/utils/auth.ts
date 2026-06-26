@@ -52,7 +52,8 @@ export function generateOnboardingToken(): string {
  * @returns Price as string incl. BTW, e.g. "18.09" or "71.39"
  */
 export function getPlanPrice(plan: string): string {
-  return plan === "pro" ? "71.39" : "18.09";
+  if (plan === "pro" || plan === "coaching") return "71.39";
+  return "18.09";
 }
 
 /**
