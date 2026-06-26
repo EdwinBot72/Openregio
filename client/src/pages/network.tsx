@@ -349,13 +349,23 @@ export default function NetworkPage() {
   const isLoading = activeTab === "posts" ? postsLoading : membersLoading;
 
   return (
-    <div className="openregio-network" data-testid="page-network">
-      <h1 data-testid="text-page-title">Netwerk & Kansenbord</h1>
-      <p className="openregio-subtitle">
-        {activeTab === "leden"
-          ? "Bekijk alle ondernemers in jouw regio en maak direct contact."
-          : "Deel concrete vragen, aanbiedingen, leads en events met ondernemers in jouw regio."}
-      </p>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }} data-testid="page-network">
+      <div style={{ maxWidth: 1060, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eaf6ee", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Users style={{ width: 24, height: 24, color: "#1a6b3a" }} />
+          </div>
+          <div>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="text-page-title">Netwerk</h1>
+            <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+              {activeTab === "leden"
+                ? "Verbind met andere lokale ondernemers in jouw regio."
+                : "Deel concrete vragen, aanbiedingen, leads en events met ondernemers in jouw regio."}
+            </p>
+          </div>
+        </div>
+      </div>
 
       {/* Tab-toggle */}
       <div className="openregio-form-actions" style={{ marginBottom: 18 }}>
@@ -466,6 +476,7 @@ export default function NetworkPage() {
           )}
         </>
       )}
+      </div>
     </div>
   );
 }

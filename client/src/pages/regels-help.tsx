@@ -185,13 +185,21 @@ export default function RegelsHelpPage() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <div data-testid="page-regels-help">
-      <h1>Hulp bij regels</h1>
-      <p className="openregio-subtitle">
-        Drie korte hulplijnen voor wat ondernemers het vaakst tegenkomen. Je
-        beantwoordt een paar vragen, krijgt direct een risico-inschatting,
-        checks en een concept-tekst die je kunt aanpassen en versturen.
-      </p>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }} data-testid="page-regels-help">
+      <div style={{ maxWidth: 860, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#f3e8ff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <ShieldAlert style={{ width: 24, height: 24, color: "#6d28d9" }} />
+          </div>
+          <div>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }}>Vergunning &amp; Regels</h1>
+            <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+              Drie korte hulplijnen voor wat ondernemers het vaakst tegenkomen.
+            </p>
+          </div>
+        </div>
+      </div>
 
       <div className="flow-hub-grid">
         {FLOW_LIST.map((flow) => {
@@ -242,6 +250,7 @@ export default function RegelsHelpPage() {
           </p>
         </section>
       )}
+      </div>
     </div>
   );
 }

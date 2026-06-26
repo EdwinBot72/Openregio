@@ -276,21 +276,19 @@ export default function PrivacyDashboardPage() {
   const configurableFields = ["email", "telefoon", "adres", "website", "beschrijving"];
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
-      <div className="flex items-center gap-4 mb-6">
-        <Link href="/dashboard">
-          <Button variant="ghost" size="icon" data-testid="button-back">
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
-        </Link>
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold flex items-center gap-2" data-testid="text-page-title">
-            <Shield className="w-7 h-7 text-primary" />
-            Privacy & Gegevens
-          </h1>
-          <p className="text-sm text-muted-foreground">
-            Beheer je privacy-instellingen en bekijk je opgeslagen gegevens.
-          </p>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 860, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eef2f9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Shield style={{ width: 24, height: 24, color: "#1f5fae" }} />
+          </div>
+          <div>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="text-page-title">Instellingen</h1>
+            <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+              Beheer je privacy-instellingen en bekijk je opgeslagen gegevens.
+            </p>
+          </div>
         </div>
       </div>
 
@@ -659,6 +657,7 @@ export default function PrivacyDashboardPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 }

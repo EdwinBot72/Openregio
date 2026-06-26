@@ -117,12 +117,20 @@ export default function AffiliatePage() {
   }
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
-      <div>
-        <h1 className="text-2xl font-bold" data-testid="heading-affiliate">Affiliate Programma</h1>
-        <p className="text-muted-foreground">
-          Verdien een vaste vergoeding voor elke ondernemer die je aanmeldt via jouw link: €{stats?.commissionRates?.basic?.toFixed(2) ?? "4,95"} per Basis-lid of €{stats?.commissionRates?.pro?.toFixed(2) ?? "9,00"} per Pro-lid.
-        </p>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 860, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eaf6ee", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Euro style={{ width: 24, height: 24, color: "#1a6b3a" }} />
+          </div>
+          <div>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="heading-affiliate">Affiliate programma</h1>
+            <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+              Verdien commissie door anderen te verwijzen naar OpenRegio. €{stats?.commissionRates?.basic?.toFixed(2) ?? "4,95"} per Basis-lid of €{stats?.commissionRates?.pro?.toFixed(2) ?? "9,00"} per Pro-lid.
+            </p>
+          </div>
+        </div>
       </div>
 
       {!stats?.referralCode ? (
@@ -342,6 +350,7 @@ export default function AffiliatePage() {
           </Card>
         </>
       )}
+      </div>
     </div>
   );
 }

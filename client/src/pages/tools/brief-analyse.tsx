@@ -209,37 +209,29 @@ export default function BriefAnalysePage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* ── Header ─────────────────────────────────────────────────── */}
-      <div className="bg-gradient-to-br from-violet-700 to-violet-900 px-6 py-10 md:py-14">
-        <div className="max-w-3xl mx-auto">
-          <Button variant="ghost" className="text-violet-200 hover:text-white mb-4 -ml-2" asChild>
-            <Link href="/regels">
-              <ArrowLeft className="w-4 h-4 mr-1" />
-              Grip op Regels
-            </Link>
-          </Button>
-          <h1 className="text-2xl md:text-3xl font-bold text-white mb-3" data-testid="heading-brief-analyse">
-            Mijn brief analyseren
-          </h1>
-          <p className="text-violet-200 max-w-lg mb-5">
-            Upload een overheidsbrief of plak de tekst. OpenRegio analyseert het document
-            en stuurt het automatisch door naar de AI agent voor verdere verwerking.
-          </p>
-          <div className="flex flex-wrap gap-2">
-            {["Besluiten", "Vergunningen", "WOO-reacties", "Aanschrijvingen", "Bezwaarbesluiten"].map((t) => (
-              <div
-                key={t}
-                className="flex items-center gap-1.5 bg-white/10 text-violet-100 text-xs px-3 py-1.5 rounded-full border border-white/10"
-              >
-                {t}
-              </div>
-            ))}
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 740, margin: "0 auto" }}>
+        {/* ── Header ─────────────────────────────────────────────────── */}
+        <div style={{ marginBottom: 28 }}>
+          <Link href="/regels" style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 600, color: "#64748b", textDecoration: "none", marginBottom: 18 }}>
+            <ArrowLeft size={13} /> Grip op Regels
+          </Link>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eef2f9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Mail style={{ width: 24, height: 24, color: "#1f5fae" }} />
+            </div>
+            <div>
+              <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="heading-brief-analyse">
+                Brief analyseren
+              </h1>
+              <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+                Upload een brief of plak tekst — de AI legt het uit in begrijpelijke taal.
+              </p>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+      <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
         {/* ── Modus switcher ────────────────────────────────────────── */}
         <div className="flex gap-2">
           <Button
@@ -446,6 +438,7 @@ export default function BriefAnalysePage() {
             Nieuwe brief analyseren
           </Button>
         )}
+      </div>
       </div>
     </div>
   );

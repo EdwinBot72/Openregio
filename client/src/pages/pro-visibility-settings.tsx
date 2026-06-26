@@ -52,20 +52,23 @@ export default function ProVisibilitySettings() {
   }
 
   return (
-    <div className="container max-w-5xl mx-auto py-8 px-4">
-      <div className="mb-8 pb-6 border-b border-border">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="p-2 rounded-md bg-primary/10">
-            <MapPin className="h-5 w-5 text-primary" />
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 1060, margin: "0 auto" }}>
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eef2f9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <TrendingUp style={{ width: 24, height: 24, color: "#1f5fae" }} />
+            </div>
+            <div>
+              <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }}>Lokale Zichtbaarheid</h1>
+              <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+                Ontdek welke zoektermen klanten gebruiken, genereer website-teksten die lokaal scoren.
+              </p>
+            </div>
           </div>
-          <h1 className="text-2xl font-bold">Lokale zichtbaarheid</h1>
         </div>
-        <p className="text-muted-foreground max-w-2xl">
-          Gebruik deze tools om als lokale ondernemer beter gevonden te worden. Ontdek welke zoektermen klanten gebruiken,
-          genereer website-teksten die lokaal scoren, en bekijk in welke gemeente de vraag naar jouw dienst het grootst is.
-        </p>
+        <LokaleVindbaarheid />
       </div>
-      <LokaleVindbaarheid />
     </div>
   );
 }

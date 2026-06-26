@@ -241,17 +241,23 @@ export default function LokaleActiesPage() {
   }, [acties, filterDoelgroep, filterRegio, zoek, sortBy]);
 
   return (
-    <div className="max-w-5xl mx-auto py-8 px-4 space-y-6" data-testid="page-lokale-acties">
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }} data-testid="page-lokale-acties">
+      <div style={{ maxWidth: 1060, margin: "0 auto" }}>
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold" data-testid="text-pagina-titel">Lokale acties</h1>
-          <p className="text-sm text-muted-foreground max-w-2xl">
-            Evenementen, buurtacties en ondernemersinitiatieven van lokale Pro-leden.
-            Maak verbinding in jouw regio: bezoek een actie of organiseer er zelf een.
-          </p>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginBottom: 28 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#fff8ef", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <CalendarDays style={{ width: 24, height: 24, color: "#f28a1a" }} />
+          </div>
+          <div>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="text-pagina-titel">Lokale Acties</h1>
+            <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+              Evenementen, buurtacties en ondernemersinitiatieven van lokale Pro-leden.
+            </p>
+          </div>
         </div>
+        <div>
         {isPro ? (
           <Button onClick={openNieuw} data-testid="button-nieuwe-actie">
             <Plus className="mr-2 h-4 w-4" /> Start lokale actie
@@ -682,6 +688,7 @@ export default function LokaleActiesPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      </div>
     </div>
   );
 }

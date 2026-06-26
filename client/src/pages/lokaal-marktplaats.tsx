@@ -136,15 +136,21 @@ export default function LokaalMarktplaatsPage() {
   const eigenIds = new Set(eigenItems.map((i) => i.id));
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4 space-y-6">
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 960, margin: "0 auto" }}>
 
       {/* Header */}
-      <div className="flex items-start justify-between gap-4 flex-wrap">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-bold">Lokale Marktplaats</h1>
-          <p className="text-sm text-muted-foreground">
-            Lokale ondernemers zoeken en bieden: diensten, producten, ruimte en samenwerking.
-          </p>
+      <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap", marginBottom: 28 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#ecfeff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Store style={{ width: 24, height: 24, color: "#0891b2" }} />
+          </div>
+          <div>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }}>Lokale Marktplaats</h1>
+            <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+              Lokale ondernemers zoeken en bieden: diensten, producten, ruimte en samenwerking.
+            </p>
+          </div>
         </div>
         {user ? (
           <Button onClick={() => setOpen(true)} data-testid="button-nieuw-aanbod">
@@ -432,6 +438,7 @@ export default function LokaalMarktplaatsPage() {
           </Form>
         </DialogContent>
       </Dialog>
+      </div>
     </div>
   );
 }

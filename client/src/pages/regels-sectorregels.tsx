@@ -320,74 +320,42 @@ export default function RegelsSectorregelPage() {
   const gemeente = user?.region || "jouw gemeente";
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* ── Header ─────────────────────────────────────────────────── */}
-      <div className="bg-gradient-to-br from-blue-800 to-blue-900 px-6 py-10 md:py-14">
-        <div className="max-w-5xl mx-auto">
-          <Button variant="ghost" className="text-blue-200 hover:text-white mb-4 -ml-2" asChild>
-            <Link href="/regels">
-              <ArrowLeft className="w-4 h-4 mr-1" />
-              Grip op Regels
-            </Link>
-          </Button>
-          <div className="flex flex-col md:flex-row gap-8 items-start">
-            <div className="flex-1">
-              <h1 className="text-2xl md:text-3xl font-bold text-white mb-3">
-                Sectorregels & Impact
-              </h1>
-              <p className="text-blue-200 max-w-lg mb-6">
-                Welke regels gelden voor jouw sector in {gemeente}?
-                OpenRegio volgt landelijke, provinciale en gemeentelijke ontwikkelingen
-                en vertaalt deze naar de impact op jouw onderneming.
-              </p>
-              {/* Monitoring categorieën */}
-              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {MONITORING_ITEMS.map(({ icon: MIcon, label }) => (
-                  <div key={label} className="flex items-center gap-2 text-blue-100 text-sm">
-                    <MIcon className="w-3.5 h-3.5 shrink-0 text-blue-300" />
-                    {label}
-                  </div>
-                ))}
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 1060, margin: "0 auto" }}>
+        {/* ── Header ─────────────────────────────────────────────────── */}
+        <div style={{ marginBottom: 28 }}>
+          <Link href="/regels" style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 600, color: "#64748b", textDecoration: "none", marginBottom: 18 }}>
+            <ArrowLeft size={13} /> Grip op Regels
+          </Link>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 20, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eaf6ee", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <BookOpen style={{ width: 24, height: 24, color: "#1a6b3a" }} />
+              </div>
+              <div>
+                <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }}>Sectorregels</h1>
+                <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+                  Welke regels gelden voor jouw sector in {gemeente}?
+                </p>
               </div>
             </div>
-
-            {/* Gemeente-monitor widget */}
-            <div className="bg-white/10 rounded-xl border border-white/20 p-5 w-full md:w-64 shrink-0">
-              <p className="text-xs font-semibold uppercase tracking-widest text-blue-300 mb-3">
-                Vandaag in {gemeente}
-              </p>
-              <div className="space-y-2.5">
-                {[
-                  { n: 3, label: "nieuwe ontwikkelingen" },
-                  { n: 2, label: "wijzigingen met impact" },
-                  { n: 1, label: "nieuwe subsidieregeling" },
-                  { n: 4, label: "openbare documenten" },
-                ].map(({ n, label }) => (
-                  <div key={label} className="flex items-baseline gap-2">
-                    <span className="text-xl font-bold text-white">{n}</span>
-                    <span className="text-sm text-blue-200">{label}</span>
-                  </div>
-                ))}
-              </div>
+            <div style={{ background: "#ffffff", border: "1px solid #dce6f0", borderRadius: 12, padding: "14px 18px", minWidth: 200 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 10 }}>Vandaag in {gemeente}</div>
+              {[
+                { n: 3, label: "nieuwe ontwikkelingen" },
+                { n: 2, label: "wijzigingen met impact" },
+                { n: 1, label: "nieuwe subsidieregeling" },
+              ].map(({ n, label }) => (
+                <div key={label} style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
+                  <span style={{ fontSize: 12, color: "#64748b" }}>{label}</span>
+                  <span style={{ fontSize: 18, fontWeight: 900, color: "#0b2240" }}>{n}</span>
+                </div>
+              ))}
             </div>
-          </div>
-
-          {/* Impactanalyse uitleg */}
-          <div className="mt-6 flex flex-wrap gap-2">
-            {IMPACT_VRAGEN.map(({ icon: IIcon, label }) => (
-              <div
-                key={label}
-                className="flex items-center gap-1.5 bg-white/10 text-blue-100 text-xs px-3 py-1.5 rounded-full border border-white/10"
-              >
-                <IIcon className="w-3 h-3" />
-                {label}
-              </div>
-            ))}
           </div>
         </div>
-      </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+      <div style={{ maxWidth: 1060 }}>
         <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-4">
           Kies jouw sector voor regelgeving & impactanalyse
         </p>
@@ -452,6 +420,7 @@ export default function RegelsSectorregelPage() {
       {selected && (
         <SectorModal sector={selected} onClose={() => setSelected(null)} />
       )}
+      </div>
     </div>
   );
 }

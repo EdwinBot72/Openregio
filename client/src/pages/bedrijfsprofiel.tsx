@@ -163,17 +163,22 @@ export default function BedrijfsprofielPage() {
   }
 
   return (
-    <div className="container max-w-4xl py-8 px-4 md:px-8">
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <Building2 className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold font-heading">Bedrijfsprofiel</h1>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 860, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eef2f9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Building2 style={{ width: 24, height: 24, color: "#1f5fae" }} />
+          </div>
+          <div>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }}>Bedrijfsprofiel</h1>
+            <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+              {existingProfile
+                ? "Bewerk je bedrijfsprofiel om zichtbaar te zijn voor andere ondernemers."
+                : "Maak je bedrijfsprofiel aan om zichtbaar te zijn voor andere ondernemers."}
+            </p>
+          </div>
         </div>
-        <p className="text-muted-foreground">
-          {existingProfile
-            ? "Bewerk je bedrijfsprofiel om zichtbaar te zijn voor andere ondernemers."
-            : "Maak je bedrijfsprofiel aan om zichtbaar te zijn voor andere ondernemers."}
-        </p>
       </div>
 
       <Card>
@@ -517,6 +522,7 @@ export default function BedrijfsprofielPage() {
           </CardContent>
         </Card>
       )}
+      </div>
     </div>
   );
 }

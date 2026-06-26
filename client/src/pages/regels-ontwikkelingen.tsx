@@ -206,76 +206,44 @@ export default function RegelsOntwikkelingenPage() {
   const zesmaandenTelling = ONTWIKKELINGEN.filter((o) => o.urgentie === "6maanden").length;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* ── Header ─────────────────────────────────────────────────── */}
-      <div className="bg-gradient-to-br from-amber-600 to-orange-700 px-6 py-10 md:py-14">
-        <div className="max-w-5xl mx-auto">
-          <Button variant="ghost" className="text-amber-100 hover:text-white mb-4 -ml-2" asChild>
-            <Link href="/regels">
-              <ArrowLeft className="w-4 h-4 mr-1" />
-              Grip op Regels
-            </Link>
-          </Button>
-
-          <div className="flex flex-col md:flex-row gap-8 items-start">
-            <div className="flex-1">
-              <h1 className="text-2xl md:text-3xl font-bold text-white mb-3">
-                Wat komt eraan?
-              </h1>
-              <p className="text-amber-100 max-w-lg mb-5">
-                Waar moet je rekening mee houden? OpenRegio volgt nieuwe wetten,
-                subsidies, Europese regels en lokale besluiten — en vertaalt die
-                direct naar wat jij moet doen.
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {REKENING_ITEMS.map(({ icon: RIcon, label }) => (
-                  <div
-                    key={label}
-                    className="flex items-center gap-1.5 bg-white/10 text-amber-100 text-xs px-3 py-1.5 rounded-full border border-white/10"
-                  >
-                    <RIcon className="w-3 h-3" />
-                    {label}
-                  </div>
-                ))}
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 1060, margin: "0 auto" }}>
+        {/* ── Header ─────────────────────────────────────────────────── */}
+        <div style={{ marginBottom: 28 }}>
+          <Link href="/regels" style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 600, color: "#64748b", textDecoration: "none", marginBottom: 18 }}>
+            <ArrowLeft size={13} /> Grip op Regels
+          </Link>
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 20, flexWrap: "wrap" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <div style={{ width: 52, height: 52, borderRadius: 14, background: "#fff8ef", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Bell style={{ width: 24, height: 24, color: "#f28a1a" }} />
+              </div>
+              <div>
+                <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }}>Wat komt eraan?</h1>
+                <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+                  Nieuwe wetten, subsidies en lokale besluiten — vertaald naar wat jij moet doen.
+                </p>
               </div>
             </div>
-
-            {/* Urgentie-samenvatting */}
-            <div className="bg-white/10 rounded-xl border border-white/20 p-5 w-full md:w-56 shrink-0">
-              <p className="text-xs font-semibold uppercase tracking-widest text-amber-200 mb-3">
-                Stand van zaken
-              </p>
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 text-red-300" />
-                    <span className="text-sm text-amber-100">Nu actie</span>
-                  </div>
-                  <span className="text-xl font-bold text-white">{actieTelling}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Clock className="w-4 h-4 text-amber-300" />
-                    <span className="text-sm text-amber-100">6 maanden</span>
-                  </div>
-                  <span className="text-xl font-bold text-white">{zesmaandenTelling}</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <CalendarDays className="w-4 h-4 text-blue-300" />
-                    <span className="text-sm text-amber-100">Volgend jaar</span>
-                  </div>
-                  <span className="text-xl font-bold text-white">
-                    {ONTWIKKELINGEN.filter((o) => o.urgentie === "volgend-jaar").length}
-                  </span>
-                </div>
+            <div style={{ background: "#ffffff", border: "1px solid #dce6f0", borderRadius: 12, padding: "14px 18px", minWidth: 180 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 10 }}>Stand van zaken</div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
+                <span style={{ fontSize: 12, color: "#dc2626" }}>Nu actie</span>
+                <span style={{ fontSize: 18, fontWeight: 900, color: "#0b2240" }}>{actieTelling}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 6 }}>
+                <span style={{ fontSize: 12, color: "#d97706" }}>6 maanden</span>
+                <span style={{ fontSize: 18, fontWeight: 900, color: "#0b2240" }}>{zesmaandenTelling}</span>
+              </div>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline" }}>
+                <span style={{ fontSize: 12, color: "#64748b" }}>Volgend jaar</span>
+                <span style={{ fontSize: 18, fontWeight: 900, color: "#0b2240" }}>{ONTWIKKELINGEN.filter((o) => o.urgentie === "volgend-jaar").length}</span>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+      <div style={{ maxWidth: 1060 }}>
         {/* ── Filter tabs ──────────────────────────────────────────── */}
         <div className="flex flex-wrap gap-2 mb-6">
           {FILTER_OPTIONS.map((opt) => (
@@ -410,6 +378,7 @@ export default function RegelsOntwikkelingenPage() {
             </Button>
           </div>
         </div>
+      </div>
       </div>
     </div>
   );

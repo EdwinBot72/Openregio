@@ -188,22 +188,22 @@ export default function WebsiteScanPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto px-6 py-10">
-      {/* Hero */}
-      <div className="relative rounded-2xl overflow-hidden mb-8" style={{ height: "220px" }}>
-        <img src="/img/zichtbaarheid.webp" alt="Website analyse & SEO" className="w-full h-full object-cover" style={{ objectPosition: "center 30%" }} />
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(15,42,78,0.88) 0%, rgba(15,42,78,0.55) 60%, rgba(15,42,78,0.2) 100%)" }} />
-        <div className="absolute inset-0 flex flex-col justify-end p-7">
-          <div className="flex items-center gap-2 mb-2">
-            <Globe className="w-4 h-4 text-blue-300" />
-            <span className="text-xs font-bold uppercase tracking-widest text-blue-300">Pro-tool · Zichtbaarheid</span>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 740, margin: "0 auto" }}>
+        {/* ── Header ─────────────────────────────────────────────────── */}
+        <div style={{ marginBottom: 28 }}>
+          <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+            <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eef2f9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+              <Globe style={{ width: 24, height: 24, color: "#1f5fae" }} />
+            </div>
+            <div>
+              <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }}>Website Scan</h1>
+              <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+                Analyseer je website op zichtbaarheid, snelheid en lokale vindbaarheid.
+              </p>
+            </div>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-1">Website Scan</h1>
-          <p className="text-sm text-white/70">
-            Voer je websiteadres in en ontdek direct wat je moet aanpakken voor betere vindbaarheid.
-          </p>
         </div>
-      </div>
 
       {/* Input */}
       <Card className="mb-5">
@@ -419,6 +419,7 @@ export default function WebsiteScanPage() {
           </p>
         </div>
       )}
+      </div>
     </div>
   );
 }
