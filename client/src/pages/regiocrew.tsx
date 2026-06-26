@@ -211,16 +211,19 @@ export default function RegioCrewPage() {
   };
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6" data-testid="page-regiocrew">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-accent font-bold flex items-center gap-3">
-            <UserPlus className="h-8 w-8 text-primary" />
-            RegioCrew
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Flex-pool voor tijdelijke hulp bij personeelstekorten
-          </p>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }} data-testid="page-regiocrew">
+      <div style={{ maxWidth: 1100, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eaf6ee", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <UserPlus style={{ width: 24, height: 24, color: "#1a6b3a" }} />
+          </div>
+          <div>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }}>RegioCrew</h1>
+            <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+              Flex-pool voor tijdelijke hulp bij personeelstekorten
+            </p>
+          </div>
         </div>
 
         <div className="flex gap-2">
@@ -872,5 +875,6 @@ export default function RegioCrewPage() {
         </TabsContent>
       </Tabs>
     </div>
+  </div>
   );
 }

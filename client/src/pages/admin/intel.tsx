@@ -43,6 +43,7 @@ import {
   Landmark,
   Image,
   ImagePlus,
+  Zap,
 } from "lucide-react";
 import type { IntelSignaal, InsertIntelSignaal } from "@shared/schema";
 import { insertIntelSignaalSchema, INTEL_CATEGORIES, INTEL_URGENTIE } from "@shared/schema";
@@ -351,14 +352,17 @@ export default function AdminIntelPage() {
     new Date(d).toLocaleDateString("nl-NL", { day: "numeric", month: "short", year: "numeric" });
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2" data-testid="heading-admin-intel">
-            <Landmark className="h-6 w-6 text-primary" />
-            Regio Intel beheer
-          </h1>
-          <p className="text-muted-foreground mt-1">Beheer signalen die zichtbaar zijn op de Intel-pagina.</p>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 1060, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#fffbef", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Zap style={{ width: 24, height: 24, color: "#d97706" }} />
+          </div>
+          <div>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="heading-admin-intel">Intel</h1>
+            <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>Beheer signalen die zichtbaar zijn op de Intel-pagina.</p>
+          </div>
         </div>
         <div className="flex gap-2 flex-wrap">
           <Button
@@ -533,5 +537,6 @@ export default function AdminIntelPage() {
         </DialogContent>
       </Dialog>
     </div>
+  </div>
   );
 }

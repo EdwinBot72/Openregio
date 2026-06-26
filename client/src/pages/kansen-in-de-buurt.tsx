@@ -275,26 +275,23 @@ export default function KansenInDeBuurtPage() {
   const laden = isLoading || isFetching;
 
   return (
-    <div className="space-y-6 pb-8">
-      {/* ── Hero ──────────────────────────────────────────────────────────────── */}
-      <div
-        className="rounded-3xl bg-gradient-to-br from-primary via-primary/90 to-primary/70 p-7 text-white shadow-lg md:p-9"
-        data-testid="section-hero"
-      >
-        <div className="flex items-center gap-2 mb-4">
-          <MapPin className="h-4 w-4 opacity-75" />
-          <span className="text-xs font-semibold uppercase tracking-widest text-white/80">
-            Kansen in de buurt
-          </span>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+      {/* ── Header ── */}
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#fff8ef", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <MapPin style={{ width: 24, height: 24, color: "#f28a1a" }} />
         </div>
-        <h1 className="text-2xl font-black leading-tight tracking-tight md:text-4xl text-white">
-          Hier liggen nu kansen
-        </h1>
-        <p className="mt-3 max-w-2xl text-sm text-white/75 md:text-base">
-          Zie in één oogopslag waar in jouw gemeente vraag groeit, waar
-          ondernemers hulp zoeken en waar jij op kunt inspelen — voor alle 342
-          gemeenten in Nederland.
-        </p>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }}>Kansen in de buurt</h1>
+          <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+            Zie waar in jouw gemeente vraag groeit — voor alle 342 gemeenten in Nederland.
+          </p>
+        </div>
+      </div>
+
+      {/* ── Gemeente-selectie (was onderdeel van hero) ── */}
+      <div style={{ background: "#ffffff", border: "1px solid #dce6f0", borderRadius: 16, padding: "20px 24px", marginBottom: 24 }} data-testid="section-hero">
 
         {/* Gemeente-selectie */}
         <div className="mt-6 flex flex-col sm:flex-row gap-3 items-start sm:items-end">
@@ -529,5 +526,6 @@ export default function KansenInDeBuurtPage() {
         </Card>
       )}
     </div>
+  </div>
   );
 }

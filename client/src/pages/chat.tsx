@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Send, Users, MessageCircle } from "lucide-react";
+import { Send, Users, MessageCircle, MessageSquare } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { formatDistanceToNow } from "date-fns";
 import { nl } from "date-fns/locale";
@@ -111,10 +111,16 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto h-[calc(100vh-10rem)]">
-      <div className="mb-6">
-        <h1 className="font-accent text-3xl font-bold mb-2">Chat Kamers</h1>
-        <p className="text-muted-foreground">Verbind met lokale ondernemers</p>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+      <div style={{ marginBottom: 24, display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eef2f9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <MessageSquare style={{ width: 24, height: 24, color: "#1f5fae" }} />
+        </div>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }}>Chat</h1>
+          <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>Verbind met lokale ondernemers</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-12 gap-6 h-[calc(100%-5rem)]">
@@ -235,5 +241,6 @@ export default function ChatPage() {
         </div>
       </div>
     </div>
+  </div>
   );
 }

@@ -199,17 +199,23 @@ export default function AdminIndexPage() {
   const proPct = totalUsers > 0 ? Math.round((proCount / totalUsers) * 100) : 0;
 
   return (
-    <div className="max-w-5xl mx-auto space-y-8 px-1">
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 1060, margin: "0 auto" }}>
 
       {/* ── Header ── */}
-      <div className="relative overflow-hidden rounded-xl bg-gradient-to-br from-[hsl(213,70%,36%)] to-[hsl(213,70%,24%)] text-white px-6 py-7 shadow-md">
-        <div className="relative z-10">
-          <div className="flex flex-wrap items-center gap-2 mb-1">
-            <ShieldCheck className="h-5 w-5 opacity-80" />
-            <h1 className="text-xl font-bold" data-testid="heading-admin">Admin Cockpit</h1>
-            <Badge className="bg-white/20 text-white border-0 text-xs">OpenRegio</Badge>
+      <div style={{ background: "#0b2240", borderRadius: 16, padding: "22px 28px", marginBottom: 28 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: "rgba(255,255,255,0.12)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <ShieldCheck style={{ width: 22, height: 22, color: "#ffffff" }} />
           </div>
-          <p className="text-sm text-white/70">Overzicht van het platform, leden en activiteit.</p>
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <h1 style={{ margin: 0, fontSize: 20, fontWeight: 900, color: "#ffffff" }} data-testid="heading-admin">Admin Cockpit</h1>
+              <span style={{ fontSize: 10, fontWeight: 700, color: "#93c5fd", background: "rgba(255,255,255,0.12)", borderRadius: 5, padding: "2px 7px" }}>OpenRegio</span>
+            </div>
+            <p style={{ margin: "4px 0 0", fontSize: 13, color: "rgba(255,255,255,0.6)" }}>Overzicht van het platform, leden en activiteit.</p>
+          </div>
+        </div>
 
           {isLoading ? null : (
             <div className="flex flex-wrap gap-6 mt-5">
@@ -235,10 +241,6 @@ export default function AdminIndexPage() {
             </div>
           )}
         </div>
-        {/* Decorative circles */}
-        <div className="absolute right-4 top-4 h-32 w-32 rounded-full bg-white/5" />
-        <div className="absolute right-16 top-12 h-20 w-20 rounded-full bg-white/5" />
-        <div className="absolute -right-2 -bottom-6 h-40 w-40 rounded-full bg-white/5" />
       </div>
 
       {/* ── KPI Row ── */}

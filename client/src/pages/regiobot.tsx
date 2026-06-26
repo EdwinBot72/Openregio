@@ -388,17 +388,19 @@ export default function RegioBotPage() {
 
   // ── Main UI ───────────────────────────────────────────────────────────────
   return (
-    <div className="max-w-3xl mx-auto px-4 py-6 space-y-6" data-testid="page-regiobot">
-
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }} data-testid="page-regiobot">
+      <div style={{ maxWidth: 760, margin: "0 auto" }}>
       {/* Header */}
-      <div className="space-y-1">
-        <h1 className="text-2xl font-bold flex items-center gap-2" data-testid="text-page-title">
-          <Bot className="w-7 h-7 text-primary" />
-          RegioBot
-        </h1>
-        <p className="text-muted-foreground">
-          Slimme AI-hulp voor lokale ondernemers. Vertel wat je zoekt — RegioBot geeft je direct de slimste route, handige tools en concrete stappen.
-        </p>
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#fff8ef", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <Bot style={{ width: 24, height: 24, color: "#f28a1a" }} />
+        </div>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="text-page-title">RegioBot</h1>
+          <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+            Jouw persoonlijke ondernemersassistent. Stel je vraag en krijg direct de slimste route.
+          </p>
+        </div>
       </div>
 
       {/* Mode tabs */}
@@ -866,5 +868,6 @@ export default function RegioBotPage() {
         </div>
       )}
     </div>
+  </div>
   );
 }

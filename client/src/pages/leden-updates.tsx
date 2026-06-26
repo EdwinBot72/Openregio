@@ -76,15 +76,18 @@ export default function LedenUpdatesPage() {
   }
 
   return (
-    <div data-testid="page-leden-updates">
-      <div className="openregio-greeting">
-        <h1 data-testid="text-leden-updates-title" style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <Megaphone className="h-6 w-6" style={{ color: "#c2410c" }} />
-          <span>Leden-updates</span>
-        </h1>
-        <p style={{ color: "#475569", fontSize: 15, lineHeight: 1.7, margin: "8px 0 0", maxWidth: 720 }}>
-          Het volledige archief van platform-aankondigingen en nieuws van OpenRegio voor leden. Zoek op trefwoord of filter op datum.
-        </p>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }} data-testid="page-leden-updates">
+      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#fff8ef", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <Megaphone style={{ width: 24, height: 24, color: "#f28a1a" }} />
+        </div>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="text-leden-updates-title">Leden-updates</h1>
+          <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+            Platform-aankondigingen en nieuws van OpenRegio voor leden.
+          </p>
+        </div>
       </div>
 
       <section
@@ -284,5 +287,6 @@ export default function LedenUpdatesPage() {
         )}
       </section>
     </div>
+  </div>
   );
 }

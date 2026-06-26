@@ -19,6 +19,7 @@ import {
   Star,
   AlertCircle,
   Minus,
+  BarChart2,
 } from "lucide-react";
 import {
   PROVINCIES,
@@ -84,26 +85,19 @@ export default function KansenMarktanalysePage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6 pb-10">
-
-      {/* ── Hero ──────────────────────────────────────────────────────────────── */}
-      <div
-        className="rounded-3xl bg-gradient-to-br from-primary via-primary/90 to-primary/70 p-7 md:p-9 text-white shadow-lg"
-        data-testid="section-hero-marktanalyse"
-      >
-        <div className="flex items-center gap-2 mb-3">
-          <TrendingUp className="h-4 w-4 opacity-70" />
-          <span className="text-xs font-semibold uppercase tracking-widest text-white/70">
-            Marktkansen
-          </span>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      {/* ── Header ── */}
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eef2f9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <BarChart2 style={{ width: 24, height: 24, color: "#1f5fae" }} />
         </div>
-        <h1 className="text-2xl md:text-4xl font-black leading-tight text-white">
-          Welke diensten ontbreken in jouw regio?
-        </h1>
-        <p className="mt-3 text-sm md:text-base text-white/75 max-w-2xl leading-relaxed">
-          Selecteer een gemeente en zie per beroep hoeveel vraag er is — en hoe hoog de concurrentie.
-          Hoge vraag + lage concurrentie = grote kans.
-        </p>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }}>Marktanalyse</h1>
+          <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+            Welke diensten ontbreken in jouw regio? Hoge vraag + lage concurrentie = grote kans.
+          </p>
+        </div>
       </div>
 
       {/* ── Gemeente-selector ─────────────────────────────────────────────────── */}
@@ -287,5 +281,6 @@ export default function KansenMarktanalysePage() {
         </>
       )}
     </div>
+  </div>
   );
 }

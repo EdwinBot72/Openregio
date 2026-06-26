@@ -1034,15 +1034,22 @@ export default function RegioScanProPage() {
   }
 
   return (
-    <div className="openregio-dashboard" data-testid="page-regioscan">
-      <header style={{ marginBottom: 18 }}>
-        <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#0b2240" }} data-testid="text-titel">
-          RegioScan voor Pro
-        </h1>
-        <p style={{ fontSize: 14, color: "#475569", margin: "6px 0 0", lineHeight: 1.6 }}>
-          Brancheafhankelijke scan met 6 uitkomstblokken, risico- en kansenscore en een concept Woo-verzoek.
-        </p>
-      </header>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }} data-testid="page-regioscan">
+      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#ecfeff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <MapPin style={{ width: 24, height: 24, color: "#0891b2" }} />
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <div>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="text-titel">RegioScan Pro</h1>
+            <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+              Brancheafhankelijke scan met risico- en kansenscore en een concept Woo-verzoek.
+            </p>
+          </div>
+          <span style={{ fontSize: 10, fontWeight: 700, color: "#0891b2", background: "#ecfeff", border: "1px solid #a5f3fc", borderRadius: 6, padding: "2px 7px", letterSpacing: "0.06em" }}>PRO</span>
+        </div>
+      </div>
 
       {!actieveScan && <ScanFormulier onResult={setActieveScan} />}
 
@@ -1152,5 +1159,6 @@ export default function RegioScanProPage() {
         </p>
       </section>
     </div>
+  </div>
   );
 }

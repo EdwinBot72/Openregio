@@ -42,12 +42,20 @@ export default function NieuwsPage() {
   }
 
   return (
-    <div data-testid="page-nieuws">
-      <div className="openregio-greeting">
-        <h1 data-testid="text-nieuws-title">Nieuws met context</h1>
-        <p style={{ color: "#475569", fontSize: 15, lineHeight: 1.7, margin: "8px 0 0", maxWidth: 720 }}>
-          Actuele berichten uit Nederlandse bronnen, voorzien van AI-context, alternatieve media en een concreet beeld van welke lokale ondernemingen het raakt.
-        </p>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }} data-testid="page-nieuws">
+      <div style={{ maxWidth: 960, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eef2f9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Newspaper style={{ width: 24, height: 24, color: "#1f5fae" }} />
+          </div>
+          <div>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="text-nieuws-title">Nieuws met context</h1>
+            <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+              Actuele berichten voorzien van AI-context — wat betekent dit voor jou?
+            </p>
+          </div>
+        </div>
         <div style={{ marginTop: 14, display: "flex", alignItems: "center", gap: 12 }}>
           <Button
             variant="outline"
@@ -200,5 +208,6 @@ export default function NieuwsPage() {
         AI-context is automatisch gegenereerd op basis van openbare bronnen. Geen vervanging voor eigen onderzoek.
       </p>
     </div>
+  </div>
   );
 }

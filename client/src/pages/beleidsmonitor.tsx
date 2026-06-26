@@ -120,10 +120,22 @@ export default function BeleidsmonitorPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#ecfeff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <Activity style={{ width: 24, height: 24, color: "#0891b2" }} />
+        </div>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }}>Beleidsmonitor</h1>
+          <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+            Actueel overzicht van beleids- en regelgevingswijzigingen voor jouw regio.
+          </p>
+        </div>
+      </div>
 
       {/* Uitleg */}
-      <Card className="border-l-0 border-r-0 border-t-0 rounded-none border-b bg-muted/30 -mx-4 px-4 py-4 shadow-none">
+      <Card className="mb-6 bg-muted/30">
         <CardContent className="p-0 space-y-3">
           <div className="flex items-start gap-3">
             <Info className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
@@ -323,5 +335,6 @@ export default function BeleidsmonitorPage() {
         </div>
       )}
     </div>
+  </div>
   );
 }

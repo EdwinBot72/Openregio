@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import {
   Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,
 } from "@/components/ui/dialog";
-import { AlertTriangle, CheckCircle, Clock, CreditCard, XCircle, Loader2, RefreshCw, ShieldAlert } from "lucide-react";
+import { AlertTriangle, CheckCircle, Clock, CreditCard, XCircle, Loader2, RefreshCw, ShieldAlert, Euro } from "lucide-react";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -105,14 +105,17 @@ export default function AdminBetalingenPage() {
   const trialingCount = (rows ?? []).filter(r => r.status === "trialing").length;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6">
-      {/* ── Header ── */}
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold" data-testid="heading-admin-betalingen">Betalingen</h1>
-          <p className="text-muted-foreground text-sm mt-0.5">
-            Overzicht van Mollie-subscriptions en betalingsstatus.
-          </p>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 1060, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eaf6ee", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Euro style={{ width: 24, height: 24, color: "#1a6b3a" }} />
+          </div>
+          <div>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="heading-admin-betalingen">Betalingen</h1>
+            <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>Overzicht van Mollie-subscriptions en betalingsstatus.</p>
+          </div>
         </div>
         <Button variant="outline" size="default" onClick={() => refetch()} disabled={isFetching} data-testid="button-refresh">
           {isFetching ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
@@ -301,5 +304,6 @@ export default function AdminBetalingenPage() {
         </DialogContent>
       </Dialog>
     </div>
+  </div>
   );
 }

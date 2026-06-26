@@ -690,5 +690,6 @@ export default function LokaleActiesPage() {
       </AlertDialog>
       </div>
     </div>
+  </div>
   );
 }

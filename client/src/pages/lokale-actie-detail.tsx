@@ -335,14 +335,11 @@ export default function LokaleActieDetailPage() {
   const isActief = actie.status === "actief";
 
   return (
-    <div className="max-w-3xl mx-auto py-8 px-4 space-y-6" data-testid="page-actie-detail">
-      <div>
-        <Link href="/lokale-acties">
-          <Button variant="ghost" size="sm" data-testid="link-terug">
-            <ArrowLeft className="mr-1.5 h-4 w-4" /> Lokale acties
-          </Button>
-        </Link>
-      </div>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }} data-testid="page-actie-detail">
+      <div style={{ maxWidth: 760, margin: "0 auto" }}>
+      <Link href="/lokale-acties" style={{ display: "inline-flex", alignItems: "center", gap: 5, fontSize: 13, fontWeight: 600, color: "#64748b", textDecoration: "none", marginBottom: 20 }} data-testid="link-terug">
+        <ArrowLeft size={13} /> Lokale acties
+      </Link>
 
       <div className="space-y-3">
         <div className="flex items-center gap-2 flex-wrap">
@@ -636,5 +633,6 @@ export default function LokaleActieDetailPage() {
         </AlertDialogContent>
       </AlertDialog>
     </div>
+  </div>
   );
 }

@@ -121,14 +121,18 @@ export default function GemeenteUpdatesPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto" data-testid="page-gemeente-updates">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-1" data-testid="text-page-title">
-          Gemeente-updates
-        </h1>
-        <p className="text-muted-foreground text-sm">
-          Actuele besluiten, plannen en updates van jouw gemeente — rechtstreeks uit de officiële bekendmakingen.
-        </p>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }} data-testid="page-gemeente-updates">
+      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eef2f9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <Building2 style={{ width: 24, height: 24, color: "#1f5fae" }} />
+        </div>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="text-page-title">Gemeente-updates</h1>
+          <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+            Actuele besluiten en bekendmakingen van jouw gemeente, rechtstreeks uit de officiële bronnen.
+          </p>
+        </div>
       </div>
 
       {/* Uitleg */}
@@ -361,5 +365,6 @@ export default function GemeenteUpdatesPage() {
         </>
       )}
     </div>
+  </div>
   );
 }

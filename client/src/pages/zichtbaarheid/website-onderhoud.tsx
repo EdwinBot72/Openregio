@@ -12,6 +12,7 @@ import {
   TrendingUp,
   Wrench,
   Monitor,
+  Globe,
 } from "lucide-react";
 
 const watWeDoen = [
@@ -42,18 +43,18 @@ const watHetOplevert = [
 
 export default function WebsiteOnderhoudPage() {
   return (
-    <div className="p-6 max-w-3xl mx-auto space-y-8">
-      <div>
-        <Badge variant="secondary" className="mb-3" data-testid="badge-section">
-          Zichtbaarheid
-        </Badge>
-        <h1 className="text-2xl font-bold" data-testid="heading-website-onderhoud">
-          Digitale basis op orde
-        </h1>
-        <p className="text-muted-foreground mt-2 text-base">
-          Voor ondernemers in de regio. Geen webdesignbureau — gewoon praktische ondersteuning
-          zodat jouw website werkt, vindbaar is en klanten niet wegjaagt.
-        </p>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 860, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eef2f9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <Globe style={{ width: 24, height: 24, color: "#1f5fae" }} />
+        </div>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="heading-website-onderhoud">Website Onderhoud</h1>
+          <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+            Gewoon praktische ondersteuning zodat jouw website werkt, vindbaar is en klanten niet wegjaagt.
+          </p>
+        </div>
       </div>
 
       <Card data-testid="card-waarom">
@@ -163,5 +164,6 @@ export default function WebsiteOnderhoudPage() {
         </CardContent>
       </Card>
     </div>
+  </div>
   );
 }

@@ -52,19 +52,22 @@ const ARTIKELEN = [
 
 export default function KennisbankPage() {
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
-      <header className="space-y-3">
-        <div className="flex flex-wrap items-center gap-3">
-          <BookMarked className="h-7 w-7 text-[#1f5fae]" />
-          <h1 className="text-2xl md:text-3xl font-bold" data-testid="heading-blog">
-            Blog
-          </h1>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eef2f9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <BookMarked style={{ width: 24, height: 24, color: "#1f5fae" }} />
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          <div>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="heading-blog">Kennisbank</h1>
+            <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+              Praktische kennis over overheidsbrieven, besluiten en regelgeving.
+            </p>
+          </div>
           <Badge variant="secondary" data-testid="badge-binnenkort">Binnenkort beschikbaar</Badge>
         </div>
-        <p className="text-muted-foreground">
-          Begrijp overheidsbrieven, besluiten en regelgeving. Praktische kennis voor iedere ondernemer.
-        </p>
-      </header>
+      </div>
 
       <section className="space-y-4">
         <h2 className="font-semibold text-lg">Blogartikelen</h2>
@@ -132,5 +135,6 @@ export default function KennisbankPage() {
         </Card>
       </section>
     </div>
+  </div>
   );
 }

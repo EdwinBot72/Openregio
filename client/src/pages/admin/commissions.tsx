@@ -161,13 +161,17 @@ export default function AdminCommissionsPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold" data-testid="heading-admin-commissions">Commissie Beheer</h1>
-          <p className="text-muted-foreground">
-            Beheer affiliate commissies en uitbetalingen
-          </p>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 1060, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eaf6ee", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <Euro style={{ width: 24, height: 24, color: "#1a6b3a" }} />
+          </div>
+          <div>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="heading-admin-commissions">Commissies</h1>
+            <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>Beheer affiliate commissies en uitbetalingen</p>
+          </div>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" onClick={() => downloadCSV("affiliates")} data-testid="button-download-affiliates-csv">
@@ -427,5 +431,6 @@ export default function AdminCommissionsPage() {
         </Card>
       )}
     </div>
+  </div>
   );
 }

@@ -1,5 +1,5 @@
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { FileText, Mail, Users, Lightbulb, ShieldCheck, Megaphone, Coffee, Search } from "lucide-react";
+import { FileText, Mail, Users, Lightbulb, ShieldCheck, Megaphone, Coffee, Search, Handshake } from "lucide-react";
 
 interface Tip {
   icon: any;
@@ -104,13 +104,18 @@ export default function SamenAanpakkenPage() {
   usePageTitle("Samen aanpakken — OpenRegio");
 
   return (
-    <div data-testid="page-samen-aanpakken">
-      <div className="openregio-greeting">
-        <h1 data-testid="text-samen-title">Samen aanpakken</h1>
-        <p style={{ color: "#475569", fontSize: 15, lineHeight: 1.7, margin: "8px 0 0", maxWidth: 720 }}>
-          Praktische, rustige manieren om als ondernemer samen invloed uit te oefenen op gemeentebeleid.
-          Geen demonstraties, geen schreeuwen — wel slimme zakelijke druk via brieven, dossiers en netwerken.
-        </p>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }} data-testid="page-samen-aanpakken">
+      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#ecfeff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <Handshake style={{ width: 24, height: 24, color: "#0891b2" }} />
+        </div>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="text-samen-title">Samen aanpakken</h1>
+          <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+            Slimme zakelijke druk via brieven, dossiers en netwerken — geen demonstraties, wel resultaat.
+          </p>
+        </div>
       </div>
 
       <div
@@ -190,5 +195,6 @@ export default function SamenAanpakkenPage() {
         Stem belangrijke stappen af met een ondernemersjurist of brancheorganisatie.
       </p>
     </div>
+  </div>
   );
 }

@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { RegionSelect } from "@/components/region-select";
-import { ExternalLink, Calendar, Info, Building2, AlertCircle, Lightbulb } from "lucide-react";
+import { ExternalLink, Calendar, Info, Building2, AlertCircle, Lightbulb, Briefcase } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 interface Aanbesteding {
@@ -86,12 +86,18 @@ export default function AanbestedingenPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto" data-testid="page-aanbestedingen">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-1" data-testid="text-page-title">Aanbestedingen</h1>
-        <p className="text-muted-foreground text-sm">
-          Live aanbestedingen van alle 342 Nederlandse gemeenten, rechtstreeks van TenderNed.
-        </p>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }} data-testid="page-aanbestedingen">
+      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#ecfeff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <Briefcase style={{ width: 24, height: 24, color: "#0891b2" }} />
+        </div>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="text-page-title">Opdrachten &amp; Aanbestedingen</h1>
+          <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+            Live aanbestedingen van alle 342 Nederlandse gemeenten, rechtstreeks van TenderNed.
+          </p>
+        </div>
       </div>
 
       {/* Uitleg */}
@@ -271,5 +277,6 @@ export default function AanbestedingenPage() {
         </>
       )}
     </div>
+  </div>
   );
 }

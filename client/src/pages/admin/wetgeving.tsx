@@ -158,18 +158,18 @@ export default function AdminWetgevingPage() {
     : null;
 
   return (
-    <div className="max-w-3xl mx-auto py-8 px-4 space-y-6">
-      <div className="flex items-center gap-3">
-        <Link href="/admin">
-          <Button size="icon" variant="ghost" data-testid="button-back">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 860, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
+        <Link href="/admin" style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, borderRadius: 8, background: "#ffffff", border: "1px solid #dce6f0", color: "#64748b", flexShrink: 0 }} data-testid="button-back">
+          <ArrowLeft size={14} />
         </Link>
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eef2f9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <BookOpen style={{ width: 24, height: 24, color: "#1f5fae" }} />
+        </div>
         <div>
-          <h1 className="text-xl font-semibold" data-testid="heading-wetgeving-admin">
-            Wetgeving Inzendingen
-          </h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="heading-wetgeving-admin">Wetgeving</h1>
+          <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
             Brieven ingediend door leden — verwerk en publiceer ze voor het platform.
           </p>
         </div>
@@ -229,5 +229,6 @@ export default function AdminWetgevingPage() {
         </Card>
       )}
     </div>
+  </div>
   );
 }

@@ -77,21 +77,18 @@ export default function AdminInzichtPage() {
   const lastRun = notifLog?.[0];
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6 px-1">
-
-      {/* Header */}
-      <div className="flex items-center gap-3">
-        <Link href="/admin">
-          <Button size="icon" variant="ghost" data-testid="button-back">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 1060, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
+        <Link href="/admin" style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, borderRadius: 8, background: "#ffffff", border: "1px solid #dce6f0", color: "#64748b", flexShrink: 0 }} data-testid="button-back">
+          <ArrowLeft size={14} />
         </Link>
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eef2f9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <BarChart2 style={{ width: 24, height: 24, color: "#1f5fae" }} />
+        </div>
         <div>
-          <div className="flex flex-wrap items-center gap-2">
-            <BarChart2 className="h-5 w-5 text-emerald-600" />
-            <h1 className="text-xl font-semibold" data-testid="heading-inzicht">Platform-inzicht</h1>
-          </div>
-          <p className="text-sm text-muted-foreground">Gebruikersgroei, Woo-trends en ondernemersproblematiek.</p>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="heading-inzicht">Inzicht</h1>
+          <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>Gebruikersgroei, Woo-trends en ondernemersproblematiek.</p>
         </div>
       </div>
 
@@ -432,5 +429,6 @@ export default function AdminInzichtPage() {
       </div>
 
     </div>
+  </div>
   );
 }

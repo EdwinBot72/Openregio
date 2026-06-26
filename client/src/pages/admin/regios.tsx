@@ -73,19 +73,18 @@ export default function AdminRegiosPage() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto space-y-6">
-      <div className="flex items-center gap-3">
-        <Link href="/admin">
-          <Button size="icon" variant="ghost" data-testid="button-back">
-            <ArrowLeft className="h-4 w-4" />
-          </Button>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 760, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
+        <Link href="/admin" style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, borderRadius: 8, background: "#ffffff", border: "1px solid #dce6f0", color: "#64748b", flexShrink: 0 }} data-testid="button-back">
+          <ArrowLeft size={14} />
         </Link>
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#fff8ef", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <MapPin style={{ width: 24, height: 24, color: "#f28a1a" }} />
+        </div>
         <div>
-          <div className="flex items-center gap-2">
-            <MapPin className="h-5 w-5 text-blue-600" />
-            <h1 className="text-xl font-semibold" data-testid="heading-regios">Regio-beheer</h1>
-          </div>
-          <p className="text-sm text-muted-foreground">Regio's beheren voor Woo-verzoeken en het platform.</p>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="heading-regios">Regio's</h1>
+          <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>Regio's beheren voor Woo-verzoeken en het platform.</p>
         </div>
       </div>
 
@@ -217,5 +216,6 @@ export default function AdminRegiosPage() {
         </CardContent>
       </Card>
     </div>
+  </div>
   );
 }

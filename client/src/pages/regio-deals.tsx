@@ -123,22 +123,18 @@ export default function RegiodealsPage() {
   const categories = ["Alle", ...REGIO_DEAL_CATEGORIES];
 
   return (
-    <div className="p-6 max-w-5xl mx-auto space-y-6">
-      <div className="rounded-md bg-primary px-5 py-4 text-primary-foreground flex items-center gap-3">
-        <Star className="w-5 h-5 shrink-0" />
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 1000, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eaf6ee", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <Star style={{ width: 24, height: 24, color: "#1a6b3a" }} />
+        </div>
         <div>
-          <p className="font-semibold">Exclusief voor OpenRegio-leden</p>
-          <p className="text-sm text-primary-foreground/80">
-            Profiteer van collectief onderhandelde kortingen en afspraken speciaal voor jou.
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="heading-regio-deals">Regio Deals</h1>
+          <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+            Collectief onderhandelde kortingen en afspraken — exclusief voor leden van OpenRegio.
           </p>
         </div>
-      </div>
-
-      <div>
-        <h1 className="text-2xl font-bold" data-testid="heading-regio-deals">Regio Deals</h1>
-        <p className="text-muted-foreground mt-1">
-          Collectieve afspraken en deals speciaal voor leden van OpenRegio.
-        </p>
       </div>
 
       <div className="flex flex-wrap gap-2" data-testid="filter-categories">
@@ -182,5 +178,6 @@ export default function RegiodealsPage() {
         </div>
       )}
     </div>
+  </div>
   );
 }

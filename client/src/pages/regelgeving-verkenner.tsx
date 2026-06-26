@@ -116,19 +116,17 @@ export default function RegelgevingVerkennerPage() {
   };
 
   return (
-    <div className="max-w-4xl mx-auto px-6 py-10">
-      {/* Hero */}
-      <div className="relative rounded-2xl overflow-hidden mb-8" style={{ height: "220px" }}>
-        <img src="/img/hero-bg.webp" alt="Regelgeving verkenner" className="w-full h-full object-cover" style={{ objectPosition: "center 40%" }} />
-        <div className="absolute inset-0" style={{ background: "linear-gradient(to right, rgba(15,42,78,0.90) 0%, rgba(15,42,78,0.60) 55%, rgba(15,42,78,0.2) 100%)" }} />
-        <div className="absolute inset-0 flex flex-col justify-end p-7">
-          <div className="flex items-center gap-2 mb-2">
-            <Gavel className="w-4 h-4 text-orange-300" />
-            <span className="text-xs font-bold uppercase tracking-widest text-orange-300">Regelgeving & WOO</span>
-          </div>
-          <h1 className="text-2xl font-bold text-white mb-1">Regelgeving Verkenner</h1>
-          <p className="text-sm text-white/70">
-            Doorzoek officiële verordeningen en beleidsregels door heel Nederland — en genereer direct een Woo-verzoek.
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+      {/* Header */}
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#f3e8ff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <Search style={{ width: 24, height: 24, color: "#6d28d9" }} />
+        </div>
+        <div>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }}>Regelgeving Verkenner</h1>
+          <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+            Doorzoek officiële verordeningen en beleidsregels door heel Nederland — genereer direct een Woo-verzoek.
           </p>
         </div>
       </div>
@@ -367,5 +365,6 @@ export default function RegelgevingVerkennerPage() {
         </div>
       )}
     </div>
+  </div>
   );
 }

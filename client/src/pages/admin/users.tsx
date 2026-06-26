@@ -581,18 +581,18 @@ export default function AdminUsersPage() {
   const aantalCoaching = (data?.users ?? []).filter((u) => !u.deletedAt && u.plan === "coaching").length;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 space-y-6">
-
-      {/* ── Header ── */}
-      <div className="flex items-center gap-3">
-        <Link href="/admin">
-          <Button variant="ghost" size="icon" data-testid="button-back">
-            <ArrowLeft className="w-4 h-4" />
-          </Button>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 960, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
+        <Link href="/admin" style={{ display: "flex", alignItems: "center", justifyContent: "center", width: 32, height: 32, borderRadius: 8, background: "#ffffff", border: "1px solid #dce6f0", color: "#64748b", flexShrink: 0 }} data-testid="button-back">
+          <ArrowLeft size={14} />
         </Link>
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eaf6ee", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <Users style={{ width: 24, height: 24, color: "#1a6b3a" }} />
+        </div>
         <div>
-          <h1 className="text-xl font-semibold font-accent" data-testid="text-page-title">Gebruikers</h1>
-          <p className="text-sm text-muted-foreground">Alle ingeschreven ondernemers beheren</p>
+          <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="text-page-title">Gebruikers beheren</h1>
+          <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>Alle ingeschreven ondernemers beheren</p>
         </div>
       </div>
 
@@ -801,5 +801,6 @@ export default function AdminUsersPage() {
       )}
 
     </div>
+  </div>
   );
 }

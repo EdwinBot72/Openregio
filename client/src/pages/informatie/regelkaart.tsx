@@ -14,20 +14,21 @@ import {
 
 export default function RegelkaartPage() {
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8 space-y-8">
-
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 900, margin: "0 auto" }}>
       {/* Header */}
-      <div className="space-y-3">
-        <div className="flex items-center gap-3">
-          <MapIcon className="h-8 w-8 text-[#1f5fae]" />
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold tracking-tight">Regelkaart</h1>
-              <Badge variant="secondary" className="text-xs gap-1">
-                <Clock className="h-3 w-3" />
-                Binnenkort beschikbaar
-              </Badge>
-            </div>
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: "#f3e8ff", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+          <MapIcon style={{ width: 24, height: 24, color: "#6d28d9" }} />
+        </div>
+        <div>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }}>Regelkaart</h1>
+            <Badge variant="secondary" className="text-xs gap-1">
+              <Clock className="h-3 w-3" />
+              Binnenkort beschikbaar
+            </Badge>
+          </div>
             <p className="text-sm text-muted-foreground">
               Wet- en regelgeving die voor jouw bedrijf geldt — per gemeente, op een rij
             </p>

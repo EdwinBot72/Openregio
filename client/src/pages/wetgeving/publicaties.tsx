@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageTitle } from "@/hooks/usePageTitle";
-import { BookOpen, Calendar, MapPin, Building2, Gavel, Plus, Filter } from "lucide-react";
+import { BookOpen, Calendar, MapPin, Building2, Gavel, Plus, Filter, FileText } from "lucide-react";
 import { Link } from "wouter";
 
 type Publicatie = {
@@ -69,18 +69,19 @@ export default function WetgevingPublicatiesPage() {
   const filteredByRegio = data?.filteredByRegio ?? false;
 
   return (
-    <div className="max-w-2xl mx-auto py-8 px-4 space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <BookOpen className="h-5 w-5 text-muted-foreground" />
-            <h1 className="text-xl font-semibold" data-testid="heading-publicaties">
-              Wet & Regelgeving
-            </h1>
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 860, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eef2f9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <FileText style={{ width: 24, height: 24, color: "#1f5fae" }} />
           </div>
-          <p className="text-sm text-muted-foreground">
-            Overheidspost die leden hebben ingediend en ons team heeft verwerkt — openbaar voor alle leden.
-          </p>
+          <div>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="heading-publicaties">Publicaties</h1>
+            <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
+              Overheidspost die leden hebben ingediend en ons team heeft verwerkt.
+            </p>
+          </div>
         </div>
         <Link href="/wetgeving-indienen">
           <Button size="default" data-testid="button-indienen">
@@ -139,5 +140,6 @@ export default function WetgevingPublicatiesPage() {
         </Card>
       )}
     </div>
+  </div>
   );
 }

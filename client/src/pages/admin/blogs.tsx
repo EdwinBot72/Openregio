@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Eye, Calendar, BookOpen, Image } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, Calendar, BookOpen, Image, FileText } from "lucide-react";
 import type { Blog, InsertBlog, BlogStatus, BlogAudience } from "@shared/schema";
 import { PexelsPicker } from "@/components/PexelsPicker";
 
@@ -156,13 +156,16 @@ export default function AdminBlogsPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <BookOpen className="h-8 w-8 text-primary" />
+    <div style={{ background: "#f4f7fc", minHeight: "100vh", padding: "28px 20px 60px" }}>
+      <div style={{ maxWidth: 1060, margin: "0 auto" }}>
+      <div style={{ marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eef2f9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <FileText style={{ width: 24, height: 24, color: "#1f5fae" }} />
+          </div>
           <div>
-            <h1 className="text-2xl font-bold">Blog beheer</h1>
-            <p className="text-muted-foreground">Beheer blogs voor de homepage</p>
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }}>Content beheren</h1>
+            <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>Beheer blogs voor de homepage</p>
           </div>
         </div>
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
@@ -412,5 +415,6 @@ export default function AdminBlogsPage() {
         </div>
       )}
     </div>
+  </div>
   );
 }
