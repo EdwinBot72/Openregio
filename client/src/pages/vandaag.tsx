@@ -1,342 +1,359 @@
-import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useQuery } from "@tanstack/react-query";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { Link } from "wouter";
 import {
-  Bell, ChevronRight, ArrowUpRight, Check,
-  Mail, FileCheck, Star, Bot,
-  BookOpen, TrendingUp, Users, Zap,
-  Globe, MapPin, Handshake, Newspaper,
-  Shield, Scale, FileText, Lightbulb,
-  Briefcase, Building2, Calendar,
+  Globe, FileText, Users, ShieldAlert, Wrench, ArrowRight,
+  Bell, TrendingUp, MapPin, Euro, Bot, Mail, FileCheck, Star,
+  ChevronRight, Megaphone, BookOpen, Building2, Briefcase,
+  Link2, Store, Search, CalendarDays, Handshake, ShieldCheck,
+  Lightbulb, BarChart2, Zap,
 } from "lucide-react";
 
-// ── Brand tokens ──────────────────────────────────────────────────────────────
-const C = {
-  navy:   "#0b2240",
-  green:  "#1a6b3a",
-  orange: "#f28a1a",
-  purple: "#6d28d9",
-  teal:   "#0891b2",
-  bg:     "#f4f7fc",
-  card:   "#ffffff",
-  border: "#dce6f0",
-};
+const BLAUW  = "#0b2240";
+const GROEN  = "#1a6b3a";
+const ORANJE = "#f28a1a";
+const PAARS  = "#6d28d9";
+const TEAL   = "#0891b2";
+const BG     = "#f4f7fc";
+const BORDER = "#dce6f0";
 
-// ── Tiny reusable components ──────────────────────────────────────────────────
-function Card({ children, style = {} }: { children: React.ReactNode; style?: React.CSSProperties }) {
-  return (
-    <div style={{
-      background: C.card,
-      border: `1px solid ${C.border}`,
-      borderRadius: 14,
-      overflow: "hidden",
-      ...style,
-    }}>
-      {children}
-    </div>
-  );
-}
+const PIJLERS = [
+  {
+    num: "1",
+    title: "Minder Afhankelijkheid",
+    color: GROEN,
+    bg: "#eaf6ee",
+    border: "#b6e2c4",
+    Icon: Link2,
+    items: [
+      { label: "Minder platformkosten",       href: "/groei/profiel" },
+      { label: "Eigen klantenkring opbouwen", href: "/groei/zichtbaarheid" },
+      { label: "Directe omzetkanalen",        href: "/lokaal-marktplaats" },
+      { label: "Continuïteit bij storingen",  href: "/agents/secretaresse" },
+    ],
+    voorbeeld: "Een pizzeria krijgt meer directe bestellingen via de eigen website in plaats van via bezorgplatforms.",
+  },
+  {
+    num: "2",
+    title: "Lokale Zichtbaarheid",
+    color: BLAUW,
+    bg: "#eef2f9",
+    border: "#c5d5ea",
+    Icon: Search,
+    items: [
+      { label: "Website scan",            href: "/groei/website-check" },
+      { label: "Google Bedrijfsprofiel",  href: "/groei/profiel" },
+      { label: "Lokale SEO",             href: "/groei/zichtbaarheid" },
+      { label: "Vindbaarheid verbeteren", href: "/groei/zichtbaarheid" },
+    ],
+    voorbeeld: "Een nagelstudio verschijnt hoger in Google en krijgt meer lokale klanten zonder extra advertenties.",
+  },
+  {
+    num: "3",
+    title: "Lokale Verbinding",
+    color: ORANJE,
+    bg: "#fff8ef",
+    border: "#fde6c8",
+    Icon: Handshake,
+    items: [
+      { label: "Events & workshops", href: "/lokale-acties" },
+      { label: "Buurtacties",        href: "/lokale-acties" },
+      { label: "Netwerk opbouwen",   href: "/network" },
+      { label: "Marktplaats",        href: "/lokaal-marktplaats" },
+    ],
+    voorbeeld: "Een bakker organiseert een workshop brood bakken en verbindt zich met de buurt.",
+  },
+  {
+    num: "4",
+    title: "Regels & Gemeente",
+    color: PAARS,
+    bg: "#f3e8ff",
+    border: "#d8b4fe",
+    Icon: ShieldAlert,
+    items: [
+      { label: "Brief analyseren",      href: "/regels/documenten" },
+      { label: "Vergunningen checken",  href: "/regels/help" },
+      { label: "Sectorregels",          href: "/regels/sectorregels" },
+      { label: "Wat komt eraan?",       href: "/regels/ontwikkelingen" },
+    ],
+    voorbeeld: "Een ondernemer ontvangt een brief, begrijpt deze met OpenRegio en neemt de juiste vervolgstap.",
+  },
+  {
+    num: "5",
+    title: "Praktisch Ondernemen",
+    color: TEAL,
+    bg: "#ecfeff",
+    border: "#a5f3fc",
+    Icon: Wrench,
+    items: [
+      { label: "Personeel vinden & binden",  href: "/agents/secretaresse" },
+      { label: "Kosten beheersen",           href: "/agents/contractagent" },
+      { label: "Basischecks uitvoeren",      href: "/groei/website-check" },
+      { label: "Kennisdeling & inspiratie",  href: "/blogs" },
+    ],
+    voorbeeld: "Een fitnesscoach verlaagt kosten, vindt lokaal personeel en bouwt een stabiel bedrijf.",
+  },
+];
 
-function NavLink({ href, label, color }: { href: string; label: string; color: string }) {
-  return (
-    <Link href={href} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8, padding: "9px 14px", borderRadius: 8, background: "#f8fafc", border: `1px solid ${C.border}`, textDecoration: "none", color: "#334155", fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
-      {label}
-      <ChevronRight size={13} style={{ color: "#94a3b8", flexShrink: 0 }} />
-    </Link>
-  );
-}
+const FLOW = [
+  { num: "1", label: "BEGRIP",   sub: "Begrijp je situatie",    color: PAARS,  href: "/regels" },
+  { num: "2", label: "VERSTERK", sub: "Versterk je bedrijf",    color: BLAUW,  href: "/groei/profiel" },
+  { num: "3", label: "REGIO",    sub: "Pak kansen in je regio", color: GROEN,  href: "/kansen/opdrachten" },
+  { num: "4", label: "SAMEN",    sub: "Werk samen & groei",     color: ORANJE, href: "/network" },
+];
 
-function SectionHeading({ children }: { children: React.ReactNode }) {
-  return (
-    <h2 style={{ fontSize: 18, fontWeight: 800, color: C.navy, margin: "0 0 18px" }}>
-      {children}
-    </h2>
-  );
-}
+const AGENTS = [
+  { label: "Brievenagent",  sub: "Analyseer brieven & besluiten",   color: BLAUW,  Icon: Mail,         href: "/agents/brievenagent" },
+  { label: "Contractagent", sub: "Check contracten & voorwaarden",  color: GROEN,  Icon: FileCheck,    href: "/agents/contractagent" },
+  { label: "Secretaresse",  sub: "Plan, organiseer en deel mee",    color: PAARS,  Icon: CalendarDays, href: "/agents/secretaresse" },
+  { label: "RegioBot",      sub: "Vraag alles over je regio",       color: ORANJE, Icon: Bot,          href: "/regiobot" },
+];
 
-// ── Main page ─────────────────────────────────────────────────────────────────
 export default function VandaagPage() {
   usePageTitle("Vandaag — OpenRegio");
   const { user } = useAuth();
-
-  const isPro = user?.role === "admin" || user?.role === "master"
-    || (user as any)?.plan === "pro" || (user as any)?.plan === "coaching";
-
-  const firstName = (user as any)?.firstName?.trim() || user?.email?.split("@")[0] || "ondernemer";
-
-  const { data: notifData } = useQuery<{ count: number }>({
-    queryKey: ["/api/notifications/unread-count"],
-    enabled: !!user,
-    staleTime: 60_000,
-    retry: false,
-  });
-  const notifCount = notifData?.count ?? 0;
+  const isPro = user?.plan === "pro" || user?.plan === "coaching"
+    || user?.role === "admin" || user?.role === "master";
+  const naam = (user as any)?.businessName
+    || user?.email?.split("@")[0]
+    || "ondernemer";
 
   return (
-    <div style={{ background: C.bg, minHeight: "100vh", padding: "28px 24px 64px" }}>
+    <div style={{ background: BG, minHeight: "100vh", padding: "28px 20px 60px" }}>
       <div style={{ maxWidth: 1100, margin: "0 auto" }}>
 
-        {/* ── 1. HEADER ── */}
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 28 }}>
+        {/* ── Header ── */}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: 12, marginBottom: 24 }}>
           <div>
-            <h1 style={{ margin: 0, fontSize: 24, fontWeight: 900, color: C.navy }}>
-              Goedemiddag, {firstName}
+            <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: BLAUW }}>
+              Goedendag, {naam}
             </h1>
             <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
-              Welkom terug op jouw OpenRegio dashboard.
+              Welkom bij jouw OpenRegio overzicht
             </p>
           </div>
           <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-            {notifCount > 0 && (
-              <Link href="/vandaag" style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "#fee2e2", color: "#b91c1c", fontWeight: 700, fontSize: 13, padding: "7px 14px", borderRadius: 999, textDecoration: "none" }} data-testid="badge-notifications">
-                <Bell size={13} /> {notifCount} melding{notifCount !== 1 ? "en" : ""}
-              </Link>
-            )}
+            <button
+              style={{ width: 38, height: 38, borderRadius: 10, border: `1px solid ${BORDER}`, background: "#fff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+              aria-label="Meldingen"
+              data-testid="button-notifications"
+            >
+              <Bell style={{ width: 17, height: 17, color: "#64748b" }} />
+            </button>
             {!isPro && (
-              <Link href="/lidmaatschap" style={{ display: "inline-flex", alignItems: "center", gap: 6, background: C.orange, color: "white", fontWeight: 700, fontSize: 13, padding: "8px 18px", borderRadius: 999, textDecoration: "none" }} data-testid="button-upgrade-pro">
-                <ArrowUpRight size={14} /> Upgrade naar Pro
+              <Link href="/account/instellingen">
+                <button
+                  style={{ height: 38, paddingLeft: 16, paddingRight: 16, borderRadius: 10, border: "none", background: ORANJE, color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}
+                  data-testid="button-upgrade-pro"
+                >
+                  Upgrade naar Pro
+                </button>
               </Link>
             )}
           </div>
         </div>
 
-        {/* ── 2. INTRO BANNER ── */}
-        <div style={{ background: C.navy, borderRadius: 16, padding: "28px 32px", marginBottom: 36, color: "white", position: "relative", overflow: "hidden" }}>
-          <div style={{ position: "absolute", top: -30, right: -40, width: 200, height: 200, background: "rgba(255,255,255,.04)", borderRadius: "50%" }} />
-          <p style={{ margin: "0 0 24px", fontSize: 15, color: "rgba(255,255,255,.85)", lineHeight: 1.7, maxWidth: 680 }}>
-            Een platform met praktische tools, kennis en lokale verbindingen. Alles op één plek, voor een sterker bedrijf én een sterkere regio.
+        {/* ── Donkerblauwe banner ── */}
+        <div style={{ background: BLAUW, borderRadius: 16, padding: "24px 28px", marginBottom: 32 }}>
+          <h2 style={{ margin: "0 0 6px", fontSize: 18, fontWeight: 900, color: "#fff" }}>
+            Wat is OpenRegio?
+          </h2>
+          <p style={{ margin: "0 0 20px", fontSize: 14, color: "rgba(255,255,255,0.72)", maxWidth: 620, lineHeight: 1.65 }}>
+            Een platform met praktische tools, kennis en lokale verbindingen — zodat je minder afhankelijk bent van grote platformen en sterker staat in je regio.
           </p>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 20 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 10 }}>
             {[
-              { icon: <BookOpen size={16} />, label: "Begrijpen" },
-              { icon: <TrendingUp size={16} />, label: "Verbeteren" },
-              { icon: <Users size={16} />, label: "Verbinden" },
-              { icon: <Zap size={16} />, label: "Volhouden" },
-            ].map((item) => (
-              <div key={item.label} style={{ display: "flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,.1)", borderRadius: 999, padding: "6px 14px", fontSize: 13, fontWeight: 700, color: "rgba(255,255,255,.9)" }}>
-                {item.icon} {item.label}
+              { Icon: BookOpen,    label: "Begrijpen",  sub: "Regels en brieven" },
+              { Icon: TrendingUp,  label: "Verbeteren", sub: "Profiel en zichtbaarheid" },
+              { Icon: Users,       label: "Verbinden",  sub: "Netwerk en samenwerking" },
+              { Icon: ShieldCheck, label: "Volhouden",  sub: "Continuïteit en groei" },
+            ].map(({ Icon, label, sub }) => (
+              <div key={label} style={{ background: "rgba(255,255,255,0.08)", borderRadius: 12, padding: "13px 15px", display: "flex", alignItems: "center", gap: 11 }}>
+                <div style={{ width: 34, height: 34, borderRadius: 9, background: "rgba(255,255,255,0.13)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <Icon style={{ width: 17, height: 17, color: "#fff" }} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: "#fff" }}>{label}</div>
+                  <div style={{ fontSize: 11, color: "rgba(255,255,255,0.58)" }}>{sub}</div>
+                </div>
               </div>
             ))}
           </div>
         </div>
 
-        {/* ── 3. FIVE PILLARS GRID ── */}
-        <SectionHeading>De 5 kernpijlers van OpenRegio</SectionHeading>
+        {/* ── Sectielabel ── */}
+        <p style={{ margin: "0 0 14px", fontSize: 11, fontWeight: 700, color: "#94a3b8", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+          De 5 kernpijlers van OpenRegio
+        </p>
+
+        {/* ── Pijler-grid ── */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 16, marginBottom: 40 }}>
-
-          {/* Pijler 1 */}
-          <Card>
-            <div style={{ background: C.green, padding: "18px 20px", display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(255,255,255,.2)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, color: "white", flexShrink: 0 }}>1</div>
-              <div>
-                <div style={{ fontWeight: 800, fontSize: 14, color: "white" }}>Minder Afhankelijkheid</div>
-                <div style={{ fontSize: 11, color: "rgba(255,255,255,.7)" }}>Zelfstandig en veerkrachtig</div>
+          {PIJLERS.map((p) => (
+            <div
+              key={p.num}
+              style={{ background: "#fff", borderRadius: 16, border: `1px solid ${BORDER}`, overflow: "hidden", display: "flex", flexDirection: "column" }}
+              data-testid={`card-pijler-${p.num}`}
+            >
+              {/* Kaart-header */}
+              <div style={{ background: p.bg, borderBottom: `1px solid ${p.border}`, padding: "16px 20px", display: "flex", alignItems: "center", gap: 12 }}>
+                <div style={{ width: 42, height: 42, borderRadius: 12, background: p.color, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <p.Icon style={{ width: 20, height: 20, color: "#fff" }} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: p.color, letterSpacing: "0.07em", textTransform: "uppercase" }}>Pijler {p.num}</div>
+                  <div style={{ fontSize: 15, fontWeight: 800, color: "#0f172a", lineHeight: 1.2 }}>{p.title}</div>
+                </div>
               </div>
-              <Building2 size={20} style={{ color: "rgba(255,255,255,.6)", marginLeft: "auto" }} />
-            </div>
-            <div style={{ padding: "14px 16px 8px" }}>
-              <NavLink href="/groei/profiel" label="Bedrijfsprofiel" color={C.green} />
-              <NavLink href="/groei/zichtbaarheid" label="Vindbaarheid verbeteren" color={C.green} />
-              <NavLink href="/lokaal-marktplaats" label="Lokale marktplaats" color={C.green} />
-              <NavLink href="/agents/secretaresse" label="Secretaresse-agent" color={C.green} />
-            </div>
-            <div style={{ background: "#f0fdf4", padding: "10px 16px", fontSize: 12, color: "#166534", borderTop: `1px solid ${C.border}` }}>
-              Voorbeeld: "Jouw profiel zichtbaar voor 140 ondernemers in Haarlem."
-            </div>
-          </Card>
 
-          {/* Pijler 2 */}
-          <Card>
-            <div style={{ background: C.navy, padding: "18px 20px", display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(255,255,255,.2)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, color: "white", flexShrink: 0 }}>2</div>
-              <div>
-                <div style={{ fontWeight: 800, fontSize: 14, color: "white" }}>Lokale Zichtbaarheid</div>
-                <div style={{ fontSize: 11, color: "rgba(255,255,255,.7)" }}>Gevonden worden dichtbij</div>
-              </div>
-              <Globe size={20} style={{ color: "rgba(255,255,255,.6)", marginLeft: "auto" }} />
-            </div>
-            <div style={{ padding: "14px 16px 8px" }}>
-              <NavLink href="/groei/website-check" label="Website scan" color={C.navy} />
-              <NavLink href="/groei/profiel" label="Bedrijfsprofiel optimaliseren" color={C.navy} />
-              <NavLink href="/groei/zichtbaarheid" label="SEO & vindbaarheid" color={C.navy} />
-            </div>
-            <div style={{ background: "#eff6ff", padding: "10px 16px", fontSize: 12, color: "#1e40af", borderTop: `1px solid ${C.border}` }}>
-              Voorbeeld: "Website scan toont 3 verbeterpunten voor meer klanten."
-            </div>
-          </Card>
-
-          {/* Pijler 3 */}
-          <Card>
-            <div style={{ background: C.orange, padding: "18px 20px", display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(255,255,255,.2)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, color: "white", flexShrink: 0 }}>3</div>
-              <div>
-                <div style={{ fontWeight: 800, fontSize: 14, color: "white" }}>Lokale Verbinding</div>
-                <div style={{ fontSize: 11, color: "rgba(255,255,255,.7)" }}>Samenwerken in de regio</div>
-              </div>
-              <Handshake size={20} style={{ color: "rgba(255,255,255,.6)", marginLeft: "auto" }} />
-            </div>
-            <div style={{ padding: "14px 16px 8px" }}>
-              <NavLink href="/lokale-acties" label="Lokale acties & events" color={C.orange} />
-              <NavLink href="/network" label="Ondernemersnetwerk" color={C.orange} />
-              <NavLink href="/lokaal-marktplaats" label="Marktplaats" color={C.orange} />
-            </div>
-            <div style={{ background: "#fff7ed", padding: "10px 16px", fontSize: 12, color: "#9a3412", borderTop: `1px solid ${C.border}` }}>
-              Voorbeeld: "Bakker zoekt samenwerking met koffiezaak voor lunchconcept."
-            </div>
-          </Card>
-
-          {/* Pijler 4 */}
-          <Card>
-            <div style={{ background: C.purple, padding: "18px 20px", display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(255,255,255,.2)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, color: "white", flexShrink: 0 }}>4</div>
-              <div>
-                <div style={{ fontWeight: 800, fontSize: 14, color: "white" }}>Regels & Gemeente</div>
-                <div style={{ fontSize: 11, color: "rgba(255,255,255,.7)" }}>Grip op wet- en regelgeving</div>
-              </div>
-              <Shield size={20} style={{ color: "rgba(255,255,255,.6)", marginLeft: "auto" }} />
-            </div>
-            <div style={{ padding: "14px 16px 8px" }}>
-              <NavLink href="/regels/documenten" label="Brief analyseren" color={C.purple} />
-              <NavLink href="/regels/help" label="Vergunning & regels hulp" color={C.purple} />
-              <NavLink href="/regels/sectorregels" label="Sectorregels" color={C.purple} />
-              <NavLink href="/regels/ontwikkelingen" label="Wat komt eraan?" color={C.purple} />
-            </div>
-            <div style={{ background: "#f5f3ff", padding: "10px 16px", fontSize: 12, color: "#5b21b6", borderTop: `1px solid ${C.border}` }}>
-              Voorbeeld: "Terrasvergunning verloopt over 14 dagen — actie vereist."
-            </div>
-          </Card>
-
-          {/* Pijler 5 */}
-          <Card>
-            <div style={{ background: C.teal, padding: "18px 20px", display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ width: 32, height: 32, borderRadius: "50%", background: "rgba(255,255,255,.2)", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 900, fontSize: 14, color: "white", flexShrink: 0 }}>5</div>
-              <div>
-                <div style={{ fontWeight: 800, fontSize: 14, color: "white" }}>Praktisch Ondernemen</div>
-                <div style={{ fontSize: 11, color: "rgba(255,255,255,.7)" }}>AI-tools voor dagelijks gebruik</div>
-              </div>
-              <Briefcase size={20} style={{ color: "rgba(255,255,255,.6)", marginLeft: "auto" }} />
-            </div>
-            <div style={{ padding: "14px 16px 8px" }}>
-              <NavLink href="/agents/secretaresse" label="Secretaresse-agent" color={C.teal} />
-              <NavLink href="/agents/contractagent" label="Contractagent" color={C.teal} />
-              <NavLink href="/groei/website-check" label="Website check" color={C.teal} />
-              <NavLink href="/blogs" label="Blog & kennisbank" color={C.teal} />
-            </div>
-            <div style={{ background: "#ecfeff", padding: "10px 16px", fontSize: 12, color: "#155e75", borderTop: `1px solid ${C.border}` }}>
-              Voorbeeld: "Vergaderingsverslag klaar in 30 seconden via de Secretaresse-agent."
-            </div>
-          </Card>
-
-        </div>
-
-        {/* ── 4. DASHBOARD FLOW ── */}
-        <SectionHeading>Jouw OpenRegio Dashboard</SectionHeading>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 16, marginBottom: 40 }}>
-          {[
-            { num: "1", label: "BEGRIP", sub: "Regelgeving begrijpen", color: C.purple, bg: "#f5f3ff", href: "/regels", icon: <Scale size={20} style={{ color: C.purple }} /> },
-            { num: "2", label: "VERSTERK", sub: "Bedrijfsprofiel versterken", color: C.navy, bg: "#eff6ff", href: "/groei/profiel", icon: <TrendingUp size={20} style={{ color: C.navy }} /> },
-            { num: "3", label: "REGIO", sub: "Kansen in jouw regio", color: C.green, bg: "#f0fdf4", href: "/kansen/opdrachten", icon: <MapPin size={20} style={{ color: C.green }} /> },
-            { num: "4", label: "SAMEN", sub: "Lokale samenwerking", color: C.orange, bg: "#fff7ed", href: "/network", icon: <Users size={20} style={{ color: C.orange }} /> },
-          ].map((item) => (
-            <Link key={item.label} href={item.href} style={{ textDecoration: "none" }} data-testid={`card-flow-${item.label.toLowerCase()}`}>
-              <Card style={{ cursor: "pointer", transition: "box-shadow .15s" }}>
-                <div style={{ padding: "20px" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: "50%", background: item.bg, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      {item.icon}
+              {/* Links */}
+              <div style={{ padding: "10px 0", flex: 1 }}>
+                {p.items.map((item) => (
+                  <Link key={item.label} href={item.href}>
+                    <div
+                      style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "9px 20px", cursor: "pointer" }}
+                      onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.background = p.bg; }}
+                      onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.background = "transparent"; }}
+                    >
+                      <span style={{ fontSize: 13, color: "#334155", fontWeight: 500 }}>{item.label}</span>
+                      <ChevronRight style={{ width: 14, height: 14, color: p.color, flexShrink: 0 }} />
                     </div>
-                    <div style={{ width: 24, height: 24, borderRadius: "50%", background: item.color, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 11, fontWeight: 900, color: "white" }}>{item.num}</div>
-                  </div>
-                  <div style={{ fontWeight: 800, fontSize: 15, color: C.navy, marginBottom: 4 }}>{item.label}</div>
-                  <div style={{ fontSize: 12, color: "#64748b" }}>{item.sub}</div>
-                </div>
-                <div style={{ padding: "8px 20px 12px", borderTop: `1px solid ${C.border}`, display: "flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, color: item.color }}>
-                  Ga naar <ChevronRight size={12} />
-                </div>
-              </Card>
-            </Link>
-          ))}
-        </div>
-
-        {/* ── 5. AI AGENTS ── */}
-        <SectionHeading>AI Agents — jouw digitale team</SectionHeading>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 16, marginBottom: 40 }}>
-          {[
-            { label: "Brievenagent", sub: "Overheidsbrieven uitgelegd", color: "#1f5fae", bg: "#eff6ff", href: "/agents/brievenagent", icon: <Mail size={20} style={{ color: "#1f5fae" }} /> },
-            { label: "Contractagent", sub: "Contracten doorlichten", color: C.green, bg: "#f0fdf4", href: "/agents/contractagent", icon: <FileCheck size={20} style={{ color: C.green }} /> },
-            { label: "Secretaresse", sub: "Taken, e-mails, vergaderingen", color: C.purple, bg: "#f5f3ff", href: "/agents/secretaresse", icon: <Star size={20} style={{ color: C.purple }} /> },
-            { label: "RegioBot", sub: "Regelgeving AI-assistent", color: C.orange, bg: "#fff7ed", href: "/regiobot", icon: <Bot size={20} style={{ color: C.orange }} /> },
-          ].map((agent) => (
-            <Link key={agent.label} href={agent.href} style={{ textDecoration: "none" }} data-testid={`card-agent-${agent.label.toLowerCase().replace(/\s/g, "-")}`}>
-              <Card style={{ cursor: "pointer" }}>
-                <div style={{ padding: "18px 20px", display: "flex", alignItems: "center", gap: 12 }}>
-                  <div style={{ width: 40, height: 40, borderRadius: 10, background: agent.bg, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    {agent.icon}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontWeight: 800, fontSize: 14, color: C.navy }}>{agent.label}</div>
-                    <div style={{ fontSize: 12, color: "#64748b" }}>{agent.sub}</div>
-                  </div>
-                  <ChevronRight size={14} style={{ color: "#94a3b8", flexShrink: 0 }} />
-                </div>
-              </Card>
-            </Link>
-          ))}
-        </div>
-
-        {/* ── 6. BASIS vs PRO (non-pro only) ── */}
-        {!isPro && (
-          <div style={{ marginBottom: 40 }}>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
-              {/* BASIS */}
-              <Card>
-                <div style={{ padding: "18px 20px 6px", borderBottom: `1px solid ${C.border}` }}>
-                  <div style={{ display: "inline-block", background: "#eff6ff", color: "#1d4ed8", fontSize: 11, fontWeight: 900, padding: "3px 12px", borderRadius: 999, letterSpacing: "0.06em", marginBottom: 8 }}>BASIS</div>
-                  <div style={{ fontWeight: 700, fontSize: 14, color: "#64748b", marginBottom: 14 }}>Gratis starten</div>
-                </div>
-                <div style={{ padding: "14px 20px" }}>
-                  {["Bedrijfsprofiel aanmaken", "Lokale acties bekijken", "Sectorregels raadplegen", "Netwerk bekijken"].map((f) => (
-                    <div key={f} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#334155", marginBottom: 8 }}>
-                      <Check size={14} style={{ color: "#1d4ed8", flexShrink: 0 }} /> {f}
-                    </div>
-                  ))}
-                </div>
-              </Card>
-
-              {/* PRO */}
-              <Card style={{ border: `2px solid ${C.orange}` }}>
-                <div style={{ padding: "18px 20px 6px", borderBottom: `1px solid ${C.border}` }}>
-                  <div style={{ display: "inline-block", background: C.orange + "18", color: C.orange, fontSize: 11, fontWeight: 900, padding: "3px 12px", borderRadius: 999, letterSpacing: "0.06em", marginBottom: 8 }}>PRO</div>
-                  <div style={{ fontWeight: 700, fontSize: 14, color: "#64748b", marginBottom: 14 }}>Alle tools ontgrendeld</div>
-                </div>
-                <div style={{ padding: "14px 20px 10px" }}>
-                  {["Document upload & analyse", "Website scan & SEO", "Brievenagent + Contractagent", "RegioBot (onbeperkt)", "Lokale actie aanmaken"].map((f) => (
-                    <div key={f} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13, color: "#334155", marginBottom: 8 }}>
-                      <Check size={14} style={{ color: C.orange, flexShrink: 0 }} /> {f}
-                    </div>
-                  ))}
-                </div>
-                <div style={{ padding: "0 20px 18px" }}>
-                  <Link href="/lidmaatschap" style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 7, background: C.orange, color: "white", fontWeight: 700, fontSize: 14, padding: "11px", borderRadius: 10, textDecoration: "none" }} data-testid="button-upgrade-pro-comparison">
-                    <ArrowUpRight size={15} /> Upgrade naar Pro
                   </Link>
+                ))}
+              </div>
+
+              {/* Voorbeeld-footer */}
+              <div style={{ background: p.bg, borderTop: `1px solid ${p.border}`, padding: "12px 20px" }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: p.color, textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: 4 }}>Voorbeeld</div>
+                <p style={{ margin: 0, fontSize: 12, color: "#475569", lineHeight: 1.55 }}>{p.voorbeeld}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Dashboard flow ── */}
+        <p style={{ margin: "0 0 14px", fontSize: 11, fontWeight: 700, color: "#94a3b8", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+          Jouw OpenRegio Dashboard
+        </p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14, marginBottom: 40 }}>
+          {FLOW.map((f) => (
+            <Link key={f.label} href={f.href}>
+              <div
+                style={{ background: "#fff", borderRadius: 14, border: `1px solid ${BORDER}`, padding: "18px 20px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14 }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.boxShadow = "0 4px 16px rgba(0,0,0,0.08)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}
+                data-testid={`card-flow-${f.label.toLowerCase()}`}
+              >
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: f.color, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <span style={{ fontSize: 18, fontWeight: 900, color: "#fff" }}>{f.num}</span>
                 </div>
-              </Card>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: "#0f172a" }}>{f.label}</div>
+                  <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>{f.sub}</div>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* ── AI Agents ── */}
+        <p style={{ margin: "0 0 14px", fontSize: 11, fontWeight: 700, color: "#94a3b8", letterSpacing: "0.08em", textTransform: "uppercase" }}>
+          AI Agents — jouw digitale team
+        </p>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: 14, marginBottom: 40 }}>
+          {AGENTS.map((a) => (
+            <Link key={a.label} href={a.href}>
+              <div
+                style={{ background: "#fff", borderRadius: 14, border: `1px solid ${BORDER}`, padding: "18px 20px", cursor: "pointer", display: "flex", alignItems: "center", gap: 14 }}
+                onMouseEnter={(e) => { (e.currentTarget as HTMLDivElement).style.boxShadow = "0 4px 16px rgba(0,0,0,0.08)"; }}
+                onMouseLeave={(e) => { (e.currentTarget as HTMLDivElement).style.boxShadow = "none"; }}
+                data-testid={`card-agent-${a.label.toLowerCase().replace(/\s/g, "-")}`}
+              >
+                <div style={{ width: 44, height: 44, borderRadius: 12, background: a.color, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                  <a.Icon style={{ width: 20, height: 20, color: "#fff" }} />
+                </div>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 800, color: "#0f172a" }}>{a.label}</div>
+                  <div style={{ fontSize: 12, color: "#64748b", marginTop: 2 }}>{a.sub}</div>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+
+        {/* ── Basis vs Pro (alleen voor niet-Pro leden) ── */}
+        {!isPro && (
+          <div style={{ background: "#fff", borderRadius: 16, border: `1px solid ${BORDER}`, overflow: "hidden", marginBottom: 40 }}>
+            <div style={{ background: BLAUW, padding: "16px 24px" }}>
+              <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "#fff" }}>Basis vs Pro</h3>
+              <p style={{ margin: "4px 0 0", fontSize: 13, color: "rgba(255,255,255,0.7)" }}>Kies het plan dat bij jou past</p>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr" }}>
+              {/* Basis */}
+              <div style={{ padding: "20px 24px", borderRight: `1px solid ${BORDER}` }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: "#334155", marginBottom: 14 }}>BASIS — gratis</div>
+                {[
+                  "Regio-inzicht inzien",
+                  "Brief analyse (beperkt)",
+                  "RegioBot (beperkt)",
+                  "Bedrijfsprofiel (basis)",
+                  "WOO-uitleg lezen",
+                  "Samenwerken meedoen",
+                ].map((item) => (
+                  <div key={item} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 9 }}>
+                    <div style={{ width: 17, height: 17, borderRadius: "50%", background: "#e2e8f0", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <span style={{ fontSize: 9, color: "#64748b", fontWeight: 900, lineHeight: 1 }}>✓</span>
+                    </div>
+                    <span style={{ fontSize: 13, color: "#475569" }}>{item}</span>
+                  </div>
+                ))}
+              </div>
+              {/* Pro */}
+              <div style={{ padding: "20px 24px", background: "#fafbff" }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: BLAUW, marginBottom: 14 }}>PRO</div>
+                {[
+                  "Alles van Basis",
+                  "Brief analyse (volledig)",
+                  "RegioBot (onbeperkt)",
+                  "WOO-verzoek maken",
+                  "WOO dossiers beheren",
+                  "Bedrijfsprofiel uitgebreid",
+                  "Website onderhoud",
+                  "Lokale acties starten",
+                  "Alle AI agents",
+                ].map((item) => (
+                  <div key={item} style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 9 }}>
+                    <div style={{ width: 17, height: 17, borderRadius: "50%", background: BLAUW, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <span style={{ fontSize: 9, color: "#fff", fontWeight: 900, lineHeight: 1 }}>✓</span>
+                    </div>
+                    <span style={{ fontSize: 13, color: "#334155" }}>{item}</span>
+                  </div>
+                ))}
+                <Link href="/account/instellingen">
+                  <button
+                    style={{ marginTop: 16, width: "100%", padding: "10px 0", borderRadius: 10, border: "none", background: ORANJE, color: "#fff", fontWeight: 700, fontSize: 13, cursor: "pointer" }}
+                    data-testid="button-upgrade-pro-comparison"
+                  >
+                    Upgrade naar Pro →
+                  </button>
+                </Link>
+              </div>
             </div>
           </div>
         )}
 
-        {/* ── 7. VALUES ROW ── */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(240px, 1fr))", gap: 16 }}>
+        {/* ── Brand values ── */}
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 14 }}>
           {[
-            { icon: <Users size={18} style={{ color: C.green }} />, label: "Vertrouwen van mens tot mens", bg: "#f0fdf4" },
-            { icon: <Lightbulb size={18} style={{ color: C.orange }} />, label: "Vakmanschap is meesterschap", bg: "#fff7ed" },
-            { icon: <MapPin size={18} style={{ color: C.navy }} />, label: "Sterke ondernemers, sterke regio's", bg: "#eff6ff" },
-          ].map((val) => (
-            <div key={val.label} style={{ background: val.bg, border: `1px solid ${C.border}`, borderRadius: 12, padding: "16px 18px", display: "flex", alignItems: "center", gap: 12 }}>
-              <div style={{ flexShrink: 0 }}>{val.icon}</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: C.navy, lineHeight: 1.4 }}>{val.label}</div>
+            { Icon: Users,      text: "Vertrouwen van mens tot mens" },
+            { Icon: Star,       text: "Vakmanschap is meesterschap" },
+            { Icon: MapPin,     text: "Sterke ondernemers, sterke regio's" },
+          ].map(({ Icon, text }) => (
+            <div key={text} style={{ background: "#fff", borderRadius: 12, border: `1px solid ${BORDER}`, padding: "14px 18px", display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ width: 34, height: 34, borderRadius: 9, background: BG, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <Icon style={{ width: 16, height: 16, color: BLAUW }} />
+              </div>
+              <span style={{ fontSize: 13, fontWeight: 600, color: "#334155" }}>{text}</span>
             </div>
           ))}
         </div>
