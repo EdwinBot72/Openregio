@@ -1,4 +1,4 @@
-import { MapPin, Lock, ArrowRight } from "lucide-react";
+import { MapPin, Lock, ArrowRight, TrendingUp } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { Skeleton } from "@/components/ui/skeleton";
