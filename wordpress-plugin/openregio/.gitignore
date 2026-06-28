@@ -1,6 +1,0 @@
-vendor/
-node_modules/
-*.log
-.DS_Store
-.env
-composer.lock
