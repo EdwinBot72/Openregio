@@ -3,6 +3,12 @@
 .cache/
 artifacts/
 uploads/
+node_modules/
+dist/
+attached_assets/
+test-results/
+playwright-report/
+.playwright/
 *.zip
 *.log
 .env
