@@ -152,13 +152,7 @@ export default function HomePage() {
 
           {/* Right — photo */}
           <div className="or-hero-right" style={{ position: "relative", minHeight: 460, overflow: "hidden" }}>
-            <div style={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${BLAUW} 0%, #1a3a5c 100%)`, zIndex: -1 }} />
-            <img
-              src="/images/openregio_foto_06.png"
-              alt="Lokale ondernemers samenwerken"
-              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block", position: "absolute", inset: 0 }}
-              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-            />
+            <div style={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${BLAUW} 0%, #1a3a5c 100%)` }} />
             {/* Brush-stroke quote — bleeds past left boundary */}
             <div style={{
               position: "absolute", bottom: 40, left: -24, right: 0,
