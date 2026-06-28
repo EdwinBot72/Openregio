@@ -14,12 +14,7 @@
 
 /* Hero Section */
 .hero {
-  background:
-    linear-gradient(90deg, rgba(14,63,134,.88), rgba(14,63,134,.55)),
-    url("/img/hero-bg.webp");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  background: linear-gradient(90deg, rgba(14,63,134,.88), rgba(14,63,134,.55));
   color: #fff;
 }
 
