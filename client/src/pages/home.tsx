@@ -132,6 +132,8 @@ export default function HomePage() {
         />
         {/* Subtle gradient for contrast — photo stays leading */}
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(11,34,64,0) 0%, rgba(11,34,64,0.05) 55%, rgba(11,34,64,0.55) 100%)" }} />
+        {/* Vignette to obscure any digital overlay elements in the source photo */}
+        <div style={{ position: "absolute", inset: 0, background: "radial-gradient(circle at 84% 80%, rgba(11,34,64,0.98) 0%, rgba(11,34,64,0.9) 28%, rgba(11,34,64,0.5) 45%, rgba(11,34,64,0) 65%)" }} />
 
         {/* Centered CTAs at the bottom of the hero */}
         <div className="or-hero-ctas" style={{ position: "relative", zIndex: 1, display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center", padding: "0 24px 40px" }}>
