@@ -58,16 +58,17 @@ function MiniKaart({
     let cancelled = false;
     setGeo({ status: "loading" });
     onStatusChange?.("loading");
-    const query = encodeURIComponent(`${locatie}, ${regio}, Nederland`);
     fetch(
-      `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`,
-      { headers: { "Accept-Language": "nl" } },
+      `/api/geocode?locatie=${encodeURIComponent(locatie)}&regio=${encodeURIComponent(regio)}`,
     )
-      .then((r) => r.json())
-      .then((data: Array<{ lat: string; lon: string }>) => {
+      .then((r) => {
+        if (!r.ok) throw new Error("geocode failed");
+        return r.json();
+      })
+      .then((data: { found: boolean; lat: number | null; lng: number | null }) => {
         if (cancelled) return;
-        if (data.length > 0) {
-          setGeo({ status: "ok", lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
+        if (data.found && data.lat !== null && data.lng !== null) {
+          setGeo({ status: "ok", lat: data.lat, lng: data.lng });
           onStatusChange?.("ok");
         } else {
           setGeo({ status: "error" });
