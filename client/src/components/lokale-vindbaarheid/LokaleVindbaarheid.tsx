@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, FileText, Map, CheckSquare, Globe, ExternalLink } from "lucide-react";
+import { Search, FileText, Map, CheckSquare, Globe, ExternalLink, Landmark } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -20,7 +20,7 @@ export default function LokaleVindbaarheid() {
       </div>
 
       <Tabs defaultValue="zoektermen">
-        <TabsList className="grid grid-cols-5 w-full">
+        <TabsList className="grid grid-cols-6 w-full">
           <TabsTrigger value="zoektermen" className="flex items-center gap-1.5 text-xs" data-testid="tab-zoektermen">
             <Search className="w-3.5 h-3.5 flex-shrink-0" />
             <span className="hidden sm:inline">Zoektermen</span>
@@ -32,6 +32,10 @@ export default function LokaleVindbaarheid() {
           <TabsTrigger value="gemeente" className="flex items-center gap-1.5 text-xs" data-testid="tab-gemeente">
             <Map className="w-3.5 h-3.5 flex-shrink-0" />
             <span className="hidden sm:inline">Gemeente radar</span>
+          </TabsTrigger>
+          <TabsTrigger value="updates" className="flex items-center gap-1.5 text-xs" data-testid="tab-gemeente-updates">
+            <Landmark className="w-3.5 h-3.5 flex-shrink-0" />
+            <span className="hidden sm:inline">Gemeente-updates</span>
           </TabsTrigger>
           <TabsTrigger value="checklist" className="flex items-center gap-1.5 text-xs" data-testid="tab-checklist">
             <CheckSquare className="w-3.5 h-3.5 flex-shrink-0" />
@@ -48,6 +52,7 @@ export default function LokaleVindbaarheid() {
           <span>Zoek</span>
           <span>Tekst</span>
           <span>Radar</span>
+          <span>Updates</span>
           <span>Check</span>
           <span>Scan</span>
         </div>
@@ -64,6 +69,10 @@ export default function LokaleVindbaarheid() {
           <GemeenteRadar />
         </TabsContent>
 
+        <TabsContent value="updates">
+          <GemeenteUpdatesTab />
+        </TabsContent>
+
         <TabsContent value="checklist">
           <WebsiteChecklist />
         </TabsContent>
@@ -72,6 +81,41 @@ export default function LokaleVindbaarheid() {
           <WebsiteScanTab />
         </TabsContent>
       </Tabs>
+    </div>
+  );
+}
+
+function GemeenteUpdatesTab() {
+  return (
+    <div className="space-y-5 pt-4">
+      <div>
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          Bekijk officiële publicaties en bekendmakingen van jouw gemeente — zoals vergunningen, bestemmingsplannen
+          en beleidswijzigingen die relevant zijn voor jouw onderneming.
+        </p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base flex items-center gap-2">
+            <Landmark className="w-4 h-4" />
+            Gemeente-updates
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <p className="text-sm text-muted-foreground">
+            Zoek op je eigen gemeente en zie direct de laatste officiële bekendmakingen van de overheid, opgehaald
+            via overheid.nl.
+          </p>
+          <Link href="/kansen/gemeente-updates">
+            <Button data-testid="button-open-gemeente-updates">
+              <Landmark className="w-4 h-4 mr-2" />
+              Open gemeente-updates
+              <ExternalLink className="w-3.5 h-3.5 ml-2" />
+            </Button>
+          </Link>
+        </CardContent>
+      </Card>
     </div>
   );
 }
