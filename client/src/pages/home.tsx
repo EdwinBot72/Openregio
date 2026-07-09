@@ -122,7 +122,7 @@ export default function HomePage() {
       </header>
 
       {/* ── HERO — full-width photo, no text overlay, centered CTAs ─────────── */}
-      <section id="platform" className="or-hero" style={{ position: "relative", minHeight: 760, display: "flex", alignItems: "flex-end", justifyContent: "center", overflow: "hidden" }}>
+      <section id="platform" className="or-hero" style={{ position: "relative", minHeight: 620, display: "flex", alignItems: "flex-end", justifyContent: "center", overflow: "hidden" }}>
         <div style={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${BLAUW} 0%, #1a3a5c 100%)`, zIndex: -1 }} />
         <img
           src="/images/hero-entrepreneur.jpg"
