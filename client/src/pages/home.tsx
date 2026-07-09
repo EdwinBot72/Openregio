@@ -134,9 +134,13 @@ export default function HomePage() {
         <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, rgba(11,34,64,0.92) 0%, rgba(11,34,64,0.72) 42%, rgba(11,34,64,0.15) 68%, rgba(11,34,64,0) 85%)" }} />
 
         <div className="or-hero-content" style={{ position: "relative", zIndex: 1, maxWidth: 1200, width: "100%", margin: "0 auto", padding: "0 24px" }}>
-          <div className="or-hero-text" style={{ maxWidth: 480 }}>
-            <p style={{ fontSize: 17, color: "#fff", lineHeight: 1.75, margin: "0 0 28px", fontWeight: 500 }}>
-              OpenRegio helpt lokale ondernemers om regels, besluiten en kansen in hun regio zichtbaar te maken — vanuit de onderneming én de mens daarachter. Samen versterken we lokaal ondernemen met inzicht, workshops, praktische ondersteuning en meer zichtbaarheid in de regio.
+          <div className="or-hero-text" style={{ maxWidth: 460 }}>
+            <div style={{ width: 40, height: 4, background: ORANJE, borderRadius: 2, margin: "0 0 20px" }} />
+            <h1 style={{ fontSize: 36, fontWeight: 900, color: "#fff", lineHeight: 1.2, margin: "0 0 16px" }}>
+              Regels en kansen<br />zichtbaar in jouw regio.
+            </h1>
+            <p style={{ fontSize: 16, color: "rgba(255,255,255,0.88)", lineHeight: 1.6, margin: "0 0 28px", maxWidth: 400 }}>
+              Vanuit de onderneming én de mens daarachter — met inzicht, workshops en praktische ondersteuning.
             </p>
             <a href="#pricing">
               <button style={{ padding: "13px 28px", borderRadius: 8, fontSize: 15, fontWeight: 700, background: ORANJE, color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
