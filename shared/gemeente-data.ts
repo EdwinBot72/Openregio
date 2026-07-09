@@ -282,6 +282,30 @@ export function berekenBeroepKansenPerGemeente(gemeenteNaam: string): BeroepKans
   return result.sort((a, b) => b.kansScore - a.kansScore);
 }
 
+export function genereerGemeenteTips(score: GemeenteScore, rank: number): string[] {
+  const tips: string[] = [];
+
+  if (score.competitie === "laag") {
+    tips.push("Weinig concurrentie hier: met een goed ingevuld Google-profiel en een paar reviews val je al snel op.");
+  } else if (score.competitie === "midden") {
+    tips.push("Gemiddelde concurrentie: onderscheid je met klantreviews en duidelijke foto's van je werk.");
+  } else {
+    tips.push("Veel concurrentie in deze gemeente: investeer in een sterk Google-profiel, actief reviews verzamelen en lokale content op je website.");
+  }
+
+  if (score.groeigebied) {
+    tips.push("Groeigebied: hier komen veel nieuwe inwoners bij — zij kennen de lokale aanbieders nog niet, dus dit is het moment om je zichtbaar te maken.");
+  }
+
+  if (rank <= 3) {
+    tips.push("Dit is een van de kansrijkste gemeenten voor jouw beroep — overweeg hier als eerste te adverteren of content op te richten.");
+  } else if (score.inwoners > 150000) {
+    tips.push("Grote gemeente met veel potentiële klanten, maar ook meer concurrentie — richt je op een duidelijke niche of specialisatie.");
+  }
+
+  return tips;
+}
+
 export function berekenGemeenteScores(beroep: string, spoedScore: number): GemeenteScore[] {
   const factor = SPOED_FACTOR[beroep] ?? 1.0;
   const scores: GemeenteScore[] = [];

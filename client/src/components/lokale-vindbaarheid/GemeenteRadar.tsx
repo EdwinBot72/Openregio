@@ -2,8 +2,8 @@ import { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { BEROEP_DATA, BEROEP_CATEGORIEEN, type Beroep } from "@shared/seo-data";
-import { PROVINCIES, berekenGemeenteScores, type GemeenteScore, type CompetitieNiveau } from "@shared/gemeente-data";
-import { TrendingUp, Users, Target } from "lucide-react";
+import { PROVINCIES, berekenGemeenteScores, genereerGemeenteTips, type GemeenteScore, type CompetitieNiveau } from "@shared/gemeente-data";
+import { TrendingUp, Users, Target, Lightbulb } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 const COMPETITIE_LABEL: Record<CompetitieNiveau, string> = {
@@ -125,6 +125,22 @@ export default function GemeenteRadar() {
             </div>
           </div>
 
+          {/* Rapport samenvatting */}
+          <Card className="bg-[#0b2240]/5 border-[#0b2240]/20">
+            <CardContent className="pt-4 pb-4 space-y-1.5">
+              <div className="flex items-center gap-1.5 text-[#0b2240] dark:text-[#0b2240]">
+                <Target className="w-3.5 h-3.5" />
+                <span className="text-xs font-semibold uppercase tracking-wide">Jouw doelgroep-rapport</span>
+              </div>
+              <p className="text-sm">
+                Voor <span className="font-semibold">{BEROEP_DATA[beroep].label.toLowerCase()}</span> zit de grootste kans in{" "}
+                <span className="font-semibold">{gefilterd[0]?.gemeente}</span>
+                {gefilterd[1] && <> en <span className="font-semibold">{gefilterd[1].gemeente}</span></>}.
+                Hieronder per gemeente de vraag, concurrentie en concrete tips om daar gevonden te worden.
+              </p>
+            </CardContent>
+          </Card>
+
           {/* Gemeente lijst */}
           <div className="space-y-2">
             {gefilterd.map((score, i) => (
@@ -199,6 +215,16 @@ function GemeenteRij({ score, rank, maxKans, maxVraag }: {
             <p className="text-xs text-muted-foreground">
               {score.inwoners.toLocaleString("nl-NL")} inwoners
             </p>
+
+            {/* Tips */}
+            <div className="space-y-1 pt-1">
+              {genereerGemeenteTips(score, rank).map((tip, i) => (
+                <div key={i} className="flex items-start gap-1.5">
+                  <Lightbulb className="w-3 h-3 text-[#f28a1a] flex-shrink-0 mt-0.5" />
+                  <p className="text-xs text-muted-foreground leading-relaxed">{tip}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </CardContent>
