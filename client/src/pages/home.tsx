@@ -30,7 +30,6 @@ export default function HomePage() {
   usePageTitle("OpenRegio — Grip op regels. Kracht in de regio.");
   const { user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const dashHref = user ? "/vandaag" : "/register";
 
   return (
     <div style={{ fontFamily: FF, background: "#f8f7f4", margin: 0, padding: 0 }}>
@@ -123,7 +122,7 @@ export default function HomePage() {
       </header>
 
       {/* ── HERO — full-width photo, no text overlay, centered CTAs ─────────── */}
-      <section id="platform" className="or-hero" style={{ position: "relative", minHeight: 440, display: "flex", alignItems: "flex-end", justifyContent: "center", overflow: "hidden" }}>
+      <section id="platform" className="or-hero" style={{ position: "relative", minHeight: 620, display: "flex", alignItems: "flex-end", justifyContent: "center", overflow: "hidden" }}>
         <div style={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${BLAUW} 0%, #1a3a5c 100%)`, zIndex: -1 }} />
         <img
           src="/images/hero-entrepreneur.jpg"
@@ -136,14 +135,9 @@ export default function HomePage() {
 
         {/* Centered CTAs at the bottom of the hero */}
         <div className="or-hero-ctas" style={{ position: "relative", zIndex: 1, display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center", padding: "0 24px 40px" }}>
-          <Link href={dashHref}>
-            <button style={{ padding: "13px 28px", borderRadius: 8, fontSize: 15, fontWeight: 700, background: ORANJE, color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
-              Gratis aanmelden <ArrowRight style={{ width: 16, height: 16 }} />
-            </button>
-          </Link>
           <a href="#pricing">
-            <button style={{ padding: "12px 26px", borderRadius: 8, fontSize: 15, fontWeight: 700, background: "rgba(255,255,255,0.94)", color: BLAUW, border: "2px solid #fff", cursor: "pointer" }}>
-              Bekijk lidmaatschap
+            <button style={{ padding: "13px 28px", borderRadius: 8, fontSize: 15, fontWeight: 700, background: ORANJE, color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+              Bekijk lidmaatschap <ArrowRight style={{ width: 16, height: 16 }} />
             </button>
           </a>
         </div>

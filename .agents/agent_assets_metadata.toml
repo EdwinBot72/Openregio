@@ -89,3 +89,21 @@ id = "Nn9C8kaBka9Ihz7GeL6kl"
 uri = "file://attached_assets/stock_images/hero_entrepreneur_photo.jpg"
 type = "image"
 title = "Dutch local entrepreneur smiling in front of small shop, warm lighting, business owner"
+
+[[outputs]]
+id = "ETJ5XEe479tvaQSNelRgt"
+uri = "file://attached_assets/stock_images/hero_local_entrepreneur_clean_1.jpg"
+type = "image"
+title = "local shop owner smiling in his store, natural light, professional lifestyle photo"
+
+[[outputs]]
+id = "JfjZAceXiKCJzZ8CUQyIh"
+uri = "file://attached_assets/stock_images/hero_local_entrepreneur_clean_2.jpg"
+type = "image"
+title = "local shop owner smiling in his store, natural light, professional lifestyle photo"
+
+[[outputs]]
+id = "H5gWYBVthCtqmAVBRq5S9"
+uri = "file://attached_assets/stock_images/hero_local_entrepreneur_clean_3.jpg"
+type = "image"
+title = "local shop owner smiling in his store, natural light, professional lifestyle photo"
