@@ -1,1 +1,2 @@
 - [Plan naming convention](plan-naming.md) — internal DB value is always "basic" (not "basis"); display is "Basis"; coaching displays as "1-op-1 coaching"
+- [.replitignore excluding build output breaks deploys](deployment-dist-exclusion.md) — "Cannot find module dist/index.js" at deploy despite successful build means check .replitignore
