@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema, insertBedrijfsprofielSchema, regioBotChatSchema, visibilitySettingsSchema, DEFAULT_VISIBILITY_SETTINGS, insertCrewProfileSchema, insertCrewRequestSchema, insertCrewApplicationSchema, CREW_CATEGORIES, users, ragDocuments, documents, insertRegioDealSchema, crewApplications, crewRequests, bedrijfsprofielen, dailyCourses, dailyCourseProgress, insertDailyCourseSchema, LOKALE_ACTIE_DOELGROEPEN, insertLokaleActieInteresseSchema } from "@shared/schema";
+import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema, insertBedrijfsprofielSchema, regioBotChatSchema, visibilitySettingsSchema, DEFAULT_VISIBILITY_SETTINGS, insertCrewProfileSchema, insertCrewRequestSchema, insertCrewApplicationSchema, CREW_CATEGORIES, users, ragDocuments, documents, insertRegioDealSchema, crewApplications, crewRequests, bedrijfsprofielen, dailyCourses, dailyCourseProgress, insertDailyCourseSchema, LOKALE_ACTIE_DOELGROEPEN, insertLokaleActieInteresseSchema, ZICHTBAARHEID_OPTIES } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { createMollieClient } from "@mollie/api-client";
@@ -5969,14 +5969,15 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
   });
   // ─── Lokale Marktplaats (ik zoek / ik bied) ──────────────────────────
 
-  // GET /api/lokaal-marktplaats — public listing (all active items)
-  app.get("/api/lokaal-marktplaats", async (req, res) => {
+  // GET /api/lokaal-marktplaats — listing (auth = alles, anoniem = alleen 'lokaal' zichtbaar)
+  app.get("/api/lokaal-marktplaats", attachUser, async (req, res) => {
     try {
       const { regio, type, categorie } = req.query as Record<string, string>;
       const items = await storage.getLokaalAanbod({
         regio: regio || undefined,
         type: type || undefined,
         categorie: categorie || undefined,
+        zichtbaarheid: req.user ? undefined : "lokaal",
       });
       return res.json(items);
     } catch (err) {
@@ -6044,13 +6045,14 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
     }
   });
 
-  // GET /api/lokale-acties/public — publieke lijst (geen auth vereist)
+  // GET /api/lokale-acties/public — publieke lijst (geen auth vereist, alleen 'lokaal' zichtbaar)
   app.get("/api/lokale-acties/public", async (req, res) => {
     try {
       const { regio, doelgroep } = req.query as Record<string, string>;
       const items = await storage.getLokaleActies({
         regio: regio || undefined,
         doelgroep: doelgroep || undefined,
+        zichtbaarheid: "lokaal",
       });
       return res.json(items);
     } catch (err) {
@@ -6295,6 +6297,7 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
       .nullish(),
     contactEmail: z.string().trim().email("Ongeldig e-mailadres").or(z.literal("")).nullish(),
     bedrijfsnaam: z.string().trim().max(255).nullish(),
+    zichtbaarheid: z.enum(ZICHTBAARHEID_OPTIES).optional(),
   });
 
   // POST /api/lokale-acties — nieuwe actie aanmaken (Pro-only)
@@ -6318,6 +6321,7 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
         externeLink: d.externeLink ? d.externeLink : null,
         contactEmail: d.contactEmail ? d.contactEmail : null,
         bedrijfsnaam: d.bedrijfsnaam ? d.bedrijfsnaam : null,
+        zichtbaarheid: d.zichtbaarheid ?? "leden",
       });
       return res.status(201).json(item);
     } catch (err) {
@@ -6338,7 +6342,7 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
       const allowed: Record<string, unknown> = {};
       const editableKeys = [
         "titel", "beschrijving", "datum", "locatie", "regio",
-        "doelgroep", "externeLink", "contactEmail", "bedrijfsnaam",
+        "doelgroep", "externeLink", "contactEmail", "bedrijfsnaam", "zichtbaarheid",
       ] as const;
       const body = (req.body ?? {}) as Record<string, unknown>;
       for (const k of editableKeys) {

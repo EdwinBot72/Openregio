@@ -234,6 +234,7 @@ export async function runMigrations(): Promise<void> {
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lokaal_aanbod_regio ON lokaal_aanbod(regio);`);
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lokaal_aanbod_type ON lokaal_aanbod(type);`);
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lokaal_aanbod_user ON lokaal_aanbod(user_id);`);
+    await db.execute(sql`ALTER TABLE lokaal_aanbod ADD COLUMN IF NOT EXISTS zichtbaarheid VARCHAR(10) NOT NULL DEFAULT 'leden';`);
     console.log("[Migration] ✓ lokaal_aanbod table ensured");
 
     // Lokale Acties (evenementen) - Pro-leden maken acties die alle leden zien
@@ -258,6 +259,7 @@ export async function runMigrations(): Promise<void> {
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lokale_acties_regio ON lokale_acties(regio);`);
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lokale_acties_owner ON lokale_acties(owner_user_id);`);
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lokale_acties_status_expires ON lokale_acties(status, expires_at);`);
+    await db.execute(sql`ALTER TABLE lokale_acties ADD COLUMN IF NOT EXISTS zichtbaarheid VARCHAR(10) NOT NULL DEFAULT 'leden';`);
     console.log("[Migration] ✓ lokale_acties table ensured");
 
     // Ondernemer Thema's table for AI-generated weekly entrepreneur insights

@@ -319,14 +319,14 @@ export interface IStorage {
   deleteIntelSignaal(id: string): Promise<boolean>;
 
   // Lokale Marktplaats
-  getLokaalAanbod(opts?: { regio?: string; type?: string; categorie?: string }): Promise<LokaalAanbod[]>;
+  getLokaalAanbod(opts?: { regio?: string; type?: string; categorie?: string; zichtbaarheid?: string }): Promise<LokaalAanbod[]>;
   getLokaalAanbodById(id: string): Promise<LokaalAanbod | undefined>;
   getLokaalAanbodByUser(userId: string): Promise<LokaalAanbod[]>;
   createLokaalAanbod(item: InsertLokaalAanbod): Promise<LokaalAanbod>;
   deleteLokaalAanbod(id: string, userId: string): Promise<boolean>;
 
   // Lokale Acties (evenementen door Pro-leden)
-  getLokaleActies(opts?: { regio?: string; doelgroep?: string; includeVerlopen?: boolean; createdSince?: Date }): Promise<LokaleActie[]>;
+  getLokaleActies(opts?: { regio?: string; doelgroep?: string; includeVerlopen?: boolean; createdSince?: Date; zichtbaarheid?: string }): Promise<LokaleActie[]>;
   getLokaleActieById(id: string): Promise<LokaleActie | undefined>;
   getLokaleActiesByUser(userId: string): Promise<LokaleActie[]>;
   createLokaleActie(input: InsertLokaleActie & { ownerUserId: string }): Promise<LokaleActie>;
@@ -1845,7 +1845,7 @@ export class MemStorage implements IStorage {
   }
 
   // Lokale Marktplaats (stub for MemStorage)
-  async getLokaalAanbod(_opts?: { regio?: string; type?: string; categorie?: string }): Promise<LokaalAanbod[]> {
+  async getLokaalAanbod(_opts?: { regio?: string; type?: string; categorie?: string; zichtbaarheid?: string }): Promise<LokaalAanbod[]> {
     return [];
   }
   async getLokaalAanbodById(_id: string): Promise<LokaalAanbod | undefined> {
@@ -1862,7 +1862,7 @@ export class MemStorage implements IStorage {
   }
 
   // Lokale Acties (stub for MemStorage)
-  async getLokaleActies(_opts?: { regio?: string; doelgroep?: string; includeVerlopen?: boolean }): Promise<LokaleActie[]> {
+  async getLokaleActies(_opts?: { regio?: string; doelgroep?: string; includeVerlopen?: boolean; createdSince?: Date; zichtbaarheid?: string }): Promise<LokaleActie[]> {
     return [];
   }
   async getLokaleActieById(_id: string): Promise<LokaleActie | undefined> {
@@ -3205,11 +3205,12 @@ class DbStorage implements IStorage {
   }
 
   // ─── Lokale Marktplaats ────────────────────────────────────────────────
-  async getLokaalAanbod(opts?: { regio?: string; type?: string; categorie?: string }): Promise<LokaalAanbod[]> {
+  async getLokaalAanbod(opts?: { regio?: string; type?: string; categorie?: string; zichtbaarheid?: string }): Promise<LokaalAanbod[]> {
     const conditions = [eq(lokaalAanbod.isActive, true)];
     if (opts?.regio) conditions.push(eq(lokaalAanbod.regio, opts.regio));
     if (opts?.type) conditions.push(eq(lokaalAanbod.type, opts.type as "zoek" | "bied"));
     if (opts?.categorie) conditions.push(eq(lokaalAanbod.categorie, opts.categorie as typeof lokaalAanbod.categorie._.data));
+    if (opts?.zichtbaarheid) conditions.push(eq(lokaalAanbod.zichtbaarheid, opts.zichtbaarheid as "lokaal" | "leden"));
     return db.select().from(lokaalAanbod).where(and(...conditions)).orderBy(desc(lokaalAanbod.createdAt));
   }
 
@@ -3235,7 +3236,7 @@ class DbStorage implements IStorage {
   }
 
   // ─── Lokale Acties ────────────────────────────────────────────────────
-  async getLokaleActies(opts?: { regio?: string; doelgroep?: string; includeVerlopen?: boolean; createdSince?: Date }): Promise<LokaleActie[]> {
+  async getLokaleActies(opts?: { regio?: string; doelgroep?: string; includeVerlopen?: boolean; createdSince?: Date; zichtbaarheid?: string }): Promise<LokaleActie[]> {
     const conditions = [];
     if (!opts?.includeVerlopen) {
       conditions.push(eq(lokaleActies.status, "actief"));
@@ -3249,6 +3250,9 @@ class DbStorage implements IStorage {
     }
     if (opts?.createdSince) {
       conditions.push(gt(lokaleActies.createdAt, opts.createdSince));
+    }
+    if (opts?.zichtbaarheid) {
+      conditions.push(eq(lokaleActies.zichtbaarheid, opts.zichtbaarheid as "lokaal" | "leden"));
     }
     const query = db.select().from(lokaleActies);
     const filtered = conditions.length > 0 ? query.where(and(...conditions)) : query;

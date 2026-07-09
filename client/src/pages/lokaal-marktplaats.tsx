@@ -59,6 +59,7 @@ const plaatsingSchema = z.object({
   regio: z.string().min(2, "Vul je gemeente of regio in"),
   bedrijfsnaam: z.string().optional(),
   contactInfo: z.string().optional(),
+  zichtbaarheid: z.enum(["lokaal", "leden"]),
 });
 type PlaatsingForm = z.infer<typeof plaatsingSchema>;
 
@@ -96,6 +97,7 @@ export default function LokaalMarktplaatsPage() {
       regio: "",
       bedrijfsnaam: "",
       contactInfo: "",
+      zichtbaarheid: "leden",
     },
   });
 
@@ -415,6 +417,27 @@ export default function LokaalMarktplaatsPage() {
                   )}
                 />
               </div>
+              <FormField
+                control={form.control}
+                name="zichtbaarheid"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Zichtbaarheid</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-form-zichtbaarheid">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="leden">Alleen leden (na inloggen)</SelectItem>
+                        <SelectItem value="lokaal">Publiek zichtbaar (ook zonder inloggen)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <div className="flex gap-3 pt-2">
                 <Button
                   type="button"

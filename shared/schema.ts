@@ -1238,6 +1238,7 @@ export const LOKAAL_AANBOD_TYPE = ["zoek", "bied"] as const;
 export const LOKAAL_AANBOD_CATEGORIEEN = [
   "diensten", "producten", "ruimte", "materieel", "kennis", "samenwerking", "overig",
 ] as const;
+export const ZICHTBAARHEID_OPTIES = ["lokaal", "leden"] as const;
 
 export const lokaalAanbod = pgTable("lokaal_aanbod", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -1249,6 +1250,7 @@ export const lokaalAanbod = pgTable("lokaal_aanbod", {
   regio: varchar("regio", { length: 255 }).notNull(),
   contactInfo: text("contact_info"),
   bedrijfsnaam: varchar("bedrijfsnaam", { length: 255 }),
+  zichtbaarheid: varchar("zichtbaarheid", { enum: ZICHTBAARHEID_OPTIES }).notNull().default("leden"),
   isActive: boolean("is_active").notNull().default(true),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 });
@@ -1278,6 +1280,7 @@ export const lokaleActies = pgTable("lokale_acties", {
   externeLink: text("externe_link"),
   contactEmail: varchar("contact_email", { length: 255 }),
   bedrijfsnaam: varchar("bedrijfsnaam", { length: 255 }),
+  zichtbaarheid: varchar("zichtbaarheid", { enum: ZICHTBAARHEID_OPTIES }).notNull().default("leden"),
   status: varchar("status", { enum: LOKALE_ACTIE_STATUS }).notNull().default("actief"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),

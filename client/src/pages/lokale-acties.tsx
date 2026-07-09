@@ -56,6 +56,7 @@ const actieSchema = insertLokaleActieSchema
     externeLink: true,
     contactEmail: true,
     bedrijfsnaam: true,
+    zichtbaarheid: true,
   })
   .extend({
     titel: z.string().min(5, "Minimaal 5 tekens").max(255),
@@ -66,6 +67,7 @@ const actieSchema = insertLokaleActieSchema
     externeLink: z.string().url("Vul een geldige URL in").or(z.literal("")).optional(),
     contactEmail: z.string().email("Ongeldig e-mailadres").or(z.literal("")).optional(),
     bedrijfsnaam: z.string().max(255).optional(),
+    zichtbaarheid: z.enum(["lokaal", "leden"]),
   });
 type ActieForm = z.infer<typeof actieSchema>;
 
@@ -148,6 +150,7 @@ export default function LokaleActiesPage() {
       externeLink: "",
       contactEmail: user?.email ?? "",
       bedrijfsnaam: user?.businessName ?? "",
+      zichtbaarheid: "leden",
     },
   });
 
@@ -197,6 +200,7 @@ export default function LokaleActiesPage() {
       externeLink: "",
       contactEmail: user?.email ?? "",
       bedrijfsnaam: user?.businessName ?? "",
+      zichtbaarheid: "leden",
     });
     setOpen(true);
   }
@@ -214,6 +218,7 @@ export default function LokaleActiesPage() {
       externeLink: actie.externeLink ?? "",
       contactEmail: actie.contactEmail ?? "",
       bedrijfsnaam: actie.bedrijfsnaam ?? "",
+      zichtbaarheid: (actie.zichtbaarheid as ActieForm["zichtbaarheid"]) ?? "leden",
     });
     setOpen(true);
   }
@@ -712,6 +717,27 @@ export default function LokaleActiesPage() {
                         data-testid="input-form-bedrijf"
                       />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="zichtbaarheid"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Zichtbaarheid</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger data-testid="select-form-zichtbaarheid">
+                          <SelectValue />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="leden">Alleen leden (na inloggen)</SelectItem>
+                        <SelectItem value="lokaal">Publiek zichtbaar (ook zonder inloggen)</SelectItem>
+                      </SelectContent>
+                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
