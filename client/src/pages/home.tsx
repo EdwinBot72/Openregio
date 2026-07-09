@@ -121,8 +121,8 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* ── HERO — full-width photo, no text overlay, centered CTAs ─────────── */}
-      <section id="platform" className="or-hero" style={{ position: "relative", minHeight: 620, display: "flex", alignItems: "flex-end", justifyContent: "center", overflow: "hidden" }}>
+      {/* ── HERO — full-width photo with left-aligned text ───────────────── */}
+      <section id="platform" className="or-hero" style={{ position: "relative", minHeight: 620, display: "flex", alignItems: "center", overflow: "hidden" }}>
         <div style={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${BLAUW} 0%, #1a3a5c 100%)`, zIndex: -1 }} />
         <img
           src="/images/hero-entrepreneur.jpg"
@@ -130,13 +130,20 @@ export default function HomePage() {
           style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block", position: "absolute", inset: 0 }}
           onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
         />
-        {/* Centered CTAs at the bottom of the hero */}
-        <div className="or-hero-ctas" style={{ position: "relative", zIndex: 1, display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center", padding: "0 24px 40px" }}>
-          <a href="#pricing">
-            <button style={{ padding: "13px 28px", borderRadius: 8, fontSize: 15, fontWeight: 700, background: ORANJE, color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
-              Bekijk lidmaatschap <ArrowRight style={{ width: 16, height: 16 }} />
-            </button>
-          </a>
+        {/* Dark wash on the left so light text stays readable over the photo */}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, rgba(11,34,64,0.92) 0%, rgba(11,34,64,0.72) 42%, rgba(11,34,64,0.15) 68%, rgba(11,34,64,0) 85%)" }} />
+
+        <div className="or-hero-content" style={{ position: "relative", zIndex: 1, maxWidth: 1200, width: "100%", margin: "0 auto", padding: "0 24px" }}>
+          <div className="or-hero-text" style={{ maxWidth: 480 }}>
+            <p style={{ fontSize: 17, color: "#fff", lineHeight: 1.75, margin: "0 0 28px", fontWeight: 500 }}>
+              OpenRegio helpt lokale ondernemers om regels, besluiten en kansen in hun regio zichtbaar te maken — vanuit de onderneming én de mens daarachter. Samen versterken we lokaal ondernemen met inzicht, workshops, praktische ondersteuning en meer zichtbaarheid in de regio.
+            </p>
+            <a href="#pricing">
+              <button style={{ padding: "13px 28px", borderRadius: 8, fontSize: 15, fontWeight: 700, background: ORANJE, color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+                Bekijk lidmaatschap <ArrowRight style={{ width: 16, height: 16 }} />
+              </button>
+            </a>
+          </div>
         </div>
       </section>
 
