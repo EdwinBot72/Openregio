@@ -156,7 +156,7 @@ export default function SamenAanpakkenPage() {
                     height: 40,
                     borderRadius: 10,
                     background: "#eef3fb",
-                    color: "#1f5fae",
+                    color: "#0b2240",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",

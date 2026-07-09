@@ -3,7 +3,7 @@
  * Alle templates: home, start, onboarding, dashboard, netwerk,
  *                 community, chat, regiobot, upgrade + admin
  *
- * Kleuren: #0b2240 (donkerblauw) · #1f5fae (blauw) · #f28a1a (oranje)
+ * Kleuren: #0b2240 (donkerblauw) · #0b2240 (blauw) · #f28a1a (oranje)
  * Font:    Plus Jakarta Sans
  */
 
@@ -46,7 +46,7 @@
     flex-shrink: 0;
 }
 .openregio-topnav-logo-dark { color: #0b2240; }
-.openregio-topnav-logo-blue { color: #1f5fae; }
+.openregio-topnav-logo-blue { color: #0b2240; }
 
 .openregio-topnav-tabs {
     display: flex;
@@ -68,7 +68,7 @@
 }
 .openregio-topnav-tab:hover {
     background: #f0f4ff;
-    color: #1f5fae;
+    color: #0b2240;
 }
 .openregio-topnav-tab.is-active {
     background: #fff;
@@ -126,7 +126,7 @@
 }
 .openregio-topnav-dropdown-item:hover {
     background: #f0f4ff;
-    color: #1f5fae;
+    color: #0b2240;
 }
 .openregio-topnav-dropdown-logout {
     color: #dc2626;
@@ -203,7 +203,7 @@
     text-decoration: none;
 }
 .openregio-topnav-mobile-subitem:hover {
-    color: #1f5fae;
+    color: #0b2240;
 }
 
 .openregio-topnav-user {
@@ -217,7 +217,7 @@
     height: 34px;
     border-radius: 50%;
     background: #f0f4ff;
-    color: #1f5fae;
+    color: #0b2240;
     font-size: 12px;
     font-weight: 800;
     display: flex;
@@ -242,7 +242,7 @@
     font-size: 12px;
     font-weight: 700;
 }
-.openregio-topnav-plan.is-basic { color: #1f5fae; }
+.openregio-topnav-plan.is-basic { color: #0b2240; }
 .openregio-topnav-plan.is-pro   { color: #f28a1a; }
 
 .openregio-topnav-burger {
@@ -274,7 +274,7 @@
 }
 .openregio-topnav-mobile-tab.is-active {
     background: #f0f4ff;
-    color: #1f5fae;
+    color: #0b2240;
 }
 .openregio-topnav-mobile-user {
     display: flex;
@@ -519,7 +519,7 @@
 .openregio-card ul li::before {
     content: '→';
     font-weight: 800;
-    color: #1f5fae;
+    color: #0b2240;
     font-size: 12px;
     flex-shrink: 0;
     margin-top: 1px;
@@ -549,10 +549,10 @@
 .openregio-button:hover  { opacity: .88; }
 .openregio-button:active { transform: scale(.97); }
 
-.openregio-button-primary { background: #1f5fae; color: #fff; }
-.openregio-button-basic   { background: #1f5fae; color: #fff; }
+.openregio-button-primary { background: #0b2240; color: #fff; }
+.openregio-button-basic   { background: #0b2240; color: #fff; }
 .openregio-button-pro     { background: #f28a1a; color: #fff; }
-.openregio-button-outline { background: #f0f4ff;  color: #1f5fae; }
+.openregio-button-outline { background: #f0f4ff;  color: #0b2240; }
 .openregio-button-ghost   { background: rgba(255,255,255,.1); color: #fff; }
 .openregio-button-danger  { background: #fef2f2; color: #dc2626; }
 
@@ -582,7 +582,7 @@
     opacity: .7;
     flex-shrink: 0;
 }
-.openregio-plan-basic { background: #f0f4ff; color: #1f5fae; }
+.openregio-plan-basic { background: #f0f4ff; color: #0b2240; }
 .openregio-plan-pro   { background: rgba(242,138,26,.15); color: #f28a1a; }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -657,7 +657,7 @@
 .openregio-onboarding-form textarea:focus,
 .openregio-onboarding-form select:focus,
 .openregio-start-form input:focus {
-    border-color: #1f5fae;
+    border-color: #0b2240;
     background: #fff;
     box-shadow: 0 0 0 3px rgba(31,95,174,.08);
 }
@@ -724,7 +724,7 @@
     line-height: 1.1;
 }
 
-.openregio-hero h1 em { font-style: normal; color: #1f5fae; }
+.openregio-hero h1 em { font-style: normal; color: #0b2240; }
 
 .openregio-tagline {
     font-size: 15px;
@@ -794,13 +794,13 @@
     transition: box-shadow .2s, transform .2s;
 }
 .openregio-plan:hover { box-shadow: 0 10px 32px rgba(31,95,174,.1); transform: translateY(-2px); }
-.openregio-plan-featured { border: 2px solid #1f5fae; box-shadow: 0 10px 40px rgba(31,95,174,.14); }
+.openregio-plan-featured { border: 2px solid #0b2240; box-shadow: 0 10px 40px rgba(31,95,174,.14); }
 
 .openregio-badge {
     position: absolute;
     top: -12px;
     left: 20px;
-    background: #1f5fae;
+    background: #0b2240;
     color: #fff;
     font-size: 10px;
     font-weight: 700;
@@ -840,7 +840,7 @@
     background: none;
     border-radius: 0;
 }
-.openregio-plan-features li::before { content: '✓'; color: #1f5fae; font-weight: 800; font-size: 12px; flex-shrink: 0; }
+.openregio-plan-features li::before { content: '✓'; color: #0b2240; font-weight: 800; font-size: 12px; flex-shrink: 0; }
 
 .openregio-plan .openregio-button { width: 100%; margin-top: 4px; }
 
@@ -852,7 +852,7 @@
     margin-top: 24px;
 }
 .openregio-cta p { font-size: 13px; color: #64748b; }
-.openregio-cta a { color: #1f5fae; font-weight: 700; text-decoration: none; }
+.openregio-cta a { color: #0b2240; font-weight: 700; text-decoration: none; }
 .openregio-cta a:hover { text-decoration: underline; }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -898,7 +898,7 @@
 
 .openregio-back-link { margin-top: 20px; text-align: center; }
 .openregio-back-link a { font-size: 13px; color: #94a3b8; text-decoration: none; font-weight: 500; }
-.openregio-back-link a:hover { color: #1f5fae; }
+.openregio-back-link a:hover { color: #0b2240; }
 
 /* ═══════════════════════════════════════════════════════════════
    ONBOARDING
@@ -915,7 +915,7 @@
     display: flex; align-items: center; gap: 8px;
     font-size: 12px; font-weight: 600; color: #cbd5e1; white-space: nowrap;
 }
-.openregio-step.active { color: #1f5fae; }
+.openregio-step.active { color: #0b2240; }
 .openregio-step.done   { color: #16a34a; }
 
 .openregio-step-num {
@@ -924,7 +924,7 @@
     font-size: 12px; font-weight: 800; color: #cbd5e1; flex-shrink: 0;
     transition: background .2s, color .2s;
 }
-.openregio-step.active .openregio-step-num { background: #1f5fae; color: #fff; }
+.openregio-step.active .openregio-step-num { background: #0b2240; color: #fff; }
 .openregio-step.done   .openregio-step-num { background: #16a34a; color: #fff; }
 
 .openregio-step-line { flex: 1; height: 1px; background: #e8edf8; margin: 0 10px; min-width: 20px; }
@@ -958,7 +958,7 @@
     text-transform: uppercase; letter-spacing: .6px; margin-bottom: 10px;
 }
 .openregio-stat-number {
-    font-size: 30px; font-weight: 800; color: #1f5fae;
+    font-size: 30px; font-weight: 800; color: #0b2240;
     letter-spacing: -1px; line-height: 1; margin: 0;
 }
 
@@ -972,7 +972,7 @@
 .openregio-dashboard-sidebar { display: flex; flex-direction: column; gap: 16px; }
 
 .openregio-profile-summary {
-    border-left: 3px solid #1f5fae;
+    border-left: 3px solid #0b2240;
     padding-left: 14px;
     margin-bottom: 16px;
 }
@@ -980,7 +980,7 @@
 .openregio-profile-summary p strong    { font-size: 15px; font-weight: 700; color: #0f172a; display: block; margin-bottom: 6px; }
 .openregio-category {
     display: inline-flex; align-items: center;
-    background: #f0f4ff; color: #1f5fae;
+    background: #f0f4ff; color: #0b2240;
     font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 10px;
 }
 
@@ -990,7 +990,7 @@
 .openregio-quick-links li a {
     display: flex; align-items: center; gap: 8px;
     padding: 10px 14px; border-radius: 12px;
-    font-size: 13px; font-weight: 600; color: #1f5fae; background: #f0f4ff;
+    font-size: 13px; font-weight: 600; color: #0b2240; background: #f0f4ff;
     text-decoration: none; transition: background .15s;
 }
 .openregio-quick-links li a::before { content: '→'; font-size: 14px; }
@@ -1031,7 +1031,7 @@
 }
 .openregio-search-input { flex: 1; min-width: 200px; }
 .openregio-search-input:focus,
-.openregio-filter-select:focus { border-color: #1f5fae; box-shadow: 0 0 0 3px rgba(31,95,174,.08); }
+.openregio-filter-select:focus { border-color: #0b2240; box-shadow: 0 0 0 3px rgba(31,95,174,.08); }
 
 .openregio-network-grid {
     display: grid;
@@ -1055,7 +1055,7 @@
 }
 
 .openregio-member-category {
-    font-size: 11px; font-weight: 700; color: #1f5fae; background: #f0f4ff;
+    font-size: 11px; font-weight: 700; color: #0b2240; background: #f0f4ff;
     display: inline-block; padding: 2px 9px; border-radius: 8px; margin-bottom: 10px;
 }
 
@@ -1063,7 +1063,7 @@
 .openregio-member-avatar {
     width: 44px; height: 44px; border-radius: 12px; background: #f0f4ff;
     display: flex; align-items: center; justify-content: center;
-    font-size: 16px; font-weight: 800; color: #1f5fae; margin-bottom: 12px;
+    font-size: 16px; font-weight: 800; color: #0b2240; margin-bottom: 12px;
 }
 .openregio-member-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
@@ -1107,7 +1107,7 @@
     font-size: 13px; color: #334155; line-height: 1.65; margin: 0;
 }
 .openregio-chat-user p {
-    background: #1f5fae; border-radius: 16px 16px 4px 16px;
+    background: #0b2240; border-radius: 16px 16px 4px 16px;
     padding: 12px 16px; font-size: 13px; color: #fff; line-height: 1.65; margin: 0;
 }
 
@@ -1121,7 +1121,7 @@
     min-height: 42px; outline: none; color: #0f172a; background: #f8faff;
     transition: border-color .15s; line-height: 1.5;
 }
-.openregio-chat-form textarea:focus { border-color: #1f5fae; background: #fff; }
+.openregio-chat-form textarea:focus { border-color: #0b2240; background: #fff; }
 .openregio-chat-form .openregio-button { flex-shrink: 0; }
 
 .openregio-regiobot-suggestions { margin-top: 20px; }
@@ -1135,7 +1135,7 @@
 }
 .openregio-regiobot-suggestions ul li {
     padding: 10px 14px !important; background: #f0f4ff !important;
-    border-radius: 12px !important; font-size: 12px; color: #1f5fae !important;
+    border-radius: 12px !important; font-size: 12px; color: #0b2240 !important;
     font-weight: 600; cursor: pointer; transition: background .15s; line-height: 1.4;
 }
 .openregio-regiobot-suggestions ul li::before { display: none !important; }
@@ -1212,12 +1212,12 @@
     text-transform: uppercase; letter-spacing: .6px; font-family: 'Plus Jakarta Sans', inherit;
 }
 .openregio-admin-stat-box .openregio-stat-number {
-    font-size: 28px; font-weight: 800; color: #1f5fae; letter-spacing: -.8px; line-height: 1; margin: 0;
+    font-size: 28px; font-weight: 800; color: #0b2240; letter-spacing: -.8px; line-height: 1; margin: 0;
     font-family: 'Plus Jakarta Sans', inherit;
 }
 
 /* Admin tabel plan badges */
-.openregio-plan-badge.openregio-plan-basic { background: #f0f4ff; color: #1f5fae; border-radius: 10px; padding: 3px 10px; }
+.openregio-plan-badge.openregio-plan-basic { background: #f0f4ff; color: #0b2240; border-radius: 10px; padding: 3px 10px; }
 .openregio-plan-badge.openregio-plan-pro   { background: rgba(242,138,26,.15); color: #f28a1a; border-radius: 10px; padding: 3px 10px; }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -1574,7 +1574,7 @@
 
 .openregio-page-shell {
   /* Map shadcn CSS variabelen naar het OpenRegio palet
-     (donkerblauw #0b2240 · blauw #1f5fae · oranje #f28a1a) */
+     (donkerblauw #0b2240 · blauw #0b2240 · oranje #f28a1a) */
   --primary: 213 70% 40%;
   --primary-foreground: 0 0% 100%;
   --ring: 213 70% 40%;
@@ -1671,7 +1671,7 @@
     gap: 6px;
     font-size: 13px;
     font-weight: 600;
-    color: #1f5fae;
+    color: #0b2240;
     text-decoration: none;
     margin-bottom: 16px;
 }
@@ -1697,7 +1697,7 @@
     transition: border-color .15s, transform .12s, box-shadow .15s;
 }
 .flow-hub-card:hover {
-    border-color: #1f5fae;
+    border-color: #0b2240;
     box-shadow: 0 8px 22px rgba(31,95,174,.08);
     transform: translateY(-1px);
 }
@@ -1730,7 +1730,7 @@
     gap: 6px;
     font-size: 13px;
     font-weight: 700;
-    color: #1f5fae;
+    color: #0b2240;
 }
 
 /* Runner grid */
@@ -1777,7 +1777,7 @@
     border-radius: 999px;
     background: #eef4ff;
     border: 1px solid #c7d7f3;
-    color: #1f5fae;
+    color: #0b2240;
     font-size: 10px;
     font-weight: 600;
     text-transform: uppercase;
@@ -1817,7 +1817,7 @@
 .flow-input:focus,
 .flow-textarea:focus {
     outline: none;
-    border-color: #1f5fae;
+    border-color: #0b2240;
     box-shadow: 0 0 0 3px rgba(31,95,174,.15);
 }
 .flow-textarea {
@@ -1843,14 +1843,14 @@
     color: #334155;
     transition: border-color .12s, background .12s;
 }
-.flow-radio:hover { border-color: #1f5fae; }
+.flow-radio:hover { border-color: #0b2240; }
 .flow-radio.is-selected {
-    border-color: #1f5fae;
+    border-color: #0b2240;
     background: #f0f4ff;
     color: #0b2240;
     font-weight: 600;
 }
-.flow-radio input { accent-color: #1f5fae; }
+.flow-radio input { accent-color: #0b2240; }
 
 /* Output panel */
 .flow-output-col { position: sticky; top: 84px; }
@@ -1910,14 +1910,14 @@
     background: #fff;
     font-size: 11px;
     font-weight: 700;
-    color: #1f5fae;
+    color: #0b2240;
     cursor: pointer;
     font-family: inherit;
     transition: background .12s, border-color .12s;
 }
 .flow-copy-button:hover {
     background: #f0f4ff;
-    border-color: #1f5fae;
+    border-color: #0b2240;
 }
 
 .flow-output-section {
@@ -1932,7 +1932,7 @@
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: .04em;
-    color: #1f5fae;
+    color: #0b2240;
     margin-bottom: 8px;
 }
 .flow-output-list {
@@ -1952,7 +1952,7 @@
 }
 .flow-output-list li::before {
     content: '✓';
-    color: #1f5fae;
+    color: #0b2240;
     font-weight: 800;
     flex-shrink: 0;
 }
@@ -2015,8 +2015,8 @@
     font-size: 13px;
     font-weight: 600;
     color: #fff;
-    background: #1f5fae;
-    border: 1px solid #1f5fae;
+    background: #0b2240;
+    border: 1px solid #0b2240;
     border-radius: 8px;
     cursor: pointer;
     transition: background-color .15s ease, opacity .15s ease;
@@ -2119,7 +2119,7 @@
     gap: 4px;
     font-size: 13px;
     font-weight: 600;
-    color: #1f5fae;
+    color: #0b2240;
     text-decoration: none;
     padding: 6px 10px;
     border: 1px solid #cbd5e1;
@@ -2128,7 +2128,7 @@
 }
 .flow-dossier-open:hover {
     background: #eef4fb;
-    border-color: #1f5fae;
+    border-color: #0b2240;
 }
 .flow-dossier-missing {
     font-size: 12px;
@@ -2138,7 +2138,7 @@
     background: none;
     border: none;
     padding: 0;
-    color: #1f5fae;
+    color: #0b2240;
     font: inherit;
     cursor: pointer;
     text-decoration: underline;

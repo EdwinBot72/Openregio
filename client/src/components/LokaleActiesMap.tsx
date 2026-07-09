@@ -202,7 +202,7 @@ export function LokaleActiesMap({ acties }: LokaleActiesMapProps) {
                     <Link
                       href={`/acties/${actie.id}`}
                       className="text-xs font-medium"
-                      style={{ color: "#0A2D6E" }}
+                      style={{ color: "#0b2240" }}
                       data-testid={`link-map-actie-${actie.id}`}
                     >
                       Bekijk details →

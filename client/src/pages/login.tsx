@@ -79,7 +79,7 @@ export default function LoginPage() {
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 7 }}>
                 <label htmlFor="password" style={{ margin: 0 }}>Wachtwoord</label>
                 <Link href="/forgot-password">
-                  <span style={{ fontSize: 11, color: "#1f5fae", cursor: "pointer", fontWeight: 600 }} data-testid="link-forgot-password">
+                  <span style={{ fontSize: 11, color: "#0b2240", cursor: "pointer", fontWeight: 600 }} data-testid="link-forgot-password">
                     Vergeten?
                   </span>
                 </Link>
@@ -123,7 +123,7 @@ export default function LoginPage() {
             <p className="openregio-auth-footer">
               Nog geen account?{" "}
               <Link href="/lidmaatschap">
-                <span style={{ color: "#1f5fae", fontWeight: 700, cursor: "pointer" }} data-testid="link-register">
+                <span style={{ color: "#0b2240", fontWeight: 700, cursor: "pointer" }} data-testid="link-register">
                   Word lid
                 </span>
               </Link>

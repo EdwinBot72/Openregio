@@ -379,7 +379,7 @@
     right: 0;
     bottom: 0;
     height: 3px;
-    background: var(--or-accent, #1f5fae);
+    background: var(--or-accent, #0b2240);
     border-radius: 0 0 16px 16px;
     transform: scaleX(0);
     transform-origin: left center;

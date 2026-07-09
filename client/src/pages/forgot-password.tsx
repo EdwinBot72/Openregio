@@ -53,7 +53,7 @@ export default function ForgotPasswordPage() {
           {isSubmitted ? (
             <div style={{ textAlign: "center", padding: "16px 0" }}>
               <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#E6F1FB", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
-                <Mail size={24} style={{ color: "#1f5fae" }} />
+                <Mail size={24} style={{ color: "#0b2240" }} />
               </div>
               <p style={{ fontSize: 13, color: "#64748b", lineHeight: 1.6, margin: 0 }}>
                 Als dit emailadres bij ons bekend is, ontvang je binnen enkele minuten een email met een link om je wachtwoord te herstellen.
@@ -89,7 +89,7 @@ export default function ForgotPasswordPage() {
 
           <p className="openregio-auth-footer">
             <Link href="/login">
-              <span style={{ color: "#1f5fae", fontWeight: 700, cursor: "pointer" }} data-testid="link-back-to-login">
+              <span style={{ color: "#0b2240", fontWeight: 700, cursor: "pointer" }} data-testid="link-back-to-login">
                 ← Terug naar inloggen
               </span>
             </Link>

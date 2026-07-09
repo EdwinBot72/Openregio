@@ -10,7 +10,7 @@ export default function VoorwaardenPage() {
         <p className="openregio-public-lead">Laatste update: November 2024</p>
 
         <section className="openregio-public-card">
-          <h2><FileText className="w-4 h-4" style={{ color: "#1f5fae" }} /> 1. Definities</h2>
+          <h2><FileText className="w-4 h-4" style={{ color: "#0b2240" }} /> 1. Definities</h2>
           <p>In deze algemene voorwaarden wordt verstaan onder:</p>
           <ul>
             <li><strong>OpenRegio:</strong> OpenRegio Coöperatie U.A., gevestigd te Nederland</li>
@@ -21,7 +21,7 @@ export default function VoorwaardenPage() {
         </section>
 
         <section className="openregio-public-card">
-          <h2><Users className="w-4 h-4" style={{ color: "#1f5fae" }} /> 2. Lidmaatschap</h2>
+          <h2><Users className="w-4 h-4" style={{ color: "#0b2240" }} /> 2. Lidmaatschap</h2>
           <h3>2.1 Typen lidmaatschap</h3>
           <p>OpenRegio biedt twee soorten lidmaatschappen:</p>
           <ul>
@@ -35,7 +35,7 @@ export default function VoorwaardenPage() {
         </section>
 
         <section className="openregio-public-card">
-          <h2><CreditCard className="w-4 h-4" style={{ color: "#1f5fae" }} /> 3. Betaling en opzegging</h2>
+          <h2><CreditCard className="w-4 h-4" style={{ color: "#0b2240" }} /> 3. Betaling en opzegging</h2>
           <h3>3.1 Betalingsvoorwaarden</h3>
           <ul>
             <li>Betaling geschiedt maandelijks via automatische incasso (Mollie)</li>
@@ -53,7 +53,7 @@ export default function VoorwaardenPage() {
         </section>
 
         <section className="openregio-public-card">
-          <h2><AlertCircle className="w-4 h-4" style={{ color: "#1f5fae" }} /> 4. Gebruik van het platform</h2>
+          <h2><AlertCircle className="w-4 h-4" style={{ color: "#0b2240" }} /> 4. Gebruik van het platform</h2>
           <h3>4.1 Toegestaan gebruik</h3>
           <p>Je mag het platform gebruiken voor zakelijke doeleinden binnen de kaders van de aangeboden diensten.</p>
           <h3>4.2 Verboden gebruik</h3>
@@ -68,7 +68,7 @@ export default function VoorwaardenPage() {
         </section>
 
         <section className="openregio-public-card">
-          <h2><Ban className="w-4 h-4" style={{ color: "#1f5fae" }} /> 5. Aansprakelijkheid</h2>
+          <h2><Ban className="w-4 h-4" style={{ color: "#0b2240" }} /> 5. Aansprakelijkheid</h2>
           <h3>5.1 RegioBot AI</h3>
           <p>RegioBot is een AI-assistent voor algemene ondersteuning. De juridische modus biedt <strong>GEEN juridisch advies</strong>. Voor formeel advies dien je altijd een advocaat te raadplegen. OpenRegio is niet aansprakelijk voor beslissingen genomen op basis van AI-gegenereerde content.</p>
           <h3>5.2 Platform beschikbaarheid</h3>
@@ -78,17 +78,17 @@ export default function VoorwaardenPage() {
         </section>
 
         <section className="openregio-public-card">
-          <h2><FileText className="w-4 h-4" style={{ color: "#1f5fae" }} /> 6. Intellectueel eigendom</h2>
+          <h2><FileText className="w-4 h-4" style={{ color: "#0b2240" }} /> 6. Intellectueel eigendom</h2>
           <p>Alle intellectuele eigendomsrechten op het platform, waaronder het ontwerp, de software en de content, berusten bij OpenRegio of haar licentiegevers. Je krijgt een beperkt gebruiksrecht voor de duur van je lidmaatschap.</p>
         </section>
 
         <section className="openregio-public-card">
-          <h2><AlertCircle className="w-4 h-4" style={{ color: "#1f5fae" }} /> 7. Wijzigingen</h2>
+          <h2><AlertCircle className="w-4 h-4" style={{ color: "#0b2240" }} /> 7. Wijzigingen</h2>
           <p>OpenRegio behoudt zich het recht voor deze voorwaarden te wijzigen. Belangrijke wijzigingen worden minimaal 30 dagen van tevoren aangekondigd. Door het platform te blijven gebruiken na wijziging, ga je akkoord met de nieuwe voorwaarden.</p>
         </section>
 
         <section className="openregio-public-card">
-          <h2><FileText className="w-4 h-4" style={{ color: "#1f5fae" }} /> 8. Toepasselijk recht</h2>
+          <h2><FileText className="w-4 h-4" style={{ color: "#0b2240" }} /> 8. Toepasselijk recht</h2>
           <p>Op deze voorwaarden is Nederlands recht van toepassing. Geschillen worden bij voorkeur in overleg opgelost. Indien dit niet lukt, zijn de bevoegde rechters in Nederland bevoegd.</p>
         </section>
 
@@ -96,7 +96,7 @@ export default function VoorwaardenPage() {
           <p>Heb je vragen over deze voorwaarden? Neem contact met ons op:</p>
           <p>
             <strong>OpenRegio Coöperatie U.A.</strong><br />
-            E-mail: <a href="mailto:info@openregio.nl" style={{ color: "#1f5fae", fontWeight: 700 }}>info@openregio.nl</a>
+            E-mail: <a href="mailto:info@openregio.nl" style={{ color: "#0b2240", fontWeight: 700 }}>info@openregio.nl</a>
           </p>
         </section>
       </div>

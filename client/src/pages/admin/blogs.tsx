@@ -161,7 +161,7 @@ export default function AdminBlogsPage() {
       <div style={{ marginBottom: 28, display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eef2f9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <FileText style={{ width: 24, height: 24, color: "#1f5fae" }} />
+            <FileText style={{ width: 24, height: 24, color: "#0b2240" }} />
           </div>
           <div>
             <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }}>Content beheren</h1>

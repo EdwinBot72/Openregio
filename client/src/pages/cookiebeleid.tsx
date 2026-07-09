@@ -12,21 +12,21 @@ export default function CookiebeleidPage() {
         </p>
 
         <section className="openregio-public-card">
-          <h2><Cookie className="w-4 h-4" style={{ color: "#1f5fae" }} /> Wat zijn cookies?</h2>
+          <h2><Cookie className="w-4 h-4" style={{ color: "#0b2240" }} /> Wat zijn cookies?</h2>
           <p>
             Cookies zijn kleine tekstbestanden die op je computer, tablet of telefoon worden opgeslagen wanneer je een website bezoekt. Ze helpen de website om je voorkeuren te onthouden en het platform goed te laten functioneren.
           </p>
         </section>
 
         <section className="openregio-public-card">
-          <h2><Shield className="w-4 h-4" style={{ color: "#1f5fae" }} /> Welke cookies gebruiken wij?</h2>
+          <h2><Shield className="w-4 h-4" style={{ color: "#0b2240" }} /> Welke cookies gebruiken wij?</h2>
 
           <div className="openregio-soft-box">
             <h3>Noodzakelijke cookies</h3>
             <p>
               Deze cookies zijn essentieel voor het functioneren van het platform. Ze zorgen ervoor dat je kunt inloggen, navigeren en basisfuncties kunt gebruiken. Zonder deze cookies werkt het platform niet naar behoren.
             </p>
-            <span style={{ display: "inline-block", marginTop: 8, padding: "3px 8px", borderRadius: 6, fontSize: 11, fontWeight: 800, background: "#e8f0fe", color: "#1f5fae" }}>
+            <span style={{ display: "inline-block", marginTop: 8, padding: "3px 8px", borderRadius: 6, fontSize: 11, fontWeight: 800, background: "#e8f0fe", color: "#0b2240" }}>
               Altijd actief
             </span>
           </div>
@@ -46,21 +46,21 @@ export default function CookiebeleidPage() {
             <p>
               Deze cookies bewaren je inlogstatus tijdens je bezoek. Ze worden automatisch verwijderd wanneer je de browser sluit of wanneer je sessie verloopt.
             </p>
-            <span style={{ display: "inline-block", marginTop: 8, padding: "3px 8px", borderRadius: 6, fontSize: 11, fontWeight: 800, background: "#e8f0fe", color: "#1f5fae" }}>
+            <span style={{ display: "inline-block", marginTop: 8, padding: "3px 8px", borderRadius: 6, fontSize: 11, fontWeight: 800, background: "#e8f0fe", color: "#0b2240" }}>
               Altijd actief
             </span>
           </div>
         </section>
 
         <section className="openregio-public-card">
-          <h2><ToggleLeft className="w-4 h-4" style={{ color: "#1f5fae" }} /> Wat we niet gebruiken</h2>
+          <h2><ToggleLeft className="w-4 h-4" style={{ color: "#0b2240" }} /> Wat we niet gebruiken</h2>
           <p>
             OpenRegio gebruikt <strong>geen</strong> tracking cookies, advertentiecookies of analytische cookies van derden. Wij volgen je niet over andere websites en verkopen geen data aan adverteerders. Dit past bij onze kernwaarde: privacy en transparantie.
           </p>
         </section>
 
         <section className="openregio-public-card">
-          <h2><Clock className="w-4 h-4" style={{ color: "#1f5fae" }} /> Bewaartermijn</h2>
+          <h2><Clock className="w-4 h-4" style={{ color: "#0b2240" }} /> Bewaartermijn</h2>
           <table className="w-full" style={{ fontSize: 14, marginTop: 8 }}>
             <thead>
               <tr style={{ borderBottom: "1px solid #e6ebf2" }}>
@@ -86,19 +86,19 @@ export default function CookiebeleidPage() {
         </section>
 
         <section className="openregio-public-card">
-          <h2><Settings className="w-4 h-4" style={{ color: "#1f5fae" }} /> Cookies beheren</h2>
+          <h2><Settings className="w-4 h-4" style={{ color: "#0b2240" }} /> Cookies beheren</h2>
           <p>
             Je kunt cookies op elk moment verwijderen of blokkeren via de instellingen van je browser. Houd er rekening mee dat het blokkeren van noodzakelijke cookies ertoe kan leiden dat bepaalde functies van het platform niet meer werken.
           </p>
           <p>
             Meer informatie over het beheren van cookies vind je op de website van je browser of op{" "}
-            <a href="https://www.consuwijzer.nl/telecom-post/internet/privacy/cookies-verwijderen" target="_blank" rel="noopener noreferrer" style={{ color: "#1f5fae", fontWeight: 700 }}>Consuwijzer.nl</a>.
+            <a href="https://www.consuwijzer.nl/telecom-post/internet/privacy/cookies-verwijderen" target="_blank" rel="noopener noreferrer" style={{ color: "#0b2240", fontWeight: 700 }}>Consuwijzer.nl</a>.
           </p>
         </section>
 
         <p style={{ fontSize: 13, color: "#64748b", marginTop: 24, textAlign: "center" }}>
           Heeft u vragen over ons cookiebeleid? Neem contact op via{" "}
-          <a href="mailto:info@openregio.nl" style={{ color: "#1f5fae", fontWeight: 700 }}>info@openregio.nl</a>.
+          <a href="mailto:info@openregio.nl" style={{ color: "#0b2240", fontWeight: 700 }}>info@openregio.nl</a>.
         </p>
       </div>
     </div>

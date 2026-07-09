@@ -56,7 +56,7 @@ export default function KennisbankPage() {
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
       <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
         <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eef2f9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <BookMarked style={{ width: 24, height: 24, color: "#1f5fae" }} />
+          <BookMarked style={{ width: 24, height: 24, color: "#0b2240" }} />
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
           <div>
@@ -78,8 +78,8 @@ export default function KennisbankPage() {
               <Card key={i} data-testid={`card-artikel-${i}`}>
                 <CardContent className="pt-5 pb-5">
                   <div className="flex items-start gap-4">
-                    <div className="p-2 rounded-md bg-[#1f5fae]/10 shrink-0">
-                      <IconComp className="h-5 w-5 text-[#1f5fae]" />
+                    <div className="p-2 rounded-md bg-[#0b2240]/10 shrink-0">
+                      <IconComp className="h-5 w-5 text-[#0b2240]" />
                     </div>
                     <div className="flex-1 min-w-0 space-y-1.5">
                       <div className="flex flex-wrap items-center gap-2">
@@ -112,8 +112,8 @@ export default function KennisbankPage() {
         <Card className="bg-muted/30">
           <CardContent className="pt-6 pb-6 space-y-4 text-center">
             <div className="flex justify-center">
-              <div className="p-3 rounded-full bg-[#1f5fae]/10">
-                <Mail className="h-6 w-6 text-[#1f5fae]" />
+              <div className="p-3 rounded-full bg-[#0b2240]/10">
+                <Mail className="h-6 w-6 text-[#0b2240]" />
               </div>
             </div>
             <div className="space-y-1">

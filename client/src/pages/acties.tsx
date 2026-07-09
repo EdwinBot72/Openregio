@@ -75,7 +75,7 @@ export default function ActiesPage() {
   return (
     <div style={{ minHeight: "100vh", background: "#f8fafc" }}>
       {/* ── Top-nav ── */}
-      <header style={{ background: "#0A2D6E", padding: "0 24px" }}>
+      <header style={{ background: "#0b2240", padding: "0 24px" }}>
         <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 60, gap: 12 }}>
           <Link href="/" style={{ display: "flex", alignItems: "center", gap: 6, textDecoration: "none" }} data-testid="link-logo">
             <span style={{ fontWeight: 900, fontSize: 18, color: "white" }}>Open</span>
@@ -88,7 +88,7 @@ export default function ActiesPage() {
               </Button>
             </Link>
             <Link href="/register">
-              <Button size="sm" style={{ background: "#E8820C", color: "white", border: "none" }} data-testid="link-nav-register">
+              <Button size="sm" style={{ background: "#f28a1a", color: "white", border: "none" }} data-testid="link-nav-register">
                 Word lid
               </Button>
             </Link>
@@ -97,7 +97,7 @@ export default function ActiesPage() {
       </header>
 
       {/* ── Hero ── */}
-      <div style={{ background: "linear-gradient(135deg, #0A2D6E 0%, #1E6DB5 100%)", padding: "52px 24px 44px" }}>
+      <div style={{ background: "linear-gradient(135deg, #0b2240 0%, #0b2240 100%)", padding: "52px 24px 44px" }}>
         <div style={{ maxWidth: 780, margin: "0 auto", textAlign: "center" }}>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 6, background: "rgba(255,255,255,.12)", borderRadius: 20, padding: "4px 14px", fontSize: 12, color: "rgba(255,255,255,.85)", marginBottom: 20 }}>
             <CalendarDays size={13} /> Actuele evenementen en initiatieven
@@ -124,7 +124,7 @@ export default function ActiesPage() {
             </div>
             <button
               onClick={() => setFilterRegio(filterRegio)}
-              style={{ padding: "11px 22px", background: "#E8820C", color: "white", border: "none", borderRadius: 10, fontWeight: 700, fontSize: 14, cursor: "pointer" }}
+              style={{ padding: "11px 22px", background: "#f28a1a", color: "white", border: "none", borderRadius: 10, fontWeight: 700, fontSize: 14, cursor: "pointer" }}
               data-testid="button-zoek"
             >
               Zoeken
@@ -251,7 +251,7 @@ export default function ActiesPage() {
                     </div>
 
                     <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", paddingTop: 8, borderTop: "1px solid #f1f5f9" }}>
-                      <span style={{ fontSize: 12, color: "#0A2D6E", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
+                      <span style={{ fontSize: 12, color: "#0b2240", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
                         Bekijk details <ArrowRight size={13} />
                       </span>
                     </div>
@@ -263,7 +263,7 @@ export default function ActiesPage() {
         )}
 
         {/* CTA voor ondernemers */}
-        <div style={{ marginTop: 56, background: "linear-gradient(135deg, #0A2D6E, #1E6DB5)", borderRadius: 16, padding: "36px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, flexWrap: "wrap" as const }}>
+        <div style={{ marginTop: 56, background: "linear-gradient(135deg, #0b2240, #0b2240)", borderRadius: 16, padding: "36px 32px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 24, flexWrap: "wrap" as const }}>
           <div>
             <p style={{ fontWeight: 800, fontSize: 18, color: "white", marginBottom: 8 }}>
               Organiseer je zelf een lokale actie?
@@ -273,7 +273,7 @@ export default function ActiesPage() {
             </p>
           </div>
           <Link href="/register" data-testid="link-cta-register">
-            <Button style={{ background: "#E8820C", color: "white", border: "none", fontWeight: 700, padding: "10px 22px" }}>
+            <Button style={{ background: "#f28a1a", color: "white", border: "none", fontWeight: 700, padding: "10px 22px" }}>
               Word Pro-lid <ChevronRight size={16} style={{ marginLeft: 4 }} />
             </Button>
           </Link>

@@ -28,7 +28,7 @@ function UpgradeSuccessPage({ plan }: { plan: "basic" | "pro" | "coaching" }) {
             <CheckCircle size={28} style={{ color: "#059669" }} data-testid="icon-success" />
           </div>
 
-          <span style={{ display: "inline-block", background: "rgba(31,95,174,.1)", color: "#1f5fae", border: "1px solid rgba(31,95,174,.2)", borderRadius: 20, padding: "4px 14px", fontSize: 12, fontWeight: 700, marginBottom: 16 }}>
+          <span style={{ display: "inline-block", background: "rgba(31,95,174,.1)", color: "#0b2240", border: "1px solid rgba(31,95,174,.2)", borderRadius: 20, padding: "4px 14px", fontSize: 12, fontWeight: 700, marginBottom: 16 }}>
             {planLabel} actief
           </span>
 
@@ -82,7 +82,7 @@ function EmailCheckPage({ email }: { email: string }) {
 
           {email && (
             <div style={{ background: "#f4f6fb", borderRadius: 12, padding: "12px 16px", marginBottom: 20, display: "flex", alignItems: "flex-start", gap: 10, textAlign: "left" }}>
-              <Mail size={16} style={{ color: "#1f5fae", flexShrink: 0, marginTop: 2 }} />
+              <Mail size={16} style={{ color: "#0b2240", flexShrink: 0, marginTop: 2 }} />
               <div>
                 <p style={{ fontSize: 12, fontWeight: 600, color: "#475569", margin: "0 0 2px" }}>Check je inbox</p>
                 <p style={{ fontSize: 12, color: "#64748b", margin: 0 }}>
@@ -101,7 +101,7 @@ function EmailCheckPage({ email }: { email: string }) {
               "Start met RegioBot en de basischeck!",
             ].map((s, i) => (
               <div key={i} style={{ display: "flex", alignItems: "flex-start", gap: 10, fontSize: 12, color: "#475569", marginBottom: 8 }}>
-                <span style={{ width: 20, height: 20, borderRadius: "50%", background: "#E6F1FB", color: "#1f5fae", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, flexShrink: 0 }}>{i + 1}</span>
+                <span style={{ width: 20, height: 20, borderRadius: "50%", background: "#E6F1FB", color: "#0b2240", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700, flexShrink: 0 }}>{i + 1}</span>
                 {s}
               </div>
             ))}

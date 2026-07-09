@@ -111,7 +111,7 @@ export default function AanbestedingenPage() {
       <Card className="mb-6 bg-muted/30">
         <CardContent className="pt-4 pb-4 space-y-3">
           <div className="flex items-start gap-3">
-            <Info className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
+            <Info className="h-5 w-5 text-[#0b2240] mt-0.5 shrink-0" />
             <div className="space-y-1.5">
               <p className="text-sm font-medium">Wat zijn Aanbestedingen?</p>
               <p className="text-sm text-muted-foreground">

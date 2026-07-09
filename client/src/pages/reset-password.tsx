@@ -146,7 +146,7 @@ export default function ResetPasswordPage() {
 
           <p className="openregio-auth-footer">
             <Link href="/login">
-              <span style={{ color: "#1f5fae", fontWeight: 700, cursor: "pointer" }} data-testid="link-back-to-login">
+              <span style={{ color: "#0b2240", fontWeight: 700, cursor: "pointer" }} data-testid="link-back-to-login">
                 ← Terug naar inloggen
               </span>
             </Link>

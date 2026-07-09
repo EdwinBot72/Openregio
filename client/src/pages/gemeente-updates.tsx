@@ -125,7 +125,7 @@ export default function GemeenteUpdatesPage() {
       <div style={{ maxWidth: 900, margin: "0 auto" }}>
       <div style={{ marginBottom: 28, display: "flex", alignItems: "center", gap: 14 }}>
         <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eef2f9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <Building2 style={{ width: 24, height: 24, color: "#1f5fae" }} />
+          <Building2 style={{ width: 24, height: 24, color: "#0b2240" }} />
         </div>
         <div>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="text-page-title">Gemeente-updates</h1>
@@ -139,7 +139,7 @@ export default function GemeenteUpdatesPage() {
       <Card className="mb-6 bg-muted/30">
         <CardContent className="pt-4 pb-4 space-y-3">
           <div className="flex items-start gap-3">
-            <Info className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
+            <Info className="h-5 w-5 text-[#0b2240] mt-0.5 shrink-0" />
             <div className="space-y-1.5">
               <p className="text-sm font-medium">Wat zijn Gemeente-updates?</p>
               <p className="text-sm text-muted-foreground">
@@ -350,7 +350,7 @@ export default function GemeenteUpdatesPage() {
                     )}
                     {item.url && (
                       <span
-                        className="flex items-center gap-1.5 text-xs font-medium text-[#1f5fae]"
+                        className="flex items-center gap-1.5 text-xs font-medium text-[#0b2240]"
                         data-testid="link-bekijk-publicatie"
                       >
                         <ExternalLink className="w-3.5 h-3.5" />

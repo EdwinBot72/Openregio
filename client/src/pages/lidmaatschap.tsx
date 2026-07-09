@@ -26,7 +26,7 @@ const PLANS = {
       "Blog lezen",
     ],
     badge: "Basis",
-    color: "#1E6DB5",
+    color: "#0b2240",
     highlight: false,
   },
   pro: {
@@ -205,7 +205,7 @@ export default function LidmaatschapPage() {
   return (
     <div className="bg-[#f4f6fb] min-h-screen pb-16">
       <div className="max-w-4xl mx-auto px-4 pt-12 pb-4">
-        <h1 className="text-3xl font-bold text-center text-[#0f2942] mb-2" data-testid="text-page-title">
+        <h1 className="text-3xl font-bold text-center text-[#0b2240] mb-2" data-testid="text-page-title">
           Word lid van OpenRegio
         </h1>
         <p className="text-center text-[#475569] text-base mb-10">
@@ -250,7 +250,7 @@ export default function LidmaatschapPage() {
                     {plan.badge}
                   </span>
                 </div>
-                <div style={{ fontSize: 26, fontWeight: 900, color: "#0f2942", marginBottom: 2 }}>
+                <div style={{ fontSize: 26, fontWeight: 900, color: "#0b2240", marginBottom: 2 }}>
                   {plan.price}
                 </div>
                 <div style={{ fontSize: 12, color: "#64748b", marginBottom: 10 }}>{plan.period}</div>
@@ -302,7 +302,7 @@ export default function LidmaatschapPage() {
                 {COACHING_PLAN.badge}
               </span>
             </div>
-            <div style={{ fontSize: 22, fontWeight: 900, color: "#0f2942", marginBottom: 2 }}>
+            <div style={{ fontSize: 22, fontWeight: 900, color: "#0b2240", marginBottom: 2 }}>
               Op maat
             </div>
             <div style={{ fontSize: 12, color: "#64748b", marginBottom: 10 }}>prijs in overleg</div>
@@ -333,7 +333,7 @@ export default function LidmaatschapPage() {
         {/* ── Vergelijkingstabel ───────────────────────────────────── */}
         <div style={{ background: "white", borderRadius: 14, border: "1px solid #e2e8f0", overflow: "hidden", marginBottom: 36 }}>
           <div style={{ padding: "16px 20px", borderBottom: "1px solid #f1f5f9" }}>
-            <h2 style={{ fontSize: 15, fontWeight: 700, color: "#0f2942", margin: 0 }}>
+            <h2 style={{ fontSize: 15, fontWeight: 700, color: "#0b2240", margin: 0 }}>
               Wat krijg je per account?
             </h2>
           </div>
@@ -342,7 +342,7 @@ export default function LidmaatschapPage() {
               <thead>
                 <tr style={{ background: "#f8fafc" }}>
                   <th style={{ padding: "10px 16px", textAlign: "left", color: "#64748b", fontWeight: 600, fontSize: 12, width: "46%" }}>Functie</th>
-                  <th style={{ padding: "10px 12px", textAlign: "center", color: "#1E6DB5", fontWeight: 700, fontSize: 12 }}>Basis</th>
+                  <th style={{ padding: "10px 12px", textAlign: "center", color: "#0b2240", fontWeight: 700, fontSize: 12 }}>Basis</th>
                   <th style={{ padding: "10px 12px", textAlign: "center", color: "#7C3AED", fontWeight: 700, fontSize: 12 }}>Pro</th>
                 </tr>
               </thead>

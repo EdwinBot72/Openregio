@@ -47,7 +47,7 @@ export default function NieuwsPage() {
       <div style={{ marginBottom: 28, display: "flex", alignItems: "flex-start", justifyContent: "space-between", flexWrap: "wrap", gap: 16 }}>
         <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
           <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eef2f9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <Newspaper style={{ width: 24, height: 24, color: "#1f5fae" }} />
+            <Newspaper style={{ width: 24, height: 24, color: "#0b2240" }} />
           </div>
           <div>
             <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="text-nieuws-title">Nieuws met context</h1>
@@ -130,7 +130,7 @@ export default function NieuwsPage() {
             {item.aiContext && (
               <div style={{ marginTop: 8 }} data-testid={`ai-context-${item.id}`}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
-                  <Sparkles className="h-4 w-4" style={{ color: "#1f5fae" }} />
+                  <Sparkles className="h-4 w-4" style={{ color: "#0b2240" }} />
                   <span style={{ fontSize: 12, fontWeight: 800, color: "#0b2240", textTransform: "uppercase", letterSpacing: ".5px" }}>
                     Wat speelt hier?
                   </span>
@@ -180,7 +180,7 @@ export default function NieuwsPage() {
             {item.media && item.media.length > 0 && (
               <div style={{ marginTop: 24 }} data-testid={`media-impact-${item.id}`}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-                  <Radio className="h-4 w-4" style={{ color: "#1f5fae" }} />
+                  <Radio className="h-4 w-4" style={{ color: "#0b2240" }} />
                   <span style={{ fontSize: 12, fontWeight: 800, color: "#0b2240", textTransform: "uppercase", letterSpacing: ".5px" }}>
                     Andere media hierover
                   </span>

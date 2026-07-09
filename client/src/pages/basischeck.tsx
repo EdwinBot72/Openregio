@@ -128,7 +128,7 @@ export default function BasischeckPage() {
             <Star className="h-3 w-3" /> Lokale Basischeck
           </span>
           <h1 className="openregio-public-title" style={{ fontSize: 34 }}>
-            Zie direct wat er speelt in <span style={{ color: "#1f5fae" }}>jouw regio.</span>
+            Zie direct wat er speelt in <span style={{ color: "#0b2240" }}>jouw regio.</span>
           </h1>
           <p className="openregio-public-lead" style={{ marginBottom: 0 }}>
             Duurt minder dan 30 seconden.
@@ -233,7 +233,7 @@ export default function BasischeckPage() {
       {loading && (
         <div className="openregio-public-content" style={{ maxWidth: 760, textAlign: "center", paddingTop: 0 }}>
           <div style={{ width: 56, height: 56, borderRadius: "50%", background: "#E6F1FB", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 14px" }}>
-            <Loader2 className="h-6 w-6 animate-spin" style={{ color: "#1f5fae" }} />
+            <Loader2 className="h-6 w-6 animate-spin" style={{ color: "#0b2240" }} />
           </div>
           <p style={{ fontSize: 14, color: "#0b2240", fontWeight: 700, margin: "0 0 4px" }}>Analyse wordt opgesteld…</p>
           <p style={{ fontSize: 13, color: "#64748b", margin: 0 }}>
@@ -325,7 +325,7 @@ export default function BasischeckPage() {
             <>
               {/* Vergunningen */}
               <div className="openregio-public-card" data-testid="card-vergunningen">
-                <h2><FileText className="w-4 h-4" style={{ color: "#1f5fae" }} /> Relevante vergunningen</h2>
+                <h2><FileText className="w-4 h-4" style={{ color: "#0b2240" }} /> Relevante vergunningen</h2>
                 {resultaat.vergunningen.map((v, i) => {
                   const uk = urgentieKleur(v.urgentie);
                   return (
@@ -379,7 +379,7 @@ export default function BasischeckPage() {
 
           {/* Stappenplan — voor iedereen handig na de scan */}
           <div className="openregio-public-card" data-testid="card-stappenplan">
-            <h2><ListChecks className="w-4 h-4" style={{ color: "#1f5fae" }} /> Jouw stappenplan</h2>
+            <h2><ListChecks className="w-4 h-4" style={{ color: "#0b2240" }} /> Jouw stappenplan</h2>
             <ol style={{ margin: "10px 0 0", padding: 0, listStyle: "none", display: "flex", flexDirection: "column", gap: 10 }}>
               {(submittedFor.type === "regio-analyse"
                 ? [
@@ -396,7 +396,7 @@ export default function BasischeckPage() {
                   ]
               ).map((stap, i) => (
                 <li key={i} style={{ display: "flex", gap: 10 }} data-testid={`stap-${i}`}>
-                  <span style={{ width: 24, height: 24, borderRadius: "50%", background: "#1f5fae", color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800, flexShrink: 0 }}>
+                  <span style={{ width: 24, height: 24, borderRadius: "50%", background: "#0b2240", color: "#fff", display: "inline-flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: 800, flexShrink: 0 }}>
                     {i + 1}
                   </span>
                   <div>
@@ -453,7 +453,7 @@ export default function BasischeckPage() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: 14 }}>
             {[
               { icon: TrendingUp, color: "#059669", bg: "#dcfce7", titel: "Regio-analyse", tekst: "Kansen, risico's en trends voor jouw beroep in jouw gemeente — AI-gegenereerd op basis van actuele bronnen." },
-              { icon: FileText, color: "#1f5fae", bg: "#E6F1FB", titel: "Regelgeving-check", tekst: "Welke vergunningen heb je nodig? Wat zijn de actuele aandachtspunten voor jouw sector? Direct antwoord." },
+              { icon: FileText, color: "#0b2240", bg: "#E6F1FB", titel: "Regelgeving-check", tekst: "Welke vergunningen heb je nodig? Wat zijn de actuele aandachtspunten voor jouw sector? Direct antwoord." },
               { icon: Shield, color: "#7c3aed", bg: "#ede9fe", titel: "Privacy-first", tekst: "Geen account nodig. Geen opslag van je gegevens. Resultaten worden niet gedeeld met derden." },
             ].map((item) => {
               const Icon = item.icon;

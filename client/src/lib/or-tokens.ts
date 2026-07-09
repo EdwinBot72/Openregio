@@ -1,7 +1,7 @@
 export const OR = {
   // Brand colours
   blauw:    "#0b2240",
-  blauwMid: "#1f5fae",
+  blauwMid: "#0b2240",
   groen:    "#1a6b3a",
   oranje:   "#f28a1a",
   paars:    "#6d28d9",

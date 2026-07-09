@@ -10,7 +10,7 @@ export default function PrivacyPage() {
         <p className="openregio-public-lead">Laatste update: November 2024</p>
 
         <section className="openregio-public-card" style={{ background: "#eff5fc", border: "1px solid #cfe0f5" }}>
-          <h2><ShieldCheck className="w-4 h-4" style={{ color: "#1f5fae" }} /> Privacy-first platform</h2>
+          <h2><ShieldCheck className="w-4 h-4" style={{ color: "#0b2240" }} /> Privacy-first platform</h2>
           <p><strong>OpenRegio is gebouwd met privacy als uitgangspunt:</strong></p>
           <ul>
             <li><strong>Geen trackers</strong> – We gebruiken geen Google Analytics, Meta pixel of andere tracking</li>
@@ -22,12 +22,12 @@ export default function PrivacyPage() {
         </section>
 
         <section className="openregio-public-card">
-          <h2><Shield className="w-4 h-4" style={{ color: "#1f5fae" }} /> Jouw privacy is belangrijk</h2>
+          <h2><Shield className="w-4 h-4" style={{ color: "#0b2240" }} /> Jouw privacy is belangrijk</h2>
           <p>OpenRegio Coöperatie U.A. respecteert de privacy van alle gebruikers van het platform en draagt zorg voor een zorgvuldige verwerking van persoonsgegevens. Deze privacyverklaring legt uit welke gegevens we verzamelen en hoe we deze gebruiken.</p>
         </section>
 
         <section className="openregio-public-card">
-          <h2><Database className="w-4 h-4" style={{ color: "#1f5fae" }} /> Welke gegevens verzamelen we?</h2>
+          <h2><Database className="w-4 h-4" style={{ color: "#0b2240" }} /> Welke gegevens verzamelen we?</h2>
           <p>We verzamelen alleen wat strikt noodzakelijk is:</p>
           <h3>Accountgegevens</h3>
           <ul>
@@ -59,7 +59,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="openregio-public-card">
-          <h2><Eye className="w-4 h-4" style={{ color: "#1f5fae" }} /> Hoe gebruiken we jouw gegevens?</h2>
+          <h2><Eye className="w-4 h-4" style={{ color: "#0b2240" }} /> Hoe gebruiken we jouw gegevens?</h2>
           <p>We gebruiken jouw gegevens uitsluitend voor:</p>
           <ul>
             <li><strong>Toegang tot platform</strong> – Inloggen en je account beheren</li>
@@ -79,7 +79,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="openregio-public-card">
-          <h2><Server className="w-4 h-4" style={{ color: "#1f5fae" }} /> Met wie delen we gegevens?</h2>
+          <h2><Server className="w-4 h-4" style={{ color: "#0b2240" }} /> Met wie delen we gegevens?</h2>
           <p>We delen alleen gegevens met partijen die strikt noodzakelijk zijn:</p>
           <ul>
             <li><strong>Mollie</strong> – Betalingsverwerking (alleen factuurgegevens)</li>
@@ -91,7 +91,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="openregio-public-card">
-          <h2><Trash2 className="w-4 h-4" style={{ color: "#1f5fae" }} /> Bewaartermijnen</h2>
+          <h2><Trash2 className="w-4 h-4" style={{ color: "#0b2240" }} /> Bewaartermijnen</h2>
           <ul>
             <li><strong>Accountgegevens</strong> – Tot opzegging + wettelijke bewaartermijn (max 7 jaar voor facturen)</li>
             <li><strong>RegioBot gesprekken</strong> – Automatisch verwijderd na 12 maanden</li>
@@ -101,7 +101,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="openregio-public-card">
-          <h2><Cookie className="w-4 h-4" style={{ color: "#1f5fae" }} /> Cookies</h2>
+          <h2><Cookie className="w-4 h-4" style={{ color: "#0b2240" }} /> Cookies</h2>
           <p>We gebruiken <strong>uitsluitend functionele cookies</strong>:</p>
           <ul>
             <li><strong>Sessiecookie</strong> – Houdt je inlogstatus bij (httpOnly, secure)</li>
@@ -119,7 +119,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="openregio-public-card">
-          <h2><Lock className="w-4 h-4" style={{ color: "#1f5fae" }} /> Hoe beschermen we jouw gegevens?</h2>
+          <h2><Lock className="w-4 h-4" style={{ color: "#0b2240" }} /> Hoe beschermen we jouw gegevens?</h2>
           <p>We nemen de beveiliging van jouw gegevens serieus:</p>
           <ul>
             <li>Versleutelde verbindingen (HTTPS/TLS)</li>
@@ -132,7 +132,7 @@ export default function PrivacyPage() {
         </section>
 
         <section className="openregio-public-card">
-          <h2><Shield className="w-4 h-4" style={{ color: "#1f5fae" }} /> Jouw rechten (AVG)</h2>
+          <h2><Shield className="w-4 h-4" style={{ color: "#0b2240" }} /> Jouw rechten (AVG)</h2>
           <p>Onder de AVG (Algemene Verordening Gegevensbescherming) heb je de volgende rechten:</p>
           <ul>
             <li><strong>Recht op inzage:</strong> Je kunt opvragen welke gegevens we van je hebben</li>
@@ -145,11 +145,11 @@ export default function PrivacyPage() {
         </section>
 
         <section className="openregio-public-card">
-          <h2><Mail className="w-4 h-4" style={{ color: "#1f5fae" }} /> Contact</h2>
+          <h2><Mail className="w-4 h-4" style={{ color: "#0b2240" }} /> Contact</h2>
           <p>Heb je vragen over deze privacyverklaring of wil je gebruik maken van je rechten? Neem dan contact met ons op:</p>
           <p>
             <strong>OpenRegio Coöperatie U.A.</strong><br />
-            E-mail: <a href="mailto:privacy@openregio.nl" style={{ color: "#1f5fae", fontWeight: 700 }}>privacy@openregio.nl</a>
+            E-mail: <a href="mailto:privacy@openregio.nl" style={{ color: "#0b2240", fontWeight: 700 }}>privacy@openregio.nl</a>
           </p>
         </section>
 

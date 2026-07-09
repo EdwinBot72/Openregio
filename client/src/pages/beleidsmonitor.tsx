@@ -138,7 +138,7 @@ export default function BeleidsmonitorPage() {
       <Card className="mb-6 bg-muted/30">
         <CardContent className="p-0 space-y-3">
           <div className="flex items-start gap-3">
-            <Info className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
+            <Info className="h-5 w-5 text-[#0b2240] mt-0.5 shrink-0" />
             <div className="space-y-1.5">
               <p className="text-sm font-medium">Wat is de Regelmonitor?</p>
               <p className="text-sm text-muted-foreground">
@@ -158,7 +158,7 @@ export default function BeleidsmonitorPage() {
       </Card>
 
       <div className="flex items-center gap-3 flex-wrap">
-        <Activity className="h-8 w-8 text-[#1f5fae]" />
+        <Activity className="h-8 w-8 text-[#0b2240]" />
         <div className="flex-1 min-w-0">
           <h1 className="text-2xl font-bold tracking-tight" data-testid="text-beleidsmonitor-title">Beleidsmonitor</h1>
           <p className="text-muted-foreground text-sm">Regionaal beleid en ontwikkelingen op een rij</p>
@@ -309,7 +309,7 @@ export default function BeleidsmonitorPage() {
                         href={item.sourceUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 text-xs text-[#1f5fae] mt-2 hover:underline"
+                        className="inline-flex items-center gap-1 text-xs text-[#0b2240] mt-2 hover:underline"
                         data-testid={`link-source-${item.id}`}
                       >
                         <ExternalLink className="h-3 w-3" />

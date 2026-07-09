@@ -23,7 +23,7 @@ export default function CheckSituatiePage() {
       {/* Header */}
       <div className="space-y-3">
         <div className="flex items-center gap-3">
-          <CheckSquare className="h-8 w-8 text-[#1f5fae]" />
+          <CheckSquare className="h-8 w-8 text-[#0b2240]" />
           <div>
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-bold tracking-tight">Check mijn situatie</h1>
@@ -40,7 +40,7 @@ export default function CheckSituatiePage() {
       </div>
 
       {/* Direct beschikbaar: hulp-engine */}
-      <Card className="border-[#1f5fae]/30 bg-[#f0f4ff]">
+      <Card className="border-[#0b2240]/30 bg-[#f0f4ff]">
         <CardContent className="pt-5 pb-5">
           <div className="flex flex-col sm:flex-row sm:items-center gap-4">
             <div className="flex-1 space-y-1">
@@ -66,7 +66,7 @@ export default function CheckSituatiePage() {
       <Card>
         <CardContent className="pt-5 pb-5 space-y-4">
           <div className="flex items-start gap-3">
-            <ClipboardList className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
+            <ClipboardList className="h-5 w-5 text-[#0b2240] mt-0.5 shrink-0" />
             <div className="space-y-2">
               <p className="font-medium">Wat is "Check mijn situatie"?</p>
               <p className="text-sm text-muted-foreground">
@@ -90,7 +90,7 @@ export default function CheckSituatiePage() {
           <Card>
             <CardContent className="pt-4 pb-4">
               <div className="flex items-start gap-3">
-                <MapPin className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
+                <MapPin className="h-5 w-5 text-[#0b2240] mt-0.5 shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Jouw situatie invullen</p>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -105,7 +105,7 @@ export default function CheckSituatiePage() {
           <Card>
             <CardContent className="pt-4 pb-4">
               <div className="flex items-start gap-3">
-                <FileSearch className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
+                <FileSearch className="h-5 w-5 text-[#0b2240] mt-0.5 shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Persoonlijk regeloverzicht</p>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -120,7 +120,7 @@ export default function CheckSituatiePage() {
           <Card>
             <CardContent className="pt-4 pb-4">
               <div className="flex items-start gap-3">
-                <ShieldCheck className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
+                <ShieldCheck className="h-5 w-5 text-[#0b2240] mt-0.5 shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Vergunningen in beeld</p>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -135,7 +135,7 @@ export default function CheckSituatiePage() {
           <Card>
             <CardContent className="pt-4 pb-4">
               <div className="flex items-start gap-3">
-                <Download className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
+                <Download className="h-5 w-5 text-[#0b2240] mt-0.5 shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Checklist opslaan</p>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -179,7 +179,7 @@ export default function CheckSituatiePage() {
           <Card>
             <CardContent className="pt-4 pb-4">
               <div className="flex items-start gap-3">
-                <Briefcase className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
+                <Briefcase className="h-5 w-5 text-[#0b2240] mt-0.5 shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Startende ondernemers</p>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -192,7 +192,7 @@ export default function CheckSituatiePage() {
           <Card>
             <CardContent className="pt-4 pb-4">
               <div className="flex items-start gap-3">
-                <Building2 className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
+                <Building2 className="h-5 w-5 text-[#0b2240] mt-0.5 shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Gevestigde ondernemers</p>
                   <p className="text-sm text-muted-foreground mt-1">

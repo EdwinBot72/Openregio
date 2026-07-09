@@ -74,7 +74,7 @@ export default function RegisterPage() {
         </div>
 
         <div style={{ textAlign: "center", marginBottom: 20 }}>
-          <span style={{ display: "inline-block", background: selectedPlan === "pro" ? "rgba(242,138,26,.12)" : "rgba(31,95,174,.1)", color: selectedPlan === "pro" ? "#f28a1a" : "#1f5fae", border: `1px solid ${selectedPlan === "pro" ? "rgba(242,138,26,.3)" : "rgba(31,95,174,.2)"}`, borderRadius: 20, padding: "5px 16px", fontSize: 12, fontWeight: 700 }}>
+          <span style={{ display: "inline-block", background: selectedPlan === "pro" ? "rgba(242,138,26,.12)" : "rgba(31,95,174,.1)", color: selectedPlan === "pro" ? "#f28a1a" : "#0b2240", border: `1px solid ${selectedPlan === "pro" ? "rgba(242,138,26,.3)" : "rgba(31,95,174,.2)"}`, borderRadius: 20, padding: "5px 16px", fontSize: 12, fontWeight: 700 }}>
             {selectedPlan === "pro" ? "Pro · €59/mnd" : "Basis · €14,95/mnd"}
           </span>
         </div>
@@ -141,7 +141,7 @@ export default function RegisterPage() {
               <p style={{ fontSize: 11, fontWeight: 700, color: "#475569", marginBottom: 8, textTransform: "uppercase" as const, letterSpacing: ".4px" }}>Wat je krijgt</p>
               {planFeats[selectedPlan].map((f, i) => (
                 <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: "#334155", marginBottom: 5 }}>
-                  <span style={{ color: "#1f5fae", fontWeight: 700 }}>✓</span>{f}
+                  <span style={{ color: "#0b2240", fontWeight: 700 }}>✓</span>{f}
                 </div>
               ))}
             </div>
@@ -161,7 +161,7 @@ export default function RegisterPage() {
           <p className="openregio-auth-footer">
             Al lid?{" "}
             <Link href="/login">
-              <span style={{ color: "#1f5fae", fontWeight: 700, cursor: "pointer" }} data-testid="link-login">Inloggen</span>
+              <span style={{ color: "#0b2240", fontWeight: 700, cursor: "pointer" }} data-testid="link-login">Inloggen</span>
             </Link>
           </p>
         </div>

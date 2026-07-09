@@ -40,7 +40,7 @@ export default function RegelkaartPage() {
       <Card>
         <CardContent className="pt-5 pb-5 space-y-4">
           <div className="flex items-start gap-3">
-            <CheckSquare className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
+            <CheckSquare className="h-5 w-5 text-[#0b2240] mt-0.5 shrink-0" />
             <div className="space-y-2">
               <p className="font-medium">Wat wordt de Regelkaart?</p>
               <p className="text-sm text-muted-foreground">
@@ -60,7 +60,7 @@ export default function RegelkaartPage() {
           <Card>
             <CardContent className="pt-4 pb-4">
               <div className="flex items-start gap-3">
-                <Building2 className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
+                <Building2 className="h-5 w-5 text-[#0b2240] mt-0.5 shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Gemeente kiezen</p>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -75,7 +75,7 @@ export default function RegelkaartPage() {
           <Card>
             <CardContent className="pt-4 pb-4">
               <div className="flex items-start gap-3">
-                <ShieldCheck className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
+                <ShieldCheck className="h-5 w-5 text-[#0b2240] mt-0.5 shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Vergunningen en meldingen</p>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -90,7 +90,7 @@ export default function RegelkaartPage() {
           <Card>
             <CardContent className="pt-4 pb-4">
               <div className="flex items-start gap-3">
-                <FileText className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
+                <FileText className="h-5 w-5 text-[#0b2240] mt-0.5 shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Doorklikken naar de bron</p>
                   <p className="text-sm text-muted-foreground mt-1">
@@ -105,7 +105,7 @@ export default function RegelkaartPage() {
           <Card>
             <CardContent className="pt-4 pb-4">
               <div className="flex items-start gap-3">
-                <ClipboardList className="h-5 w-5 text-[#1f5fae] mt-0.5 shrink-0" />
+                <ClipboardList className="h-5 w-5 text-[#0b2240] mt-0.5 shrink-0" />
                 <div>
                   <p className="text-sm font-medium">Persoonlijke checklist</p>
                   <p className="text-sm text-muted-foreground mt-1">

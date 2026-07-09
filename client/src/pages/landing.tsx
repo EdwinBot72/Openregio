@@ -22,7 +22,7 @@ import { REGIONS } from "@shared/schema";
 import { apiRequest } from "@/lib/queryClient";
 
 const BRAND = {
-  purple: "#1f5fae",
+  purple: "#0b2240",
   purpleDark: "#174a8a",
 };
 
@@ -241,7 +241,7 @@ function LandingCard({ children, className = "" }: { children: React.ReactNode; 
 
 function LandingButton({ href, children, variant = "primary" }: { href: string; children: React.ReactNode; variant?: "primary" | "secondary" }) {
   const base = "inline-flex items-center justify-center rounded-xl px-4 py-2 text-sm font-semibold transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-black";
-  const primary = "bg-[#1f5fae] text-white hover:opacity-90 focus:ring-[#1f5fae]";
+  const primary = "bg-[#0b2240] text-white hover:opacity-90 focus:ring-[#0b2240]";
   const secondary = "border border-white/15 bg-white/5 text-white hover:bg-white/10 focus:ring-white/40";
   const cls = cx(base, variant === "primary" ? primary : secondary);
 
@@ -720,7 +720,7 @@ export default function LandingPage() {
               Zo ontstaat rust, overzicht en continuïteit.
             </p>
 
-            <p className="mt-3 text-sm font-semibold" style={{ color: "#1f5fae" }}>
+            <p className="mt-3 text-sm font-semibold" style={{ color: "#0b2240" }}>
               Elke regio die dit niet organiseert, verliest werk en grip zonder het te merken.
             </p>
 
@@ -817,7 +817,7 @@ export default function LandingPage() {
             const Icon = a.icon;
             return (
               <LandingCard key={a.title}>
-                <Icon className="w-8 h-8 text-[#1f5fae]" />
+                <Icon className="w-8 h-8 text-[#0b2240]" />
                 <div className="mt-3 text-lg font-semibold">{a.title}</div>
                 <div className="mt-2 text-sm text-white/70">{a.text}</div>
               </LandingCard>
@@ -847,7 +847,7 @@ export default function LandingPage() {
                     <div className="text-sm font-semibold text-white/80">{p.kicker}</div>
                     <div className="mt-1 text-2xl font-semibold">{p.title}</div>
                   </div>
-                  <Icon className="w-8 h-8 text-[#1f5fae]" />
+                  <Icon className="w-8 h-8 text-[#0b2240]" />
                 </div>
 
                 <ul className="mt-4 space-y-2 text-sm text-white/70">

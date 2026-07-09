@@ -221,7 +221,7 @@ function PijlerView({ pijler }: { pijler: Pijler }) {
                 style={{ display: "flex", gap: 12, alignItems: "flex-start" }}
               >
                 <CheckCircle2
-                  style={{ width: 20, height: 20, color: "#1f5fae", flexShrink: 0, marginTop: 2 }}
+                  style={{ width: 20, height: 20, color: "#0b2240", flexShrink: 0, marginTop: 2 }}
                   aria-hidden
                 />
                 <div>
@@ -263,7 +263,7 @@ function PijlerView({ pijler }: { pijler: Pijler }) {
                     <div style={{ fontWeight: 700, color: "#0f172a", marginBottom: 2 }}>{m.label}</div>
                     <div style={{ fontSize: 13, color: "#64748b", lineHeight: 1.5 }}>{m.description}</div>
                   </div>
-                  <ArrowRight style={{ width: 18, height: 18, color: "#1f5fae", flexShrink: 0 }} aria-hidden />
+                  <ArrowRight style={{ width: 18, height: 18, color: "#0b2240", flexShrink: 0 }} aria-hidden />
                 </div>
               </Link>
             ))}
@@ -317,7 +317,7 @@ function PijlerView({ pijler }: { pijler: Pijler }) {
                       <p.Icon style={{ width: 16, height: 16, color: "#f28a1a" }} />
                     </span>
                     <span style={{ fontWeight: 700, color: "#0f172a" }}>{p.title}</span>
-                    <ArrowRight style={{ width: 16, height: 16, color: "#1f5fae", marginLeft: "auto" }} aria-hidden />
+                    <ArrowRight style={{ width: 16, height: 16, color: "#0b2240", marginLeft: "auto" }} aria-hidden />
                   </div>
                 </Link>
               ))}
@@ -326,11 +326,11 @@ function PijlerView({ pijler }: { pijler: Pijler }) {
 
         <p style={{ fontSize: 13, color: "#64748b", marginTop: 24, textAlign: "center" }}>
           Klaar om te beginnen?{" "}
-          <Link href="/lidmaatschap" style={{ color: "#1f5fae", fontWeight: 700 }} data-testid="link-naar-lidmaatschap">
+          <Link href="/lidmaatschap" style={{ color: "#0b2240", fontWeight: 700 }} data-testid="link-naar-lidmaatschap">
             Bekijk het lidmaatschap
           </Link>{" "}
           of{" "}
-          <Link href="/login" style={{ color: "#1f5fae", fontWeight: 700 }} data-testid="link-naar-login">
+          <Link href="/login" style={{ color: "#0b2240", fontWeight: 700 }} data-testid="link-naar-login">
             log in
           </Link>
           .

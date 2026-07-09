@@ -279,7 +279,7 @@ export default function ActieDetailPage() {
             <CardContent className="p-4">
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14 }}>
-                  <MapPin size={16} style={{ color: "#1E6DB5", flexShrink: 0 }} />
+                  <MapPin size={16} style={{ color: "#0b2240", flexShrink: 0 }} />
                   <span style={{ fontWeight: 600 }}>{actie.locatie}</span>
                   <span style={{ color: "#94a3b8" }}>— {actie.regio}</span>
                 </div>
@@ -295,7 +295,7 @@ export default function ActieDetailPage() {
         <Card data-testid="card-herinnering">
           <CardContent className="p-5" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-              <BellRing size={16} style={{ color: "#1E6DB5" }} />
+              <BellRing size={16} style={{ color: "#0b2240" }} />
               <p style={{ fontWeight: 600, fontSize: 14, margin: 0 }}>Stuur mij een herinnering</p>
             </div>
             {reminderSent ? (
@@ -440,7 +440,7 @@ export default function ActieDetailPage() {
         </Card>
 
         {/* CTA voor bezoekers */}
-        <div style={{ background: "linear-gradient(135deg, #0A2D6E, #1E6DB5)", borderRadius: 14, padding: "28px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, flexWrap: "wrap" as const }}>
+        <div style={{ background: "linear-gradient(135deg, #0b2240, #0b2240)", borderRadius: 14, padding: "28px 28px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 20, flexWrap: "wrap" as const }}>
           <div>
             <p style={{ fontWeight: 800, fontSize: 16, color: "white", marginBottom: 6 }}>
               Wil je ook acties plaatsen in jouw regio?
@@ -450,7 +450,7 @@ export default function ActieDetailPage() {
             </p>
           </div>
           <Link href="/register" data-testid="link-cta-register">
-            <Button style={{ background: "#E8820C", color: "white", border: "none", fontWeight: 700 }}>
+            <Button style={{ background: "#f28a1a", color: "white", border: "none", fontWeight: 700 }}>
               Word lid <ChevronRight size={15} style={{ marginLeft: 4 }} />
             </Button>
           </Link>
@@ -473,7 +473,7 @@ export default function ActieDetailPage() {
 
 function NavBar() {
   return (
-    <header style={{ background: "#0A2D6E", padding: "0 24px" }}>
+    <header style={{ background: "#0b2240", padding: "0 24px" }}>
       <div style={{ maxWidth: 1100, margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: 60, gap: 12 }}>
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: 6, textDecoration: "none" }} data-testid="link-logo">
           <span style={{ fontWeight: 900, fontSize: 18, color: "white" }}>Open</span>
@@ -491,7 +491,7 @@ function NavBar() {
             </Button>
           </Link>
           <Link href="/register">
-            <Button size="sm" style={{ background: "#E8820C", color: "white", border: "none" }} data-testid="link-nav-register">
+            <Button size="sm" style={{ background: "#f28a1a", color: "white", border: "none" }} data-testid="link-nav-register">
               Word lid
             </Button>
           </Link>

@@ -21,7 +21,7 @@ type AnalyseResult = {
   samenvatting?: string;
 };
 
-const ACCENT = "#1f5fae";
+const ACCENT = "#0b2240";
 
 export default function BrievenagentPage() {
   const { toast } = useToast();

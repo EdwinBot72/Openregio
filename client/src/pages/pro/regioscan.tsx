@@ -39,7 +39,7 @@ import { regioScanResultSchema } from "@shared/schema";
 const PRIO_COLOR: Record<string, { bg: string; fg: string; label: string }> = {
   hoog: { bg: "#fef2f2", fg: "#b91c1c", label: "Hoog" },
   midden: { bg: "#fff7ed", fg: "#c2410c", label: "Midden" },
-  laag: { bg: "#f0f9ff", fg: "#1f5fae", label: "Laag" },
+  laag: { bg: "#f0f9ff", fg: "#0b2240", label: "Laag" },
 };
 
 function relTime(d: string | Date | null | undefined): string {
@@ -155,8 +155,8 @@ function ActieBlok({ acties }: { acties: RegioScanActie[] }) {
   return (
     <section className="openregio-public-card" data-testid="block-acties" style={{ marginBottom: 14 }}>
       <h2 style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <span style={{ display: "inline-flex", width: 32, height: 32, borderRadius: 10, background: "#1f5fae1a", alignItems: "center", justifyContent: "center" }}>
-          <ListChecks className="h-4 w-4" style={{ color: "#1f5fae" }} />
+        <span style={{ display: "inline-flex", width: 32, height: 32, borderRadius: 10, background: "#0b22401a", alignItems: "center", justifyContent: "center" }}>
+          <ListChecks className="h-4 w-4" style={{ color: "#0b2240" }} />
         </span>
         <span>Aanbevolen acties</span>
         <span style={{ fontSize: 12, fontWeight: 600, color: "#94a3b8", marginLeft: "auto" }}>{acties.length}</span>
@@ -255,8 +255,8 @@ function IndienBlok({
   return (
     <section className="openregio-public-card" data-testid="indien-blok" style={{ marginTop: 14 }}>
       <h2 style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <span style={{ display: "inline-flex", width: 32, height: 32, borderRadius: 10, background: "#1f5fae1a", alignItems: "center", justifyContent: "center" }}>
-          <Send className="h-4 w-4" style={{ color: "#1f5fae" }} />
+        <span style={{ display: "inline-flex", width: 32, height: 32, borderRadius: 10, background: "#0b22401a", alignItems: "center", justifyContent: "center" }}>
+          <Send className="h-4 w-4" style={{ color: "#0b2240" }} />
         </span>
         Indienen bij gemeente {scan.gemeente}
       </h2>
@@ -274,7 +274,7 @@ function IndienBlok({
               onChange={() => setKanaal("email")}
               data-testid="radio-kanaal-email"
             />
-            <Mail className="h-4 w-4" style={{ color: "#1f5fae" }} />
+            <Mail className="h-4 w-4" style={{ color: "#0b2240" }} />
             E-mail
           </label>
           <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "#0b2240", cursor: "pointer" }}>
@@ -286,7 +286,7 @@ function IndienBlok({
               onChange={() => setKanaal("post")}
               data-testid="radio-kanaal-post"
             />
-            <FileText className="h-4 w-4" style={{ color: "#1f5fae" }} />
+            <FileText className="h-4 w-4" style={{ color: "#0b2240" }} />
             Post (zelf versturen)
           </label>
         </div>
@@ -425,7 +425,7 @@ function ResultaatWeergave({
       <section className="openregio-public-card" data-testid="resultaat-kop">
         <div style={{ display: "flex", flexWrap: "wrap", gap: 12, alignItems: "flex-start", justifyContent: "space-between" }}>
           <div style={{ flex: "1 1 300px" }}>
-            <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".5px", color: "#1f5fae", marginBottom: 4 }}>
+            <div style={{ fontSize: 11, fontWeight: 800, textTransform: "uppercase", letterSpacing: ".5px", color: "#0b2240", marginBottom: 4 }}>
               RegioScan
             </div>
             <h2 style={{ margin: 0 }} data-testid="text-scan-titel">{scan.branche} · {scan.gemeente}</h2>
@@ -505,7 +505,7 @@ function ResultaatWeergave({
           icon={ScrollText}
           titel="Lokale besluiten"
           items={result.besluiten}
-          kleur="#1f5fae"
+          kleur="#0b2240"
           testId="block-besluiten"
           legeTekst="Geen specifieke besluiten gevonden."
         />
@@ -547,8 +547,8 @@ function ResultaatWeergave({
       {/* Woo-concept actiestrook */}
       <section className="openregio-public-card" data-testid="woo-concept-blok" style={{ marginTop: 14 }}>
         <h2 style={{ display: "flex", alignItems: "center", gap: 8 }}>
-          <span style={{ display: "inline-flex", width: 32, height: 32, borderRadius: 10, background: "#1f5fae1a", alignItems: "center", justifyContent: "center" }}>
-            <FileText className="h-4 w-4" style={{ color: "#1f5fae" }} />
+          <span style={{ display: "inline-flex", width: 32, height: 32, borderRadius: 10, background: "#0b22401a", alignItems: "center", justifyContent: "center" }}>
+            <FileText className="h-4 w-4" style={{ color: "#0b2240" }} />
           </span>
           Concept Woo-verzoek
         </h2>
@@ -681,7 +681,7 @@ function ResultaatWeergave({
           gap: 14,
         }}
       >
-        <span style={{ display: "inline-flex", width: 44, height: 44, borderRadius: 12, background: "#1f5fae", alignItems: "center", justifyContent: "center" }}>
+        <span style={{ display: "inline-flex", width: 44, height: 44, borderRadius: 12, background: "#0b2240", alignItems: "center", justifyContent: "center" }}>
           <FolderOpen className="h-5 w-5" style={{ color: "#fff" }} />
         </span>
         <div style={{ flex: "1 1 220px" }}>
@@ -757,7 +757,7 @@ function ScanFormulier({
     >
       <div>
         <h2 style={{ margin: 0 }}>
-          <Compass className="h-5 w-5" style={{ color: "#1f5fae", marginRight: 6, display: "inline-block", verticalAlign: "-3px" }} />
+          <Compass className="h-5 w-5" style={{ color: "#0b2240", marginRight: 6, display: "inline-block", verticalAlign: "-3px" }} />
           Start je RegioScan
         </h2>
         <p style={{ fontSize: 13, color: "#475569", margin: "6px 0 0", lineHeight: 1.6 }}>
@@ -1075,7 +1075,7 @@ export default function RegioScanProPage() {
       {/* Eerdere scans */}
       <section className="openregio-public-card" data-testid="lijst-eerdere-scans" style={{ marginTop: 14 }}>
         <h2>
-          <ListChecks className="h-5 w-5" style={{ color: "#1f5fae", marginRight: 6, display: "inline-block", verticalAlign: "-3px" }} />
+          <ListChecks className="h-5 w-5" style={{ color: "#0b2240", marginRight: 6, display: "inline-block", verticalAlign: "-3px" }} />
           Eerdere scans
         </h2>
         {scansLoading ? (

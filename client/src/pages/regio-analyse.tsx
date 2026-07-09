@@ -309,7 +309,7 @@ export default function RegioAnalysePage() {
     <div className="min-h-screen" style={{ background: "#f5f7fb", color: "#0f172a" }}>
       <nav className="sticky top-0 z-50 backdrop-blur-lg border-b" style={{ background: "rgba(255,255,255,.92)", borderColor: "#e6ebf2" }}>
         <div className="max-w-[1120px] mx-auto px-4 h-16 flex items-center justify-between gap-2 flex-wrap">
-          <Link href="/" className="font-black text-lg" style={{ color: "#1f5fae" }} data-testid="link-home-logo">
+          <Link href="/" className="font-black text-lg" style={{ color: "#0b2240" }} data-testid="link-home-logo">
             OpenRegio
           </Link>
           <Link href="/">
@@ -326,7 +326,7 @@ export default function RegioAnalysePage() {
           <div className="text-center" data-testid="section-intro">
             <div
               className="w-[72px] h-[72px] rounded-2xl flex items-center justify-center mx-auto mb-4"
-              style={{ background: "rgba(31,95,174,.10)", color: "#1f5fae", border: "1px solid rgba(31,95,174,.18)" }}
+              style={{ background: "rgba(31,95,174,.10)", color: "#0b2240", border: "1px solid rgba(31,95,174,.18)" }}
             >
               <BarChart3 className="w-8 h-8" />
             </div>
@@ -343,7 +343,7 @@ export default function RegioAnalysePage() {
             <button
               onClick={() => setStep("scan")}
               className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full font-black text-white text-base"
-              style={{ background: "#1f5fae", boxShadow: "0 14px 40px rgba(31,95,174,.25)" }}
+              style={{ background: "#0b2240", boxShadow: "0 14px 40px rgba(31,95,174,.25)" }}
               data-testid="button-start-scan"
             >
               Start scan <ArrowRight className="w-4 h-4" />
@@ -362,7 +362,7 @@ export default function RegioAnalysePage() {
                   style={{ background: "#fff", border: "1px solid #e6ebf2", boxShadow: "0 4px 12px rgba(15,23,42,.04)" }}
                   data-testid={`card-domain-${i}`}
                 >
-                  <d.icon className="w-5 h-5 mb-1.5" style={{ color: "#1f5fae" }} />
+                  <d.icon className="w-5 h-5 mb-1.5" style={{ color: "#0b2240" }} />
                   <div className="font-bold text-sm">{d.label}</div>
                   <div style={{ color: "#8896a8", fontSize: "12px" }}>{d.hint}</div>
                 </div>
@@ -385,7 +385,7 @@ export default function RegioAnalysePage() {
               <div className="h-2 rounded-full overflow-hidden" style={{ background: "#e6ebf2" }}>
                 <div
                   className="h-full rounded-full"
-                  style={{ width: `${progress}%`, background: "#1f5fae", transition: "width 0.3s ease" }}
+                  style={{ width: `${progress}%`, background: "#0b2240", transition: "width 0.3s ease" }}
                   data-testid="progress-bar"
                 />
               </div>
@@ -447,7 +447,7 @@ export default function RegioAnalysePage() {
                   disabled={answers[currentQ] === null}
                   className="flex items-center gap-1.5 px-4 py-2.5 rounded-full font-bold text-sm text-white"
                   style={{
-                    background: answers[currentQ] !== null ? "#1f5fae" : "#a0aec0",
+                    background: answers[currentQ] !== null ? "#0b2240" : "#a0aec0",
                   }}
                   data-testid="button-next-question"
                 >
@@ -477,7 +477,7 @@ export default function RegioAnalysePage() {
                   className="w-2.5 h-2.5 rounded-full"
                   style={{
                     background: i === currentQ
-                      ? "#1f5fae"
+                      ? "#0b2240"
                       : answers[i] !== null
                         ? "#22c55e"
                         : "#d1d5db",
@@ -547,10 +547,10 @@ export default function RegioAnalysePage() {
                         <div>
                           <div className="font-bold text-sm" style={{ color: "#ef4444" }}>{b.label}</div>
                           <p className="text-sm mt-0.5" style={{ color: "#374151" }}>{b.message}</p>
-                          <p className="text-xs mt-1.5 font-bold" style={{ color: "#1f5fae" }}>
+                          <p className="text-xs mt-1.5 font-bold" style={{ color: "#0b2240" }}>
                             Actie: {b.action}
                           </p>
-                          <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold" style={{ background: "rgba(31,95,174,.08)", color: "#1f5fae" }}>
+                          <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold" style={{ background: "rgba(31,95,174,.08)", color: "#0b2240" }}>
                             <b.pillarIcon className="w-3 h-3" /> {b.pillar}
                           </div>
                         </div>
@@ -585,7 +585,7 @@ export default function RegioAnalysePage() {
                         <div>
                           <div className="font-bold text-sm" style={{ color: "#22c55e" }}>{l.label}</div>
                           <p className="text-sm mt-0.5" style={{ color: "#374151" }}>{l.message}</p>
-                          <p className="text-xs mt-1.5 font-bold" style={{ color: "#1f5fae" }}>
+                          <p className="text-xs mt-1.5 font-bold" style={{ color: "#0b2240" }}>
                             Actie: {l.action}
                           </p>
                           <div className="mt-2 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold" style={{ background: "rgba(34,197,94,.08)", color: "#22c55e" }}>
@@ -602,7 +602,7 @@ export default function RegioAnalysePage() {
             <div
               className="rounded-[22px] p-5 mb-4"
               style={{
-                background: "linear-gradient(135deg, #0e3f86, #1f5fae)",
+                background: "linear-gradient(135deg, #0e3f86, #0b2240)",
                 color: "#fff",
                 boxShadow: "0 16px 40px rgba(15,23,42,.10)",
               }}

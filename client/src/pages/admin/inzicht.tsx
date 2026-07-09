@@ -84,7 +84,7 @@ export default function AdminInzichtPage() {
           <ArrowLeft size={14} />
         </Link>
         <div style={{ width: 52, height: 52, borderRadius: 14, background: "#eef2f9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-          <BarChart2 style={{ width: 24, height: 24, color: "#1f5fae" }} />
+          <BarChart2 style={{ width: 24, height: 24, color: "#0b2240" }} />
         </div>
         <div>
           <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="heading-inzicht">Inzicht</h1>

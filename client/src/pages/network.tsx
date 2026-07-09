@@ -440,7 +440,7 @@ export default function NetworkPage() {
 
       {isLoading && (
         <div style={{ display: "flex", justifyContent: "center", padding: "32px 0" }}>
-          <Loader2 className="w-6 h-6 animate-spin" style={{ color: "#1f5fae" }} />
+          <Loader2 className="w-6 h-6 animate-spin" style={{ color: "#0b2240" }} />
         </div>
       )}
 

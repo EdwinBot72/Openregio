@@ -111,9 +111,9 @@ const FEATURES: Feature[] = [
 ];
 
 const NETWERK = [
-  { initialen: "BV", kleur: "#2563a8", naam: "Bakkerij de Vries", sector: "🥐 Horeca", regio: "Centrum" },
+  { initialen: "BV", kleur: "#0b2240", naam: "Bakkerij de Vries", sector: "🥐 Horeca", regio: "Centrum" },
   { initialen: "KS", kleur: "#2B7A3E", naam: "Kapsalon Stijl", sector: "✂️ Dienstverlening", regio: "Oost" },
-  { initialen: "FW", kleur: "#E8890A", naam: "Fietsenwinkel Wout", sector: "🚲 Winkels", regio: "Noord", verbonden: true },
+  { initialen: "FW", kleur: "#f28a1a", naam: "Fietsenwinkel Wout", sector: "🚲 Winkels", regio: "Noord", verbonden: true },
   { initialen: "ZP", kleur: "#7F77DD", naam: "ZorgPunt Utrecht", sector: "🏥 Zorg", regio: "West" },
   { initialen: "PT", kleur: "#D85A30", naam: "Sportschool PowerUp", sector: "🏋️ Sport", regio: "Zuid" },
 ];
@@ -124,9 +124,9 @@ const ACTIES = [
     naam: "Workshop: Online zichtbaarheid", meta: "📍 Centrum · 14:00",
     type: "Workshop", typeClass: "or-pp-at-groen",
     deelnemers: [
-      { i: "BV", k: "#2563a8" },
+      { i: "BV", k: "#0b2240" },
       { i: "KS", k: "#2B7A3E" },
-      { i: "FW", k: "#E8890A" },
+      { i: "FW", k: "#f28a1a" },
     ],
     deelTekst: "14 ondernemers aangemeld",
     knop: "Aanmelden →", aangemeld: false,
@@ -138,7 +138,7 @@ const ACTIES = [
     deelnemers: [
       { i: "ZP", k: "#7F77DD" },
       { i: "PT", k: "#D85A30" },
-      { i: "+", k: "#2563a8" },
+      { i: "+", k: "#0b2240" },
     ],
     deelTekst: "23 ondernemers aangemeld",
     knop: "✓ Aangemeld", aangemeld: true,
@@ -149,8 +149,8 @@ const ACTIES = [
     type: "Event", typeClass: "or-pp-at-oranje",
     deelnemers: [
       { i: "KS", k: "#2B7A3E" },
-      { i: "FW", k: "#E8890A" },
-      { i: "+", k: "#2563a8" },
+      { i: "FW", k: "#f28a1a" },
+      { i: "+", k: "#0b2240" },
     ],
     deelTekst: "31 ondernemers aangemeld",
     knop: "Aanmelden →", aangemeld: false,
