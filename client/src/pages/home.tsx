@@ -148,15 +148,6 @@ export default function HomePage() {
 
           {/* Right — text */}
           <div className="or-hero-left" style={{ padding: "60px 24px 48px 48px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-            <h1 style={{ fontSize: 54, fontWeight: 900, color: BLAUW, lineHeight: 1.02, margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "-0.01em" }}>
-              DIT KRIJG JE BIJ<br />OPENREGIO
-            </h1>
-            <h2 style={{ fontSize: 32, fontWeight: 900, color: ORANJE, lineHeight: 1.1, margin: "0 0 28px", textTransform: "uppercase" }}>
-              TOOLS, NETWERK EN ZICHTBAARHEID.
-            </h2>
-            <p style={{ fontSize: 15, color: "#334155", lineHeight: 1.8, margin: "0 0 34px", maxWidth: 480 }}>
-              Als lid van OpenRegio krijg je toegang tot <strong>kennis</strong>, <strong>mensen</strong> en <strong>middelen</strong> die je verder helpen. Alles wat je nodig hebt om <strong>grip</strong> te houden op regels, <strong>kansen</strong> te benutten en samen te <strong>groeien</strong> in jouw regio.
-            </p>
             <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
               <Link href={dashHref}>
                 <button style={{ padding: "13px 28px", borderRadius: 8, fontSize: 15, fontWeight: 700, background: ORANJE, color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
