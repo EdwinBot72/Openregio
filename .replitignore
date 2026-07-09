@@ -3,7 +3,6 @@
 .cache/
 artifacts/
 uploads/
-node_modules/
 attached_assets/
 test-results/
 playwright-report/
