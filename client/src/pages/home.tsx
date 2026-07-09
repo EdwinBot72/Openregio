@@ -14,9 +14,12 @@ import {
   ArrowRight,
   Bell,
   Briefcase,
-  Brain,
+  ShieldCheck,
   Megaphone,
   Heart,
+  ClipboardCheck,
+  Compass,
+  CheckCircle2,
 } from "lucide-react";
 
 const BLAUW = "#0b2240";
@@ -54,8 +57,8 @@ export default function HomePage() {
 
             {/* Desktop nav */}
             <nav className="or-nav-desktop" style={{ display: "flex", alignItems: "center", gap: 28 }}>
-              <a href="#features" style={{ fontSize: 14, fontWeight: 600, color: "#475569", textDecoration: "none" }}>Platform</a>
-              <a href="#agents" style={{ fontSize: 14, fontWeight: 600, color: "#475569", textDecoration: "none" }}>AI Agents</a>
+              <a href="#platform" style={{ fontSize: 14, fontWeight: 600, color: "#475569", textDecoration: "none" }}>Platform</a>
+              <a href="#hulp" style={{ fontSize: 14, fontWeight: 600, color: "#475569", textDecoration: "none" }}>Hulp voor ondernemers</a>
               <a href="#pricing" style={{ fontSize: 14, fontWeight: 600, color: "#475569", textDecoration: "none" }}>Lidmaatschap</a>
             </nav>
 
@@ -99,7 +102,7 @@ export default function HomePage() {
           {/* Mobile dropdown */}
           {mobileOpen && (
             <div style={{ padding: "12px 0 16px", borderTop: "1px solid #f0f0f0", display: "flex", flexDirection: "column", gap: 8 }}>
-              {[["#features", "Platform"], ["#agents", "AI Agents"], ["#pricing", "Lidmaatschap"]].map(([href, label]) => (
+              {[["#platform", "Platform"], ["#hulp", "Hulp voor ondernemers"], ["#pricing", "Lidmaatschap"]].map(([href, label]) => (
                 <a key={href} href={href} onClick={() => setMobileOpen(false)} style={{ fontSize: 15, fontWeight: 600, color: "#475569", textDecoration: "none", padding: "8px 4px" }}>{label}</a>
               ))}
               <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
@@ -119,125 +122,108 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* ── HERO ──────────────────────────────────────────────────────────── */}
-      <section id="features" style={{ background: "#f8f7f4", padding: "0 0 0 0" }}>
-        {/* Top: headline + photo */}
-        <div className="or-hero-grid" style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "45fr 55fr", minHeight: 500, alignItems: "stretch" }}>
+      {/* ── HERO — full-width photo, no text overlay, centered CTAs ─────────── */}
+      <section id="platform" className="or-hero" style={{ position: "relative", minHeight: 440, display: "flex", alignItems: "flex-end", justifyContent: "center", overflow: "hidden" }}>
+        <div style={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${BLAUW} 0%, #1a3a5c 100%)`, zIndex: -1 }} />
+        <img
+          src="/images/hero-entrepreneur.jpg"
+          alt="Lokale ondernemer"
+          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block", position: "absolute", inset: 0 }}
+          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+        />
+        {/* Subtle gradient for contrast — photo stays leading */}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to bottom, rgba(11,34,64,0) 0%, rgba(11,34,64,0.05) 55%, rgba(11,34,64,0.55) 100%)" }} />
 
-          {/* Left — photo */}
-          <div className="or-hero-right" style={{ position: "relative", minHeight: 460, overflow: "hidden" }}>
-            <div style={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${BLAUW} 0%, #1a3a5c 100%)`, zIndex: -1 }} />
-            <img
-              src="/images/hero-entrepreneur.jpg"
-              alt="Lokale ondernemer"
-              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block", position: "absolute", inset: 0 }}
-              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-            />
-            {/* Brush-stroke quote — bleeds past right boundary */}
-            <div style={{
-              position: "absolute", bottom: 40, left: 0, right: -24,
-              background: "rgba(11,34,64,0.92)",
-              padding: "16px 36px 16px 28px",
-              borderRadius: "10px 0 0 10px",
-            }}>
-              <p style={{ margin: 0, fontSize: 16, fontStyle: "italic", color: "#fff", lineHeight: 1.55, fontWeight: 600, textAlign: "right" }}>
-                Samen weet je meer dan alleen.
-              </p>
-            </div>
-          </div>
-
-          {/* Right — text */}
-          <div className="or-hero-left" style={{ padding: "60px 24px 48px 48px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
-            <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
-              <Link href={dashHref}>
-                <button style={{ padding: "13px 28px", borderRadius: 8, fontSize: 15, fontWeight: 700, background: ORANJE, color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
-                  Gratis aanmelden <ArrowRight style={{ width: 16, height: 16 }} />
-                </button>
-              </Link>
-              <a href="#pricing">
-                <button style={{ padding: "12px 26px", borderRadius: 8, fontSize: 15, fontWeight: 700, background: "transparent", color: BLAUW, border: `2px solid ${BLAUW}`, cursor: "pointer" }}>
-                  Bekijk lidmaatschap
-                </button>
-              </a>
-            </div>
-          </div>
+        {/* Centered CTAs at the bottom of the hero */}
+        <div className="or-hero-ctas" style={{ position: "relative", zIndex: 1, display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center", padding: "0 24px 40px" }}>
+          <Link href={dashHref}>
+            <button style={{ padding: "13px 28px", borderRadius: 8, fontSize: 15, fontWeight: 700, background: ORANJE, color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+              Gratis aanmelden <ArrowRight style={{ width: 16, height: 16 }} />
+            </button>
+          </Link>
+          <a href="#pricing">
+            <button style={{ padding: "12px 26px", borderRadius: 8, fontSize: 15, fontWeight: 700, background: "rgba(255,255,255,0.94)", color: BLAUW, border: "2px solid #fff", cursor: "pointer" }}>
+              Bekijk lidmaatschap
+            </button>
+          </a>
         </div>
+      </section>
 
-        {/* Bottom: 6 feature blocks */}
-        <div style={{ background: "#fff", padding: "52px 24px 60px" }}>
-          <div className="or-features-grid" style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "36px 48px" }}>
+      {/* ── KORTE INTRO ───────────────────────────────────────────────────── */}
+      <section style={{ background: "#fff", padding: "64px 24px" }}>
+        <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
+          <h1 style={{ fontSize: 30, fontWeight: 900, color: BLAUW, lineHeight: 1.3, margin: "0 0 18px" }}>
+            OpenRegio helpt lokale ondernemers vooruit.
+          </h1>
+          <p style={{ fontSize: 16, color: "#475569", lineHeight: 1.85, margin: 0 }}>
+            Wij nemen wet- en regelgeving onder de loep, helpen bij gezond ondernemen en zorgen dat ondernemers sterker op de kaart staan in hun eigen regio. Praktisch, duidelijk en gericht op wat nú nodig is.
+          </p>
+        </div>
+      </section>
+
+      {/* ── 3 PIJLERS ─────────────────────────────────────────────────────── */}
+      <section id="hulp" style={{ background: "#f8f7f4", padding: "64px 24px" }}>
+        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
+          <div className="or-pillars-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 28 }}>
             {[
               {
-                Icon: Bell,
-                title: "REGIO UPDATES",
-                body: "Blijf ",
-                accent: "op de hoogte",
-                body2: " van belangrijke ontwikkelingen, regels en initiatieven in jouw regio.",
+                Icon: ClipboardCheck,
+                title: "Regelgeving onder de loep",
+                body: "Wij helpen ondernemers om scherper te kijken naar regels, besluiten en verplichtingen die invloed hebben op hun bedrijf. Wat betekent een regel echt in de praktijk? Wat geldt wel, wat geldt niet, en waar liggen aandachtspunten?",
               },
               {
-                Icon: Briefcase,
-                title: "PRAKTISCHE TOOLS",
-                body: "Direct toepasbare templates, checklists en stappenplannen die je ",
-                accent: "tijd besparen",
-                body2: " en verder helpen.",
+                Icon: ShieldCheck,
+                title: "Gezond ondernemen",
+                body: "OpenRegio helpt ondernemers om grip te houden op hun bedrijf. Van praktische vragen en risico's tot kansen, structuur en continuïteit: wij helpen overzicht creëren in lastige tijden.",
               },
               {
-                Icon: Brain,
-                title: "AI ONDERSTEUNING",
-                body: "Slimme AI-tools die je helpen informatie te vinden, teksten te verbeteren en ",
-                accent: "sneller",
-                body2: " beslissingen te nemen.",
+                Icon: Compass,
+                title: "Zichtbaar in jouw regio",
+                body: "Wij helpen lokale ondernemers om beter op de kaart te staan in hun eigen regio. Denk aan zichtbaarheid, positionering, lokale vindbaarheid en aansluiting bij kansen in de omgeving.",
               },
-              {
-                Icon: Users,
-                title: "NETWERK",
-                body: "",
-                accent: "Verbind",
-                body2: " met ondernemers, experts en partners in de regio en leer van elkaar.",
-              },
-              {
-                Icon: MapPin,
-                title: "LOKALE KANSEN",
-                body: "Ontdek samenwerkingen, projecten en ",
-                accent: "kansen",
-                body2: " die passen bij jouw bedrijf en ambities.",
-              },
-              {
-                Icon: Megaphone,
-                title: "ZICHTBAARHEID",
-                body: "Laat zien wie je bent en wat je doet. Vergroot je ",
-                accent: "zichtbaarheid",
-                body2: " bij collega's, partners en klanten.",
-              },
-            ].map(({ Icon, title, body, accent, body2 }) => (
-              <div key={title} style={{ display: "flex", gap: 18, alignItems: "flex-start" }}>
-                <div style={{ width: 52, height: 52, borderRadius: "50%", background: BLAUW, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Icon style={{ width: 22, height: 22, color: ORANJE }} />
+            ].map(({ Icon, title, body }) => (
+              <div key={title} style={{ background: "#fff", borderRadius: 12, padding: "32px 26px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
+                <div style={{ width: 52, height: 52, borderRadius: "50%", background: BLAUW, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
+                  <Icon style={{ width: 24, height: 24, color: ORANJE }} />
                 </div>
-                <div>
-                  <div style={{ fontSize: 12, fontWeight: 800, color: BLAUW, textTransform: "uppercase", letterSpacing: "0.07em", marginBottom: 8 }}>{title}</div>
-                  <div style={{ fontSize: 13, color: "#475569", lineHeight: 1.75 }}>
-                    {body}<span style={{ color: ORANJE, fontWeight: 700 }}>{accent}</span>{body2}
-                  </div>
-                </div>
+                <div style={{ fontSize: 18, fontWeight: 800, color: BLAUW, marginBottom: 12 }}>{title}</div>
+                <p style={{ fontSize: 14, color: "#475569", lineHeight: 1.8, margin: 0 }}>{body}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── AI AGENTS SECTION ─────────────────────────────────────────────── */}
-      <section id="agents" style={{ background: "#f8f7f4", padding: "72px 24px" }}>
+      {/* ── USP CHECKLIST ─────────────────────────────────────────────────── */}
+      <section style={{ background: "#fff", padding: "56px 24px" }}>
+        <div className="or-usp-grid" style={{ maxWidth: 1000, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "20px 32px" }}>
+          {[
+            "Praktische hulp voor lokale ondernemers",
+            "Regelgeving helder uitgelegd",
+            "Meer grip op kansen en risico's",
+            "Sterker zichtbaar in de regio",
+            "Betrokken en lokaal gericht",
+          ].map((item) => (
+            <div key={item} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "#334155", fontWeight: 600 }}>
+              <CheckCircle2 style={{ width: 18, height: 18, color: ORANJE, flexShrink: 0 }} />
+              {item}
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── AGENTS / TOOLS (rewritten, no "AI" language) ─────────────────── */}
+      <section style={{ background: "#f8f7f4", padding: "72px 24px" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 48 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: ORANJE, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 12 }}>
-              Slimme hulp voor ondernemers
+              Praktische hulp
             </div>
-            <h2 style={{ fontSize: 34, fontWeight: 900, color: BLAUW, margin: "0 0 14px", textTransform: "uppercase" }}>
-              AI AGENTS VOOR JOU
+            <h2 style={{ fontSize: 30, fontWeight: 900, color: BLAUW, margin: "0 0 14px" }}>
+              Hulp waar je echt iets aan hebt
             </h2>
             <p style={{ fontSize: 15, color: "#475569", lineHeight: 1.75, margin: "0 auto", maxWidth: 520 }}>
-              Laat AI het zware denkwerk doen. Onze gespecialiseerde agents helpen je sneller, beter en met minder gedoe.
+              Onze hulpmiddelen nemen het zware denkwerk uit handen, zodat jij sneller en met minder gedoe verder kunt.
             </p>
           </div>
 
@@ -245,21 +231,21 @@ export default function HomePage() {
             {[
               {
                 Icon: Mail, color: "#1d4ed8", bg: "#eff6ff",
-                title: "Brievenagent",
+                title: "Brievenhulp",
                 sub: "Brieven van de overheid begrijpen",
-                body: "Upload een brief van de gemeente of belastingdienst. De agent legt uit wat het betekent, welke actie nodig is en wat je rechten zijn.",
+                body: "Upload een brief van de gemeente of belastingdienst. Wij leggen uit wat het betekent, welke actie nodig is en wat je rechten zijn.",
                 tag: "Brief analyse",
               },
               {
                 Icon: FileCheck, color: "#16a34a", bg: "#f0fdf4",
-                title: "Contractagent",
+                title: "Contracthulp",
                 sub: "Contracten checken en opstellen",
                 body: "Laat contracten doorlichten op risico's, onduidelijkheden en ontbrekende clausules. Of laat een nieuw contract opstellen op maat.",
                 tag: "Pro feature",
               },
               {
                 Icon: Star, color: "#7c3aed", bg: "#f5f3ff",
-                title: "Secretaresse-agent",
+                title: "Secretariële hulp",
                 sub: "Administratie en communicatie",
                 body: "Van het opstellen van offertes tot het plannen van afspraken en het schrijven van professionele e-mails — altijd paraat.",
                 tag: "Pro feature",
@@ -314,7 +300,7 @@ export default function HomePage() {
               DIT KRIJG JE BIJ OPENREGIO
             </h3>
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "14px 24px" }}>
-              {["Grip op regels", "Praktische tools", "AI ondersteuning", "Regio updates", "Netwerk & kennisdeling", "Lokale zichtbaarheid"].map((item) => (
+              {["Grip op regels", "Praktische tools", "Persoonlijke ondersteuning", "Regio updates", "Netwerk & kennisdeling", "Lokale zichtbaarheid"].map((item) => (
                 <div key={item} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "#e2e8f0" }}>
                   <ChevronRight style={{ width: 14, height: 14, color: ORANJE, flexShrink: 0 }} />
                   {item}
@@ -337,6 +323,30 @@ export default function HomePage() {
                 Aanmelden — gratis starten <ArrowRight style={{ width: 15, height: 15 }} />
               </button>
             </Link>
+          </div>
+        </div>
+      </section>
+
+      {/* ── CTA-SECTIE ────────────────────────────────────────────────────── */}
+      <section style={{ background: "#fff", padding: "64px 24px" }}>
+        <div style={{ maxWidth: 700, margin: "0 auto", textAlign: "center" }}>
+          <h2 style={{ fontSize: 26, fontWeight: 900, color: BLAUW, lineHeight: 1.35, margin: "0 0 10px" }}>
+            OpenRegio helpt de lokale ondernemer in moeilijke tijden.
+          </h2>
+          <p style={{ fontSize: 17, color: ORANJE, fontWeight: 700, margin: "0 0 32px" }}>
+            Duidelijk. Praktisch. Lokaal betrokken.
+          </p>
+          <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center" }}>
+            <Link href="/register">
+              <button style={{ padding: "13px 28px", borderRadius: 8, fontSize: 15, fontWeight: 700, background: ORANJE, color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+                Word lid <ArrowRight style={{ width: 16, height: 16 }} />
+              </button>
+            </Link>
+            <a href="#pricing">
+              <button style={{ padding: "12px 26px", borderRadius: 8, fontSize: 15, fontWeight: 700, background: "transparent", color: BLAUW, border: `2px solid ${BLAUW}`, cursor: "pointer" }}>
+                Ontdek de mogelijkheden
+              </button>
+            </a>
           </div>
         </div>
       </section>
@@ -395,7 +405,7 @@ export default function HomePage() {
                 <span style={{ fontSize: 14, color: "rgba(255,255,255,0.65)" }}>/maand</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {["Alles van Basis", "RegioBot (onbeperkt)", "AI Agents toegang", "WOO-verzoeken", "Woo dossiers", "Lokale acties aanmaken", "Prioriteitsondersteuning"].map((f) => (
+                {["Alles van Basis", "RegioBot (onbeperkt)", "Volledige toegang tot alle hulpmiddelen", "WOO-verzoeken", "Woo dossiers", "Lokale acties aanmaken", "Prioriteitsondersteuning"].map((f) => (
                   <div key={f} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "#e2e8f0" }}>
                     <span style={{ color: ORANJE, fontWeight: 700, fontSize: 15 }}>✓</span> {f}
                   </div>
@@ -438,16 +448,17 @@ export default function HomePage() {
       {/* ── RESPONSIVE ────────────────────────────────────────────────────── */}
       <style>{`
         @media (max-width: 960px) {
-          .or-hero-grid { grid-template-columns: 1fr !important; }
-          .or-hero-left { padding: 48px 24px 32px !important; }
-          .or-hero-right { min-height: 300px !important; }
-          .or-values-grid { grid-template-columns: repeat(2, 1fr) !important; }
+          .or-hero { min-height: 360px !important; }
+          .or-pillars-grid { grid-template-columns: 1fr !important; }
           .or-agents-grid { grid-template-columns: 1fr !important; }
           .or-bottom-grid { grid-template-columns: 1fr !important; }
           .or-pricing-grid { grid-template-columns: 1fr !important; }
+          .or-usp-grid { grid-template-columns: repeat(2, 1fr) !important; }
         }
         @media (max-width: 600px) {
-          .or-values-grid { grid-template-columns: 1fr !important; }
+          .or-hero { min-height: 300px !important; }
+          .or-hero-ctas button { font-size: 14px !important; padding: 11px 20px !important; }
+          .or-usp-grid { grid-template-columns: 1fr !important; }
           .or-nav-desktop { display: none !important; }
           .or-nav-mobile { display: block !important; }
         }

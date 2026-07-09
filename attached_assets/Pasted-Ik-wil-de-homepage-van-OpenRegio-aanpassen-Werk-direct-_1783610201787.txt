@@ -1,0 +1,113 @@
+Ik wil de homepage van OpenRegio aanpassen. Werk direct in de bestaande codebase en pas de homepage visueel en inhoudelijk aan.
+
+DOEL
+De homepage moet rustiger, sterker en duidelijker worden voor lokale ondernemers.
+Ik wil GEEN nadruk meer op “AI”.
+OpenRegio moet overkomen als een praktische partner voor lokale ondernemers:
+- regelgeving onder de loep
+- gezond ondernemen
+- beter zichtbaar in de regio
+
+BELANGRIJK
+- Gebruik de bestaande hero-afbeelding / foto die ik heb aangeleverd als full-width header image.
+- Verdeel die foto over de hele headerbreedte.
+- Geen extra tekstblokken over de foto heen, dus geen grote kop of paragraaf in de hero zelf.
+- Alleen de 2 bestaande buttons mogen zichtbaar blijven, gecentreerd onderin de header.
+- Zorg dat die buttons netjes gecentreerd staan en goed leesbaar zijn.
+- Maak de header modern, strak, rustig en professioneel.
+- Gebruik eventueel een subtiele overlay of gradient als nodig voor contrast, maar houd de foto leidend.
+- De uitstraling moet lokaal, betrouwbaar, zakelijk en toegankelijk zijn.
+
+TEKSTLIJNSTURING
+Ik wil op de homepage nergens het woord “AI” terugzien.
+Vervang alle teksten waarin “AI”, “AI-hulp”, “AI-assistent” of iets dergelijks voorkomt.
+Dus ook in blokken zoals RegioBot, website scan, tools, uitlegteksten enzovoort: herschrijf dit zonder AI-taal.
+
+HOMEPAGE STRUCTUUR
+1. HERO
+- Full-width header met de aangeleverde foto
+- Geen losse hero-tekst
+- Alleen 2 gecentreerde CTA-buttons onderaan de hero
+- Houd voldoende witruimte
+- Mobiel ook netjes schalen
+
+2. KORTE INTRO-SECTIE ONDER DE HERO
+Gebruik deze tekst:
+
+OpenRegio helpt lokale ondernemers vooruit.
+Wij nemen wet- en regelgeving onder de loep, helpen bij gezond ondernemen en zorgen dat ondernemers sterker op de kaart staan in hun eigen regio.
+Praktisch, duidelijk en gericht op wat nú nodig is.
+
+3. SECTIE MET 3 PIJLERS
+Toon 3 duidelijke pijlers als cards of blokken met een icoon en korte uitleg.
+
+PIJLER 1
+Titel: Regelgeving onder de loep
+Tekst:
+Wij helpen ondernemers om scherper te kijken naar regels, besluiten en verplichtingen die invloed hebben op hun bedrijf.
+Wat betekent een regel echt in de praktijk?
+Wat geldt wel, wat geldt niet, en waar liggen aandachtspunten?
+
+PIJLER 2
+Titel: Gezond ondernemen
+Tekst:
+OpenRegio helpt ondernemers om grip te houden op hun bedrijf.
+Van praktische vragen en risico’s tot kansen, structuur en continuïteit:
+wij helpen overzicht creëren in lastige tijden.
+
+PIJLER 3
+Titel: Zichtbaar in jouw regio
+Tekst:
+Wij helpen lokale ondernemers om beter op de kaart te staan in hun eigen regio.
+Denk aan zichtbaarheid, positionering, lokale vindbaarheid en aansluiting bij kansen in de omgeving.
+
+4. EXTRA KORTE CHECKPOINTS / USP-SECTIE
+Maak onder de 3 pijlers een compacte checklist of iconenrij met bijvoorbeeld:
+
+- Praktische hulp voor lokale ondernemers
+- Regelgeving helder uitgelegd
+- Meer grip op kansen en risico’s
+- Sterker zichtbaar in de regio
+- Betrokken en lokaal gericht
+
+5. CTA-SECTIE
+Gebruik deze tekst:
+
+OpenRegio helpt de lokale ondernemer in moeilijke tijden.
+Duidelijk. Praktisch. Lokaal betrokken.
+
+Plaats daaronder 2 duidelijke knoppen:
+- Word lid
+- Ontdek de mogelijkheden
+
+DESIGNRICHTING
+- Modern en professioneel
+- Rustige layout
+- Veel witruimte
+- Heldere typografie
+- Lokale en menselijke uitstraling
+- Geen drukke tech-look
+- Geen futuristische AI-elementen
+- Geen zwevende digitale overlays in beeld
+- Eerder coöperatief, betrouwbaar en sterk
+
+TECHNISCHE UITWERKING
+- Pas de homepage-componenten direct aan
+- Zorg dat alles responsive is
+- Hero-afbeelding moet netjes full-width en responsive zijn
+- Buttons in hero onderaan gecentreerd
+- Desktop, tablet en mobiel netjes uitwerken
+- Verwijder of herschrijf bestaande content die nog te veel “AI” ademt
+- Houd bestaande routing en button-links intact als die al goed staan
+
+SEO / COPY
+Gebruik op natuurlijke wijze woorden zoals:
+- lokale ondernemers
+- wet- en regelgeving
+- gezond ondernemen
+- zichtbaar in de regio
+- kansen en risico’s
+- praktische hulp
+- lokaal betrokken
+
+Laat mij daarna direct de aangepaste homepage zien.
