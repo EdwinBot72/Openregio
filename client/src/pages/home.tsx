@@ -208,6 +208,37 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── MANIFEST ──────────────────────────────────────────────────────── */}
+      <section style={{ background: BLAUW, padding: "80px 24px" }}>
+        <div style={{ maxWidth: 780, margin: "0 auto" }}>
+          <div style={{ width: 44, height: 4, background: ORANJE, borderRadius: 2, margin: "0 auto 32px" }} />
+          <h2 style={{ fontSize: 30, fontWeight: 900, color: "#fff", lineHeight: 1.4, textAlign: "center", margin: "0 0 40px" }}>
+            Als ondernemer ben je zichtbaar voor het systeem.<br />
+            <span style={{ color: ORANJE }}>OpenRegio maakt het systeem zichtbaar voor jou.</span>
+          </h2>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
+            <p style={{ fontSize: 15, color: "#cbd5e1", lineHeight: 1.85, margin: 0 }}>
+              Iedere ondernemer krijgt te maken met regels, heffingen, vergunningen, controles, verplichtingen en besluiten. Vaak wordt verwacht dat je gewoon meebeweegt, betaalt of voldoet. Maar als ondernemer mag je ook vragen stellen: waar komt deze regel vandaan, wie heeft dit besloten, welke grondslag wordt gebruikt en geldt dit echt voor mijn onderneming?
+            </p>
+            <p style={{ fontSize: 15, color: "#cbd5e1", lineHeight: 1.85, margin: 0 }}>
+              OpenRegio helpt lokale ondernemers om wetten, regels en besluiten zichtbaar en begrijpelijk te maken. Door samen de juiste vragen te stellen en waar nodig Woo-documenten op te vragen, brengen we boven tafel wat normaal verspreid zit in verordeningen, beleidsstukken, mandaatregisters, besluiten en gemeentelijke systemen.
+            </p>
+            <p style={{ fontSize: 15, color: "#cbd5e1", lineHeight: 1.85, margin: 0 }}>
+              Daarmee sta je als ondernemer sterker. Je krijgt meer grip op verplichtingen, meer inzicht in kansen en risico's en meer duidelijkheid over wat wel en niet aantoonbaar is. Niet alleen voor jezelf, maar ook voor andere ondernemers in jouw regio die met dezelfde regels te maken hebben.
+            </p>
+            <p style={{ fontSize: 15, color: "#cbd5e1", lineHeight: 1.85, margin: 0 }}>
+              Want één ondernemer met een vraag staat vaak alleen. Maar ondernemers die samen dezelfde regels zichtbaar maken, bouwen aan overzicht, invloed en lokale kracht.
+            </p>
+          </div>
+
+          <p style={{ fontSize: 19, fontWeight: 800, color: "#fff", textAlign: "center", lineHeight: 1.6, margin: "40px 0 0" }}>
+            OpenRegio is er om ondernemers te helpen begrijpen, controleren en vooruitkijken.<br />
+            <span style={{ color: ORANJE }}>Samen maken we regels open. Samen staan we sterker.</span>
+          </p>
+        </div>
+      </section>
+
       {/* ── AGENTS / TOOLS (rewritten, no "AI" language) ─────────────────── */}
       <section style={{ background: "#f8f7f4", padding: "72px 24px" }}>
         <div style={{ maxWidth: 1200, margin: "0 auto" }}>
