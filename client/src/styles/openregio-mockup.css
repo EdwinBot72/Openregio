@@ -11,8 +11,8 @@
   --or-blauw:        #0b2240;
   --or-blauw-mid:    #0b2240;
   --or-blauw-licht:  #f0f4ff;
-  --or-groen:        #2B7A3E;
-  --or-groen-licht:  #e8f4ec;
+  --or-groen:        #f28a1a;
+  --or-groen-licht:  #fdf3e0;
   --or-oranje:       #f28a1a;
   --or-oranje-licht: #fdf3e0;
   --or-wit:          #ffffff;
@@ -63,7 +63,7 @@
   letter-spacing: -.5px;
 }
 .or-topbar-logo .or-open  { color: #6ab0f5; }
-.or-topbar-logo .or-regio { color: #6dd89a; }
+.or-topbar-logo .or-regio { color: #f5b46a; }
 
 .or-topbar-sep { flex: 1; }
 
@@ -293,7 +293,7 @@
   font-weight: 700;
 }
 .or-nav-item.or-p1.or-actief { background: rgba(31,95,174,.12); color: #0b2240; }
-.or-nav-item.or-p2.or-actief { background: rgba(43,122,62,.12); color: #2B7A3E; }
+.or-nav-item.or-p2.or-actief { background: rgba(232,137,10,.12); color: #f28a1a; }
 .or-nav-item.or-p3.or-actief { background: rgba(242,138,26,.12); color: #b8650a; }
 
 .or-nav-icon {
@@ -370,7 +370,7 @@
 }
 .or-health-fill {
   height: 100%;
-  background: linear-gradient(90deg, var(--or-groen), #4ade80);
+  background: linear-gradient(90deg, var(--or-groen), #f6ad55);
   border-radius: 3px;
   transition: width .6s ease;
 }
@@ -578,7 +578,7 @@
   box-shadow: 0 6px 20px rgba(0,0,0,.08);
 }
 .or-pvk-blauw  { border-color: #b8cce4; }
-.or-pvk-groen  { border-color: #9fcfaa; }
+.or-pvk-groen  { border-color: #f0c46a; }
 .or-pvk-oranje { border-color: #f0c46a; }
 .or-pvk-header {
   display: flex;
@@ -859,7 +859,7 @@
   flex-direction: column;
 }
 .or-p1-kaart { border-color: #b8cce4; background: #f2f7fd; }
-.or-p2-kaart { border-color: #9fcfaa; background: #f0f9f2; }
+.or-p2-kaart { border-color: #f0c46a; background: #fffbf0; }
 .or-p3-kaart { border-color: #f0c46a; background: #fffbf0; }
 
 .or-pijler-header {
@@ -911,7 +911,7 @@
   border-bottom: 1px solid;
 }
 .or-p1-kaart .or-feature-item { border-color: #d0dff0; }
-.or-p2-kaart .or-feature-item { border-color: #c5e0ca; }
+.or-p2-kaart .or-feature-item { border-color: #f0c46a; }
 .or-p3-kaart .or-feature-item { border-color: #f0d890; }
 .or-feature-item:last-of-type { border-bottom: none; }
 .or-feature-icon {
@@ -1142,8 +1142,8 @@
    Kleur per pagina via wrapper .or-pp-grip / .or-pp-zicht / .or-pp-kracht
    ============================================================ */
 
-.or-pp-grip   { --or-pp: #1B3F7A; --or-pp-licht: #e8f0f9; --or-pp-rand: #b8cce4; --or-pp-shadow: rgba(27,63,122,.12); }
-.or-pp-zicht  { --or-pp: #2B7A3E; --or-pp-licht: #e8f4ec; --or-pp-rand: #9fcfaa; --or-pp-shadow: rgba(43,122,62,.12); }
+.or-pp-grip   { --or-pp: #0b2240; --or-pp-licht: #f0f4ff; --or-pp-rand: #b8cce4; --or-pp-shadow: rgba(11,34,64,.12); }
+.or-pp-zicht  { --or-pp: #f28a1a; --or-pp-licht: #fdf3e0; --or-pp-rand: #f0c46a; --or-pp-shadow: rgba(232,137,10,.12); }
 .or-pp-kracht { --or-pp: #f28a1a; --or-pp-licht: #fdf3e0; --or-pp-rand: #f0c46a; --or-pp-shadow: rgba(232,137,10,.14); }
 
 .or-pp-page { display: flex; flex-direction: column; padding-bottom: 32px; }
@@ -1329,7 +1329,7 @@
 }
 .or-pp-fk-status.or-pp-status-af {
   background: var(--or-groen-licht); color: var(--or-groen);
-  border: 1.5px solid #9fcfaa;
+  border: 1.5px solid #f0c46a;
 }
 
 .or-pp-fk-body { padding: 16px 18px; flex: 1; }
@@ -1564,7 +1564,7 @@
 }
 .or-pp-cat-tech   { background: #e8f0f9; color: var(--or-blauw-mid); }
 .or-pp-cat-inhoud { background: var(--or-oranje-licht); color: var(--or-oranje); }
-.or-pp-cat-design { background: #f0f0f8; color: #7F77DD; }
+.or-pp-cat-design { background: #f0f0f8; color: #0b2240; }
 
 /* NETWERK (kracht) */
 .or-pp-netwerk {
@@ -1607,7 +1607,7 @@
 .or-pp-nk-btn:hover { opacity: .85; }
 .or-pp-nk-btn.or-pp-verbonden {
   background: var(--or-groen-licht); color: var(--or-groen);
-  border-color: #9fcfaa;
+  border-color: #f0c46a;
 }
 .or-pp-nk-meer {
   border: 2px dashed var(--or-pp-rand);
