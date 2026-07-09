@@ -4,6 +4,7 @@ import { Link, useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, Eye, EyeOff } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
+import loginPhoto from "@assets/generated_images/login_ondernemer.png";
 
 export default function LoginPage() {
   usePageTitle("Inloggen");
@@ -40,23 +41,24 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="openregio-page openregio-auth-page" data-testid="page-login">
-      <div className="openregio-auth-center">
+    <div className="openregio-auth-split" data-testid="page-login">
+      <div className="openregio-auth-formside">
+        <div className="openregio-auth-center">
 
-        <div className="openregio-auth-logo" data-testid="link-home-logo">
-          <Link href="/">
-            <span className="openregio-topnav-logo">
-              <span className="openregio-topnav-logo-dark">Open</span>
-              <span className="openregio-topnav-logo-blue">Regio</span>
-            </span>
-          </Link>
-        </div>
-
-        <div className="openregio-card openregio-auth-card" data-testid="card-login">
-          <div className="openregio-auth-header">
-            <h1 className="openregio-auth-title">Welkom terug</h1>
-            <p className="openregio-auth-sub">Log in met je e-mailadres en wachtwoord om door te gaan.</p>
+          <div className="openregio-auth-logo" data-testid="link-home-logo">
+            <Link href="/">
+              <span className="openregio-topnav-logo">
+                <span className="openregio-topnav-logo-dark">Open</span>
+                <span className="openregio-topnav-logo-blue">Regio</span>
+              </span>
+            </Link>
           </div>
+
+          <div className="openregio-card openregio-auth-card" data-testid="card-login">
+            <div className="openregio-auth-header">
+              <h1 className="openregio-auth-title">Welkom terug</h1>
+              <p className="openregio-auth-sub">Log in met je e-mailadres en wachtwoord om door te gaan.</p>
+            </div>
 
           <form onSubmit={handleSubmit} className="openregio-onboarding-form">
             <div className="openregio-form-group">
@@ -118,17 +120,26 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <p className="openregio-auth-footer">
-            Nog geen account?{" "}
-            <Link href="/lidmaatschap">
-              <span style={{ color: "#1f5fae", fontWeight: 700, cursor: "pointer" }} data-testid="link-register">
-                Word lid
-              </span>
-            </Link>
-          </p>
+            <p className="openregio-auth-footer">
+              Nog geen account?{" "}
+              <Link href="/lidmaatschap">
+                <span style={{ color: "#1f5fae", fontWeight: 700, cursor: "pointer" }} data-testid="link-register">
+                  Word lid
+                </span>
+              </Link>
+            </p>
+          </div>
         </div>
       </div>
 
+      <div className="openregio-auth-photoside" data-testid="img-login-photo">
+        <img src={loginPhoto} alt="Lokale ondernemer bij OpenRegio" />
+        <div className="openregio-auth-photo-overlay" style={{ zIndex: 1 }} />
+        <div className="openregio-auth-photo-quote" style={{ zIndex: 2 }}>
+          <p style={{ color: "#fff" }}>&ldquo;Samen weet je meer dan alleen.&rdquo;</p>
+          <span style={{ color: "#cbd5e1" }}>Onderdeel van de coöperatie van lokale ondernemers</span>
+        </div>
+      </div>
     </div>
   );
 }

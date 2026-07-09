@@ -24,6 +24,12 @@ uri = "file://client/src/assets/optimized/sector-agrarisch.png"
 type = "image"
 title = "sector agrarisch"
 
+[[generated]]
+id = "phJqW2rAY2vR9A9bCfGFp"
+uri = "file://attached_assets/generated_images/login_ondernemer.png"
+type = "image"
+title = "login ondernemer foto"
+
 [[outputs]]
 id = "QrA78FbOfalijyMAB1Sx4"
 uri = "file://.local/exports/openregio-source.zip"
@@ -41,3 +47,39 @@ id = "uhUAOccjUIDGZJOfQEd0N"
 uri = "file://openregio_clean.zip"
 type = "unspecified"
 title = "OpenRegio — schone export (44 MB)"
+
+[[outputs]]
+id = "7NPq8HM3s0vRKZDoDXujP"
+uri = "file://attached_assets/stock_images/login_entrepreneur_1.jpg"
+type = "image"
+title = "small business owner smiling in shop"
+
+[[outputs]]
+id = "fOMe348oleFRL9yFZPmtU"
+uri = "file://attached_assets/stock_images/login_entrepreneur_2.jpg"
+type = "image"
+title = "small business owner smiling in shop"
+
+[[outputs]]
+id = "G_7TOLFp1H-tTPdLJPhfa"
+uri = "file://attached_assets/stock_images/login_entrepreneur_3.jpg"
+type = "image"
+title = "small business owner smiling in shop"
+
+[[outputs]]
+id = "VelAFnUrOqNCyBRrwDwR7"
+uri = "file://attached_assets/stock_images/login_shopkeeper_1.jpg"
+type = "image"
+title = "cafe owner standing in front of storefront, warm smile, apron, small business"
+
+[[outputs]]
+id = "TgTdKIEuyS9ANcAUTqOE_"
+uri = "file://attached_assets/stock_images/login_shopkeeper_2.jpg"
+type = "image"
+title = "cafe owner standing in front of storefront, warm smile, apron, small business"
+
+[[outputs]]
+id = "84v9EsaPn2Omn606UrQ0d"
+uri = "file://attached_assets/stock_images/login_shopkeeper_3.jpg"
+type = "image"
+title = "cafe owner standing in front of storefront, warm smile, apron, small business"
