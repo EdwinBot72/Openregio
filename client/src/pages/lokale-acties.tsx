@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { Link } from "wouter";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
@@ -32,6 +32,7 @@ import {
 import {
   CalendarDays, MapPin, Users, Plus, Pencil, Trash2,
   Search, Sparkles, Building2, Lock, ArrowRight, CheckCircle2, Clock,
+  AlertTriangle, Loader2,
 } from "lucide-react";
 import type { LokaleActie } from "@shared/schema";
 import { LOKALE_ACTIE_DOELGROEPEN, insertLokaleActieSchema } from "@shared/schema";
@@ -82,6 +83,23 @@ function formatDatumKort(d: string | Date | null | undefined) {
   return format(date, "d MMM", { locale: nl });
 }
 
+type GeocodeStatus = "idle" | "checking" | "ok" | "notfound" | "error";
+
+async function checkAdresGeocodeerbaar(locatie: string, regio: string): Promise<boolean | null> {
+  const query = `${locatie}, ${regio}, Nederland`;
+  try {
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=nl&q=${encodeURIComponent(query)}`,
+      { headers: { Accept: "application/json" } }
+    );
+    if (!res.ok) return null;
+    const json = await res.json();
+    return Array.isArray(json) && json.length > 0;
+  } catch {
+    return null;
+  }
+}
+
 function toDatetimeLocalValue(d: string | Date | null | undefined): string {
   if (!d) return "";
   const date = new Date(d);
@@ -111,6 +129,9 @@ export default function LokaleActiesPage() {
   const [filterDoelgroep, setFilterDoelgroep] = useState("alle");
   const [filterRegio, setFilterRegio] = useState("");
   const [sortBy, setSortBy] = useState<"datum" | "regio">("datum");
+  const [geocodeStatus, setGeocodeStatus] = useState<GeocodeStatus>("idle");
+  const geocodeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const geocodeCallId = useRef(0);
 
   const { data: acties = [], isLoading } = useQuery<LokaleActie[]>({
     queryKey: ["/api/lokale-acties"],
@@ -132,8 +153,42 @@ export default function LokaleActiesPage() {
     },
   });
 
+  const watchedLocatie = form.watch("locatie");
+  const watchedRegio = form.watch("regio");
+
+  useEffect(() => {
+    if (!open) return;
+    const locatie = watchedLocatie?.trim() ?? "";
+    const regio = watchedRegio?.trim() ?? "";
+
+    if (geocodeTimer.current) clearTimeout(geocodeTimer.current);
+
+    if (locatie.length < 2 || regio.length < 2) {
+      setGeocodeStatus("idle");
+      return;
+    }
+
+    setGeocodeStatus("checking");
+    const callId = ++geocodeCallId.current;
+
+    geocodeTimer.current = setTimeout(async () => {
+      const found = await checkAdresGeocodeerbaar(locatie, regio);
+      if (geocodeCallId.current !== callId) return;
+      if (found === null) {
+        setGeocodeStatus("error");
+      } else {
+        setGeocodeStatus(found ? "ok" : "notfound");
+      }
+    }, 900);
+
+    return () => {
+      if (geocodeTimer.current) clearTimeout(geocodeTimer.current);
+    };
+  }, [watchedLocatie, watchedRegio, open]);
+
   function openNieuw() {
     setEditing(null);
+    setGeocodeStatus("idle");
     form.reset({
       titel: "",
       beschrijving: "",
@@ -150,6 +205,7 @@ export default function LokaleActiesPage() {
 
   function openBewerken(actie: LokaleActie) {
     setEditing(actie);
+    setGeocodeStatus("idle");
     form.reset({
       titel: actie.titel,
       beschrijving: actie.beschrijving,
@@ -586,6 +642,28 @@ export default function LokaleActiesPage() {
                   </FormItem>
                 )}
               />
+              {geocodeStatus === "checking" && (
+                <div
+                  className="flex items-center gap-2 text-xs text-muted-foreground"
+                  data-testid="status-geocode-checking"
+                >
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  <span>Adres wordt gecontroleerd op de kaart...</span>
+                </div>
+              )}
+              {geocodeStatus === "notfound" && (
+                <div
+                  className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 dark:border-amber-900 dark:bg-amber-950 p-3 text-xs text-amber-800 dark:text-amber-300"
+                  data-testid="warning-geocode-notfound"
+                >
+                  <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+                  <span>
+                    Dit adres kon niet worden gevonden op de kaart. Je actie wordt wel geplaatst,
+                    maar verschijnt dan niet op de kaart bij /acties. Controleer de locatie en regio
+                    en pas ze eventueel aan.
+                  </span>
+                </div>
+              )}
               <div className="grid grid-cols-2 gap-3">
                 <FormField
                   control={form.control}
