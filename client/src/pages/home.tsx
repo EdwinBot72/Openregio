@@ -224,12 +224,6 @@ export default function HomePage() {
             <p style={{ fontSize: 15, color: "#cbd5e1", lineHeight: 1.85, margin: 0 }}>
               OpenRegio helpt lokale ondernemers om wetten, regels en besluiten zichtbaar en begrijpelijk te maken. Door samen de juiste vragen te stellen en waar nodig Woo-documenten op te vragen, brengen we boven tafel wat normaal verspreid zit in verordeningen, beleidsstukken, mandaatregisters, besluiten en gemeentelijke systemen.
             </p>
-            <p style={{ fontSize: 15, color: "#cbd5e1", lineHeight: 1.85, margin: 0 }}>
-              Daarmee sta je als ondernemer sterker. Je krijgt meer grip op verplichtingen, meer inzicht in kansen en risico's en meer duidelijkheid over wat wel en niet aantoonbaar is. Niet alleen voor jezelf, maar ook voor andere ondernemers in jouw regio die met dezelfde regels te maken hebben.
-            </p>
-            <p style={{ fontSize: 15, color: "#cbd5e1", lineHeight: 1.85, margin: 0 }}>
-              Want één ondernemer met een vraag staat vaak alleen. Maar ondernemers die samen dezelfde regels zichtbaar maken, bouwen aan overzicht, invloed en lokale kracht.
-            </p>
           </div>
 
           <p style={{ fontSize: 19, fontWeight: 800, color: "#fff", textAlign: "center", lineHeight: 1.6, margin: "40px 0 0" }}>
