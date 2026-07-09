@@ -59,6 +59,8 @@ export default function HomePage() {
               <a href="#platform" style={{ fontSize: 14, fontWeight: 600, color: "#475569", textDecoration: "none" }}>Platform</a>
               <a href="#hulp" style={{ fontSize: 14, fontWeight: 600, color: "#475569", textDecoration: "none" }}>Hulp voor ondernemers</a>
               <a href="#pricing" style={{ fontSize: 14, fontWeight: 600, color: "#475569", textDecoration: "none" }}>Lidmaatschap</a>
+              <Link href="/acties" style={{ fontSize: 14, fontWeight: 600, color: "#475569", textDecoration: "none" }}>Acties</Link>
+              <Link href="/blogs" style={{ fontSize: 14, fontWeight: 600, color: "#475569", textDecoration: "none" }}>Blogs</Link>
             </nav>
 
             {/* Desktop buttons */}
@@ -104,6 +106,8 @@ export default function HomePage() {
               {[["#platform", "Platform"], ["#hulp", "Hulp voor ondernemers"], ["#pricing", "Lidmaatschap"]].map(([href, label]) => (
                 <a key={href} href={href} onClick={() => setMobileOpen(false)} style={{ fontSize: 15, fontWeight: 600, color: "#475569", textDecoration: "none", padding: "8px 4px" }}>{label}</a>
               ))}
+              <Link href="/acties" onClick={() => setMobileOpen(false)} style={{ fontSize: 15, fontWeight: 600, color: "#475569", textDecoration: "none", padding: "8px 4px" }}>Acties</Link>
+              <Link href="/blogs" onClick={() => setMobileOpen(false)} style={{ fontSize: 15, fontWeight: 600, color: "#475569", textDecoration: "none", padding: "8px 4px" }}>Blogs</Link>
               <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 8 }}>
                 <Link href="/login">
                   <button onClick={() => setMobileOpen(false)} style={{ width: "100%", padding: "10px 16px", borderRadius: 8, fontSize: 15, fontWeight: 600, background: "transparent", color: BLAUW, border: `2px solid ${BLAUW}`, cursor: "pointer", textAlign: "left" }}>

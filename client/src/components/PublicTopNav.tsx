@@ -29,6 +29,11 @@ export function PublicTopNav({ showWordLid = true }: PublicTopNavProps) {
               Blogs
             </button>
           </Link>
+          <Link href="/acties">
+            <button className="openregio-button openregio-button-outline openregio-button-small" data-testid="link-nav-acties">
+              Acties
+            </button>
+          </Link>
           <Link href="/login">
             <button className="openregio-button openregio-button-outline openregio-button-small" data-testid="button-nav-login">
               Inloggen
