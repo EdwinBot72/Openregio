@@ -151,7 +151,7 @@ export default function BeleidsmonitorPage() {
             </div>
           </div>
           <div className="flex items-center gap-1.5 pl-8">
-            <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
+            <Lightbulb className="h-3.5 w-3.5 text-[#f28a1a]" />
             <span className="text-xs text-muted-foreground">Nieuwe items verschijnen zodra wetgeving of gemeentelijk beleid wijzigt.</span>
           </div>
         </CardContent>

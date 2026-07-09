@@ -29,13 +29,13 @@ import {
 
 function KansBadge({ kans }: { kans: BeroepKans; }) {
   const score = kans.kansScore;
-  if (score >= 14) return <Badge variant="default" className="text-xs shrink-0 bg-emerald-600 hover:bg-emerald-600">Grote kans</Badge>;
+  if (score >= 14) return <Badge variant="default" className="text-xs shrink-0 bg-[#f28a1a] hover:bg-[#f28a1a]">Grote kans</Badge>;
   if (score >= 8) return <Badge variant="secondary" className="text-xs shrink-0">Gemiddeld</Badge>;
   return <Badge variant="outline" className="text-xs shrink-0 text-muted-foreground">Verzadigd</Badge>;
 }
 
 function KansIcon({ score }: { score: number }) {
-  if (score >= 14) return <Star className="h-4 w-4 text-emerald-600 shrink-0" />;
+  if (score >= 14) return <Star className="h-4 w-4 text-[#f28a1a] shrink-0" />;
   if (score >= 8) return <Minus className="h-4 w-4 text-muted-foreground shrink-0" />;
   return <AlertCircle className="h-4 w-4 text-muted-foreground/50 shrink-0" />;
 }
@@ -169,7 +169,7 @@ export default function KansenMarktanalysePage() {
               )}
             </p>
             {kansen[0]?.groeigebied && (
-              <div className="flex items-center gap-2 mt-2 text-xs text-emerald-700 bg-emerald-50 rounded-xl px-3 py-2">
+              <div className="flex items-center gap-2 mt-2 text-xs text-[#f28a1a] bg-[#f28a1a]/10 rounded-xl px-3 py-2">
                 <Star className="h-3.5 w-3.5 shrink-0" />
                 {geselecteerdeGemeente} is een groeigebied — vraag groeit sneller dan gemiddeld.
               </div>
@@ -241,7 +241,7 @@ export default function KansenMarktanalysePage() {
                             <span
                               className={`text-xs font-bold ${
                                 k.kansScore >= 14
-                                  ? "text-emerald-600"
+                                  ? "text-[#f28a1a]"
                                   : k.kansScore >= 8
                                   ? "text-muted-foreground"
                                   : "text-muted-foreground/50"

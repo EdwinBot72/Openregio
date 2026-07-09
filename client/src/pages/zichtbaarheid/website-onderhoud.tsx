@@ -119,7 +119,7 @@ export default function WebsiteOnderhoudPage() {
                 "Basis vindbaarheidscheck",
               ].map((item) => (
                 <div key={item} className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <CheckCircle className="w-3.5 h-3.5 text-green-600 shrink-0" />
+                  <CheckCircle className="w-3.5 h-3.5 text-[#f28a1a] shrink-0" />
                   <span>{item}</span>
                 </div>
               ))}
@@ -141,7 +141,7 @@ export default function WebsiteOnderhoudPage() {
                 "Alles van Basis",
               ].map((item) => (
                 <div key={item} className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <CheckCircle className="w-3.5 h-3.5 text-green-600 shrink-0" />
+                  <CheckCircle className="w-3.5 h-3.5 text-[#f28a1a] shrink-0" />
                   <span>{item}</span>
                 </div>
               ))}

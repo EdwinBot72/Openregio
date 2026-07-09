@@ -306,7 +306,7 @@ function SendActivationButton({ user }: { user: AdminUser }) {
       <div className="flex items-center gap-2 flex-wrap">
         {/* Mail sturen */}
         {sent ? (
-          <div className="flex items-center gap-1.5 text-xs text-green-700 font-medium">
+          <div className="flex items-center gap-1.5 text-xs text-[#f28a1a] font-medium">
             <MailCheck className="h-3.5 w-3.5" />
             Activatiemail verstuurd
           </div>
@@ -394,13 +394,13 @@ function UserRow({ user }: { user: AdminUser }) {
         <div className="flex items-center gap-2 flex-wrap shrink-0">
           <Badge
             variant={user.plan === "pro" ? "default" : user.plan === "coaching" ? "outline" : "secondary"}
-            className={`text-[10px] ${user.plan === "coaching" ? "border-cyan-600 text-cyan-700" : ""}`}
+            className={`text-[10px] ${user.plan === "coaching" ? "border-[#0b2240] text-[#0b2240]" : ""}`}
             data-testid={`badge-plan-${user.id}`}
           >
             {user.plan === "pro" ? "Pro" : user.plan === "coaching" ? "1-op-1 coaching" : "Basis"}
           </Badge>
           {user.role === "admin" || user.role === "master" ? (
-            <Badge variant="outline" className="text-[10px] border-amber-400 text-amber-600">Admin</Badge>
+            <Badge variant="outline" className="text-[10px] border-[#f28a1a] text-[#f28a1a]">Admin</Badge>
           ) : null}
           {isDeleted && (
             <Badge variant="destructive" className="text-[10px]">Verwijderd</Badge>
@@ -607,8 +607,8 @@ export default function AdminUsersPage() {
           <span className="text-sm font-semibold text-foreground" data-testid="text-count-pro">{aantalPro}</span>
           <span className="text-xs text-muted-foreground">Pro-leden</span>
         </div>
-        <div className="rounded-xl border border-cyan-200 bg-card px-4 py-2.5 flex items-center gap-2">
-          <span className="text-sm font-semibold text-cyan-700" data-testid="text-count-coaching">{aantalCoaching}</span>
+        <div className="rounded-xl border border-[#0b2240]/20 bg-card px-4 py-2.5 flex items-center gap-2">
+          <span className="text-sm font-semibold text-[#0b2240]" data-testid="text-count-coaching">{aantalCoaching}</span>
           <span className="text-xs text-muted-foreground">Coaching-leden</span>
         </div>
       </div>
@@ -727,7 +727,7 @@ export default function AdminUsersPage() {
             {/* Activatiemail sturen */}
             <div className="flex items-center gap-2">
               {mailSent ? (
-                <div className="flex items-center gap-1.5 text-sm text-green-700 font-medium">
+                <div className="flex items-center gap-1.5 text-sm text-[#f28a1a] font-medium">
                   <MailCheck className="h-4 w-4" />
                   Activatiemail verstuurd naar {result.user.email}
                 </div>

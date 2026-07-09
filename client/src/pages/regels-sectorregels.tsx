@@ -55,9 +55,9 @@ const SECTOREN: Sector[] = [
     id: "horeca",
     label: "Horeca",
     icon: UtensilsCrossed,
-    color: "text-orange-600 dark:text-orange-400",
-    bg: "bg-orange-50 dark:bg-orange-950/30",
-    borderColor: "border-orange-200 dark:border-orange-800",
+    color: "text-[#f28a1a] dark:text-[#f28a1a]",
+    bg: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/30",
+    borderColor: "border-[#f28a1a]/20 dark:border-[#f28a1a]",
     regels: ["Exploitatievergunning", "Terrasregels gemeente", "Alcoholwet (DHW)", "Brandveiligheid", "Afvalverwerking"],
     vergunningen: ["Drank- en horecavergunning", "Omgevingsvergunning terrassen", "Muziekvergunning"],
     aankomend: ["Nieuwe terrasregels 2025", "Aanpassing Alcoholwet"],
@@ -74,9 +74,9 @@ const SECTOREN: Sector[] = [
     id: "detailhandel",
     label: "Detailhandel",
     icon: ShoppingBag,
-    color: "text-blue-600 dark:text-blue-400",
-    bg: "bg-blue-50 dark:bg-blue-950/30",
-    borderColor: "border-blue-200 dark:border-blue-800",
+    color: "text-[#0b2240] dark:text-[#0b2240]",
+    bg: "bg-[#0b2240]/10 dark:bg-[#0b2240]/30",
+    borderColor: "border-[#0b2240]/20 dark:border-[#0b2240]",
     regels: ["Winkeltijdenwet", "Consumentenwetgeving", "Kassabonplicht", "Retourbeleid", "Productaansprakelijkheid"],
     vergunningen: ["Vestigingsvergunning", "Evenementenvergunning"],
     aankomend: ["EU Omnibus richtlijn", "Nieuwe etiketteringsregels"],
@@ -112,9 +112,9 @@ const SECTOREN: Sector[] = [
     id: "bouw",
     label: "Bouw",
     icon: HardHat,
-    color: "text-yellow-600 dark:text-yellow-500",
-    bg: "bg-yellow-50 dark:bg-yellow-950/30",
-    borderColor: "border-yellow-200 dark:border-yellow-800",
+    color: "text-[#f28a1a] dark:text-[#f28a1a]",
+    bg: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/30",
+    borderColor: "border-[#f28a1a]/20 dark:border-[#f28a1a]",
     regels: ["Bouwbesluit 2012", "Omgevingsvergunning", "Arbeidsomstandigheden", "Stikstof regelgeving", "Asbestwetgeving"],
     vergunningen: ["Omgevingsvergunning bouwen", "G-rekening", "VCA certificaat"],
     aankomend: ["Omgevingswet updates", "Energieprestatie-eisen"],
@@ -131,9 +131,9 @@ const SECTOREN: Sector[] = [
     id: "agrarisch",
     label: "Agrarisch",
     icon: Sprout,
-    color: "text-green-600 dark:text-green-500",
-    bg: "bg-green-50 dark:bg-green-950/30",
-    borderColor: "border-green-200 dark:border-green-800",
+    color: "text-[#f28a1a] dark:text-[#f28a1a]",
+    bg: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/30",
+    borderColor: "border-[#f28a1a]/20 dark:border-[#f28a1a]",
     regels: ["Meststoffenwet", "Dierenwelzijnswet", "Gewasbeschermingsmiddelen", "Waterwetgeving", "Stikstofdeposities"],
     vergunningen: ["Omgevingsvergunning milieu", "GLB-subsidie aanvraag", "Vervoersdocumenten mest"],
     aankomend: ["Nieuw GLB 2025", "Stikstof aanpak"],
@@ -150,9 +150,9 @@ const SECTOREN: Sector[] = [
     id: "zorg",
     label: "Zorg & Welzijn",
     icon: Heart,
-    color: "text-rose-600 dark:text-rose-400",
-    bg: "bg-rose-50 dark:bg-rose-950/30",
-    borderColor: "border-rose-200 dark:border-rose-800",
+    color: "text-[#0b2240] dark:text-[#0b2240]",
+    bg: "bg-[#0b2240]/10 dark:bg-[#0b2240]/30",
+    borderColor: "border-[#0b2240]/20 dark:border-[#0b2240]",
     regels: ["WTZi toelating", "AVG (privacywetgeving)", "BIG-registratie", "Inspectie IGJ", "Klachtenregeling"],
     vergunningen: ["WTZi toelating", "BIG-registratie zorgverleners", "CAO-toepassing"],
     aankomend: ["Wet toetreding zorgaanbieders", "AVG handhaving"],
@@ -169,9 +169,9 @@ const SECTOREN: Sector[] = [
     id: "dienstverlening",
     label: "Dienstverlening",
     icon: Briefcase,
-    color: "text-violet-600 dark:text-violet-400",
-    bg: "bg-violet-50 dark:bg-violet-950/30",
-    borderColor: "border-violet-200 dark:border-violet-800",
+    color: "text-[#0b2240] dark:text-[#0b2240]",
+    bg: "bg-[#0b2240]/10 dark:bg-[#0b2240]/30",
+    borderColor: "border-[#0b2240]/20 dark:border-[#0b2240]",
     regels: ["AVG & privacywetgeving", "Wet DBA (zzp)", "Algemene voorwaarden", "Btw-regelgeving", "Beroepsaansprakelijkheid"],
     vergunningen: ["KvK-inschrijving", "Beroepskwalificaties", "Vakdiploma's"],
     aankomend: ["Wet toelating uitzendbureau", "Digital Services Act"],
@@ -271,7 +271,7 @@ function SectorModal({ sector, onClose }: { sector: Sector; onClose: () => void 
               <ul className="space-y-1">
                 {sector.regels.map((r) => (
                   <li key={r} className="flex items-center gap-2 text-sm">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-500 shrink-0" />
+                    <CheckCircle2 className="w-4 h-4 text-[#f28a1a] shrink-0" />
                     {r}
                   </li>
                 ))}
@@ -287,7 +287,7 @@ function SectorModal({ sector, onClose }: { sector: Sector; onClose: () => void 
                 <ul className="space-y-1">
                   {sector.aankomend.map((a) => (
                     <li key={a} className="flex items-center gap-2 text-sm">
-                      <AlertCircle className="w-4 h-4 text-amber-500 shrink-0" />
+                      <AlertCircle className="w-4 h-4 text-[#f28a1a] shrink-0" />
                       {a}
                     </li>
                   ))}

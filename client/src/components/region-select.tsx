@@ -24,7 +24,7 @@ export function RegionSelect({
     ? "max-h-80 bg-slate-900 border-slate-700"
     : "max-h-80";
   const labelCls = dark
-    ? "font-semibold text-blue-300"
+    ? "font-semibold text-[#0b2240]/30"
     : "font-semibold text-primary";
   const itemCls = dark
     ? "pl-6 text-white focus:bg-white/15 focus:text-white"

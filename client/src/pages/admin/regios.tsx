@@ -170,7 +170,7 @@ export default function AdminRegiosPage() {
                         disabled={updateMut.isPending}
                         data-testid={`button-save-${r.id}`}
                       >
-                        <Check className="h-3.5 w-3.5 text-emerald-600" />
+                        <Check className="h-3.5 w-3.5 text-[#f28a1a]" />
                       </Button>
                       <Button
                         size="icon"

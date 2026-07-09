@@ -50,12 +50,12 @@ type CursussenResponse = {
 // ─── Category metadata ────────────────────────────────────────────────────────
 
 const CATEGORY_META: Record<string, { label: string; color: string; bg: string }> = {
-  zichtbaarheid: { label: "Zichtbaarheid", color: "text-blue-600 dark:text-blue-400", bg: "bg-blue-50 dark:bg-blue-950/40" },
-  financieel: { label: "Financieel", color: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-950/40" },
-  marketing: { label: "Marketing", color: "text-pink-600 dark:text-pink-400", bg: "bg-pink-50 dark:bg-pink-950/40" },
-  operatie: { label: "Operatie", color: "text-violet-600 dark:text-violet-400", bg: "bg-violet-50 dark:bg-violet-950/40" },
-  wetgeving: { label: "Wetgeving", color: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-950/40" },
-  netwerk: { label: "Netwerk", color: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-950/40" },
+  zichtbaarheid: { label: "Zichtbaarheid", color: "text-[#0b2240] dark:text-[#0b2240]", bg: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40" },
+  financieel: { label: "Financieel", color: "text-[#f28a1a] dark:text-[#f28a1a]", bg: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40" },
+  marketing: { label: "Marketing", color: "text-[#0b2240] dark:text-[#0b2240]", bg: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40" },
+  operatie: { label: "Operatie", color: "text-[#0b2240] dark:text-[#0b2240]", bg: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40" },
+  wetgeving: { label: "Wetgeving", color: "text-[#0b2240] dark:text-[#0b2240]", bg: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40" },
+  netwerk: { label: "Netwerk", color: "text-[#f28a1a] dark:text-[#f28a1a]", bg: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40" },
 };
 
 // ─── Single cursus card ───────────────────────────────────────────────────────

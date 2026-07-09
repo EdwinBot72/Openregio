@@ -97,7 +97,7 @@ export default function AdminInzichtPage() {
         <CardHeader className="pb-2 pt-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <div className="rounded-lg p-1.5 bg-sky-100 dark:bg-sky-950/50 text-sky-600">
+              <div className="rounded-lg p-1.5 bg-[#0b2240]/10 dark:bg-[#0b2240]/50 text-[#0b2240]">
                 <Mail className="h-3.5 w-3.5" />
               </div>
               <CardTitle className="text-sm font-semibold">Lokale Acties notificatie-mails</CardTitle>
@@ -141,14 +141,14 @@ export default function AdminInzichtPage() {
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                     <div className="flex flex-col gap-0.5" data-testid="stat-sent">
-                      <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+                      <div className="flex items-center gap-1.5 text-[#f28a1a] dark:text-[#f28a1a]">
                         <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
                         <span className="text-xs font-medium">Verstuurd</span>
                       </div>
                       <span className="text-lg font-bold pl-5">{lastRun.sent}</span>
                     </div>
                     <div className="flex flex-col gap-0.5" data-testid="stat-no-region">
-                      <div className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400">
+                      <div className="flex items-center gap-1.5 text-[#f28a1a] dark:text-[#f28a1a]">
                         <UserX className="h-3.5 w-3.5 shrink-0" />
                         <span className="text-xs font-medium">Zonder regio</span>
                       </div>
@@ -195,9 +195,9 @@ export default function AdminInzichtPage() {
                         {notifLog.slice(1).map((entry, idx) => (
                           <tr key={idx} className="border-b last:border-0 hover-elevate" data-testid={`notif-log-row-${idx}`}>
                             <td className="px-3 py-2 text-muted-foreground">{formatTimestamp(entry.timestamp)}</td>
-                            <td className="px-3 py-2 text-center font-medium text-emerald-600 dark:text-emerald-400">{entry.sent}</td>
+                            <td className="px-3 py-2 text-center font-medium text-[#f28a1a] dark:text-[#f28a1a]">{entry.sent}</td>
                             <td className="px-3 py-2 text-center text-muted-foreground">{entry.skippedOptOut}</td>
-                            <td className="px-3 py-2 text-center text-amber-600 dark:text-amber-400">{entry.skippedNoRegion}</td>
+                            <td className="px-3 py-2 text-center text-[#f28a1a] dark:text-[#f28a1a]">{entry.skippedNoRegion}</td>
                             <td className="px-3 py-2 text-center text-destructive">{entry.failed}</td>
                             <td className="px-3 py-2 text-center">
                               <Badge variant="secondary" className="text-[10px]">
@@ -223,7 +223,7 @@ export default function AdminInzichtPage() {
         <Card data-testid="card-user-growth">
           <CardHeader className="pb-2 pt-4">
             <div className="flex items-center gap-2">
-              <div className="rounded-lg p-1.5 bg-blue-100 dark:bg-blue-950/50 text-blue-600">
+              <div className="rounded-lg p-1.5 bg-[#0b2240]/10 dark:bg-[#0b2240]/50 text-[#0b2240]">
                 <Users className="h-3.5 w-3.5" />
               </div>
               <CardTitle className="text-sm font-semibold">Ledengroei (6 maanden)</CardTitle>
@@ -269,7 +269,7 @@ export default function AdminInzichtPage() {
         <Card data-testid="card-woo-growth">
           <CardHeader className="pb-2 pt-4">
             <div className="flex items-center gap-2">
-              <div className="rounded-lg p-1.5 bg-orange-100 dark:bg-orange-950/50 text-orange-600">
+              <div className="rounded-lg p-1.5 bg-[#f28a1a]/10 dark:bg-[#f28a1a]/50 text-[#f28a1a]">
                 <Gavel className="h-3.5 w-3.5" />
               </div>
               <CardTitle className="text-sm font-semibold">Woo-verzoeken (6 maanden)</CardTitle>
@@ -319,7 +319,7 @@ export default function AdminInzichtPage() {
         <Card className="sm:col-span-2" data-testid="card-plan-distribution">
           <CardHeader className="pb-2 pt-4">
             <div className="flex items-center gap-2">
-              <div className="rounded-lg p-1.5 bg-violet-100 dark:bg-violet-950/50 text-violet-600">
+              <div className="rounded-lg p-1.5 bg-[#0b2240]/10 dark:bg-[#0b2240]/50 text-[#0b2240]">
                 <PieIcon className="h-3.5 w-3.5" />
               </div>
               <CardTitle className="text-sm font-semibold">Plan-verdeling</CardTitle>
@@ -389,7 +389,7 @@ export default function AdminInzichtPage() {
         <Card className="sm:col-span-3" data-testid="card-top-categories">
           <CardHeader className="pb-2 pt-4">
             <div className="flex items-center gap-2">
-              <div className="rounded-lg p-1.5 bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600">
+              <div className="rounded-lg p-1.5 bg-[#f28a1a]/10 dark:bg-[#f28a1a]/50 text-[#f28a1a]">
                 <TrendingUp className="h-3.5 w-3.5" />
               </div>
               <CardTitle className="text-sm font-semibold">Trending Woo-onderwerpen</CardTitle>

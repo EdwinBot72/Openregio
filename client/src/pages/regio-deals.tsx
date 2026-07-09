@@ -10,11 +10,11 @@ import type { RegioDeal } from "@shared/schema";
 import { REGIO_DEAL_CATEGORIES } from "@shared/schema";
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Software: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300",
-  Kantoor: "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300",
-  Marketing: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300",
-  Verzekering: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300",
-  Energie: "bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300",
+  Software: "bg-[#0b2240]/10 text-[#0b2240] dark:bg-[#0b2240]/30 dark:text-[#0b2240]/30",
+  Kantoor: "bg-[#f28a1a]/10 text-[#f28a1a] dark:bg-[#f28a1a]/30 dark:text-[#f28a1a]/30",
+  Marketing: "bg-[#0b2240]/10 text-[#0b2240] dark:bg-[#0b2240]/30 dark:text-[#0b2240]/30",
+  Verzekering: "bg-[#f28a1a]/10 text-[#f28a1a] dark:bg-[#f28a1a]/30 dark:text-[#f28a1a]/30",
+  Energie: "bg-[#f28a1a]/10 text-[#f28a1a] dark:bg-[#f28a1a]/30 dark:text-[#f28a1a]/30",
   Overig: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
 };
 
@@ -45,7 +45,7 @@ function PromoCodeButton({ code }: { code: string }) {
         data-testid="button-copy-promo-code"
         title="Kopieer code"
       >
-        {copied ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+        {copied ? <Check className="w-4 h-4 text-[#f28a1a]" /> : <Copy className="w-4 h-4" />}
       </Button>
     </div>
   );

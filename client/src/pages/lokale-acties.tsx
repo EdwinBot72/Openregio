@@ -656,7 +656,7 @@ export default function LokaleActiesPage() {
               )}
               {geocodeStatus === "notfound" && (
                 <div
-                  className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 dark:border-amber-900 dark:bg-amber-950 p-3 text-xs text-amber-800 dark:text-amber-300"
+                  className="flex items-start gap-2 rounded-md border border-[#f28a1a]/30 bg-[#f28a1a]/10 dark:border-[#f28a1a]/20 dark:bg-[#f28a1a]/20 p-3 text-xs text-[#f28a1a] dark:text-[#f28a1a]/30"
                   data-testid="warning-geocode-notfound"
                 >
                   <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />

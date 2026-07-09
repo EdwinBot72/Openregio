@@ -42,32 +42,32 @@ const BRONNEN = [
     label: "Wetgeving",
     icon: Gavel,
     omschrijving: "Rijkswetgeving en officieel nieuws van Rijksoverheid.nl, AMvB's en ministeriële regelingen die jouw sector raken",
-    kleur: "text-blue-600 dark:text-blue-400",
-    bg: "bg-blue-50 dark:bg-blue-950/40",
+    kleur: "text-[#0b2240] dark:text-[#0b2240]",
+    bg: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40",
   },
   {
     id: "beleid",
     label: "Beleid & overheid",
     icon: MapPin,
     omschrijving: "Persberichten van de Rijksoverheid, gemeentelijk en provinciaal beleid en raadsbesluiten",
-    kleur: "text-purple-600 dark:text-purple-400",
-    bg: "bg-purple-50 dark:bg-purple-950/40",
+    kleur: "text-[#0b2240] dark:text-[#0b2240]",
+    bg: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40",
   },
   {
     id: "financieel",
     label: "Financieel",
     icon: TrendingUp,
     omschrijving: "Fiscale wijzigingen, tariefsverhogingen en financiële randvoorwaarden",
-    kleur: "text-amber-600 dark:text-amber-400",
-    bg: "bg-amber-50 dark:bg-amber-950/40",
+    kleur: "text-[#f28a1a] dark:text-[#f28a1a]",
+    bg: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40",
   },
   {
     id: "subsidies",
     label: "Subsidies",
     icon: Banknote,
     omschrijving: "Nieuwe subsidieregelingen, fondsen en aanvraagperioden",
-    kleur: "text-green-600 dark:text-green-400",
-    bg: "bg-green-50 dark:bg-green-950/40",
+    kleur: "text-[#f28a1a] dark:text-[#f28a1a]",
+    bg: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40",
   },
 ];
 
@@ -122,8 +122,8 @@ type ThemaStijl = {
 const THEMA_STIJL: Record<string, ThemaStijl> = {
   energie: {
     icon: Zap,
-    kleur: "text-amber-600 dark:text-amber-400",
-    bg: "bg-amber-50 dark:bg-amber-950/40",
+    kleur: "text-[#f28a1a] dark:text-[#f28a1a]",
+    bg: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40",
     tagVariant: "destructive",
     fallbackTag: "Hoog impact",
     fallbackSamenvatting:
@@ -136,8 +136,8 @@ const THEMA_STIJL: Record<string, ThemaStijl> = {
   },
   regelgeving: {
     icon: Globe,
-    kleur: "text-blue-600 dark:text-blue-400",
-    bg: "bg-blue-50 dark:bg-blue-950/40",
+    kleur: "text-[#0b2240] dark:text-[#0b2240]",
+    bg: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40",
     tagVariant: "secondary",
     fallbackTag: "Nieuwe verplichtingen",
     fallbackSamenvatting:
@@ -150,8 +150,8 @@ const THEMA_STIJL: Record<string, ThemaStijl> = {
   },
   arbeidsmarkt: {
     icon: Users,
-    kleur: "text-purple-600 dark:text-purple-400",
-    bg: "bg-purple-50 dark:bg-purple-950/40",
+    kleur: "text-[#0b2240] dark:text-[#0b2240]",
+    bg: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40",
     tagVariant: "secondary",
     fallbackTag: "Actueel",
     fallbackSamenvatting:
@@ -164,8 +164,8 @@ const THEMA_STIJL: Record<string, ThemaStijl> = {
   },
   ai: {
     icon: Bot,
-    kleur: "text-green-600 dark:text-green-400",
-    bg: "bg-green-50 dark:bg-green-950/40",
+    kleur: "text-[#f28a1a] dark:text-[#f28a1a]",
+    bg: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40",
     tagVariant: "outline",
     fallbackTag: "Kans",
     fallbackSamenvatting:
@@ -178,8 +178,8 @@ const THEMA_STIJL: Record<string, ThemaStijl> = {
   },
   circulair: {
     icon: Leaf,
-    kleur: "text-teal-600 dark:text-teal-400",
-    bg: "bg-teal-50 dark:bg-teal-950/40",
+    kleur: "text-[#0b2240] dark:text-[#0b2240]",
+    bg: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40",
     tagVariant: "outline",
     fallbackTag: "Kans",
     fallbackSamenvatting:
@@ -192,8 +192,8 @@ const THEMA_STIJL: Record<string, ThemaStijl> = {
   },
   financiering: {
     icon: Building2,
-    kleur: "text-rose-600 dark:text-rose-400",
-    bg: "bg-rose-50 dark:bg-rose-950/40",
+    kleur: "text-[#0b2240] dark:text-[#0b2240]",
+    bg: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40",
     tagVariant: "secondary",
     fallbackTag: "Let op",
     fallbackSamenvatting:

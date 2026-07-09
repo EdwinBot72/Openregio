@@ -28,15 +28,15 @@ const CATEGORIE_LABELS: Record<string, string> = {
 };
 
 const CATEGORIE_KLEUR: Record<string, string> = {
-  retail: "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300",
-  food: "bg-orange-50 dark:bg-orange-950/40 text-orange-700 dark:text-orange-300",
-  services: "bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300",
-  health: "bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300",
-  education: "bg-teal-50 dark:bg-teal-950/40 text-teal-700 dark:text-teal-300",
-  creative: "bg-pink-50 dark:bg-pink-950/40 text-pink-700 dark:text-pink-300",
-  construction: "bg-amber-50 dark:bg-amber-950/40 text-amber-700 dark:text-amber-300",
-  agriculture: "bg-lime-50 dark:bg-lime-950/40 text-lime-700 dark:text-lime-300",
-  transport: "bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300",
+  retail: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40 text-[#0b2240] dark:text-[#0b2240]/30",
+  food: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40 text-[#f28a1a] dark:text-[#f28a1a]/30",
+  services: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40 text-[#0b2240] dark:text-[#0b2240]/30",
+  health: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40 text-[#f28a1a] dark:text-[#f28a1a]/30",
+  education: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40 text-[#0b2240] dark:text-[#0b2240]/30",
+  creative: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40 text-[#0b2240] dark:text-[#0b2240]/30",
+  construction: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40 text-[#f28a1a] dark:text-[#f28a1a]/30",
+  agriculture: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40 text-[#f28a1a] dark:text-[#f28a1a]/30",
+  transport: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40 text-[#0b2240] dark:text-[#0b2240]/30",
 };
 
 export default function KoopLokaalPage() {
@@ -67,8 +67,8 @@ export default function KoopLokaalPage() {
 
       {/* Header */}
       <div className="text-center space-y-3">
-        <div className="w-14 h-14 rounded-2xl bg-green-50 dark:bg-green-950/40 flex items-center justify-center mx-auto">
-          <Star className="h-7 w-7 text-green-600 dark:text-green-400" />
+        <div className="w-14 h-14 rounded-2xl bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40 flex items-center justify-center mx-auto">
+          <Star className="h-7 w-7 text-[#f28a1a] dark:text-[#f28a1a]" />
         </div>
         <h1 className="text-3xl font-bold">Koop Lokaal</h1>
         <p className="text-muted-foreground max-w-lg mx-auto leading-relaxed">
@@ -159,7 +159,7 @@ export default function KoopLokaalPage() {
                     href={b.websiteUrl.startsWith("http") ? b.websiteUrl : `https://${b.websiteUrl}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                    className="flex items-center gap-1.5 text-xs text-[#0b2240] dark:text-[#0b2240] hover:underline"
                     data-testid={`link-website-${b.id}`}
                   >
                     <Globe className="h-3 w-3" />
@@ -175,8 +175,8 @@ export default function KoopLokaalPage() {
       {/* CTA voor ondernemers */}
       <div className="border rounded-xl p-6 flex items-center justify-between gap-4 flex-wrap bg-muted/30">
         <div className="flex items-start gap-3">
-          <div className="w-9 h-9 rounded-xl bg-green-50 dark:bg-green-950/40 flex items-center justify-center shrink-0">
-            <Building2 className="h-4 w-4 text-green-600 dark:text-green-400" />
+          <div className="w-9 h-9 rounded-xl bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40 flex items-center justify-center shrink-0">
+            <Building2 className="h-4 w-4 text-[#f28a1a] dark:text-[#f28a1a]" />
           </div>
           <div>
             <p className="font-semibold text-sm">Ben jij ondernemer?</p>

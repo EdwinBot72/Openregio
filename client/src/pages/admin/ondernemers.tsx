@@ -111,8 +111,8 @@ export default function AdminOndernemersPage() {
                       {stats?.total ?? 0}
                     </p>
                   </div>
-                  <div className="rounded-md p-2.5 bg-blue-50 dark:bg-blue-950/40">
-                    <Users className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                  <div className="rounded-md p-2.5 bg-[#0b2240]/10 dark:bg-[#0b2240]/40">
+                    <Users className="h-4 w-4 text-[#0b2240] dark:text-[#0b2240]" />
                   </div>
                 </div>
               </CardContent>
@@ -126,8 +126,8 @@ export default function AdminOndernemersPage() {
                       {stats?.totalPro ?? 0}
                     </p>
                   </div>
-                  <div className="rounded-md p-2.5 bg-orange-50 dark:bg-orange-950/40">
-                    <Building2 className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+                  <div className="rounded-md p-2.5 bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40">
+                    <Building2 className="h-4 w-4 text-[#f28a1a] dark:text-[#f28a1a]" />
                   </div>
                 </div>
               </CardContent>
@@ -141,8 +141,8 @@ export default function AdminOndernemersPage() {
                       {stats?.totalActive ?? 0}
                     </p>
                   </div>
-                  <div className="rounded-md p-2.5 bg-emerald-50 dark:bg-emerald-950/40">
-                    <Activity className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  <div className="rounded-md p-2.5 bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40">
+                    <Activity className="h-4 w-4 text-[#f28a1a] dark:text-[#f28a1a]" />
                   </div>
                 </div>
               </CardContent>
@@ -159,8 +159,8 @@ export default function AdminOndernemersPage() {
                       {stats?.topRegion || "-"}
                     </p>
                   </div>
-                  <div className="rounded-md p-2.5 bg-violet-50 dark:bg-violet-950/40">
-                    <MapPin className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                  <div className="rounded-md p-2.5 bg-[#0b2240]/10 dark:bg-[#0b2240]/40">
+                    <MapPin className="h-4 w-4 text-[#0b2240] dark:text-[#0b2240]" />
                   </div>
                 </div>
               </CardContent>
@@ -292,14 +292,14 @@ export default function AdminOndernemersPage() {
                         <span
                           className={`inline-flex items-center gap-1.5 text-xs ${
                             row.isRecentlyActive
-                              ? "text-emerald-600 dark:text-emerald-400"
+                              ? "text-[#f28a1a] dark:text-[#f28a1a]"
                               : "text-muted-foreground"
                           }`}
                           data-testid={`status-active-${row.id}`}
                         >
                           <span
                             className={`h-1.5 w-1.5 rounded-full ${
-                              row.isRecentlyActive ? "bg-emerald-500" : "bg-muted-foreground/40"
+                              row.isRecentlyActive ? "bg-[#f28a1a]" : "bg-muted-foreground/40"
                             }`}
                           />
                           {row.isRecentlyActive ? "Actief" : "Inactief"}

@@ -37,8 +37,8 @@ const PLAN_LABEL: Record<string, string> = {
 };
 
 const STATUS_CONFIG: Record<string, { label: string; icon: React.ElementType; className: string }> = {
-  active: { label: "Actief", icon: CheckCircle, className: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400" },
-  trialing: { label: "In afwachting", icon: Clock, className: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" },
+  active: { label: "Actief", icon: CheckCircle, className: "bg-[#f28a1a]/10 text-[#f28a1a] dark:bg-[#f28a1a]/30 dark:text-[#f28a1a]" },
+  trialing: { label: "In afwachting", icon: Clock, className: "bg-[#f28a1a]/10 text-[#f28a1a] dark:bg-[#f28a1a]/30 dark:text-[#f28a1a]" },
   cancelled: { label: "Geannuleerd", icon: XCircle, className: "bg-slate-100 text-slate-600 dark:bg-slate-800/50 dark:text-slate-400" },
   past_due: { label: "Achterstallig", icon: AlertTriangle, className: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400" },
 };
@@ -125,13 +125,13 @@ export default function AdminBetalingenPage() {
 
       {/* ── Alert: stale trialing ── */}
       {staleCount > 0 && (
-        <div className="flex items-start gap-3 rounded-md border border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-950/30 px-4 py-3" data-testid="alert-stale-trialing">
-          <ShieldAlert className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+        <div className="flex items-start gap-3 rounded-md border border-[#f28a1a]/30 bg-[#f28a1a]/10 dark:border-[#f28a1a] dark:bg-[#f28a1a]/30 px-4 py-3" data-testid="alert-stale-trialing">
+          <ShieldAlert className="h-5 w-5 text-[#f28a1a] dark:text-[#f28a1a] shrink-0 mt-0.5" />
           <div>
-            <p className="text-sm font-semibold text-amber-800 dark:text-amber-300">
+            <p className="text-sm font-semibold text-[#f28a1a] dark:text-[#f28a1a]/30">
               {staleCount} subscription{staleCount > 1 ? "s" : ""} in afwachting ouder dan 24 uur
             </p>
-            <p className="text-xs text-amber-700 dark:text-amber-400 mt-0.5">
+            <p className="text-xs text-[#f28a1a] dark:text-[#f28a1a] mt-0.5">
               Mogelijk is een webhook niet aangekomen. Controleer en gebruik de noodhulp-knop indien nodig.
             </p>
           </div>
@@ -149,13 +149,13 @@ export default function AdminBetalingenPage() {
             <Card data-testid="kpi-active">
               <CardContent className="pt-5 pb-4 px-5">
                 <p className="text-xs text-muted-foreground font-medium mb-1">Actief</p>
-                <p className="text-3xl font-bold text-green-600 dark:text-green-400">{activeCount}</p>
+                <p className="text-3xl font-bold text-[#f28a1a] dark:text-[#f28a1a]">{activeCount}</p>
               </CardContent>
             </Card>
             <Card data-testid="kpi-trialing">
               <CardContent className="pt-5 pb-4 px-5">
                 <p className="text-xs text-muted-foreground font-medium mb-1">In afwachting</p>
-                <p className={`text-3xl font-bold ${staleCount > 0 ? "text-amber-600 dark:text-amber-400" : ""}`}>{trialingCount}</p>
+                <p className={`text-3xl font-bold ${staleCount > 0 ? "text-[#f28a1a] dark:text-[#f28a1a]" : ""}`}>{trialingCount}</p>
               </CardContent>
             </Card>
             <Card data-testid="kpi-failed">
@@ -226,11 +226,11 @@ export default function AdminBetalingenPage() {
                     <TableRow
                       key={row.id}
                       data-testid={`row-subscription-${row.id}`}
-                      className={stale ? "bg-amber-50/60 dark:bg-amber-950/20" : undefined}
+                      className={stale ? "bg-[#f28a1a]/60 dark:bg-[#f28a1a]/20" : undefined}
                     >
                       <TableCell className="font-medium max-w-[180px] truncate" title={row.email}>
                         <span className="flex items-center gap-1.5">
-                          {stale && <AlertTriangle className="h-3.5 w-3.5 text-amber-500 shrink-0" />}
+                          {stale && <AlertTriangle className="h-3.5 w-3.5 text-[#f28a1a] shrink-0" />}
                           {row.email}
                         </span>
                       </TableCell>

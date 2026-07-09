@@ -55,7 +55,7 @@ export default function VoorbeeldenGalerij() {
                 {data.longTail.map((t) => (
                   <span
                     key={t}
-                    className="text-xs px-2 py-1 rounded border bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20"
+                    className="text-xs px-2 py-1 rounded border bg-[#0b2240]/10 text-[#0b2240] dark:text-[#0b2240] border-[#0b2240]/20"
                   >
                     {t
                       .replace(/{beroep}/g, actief!)
@@ -80,9 +80,9 @@ export default function VoorbeeldenGalerij() {
               </ul>
             </div>
 
-            <div className="bg-amber-500/8 border border-amber-500/20 rounded-md p-3">
-              <p className="text-xs font-medium text-amber-700 dark:text-amber-400 mb-1">Tip</p>
-              <p className="text-xs text-amber-700/80 dark:text-amber-400/80">{data.wijkTip}</p>
+            <div className="bg-[#f28a1a]/8 border border-[#f28a1a]/20 rounded-md p-3">
+              <p className="text-xs font-medium text-[#f28a1a] dark:text-[#f28a1a] mb-1">Tip</p>
+              <p className="text-xs text-[#f28a1a]/80 dark:text-[#f28a1a]/80">{data.wijkTip}</p>
             </div>
           </CardContent>
         </Card>

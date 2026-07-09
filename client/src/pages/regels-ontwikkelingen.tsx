@@ -55,14 +55,14 @@ const URGENTIE_CONFIG: Record<
   "6maanden": {
     label: "Binnen 6 maanden",
     icon: Clock,
-    colorClass: "text-amber-600 dark:text-amber-400",
-    badgeClass: "bg-amber-100 text-amber-700 border-amber-200 dark:bg-amber-950/40 dark:text-amber-400 dark:border-amber-800",
+    colorClass: "text-[#f28a1a] dark:text-[#f28a1a]",
+    badgeClass: "bg-[#f28a1a]/10 text-[#f28a1a] border-[#f28a1a]/20 dark:bg-[#f28a1a]/40 dark:text-[#f28a1a] dark:border-[#f28a1a]",
   },
   "volgend-jaar": {
     label: "Volgend jaar",
     icon: CalendarDays,
-    colorClass: "text-blue-600 dark:text-blue-400",
-    badgeClass: "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-950/40 dark:text-blue-400 dark:border-blue-800",
+    colorClass: "text-[#0b2240] dark:text-[#0b2240]",
+    badgeClass: "bg-[#0b2240]/10 text-[#0b2240] border-[#0b2240]/20 dark:bg-[#0b2240]/40 dark:text-[#0b2240] dark:border-[#0b2240]",
   },
   onderzoek: {
     label: "In onderzoek",
@@ -73,11 +73,11 @@ const URGENTIE_CONFIG: Record<
 };
 
 const CATEGORIE_CONFIG: Record<Categorie, { label: string; colorClass: string }> = {
-  EU: { label: "EU", colorClass: "bg-indigo-100 text-indigo-700 border-indigo-200 dark:bg-indigo-950/40 dark:text-indigo-400 dark:border-indigo-800" },
-  Subsidie: { label: "Subsidie", colorClass: "bg-emerald-100 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800" },
-  Gemeentelijk: { label: "Gemeente", colorClass: "bg-violet-100 text-violet-700 border-violet-200 dark:bg-violet-950/40 dark:text-violet-400 dark:border-violet-800" },
+  EU: { label: "EU", colorClass: "bg-[#0b2240]/10 text-[#0b2240] border-[#0b2240]/20 dark:bg-[#0b2240]/40 dark:text-[#0b2240] dark:border-[#0b2240]" },
+  Subsidie: { label: "Subsidie", colorClass: "bg-[#f28a1a]/10 text-[#f28a1a] border-[#f28a1a]/20 dark:bg-[#f28a1a]/40 dark:text-[#f28a1a] dark:border-[#f28a1a]" },
+  Gemeentelijk: { label: "Gemeente", colorClass: "bg-[#0b2240]/10 text-[#0b2240] border-[#0b2240]/20 dark:bg-[#0b2240]/40 dark:text-[#0b2240] dark:border-[#0b2240]" },
   Belasting: { label: "Belasting", colorClass: "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-950/40 dark:text-slate-400 dark:border-slate-700" },
-  Milieu: { label: "Milieu", colorClass: "bg-green-100 text-green-700 border-green-200 dark:bg-green-950/40 dark:text-green-400 dark:border-green-800" },
+  Milieu: { label: "Milieu", colorClass: "bg-[#f28a1a]/10 text-[#f28a1a] border-[#f28a1a]/20 dark:bg-[#f28a1a]/40 dark:text-[#f28a1a] dark:border-[#f28a1a]" },
 };
 
 const ONTWIKKELINGEN: Ontwikkeling[] = [

@@ -156,7 +156,7 @@ function CategorieSectie({
           {/* Fallback-melding */}
           {!laden && !isError && data?.fallback && (
             <div className="flex items-center gap-2 px-5 py-2 text-xs text-muted-foreground border-b">
-              <Lightbulb className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+              <Lightbulb className="h-3.5 w-3.5 text-[#f28a1a] shrink-0" />
               <span>Generieke inzichten getoond — sector-specifieke worden morgen opnieuw geprobeerd.</span>
             </div>
           )}

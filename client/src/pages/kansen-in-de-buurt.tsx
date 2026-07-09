@@ -418,7 +418,7 @@ export default function KansenInDeBuurtPage() {
 
           {!laden && !isError && data?.fallback && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground mb-3 px-1">
-              <Lightbulb className="h-3.5 w-3.5 text-amber-500 shrink-0" />
+              <Lightbulb className="h-3.5 w-3.5 text-[#f28a1a] shrink-0" />
               <span>Generieke kansen getoond — gemeente-specifieke kansen worden morgen opnieuw geprobeerd.</span>
             </div>
           )}

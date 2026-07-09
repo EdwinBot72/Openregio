@@ -192,7 +192,7 @@ export default function BriefAnalysePage() {
     return (
       <div className="flex items-center gap-2">
         <div className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
-          status === "klaar" ? "bg-emerald-500" :
+          status === "klaar" ? "bg-[#f28a1a]" :
           status === "bezig" ? "bg-primary animate-pulse" :
           status === "fout" ? "bg-destructive" :
           "bg-muted"
@@ -285,7 +285,7 @@ export default function BriefAnalysePage() {
                 ) : (
                   <div className="flex items-center gap-3 p-4 rounded-lg border bg-muted/30">
                     <div className="p-2 rounded-md bg-muted">
-                      <FileText className="h-5 w-5 text-violet-600" />
+                      <FileText className="h-5 w-5 text-[#0b2240]" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate" data-testid="text-bestandsnaam">{bestand.name}</p>
@@ -346,13 +346,13 @@ export default function BriefAnalysePage() {
                 status={stappen.verstuur}
               />
               {verstuurFout && (
-                <div className="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800 px-3 py-2 text-sm text-amber-800 dark:text-amber-300 mt-1">
+                <div className="flex items-start gap-2 rounded-lg border border-[#f28a1a]/20 bg-[#f28a1a]/10 dark:bg-[#f28a1a]/30 dark:border-[#f28a1a] px-3 py-2 text-sm text-[#f28a1a] dark:text-[#f28a1a]/30 mt-1">
                   <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                   <span>Analyse geslaagd, maar doorsturen mislukt: {verstuurFout}</span>
                 </div>
               )}
               {stappen.verstuur === "klaar" && (
-                <div className="flex items-center gap-2 text-sm text-emerald-700 dark:text-emerald-400">
+                <div className="flex items-center gap-2 text-sm text-[#f28a1a] dark:text-[#f28a1a]">
                   <Bot className="h-4 w-4" />
                   Brief succesvol afgeleverd bij de AI agent.
                 </div>

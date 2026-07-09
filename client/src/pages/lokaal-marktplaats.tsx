@@ -232,7 +232,7 @@ export default function LokaalMarktplaatsPage() {
                   <div className="flex items-start justify-between gap-2 flex-wrap">
                     <div className="flex items-center gap-2">
                       <Badge
-                        className={`text-[10px] shrink-0 ${item.type === "bied" ? "bg-green-50 dark:bg-green-950/40 text-green-700 dark:text-green-300" : "bg-blue-50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-300"}`}
+                        className={`text-[10px] shrink-0 ${item.type === "bied" ? "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40 text-[#f28a1a] dark:text-[#f28a1a]/30" : "bg-[#0b2240]/10 dark:bg-[#0b2240]/40 text-[#0b2240] dark:text-[#0b2240]/30"}`}
                         data-testid={`badge-type-${item.id}`}
                       >
                         {item.type === "bied" ? "Ik bied" : "Ik zoek"}

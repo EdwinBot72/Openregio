@@ -49,8 +49,8 @@ const CATEGORIEEN: Categorie[] = [
     titel: "Regelgeving & Vergunningen",
     subtitel: "Ben je formeel op orde?",
     icon: ClipboardList,
-    kleur: "text-blue-600 dark:text-blue-400",
-    bg: "bg-blue-50 dark:bg-blue-500/10",
+    kleur: "text-[#0b2240] dark:text-[#0b2240]",
+    bg: "bg-[#0b2240]/10 dark:bg-[#0b2240]/10",
     vragen: [
       {
         id: "kvk",
@@ -89,8 +89,8 @@ const CATEGORIEEN: Categorie[] = [
     titel: "Online zichtbaarheid",
     subtitel: "Vinden klanten jou makkelijk?",
     icon: Globe,
-    kleur: "text-violet-600 dark:text-violet-400",
-    bg: "bg-violet-50 dark:bg-violet-500/10",
+    kleur: "text-[#0b2240] dark:text-[#0b2240]",
+    bg: "bg-[#0b2240]/10 dark:bg-[#0b2240]/10",
     vragen: [
       {
         id: "website",
@@ -125,8 +125,8 @@ const CATEGORIEEN: Categorie[] = [
     titel: "Lokale verankering",
     subtitel: "Hoe verbonden ben je met je regio?",
     icon: MapPin,
-    kleur: "text-emerald-600 dark:text-emerald-400",
-    bg: "bg-emerald-50 dark:bg-emerald-500/10",
+    kleur: "text-[#f28a1a] dark:text-[#f28a1a]",
+    bg: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/10",
     vragen: [
       {
         id: "inkopen",
@@ -163,8 +163,8 @@ const CATEGORIEEN: Categorie[] = [
     titel: "Subsidies & Kansen",
     subtitel: "Laat je geen geld liggen?",
     icon: Euro,
-    kleur: "text-amber-600 dark:text-amber-400",
-    bg: "bg-amber-50 dark:bg-amber-500/10",
+    kleur: "text-[#f28a1a] dark:text-[#f28a1a]",
+    bg: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/10",
     vragen: [
       {
         id: "gemeentelijk_subsidie",
@@ -203,8 +203,8 @@ const CATEGORIEEN: Categorie[] = [
     titel: "Overheid & Transparantie",
     subtitel: "Ken je je rechten bij de overheid?",
     icon: Landmark,
-    kleur: "text-rose-600 dark:text-rose-400",
-    bg: "bg-rose-50 dark:bg-rose-500/10",
+    kleur: "text-[#0b2240] dark:text-[#0b2240]",
+    bg: "bg-[#0b2240]/10 dark:bg-[#0b2240]/10",
     vragen: [
       {
         id: "brieven",
@@ -267,10 +267,10 @@ function maxTotaal(): number {
 }
 
 function scoreLabel(pct: number): { label: string; kleur: string; bg: string } {
-  if (pct >= 85) return { label: "Uitstekend", kleur: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-50 dark:bg-emerald-500/10" };
+  if (pct >= 85) return { label: "Uitstekend", kleur: "text-[#f28a1a] dark:text-[#f28a1a]", bg: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/10" };
   if (pct >= 65) return { label: "Goed op weg", kleur: "text-[#0f6a67]", bg: "bg-[#0f6a67]/8 dark:bg-[#0f6a67]/15" };
-  if (pct >= 40) return { label: "Nog te winnen", kleur: "text-amber-600 dark:text-amber-400", bg: "bg-amber-50 dark:bg-amber-500/10" };
-  return { label: "Actie vereist", kleur: "text-rose-600 dark:text-rose-400", bg: "bg-rose-50 dark:bg-rose-500/10" };
+  if (pct >= 40) return { label: "Nog te winnen", kleur: "text-[#f28a1a] dark:text-[#f28a1a]", bg: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/10" };
+  return { label: "Actie vereist", kleur: "text-[#0b2240] dark:text-[#0b2240]", bg: "bg-[#0b2240]/10 dark:bg-[#0b2240]/10" };
 }
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -402,10 +402,10 @@ export default function LokaleBasischeckPage() {
                         ? "bg-[#0f6a67]"
                         : gedaan
                         ? antwoorden[v.id] === "ja"
-                          ? "bg-emerald-400"
+                          ? "bg-[#f28a1a]"
                           : antwoorden[v.id] === "deels"
-                          ? "bg-amber-400"
-                          : "bg-rose-400"
+                          ? "bg-[#f28a1a]"
+                          : "bg-[#0b2240]"
                         : "bg-[#ede8df] dark:bg-muted"
                     }`}
                   />
@@ -437,7 +437,7 @@ export default function LokaleBasischeckPage() {
               className={`${INNER} flex flex-col items-center gap-2 py-4 px-3 hover-elevate cursor-pointer transition-all`}
               data-testid="button-ja"
             >
-              <CheckCircle2 className="h-6 w-6 text-emerald-500" />
+              <CheckCircle2 className="h-6 w-6 text-[#f28a1a]" />
               <span className="text-sm font-semibold text-foreground">Ja</span>
             </button>
             <button
@@ -445,7 +445,7 @@ export default function LokaleBasischeckPage() {
               className={`${INNER} flex flex-col items-center gap-2 py-4 px-3 hover-elevate cursor-pointer transition-all`}
               data-testid="button-deels"
             >
-              <Minus className="h-6 w-6 text-amber-500" />
+              <Minus className="h-6 w-6 text-[#f28a1a]" />
               <span className="text-sm font-semibold text-foreground">Deels</span>
             </button>
             <button
@@ -453,7 +453,7 @@ export default function LokaleBasischeckPage() {
               className={`${INNER} flex flex-col items-center gap-2 py-4 px-3 hover-elevate cursor-pointer transition-all`}
               data-testid="button-nee"
             >
-              <XCircle className="h-6 w-6 text-rose-500" />
+              <XCircle className="h-6 w-6 text-[#0b2240]" />
               <span className="text-sm font-semibold text-foreground">Nee</span>
             </button>
           </div>
@@ -546,7 +546,7 @@ export default function LokaleBasischeckPage() {
                   <div className="h-2 w-full rounded-full bg-[#ede8df] dark:bg-muted overflow-hidden">
                     <div
                       className={`h-full rounded-full transition-all ${
-                        catPct >= 85 ? "bg-emerald-500" : catPct >= 65 ? "bg-[#0f6a67]" : catPct >= 40 ? "bg-amber-500" : "bg-rose-500"
+                        catPct >= 85 ? "bg-[#f28a1a]" : catPct >= 65 ? "bg-[#0f6a67]" : catPct >= 40 ? "bg-[#f28a1a]" : "bg-[#0b2240]"
                       }`}
                       style={{ width: `${catPct}%` }}
                     />
@@ -582,10 +582,10 @@ export default function LokaleBasischeckPage() {
                 return (
                   <div key={v.id} className={`${INNER} p-4`} data-testid={`tip-${v.id}`}>
                     <div className="flex items-start gap-3">
-                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${isDeel ? "bg-amber-50 dark:bg-amber-500/10" : "bg-rose-50 dark:bg-rose-500/10"}`}>
+                      <div className={`w-6 h-6 rounded-lg flex items-center justify-center shrink-0 mt-0.5 ${isDeel ? "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/10" : "bg-[#0b2240]/10 dark:bg-[#0b2240]/10"}`}>
                         {isDeel
-                          ? <Minus className="h-3.5 w-3.5 text-amber-500" />
-                          : <XCircle className="h-3.5 w-3.5 text-rose-500" />}
+                          ? <Minus className="h-3.5 w-3.5 text-[#f28a1a]" />
+                          : <XCircle className="h-3.5 w-3.5 text-[#0b2240]" />}
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-semibold text-foreground leading-snug mb-1.5">{v.titel}</p>
@@ -618,8 +618,8 @@ export default function LokaleBasischeckPage() {
 
       {/* Volledig groen */}
       {pct === 100 && (
-        <div className="rounded-[28px] border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-950/20 p-6 text-center space-y-3">
-          <CheckCircle2 className="h-10 w-10 text-emerald-500 mx-auto" />
+        <div className="rounded-[28px] border border-[#f28a1a]/20 dark:border-[#f28a1a] bg-[#f28a1a]/10 dark:bg-[#f28a1a]/20 p-6 text-center space-y-3">
+          <CheckCircle2 className="h-10 w-10 text-[#f28a1a] mx-auto" />
           <p className="font-bold text-foreground">Je scoort op alle punten volledig!</p>
           <p className="text-sm text-muted-foreground">Je bedrijf is een voorbeeld in de regio. Deel jouw aanpak met collega-ondernemers.</p>
         </div>

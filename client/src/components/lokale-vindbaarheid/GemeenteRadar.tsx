@@ -13,8 +13,8 @@ const COMPETITIE_LABEL: Record<CompetitieNiveau, string> = {
 };
 
 const COMPETITIE_COLOR: Record<CompetitieNiveau, string> = {
-  laag: "bg-green-500/10 text-green-700 dark:text-green-400 border-green-500/20",
-  midden: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
+  laag: "bg-[#f28a1a]/10 text-[#f28a1a] dark:text-[#f28a1a] border-[#f28a1a]/20",
+  midden: "bg-[#f28a1a]/10 text-[#f28a1a] dark:text-[#f28a1a] border-[#f28a1a]/20",
   hoog: "bg-red-500/10 text-red-600 dark:text-red-400 border-red-500/20",
 };
 
@@ -120,7 +120,7 @@ export default function GemeenteRadar() {
               <span className="text-muted-foreground">Kansscore = vraag minus concurrentie</span>
             </div>
             <div className="flex items-center gap-1.5">
-              <Users className="w-3.5 h-3.5 text-blue-500" />
+              <Users className="w-3.5 h-3.5 text-[#0b2240]" />
               <span className="text-muted-foreground">Vraagindex = geschatte marktomvang</span>
             </div>
           </div>
@@ -166,7 +166,7 @@ function GemeenteRij({ score, rank, maxKans, maxVraag }: {
                 {COMPETITIE_LABEL[score.competitie]}
               </span>
               {score.groeigebied && (
-                <span className="text-xs px-1.5 py-0.5 rounded border bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20">
+                <span className="text-xs px-1.5 py-0.5 rounded border bg-[#0b2240]/10 text-[#0b2240] dark:text-[#0b2240] border-[#0b2240]/20">
                   Groeigebied
                 </span>
               )}
@@ -178,7 +178,7 @@ function GemeenteRij({ score, rank, maxKans, maxVraag }: {
                 <span className="text-xs text-muted-foreground w-16 flex-shrink-0">Vraag</span>
                 <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-blue-500 rounded-full transition-all"
+                    className="h-full bg-[#0b2240] rounded-full transition-all"
                     style={{ width: `${vraagPct}%` }}
                   />
                 </div>

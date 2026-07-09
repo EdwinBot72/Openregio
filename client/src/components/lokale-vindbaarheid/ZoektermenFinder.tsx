@@ -164,7 +164,7 @@ function KopieRegel({ label, waarde, id, gekopieerd, onKopieer }: {
           data-testid={`copy-${id}`}
           title="Kopieer"
         >
-          {gekopieerd === id ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5" />}
+          {gekopieerd === id ? <Check className="w-3.5 h-3.5 text-[#f28a1a]" /> : <Copy className="w-3.5 h-3.5" />}
         </Button>
       </div>
     </div>
@@ -178,8 +178,8 @@ function TermenKaart({ titel, termen, variant }: {
 }) {
   const tagClass = {
     primair: "bg-primary/10 text-primary border-primary/20",
-    longtail: "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20",
-    vragen: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
+    longtail: "bg-[#0b2240]/10 text-[#0b2240] dark:text-[#0b2240] border-[#0b2240]/20",
+    vragen: "bg-[#f28a1a]/10 text-[#f28a1a] dark:text-[#f28a1a] border-[#f28a1a]/20",
   }[variant];
 
   return (

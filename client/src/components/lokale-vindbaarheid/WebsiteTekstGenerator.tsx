@@ -349,7 +349,7 @@ export default function WebsiteTekstGenerator() {
                   )}
                   title="Kopieer alle diensten"
                 >
-                  {gekopieerd === "diensten" ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5" />}
+                  {gekopieerd === "diensten" ? <Check className="w-3.5 h-3.5 text-[#f28a1a]" /> : <Copy className="w-3.5 h-3.5" />}
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">Gebruik per dienst als aparte sectie op je diensten-pagina.</p>
@@ -381,7 +381,7 @@ export default function WebsiteTekstGenerator() {
                   )}
                   title="Kopieer FAQ"
                 >
-                  {gekopieerd === "faq" ? <Check className="w-3.5 h-3.5 text-green-600" /> : <Copy className="w-3.5 h-3.5" />}
+                  {gekopieerd === "faq" ? <Check className="w-3.5 h-3.5 text-[#f28a1a]" /> : <Copy className="w-3.5 h-3.5" />}
                 </Button>
               </div>
               <p className="text-xs text-muted-foreground">Zet een FAQ op je website — Google toont deze als rich snippet in de zoekresultaten.</p>
@@ -438,7 +438,7 @@ function TekstBlok({ titel, icon: Icon, id, gekopieerd, onKopieer, inhoud, uitle
           </div>
           <Button size="icon" variant="ghost" onClick={() => onKopieer(inhoud, id)} title="Kopieer">
             {gekopieerd === id
-              ? <Check className="w-3.5 h-3.5 text-green-600" />
+              ? <Check className="w-3.5 h-3.5 text-[#f28a1a]" />
               : <Copy className="w-3.5 h-3.5" />}
           </Button>
         </div>

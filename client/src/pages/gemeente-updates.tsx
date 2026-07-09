@@ -51,11 +51,11 @@ function sortItems(items: GemeenteUpdate[], key: SortKey): GemeenteUpdate[] {
 function TypeBadge({ type }: { type: string | null }) {
   if (!type) return null;
   const map: Record<string, string> = {
-    Gemeenteblad: "bg-blue-100 text-blue-800",
-    Staatscourant: "bg-purple-100 text-purple-800",
-    Provinciaalblad: "bg-teal-100 text-teal-800",
-    Stcrt: "bg-purple-100 text-purple-800",
-    gmb: "bg-blue-100 text-blue-800",
+    Gemeenteblad: "bg-[#0b2240]/10 text-[#0b2240]",
+    Staatscourant: "bg-[#0b2240]/10 text-[#0b2240]",
+    Provinciaalblad: "bg-[#0b2240]/10 text-[#0b2240]",
+    Stcrt: "bg-[#0b2240]/10 text-[#0b2240]",
+    gmb: "bg-[#0b2240]/10 text-[#0b2240]",
   };
   const cls = map[type] ?? "bg-muted text-muted-foreground";
   return (
@@ -153,7 +153,7 @@ export default function GemeenteUpdatesPage() {
             </div>
           </div>
           <div className="flex items-center gap-1.5 pl-8">
-            <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
+            <Lightbulb className="h-3.5 w-3.5 text-[#f28a1a]" />
             <span className="text-xs text-muted-foreground">
               Publicaties zijn actueel tot op de dag — de API haalt dagelijks nieuwe bekendmakingen op.
             </span>

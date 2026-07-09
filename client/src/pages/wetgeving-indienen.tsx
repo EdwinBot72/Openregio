@@ -101,8 +101,8 @@ export default function WetgevingIndienenPage() {
     return (
       <div className="max-w-xl mx-auto py-16 px-4 space-y-6 text-center" data-testid="section-bevestiging">
         <div className="flex justify-center">
-          <div className="rounded-full bg-emerald-100 dark:bg-emerald-900/40 p-4">
-            <CheckCircle className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
+          <div className="rounded-full bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40 p-4">
+            <CheckCircle className="h-10 w-10 text-[#f28a1a] dark:text-[#f28a1a]" />
           </div>
         </div>
         <h1 className="text-2xl font-bold" data-testid="heading-bevestiging">Bedankt voor je inzending!</h1>
@@ -161,7 +161,7 @@ export default function WetgevingIndienenPage() {
       <Card data-testid="card-info">
         <CardContent className="pt-4 pb-4">
           <div className="flex gap-3 items-start">
-            <Info className="h-4 w-4 text-blue-500 dark:text-blue-400 mt-0.5 shrink-0" />
+            <Info className="h-4 w-4 text-[#0b2240] dark:text-[#0b2240] mt-0.5 shrink-0" />
             <p className="text-sm text-muted-foreground leading-relaxed">
               Je inzending wordt door het OpenRegio-team bekeken. We publiceren alleen wat relevant en nuttig is voor
               andere leden — persoonlijke gegevens worden nooit openbaar gemaakt.

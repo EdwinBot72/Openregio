@@ -581,7 +581,7 @@ function PricingSignup() {
             </div>
           )}
           {ok && (
-            <div className="rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-emerald-200" data-testid="text-success">
+            <div className="rounded-xl border border-white/10 bg-black/30 px-4 py-3 text-sm text-[#f28a1a]/20" data-testid="text-success">
               Nice. Inschrijving is binnen. We pakken 'm op.
             </div>
           )}

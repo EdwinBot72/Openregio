@@ -224,7 +224,7 @@ function PexelsPicker({
 
       {/* Zoekbalk */}
       {noKey ? (
-        <div className="flex items-center gap-2 p-3 rounded-lg bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-800 text-sm text-amber-800 dark:text-amber-300">
+        <div className="flex items-center gap-2 p-3 rounded-lg bg-[#f28a1a]/10 dark:bg-[#f28a1a]/30 border border-[#f28a1a]/20 dark:border-[#f28a1a] text-sm text-[#f28a1a] dark:text-[#f28a1a]/30">
           <AlertCircle className="h-4 w-4 shrink-0" />
           <span>Stel de <strong>PEXELS_API_KEY</strong> in als secret om afbeeldingen te zoeken.</span>
         </div>

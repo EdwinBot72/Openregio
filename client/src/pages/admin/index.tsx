@@ -43,22 +43,22 @@ function timeAgo(dateStr: string) {
 }
 
 const PLAN_COLORS: Record<string, string> = {
-  pro: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400",
-  basic: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400",
+  pro: "bg-[#f28a1a]/10 text-[#f28a1a] dark:bg-[#f28a1a]/30 dark:text-[#f28a1a]",
+  basic: "bg-[#0b2240]/10 text-[#0b2240] dark:bg-[#0b2240]/30 dark:text-[#0b2240]",
 };
 
 const sections = [
-  { id: "woo", href: "/admin/woo", icon: Gavel, title: "Woo-monitoring", description: "Verzoeken per status, regio en categorie.", color: "bg-orange-50 dark:bg-orange-950/40 text-orange-600 dark:text-orange-400" },
-  { id: "regios", href: "/admin/regios", icon: MapPin, title: "Regio-beheer", description: "Regio's toevoegen en beheren.", color: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400" },
-  { id: "inzicht", href: "/admin/inzicht", icon: BarChart2, title: "Platform-inzicht", description: "Groei en trends in detail.", color: "bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400" },
-  { id: "users", href: "/admin/users", icon: Users, title: "Gebruikers", description: "Accounts aanmaken en beheren.", color: "bg-violet-50 dark:bg-violet-950/40 text-violet-600 dark:text-violet-400" },
+  { id: "woo", href: "/admin/woo", icon: Gavel, title: "Woo-monitoring", description: "Verzoeken per status, regio en categorie.", color: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40 text-[#f28a1a] dark:text-[#f28a1a]" },
+  { id: "regios", href: "/admin/regios", icon: MapPin, title: "Regio-beheer", description: "Regio's toevoegen en beheren.", color: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40 text-[#0b2240] dark:text-[#0b2240]" },
+  { id: "inzicht", href: "/admin/inzicht", icon: BarChart2, title: "Platform-inzicht", description: "Groei en trends in detail.", color: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40 text-[#f28a1a] dark:text-[#f28a1a]" },
+  { id: "users", href: "/admin/users", icon: Users, title: "Gebruikers", description: "Accounts aanmaken en beheren.", color: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40 text-[#0b2240] dark:text-[#0b2240]" },
   { id: "blogs", href: "/admin/blogs", icon: FileText, title: "Blogs", description: "Publiceer redactionele content.", color: "bg-slate-50 dark:bg-slate-900/40 text-slate-600 dark:text-slate-400" },
-  { id: "commissions", href: "/admin/commissions", icon: TrendingUp, title: "Affiliates & Commissies", description: "Overzicht en uitbetaling.", color: "bg-amber-50 dark:bg-amber-950/40 text-amber-600 dark:text-amber-400" },
-  { id: "regio-deals", href: "/admin/regio-deals", icon: Landmark, title: "Regio Deals", description: "Collectieve deals voor leden.", color: "bg-teal-50 dark:bg-teal-950/40 text-teal-600 dark:text-teal-400" },
-  { id: "ondernemers", href: "/admin/ondernemers", icon: Building2, title: "Ondernemers", description: "Leden met activiteits- en planstatus.", color: "bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400" },
-  { id: "wetgeving", href: "/admin/wetgeving", icon: BookOpen, title: "Wetgeving Inzendingen", description: "Verwerk brieven van leden.", color: "bg-green-50 dark:bg-green-950/40 text-green-600 dark:text-green-400" },
+  { id: "commissions", href: "/admin/commissions", icon: TrendingUp, title: "Affiliates & Commissies", description: "Overzicht en uitbetaling.", color: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40 text-[#f28a1a] dark:text-[#f28a1a]" },
+  { id: "regio-deals", href: "/admin/regio-deals", icon: Landmark, title: "Regio Deals", description: "Collectieve deals voor leden.", color: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40 text-[#0b2240] dark:text-[#0b2240]" },
+  { id: "ondernemers", href: "/admin/ondernemers", icon: Building2, title: "Ondernemers", description: "Leden met activiteits- en planstatus.", color: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40 text-[#0b2240] dark:text-[#0b2240]" },
+  { id: "wetgeving", href: "/admin/wetgeving", icon: BookOpen, title: "Wetgeving Inzendingen", description: "Verwerk brieven van leden.", color: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40 text-[#f28a1a] dark:text-[#f28a1a]" },
   { id: "betalingen", href: "/admin/betalingen", icon: Euro, title: "Betalingen", description: "Mollie-subscriptions en betalingsstatus.", color: "bg-red-50 dark:bg-red-950/40 text-red-600 dark:text-red-400" },
-  { id: "lokale-acties", href: "/admin/lokale-acties", icon: Trash2, title: "Lokale acties opschoning", description: "Log en handmatig uitvoeren van opschoning.", color: "bg-rose-50 dark:bg-rose-950/40 text-rose-600 dark:text-rose-400" },
+  { id: "lokale-acties", href: "/admin/lokale-acties", icon: Trash2, title: "Lokale acties opschoning", description: "Log en handmatig uitvoeren van opschoning.", color: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40 text-[#0b2240] dark:text-[#0b2240]" },
 ];
 
 function KpiCard({
@@ -84,7 +84,7 @@ function KpiCard({
         <div className="flex flex-wrap items-center gap-2 mt-1.5">
           {sub && <p className="text-xs text-muted-foreground">{sub}</p>}
           {trend?.value !== null && trend?.value !== undefined && (
-            <span className={`flex items-center gap-0.5 text-xs font-medium ${trend.value >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-red-500"}`}>
+            <span className={`flex items-center gap-0.5 text-xs font-medium ${trend.value >= 0 ? "text-[#f28a1a] dark:text-[#f28a1a]" : "text-red-500"}`}>
               {trend.value >= 0 ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
               {trend.value >= 0 ? "+" : ""}{trend.value}% {trend.label}
             </span>
@@ -256,7 +256,7 @@ export default function AdminIndexPage() {
               value={stats?.woo.total ?? 0}
               sub={`+${stats?.woo.thisMonth ?? 0} deze maand`}
               icon={Gavel}
-              iconColor="bg-orange-100 dark:bg-orange-950/50 text-orange-600"
+              iconColor="bg-[#f28a1a]/10 dark:bg-[#f28a1a]/50 text-[#f28a1a]"
               data-testid="kpi-woo"
             />
             <KpiCard
@@ -264,21 +264,21 @@ export default function AdminIndexPage() {
               value={`${proCount} / ${basicCount}`}
               sub={`${proPct}% is Pro`}
               icon={ShieldCheck}
-              iconColor="bg-violet-100 dark:bg-violet-950/50 text-violet-600"
+              iconColor="bg-[#0b2240]/10 dark:bg-[#0b2240]/50 text-[#0b2240]"
             />
             <KpiCard
               title="Regio's actief"
               value={stats?.regions ?? 0}
               sub={`Crew: ${stats?.crewProfiles ?? 0} profielen`}
               icon={MapPin}
-              iconColor="bg-emerald-100 dark:bg-emerald-950/50 text-emerald-600"
+              iconColor="bg-[#f28a1a]/10 dark:bg-[#f28a1a]/50 text-[#f28a1a]"
             />
             <KpiCard
               title="Groei (30 dagen)"
               value={`+${stats?.newUsersLast30Days ?? 0}`}
               sub="nieuwe leden"
               icon={Sparkles}
-              iconColor="bg-blue-100 dark:bg-blue-950/50 text-blue-600"
+              iconColor="bg-[#0b2240]/10 dark:bg-[#0b2240]/50 text-[#0b2240]"
               trend={stats?.growthPct !== null ? { value: stats?.growthPct ?? null, label: "vs vorige maand" } : undefined}
             />
           </>
@@ -299,7 +299,7 @@ export default function AdminIndexPage() {
               data={stats?.dailySignups ?? []}
               color="hsl(213, 70%, 50%)"
               icon={Activity}
-              iconColor="bg-blue-100 dark:bg-blue-950/50 text-blue-600"
+              iconColor="bg-[#0b2240]/10 dark:bg-[#0b2240]/50 text-[#0b2240]"
             />
           )}
         </div>
@@ -344,11 +344,11 @@ export default function AdminIndexPage() {
               <p className="text-sm font-semibold">Plan-verdeling</p>
               <div className="flex items-center gap-4">
                 <div className="flex items-center gap-1.5">
-                  <div className="h-2.5 w-2.5 rounded-full bg-orange-500" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-[#f28a1a]" />
                   <span className="text-xs text-muted-foreground">Pro ({proCount})</span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <div className="h-2.5 w-2.5 rounded-full bg-blue-500" />
+                  <div className="h-2.5 w-2.5 rounded-full bg-[#0b2240]" />
                   <span className="text-xs text-muted-foreground">Basis ({basicCount})</span>
                 </div>
               </div>
@@ -356,14 +356,14 @@ export default function AdminIndexPage() {
             <div className="h-4 rounded-full bg-muted overflow-hidden flex">
               {proCount > 0 && (
                 <div
-                  className="h-full bg-orange-500 transition-all"
+                  className="h-full bg-[#f28a1a] transition-all"
                   style={{ width: `${proPct}%` }}
                   title={`Pro: ${proCount} (${proPct}%)`}
                 />
               )}
               {basicCount > 0 && (
                 <div
-                  className="h-full bg-blue-500 flex-1"
+                  className="h-full bg-[#0b2240] flex-1"
                   title={`Basis: ${basicCount}`}
                 />
               )}

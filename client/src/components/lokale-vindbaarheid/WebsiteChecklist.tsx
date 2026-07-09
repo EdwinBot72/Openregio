@@ -5,7 +5,7 @@ import { Check } from "lucide-react";
 
 const PRIORITEIT_CLASS = {
   hoog: "bg-destructive/10 text-destructive border-destructive/20",
-  midden: "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20",
+  midden: "bg-[#f28a1a]/10 text-[#f28a1a] dark:text-[#f28a1a] border-[#f28a1a]/20",
   laag: "bg-muted text-muted-foreground border-border",
 };
 

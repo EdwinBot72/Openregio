@@ -26,16 +26,16 @@ function DeadlineBadge({ daysLeft }: { daysLeft: number | null }) {
   if (daysLeft === null) return null;
   if (daysLeft < 0) return <Badge variant="outline" className="text-xs">Gesloten</Badge>;
   if (daysLeft <= 7) return <Badge className="text-xs bg-red-600 text-white">{daysLeft} dag{daysLeft !== 1 ? "en" : ""}</Badge>;
-  if (daysLeft <= 30) return <Badge className="text-xs bg-orange-500 text-white">{daysLeft} dagen</Badge>;
-  return <Badge className="text-xs bg-green-600 text-white">{daysLeft} dagen</Badge>;
+  if (daysLeft <= 30) return <Badge className="text-xs bg-[#f28a1a] text-white">{daysLeft} dagen</Badge>;
+  return <Badge className="text-xs bg-[#f28a1a] text-white">{daysLeft} dagen</Badge>;
 }
 
 function TypeBadge({ type }: { type: string | null }) {
   if (!type) return null;
   const colors: Record<string, string> = {
-    "Werken": "bg-blue-100 text-blue-800",
-    "Diensten": "bg-purple-100 text-purple-800",
-    "Leveringen": "bg-amber-100 text-amber-800",
+    "Werken": "bg-[#0b2240]/10 text-[#0b2240]",
+    "Diensten": "bg-[#0b2240]/10 text-[#0b2240]",
+    "Leveringen": "bg-[#f28a1a]/10 text-[#f28a1a]",
   };
   const cls = colors[type] ?? "bg-gray-100 text-gray-700";
   return <Badge variant="outline" className={`text-xs ${cls}`}>{type}</Badge>;
@@ -125,7 +125,7 @@ export default function AanbestedingenPage() {
             </div>
           </div>
           <div className="flex items-center gap-1.5 pl-8">
-            <Lightbulb className="h-3.5 w-3.5 text-amber-500" />
+            <Lightbulb className="h-3.5 w-3.5 text-[#f28a1a]" />
             <span className="text-xs text-muted-foreground">
               Jouw gemeente wordt automatisch ingevuld vanuit je bedrijfsprofiel.
             </span>

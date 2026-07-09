@@ -194,11 +194,11 @@ const OPTIES: FinancieringsOptie[] = [
 ];
 
 const CATEGORIE_KLEUREN: Record<Exclude<Categorie, "Alle">, string> = {
-  Crowdfunding: "bg-blue-100 text-blue-800",
-  Lening:       "bg-amber-100 text-amber-800",
-  "EU-fonds":   "bg-purple-100 text-purple-800",
-  Regionaal:    "bg-teal-100 text-teal-800",
-  Subsidie:     "bg-green-100 text-green-800",
+  Crowdfunding: "bg-[#0b2240]/10 text-[#0b2240]",
+  Lening:       "bg-[#f28a1a]/10 text-[#f28a1a]",
+  "EU-fonds":   "bg-[#0b2240]/10 text-[#0b2240]",
+  Regionaal:    "bg-[#0b2240]/10 text-[#0b2240]",
+  Subsidie:     "bg-[#f28a1a]/10 text-[#f28a1a]",
 };
 
 const CATEGORIEEN: Categorie[] = ["Alle", "Crowdfunding", "Lening", "EU-fonds", "Regionaal", "Subsidie"];

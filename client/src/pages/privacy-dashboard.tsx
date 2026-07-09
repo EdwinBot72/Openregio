@@ -557,7 +557,7 @@ export default function PrivacyDashboardPage() {
                   className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-2 border-b last:border-0 text-sm"
                 >
                   <div className="flex items-center gap-2">
-                    <CheckCircle className="w-4 h-4 text-green-600" />
+                    <CheckCircle className="w-4 h-4 text-[#f28a1a]" />
                     <span>
                       <strong>{fieldLabels[log.fieldName] || log.fieldName}</strong>: van{" "}
                       <Badge variant="outline" className="mx-1">

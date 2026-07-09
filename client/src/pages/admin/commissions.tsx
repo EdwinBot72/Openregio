@@ -97,9 +97,9 @@ export default function AdminCommissionsPage() {
       case "pending":
         return <Badge variant="secondary" className="gap-1"><Clock className="h-3 w-3" />Openstaand</Badge>;
       case "approved":
-        return <Badge variant="default" className="gap-1 bg-blue-500"><TrendingUp className="h-3 w-3" />Goedgekeurd</Badge>;
+        return <Badge variant="default" className="gap-1 bg-[#0b2240]"><TrendingUp className="h-3 w-3" />Goedgekeurd</Badge>;
       case "paid":
-        return <Badge variant="default" className="gap-1 bg-green-600"><CheckCircle className="h-3 w-3" />Uitbetaald</Badge>;
+        return <Badge variant="default" className="gap-1 bg-[#f28a1a]"><CheckCircle className="h-3 w-3" />Uitbetaald</Badge>;
       case "cancelled":
         return <Badge variant="destructive" className="gap-1"><Ban className="h-3 w-3" />Geannuleerd</Badge>;
       default:
@@ -189,8 +189,8 @@ export default function AdminCommissionsPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-amber-500/10">
-                <Clock className="h-6 w-6 text-amber-500" />
+              <div className="p-3 rounded-full bg-[#f28a1a]/10">
+                <Clock className="h-6 w-6 text-[#f28a1a]" />
               </div>
               <div>
                 <p className="text-2xl font-bold" data-testid="text-pending-total">
@@ -205,8 +205,8 @@ export default function AdminCommissionsPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-blue-500/10">
-                <TrendingUp className="h-6 w-6 text-blue-500" />
+              <div className="p-3 rounded-full bg-[#0b2240]/10">
+                <TrendingUp className="h-6 w-6 text-[#0b2240]" />
               </div>
               <div>
                 <p className="text-2xl font-bold" data-testid="text-approved-total">
@@ -221,8 +221,8 @@ export default function AdminCommissionsPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="flex items-center gap-4">
-              <div className="p-3 rounded-full bg-green-500/10">
-                <CheckCircle className="h-6 w-6 text-green-500" />
+              <div className="p-3 rounded-full bg-[#f28a1a]/10">
+                <CheckCircle className="h-6 w-6 text-[#f28a1a]" />
               </div>
               <div>
                 <p className="text-2xl font-bold" data-testid="text-paid-total">
@@ -355,7 +355,7 @@ export default function AdminCommissionsPage() {
                           <Button
                             size="sm"
                             variant="outline"
-                            className="text-green-600"
+                            className="text-[#f28a1a]"
                             onClick={() => updateStatusMutation.mutate({ id: commission.id, status: "paid" })}
                             disabled={updateStatusMutation.isPending}
                             data-testid={`button-pay-${commission.id}`}
@@ -421,7 +421,7 @@ export default function AdminCommissionsPage() {
                     <TableCell className="font-mono text-sm">{stat.referralCode}</TableCell>
                     <TableCell className="text-right">{stat.activeReferrals}</TableCell>
                     <TableCell className="text-right">€{stat.pendingCommission.toFixed(2)}</TableCell>
-                    <TableCell className="text-right text-green-600">€{stat.paidCommission.toFixed(2)}</TableCell>
+                    <TableCell className="text-right text-[#f28a1a]">€{stat.paidCommission.toFixed(2)}</TableCell>
                     <TableCell className="text-right font-semibold">€{stat.totalCommission.toFixed(2)}</TableCell>
                   </TableRow>
                 ))}

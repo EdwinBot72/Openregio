@@ -49,14 +49,14 @@ function scoreLabel(score: number) {
 
 function prioriteitIcon(p: string) {
   if (p === "hoog") return <Flame className="w-3.5 h-3.5 text-red-500 flex-shrink-0" />;
-  if (p === "midden") return <AlertCircle className="w-3.5 h-3.5 text-amber-500 flex-shrink-0" />;
-  return <Info className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />;
+  if (p === "midden") return <AlertCircle className="w-3.5 h-3.5 text-[#f28a1a] flex-shrink-0" />;
+  return <Info className="w-3.5 h-3.5 text-[#0b2240] flex-shrink-0" />;
 }
 
 function prioriteitStyle(p: string): string {
   if (p === "hoog") return "border-red-100 bg-red-50";
-  if (p === "midden") return "border-amber-100 bg-amber-50";
-  return "border-blue-100 bg-blue-50";
+  if (p === "midden") return "border-[#f28a1a]/10 bg-[#f28a1a]/10";
+  return "border-[#0b2240]/10 bg-[#0b2240]/10";
 }
 
 // Bouw een hulp-engine link vanuit een website-scan uitkomst.
@@ -170,8 +170,8 @@ export default function WebsiteScanPage() {
   if (!isPro) {
     return (
       <div className="max-w-xl mx-auto px-6 py-20 text-center">
-        <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
-          <Lock className="w-7 h-7 text-blue-600" />
+        <div className="w-16 h-16 bg-[#0b2240]/10 rounded-full flex items-center justify-center mx-auto mb-6">
+          <Lock className="w-7 h-7 text-[#0b2240]" />
         </div>
         <h1 className="text-2xl font-bold text-slate-900 mb-3">Website Scan</h1>
         <p className="text-slate-600 mb-8">
@@ -179,7 +179,7 @@ export default function WebsiteScanPage() {
           van jouw online zichtbaarheid met concrete actiepunten.
         </p>
         <Link href="/lidmaatschap?plan=pro">
-          <Button className="bg-orange-500 hover:bg-orange-600 text-white" data-testid="button-upgrade-pro">
+          <Button className="bg-[#f28a1a] hover:bg-[#f28a1a] text-white" data-testid="button-upgrade-pro">
             Bekijk Pro-lidmaatschap <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
         </Link>
@@ -224,7 +224,7 @@ export default function WebsiteScanPage() {
             <Button
               onClick={runScan}
               disabled={loading || !url.trim()}
-              className="bg-blue-600 hover:bg-blue-700 text-white"
+              className="bg-[#0b2240] hover:bg-[#0b2240] text-white"
               data-testid="button-start-scan"
             >
               {loading
@@ -237,7 +237,7 @@ export default function WebsiteScanPage() {
           {loading && (
             <div className="mt-4 space-y-2">
               <div className="flex items-center gap-2 text-sm text-slate-500">
-                <Loader2 className="w-3.5 h-3.5 animate-spin text-blue-500 flex-shrink-0" />
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0b2240] flex-shrink-0" />
                 <span>{MSGS[msgIdx]}</span>
               </div>
               <Progress value={((msgIdx + 1) / MSGS.length) * 80} className="h-1" />
@@ -333,9 +333,9 @@ export default function WebsiteScanPage() {
               <h2 className="font-bold text-slate-800 mb-3">Wat al goed gaat</h2>
               <div className="space-y-2">
                 {result.analysis.sterkePunten.map((p, i) => (
-                  <div key={i} className="flex items-start gap-2.5 p-3 rounded-lg bg-emerald-50">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0 mt-0.5" />
-                    <span className="text-sm text-emerald-800">{p}</span>
+                  <div key={i} className="flex items-start gap-2.5 p-3 rounded-lg bg-[#f28a1a]/10">
+                    <CheckCircle2 className="w-4 h-4 text-[#f28a1a] flex-shrink-0 mt-0.5" />
+                    <span className="text-sm text-[#f28a1a]">{p}</span>
                   </div>
                 ))}
               </div>
@@ -374,14 +374,14 @@ export default function WebsiteScanPage() {
                         <div key={i} className="flex items-center gap-2">
                           {sig.type === "bool" ? (
                             sig.value
-                              ? <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
-                              : <AlertTriangle className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
+                              ? <CheckCircle2 className="w-3.5 h-3.5 text-[#f28a1a] flex-shrink-0" />
+                              : <AlertTriangle className="w-3.5 h-3.5 text-[#f28a1a] flex-shrink-0" />
                           ) : sig.type === "num-warn" ? (
                             (sig.value as number) > 0
-                              ? <AlertTriangle className="w-3.5 h-3.5 text-amber-400 flex-shrink-0" />
-                              : <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500 flex-shrink-0" />
+                              ? <AlertTriangle className="w-3.5 h-3.5 text-[#f28a1a] flex-shrink-0" />
+                              : <CheckCircle2 className="w-3.5 h-3.5 text-[#f28a1a] flex-shrink-0" />
                           ) : (
-                            <TrendingUp className="w-3.5 h-3.5 text-blue-400 flex-shrink-0" />
+                            <TrendingUp className="w-3.5 h-3.5 text-[#0b2240] flex-shrink-0" />
                           )}
                           <span className="text-xs text-slate-600">{sig.label}</span>
                           {(sig.type === "num" || sig.type === "num-warn") && (
@@ -400,7 +400,7 @@ export default function WebsiteScanPage() {
           <div className="flex flex-wrap gap-3 pt-1">
             <Link href={bouwHulpEngineHref(result)}>
               <Button
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-[#0b2240] hover:bg-[#0b2240] text-white"
                 data-testid="button-hulp-engine"
               >
                 <HelpCircle className="w-4 h-4 mr-2" />Reageren met hulp-engine

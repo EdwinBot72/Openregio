@@ -98,9 +98,9 @@ export default function AffiliatePage() {
       case "pending":
         return <Badge variant="secondary" className="gap-1"><Clock className="h-3 w-3" />Openstaand</Badge>;
       case "approved":
-        return <Badge variant="default" className="gap-1 bg-blue-500"><TrendingUp className="h-3 w-3" />Goedgekeurd</Badge>;
+        return <Badge variant="default" className="gap-1 bg-[#0b2240]"><TrendingUp className="h-3 w-3" />Goedgekeurd</Badge>;
       case "paid":
-        return <Badge variant="default" className="gap-1 bg-green-600"><CheckCircle className="h-3 w-3" />Uitbetaald</Badge>;
+        return <Badge variant="default" className="gap-1 bg-[#f28a1a]"><CheckCircle className="h-3 w-3" />Uitbetaald</Badge>;
       case "cancelled":
         return <Badge variant="destructive" className="gap-1"><Ban className="h-3 w-3" />Geannuleerd</Badge>;
       default:
@@ -188,7 +188,7 @@ export default function AffiliatePage() {
                   data-testid="button-copy-link"
                 >
                   {copied ? (
-                    <Check className="h-4 w-4 text-green-600" />
+                    <Check className="h-4 w-4 text-[#f28a1a]" />
                   ) : (
                     <Copy className="h-4 w-4" />
                   )}
@@ -218,8 +218,8 @@ export default function AffiliatePage() {
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-full bg-amber-500/10">
-                    <Clock className="h-6 w-6 text-amber-500" />
+                  <div className="p-3 rounded-full bg-[#f28a1a]/10">
+                    <Clock className="h-6 w-6 text-[#f28a1a]" />
                   </div>
                   <div>
                     <p className="text-2xl font-bold" data-testid="text-pending-commission">
@@ -234,8 +234,8 @@ export default function AffiliatePage() {
             <Card>
               <CardContent className="pt-6">
                 <div className="flex items-center gap-4">
-                  <div className="p-3 rounded-full bg-green-500/10">
-                    <Euro className="h-6 w-6 text-green-500" />
+                  <div className="p-3 rounded-full bg-[#f28a1a]/10">
+                    <Euro className="h-6 w-6 text-[#f28a1a]" />
                   </div>
                   <div>
                     <p className="text-2xl font-bold" data-testid="text-paid-commission">
@@ -340,9 +340,9 @@ export default function AffiliatePage() {
             </CardContent>
           </Card>
 
-          <Card className="border-amber-200 bg-amber-50 dark:bg-amber-950/20 dark:border-amber-800">
+          <Card className="border-[#f28a1a]/20 bg-[#f28a1a]/10 dark:bg-[#f28a1a]/20 dark:border-[#f28a1a]">
             <CardContent className="pt-6">
-              <p className="text-sm text-amber-800 dark:text-amber-200">
+              <p className="text-sm text-[#f28a1a] dark:text-[#f28a1a]/20">
                 <strong>Let op:</strong> Commissie wordt alleen uitbetaald zolang de doorverwezen klant een actief abonnement heeft. 
                 Bij opzegging stopt de commissie automatisch. Uitbetaling gebeurt maandelijks via bankoverschrijving na goedkeuring.
               </p>

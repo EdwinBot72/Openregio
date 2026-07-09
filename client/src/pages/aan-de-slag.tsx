@@ -31,9 +31,9 @@ const KEUZE_BLOKKEN = [
     label: "Ik wil beter gevonden worden",
     sub: "Website check, vindbaarheid en bedrijfsprofiel",
     href: "/tools/website-scan",
-    color: "text-blue-600 dark:text-blue-400",
-    bg: "bg-blue-50 dark:bg-blue-950/40",
-    ring: "ring-blue-200 dark:ring-blue-900/60",
+    color: "text-[#0b2240] dark:text-[#0b2240]",
+    bg: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40",
+    ring: "ring-[#0b2240]/20 dark:ring-[#0b2240]/60",
     testid: "keuze-gevonden",
   },
   {
@@ -41,9 +41,9 @@ const KEUZE_BLOKKEN = [
     label: "Ik wil een brief laten checken",
     sub: "Upload een overheidsbrief of beschikking",
     href: "/tools/brief-analyse",
-    color: "text-violet-600 dark:text-violet-400",
-    bg: "bg-violet-50 dark:bg-violet-950/40",
-    ring: "ring-violet-200 dark:ring-violet-900/60",
+    color: "text-[#0b2240] dark:text-[#0b2240]",
+    bg: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40",
+    ring: "ring-[#0b2240]/20 dark:ring-[#0b2240]/60",
     testid: "keuze-brief",
   },
   {
@@ -51,9 +51,9 @@ const KEUZE_BLOKKEN = [
     label: "Ik wil kansen in mijn regio zien",
     sub: "Subsidies, aanbestedingen en regio-updates",
     href: "/kansen-in-de-buurt",
-    color: "text-emerald-600 dark:text-emerald-400",
-    bg: "bg-emerald-50 dark:bg-emerald-950/40",
-    ring: "ring-emerald-200 dark:ring-emerald-900/60",
+    color: "text-[#f28a1a] dark:text-[#f28a1a]",
+    bg: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40",
+    ring: "ring-[#f28a1a]/20 dark:ring-[#f28a1a]/60",
     testid: "keuze-kansen",
   },
 ];
@@ -65,8 +65,8 @@ const STAPPEN = [
     omschrijving: "Vul je bedrijfsprofiel in zodat andere leden je kunnen vinden.",
     icon: Shield,
     url: "/bedrijfsprofiel",
-    kleur: "text-blue-600 dark:text-blue-400",
-    bg: "bg-blue-50 dark:bg-blue-950/40",
+    kleur: "text-[#0b2240] dark:text-[#0b2240]",
+    bg: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40",
     checkKey: "profiel",
   },
   {
@@ -75,8 +75,8 @@ const STAPPEN = [
     omschrijving: "Controleer in 3 minuten of je voldoet aan de regels in jouw regio.",
     icon: Target,
     url: "/basischeck",
-    kleur: "text-green-600 dark:text-green-400",
-    bg: "bg-green-50 dark:bg-green-950/40",
+    kleur: "text-[#f28a1a] dark:text-[#f28a1a]",
+    bg: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40",
     checkKey: "basischeck",
   },
   {
@@ -85,8 +85,8 @@ const STAPPEN = [
     omschrijving: "Bekijk welke regelgeving, subsidies en beleid er actueel zijn.",
     icon: TrendingUp,
     url: "/intel",
-    kleur: "text-purple-600 dark:text-purple-400",
-    bg: "bg-purple-50 dark:bg-purple-950/40",
+    kleur: "text-[#0b2240] dark:text-[#0b2240]",
+    bg: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40",
     checkKey: "intel",
   },
   {
@@ -95,8 +95,8 @@ const STAPPEN = [
     omschrijving: "Upload een beschikking of gemeentebesluit en laat OpenRegio het voor jou lezen.",
     icon: FileText,
     url: "/tools/brief-analyse",
-    kleur: "text-amber-600 dark:text-amber-400",
-    bg: "bg-amber-50 dark:bg-amber-950/40",
+    kleur: "text-[#f28a1a] dark:text-[#f28a1a]",
+    bg: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40",
     checkKey: "brief",
   },
   {
@@ -105,8 +105,8 @@ const STAPPEN = [
     omschrijving: "Gebruik AI om documenten te analyseren en antwoorden te vinden.",
     icon: Bot,
     url: "/regiobot",
-    kleur: "text-rose-600 dark:text-rose-400",
-    bg: "bg-rose-50 dark:bg-rose-950/40",
+    kleur: "text-[#0b2240] dark:text-[#0b2240]",
+    bg: "bg-[#0b2240]/10 dark:bg-[#0b2240]/40",
     checkKey: "regiobot",
     proOnly: true,
   },
@@ -229,8 +229,8 @@ export default function AanDeSlagPage() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-950/40 flex items-center justify-center">
-                  <Lightbulb className="h-4 w-4 text-amber-500" />
+                <div className="w-8 h-8 rounded-lg bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40 flex items-center justify-center">
+                  <Lightbulb className="h-4 w-4 text-[#f28a1a]" />
                 </div>
                 <div>
                   <CardTitle className="text-sm font-semibold">Kans van vandaag</CardTitle>
@@ -277,8 +277,8 @@ export default function AanDeSlagPage() {
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2">
-                <div className="w-8 h-8 rounded-lg bg-green-50 dark:bg-green-950/40 flex items-center justify-center">
-                  <Star className="h-4 w-4 text-green-600 dark:text-green-400" />
+                <div className="w-8 h-8 rounded-lg bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40 flex items-center justify-center">
+                  <Star className="h-4 w-4 text-[#f28a1a] dark:text-[#f28a1a]" />
                 </div>
                 <CardTitle className="text-sm font-semibold">Jouw voortgang</CardTitle>
               </div>
@@ -296,7 +296,7 @@ export default function AanDeSlagPage() {
                   data-testid={`check-${stap.checkKey}`}
                 >
                   {checklist[stap.checkKey] ? (
-                    <CheckCircle2 className="h-4 w-4 text-green-500 shrink-0" />
+                    <CheckCircle2 className="h-4 w-4 text-[#f28a1a] shrink-0" />
                   ) : (
                     <Circle className="h-4 w-4 text-muted-foreground shrink-0" />
                   )}
@@ -316,8 +316,8 @@ export default function AanDeSlagPage() {
         <CardHeader className="pb-3">
           <div className="flex items-center justify-between gap-2 flex-wrap">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-950/40 flex items-center justify-center">
-                <Zap className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+              <div className="w-8 h-8 rounded-lg bg-[#0b2240]/10 dark:bg-[#0b2240]/40 flex items-center justify-center">
+                <Zap className="h-4 w-4 text-[#0b2240] dark:text-[#0b2240]" />
               </div>
               <CardTitle className="text-sm font-semibold">Actuele signalen in jouw regio</CardTitle>
             </div>
@@ -392,11 +392,11 @@ export default function AanDeSlagPage() {
 
       {/* ── Pro-upgrade CTA voor basis-leden ─────────────────────────────── */}
       {!isPro && (
-        <Card className="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/20 dark:to-indigo-950/20 border-blue-100 dark:border-blue-900/40" data-testid="card-pro-cta">
+        <Card className="bg-gradient-to-r from-[#0b2240]/10 to-[#0b2240]/10 dark:from-[#0b2240]/20 dark:to-[#0b2240]/20 border-[#0b2240]/10 dark:border-[#0b2240]/40" data-testid="card-pro-cta">
           <CardContent className="p-5 flex items-center gap-4 flex-wrap justify-between">
             <div className="flex items-start gap-3">
-              <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center shrink-0">
-                <Bot className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <div className="w-9 h-9 rounded-xl bg-[#0b2240]/10 dark:bg-[#0b2240]/40 flex items-center justify-center shrink-0">
+                <Bot className="h-4 w-4 text-[#0b2240] dark:text-[#0b2240]" />
               </div>
               <div>
                 <p className="font-semibold text-sm">Meer grip op brieven, kansen en documenten?</p>

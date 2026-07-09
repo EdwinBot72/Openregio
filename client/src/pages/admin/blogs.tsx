@@ -137,7 +137,7 @@ export default function AdminBlogsPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "published":
-        return <Badge className="bg-green-500">Gepubliceerd</Badge>;
+        return <Badge className="bg-[#f28a1a]">Gepubliceerd</Badge>;
       case "draft":
         return <Badge variant="secondary">Concept</Badge>;
       case "archived":

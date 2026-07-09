@@ -149,7 +149,7 @@ export default function RegelgevingVerkennerPage() {
             <Button
               onClick={handleSearch}
               disabled={isLoading || !query.trim()}
-              className="bg-orange-500 hover:bg-orange-600 text-white min-w-[100px]"
+              className="bg-[#f28a1a] hover:bg-[#f28a1a] text-white min-w-[100px]"
               data-testid="button-zoek-regelgeving"
             >
               {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <><Search className="w-4 h-4 mr-1.5" />Zoeken</>}
@@ -165,7 +165,7 @@ export default function RegelgevingVerkennerPage() {
                 onClick={() => setCategorie(c.value)}
                 className={`text-xs px-3 py-1 rounded-full font-medium transition-colors ${
                   categorie === c.value
-                    ? "bg-orange-100 text-orange-700"
+                    ? "bg-[#f28a1a]/10 text-[#f28a1a]"
                     : "bg-slate-100 text-slate-500 hover:bg-slate-200"
                 }`}
                 data-testid={`filter-${c.value}`}
@@ -184,7 +184,7 @@ export default function RegelgevingVerkennerPage() {
                   <button
                     key={z}
                     onClick={() => { setQuery(z); setActiveQuery(z); }}
-                    className="text-xs px-3 py-1.5 bg-slate-50 text-slate-600 rounded-full border border-slate-200 hover:bg-blue-50 hover:border-blue-200 hover:text-blue-600 transition-colors"
+                    className="text-xs px-3 py-1.5 bg-slate-50 text-slate-600 rounded-full border border-slate-200 hover:bg-[#0b2240]/10 hover:border-[#0b2240]/20 hover:text-[#0b2240] transition-colors"
                     data-testid={`quick-search-${z.replace(/\s/g, "-")}`}
                   >
                     {z}
@@ -230,7 +230,7 @@ export default function RegelgevingVerkennerPage() {
           {data.items.map((item, i) => (
             <Card
               key={item.id}
-              className={`cursor-pointer transition-colors ${selectedItem?.id === item.id ? "ring-2 ring-orange-300" : ""}`}
+              className={`cursor-pointer transition-colors ${selectedItem?.id === item.id ? "ring-2 ring-[#f28a1a]/30" : ""}`}
               onClick={() => { setSelectedItem(selectedItem?.id === item.id ? null : item); setWooConcept(null); setShowConcept(false); }}
               data-testid={`regelgeving-item-${i}`}
             >
@@ -239,7 +239,7 @@ export default function RegelgevingVerkennerPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-1.5 flex-wrap">
                       {item.type && (
-                        <Badge className="bg-orange-50 text-orange-700 text-xs">{item.type}</Badge>
+                        <Badge className="bg-[#f28a1a]/10 text-[#f28a1a] text-xs">{item.type}</Badge>
                       )}
                       {item.date && (
                         <span className="text-xs text-slate-400 flex items-center gap-1">
@@ -275,7 +275,7 @@ export default function RegelgevingVerkennerPage() {
                           href={item.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg hover:bg-blue-100 transition-colors"
+                          className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 bg-[#0b2240]/10 text-[#0b2240] rounded-lg hover:bg-[#0b2240]/10 transition-colors"
                           data-testid="link-officieel-document"
                         >
                           <ExternalLink className="w-3 h-3" />
@@ -287,7 +287,7 @@ export default function RegelgevingVerkennerPage() {
                           size="sm"
                           onClick={() => wooConcMutation.mutate(item)}
                           disabled={wooConcMutation.isPending}
-                          className="bg-orange-500 hover:bg-orange-600 text-white text-xs h-7"
+                          className="bg-[#f28a1a] hover:bg-[#f28a1a] text-white text-xs h-7"
                           data-testid="button-genereer-woo"
                         >
                           {wooConcMutation.isPending ? (
@@ -307,11 +307,11 @@ export default function RegelgevingVerkennerPage() {
 
                     {/* WOO Concept */}
                     {showConcept && wooConcept && (
-                      <div className="mt-3 p-4 bg-orange-50 rounded-xl border border-orange-100" data-testid="woo-concept">
+                      <div className="mt-3 p-4 bg-[#f28a1a]/10 rounded-xl border border-[#f28a1a]/10" data-testid="woo-concept">
                         <div className="flex items-center justify-between mb-3">
                           <div className="flex items-center gap-2">
-                            <FileText className="w-4 h-4 text-orange-600" />
-                            <span className="text-sm font-semibold text-orange-800">Woo-verzoek concept</span>
+                            <FileText className="w-4 h-4 text-[#f28a1a]" />
+                            <span className="text-sm font-semibold text-[#f28a1a]">Woo-verzoek concept</span>
                           </div>
                           <div className="flex gap-2">
                             <Button variant="outline" size="sm" onClick={copyBrief} className="text-xs h-7" data-testid="button-copy-brief">
@@ -322,17 +322,17 @@ export default function RegelgevingVerkennerPage() {
                             </button>
                           </div>
                         </div>
-                        <div className="text-xs text-orange-700 font-medium mb-2">{wooConcept.aanhef}</div>
-                        <pre className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap bg-white rounded-lg p-3 border border-orange-100 max-h-64 overflow-y-auto">
+                        <div className="text-xs text-[#f28a1a] font-medium mb-2">{wooConcept.aanhef}</div>
+                        <pre className="text-xs text-slate-700 leading-relaxed whitespace-pre-wrap bg-white rounded-lg p-3 border border-[#f28a1a]/10 max-h-64 overflow-y-auto">
                           {wooConcept.brief}
                         </pre>
                         {wooConcept.aanbevolenDocumenten?.length > 0 && (
                           <div className="mt-3">
-                            <p className="text-xs font-semibold text-orange-700 mb-1.5">Vraag ook om:</p>
+                            <p className="text-xs font-semibold text-[#f28a1a] mb-1.5">Vraag ook om:</p>
                             <ul className="space-y-1">
                               {wooConcept.aanbevolenDocumenten.map((d, j) => (
                                 <li key={j} className="text-xs text-slate-600 flex items-start gap-1.5">
-                                  <ChevronRight className="w-3 h-3 text-orange-400 flex-shrink-0 mt-0.5" />
+                                  <ChevronRight className="w-3 h-3 text-[#f28a1a] flex-shrink-0 mt-0.5" />
                                   {d}
                                 </li>
                               ))}

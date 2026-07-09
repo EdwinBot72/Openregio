@@ -158,7 +158,7 @@ export default function CooperativePage() {
                           </div>
                           <Progress value={yesPercentage} className="h-2" />
                           <div className="flex justify-between text-xs text-muted-foreground">
-                            <span className="text-green-600">Ja: {voteCounts.yes}</span>
+                            <span className="text-[#f28a1a]">Ja: {voteCounts.yes}</span>
                             <span className="text-red-600">Nee: {voteCounts.no}</span>
                             <span>Onthouding: {voteCounts.abstain}</span>
                           </div>
@@ -248,19 +248,19 @@ export default function CooperativePage() {
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  <CheckCircle2 className="h-4 w-4 text-[#f28a1a]" />
                   <span>1 lid = 1 stem</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  <CheckCircle2 className="h-4 w-4 text-[#f28a1a]" />
                   <span>Open financiën</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  <CheckCircle2 className="h-4 w-4 text-[#f28a1a]" />
                   <span>Democratische besluitvorming</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+                  <CheckCircle2 className="h-4 w-4 text-[#f28a1a]" />
                   <span>Winstdeling onder leden</span>
                 </div>
               </CardContent>
