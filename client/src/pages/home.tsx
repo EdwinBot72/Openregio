@@ -24,7 +24,7 @@ import {
 
 const BLAUW = "#0b2240";
 const ORANJE = "#f28a1a";
-const FF = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+const FF = "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
 export default function HomePage() {
   usePageTitle("OpenRegio — Grip op regels. Kracht in de regio.");
@@ -217,11 +217,11 @@ export default function HomePage() {
             <span style={{ color: ORANJE }}>OpenRegio maakt het systeem zichtbaar voor jou.</span>
           </h2>
 
-          <div style={{ display: "flex", flexDirection: "column", gap: 22 }}>
-            <p style={{ fontSize: 15, color: "#cbd5e1", lineHeight: 1.85, margin: 0 }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: 24, maxWidth: 620, margin: "0 auto" }}>
+            <p style={{ fontSize: 17, color: "#e2e8f0", lineHeight: 1.75, margin: 0, textAlign: "center" }}>
               Iedere ondernemer krijgt te maken met regels, heffingen, vergunningen, controles, verplichtingen en besluiten. Vaak wordt verwacht dat je gewoon meebeweegt, betaalt of voldoet. Maar als ondernemer mag je ook vragen stellen: waar komt deze regel vandaan, wie heeft dit besloten, welke grondslag wordt gebruikt en geldt dit echt voor mijn onderneming?
             </p>
-            <p style={{ fontSize: 15, color: "#cbd5e1", lineHeight: 1.85, margin: 0 }}>
+            <p style={{ fontSize: 17, color: "#e2e8f0", lineHeight: 1.75, margin: 0, textAlign: "center" }}>
               OpenRegio helpt lokale ondernemers om wetten, regels en besluiten zichtbaar en begrijpelijk te maken. Door samen de juiste vragen te stellen en waar nodig Woo-documenten op te vragen, brengen we boven tafel wat normaal verspreid zit in verordeningen, beleidsstukken, mandaatregisters, besluiten en gemeentelijke systemen.
             </p>
           </div>
