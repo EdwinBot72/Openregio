@@ -1309,6 +1309,25 @@ export const insertLokaleActieRsvpSchema = createInsertSchema(lokaleActiesRsvp).
 export type InsertLokaleActieRsvp = z.infer<typeof insertLokaleActieRsvpSchema>;
 export type LokaleActieRsvp = typeof lokaleActiesRsvp.$inferSelect;
 
+// ── Lokale Acties E-mailherinnering (anonieme bezoekers) ─────────────────────
+export const lokaleActiesInteresse = pgTable("lokale_acties_interesse", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  actieId: varchar("actie_id").notNull().references(() => lokaleActies.id, { onDelete: "cascade" }),
+  email: varchar("email", { length: 255 }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+}, (table) => ({
+  uniqInteresse: unique().on(table.actieId, table.email),
+}));
+
+export const insertLokaleActieInteresseSchema = createInsertSchema(lokaleActiesInteresse).omit({
+  id: true,
+  createdAt: true,
+}).extend({
+  email: z.string().trim().email("Vul een geldig e-mailadres in").max(255),
+});
+export type InsertLokaleActieInteresse = z.infer<typeof insertLokaleActieInteresseSchema>;
+export type LokaleActieInteresse = typeof lokaleActiesInteresse.$inferSelect;
+
 // ── Ondernemer Thema's (AI-gegenereerde wekelijkse updates) ──────────────────
 export const ondernemerThemas = pgTable("ondernemer_themas", {
   id: serial("id").primaryKey(),

@@ -392,6 +392,60 @@ export async function sendLokaleActiesDigestEmail(
   );
 }
 
+export async function sendLokaleActieHerinneringEmail(
+  to: string,
+  actie: {
+    id: string;
+    titel: string;
+    beschrijving: string;
+    locatie: string;
+    regio: string;
+    datum?: Date | string | null;
+  },
+): Promise<boolean> {
+  const formatDatum = (d?: Date | string | null) => {
+    if (!d) return 'Doorlopend';
+    try {
+      const dt = new Date(d);
+      return dt.toLocaleDateString('nl-NL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    } catch {
+      return 'Doorlopend';
+    }
+  };
+
+  const truncate = (s: string, n: number) => (s.length > n ? s.slice(0, n - 1) + '…' : s);
+  const actieUrl = `${BASE_URL}/acties/${actie.id}`;
+
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head><meta charset="utf-8"></head>
+    <body style="font-family: Inter, Arial, sans-serif; line-height: 1.6; color: #1a1a1a;">
+      <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; padding: 24px; text-align: center; border-radius: 8px 8px 0 0;">
+          <h1 style="margin: 0; font-size: 20px;">Herinnering: ${actie.titel}</h1>
+        </div>
+        <div style="background: #ffffff; padding: 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px;">
+          <p>Bedankt voor je interesse in deze lokale actie. Hier zijn de details zodat je ze niet vergeet:</p>
+          <div style="margin: 18px 0; padding: 14px 16px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px;">
+            <p style="margin: 0 0 6px 0;"><strong>Wanneer:</strong> ${formatDatum(actie.datum)}</p>
+            <p style="margin: 0 0 6px 0;"><strong>Waar:</strong> ${actie.locatie}, ${actie.regio}</p>
+            <p style="margin: 8px 0 0 0; color: #334155;">${truncate(actie.beschrijving, 300)}</p>
+          </div>
+          <p style="text-align: center;">
+            <a href="${actieUrl}" style="display: inline-block; background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">Bekijk de actie</a>
+          </p>
+        </div>
+        <div style="text-align: center; padding: 16px; color: #6b7280; font-size: 12px;">
+          <p>Je ontvangt deze e-mail omdat je je hebt aangemeld voor een herinnering over deze lokale actie op OpenRegio.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+  return sendEmail(to, `Herinnering: ${actie.titel}`, html);
+}
+
 export async function sendWooSubmissionEmail(
   to: string,
   subject: string,

@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "wouter";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { nl } from "date-fns/locale";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useToast } from "@/hooks/use-toast";
+import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   CalendarDays, MapPin, Users, ExternalLink, Mail, Clock, Building2,
-  ArrowLeft, Share2, Copy, CheckCircle2, ChevronRight,
+  ArrowLeft, Share2, Copy, CheckCircle2, ChevronRight, BellRing,
 } from "lucide-react";
 import { SiFacebook, SiX, SiLinkedin, SiWhatsapp } from "react-icons/si";
 import type { LokaleActie } from "@shared/schema";
@@ -78,6 +80,8 @@ export default function ActieDetailPage() {
   const params = useParams<{ id: string }>();
   const { toast } = useToast();
   const [copied, setCopied] = useState(false);
+  const [reminderEmail, setReminderEmail] = useState("");
+  const [reminderSent, setReminderSent] = useState(false);
 
   const { data: actie, isLoading, isError } = useQuery<LokaleActie>({
     queryKey: ["/api/lokale-acties/public", params.id],
@@ -89,6 +93,30 @@ export default function ActieDetailPage() {
     enabled: !!params.id,
     retry: false,
   });
+
+  const reminderMutation = useMutation({
+    mutationFn: async (email: string) => {
+      const res = await apiRequest("POST", `/api/lokale-acties/public/${params.id}/interesse`, { email });
+      return res.json();
+    },
+    onSuccess: () => {
+      setReminderSent(true);
+      toast({ title: "Bevestigd", description: "We sturen je een herinnering met de details van deze actie." });
+    },
+    onError: (err: any) => {
+      toast({
+        title: "Kon herinnering niet instellen",
+        description: parseApiError(err, "Controleer je e-mailadres en probeer het opnieuw."),
+        variant: "destructive",
+      });
+    },
+  });
+
+  function handleReminderSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!reminderEmail.trim()) return;
+    reminderMutation.mutate(reminderEmail.trim());
+  }
 
   usePageTitle(actie ? `${actie.titel} — OpenRegio` : "Lokale actie");
   useOpenGraphMeta(actie);
@@ -262,6 +290,51 @@ export default function ActieDetailPage() {
             </CardContent>
           </Card>
         </a>
+
+        {/* Herinnering per e-mail */}
+        <Card data-testid="card-herinnering">
+          <CardContent className="p-5" style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+              <BellRing size={16} style={{ color: "#1E6DB5" }} />
+              <p style={{ fontWeight: 600, fontSize: 14, margin: 0 }}>Stuur mij een herinnering</p>
+            </div>
+            {reminderSent ? (
+              <p style={{ fontSize: 13, color: "#64748b", display: "flex", alignItems: "center", gap: 6 }} data-testid="text-herinnering-bevestigd">
+                <CheckCircle2 className="h-4 w-4" style={{ color: "#16a34a" }} />
+                We hebben je een e-mail gestuurd met de details van deze actie.
+              </p>
+            ) : (
+              <>
+                <p style={{ fontSize: 13, color: "#64748b" }}>
+                  Vul je e-mailadres in en ontvang de datum en locatie van deze actie in je inbox.
+                </p>
+                <form
+                  onSubmit={handleReminderSubmit}
+                  style={{ display: "flex", gap: 8, flexWrap: "wrap" as const }}
+                >
+                  <Input
+                    type="email"
+                    required
+                    placeholder="jouw@email.nl"
+                    value={reminderEmail}
+                    onChange={(e) => setReminderEmail(e.target.value)}
+                    className="max-w-xs"
+                    data-testid="input-herinnering-email"
+                  />
+                  <Button
+                    type="submit"
+                    size="default"
+                    disabled={reminderMutation.isPending}
+                    data-testid="button-herinnering-versturen"
+                  >
+                    <Mail className="mr-1.5 h-3.5 w-3.5" />
+                    {reminderMutation.isPending ? "Versturen…" : "Herinner mij"}
+                  </Button>
+                </form>
+              </>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Contact */}
         {(actie.externeLink || actie.contactEmail) && (

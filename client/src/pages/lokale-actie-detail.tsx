@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import {
   CalendarDays, MapPin, Users, ExternalLink, Mail, Clock, Building2,
-  ArrowLeft, Share2, Copy, CheckCircle2, Pencil, Trash2, UserCheck, UserMinus,
+  ArrowLeft, Share2, Copy, CheckCircle2, Pencil, Trash2, UserCheck, UserMinus, BellRing,
 } from "lucide-react";
 import type { LokaleActie } from "@shared/schema";
 
@@ -222,6 +222,13 @@ export default function LokaleActieDetailPage() {
     queryKey: ["/api/lokale-acties", params.id, "rsvp"],
     queryFn: () => fetch(`/api/lokale-acties/${params.id}/rsvp`, { credentials: "include" }).then((r) => r.json()),
     enabled: !!params.id && !!user && !!actie,
+  });
+
+  const isEigenForInteresse = !!user && !!actie && user.id === actie.ownerUserId;
+  const { data: interesseInfo, isLoading: interesseLoading } = useQuery<{ count: number }>({
+    queryKey: ["/api/lokale-acties", params.id, "interesse"],
+    queryFn: () => fetch(`/api/lokale-acties/${params.id}/interesse`, { credentials: "include" }).then((r) => r.json()),
+    enabled: !!params.id && isEigenForInteresse,
   });
 
   usePageTitle(actie ? actie.titel : "Lokale actie");
@@ -502,6 +509,22 @@ export default function LokaleActieDetailPage() {
                 ))}
               </ul>
             )}
+            <div className="flex items-center justify-between gap-2 flex-wrap pt-2 border-t">
+              <div className="flex items-center gap-2">
+                <BellRing className="h-4 w-4 text-muted-foreground" />
+                <span className="text-sm font-semibold">Herinneringen per e-mail</span>
+              </div>
+              {interesseLoading ? (
+                <Skeleton className="h-5 w-20" />
+              ) : (
+                <Badge variant="secondary" data-testid="badge-herinneringen-totaal">
+                  {interesseInfo?.count ?? 0} {(interesseInfo?.count ?? 0) === 1 ? "aanmelding" : "aanmeldingen"}
+                </Badge>
+              )}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Bezoekers die op de publieke pagina hun e-mailadres achterlieten om een herinnering met datum en locatie te ontvangen.
+            </p>
           </CardContent>
         </Card>
       )}

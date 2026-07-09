@@ -1,14 +1,14 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema, insertBedrijfsprofielSchema, regioBotChatSchema, visibilitySettingsSchema, DEFAULT_VISIBILITY_SETTINGS, insertCrewProfileSchema, insertCrewRequestSchema, insertCrewApplicationSchema, CREW_CATEGORIES, users, ragDocuments, documents, insertRegioDealSchema, crewApplications, crewRequests, bedrijfsprofielen, dailyCourses, dailyCourseProgress, insertDailyCourseSchema, LOKALE_ACTIE_DOELGROEPEN } from "@shared/schema";
+import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema, insertBedrijfsprofielSchema, regioBotChatSchema, visibilitySettingsSchema, DEFAULT_VISIBILITY_SETTINGS, insertCrewProfileSchema, insertCrewRequestSchema, insertCrewApplicationSchema, CREW_CATEGORIES, users, ragDocuments, documents, insertRegioDealSchema, crewApplications, crewRequests, bedrijfsprofielen, dailyCourses, dailyCourseProgress, insertDailyCourseSchema, LOKALE_ACTIE_DOELGROEPEN, insertLokaleActieInteresseSchema } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { createMollieClient } from "@mollie/api-client";
 import { setupJwtAuth, attachUser, requireAuth, requireBasic, requireAdmin, requirePro, issueTokensForUser, clearTokenCookies, revokeAllUserTokens } from "./jwtAuth";
 import { seedMasterAccount, seedTestAccounts } from "./seed";
 import { generateRandomPassword, generateOnboardingToken, getPlanPrice, getPlanDisplayName, generateReferralCode } from "./utils/auth";
-import { sendOnboardingEmail, sendNotificationEmail } from "./services/emailService";
+import { sendOnboardingEmail, sendNotificationEmail, sendLokaleActieHerinneringEmail } from "./services/emailService";
 import bcrypt from "bcrypt";
 import { uploadMemory, getDocumentType } from "./middleware/upload";
 import { publicAiRateLimit, authenticatedAiRateLimit } from "./middleware/aiRateLimit";
@@ -6071,6 +6071,47 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
     } catch (err) {
       console.error("[LokaleActies] fout bij ophalen publiek detail:", err);
       return res.status(500).json({ error: "Fout bij ophalen actie" });
+    }
+  });
+
+  // POST /api/lokale-acties/public/:id/interesse — anonieme bezoeker laat e-mail achter voor herinnering
+  app.post("/api/lokale-acties/public/:id/interesse", contactFormRateLimit, async (req, res) => {
+    try {
+      const actie = await storage.getLokaleActieById(req.params.id);
+      const now = new Date();
+      if (!actie || actie.status === "verlopen" || actie.expiresAt <= now) {
+        return res.status(404).json({ error: "Actie niet gevonden" });
+      }
+      const parsed = insertLokaleActieInteresseSchema.pick({ email: true }).safeParse(req.body);
+      if (!parsed.success) {
+        return res.status(400).json({ error: parsed.error.errors[0]?.message || "Ongeldig e-mailadres" });
+      }
+      await storage.createLokaleActieInteresse(actie.id, parsed.data.email);
+      sendLokaleActieHerinneringEmail(parsed.data.email, actie).catch((err) => {
+        console.error("[LokaleActies] fout bij versturen herinneringsmail:", err);
+      });
+      return res.json({ success: true });
+    } catch (err) {
+      console.error("[LokaleActies] fout bij interesse-registratie:", err);
+      return res.status(500).json({ error: "Fout bij registreren interesse" });
+    }
+  });
+
+  // GET /api/lokale-acties/:id/interesse — aantal geïnteresseerden (alleen eigenaar)
+  app.get("/api/lokale-acties/:id/interesse", requireAuth, requirePro, async (req, res) => {
+    try {
+      const actie = await storage.getLokaleActieById(req.params.id);
+      if (!actie) {
+        return res.status(404).json({ error: "Actie niet gevonden" });
+      }
+      if (actie.ownerUserId !== req.user!.id) {
+        return res.status(403).json({ error: "Geen toegang" });
+      }
+      const count = await storage.getInteresseCountForActie(req.params.id);
+      return res.json({ count });
+    } catch (err) {
+      console.error("[LokaleActies] fout bij ophalen interesse-aantal:", err);
+      return res.status(500).json({ error: "Fout bij ophalen interesse" });
     }
   });
 

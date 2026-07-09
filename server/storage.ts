@@ -91,6 +91,8 @@ import {
   lokaleActies,
   type LokaleActieRsvp,
   lokaleActiesRsvp,
+  type LokaleActieInteresse,
+  lokaleActiesInteresse,
   LOKALE_ACTIE_DOELGROEPEN,
   type OndernemerThema,
   type InsertOndernemerThema,
@@ -339,6 +341,10 @@ export interface IStorage {
   hasUserRsvp(actieId: string, userId: string): Promise<boolean>;
   createRsvp(actieId: string, userId: string): Promise<LokaleActieRsvp>;
   deleteRsvp(actieId: string, userId: string): Promise<boolean>;
+
+  // Lokale Acties Interesse (e-mailherinnering voor anonieme bezoekers)
+  createLokaleActieInteresse(actieId: string, email: string): Promise<LokaleActieInteresse>;
+  getInteresseCountForActie(actieId: string): Promise<number>;
 
   // Ondernemer Thema's
   getOndernemerThemas(): Promise<OndernemerThema[]>;
@@ -1905,6 +1911,14 @@ export class MemStorage implements IStorage {
     return false;
   }
 
+  // Lokale Acties Interesse (stubs for MemStorage)
+  async createLokaleActieInteresse(actieId: string, email: string): Promise<LokaleActieInteresse> {
+    return { id: randomUUID(), actieId, email, createdAt: new Date() };
+  }
+  async getInteresseCountForActie(_actieId: string): Promise<number> {
+    return 0;
+  }
+
   // Ondernemer Thema's (stubs for MemStorage)
   async getOndernemerThemas(): Promise<OndernemerThema[]> {
     return [];
@@ -3390,6 +3404,30 @@ class DbStorage implements IStorage {
       .where(and(eq(lokaleActiesRsvp.actieId, actieId), eq(lokaleActiesRsvp.userId, userId)))
       .returning();
     return result.length > 0;
+  }
+
+  async createLokaleActieInteresse(actieId: string, email: string): Promise<LokaleActieInteresse> {
+    const [created] = await db
+      .insert(lokaleActiesInteresse)
+      .values({ actieId, email })
+      .onConflictDoNothing()
+      .returning();
+    if (!created) {
+      const [existing] = await db
+        .select()
+        .from(lokaleActiesInteresse)
+        .where(and(eq(lokaleActiesInteresse.actieId, actieId), eq(lokaleActiesInteresse.email, email)));
+      return existing;
+    }
+    return created;
+  }
+
+  async getInteresseCountForActie(actieId: string): Promise<number> {
+    const [row] = await db
+      .select({ count: sql<number>`cast(count(*) as int)` })
+      .from(lokaleActiesInteresse)
+      .where(eq(lokaleActiesInteresse.actieId, actieId));
+    return row?.count ?? 0;
   }
 
   // Ondernemer Thema's

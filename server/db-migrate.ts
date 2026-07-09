@@ -467,6 +467,19 @@ export async function runMigrations(): Promise<void> {
     `);
     console.log("[Migration] ✓ users.last_lokale_acties_seen_at column ensured");
 
+    // E-mailherinnering voor anonieme bezoekers van een lokale actie (task #113)
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS lokale_acties_interesse (
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid(),
+        actie_id VARCHAR NOT NULL REFERENCES lokale_acties(id) ON DELETE CASCADE,
+        email VARCHAR(255) NOT NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        UNIQUE (actie_id, email)
+      );
+    `);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lokale_acties_interesse_actie ON lokale_acties_interesse(actie_id);`);
+    console.log("[Migration] ✓ lokale_acties_interesse table ensured");
+
     console.log("[Migration] Database schema is up to date");
   } catch (error) {
     console.error("[Migration] Error running migrations:", error);
