@@ -21,6 +21,7 @@ import {
 import {
   CalendarDays, MapPin, Users, ExternalLink, Mail, Clock, Building2,
   ArrowLeft, Share2, Copy, CheckCircle2, Pencil, Trash2, UserCheck, UserMinus, BellRing,
+  AlertTriangle,
 } from "lucide-react";
 import type { LokaleActie } from "@shared/schema";
 
@@ -44,16 +45,19 @@ function MiniKaart({
   locatie,
   regio,
   mapsLink,
+  onStatusChange,
 }: {
   locatie: string;
   regio: string;
   mapsLink: string;
+  onStatusChange?: (status: GeoState["status"]) => void;
 }) {
   const [geo, setGeo] = useState<GeoState>({ status: "idle" });
 
   useEffect(() => {
     let cancelled = false;
     setGeo({ status: "loading" });
+    onStatusChange?.("loading");
     const query = encodeURIComponent(`${locatie}, ${regio}, Nederland`);
     fetch(
       `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1`,
@@ -64,14 +68,19 @@ function MiniKaart({
         if (cancelled) return;
         if (data.length > 0) {
           setGeo({ status: "ok", lat: parseFloat(data[0].lat), lng: parseFloat(data[0].lon) });
+          onStatusChange?.("ok");
         } else {
           setGeo({ status: "error" });
+          onStatusChange?.("error");
         }
       })
       .catch(() => {
-        if (!cancelled) setGeo({ status: "error" });
+        if (cancelled) return;
+        setGeo({ status: "error" });
+        onStatusChange?.("error");
       });
     return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [locatie, regio]);
 
   if (geo.status === "loading") {
@@ -212,6 +221,7 @@ export default function LokaleActieDetailPage() {
   const { toast } = useToast();
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [kaartStatus, setKaartStatus] = useState<GeoState["status"]>("idle");
 
   const { data: actie, isLoading, isError } = useQuery<LokaleActie>({
     queryKey: ["/api/lokale-acties", params.id],
@@ -536,7 +546,25 @@ export default function LokaleActieDetailPage() {
             <span className="font-medium">{actie.locatie}</span>
             <span className="text-muted-foreground">— {actie.regio}</span>
           </div>
-          <MiniKaart locatie={actie.locatie} regio={actie.regio} mapsLink={mapsLink} />
+          <MiniKaart
+            locatie={actie.locatie}
+            regio={actie.regio}
+            mapsLink={mapsLink}
+            onStatusChange={setKaartStatus}
+          />
+          {kaartStatus === "error" && (
+            <div
+              className="flex items-start gap-2 rounded-md border border-amber-300 bg-amber-50 dark:border-amber-900 dark:bg-amber-950 p-3 text-xs text-amber-800 dark:text-amber-300"
+              data-testid="warning-kaart-notfound"
+            >
+              <AlertTriangle className="h-4 w-4 shrink-0 mt-0.5" />
+              <span>
+                Dit adres kon niet worden gevonden op de kaart. De actie wordt wel getoond,
+                maar verschijnt niet op de kaart bij /acties.
+                {isEigen && " Pas de locatie of regio aan via 'Bewerken' als dit niet klopt."}
+              </span>
+            </div>
+          )}
         </CardContent>
       </Card>
 
