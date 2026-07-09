@@ -48,7 +48,6 @@ export default function HomePage() {
                 </div>
                 <div>
                   <div style={{ fontSize: 17, fontWeight: 900, color: BLAUW, lineHeight: 1 }}>OpenRegio</div>
-                  <div style={{ fontSize: 10, color: "#94a3b8", marginTop: 1, fontWeight: 500 }}>Grip op regels. Kracht in de regio.</div>
                 </div>
               </div>
             </Link>
@@ -123,10 +122,32 @@ export default function HomePage() {
       {/* ── HERO ──────────────────────────────────────────────────────────── */}
       <section id="features" style={{ background: "#f8f7f4", padding: "0 0 0 0" }}>
         {/* Top: headline + photo */}
-        <div className="or-hero-grid" style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "55fr 45fr", minHeight: 500, alignItems: "stretch" }}>
+        <div className="or-hero-grid" style={{ maxWidth: 1200, margin: "0 auto", display: "grid", gridTemplateColumns: "45fr 55fr", minHeight: 500, alignItems: "stretch" }}>
 
-          {/* Left — text */}
-          <div className="or-hero-left" style={{ padding: "60px 48px 48px 24px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+          {/* Left — photo */}
+          <div className="or-hero-right" style={{ position: "relative", minHeight: 460, overflow: "hidden" }}>
+            <div style={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${BLAUW} 0%, #1a3a5c 100%)`, zIndex: -1 }} />
+            <img
+              src="/images/hero-entrepreneur.jpg"
+              alt="Lokale ondernemer"
+              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block", position: "absolute", inset: 0 }}
+              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+            />
+            {/* Brush-stroke quote — bleeds past right boundary */}
+            <div style={{
+              position: "absolute", bottom: 40, left: 0, right: -24,
+              background: "rgba(11,34,64,0.92)",
+              padding: "16px 36px 16px 28px",
+              borderRadius: "10px 0 0 10px",
+            }}>
+              <p style={{ margin: 0, fontSize: 16, fontStyle: "italic", color: "#fff", lineHeight: 1.55, fontWeight: 600, textAlign: "right" }}>
+                Samen weet je meer dan alleen.
+              </p>
+            </div>
+          </div>
+
+          {/* Right — text */}
+          <div className="or-hero-left" style={{ padding: "60px 24px 48px 48px", display: "flex", flexDirection: "column", justifyContent: "center" }}>
             <h1 style={{ fontSize: 54, fontWeight: 900, color: BLAUW, lineHeight: 1.02, margin: "0 0 6px", textTransform: "uppercase", letterSpacing: "-0.01em" }}>
               DIT KRIJG JE BIJ<br />OPENREGIO
             </h1>
@@ -147,28 +168,6 @@ export default function HomePage() {
                   Bekijk lidmaatschap
                 </button>
               </a>
-            </div>
-          </div>
-
-          {/* Right — photo */}
-          <div className="or-hero-right" style={{ position: "relative", minHeight: 460, overflow: "hidden" }}>
-            <div style={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${BLAUW} 0%, #1a3a5c 100%)`, zIndex: -1 }} />
-            <img
-              src="/images/hero-entrepreneur.jpg"
-              alt="Lokale ondernemer"
-              style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block", position: "absolute", inset: 0 }}
-              onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-            />
-            {/* Brush-stroke quote — bleeds past left boundary */}
-            <div style={{
-              position: "absolute", bottom: 40, left: -24, right: 0,
-              background: "rgba(11,34,64,0.92)",
-              padding: "16px 28px 16px 36px",
-              borderRadius: "0 10px 10px 0",
-            }}>
-              <p style={{ margin: 0, fontSize: 16, fontStyle: "italic", color: "#fff", lineHeight: 1.55, fontWeight: 600 }}>
-                Samen weet je meer dan alleen.
-              </p>
             </div>
           </div>
         </div>
