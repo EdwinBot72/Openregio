@@ -12,7 +12,7 @@ import { sendOnboardingEmail, sendNotificationEmail, sendLokaleActieHerinneringE
 import bcrypt from "bcrypt";
 import { uploadMemory, getDocumentType } from "./middleware/upload";
 import { publicAiRateLimit, authenticatedAiRateLimit } from "./middleware/aiRateLimit";
-import { mollieStartRateLimit, contactFormRateLimit } from "./middleware/rateLimits";
+import { mollieStartRateLimit, contactFormRateLimit, geocodeRateLimit } from "./middleware/rateLimits";
 import { objectStorageClient } from "./replit_integrations/object_storage";
 import { randomUUID, createHash } from "crypto";
 import { runRegioBot } from "./regiobot";
@@ -6150,6 +6150,104 @@ Geef ALLEEN de twee zinnen terug, zonder opmaak, nummers of titels. Maximaal 320
     } catch (err) {
       console.error("[LokaleActies/mark-seen] failed:", err);
       res.status(500).json({ error: "Kon niet markeren als gezien" });
+    }
+  });
+
+  // GET /api/geocode — server-side proxy/cache voor Nominatim, voorkomt directe
+  // browser-naar-Nominatim calls (rate-limit policy: max ~1 req/sec per client).
+  const geocodeCache = new Map<string, { found: boolean; lat: number | null; lng: number | null; ts: number; error?: boolean }>();
+  const GEOCODE_CACHE_TTL_MS = 24 * 60 * 60 * 1000; // 24 uur
+  const GEOCODE_ERROR_CACHE_TTL_MS = 30 * 1000; // 30 sec — voorkomt herhaald bombarderen bij upstream-storing
+  const GEOCODE_CACHE_MAX_SIZE = 2000;
+  const NOMINATIM_MIN_INTERVAL_MS = 1100; // Respecteer Nominatim's usage policy (max ~1 req/sec), server-breed
+
+  // Server-brede FIFO-queue: garandeert dat alle uitgaande calls naar Nominatim
+  // vanuit dit proces met minimaal NOMINATIM_MIN_INTERVAL_MS tussenpoos verlopen,
+  // ongeacht hoeveel gelijktijdige /api/geocode-requests er binnenkomen.
+  let nominatimQueueTail: Promise<void> = Promise.resolve();
+  let lastNominatimCallAt = 0;
+
+  function queueNominatimCall<T>(fn: () => Promise<T>): Promise<T> {
+    const run = nominatimQueueTail.then(async () => {
+      const wait = Math.max(0, lastNominatimCallAt + NOMINATIM_MIN_INTERVAL_MS - Date.now());
+      if (wait > 0) await new Promise((resolve) => setTimeout(resolve, wait));
+      lastNominatimCallAt = Date.now();
+      return fn();
+    });
+    nominatimQueueTail = run.then(
+      () => undefined,
+      () => undefined,
+    );
+    return run;
+  }
+
+  app.get("/api/geocode", geocodeRateLimit, async (req, res) => {
+    try {
+      const locatie = typeof req.query.locatie === "string" ? req.query.locatie.trim() : "";
+      const regio = typeof req.query.regio === "string" ? req.query.regio.trim() : "";
+      if (!locatie || !regio) {
+        return res.status(400).json({ error: "locatie en regio zijn verplicht" });
+      }
+      const cacheKey = `${locatie.toLowerCase()}|${regio.toLowerCase()}`;
+      const cached = geocodeCache.get(cacheKey);
+      const cacheTtl = cached && !cached.found && cached.lat === null && cached.error
+        ? GEOCODE_ERROR_CACHE_TTL_MS
+        : GEOCODE_CACHE_TTL_MS;
+      if (cached && Date.now() - cached.ts < cacheTtl) {
+        if (cached.error) {
+          return res.status(502).json({ error: "Geocoding tijdelijk niet beschikbaar", cached: true });
+        }
+        return res.json({ found: cached.found, lat: cached.lat, lng: cached.lng, cached: true });
+      }
+
+      const query = `${locatie}, ${regio}, Nederland`;
+      let result: { found: boolean; lat: number | null; lng: number | null; error?: boolean };
+      try {
+        const response = await queueNominatimCall(() =>
+          fetch(
+            `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=nl&q=${encodeURIComponent(query)}`,
+            {
+              headers: {
+                Accept: "application/json",
+                "User-Agent": "OpenRegio/1.0 (https://openregio.nl)",
+              },
+            },
+          ),
+        );
+
+        if (!response.ok) {
+          // Upstream-fout (bv. 429/5xx) — dit is GEEN "adres niet gevonden" en mag
+          // niet langdurig gecached worden als zodanig.
+          result = { found: false, lat: null, lng: null, error: true };
+        } else {
+          const json = await response.json();
+          if (Array.isArray(json) && json.length > 0) {
+            const lat = parseFloat(json[0].lat);
+            const lng = parseFloat(json[0].lon);
+            result = !Number.isNaN(lat) && !Number.isNaN(lng)
+              ? { found: true, lat, lng }
+              : { found: false, lat: null, lng: null };
+          } else {
+            result = { found: false, lat: null, lng: null };
+          }
+        }
+      } catch (fetchErr) {
+        result = { found: false, lat: null, lng: null, error: true };
+      }
+
+      if (geocodeCache.size >= GEOCODE_CACHE_MAX_SIZE) {
+        const oldestKey = geocodeCache.keys().next().value;
+        if (oldestKey !== undefined) geocodeCache.delete(oldestKey);
+      }
+      geocodeCache.set(cacheKey, { ...result, ts: Date.now() });
+
+      if (result.error) {
+        return res.status(502).json({ error: "Geocoding tijdelijk niet beschikbaar", cached: false });
+      }
+      return res.json({ found: result.found, lat: result.lat, lng: result.lng, cached: false });
+    } catch (err) {
+      console.error("[Geocode] fout bij opzoeken:", err);
+      return res.status(502).json({ error: "Geocoding tijdelijk niet beschikbaar" });
     }
   });
 

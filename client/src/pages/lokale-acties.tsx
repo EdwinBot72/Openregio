@@ -86,15 +86,13 @@ function formatDatumKort(d: string | Date | null | undefined) {
 type GeocodeStatus = "idle" | "checking" | "ok" | "notfound" | "error";
 
 async function checkAdresGeocodeerbaar(locatie: string, regio: string): Promise<boolean | null> {
-  const query = `${locatie}, ${regio}, Nederland`;
   try {
     const res = await fetch(
-      `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=nl&q=${encodeURIComponent(query)}`,
-      { headers: { Accept: "application/json" } }
+      `/api/geocode?locatie=${encodeURIComponent(locatie)}&regio=${encodeURIComponent(regio)}`,
     );
     if (!res.ok) return null;
     const json = await res.json();
-    return Array.isArray(json) && json.length > 0;
+    return Boolean(json?.found);
   } catch {
     return null;
   }

@@ -50,3 +50,26 @@ export async function contactFormRateLimit(
     });
   }
 }
+
+// ── Geocode proxy — beschermt Nominatim tegen te veel requests vanuit de browser
+const geocodeLimiter = new RateLimiterMemory({
+  points: isE2E ? 100_000 : 30,
+  duration: 60,       // 1 minuut
+  blockDuration: 60,
+});
+
+export async function geocodeRateLimit(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
+  const ip = req.ip || req.socket?.remoteAddress || "unknown";
+  try {
+    await geocodeLimiter.consume(ip);
+    next();
+  } catch {
+    res.status(429).json({
+      error: "Te veel geocode-verzoeken. Probeer het over een minuut opnieuw.",
+    });
+  }
+}

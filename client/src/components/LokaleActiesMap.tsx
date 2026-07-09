@@ -23,7 +23,7 @@ const customIcon = new Icon({
   shadowSize: [41, 41],
 });
 
-const CACHE_KEY = "openregio_geocode_cache_v1";
+const CACHE_KEY = "openregio_geocode_cache_v2";
 const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000; // 30 dagen
 
 type GeocodeCache = Record<string, { lat: number; lng: number; ts: number }>;
@@ -64,9 +64,9 @@ export function LokaleActiesMap({ acties }: LokaleActiesMapProps) {
   const [coords, setCoords] = useState<Record<string, { lat: number; lng: number }>>({});
 
   const uniekeAdressen = useMemo(() => {
-    const set = new Set<string>();
-    acties.forEach((a) => set.add(actieKey(a)));
-    return Array.from(set);
+    const map = new Map<string, { locatie: string; regio: string }>();
+    acties.forEach((a) => map.set(actieKey(a), { locatie: a.locatie, regio: a.regio }));
+    return Array.from(map.entries()).map(([key, val]) => ({ key, ...val }));
   }, [acties]);
 
   useEffect(() => {
@@ -76,12 +76,12 @@ export function LokaleActiesMap({ acties }: LokaleActiesMapProps) {
       const cache = readCache();
       const now = Date.now();
       const resolved: Record<string, { lat: number; lng: number }> = {};
-      const todo: string[] = [];
+      const todo: { key: string; locatie: string; regio: string }[] = [];
 
       for (const adres of uniekeAdressen) {
-        const hit = cache[adres];
+        const hit = cache[adres.key];
         if (hit && now - hit.ts < CACHE_TTL_MS) {
-          resolved[adres] = { lat: hit.lat, lng: hit.lng };
+          resolved[adres.key] = { lat: hit.lat, lng: hit.lng };
         } else {
           todo.push(adres);
         }
@@ -91,33 +91,41 @@ export function LokaleActiesMap({ acties }: LokaleActiesMapProps) {
         setCoords((prev) => ({ ...prev, ...resolved }));
       }
 
-      for (const adres of todo) {
-        if (cancelled) return;
-        try {
-          const res = await fetch(
-            `https://nominatim.openstreetmap.org/search?format=json&limit=1&countrycodes=nl&q=${encodeURIComponent(adres)}`,
-            { headers: { Accept: "application/json" } }
-          );
-          if (res.ok) {
-            const json = await res.json();
-            if (Array.isArray(json) && json.length > 0) {
-              const lat = parseFloat(json[0].lat);
-              const lng = parseFloat(json[0].lon);
-              if (!Number.isNaN(lat) && !Number.isNaN(lng)) {
-                cache[adres] = { lat, lng, ts: Date.now() };
+      // Onze eigen /api/geocode-endpoint serialiseert uitgaande Nominatim-calls
+      // server-side, maar we begrenzen hier toch het aantal gelijktijdige
+      // /api/geocode-requests zodat we die endpoint (en de rate-limiter erop)
+      // niet onnodig bombarderen bij veel unieke adressen.
+      const CONCURRENCY = 3;
+      let cursor = 0;
+
+      async function worker() {
+        while (!cancelled) {
+          const index = cursor++;
+          if (index >= todo.length) return;
+          const { key, locatie, regio } = todo[index];
+          try {
+            const res = await fetch(
+              `/api/geocode?locatie=${encodeURIComponent(locatie)}&regio=${encodeURIComponent(regio)}`,
+            );
+            if (res.ok) {
+              const json = await res.json();
+              if (json?.found && typeof json.lat === "number" && typeof json.lng === "number") {
+                cache[key] = { lat: json.lat, lng: json.lng, ts: Date.now() };
                 writeCache(cache);
                 if (!cancelled) {
-                  setCoords((prev) => ({ ...prev, [adres]: { lat, lng } }));
+                  setCoords((prev) => ({ ...prev, [key]: { lat: json.lat, lng: json.lng } }));
                 }
               }
             }
+          } catch {
+            // Geocoding mislukt voor dit adres — actie wordt simpelweg niet op de kaart getoond
           }
-        } catch {
-          // Geocoding mislukt voor dit adres — actie wordt simpelweg niet op de kaart getoond
         }
-        // Respecteer Nominatim's usage policy (max ~1 request/seconde)
-        await new Promise((resolve) => setTimeout(resolve, 1100));
       }
+
+      await Promise.all(
+        Array.from({ length: Math.min(CONCURRENCY, todo.length) }, () => worker()),
+      );
     }
 
     if (uniekeAdressen.length > 0) {
