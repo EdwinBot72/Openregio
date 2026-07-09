@@ -8,23 +8,23 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap');
 
 .or-app {
-  --or-blauw:        #1B3F7A;
-  --or-blauw-mid:    #2563a8;
-  --or-blauw-licht:  #e8f0f9;
+  --or-blauw:        #1f5fae;
+  --or-blauw-mid:    #1f5fae;
+  --or-blauw-licht:  #f0f4ff;
   --or-groen:        #2B7A3E;
   --or-groen-licht:  #e8f4ec;
-  --or-oranje:       #E8890A;
+  --or-oranje:       #f28a1a;
   --or-oranje-licht: #fdf3e0;
   --or-wit:          #ffffff;
-  --or-bg:           #f0f4f8;
-  --or-grijs-licht:  #f5f6f8;
-  --or-grijs-rand:   #dde3ec;
-  --or-tekst:        #1a2a3a;
-  --or-tekst-zacht:  #4a5568;
-  --or-donkerblauw:  #0f2546;
+  --or-bg:           #f4f6fb;
+  --or-grijs-licht:  #f8faff;
+  --or-grijs-rand:   #e8edf8;
+  --or-tekst:        #0f172a;
+  --or-tekst-zacht:  #64748b;
+  --or-donkerblauw:  #0b2240;
   --or-sidebar-w:    268px;
 
-  font-family: 'Nunito Sans', sans-serif;
+  font-family: 'Plus Jakarta Sans', 'Nunito Sans', sans-serif;
   background: var(--or-bg);
   color: var(--or-tekst);
   height: 100vh;
@@ -142,7 +142,8 @@
 /* ── SIDEBAR ─────────────────────────────────────────────── */
 .or-sidebar {
   width: var(--or-sidebar-w);
-  background: var(--or-donkerblauw);
+  background: #fff;
+  border-right: 1px solid var(--or-grijs-rand);
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -152,7 +153,7 @@
 /* HEAD: Brand + User */
 .or-sb-head {
   padding: 18px 14px 14px;
-  border-bottom: 1px solid rgba(255,255,255,.1);
+  border-bottom: 1px solid var(--or-grijs-rand);
   flex-shrink: 0;
 }
 .or-sb-brand {
@@ -174,9 +175,9 @@
   font-family: 'Nunito', sans-serif;
   font-size: 18px; font-weight: 900;
   letter-spacing: -.5px;
-  color: white;
+  color: var(--or-donkerblauw);
 }
-.or-sb-brand-name .or-regio { color: #6dd89a; }
+.or-sb-brand-name .or-regio { color: var(--or-groen); }
 
 .or-sb-user {
   display: flex;
@@ -193,11 +194,11 @@
 }
 .or-sb-user-info { flex: 1; min-width: 0; }
 .or-sb-user-name {
-  font-size: 13px; font-weight: 700; color: white;
+  font-size: 13px; font-weight: 700; color: var(--or-tekst);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 .or-sb-user-biz {
-  font-size: 11px; color: rgba(255,255,255,.5);
+  font-size: 11px; color: var(--or-tekst-zacht);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   margin-top: 1px;
 }
@@ -218,10 +219,10 @@
   overflow-y: auto;
   padding: 8px 10px 6px;
   scrollbar-width: thin;
-  scrollbar-color: rgba(255,255,255,.1) transparent;
+  scrollbar-color: var(--or-grijs-rand) transparent;
 }
 .or-sb-body::-webkit-scrollbar { width: 3px; }
-.or-sb-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,.12); border-radius: 2px; }
+.or-sb-body::-webkit-scrollbar-thumb { background: var(--or-grijs-rand); border-radius: 2px; }
 
 /* Section label */
 .or-sec-label {
@@ -229,7 +230,7 @@
   font-weight: 700;
   letter-spacing: .09em;
   text-transform: uppercase;
-  color: rgba(255,255,255,.38);
+  color: #94a3b8;
   padding: 10px 8px 4px;
 }
 
@@ -252,7 +253,7 @@
 .or-num-p1    { background: var(--or-blauw-mid); }
 .or-num-p2    { background: var(--or-groen); }
 .or-num-p3    { background: var(--or-oranje); }
-.or-num-euro  { background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.2); }
+.or-num-euro  { background: var(--or-grijs-licht); border: 1px solid var(--or-grijs-rand); color: var(--or-tekst-zacht); }
 .or-num-admin { background: #DC2626; }
 
 .or-pijler-nav-name {
@@ -260,13 +261,13 @@
   font-weight: 900;
   letter-spacing: .1em;
   text-transform: uppercase;
-  color: rgba(255,255,255,.4);
+  color: #94a3b8;
 }
 
 /* Divider in body */
 .or-sb-div {
   height: 1px;
-  background: rgba(255,255,255,.08);
+  background: var(--or-grijs-rand);
   margin: 6px 4px;
 }
 
@@ -279,21 +280,21 @@
   border-radius: 9px;
   font-size: 12.5px;
   font-weight: 600;
-  color: rgba(255,255,255,.62);
+  color: #475569;
   cursor: pointer;
   text-decoration: none;
   transition: background .13s, color .13s;
   margin-bottom: 1px;
 }
-.or-nav-item:hover  { background: rgba(255,255,255,.09); color: rgba(255,255,255,.9); }
+.or-nav-item:hover  { background: #f0f4ff; color: #1f5fae; }
 .or-nav-item.or-actief {
-  background: rgba(255,255,255,.14);
-  color: white;
+  background: #f0f4ff;
+  color: var(--or-donkerblauw);
   font-weight: 700;
 }
-.or-nav-item.or-p1.or-actief { background: rgba(37,99,168,.45); }
-.or-nav-item.or-p2.or-actief { background: rgba(43,122,62,.4); }
-.or-nav-item.or-p3.or-actief { background: rgba(232,137,10,.35); }
+.or-nav-item.or-p1.or-actief { background: rgba(31,95,174,.12); color: #1f5fae; }
+.or-nav-item.or-p2.or-actief { background: rgba(43,122,62,.12); color: #2B7A3E; }
+.or-nav-item.or-p3.or-actief { background: rgba(242,138,26,.12); color: #b8650a; }
 
 .or-nav-icon {
   width: 22px; height: 22px;
@@ -335,14 +336,14 @@
 /* Divider line */
 .or-sidebar-divider {
   border: none;
-  border-top: 1px solid rgba(255,255,255,.1);
+  border-top: 1px solid var(--or-grijs-rand);
   margin: 8px 14px;
 }
 
 /* FOOTER: Health bar + Logout */
 .or-sb-foot {
   padding: 12px 12px 14px;
-  border-top: 1px solid rgba(255,255,255,.1);
+  border-top: 1px solid var(--or-grijs-rand);
   flex-shrink: 0;
 }
 .or-health-block { margin-bottom: 10px; }
@@ -354,16 +355,16 @@
 }
 .or-health-lbl {
   font-size: 10.5px; font-weight: 700;
-  color: rgba(255,255,255,.55);
+  color: var(--or-tekst-zacht);
 }
 .or-health-val {
   font-family: 'Nunito', sans-serif;
   font-size: 11px; font-weight: 900;
-  color: #6dd89a;
+  color: var(--or-groen);
 }
 .or-health-bar {
   height: 5px;
-  background: rgba(255,255,255,.1);
+  background: var(--or-grijs-licht);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -381,7 +382,7 @@
   padding: 7px 10px;
   border-radius: 8px;
   font-size: 12px; font-weight: 600;
-  color: rgba(255,255,255,.4);
+  color: var(--or-tekst-zacht);
   background: none;
   border: none;
   cursor: pointer;
@@ -390,20 +391,20 @@
   margin-top: 2px;
 }
 .or-sb-logout:hover {
-  background: rgba(255,255,255,.07);
-  color: rgba(255,255,255,.75);
+  background: #fef2f2;
+  color: #dc2626;
 }
 
 /* Legacy profile card (kept for compat) */
 .or-sidebar-sectie { padding: 0 10px; margin-bottom: 4px; }
 .or-sidebar-label {
   font-size: 9.5px; font-weight: 700; letter-spacing: .09em;
-  text-transform: uppercase; color: rgba(255,255,255,.38);
+  text-transform: uppercase; color: #94a3b8;
   padding: 10px 8px 4px;
 }
 .or-sidebar-profiel { padding: 0 10px; }
 .or-profiel-kaart {
-  background: rgba(0,0,0,.2); border-radius: 10px; padding: 12px;
+  background: var(--or-grijs-licht); border-radius: 10px; padding: 12px;
   display: flex; align-items: center; gap: 10px;
 }
 .or-profiel-avatar {
@@ -413,15 +414,15 @@
 }
 .or-profiel-info { flex: 1; min-width: 0; }
 .or-profiel-naam {
-  font-size: 13px; font-weight: 700; color: white;
+  font-size: 13px; font-weight: 700; color: var(--or-tekst);
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.or-profiel-sector { font-size: 11px; color: rgba(255,255,255,.5); }
+.or-profiel-sector { font-size: 11px; color: var(--or-tekst-zacht); }
 .or-profiel-uitlog {
-  font-size: 16px; color: rgba(255,255,255,.35); cursor: pointer;
+  font-size: 16px; color: #94a3b8; cursor: pointer;
   background: none; border: none; padding: 0;
 }
-.or-profiel-uitlog:hover { color: rgba(255,255,255,.85); }
+.or-profiel-uitlog:hover { color: #475569; }
 
 /* ── CONTENT AREA ───────────────────────────────────────── */
 .or-content {
