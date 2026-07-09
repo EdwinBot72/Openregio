@@ -1,0 +1,98 @@
+Dit is **nog geen echte foutmelding**. Dit betekent alleen: **Replit probeert je app te starten**, maar daarna komt er geen output of hij hangt vast.
+
+Bij OpenRegio zie ik meteen 3 verdachte punten:
+
+## 1. Replit start mogelijk de verkeerde app
+
+Je project heeft én:
+
+```txt
+main.py
+package.json
+server/
+client/
+vite.config.ts
+```
+
+Dus Replit kan denken: **dit is een Python-app**, terwijl OpenRegio waarschijnlijk een **Node/Vite/Express-app** is.
+
+Check in Replit of je `.replit` bestand zichtbaar is. Zet bij voorkeur dit als run command:
+
+```toml
+run = "npm run dev"
+```
+
+Of via **Tools → Workflows / Commands**:
+
+```bash
+npm run dev
+```
+
+Replit bepaalt via `.replit` welk commando draait als je op Run klikt. ([Replit Docs][1])
+
+## 2. Je server moet luisteren op `0.0.0.0`
+
+In je serverbestand moet niet dit staan:
+
+```ts
+app.listen(5000)
+```
+
+En ook niet alleen:
+
+```ts
+app.listen(port, "localhost")
+```
+
+Maar dit:
+
+```ts
+const port = Number(process.env.PORT) || 5000;
+
+app.listen(port, "0.0.0.0", () => {
+  console.log(`OpenRegio draait op poort ${port}`);
+});
+```
+
+Voor Replit Deployments moet een webserver luisteren op `0.0.0.0`; alleen `localhost` of `127.0.0.1` werkt niet goed voor gepubliceerde apps. ([Replit Docs][2])
+
+## 3. Je `package.json` moet duidelijke scripts hebben
+
+Open `package.json` en check of dit ongeveer bestaat:
+
+```json
+{
+  "scripts": {
+    "dev": "tsx server/index.ts",
+    "build": "vite build && esbuild server/index.ts --platform=node --packages=external --bundle --format=esm --outdir=dist",
+    "start": "node dist/index.js"
+  }
+}
+```
+
+Als `npm run dev` niet bestaat, blijft Replit vaak vaag hangen of start hij niks nuttigs.
+
+## Plak dit letterlijk in Replit Agent
+
+```txt
+Check mijn Replit project OpenRegio. De app blijft hangen op “starting up user application”.
+
+Controleer specifiek:
+1. Of Replit per ongeluk main.py probeert te starten in plaats van de Node/Vite/Express app.
+2. Of de .replit run command correct staat op npm run dev.
+3. Of package.json een werkende dev, build en start script heeft.
+4. Of de Express server luistert op process.env.PORT en host 0.0.0.0.
+5. Of DATABASE_URL en andere benodigde secrets aanwezig zijn.
+6. Start daarna de app opnieuw en toon de echte error log als hij faalt.
+
+Pas alleen noodzakelijke configuratie aan en breek geen bestaande code.
+```
+
+## Mijn inschatting
+
+De fout zit waarschijnlijk niet diep in je code, maar in de **startconfiguratie**. Door `main.py` naast je Node-project kan Replit de verkeerde runtime pakken. Tweede verdachte is de poort: OpenRegio moet op `process.env.PORT` + `0.0.0.0` draaien.
+
+Stuur anders je `package.json`, `.replit` en `server/index.ts` hierheen, dan wijs ik precies aan welke regel fout staat.
+
+[1]: https://docs.replit.com/references/project-setup/configuration?utm_source=chatgpt.com "Replit App Configuration"
+[2]: https://docs.replit.com/build/troubleshooting?utm_source=chatgpt.com "Troubleshoot publishing"
