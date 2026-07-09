@@ -24,14 +24,14 @@ export function securityHeaders(req: Request, res: Response, next: NextFunction)
     : "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com";
   
   const connectSrc = isProduction
-    ? "connect-src 'self'"
-    : "connect-src 'self' ws: wss:"; // WebSocket voor Vite HMR
+    ? "connect-src 'self' https://nominatim.openstreetmap.org"
+    : "connect-src 'self' ws: wss: https://nominatim.openstreetmap.org"; // WebSocket voor Vite HMR + OSM geocoding voor lokale-acties kaart
   
   const cspDirectives = [
     "default-src 'self'",
     scriptSrc,
     styleSrc,
-    "img-src 'self' data: blob:",
+    "img-src 'self' data: blob: https://*.tile.openstreetmap.org https://unpkg.com", // OSM kaarttegels + Leaflet marker-iconen voor lokale-acties kaart
     "font-src 'self' https://fonts.gstatic.com", // Lokale fonts + Google Fonts (Nunito)
     connectSrc,
     "frame-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://js.mollie.com", // YouTube embeds + Mollie

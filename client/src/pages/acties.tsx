@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import type { LokaleActie } from "@shared/schema";
 import { LOKALE_ACTIE_DOELGROEPEN } from "@shared/schema";
+import { LokaleActiesMap } from "@/components/LokaleActiesMap";
 
 const DOELGROEP_LABELS: Record<string, string> = {
   iedereen: "Iedereen",
@@ -134,6 +135,8 @@ export default function ActiesPage() {
 
       {/* ── Filters + lijst ── */}
       <div style={{ maxWidth: 1100, margin: "0 auto", padding: "32px 24px 64px" }}>
+        {!isLoading && gefilterd.length > 0 && <LokaleActiesMap acties={gefilterd} />}
+
         {/* Extra filters */}
         <div style={{ display: "flex", gap: 10, marginBottom: 24, flexWrap: "wrap" as const }}>
           <div style={{ position: "relative" as const, flex: 1, minWidth: 180 }}>
