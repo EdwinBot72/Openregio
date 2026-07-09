@@ -83,3 +83,9 @@ id = "84v9EsaPn2Omn606UrQ0d"
 uri = "file://attached_assets/stock_images/login_shopkeeper_3.jpg"
 type = "image"
 title = "cafe owner standing in front of storefront, warm smile, apron, small business"
+
+[[outputs]]
+id = "Nn9C8kaBka9Ihz7GeL6kl"
+uri = "file://attached_assets/stock_images/hero_entrepreneur_photo.jpg"
+type = "image"
+title = "Dutch local entrepreneur smiling in front of small shop, warm lighting, business owner"
