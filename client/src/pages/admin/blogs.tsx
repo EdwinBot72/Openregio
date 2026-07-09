@@ -10,9 +10,75 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
-import { Plus, Edit, Trash2, Eye, Calendar, BookOpen, Image, FileText } from "lucide-react";
+import { Plus, Edit, Trash2, Eye, Calendar, BookOpen, Image, FileText, Upload, Loader2 } from "lucide-react";
 import type { Blog, InsertBlog, BlogStatus, BlogAudience } from "@shared/schema";
 import { PexelsPicker } from "@/components/PexelsPicker";
+import { useUpload } from "@/hooks/use-upload";
+
+function BlogImageField({
+  label,
+  value,
+  onChange,
+  defaultQuery,
+  testIdPrefix,
+}: {
+  label: string;
+  value: string;
+  onChange: (url: string) => void;
+  defaultQuery?: string;
+  testIdPrefix: string;
+}) {
+  const { uploadFile, isUploading } = useUpload();
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    const result = await uploadFile(file);
+    if (!result) return;
+    try {
+      await apiRequest("POST", "/api/admin/blog-images/finalize", {
+        objectPath: result.objectPath,
+      });
+    } catch {
+      // ACL kon niet gezet worden; afbeelding blijft mogelijk privé
+    }
+    onChange(result.objectPath);
+  };
+
+  return (
+    <div className="space-y-2">
+      <Label>
+        <div className="flex items-center gap-2">
+          <Image className="h-4 w-4" />
+          {label}
+        </div>
+      </Label>
+      <div className="flex items-center gap-2">
+        <Button type="button" variant="outline" size="default" disabled={isUploading} asChild>
+          <label htmlFor={`${testIdPrefix}-file`} className="cursor-pointer flex items-center gap-2">
+            {isUploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+            {isUploading ? "Uploaden..." : "Upload eigen foto"}
+          </label>
+        </Button>
+        <input
+          id={`${testIdPrefix}-file`}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleFileChange}
+          data-testid={`input-${testIdPrefix}-upload`}
+        />
+        <span className="text-xs text-muted-foreground">of kies hieronder een foto via Pexels</span>
+      </div>
+      <PexelsPicker
+        value={value}
+        onChange={onChange}
+        defaultQuery={defaultQuery}
+      />
+    </div>
+  );
+}
 
 export default function AdminBlogsPage() {
   const { toast } = useToast();
@@ -26,6 +92,7 @@ export default function AdminBlogsPage() {
     status: "draft",
     audience: "publiek",
     featuredImage: "",
+    secondImage: "",
   });
 
   const { data: blogs = [], isLoading } = useQuery<Blog[]>({
@@ -90,6 +157,7 @@ export default function AdminBlogsPage() {
       status: "draft",
       audience: "publiek",
       featuredImage: "",
+      secondImage: "",
     });
     setEditingBlog(null);
     setIsOpen(false);
@@ -105,6 +173,7 @@ export default function AdminBlogsPage() {
       status: blog.status,
       audience: blog.audience ?? "publiek",
       featuredImage: blog.featuredImage || "",
+      secondImage: blog.secondImage || "",
     });
     setIsOpen(true);
   };
@@ -239,19 +308,21 @@ export default function AdminBlogsPage() {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label>
-                  <div className="flex items-center gap-2">
-                    <Image className="h-4 w-4" />
-                    Coverafbeelding via Pexels (optioneel)
-                  </div>
-                </Label>
-                <PexelsPicker
-                  value={formData.featuredImage || ""}
-                  onChange={(url) => setFormData({ ...formData, featuredImage: url })}
-                  defaultQuery={formData.title || "ondernemer"}
-                />
-              </div>
+              <BlogImageField
+                label="Coverafbeelding (optioneel)"
+                value={formData.featuredImage || ""}
+                onChange={(url) => setFormData({ ...formData, featuredImage: url })}
+                defaultQuery={formData.title || "ondernemer"}
+                testIdPrefix="blog-featured-image"
+              />
+
+              <BlogImageField
+                label="Tweede afbeelding (optioneel)"
+                value={formData.secondImage || ""}
+                onChange={(url) => setFormData({ ...formData, secondImage: url })}
+                defaultQuery={formData.title || "ondernemer"}
+                testIdPrefix="blog-second-image"
+              />
 
               <div className="grid sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -329,14 +400,28 @@ export default function AdminBlogsPage() {
             <Card key={blog.id} data-testid={`card-blog-admin-${blog.id}`}>
               <CardContent className="p-4">
                 <div className="flex items-start justify-between gap-4">
-                  {blog.featuredImage && (
-                    <div className="w-24 h-16 rounded overflow-hidden shrink-0 bg-muted">
-                      <img 
-                        src={blog.featuredImage} 
-                        alt={blog.title}
-                        className="w-full h-full object-cover"
-                        data-testid={`thumbnail-blog-${blog.id}`}
-                      />
+                  {(blog.featuredImage || blog.secondImage) && (
+                    <div className="flex gap-1 shrink-0">
+                      {blog.featuredImage && (
+                        <div className="w-24 h-16 rounded overflow-hidden bg-muted">
+                          <img
+                            src={blog.featuredImage}
+                            alt={blog.title}
+                            className="w-full h-full object-cover"
+                            data-testid={`thumbnail-blog-${blog.id}`}
+                          />
+                        </div>
+                      )}
+                      {blog.secondImage && (
+                        <div className="w-24 h-16 rounded overflow-hidden bg-muted">
+                          <img
+                            src={blog.secondImage}
+                            alt={blog.title}
+                            className="w-full h-full object-cover"
+                            data-testid={`thumbnail-blog-second-${blog.id}`}
+                          />
+                        </div>
+                      )}
                     </div>
                   )}
                   <div className="flex-1 min-w-0">

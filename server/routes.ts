@@ -230,6 +230,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Register object storage routes for user file uploads
   registerObjectStorageRoutes(app, requireAuth);
+
+  // Admin: mark an uploaded object as public (used for blog images)
+  app.post("/api/admin/blog-images/finalize", requireAdmin, async (req, res) => {
+    try {
+      const { objectPath } = req.body;
+      if (!objectPath || typeof objectPath !== "string") {
+        return res.status(400).json({ error: "objectPath is verplicht" });
+      }
+      const { ObjectStorageService } = await import("./replit_integrations/object_storage/objectStorage");
+      const { setObjectAclPolicy } = await import("./replit_integrations/object_storage/objectAcl");
+      const objectStorageService = new ObjectStorageService();
+      const objectFile = await objectStorageService.getObjectEntityFile(objectPath);
+      await setObjectAclPolicy(objectFile, {
+        owner: req.user!.id,
+        visibility: "public",
+      });
+      res.json({ success: true, objectPath });
+    } catch (error: any) {
+      console.error("Error finalizing blog image:", error);
+      res.status(500).json({ error: "Kon afbeelding niet publiceren" });
+    }
+  });
   
   // BLOK 2: Mollie Payment Flow (Basis €14,95 / Pro €59 ex btw)
   

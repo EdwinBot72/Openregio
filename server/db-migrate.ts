@@ -365,6 +365,12 @@ export async function runMigrations(): Promise<void> {
     `);
     console.log("[Migration] ✓ blogs.audience column ensured");
 
+    // Tweede afbeelding voor blogs
+    await db.execute(sql`
+      ALTER TABLE blogs ADD COLUMN IF NOT EXISTS second_image TEXT;
+    `);
+    console.log("[Migration] ✓ blogs.second_image column ensured");
+
     // Notificaties voor leden-updates (task #72)
     await db.execute(sql`
       ALTER TABLE users ADD COLUMN IF NOT EXISTS last_news_read_at TIMESTAMPTZ;

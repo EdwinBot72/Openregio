@@ -122,6 +122,17 @@ export default function BlogDetailPage() {
           dangerouslySetInnerHTML={{ __html: blog.content.replace(/\n/g, "<br/>") }}
         />
 
+        {blog.secondImage && (
+          <div style={{ marginTop: 24, borderRadius: 12, overflow: "hidden" }}>
+            <img
+              src={blog.secondImage}
+              alt={blog.title}
+              style={{ width: "100%", maxHeight: 420, objectFit: "cover", display: "block" }}
+              data-testid="img-blog-second"
+            />
+          </div>
+        )}
+
         <div style={{ marginTop: 28, paddingTop: 24, borderTop: "1px solid #e6ebf2", textAlign: "center" }}>
           <Link href="/lidmaatschap">
             <button className="openregio-button openregio-button-primary" data-testid="button-blog-cta">

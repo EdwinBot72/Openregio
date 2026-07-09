@@ -1675,6 +1675,7 @@ export class MemStorage implements IStorage {
       status: blog.status || "draft",
       audience: blog.audience || "publiek",
       featuredImage: blog.featuredImage || null,
+      secondImage: blog.secondImage || null,
       publishedAt: blog.status === "published" ? new Date() : null,
       createdAt: new Date(),
       updatedAt: new Date(),

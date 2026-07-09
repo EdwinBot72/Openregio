@@ -169,6 +169,7 @@ export const blogs = pgTable("blogs", {
   authorId: varchar("author_id").notNull().references(() => users.id),
   authorName: text("author_name").notNull(),
   featuredImage: text("featured_image"),
+  secondImage: text("second_image"),
   status: text("status", { enum: BLOG_STATUS }).notNull().default("draft"),
   audience: text("audience", { enum: BLOG_AUDIENCE }).notNull().default("publiek"),
   publishedAt: timestamp("published_at"),
