@@ -347,7 +347,7 @@ export default function HomePage() {
             </p>
             <Link href="/register">
               <button style={{ width: "100%", padding: "12px 18px", borderRadius: 8, fontSize: 14, fontWeight: 700, background: "#fff", color: ORANJE, border: "none", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8, marginTop: 4 }}>
-                Aanmelden — gratis starten <ArrowRight style={{ width: 15, height: 15 }} />
+                Aanmelden <ArrowRight style={{ width: 15, height: 15 }} />
               </button>
             </Link>
           </div>
