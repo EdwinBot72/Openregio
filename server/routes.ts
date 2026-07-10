@@ -4489,7 +4489,13 @@ Maak het verzoek professioneel en juridisch correct.`;
 
       const existing = await storage.getUserByEmail(email);
       if (existing) {
-        return res.status(409).json({ error: "Er bestaat al een gebruiker met dit e-mailadres" });
+        if (existing.deletedAt) {
+          // Verwijderd account met dit e-mailadres: definitief opruimen zodat het adres vrijkomt.
+          await storage.permanentDeleteUser(existing.id);
+          console.log(`[Admin] Verwijderd account ${email} (${existing.id}) automatisch definitief opgeruimd voor hergebruik e-mailadres`);
+        } else {
+          return res.status(409).json({ error: "Er bestaat al een gebruiker met dit e-mailadres" });
+        }
       }
 
       const tempPassword = customPassword || generateRandomPassword();
