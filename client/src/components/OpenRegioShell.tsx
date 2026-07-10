@@ -217,6 +217,13 @@ export function OpenRegioShell({ children }: { children: ReactNode }) {
               currentPath={location}
               pijler="p2"
             />
+            <NavItem
+              icon={Users}
+              href="/groei/zichtbaarheid?tab=concurrentie"
+              label="Concurrentie-check"
+              currentPath={location}
+              pijler="p2"
+            />
 
             <div className="or-sb-div" />
 

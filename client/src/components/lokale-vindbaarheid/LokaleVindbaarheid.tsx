@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Search, FileText, Map, CheckSquare, Globe, ExternalLink, Landmark, Users } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useSearch } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import ZoektermenFinder from "./ZoektermenFinder";
@@ -9,7 +10,15 @@ import WebsiteTekstGenerator from "./WebsiteTekstGenerator";
 import GemeenteRadar from "./GemeenteRadar";
 import ConcurrentieCheck from "./ConcurrentieCheck";
 
+const GELDIGE_TABS = ["zoektermen", "tekst", "gemeente", "concurrentie", "updates", "checklist", "scan"] as const;
+
 export default function LokaleVindbaarheid() {
+  const searchString = useSearch();
+  const params = new URLSearchParams(searchString);
+  const tabParam = params.get("tab");
+  const initialTab = (GELDIGE_TABS as readonly string[]).includes(tabParam ?? "") ? (tabParam as string) : "zoektermen";
+  const [activeTab, setActiveTab] = useState(initialTab);
+
   return (
     <div className="space-y-6">
       <div>
@@ -20,7 +29,7 @@ export default function LokaleVindbaarheid() {
         </p>
       </div>
 
-      <Tabs defaultValue="zoektermen">
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid grid-cols-7 w-full">
           <TabsTrigger value="zoektermen" className="flex items-center gap-1.5 text-xs" data-testid="tab-zoektermen">
             <Search className="w-3.5 h-3.5 flex-shrink-0" />
