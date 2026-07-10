@@ -8,7 +8,7 @@ import {
   Users, CalendarDays, Lightbulb, Euro, MapPin, LogOut,
   Settings, ShieldCheck, BarChart2, Building2, FileText,
   Bell, Zap, Scale, Handshake, Newspaper, Activity, Shield,
-  Star, FileCheck,
+  Star, FileCheck, Landmark,
 } from "lucide-react";
 
 type ChipColor = "red" | "orange" | "blue" | "green";
@@ -207,6 +207,13 @@ export function OpenRegioShell({ children }: { children: ReactNode }) {
               icon={Building2}
               href="/groei/profiel"
               label="Bedrijfsprofiel"
+              currentPath={location}
+              pijler="p2"
+            />
+            <NavItem
+              icon={Landmark}
+              href="/kansen/gemeente-updates"
+              label="Gemeente-updates"
               currentPath={location}
               pijler="p2"
             />
