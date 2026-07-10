@@ -598,6 +598,7 @@ export default function AdminUsersPage() {
   const [plan, setPlan] = useState<string>("basic");
   const [customPassword, setCustomPassword] = useState("");
   const [skipOnboarding, setSkipOnboarding] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [result, setResult] = useState<{
     user: { id: string; email: string; plan: string };
     onboardingLink: string;
@@ -641,7 +642,7 @@ export default function AdminUsersPage() {
     mutationFn: async () => {
       const res = await apiRequest("POST", "/api/admin/create-user", {
         email, firstName: firstName || undefined, lastName: lastName || undefined, plan,
-        customPassword: customPassword || undefined, skipOnboarding,
+        customPassword: customPassword || undefined, skipOnboarding, isAdmin,
       });
       return res.json();
     },
@@ -649,7 +650,7 @@ export default function AdminUsersPage() {
       setResult(d);
       setMailSent(d.emailSent); // al verstuurd bij aanmaken? markeer dan direct
       toast({ title: "Gebruiker aangemaakt", description: `${d.user.email} is aangemaakt.` });
-      setEmail(""); setFirstName(""); setLastName(""); setCustomPassword(""); setSkipOnboarding(false);
+      setEmail(""); setFirstName(""); setLastName(""); setCustomPassword(""); setSkipOnboarding(false); setIsAdmin(false);
       qc.invalidateQueries({ queryKey: ["/api/admin/users"] });
     },
     onError: (e: any) => toast({ variant: "destructive", title: "Fout", description: e.message || "Kon gebruiker niet aanmaken" }),
@@ -848,6 +849,20 @@ export default function AdminUsersPage() {
               />
               <Label htmlFor="skipOnboarding" className="font-normal text-sm cursor-pointer">
                 Account direct actief (geen onboarding-stap nodig)
+              </Label>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                id="isAdmin"
+                type="checkbox"
+                checked={isAdmin}
+                onChange={(e) => setIsAdmin(e.target.checked)}
+                disabled={createUserMutation.isPending}
+                className="h-4 w-4"
+                data-testid="checkbox-is-admin"
+              />
+              <Label htmlFor="isAdmin" className="font-normal text-sm cursor-pointer">
+                Beheerder (admin-rechten)
               </Label>
             </div>
             <Button type="submit" className="w-full" disabled={createUserMutation.isPending || !email} data-testid="button-create-user">

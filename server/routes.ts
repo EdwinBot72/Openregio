@@ -4473,7 +4473,7 @@ Maak het verzoek professioneel en juridisch correct.`;
   // Admin: POST /api/admin/create-user - Create user without payment (backdoor for friends/family)
   app.post("/api/admin/create-user", requireAdmin, async (req, res) => {
     try {
-      const { email, firstName, lastName, plan, customPassword, skipOnboarding } = req.body;
+      const { email, firstName, lastName, plan, customPassword, skipOnboarding, isAdmin } = req.body;
 
       if (!email || !plan) {
         return res.status(400).json({ error: "Email en plan zijn verplicht" });
@@ -4503,7 +4503,7 @@ Maak het verzoek professioneel en juridisch correct.`;
         firstName: firstName || undefined,
         lastName: lastName || undefined,
         plan: plan as "basic" | "pro",
-        role: "member",
+        role: isAdmin ? "admin" : "member",
         mustCompleteOnboarding: !skipOnboarding,
         onboardingToken,
         referralCode,
