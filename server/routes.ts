@@ -4473,7 +4473,7 @@ Maak het verzoek professioneel en juridisch correct.`;
   // Admin: POST /api/admin/create-user - Create user without payment (backdoor for friends/family)
   app.post("/api/admin/create-user", requireAdmin, async (req, res) => {
     try {
-      const { email, firstName, lastName, plan } = req.body;
+      const { email, firstName, lastName, plan, customPassword, skipOnboarding } = req.body;
 
       if (!email || !plan) {
         return res.status(400).json({ error: "Email en plan zijn verplicht" });
@@ -4483,12 +4483,16 @@ Maak het verzoek professioneel en juridisch correct.`;
         return res.status(400).json({ error: "Plan moet 'basic', 'pro' of 'coaching' zijn" });
       }
 
+      if (customPassword && customPassword.length < 8) {
+        return res.status(400).json({ error: "Wachtwoord moet minimaal 8 tekens zijn" });
+      }
+
       const existing = await storage.getUserByEmail(email);
       if (existing) {
         return res.status(409).json({ error: "Er bestaat al een gebruiker met dit e-mailadres" });
       }
 
-      const tempPassword = generateRandomPassword();
+      const tempPassword = customPassword || generateRandomPassword();
       const onboardingToken = generateOnboardingToken();
       const referralCode = generateReferralCode();
       const passwordHash = await bcrypt.hash(tempPassword, 10);
@@ -4500,7 +4504,7 @@ Maak het verzoek professioneel en juridisch correct.`;
         lastName: lastName || undefined,
         plan: plan as "basic" | "pro",
         role: "member",
-        mustCompleteOnboarding: true,
+        mustCompleteOnboarding: !skipOnboarding,
         onboardingToken,
         referralCode,
       });
@@ -4532,6 +4536,7 @@ Maak het verzoek professioneel en juridisch correct.`;
           lastName: user.lastName,
         },
         onboardingLink,
+        tempPassword,
         emailSent,
       });
     } catch (error: any) {
@@ -4643,10 +4648,14 @@ Maak het verzoek professioneel en juridisch correct.`;
   // gebruiker die de onboarding al heeft voltooid (dus geen onboarding-link van toepassing is)
   app.post("/api/admin/reset-user-password", requireAdmin, async (req, res) => {
     try {
-      const { email } = req.body;
+      const { email, customPassword } = req.body;
 
       if (!email) {
         return res.status(400).json({ error: "Email is verplicht" });
+      }
+
+      if (customPassword && customPassword.length < 8) {
+        return res.status(400).json({ error: "Wachtwoord moet minimaal 8 tekens zijn" });
       }
 
       const user = await storage.getUserByEmail(email);
@@ -4654,7 +4663,7 @@ Maak het verzoek professioneel en juridisch correct.`;
         return res.status(404).json({ error: "Gebruiker niet gevonden" });
       }
 
-      const tempPassword = generateRandomPassword();
+      const tempPassword = customPassword || generateRandomPassword();
       const passwordHash = await bcrypt.hash(tempPassword, 10);
 
       await storage.updateUser(user.id, { passwordHash });

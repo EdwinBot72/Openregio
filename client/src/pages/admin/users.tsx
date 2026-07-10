@@ -366,16 +366,25 @@ function SendActivationButton({ user }: { user: AdminUser }) {
 
 function ResetPasswordButton({ user }: { user: AdminUser }) {
   const { toast } = useToast();
+  const [showForm, setShowForm] = useState(false);
+  const [customPassword, setCustomPassword] = useState("");
   const [password, setPassword] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
 
   const resetMut = useMutation({
     mutationFn: async () => {
-      const res = await apiRequest("POST", "/api/admin/reset-user-password", { email: user.email });
+      if (customPassword && customPassword.length < 8) {
+        throw new Error("Wachtwoord moet minimaal 8 tekens zijn");
+      }
+      const res = await apiRequest("POST", "/api/admin/reset-user-password", {
+        email: user.email,
+        customPassword: customPassword || undefined,
+      });
       return res.json();
     },
     onSuccess: (d) => {
       setPassword(d.tempPassword);
+      setShowForm(false);
       if (d.emailSent) {
         toast({ title: "Wachtwoord gereset", description: `Het nieuwe wachtwoord is gemaild naar ${user.email}.` });
       } else {
@@ -392,40 +401,72 @@ function ResetPasswordButton({ user }: { user: AdminUser }) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  if (!password) {
+  if (password) {
     return (
-      <Button
-        size="sm"
-        variant="outline"
-        className="h-7 gap-1.5 text-xs"
-        onClick={() => resetMut.mutate()}
-        disabled={resetMut.isPending}
-        data-testid={`button-reset-password-${user.id}`}
-      >
-        {resetMut.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <RotateCcw className="h-3 w-3" />}
-        Reset wachtwoord
-      </Button>
+      <div className="flex items-center gap-2 w-full">
+        <Input
+          readOnly
+          value={password}
+          className="text-[11px] font-mono h-7"
+          data-testid={`input-temp-password-${user.id}`}
+        />
+        <Button
+          size="icon"
+          variant="outline"
+          className="h-7 w-7 shrink-0"
+          onClick={copyPassword}
+          data-testid={`button-copy-password-${user.id}`}
+        >
+          {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+        </Button>
+      </div>
+    );
+  }
+
+  if (showForm) {
+    return (
+      <div className="flex items-center gap-2 w-full flex-wrap">
+        <Input
+          placeholder="Eigen wachtwoord (optioneel, min. 8 tekens)"
+          value={customPassword}
+          onChange={(e) => setCustomPassword(e.target.value)}
+          className="text-xs h-7 flex-1 min-w-[180px]"
+          data-testid={`input-custom-reset-password-${user.id}`}
+        />
+        <Button
+          size="sm"
+          className="h-7 text-xs"
+          onClick={() => resetMut.mutate()}
+          disabled={resetMut.isPending}
+          data-testid={`button-confirm-reset-password-${user.id}`}
+        >
+          {resetMut.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : "Bevestig"}
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="h-7 text-xs"
+          onClick={() => { setShowForm(false); setCustomPassword(""); }}
+          disabled={resetMut.isPending}
+          data-testid={`button-cancel-reset-password-${user.id}`}
+        >
+          Annuleer
+        </Button>
+      </div>
     );
   }
 
   return (
-    <div className="flex items-center gap-2 w-full">
-      <Input
-        readOnly
-        value={password}
-        className="text-[11px] font-mono h-7"
-        data-testid={`input-temp-password-${user.id}`}
-      />
-      <Button
-        size="icon"
-        variant="outline"
-        className="h-7 w-7 shrink-0"
-        onClick={copyPassword}
-        data-testid={`button-copy-password-${user.id}`}
-      >
-        {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
-      </Button>
-    </div>
+    <Button
+      size="sm"
+      variant="outline"
+      className="h-7 gap-1.5 text-xs"
+      onClick={() => setShowForm(true)}
+      data-testid={`button-reset-password-${user.id}`}
+    >
+      <RotateCcw className="h-3 w-3" />
+      Reset wachtwoord
+    </Button>
   );
 }
 
@@ -555,12 +596,16 @@ export default function AdminUsersPage() {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [plan, setPlan] = useState<string>("basic");
+  const [customPassword, setCustomPassword] = useState("");
+  const [skipOnboarding, setSkipOnboarding] = useState(false);
   const [result, setResult] = useState<{
     user: { id: string; email: string; plan: string };
     onboardingLink: string;
+    tempPassword: string;
     emailSent: boolean;
   } | null>(null);
   const [copied, setCopied] = useState(false);
+  const [passwordCopied, setPasswordCopied] = useState(false);
   const [mailSent, setMailSent] = useState(false);
 
   const [resendEmail, setResendEmail] = useState("");
@@ -596,6 +641,7 @@ export default function AdminUsersPage() {
     mutationFn: async () => {
       const res = await apiRequest("POST", "/api/admin/create-user", {
         email, firstName: firstName || undefined, lastName: lastName || undefined, plan,
+        customPassword: customPassword || undefined, skipOnboarding,
       });
       return res.json();
     },
@@ -603,7 +649,7 @@ export default function AdminUsersPage() {
       setResult(d);
       setMailSent(d.emailSent); // al verstuurd bij aanmaken? markeer dan direct
       toast({ title: "Gebruiker aangemaakt", description: `${d.user.email} is aangemaakt.` });
-      setEmail(""); setFirstName(""); setLastName("");
+      setEmail(""); setFirstName(""); setLastName(""); setCustomPassword(""); setSkipOnboarding(false);
       qc.invalidateQueries({ queryKey: ["/api/admin/users"] });
     },
     onError: (e: any) => toast({ variant: "destructive", title: "Fout", description: e.message || "Kon gebruiker niet aanmaken" }),
@@ -777,6 +823,33 @@ export default function AdminUsersPage() {
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="customPassword">Wachtwoord (optioneel)</Label>
+              <Input
+                id="customPassword"
+                type="text"
+                placeholder="Leeg = automatisch gegenereerd"
+                value={customPassword}
+                onChange={(e) => setCustomPassword(e.target.value)}
+                disabled={createUserMutation.isPending}
+                data-testid="input-custom-password"
+              />
+              <p className="text-xs text-muted-foreground">Minimaal 8 tekens. Laat leeg om er automatisch één te laten genereren.</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                id="skipOnboarding"
+                type="checkbox"
+                checked={skipOnboarding}
+                onChange={(e) => setSkipOnboarding(e.target.checked)}
+                disabled={createUserMutation.isPending}
+                className="h-4 w-4"
+                data-testid="checkbox-skip-onboarding"
+              />
+              <Label htmlFor="skipOnboarding" className="font-normal text-sm cursor-pointer">
+                Account direct actief (geen onboarding-stap nodig)
+              </Label>
+            </div>
             <Button type="submit" className="w-full" disabled={createUserMutation.isPending || !email} data-testid="button-create-user">
               {createUserMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               Account aanmaken
@@ -821,11 +894,34 @@ export default function AdminUsersPage() {
             </div>
 
             {/* Link kopiëren */}
-            <div className="flex items-center gap-2">
-              <Input readOnly value={result.onboardingLink} className="text-xs font-mono" data-testid="input-onboarding-link" />
-              <Button variant="outline" size="icon" onClick={copyLink} data-testid="button-copy-link">
-                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-              </Button>
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">Activatielink</Label>
+              <div className="flex items-center gap-2">
+                <Input readOnly value={result.onboardingLink} className="text-xs font-mono" data-testid="input-onboarding-link" />
+                <Button variant="outline" size="icon" onClick={copyLink} data-testid="button-copy-link">
+                  {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                </Button>
+              </div>
+            </div>
+
+            {/* Wachtwoord kopiëren */}
+            <div className="space-y-1">
+              <Label className="text-xs text-muted-foreground">Wachtwoord</Label>
+              <div className="flex items-center gap-2">
+                <Input readOnly value={result.tempPassword} className="text-xs font-mono" data-testid="input-created-password" />
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={async () => {
+                    await navigator.clipboard.writeText(result.tempPassword);
+                    setPasswordCopied(true);
+                    setTimeout(() => setPasswordCopied(false), 2000);
+                  }}
+                  data-testid="button-copy-created-password"
+                >
+                  {passwordCopied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                </Button>
+              </div>
             </div>
           </AlertDescription>
         </Alert>
