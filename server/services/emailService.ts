@@ -192,6 +192,51 @@ export async function sendPasswordResetEmail(to: string, resetToken: string, fir
   return sendEmail(to, 'Wachtwoord herstellen - OpenRegio', html);
 }
 
+export async function sendPasswordResetNotificationEmail(to: string, tempPassword: string): Promise<boolean> {
+  const html = `
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body { font-family: 'Inter', Arial, sans-serif; line-height: 1.6; color: #1a1a1a; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); color: white; padding: 30px; text-align: center; border-radius: 8px 8px 0 0; }
+        .content { background: #ffffff; padding: 30px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px; }
+        .button { display: inline-block; background: #2563eb; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 20px 0; }
+        .footer { text-align: center; padding: 20px; color: #6b7280; font-size: 14px; }
+        .credentials { background: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .credential-value { font-family: monospace; font-size: 16px; font-weight: 600; color: #1a1a1a; background: white; padding: 8px 12px; border-radius: 4px; display: inline-block; margin-top: 4px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1 style="margin: 0;">Nieuw wachtwoord</h1>
+        </div>
+        <div class="content">
+          <p>Beste ondernemer,</p>
+          <p>Een beheerder heeft een nieuw tijdelijk wachtwoord voor je account ingesteld:</p>
+          <div class="credentials">
+            <div class="credential-value">${tempPassword}</div>
+          </div>
+          <p style="text-align: center;">
+            <a href="${BASE_URL}/login" class="button" style="color: white;">Inloggen</a>
+          </p>
+          <p style="font-size: 14px; color: #6b7280;">We raden aan om na het inloggen zelf een nieuw wachtwoord in te stellen.</p>
+          <p>Met vriendelijke groet,<br>Het OpenRegio Team</p>
+        </div>
+        <div class="footer">
+          <p>OpenRegio - Werk blijft in de regio</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  return sendEmail(to, 'Nieuw wachtwoord - OpenRegio', html);
+}
+
 export async function sendNotificationEmail(to: string, subject: string, message: string, firstName: string): Promise<boolean> {
   const html = `
     <!DOCTYPE html>

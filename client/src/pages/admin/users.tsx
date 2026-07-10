@@ -364,6 +364,71 @@ function SendActivationButton({ user }: { user: AdminUser }) {
   );
 }
 
+function ResetPasswordButton({ user }: { user: AdminUser }) {
+  const { toast } = useToast();
+  const [password, setPassword] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+
+  const resetMut = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/admin/reset-user-password", { email: user.email });
+      return res.json();
+    },
+    onSuccess: (d) => {
+      setPassword(d.tempPassword);
+      if (d.emailSent) {
+        toast({ title: "Wachtwoord gereset", description: `Het nieuwe wachtwoord is gemaild naar ${user.email}.` });
+      } else {
+        toast({ title: "Wachtwoord gereset", description: "Kopieer het wachtwoord hieronder om het zelf door te sturen." });
+      }
+    },
+    onError: (e: any) => toast({ variant: "destructive", title: "Fout", description: e.message || "Kon wachtwoord niet resetten" }),
+  });
+
+  const copyPassword = async () => {
+    if (!password) return;
+    await navigator.clipboard.writeText(password);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  if (!password) {
+    return (
+      <Button
+        size="sm"
+        variant="outline"
+        className="h-7 gap-1.5 text-xs"
+        onClick={() => resetMut.mutate()}
+        disabled={resetMut.isPending}
+        data-testid={`button-reset-password-${user.id}`}
+      >
+        {resetMut.isPending ? <Loader2 className="h-3 w-3 animate-spin" /> : <RotateCcw className="h-3 w-3" />}
+        Reset wachtwoord
+      </Button>
+    );
+  }
+
+  return (
+    <div className="flex items-center gap-2 w-full">
+      <Input
+        readOnly
+        value={password}
+        className="text-[11px] font-mono h-7"
+        data-testid={`input-temp-password-${user.id}`}
+      />
+      <Button
+        size="icon"
+        variant="outline"
+        className="h-7 w-7 shrink-0"
+        onClick={copyPassword}
+        data-testid={`button-copy-password-${user.id}`}
+      >
+        {copied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+      </Button>
+    </div>
+  );
+}
+
 function UserRow({ user }: { user: AdminUser }) {
   const [expanded, setExpanded] = useState(false);
   const name = [user.firstName, user.lastName].filter(Boolean).join(" ") || "—";
@@ -450,10 +515,14 @@ function UserRow({ user }: { user: AdminUser }) {
             </div>
           </div>
 
-          {/* Activatiemail sturen */}
+          {/* Activatiemail sturen of wachtwoord resetten */}
           {!isDeleted && (
             <div className="pt-1 border-t border-border flex items-center gap-3 flex-wrap">
-              <SendActivationButton user={user} />
+              {user.mustCompleteOnboarding ? (
+                <SendActivationButton user={user} />
+              ) : (
+                <ResetPasswordButton user={user} />
+              )}
             </div>
           )}
 

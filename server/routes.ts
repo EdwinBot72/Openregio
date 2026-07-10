@@ -8,7 +8,7 @@ import { createMollieClient } from "@mollie/api-client";
 import { setupJwtAuth, attachUser, requireAuth, requireBasic, requireAdmin, requirePro, issueTokensForUser, clearTokenCookies, revokeAllUserTokens } from "./jwtAuth";
 import { seedMasterAccount, seedTestAccounts } from "./seed";
 import { generateRandomPassword, generateOnboardingToken, getPlanPrice, getPlanDisplayName, generateReferralCode } from "./utils/auth";
-import { sendOnboardingEmail, sendNotificationEmail, sendLokaleActieHerinneringEmail } from "./services/emailService";
+import { sendOnboardingEmail, sendNotificationEmail, sendLokaleActieHerinneringEmail, sendPasswordResetNotificationEmail } from "./services/emailService";
 import bcrypt from "bcrypt";
 import { uploadMemory, getDocumentType } from "./middleware/upload";
 import { publicAiRateLimit, authenticatedAiRateLimit } from "./middleware/aiRateLimit";
@@ -4636,6 +4636,41 @@ Maak het verzoek professioneel en juridisch correct.`;
     } catch (error: any) {
       console.error("Error resending activation:", error);
       res.status(500).json({ error: "Kon activatielink niet opnieuw versturen" });
+    }
+  });
+
+  // Admin: POST /api/admin/reset-user-password — nieuw tijdelijk wachtwoord voor een
+  // gebruiker die de onboarding al heeft voltooid (dus geen onboarding-link van toepassing is)
+  app.post("/api/admin/reset-user-password", requireAdmin, async (req, res) => {
+    try {
+      const { email } = req.body;
+
+      if (!email) {
+        return res.status(400).json({ error: "Email is verplicht" });
+      }
+
+      const user = await storage.getUserByEmail(email);
+      if (!user) {
+        return res.status(404).json({ error: "Gebruiker niet gevonden" });
+      }
+
+      const tempPassword = generateRandomPassword();
+      const passwordHash = await bcrypt.hash(tempPassword, 10);
+
+      await storage.updateUser(user.id, { passwordHash });
+
+      const emailSent = await sendPasswordResetNotificationEmail(email, tempPassword);
+
+      console.log(`[Admin] Password reset by ${req.user!.email}: ${email}`);
+
+      res.json({
+        message: "Nieuw tijdelijk wachtwoord ingesteld",
+        tempPassword,
+        emailSent,
+      });
+    } catch (error: any) {
+      console.error("Error resetting user password:", error);
+      res.status(500).json({ error: "Kon wachtwoord niet resetten" });
     }
   });
 
