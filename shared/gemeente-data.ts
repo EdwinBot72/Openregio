@@ -306,6 +306,109 @@ export function genereerGemeenteTips(score: GemeenteScore, rank: number): string
   return tips;
 }
 
+export interface ConcurrentieCheckResultaat {
+  gemeente: string;
+  provincie: string;
+  inwoners: number;
+  aantalConcurrenten: number;
+  competitie: CompetitieNiveau;
+  groeigebied: boolean;
+}
+
+/**
+ * Schat het aantal concurrenten voor een beroep in een specifieke gemeente,
+ * op basis van inwonertal en beroep-specifieke vraagfactor. Dit is een indicatie,
+ * geen exacte telling uit een bedrijvenregister.
+ */
+export function berekenAantalConcurrenten(beroep: string, gemeenteNaam: string): ConcurrentieCheckResultaat | null {
+  let gem: Gemeente | undefined;
+  let provincieNaam = "";
+
+  for (const prov of PROVINCIES) {
+    const found = prov.gemeentes.find(
+      (g) => g.naam.toLowerCase() === gemeenteNaam.toLowerCase()
+    );
+    if (found) {
+      gem = found;
+      provincieNaam = prov.naam;
+      break;
+    }
+  }
+
+  if (!gem) return null;
+
+  const factor = SPOED_FACTOR[beroep] ?? 1.0;
+  const base = gem.inwoners / 10000;
+  const aantalConcurrenten = Math.max(1, Math.round(base * factor));
+
+  const competitie: CompetitieNiveau =
+    gem.inwoners > 150000 ? "hoog" :
+    gem.inwoners > 60000 ? "midden" : "laag";
+
+  return {
+    gemeente: gem.naam,
+    provincie: provincieNaam,
+    inwoners: gem.inwoners,
+    aantalConcurrenten,
+    competitie,
+    groeigebied: gem.groeigebied ?? false,
+  };
+}
+
+const CONCURRENTIE_INVALSHOEKEN: string[] = [
+  "Specialiseer je in spoedklussen binnen 24 uur",
+  "Bied een vaste prijs vooraf, zonder verrassingen achteraf",
+  "Focus op één wijk of buurt en word dé lokale naam daar",
+  "Werk met duurzame of milieuvriendelijke materialen",
+  "Bied een gratis inspectie of offerte aan huis",
+  "Richt je op kleine klussen die grotere bedrijven overslaan",
+  "Richt je juist op grote, luxe of maatwerkprojecten",
+  "Bied een onderhoudsabonnement aan voor terugkerende klanten",
+  "Werk samen met een aanverwant beroep voor complete klussen",
+  "Bied flexibele avond- en weekendafspraken aan",
+  "Geef standaard een langere garantietermijn dan gebruikelijk",
+  "Deel voortgangsfoto's van elke klus met de klant",
+  "Specialiseer je in monumentale of oudere panden",
+  "Specialiseer je juist in nieuwbouwprojecten",
+  "Bied korting aan buurtgenoten die samen een klus boeken",
+  "Maak een duidelijke stap-voor-stap uitleg van je werkwijze",
+  "Zet in op razendsnelle reactietijd op aanvragen",
+  "Bied gratis nazorg of controle na afronding van de klus",
+  "Werk met een online planningstool zodat klanten zelf kunnen boeken",
+  "Vraag na elke klus actief om een Google-review",
+];
+
+const CONCURRENTIE_ACTIES: string[] = [
+  "Zet dit duidelijk bovenaan je Google Bedrijfsprofiel.",
+  "Maak er een aparte pagina op je website over.",
+  "Deel dit in lokale Facebook- of buurtgroepen.",
+  "Noem het in elke offerte die je verstuurt.",
+  "Maak er een korte video over voor social media.",
+  "Zet het in je e-mailhandtekening.",
+  "Print het op je bedrijfsbusje of visitekaartje.",
+  "Noem het als eerste bij elk telefoongesprek met een nieuwe klant.",
+  "Vraag tevreden klanten dit expliciet te noemen in hun review.",
+  "Zet het als los kopje in je Google Bedrijfsprofiel-berichten.",
+];
+
+/**
+ * Genereert precies `aantal` unieke tips/ideeën, zodat elk (geschat) concurrent
+ * een eigen mogelijke invalshoek krijgt om zich mee te onderscheiden.
+ */
+export function genereerUniekeIdeeenTips(beroepLabel: string, aantal: number): string[] {
+  const tips: string[] = [];
+  const n = Math.max(0, aantal);
+
+  for (let i = 0; i < n; i++) {
+    const invalshoek = CONCURRENTIE_INVALSHOEKEN[i % CONCURRENTIE_INVALSHOEKEN.length];
+    const actieIndex = Math.floor(i / CONCURRENTIE_INVALSHOEKEN.length) % CONCURRENTIE_ACTIES.length;
+    const actie = CONCURRENTIE_ACTIES[actieIndex];
+    tips.push(`${invalshoek}. ${actie}`);
+  }
+
+  return tips;
+}
+
 export function berekenGemeenteScores(beroep: string, spoedScore: number): GemeenteScore[] {
   const factor = SPOED_FACTOR[beroep] ?? 1.0;
   const scores: GemeenteScore[] = [];

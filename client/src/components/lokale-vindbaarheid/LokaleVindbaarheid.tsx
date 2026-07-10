@@ -1,5 +1,5 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Search, FileText, Map, CheckSquare, Globe, ExternalLink, Landmark } from "lucide-react";
+import { Search, FileText, Map, CheckSquare, Globe, ExternalLink, Landmark, Users } from "lucide-react";
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,6 +7,7 @@ import ZoektermenFinder from "./ZoektermenFinder";
 import WebsiteChecklist from "./WebsiteChecklist";
 import WebsiteTekstGenerator from "./WebsiteTekstGenerator";
 import GemeenteRadar from "./GemeenteRadar";
+import ConcurrentieCheck from "./ConcurrentieCheck";
 
 export default function LokaleVindbaarheid() {
   return (
@@ -20,7 +21,7 @@ export default function LokaleVindbaarheid() {
       </div>
 
       <Tabs defaultValue="zoektermen">
-        <TabsList className="grid grid-cols-6 w-full">
+        <TabsList className="grid grid-cols-7 w-full">
           <TabsTrigger value="zoektermen" className="flex items-center gap-1.5 text-xs" data-testid="tab-zoektermen">
             <Search className="w-3.5 h-3.5 flex-shrink-0" />
             <span className="hidden sm:inline">Zoektermen</span>
@@ -32,6 +33,10 @@ export default function LokaleVindbaarheid() {
           <TabsTrigger value="gemeente" className="flex items-center gap-1.5 text-xs" data-testid="tab-gemeente">
             <Map className="w-3.5 h-3.5 flex-shrink-0" />
             <span className="hidden sm:inline">Gemeente radar</span>
+          </TabsTrigger>
+          <TabsTrigger value="concurrentie" className="flex items-center gap-1.5 text-xs" data-testid="tab-concurrentie">
+            <Users className="w-3.5 h-3.5 flex-shrink-0" />
+            <span className="hidden sm:inline">Concurrentie-check</span>
           </TabsTrigger>
           <TabsTrigger value="updates" className="flex items-center gap-1.5 text-xs" data-testid="tab-gemeente-updates">
             <Landmark className="w-3.5 h-3.5 flex-shrink-0" />
@@ -52,6 +57,7 @@ export default function LokaleVindbaarheid() {
           <span>Zoek</span>
           <span>Tekst</span>
           <span>Radar</span>
+          <span>Concur.</span>
           <span>Updates</span>
           <span>Check</span>
           <span>Scan</span>
@@ -67,6 +73,10 @@ export default function LokaleVindbaarheid() {
 
         <TabsContent value="gemeente">
           <GemeenteRadar />
+        </TabsContent>
+
+        <TabsContent value="concurrentie">
+          <ConcurrentieCheck />
         </TabsContent>
 
         <TabsContent value="updates">
