@@ -1,0 +1,420 @@
+Plak dit als eerste opdracht in Replit Agent. Dit script laat Replit alleen onderzoeken en rapporteren. Er mag niets worden aangepast.
+
+Voer een volledige READ-ONLY audit uit op dit OpenRegio-project.
+
+BELANGRIJK: JE MAG NIETS VERANDEREN.
+
+Dit is uitsluitend onderzoek. Voer geen reparaties, verbeteringen, migraties, installaties of deployments uit.
+
+VERBODEN ACTIES
+
+* Geen bestanden maken.
+* Geen bestanden aanpassen.
+* Geen bestanden verwijderen, verplaatsen of hernoemen.
+* Geen code formatteren.
+* Geen automatische fixes uitvoeren.
+* Geen package.json of package-lock.json aanpassen.
+* Geen `npm install`, `npm update`, `npm audit fix` of vergelijkbare opdrachten.
+* Geen databasewijzigingen.
+* Geen migraties uitvoeren.
+* Geen `db:push`.
+* Geen seed uitvoeren.
+* Geen productiegegevens lezen, wijzigen of verwijderen.
+* Geen gebruikers aanmaken.
+* Geen testaccounts aanmaken.
+* Geen betalingen starten.
+* Geen Mollie-webhooks simuleren op productie.
+* Geen e-mails versturen.
+* Geen API-aanroepen doen die gegevens wijzigen.
+* Geen secrets tonen.
+* Geen `.env`-inhoud afdrukken.
+* Geen deployment starten.
+* Geen Replit-configuratie aanpassen.
+* Geen commits maken.
+* Geen branches maken.
+* Geen pull requests maken.
+* Geen rapportbestand aanmaken.
+
+Rapporteer alle resultaten uitsluitend in het Replit-chatvenster.
+
+TOEGESTAAN
+
+* Bestanden en mappen lezen.
+* Code doorzoeken.
+* Routes inventariseren.
+* Imports en afhankelijkheden vergelijken.
+* Database-schema’s lezen.
+* Migratiebestanden lezen zonder ze uit te voeren.
+* Configuratiebestanden lezen.
+* Bestaande tests en workflows lezen.
+* Statische analyse uitvoeren wanneer dit aantoonbaar niets schrijft.
+* `git status` en `git diff` uitvoeren.
+* Bestaande logs lezen, maar geen persoonsgegevens, tokens of secrets tonen.
+
+VEILIGHEIDSCONTROLE
+
+Voer vóór het onderzoek uit:
+
+1. Lees `git status --short`.
+2. Onthoud exact welke wijzigingen al aanwezig zijn.
+3. Controleer na het onderzoek opnieuw `git status --short`.
+4. De eindstatus moet exact gelijk zijn aan de beginstatus.
+5. Als een onderzoeksactie mogelijk bestanden kan veranderen: niet uitvoeren.
+6. Als je per ongeluk toch iets verandert: stop onmiddellijk en rapporteer exact wat veranderde. Probeer niets zelfstandig terug te draaien.
+
+DOEL VAN DE AUDIT
+
+Onderzoek waarom de publieke klantreis, registratie, login, onboarding, Mollie-abonnementen en toegang tot functies niet volledig consistent werken.
+
+ONDERZOEK 1 — PROJECTSTRUCTUUR
+
+Breng in kaart:
+
+* frontendframework;
+* backendframework;
+* database en ORM;
+* authenticatiemethode;
+* sessie- en tokenopbouw;
+* e-mailprovider;
+* Mollie-integratie;
+* AI-providers;
+* bestandsopslag;
+* alle belangrijke mappen;
+* alle start-, build-, test- en deployscripts;
+* totale omvang van belangrijke bestanden;
+* bestanden die te veel verantwoordelijkheden bevatten.
+
+Let extra op:
+
+* `server/routes.ts`;
+* `server/storage.ts`;
+* `shared/schema.ts`;
+* `shared/pricing.ts`;
+* `server/jwtAuth.ts`;
+* `server/services/emailService.ts`;
+* `client/src/App.tsx`.
+
+ONDERZOEK 2 — ROUTES EN KLANTREIS
+
+Controleer minimaal:
+
+* `/`;
+* `/login`;
+* `/aan-de-slag`;
+* `/register`;
+* `/lidmaatschap`;
+* `/betaling-geslaagd`;
+* `/first-login`;
+* `/forgot-password`;
+* `/reset-password`;
+* `/vandaag`;
+* dashboard- en accountpagina’s.
+
+Maak een tabel met:
+
+* route;
+* publiek of beveiligd;
+* component;
+* gebruikte API;
+* verwachte functie;
+* werkelijke functie;
+* gevonden inconsistentie;
+* ernst.
+
+Onderzoek specifiek:
+
+* waarom `/aan-de-slag` een loginpagina lijkt te tonen;
+* waarom `/register` en `/lidmaatschap` naast elkaar bestaan;
+* waar alle knoppen “Aanmelden”, “Word lid”, “Basis starten” en “Pro starten” naartoe gaan;
+* of gebruikers vóór betaling kunnen worden aangemaakt;
+* of gebruikers vóór betaling kunnen inloggen;
+* of `pending`-gebruikers beveiligde pagina’s of API’s kunnen bereiken;
+* of onboarding kan worden overgeslagen;
+* wat er gebeurt als een bestaande gebruiker opnieuw betaalt;
+* wat er gebeurt als hetzelfde e-mailadres meerdere keren wordt gebruikt.
+
+ONDERZOEK 3 — AUTHENTICATIE
+
+Controleer:
+
+* registratie;
+* login;
+* logout;
+* refresh tokens;
+* cookies;
+* wachtwoordhashing;
+* wachtwoordreset;
+* activatietokens;
+* onboardingtokens;
+* tokenverval;
+* tokenhergebruik;
+* sessie-intrekking;
+* rate limiting;
+* gebruikersenumeratie;
+* rollen;
+* admincontrole;
+* plancontrole;
+* server-side autorisatie.
+
+Beantwoord expliciet:
+
+* Worden wachtwoorden ooit plaintext opgeslagen, teruggestuurd of gemaild?
+* Worden tijdelijke wachtwoorden aan gebruikers of admins getoond?
+* Kan een gebruiker onboarding omzeilen door direct in te loggen?
+* Worden onboardingtokens plaintext in de database opgeslagen?
+* Is een activatietoken eenmalig?
+* Worden bestaande sessies ingetrokken na wachtwoordreset?
+* Worden bestaande sessies ingetrokken na een gewone wachtwoordwijziging?
+* Zijn alle beveiligde frontendfuncties ook backendmatig beschermd?
+
+ONDERZOEK 4 — MOLLIE EN ABONNEMENTEN
+
+Lees de volledige Mollie-flow zonder betalingen te starten.
+
+Controleer:
+
+* publieke checkout;
+* checkout voor ingelogde gebruikers;
+* Mollie-customercreatie;
+* hergebruik van customers;
+* eerste betaling;
+* mandates;
+* recurring subscriptions;
+* webhooks;
+* metadata;
+* idempotentie;
+* upgrades;
+* downgrades;
+* mislukte betalingen;
+* verlopen betalingen;
+* annuleringen;
+* opzeggingen;
+* einddatum toegang;
+* database-abonnementstatus;
+* koppeling tussen `users.plan` en `subscriptions.plan`;
+* affiliatecommissies.
+
+BELANGRIJKE PRIJSVRAAG
+
+De website noemt:
+
+* Basis: €14,95 exclusief btw per maand.
+* Pro: €59 exclusief btw per maand.
+
+Controleer welk bedrag werkelijk naar Mollie wordt gestuurd.
+
+Bereken en rapporteer:
+
+* Basis exclusief btw;
+* Basis inclusief 21% btw;
+* Pro exclusief btw;
+* Pro inclusief 21% btw;
+* werkelijk geïncasseerd bedrag volgens de code;
+* verschil tussen tekst, commentaar en uitvoering.
+
+Controleer ook of hetzelfde e-mailadres meerdere Mollie-customers en subscriptions kan krijgen.
+
+ONDERZOEK 5 — PRIJZEN EN FEATURE ACCESS
+
+Zoek alle plaatsen waar prijzen, plannen of functies hardcoded staan.
+
+Vergelijk:
+
+* `shared/pricing.ts`;
+* homepage;
+* lidmaatschapspagina;
+* registratiepagina;
+* featureAccess-configuratie;
+* navigatie;
+* frontend-paywalls;
+* backendmiddleware;
+* abonnemententabel.
+
+Maak één vergelijkingstabel voor:
+
+* pending;
+* Basis;
+* Pro;
+* Coaching;
+* admin.
+
+Controleer minimaal:
+
+* RegioBot;
+* Brievenagent;
+* Contractagent;
+* Secretaresse;
+* briefanalyse;
+* website-scan;
+* sectorregels;
+* lokale acties;
+* lokale marktplaats;
+* netwerk;
+* subsidies;
+* gemeentepublicaties;
+* affiliatebeheer;
+* coaching.
+
+Rapporteer waar frontend en backend elkaar tegenspreken.
+
+ONDERZOEK 6 — BUILD EN TYPESCRIPT
+
+Wijzig niets en installeer niets.
+
+Controleer statisch:
+
+* foutieve imports;
+* ontbrekende imports;
+* niet-bestaande exports;
+* typefouten;
+* schema-objecten met ontbrekende velden;
+* package.json versus package-lock.json;
+* verouderde of dubbele afhankelijkheden;
+* ontbrekende scripts;
+* bestaande build- of workflowconfiguratie.
+
+Verifieer specifiek de eerder waargenomen mogelijke fouten:
+
+* `SiLinkedin` in `actie-detail.tsx`;
+* ontbrekende `BookOpen`;
+* ontbrekende `MapPin`;
+* ontbrekende `Mail`;
+* ontbrekende `lastDigestSentAt`;
+* ontbrekende `lastLokaleActiesSeenAt`;
+* onsynchroniseerbaar package-lockbestand.
+
+Voer alleen een typecheck uit als het bestaande script gegarandeerd geen bestanden schrijft. Voer geen build uit, omdat een build outputbestanden kan maken.
+
+ONDERZOEK 7 — API-KWALITEIT
+
+Inventariseer:
+
+* aantal API-routes;
+* publieke muterende endpoints;
+* endpoints zonder authenticatie;
+* endpoints zonder autorisatie;
+* endpoints zonder invoervalidatie;
+* dubbele endpoints;
+* dubbele responses;
+* routes met Engelse en Nederlandse foutmeldingen door elkaar;
+* te brede `any`-types;
+* fouten die altijd HTTP 200 teruggeven terwijl verwerking niet is gelukt;
+* logging van e-mailadressen, tokens, klant-ID’s of persoonsgegevens.
+
+Controleer expliciet of `/api/lead` tweemaal `res.json()` aanroept.
+
+ONDERZOEK 8 — AI-AGENTS
+
+Controleer:
+
+* Brievenagent;
+* Contractagent;
+* Secretaresse;
+* RegioBot;
+* gebruikte AI-provider;
+* fallbackproviders;
+* API-keygebruik;
+* server-side bescherming;
+* limieten;
+* plancontrole;
+* prompt-injectionrisico;
+* documentuploads;
+* toegestane bestandstypen;
+* bestandsgrootte;
+* tekstextractie;
+* OCR;
+* bewaartermijn;
+* verwijdering;
+* tenant-isolatie;
+* logging van documentinhoud.
+
+Voer geen AI-verzoeken uit en upload geen documenten.
+
+ONDERZOEK 9 — PRIVACY EN SECURITY
+
+Controleer:
+
+* CSP;
+* HSTS;
+* CSRF-risico;
+* XSS-risico;
+* cookie-instellingen;
+* rate limiting;
+* gevoelige logs;
+* database-isolatie;
+* object storage;
+* gebruikersdata-export;
+* accountverwijdering;
+* soft delete;
+* bewaartermijnen;
+* tracking en cookies;
+* privacyverklaring versus werkelijke verwerking.
+
+Toon nooit secrets of echte persoonsgegevens in het rapport.
+
+ONDERZOEK 10 — TESTDEKKING
+
+Zoek:
+
+* unit tests;
+* integratietests;
+* Playwright-tests;
+* webhooktests;
+* authenticatietests;
+* autorisatietests;
+* abonnementstests;
+* GitHub Actions;
+* Replit-deploymentchecks.
+
+Rapporteer welke kritieke flows geen aantoonbare testdekking hebben.
+
+VEREIST EINDRAPPORT
+
+Geef het rapport in deze volgorde:
+
+1. Managementsamenvatting in maximaal tien regels.
+2. Kritieke bevindingen die vóór echte betalingen opgelost moeten worden.
+3. Beveiligingsproblemen.
+4. Betalings- en abonnementsproblemen.
+5. Registratie-, login- en onboardingproblemen.
+6. Build- en TypeScriptproblemen.
+7. Inconsistente prijzen, teksten en functies.
+8. Ontbrekende tests.
+9. Technische schuld en te grote bestanden.
+10. Positieve onderdelen die behouden moeten blijven.
+11. Reparatievolgorde, zonder de reparaties uit te voeren.
+12. Tabel met per probleem:
+
+* prioriteit;
+* bestand;
+* relevante functie of route;
+* oorzaak;
+* impact;
+* voorgestelde oplossing;
+* risico van de oplossing.
+
+13. Lijst met beslissingen die Edwin eerst zelf moet nemen.
+14. Eindcontrole van `git status --short`.
+
+PRIORITEITEN
+
+Gebruik:
+
+* P0: direct veiligheids-, betalings- of datarisico;
+* P1: blokkeert betrouwbare ingebruikname;
+* P2: belangrijk voor kwaliteit en conversie;
+* P3: optimalisatie.
+
+ABSOLUTE STOPREGEL
+
+Je taak eindigt na het rapport.
+
+Voer geen enkele voorgestelde oplossing uit.
+
+Vraag niet automatisch toestemming om daarna wijzigingen te maken.
+
+Sluit af met exact:
+
+“READ-ONLY AUDIT AFGEROND — ER ZIJN GEEN BESTANDEN, DATA, SECRETS OF DEPLOYMENTS GEWIJZIGD.”
+
+Gebruik die zin alleen als de afsluitende `git status --short` exact gelijk is aan de beginstatus. Als dat niet zo is, meld dan duidelijk dat de read-only garantie niet kan worden gegeven.
