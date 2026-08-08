@@ -1,0 +1,114 @@
+# ─────────────────────────────────────────────────────────────
+# OpenRegio — OTAP deploy-pijplijn
+#
+# Branch-strategie:
+#   feature/*   -> lokaal (Ontwikkel), geen deploy
+#   develop     -> Test
+#   acceptatie  -> Acceptatie   (approval-gate via GitHub Environment)
+#   main        -> Productie     (approval-gate via GitHub Environment)
+#
+# Elke push bouwt eerst (check + docker image) en pusht de image naar
+# GitHub Container Registry (GHCR). Daarna draait de bijbehorende
+# deploy-job. De deploy-stap zelf is een SJABLOON: vul de host-secrets
+# in zodra de hosting bekend is (zie DEPLOY.md).
+# ─────────────────────────────────────────────────────────────
+
+name: OTAP Deploy
+
+on:
+  push:
+    branches: [develop, acceptatie, main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/${{ github.repository }}
+
+jobs:
+  # ── 1. Bouwen + typecheck + image publiceren ──────────────────
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      image_tag: ${{ steps.meta.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+      - name: Typecheck
+        run: npm run check
+
+      - name: Bepaal image-tag
+        id: meta
+        run: echo "tag=${GITHUB_REF_NAME}-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Login GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:${{ steps.meta.outputs.tag }}
+            ${{ env.IMAGE }}:${{ github.ref_name }}-latest
+
+  # ── 2a. Deploy naar TEST (branch develop) ─────────────────────
+  deploy-test:
+    if: github.ref_name == 'develop'
+    needs: build
+    runs-on: ubuntu-latest
+    environment: test
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy Test
+        run: ./scripts/deploy.sh test "${{ needs.build.outputs.image_tag }}"
+        env:
+          DEPLOY_HOST: ${{ secrets.TEST_DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.TEST_DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.TEST_DEPLOY_SSH_KEY }}
+
+  # ── 2b. Deploy naar ACCEPTATIE (branch acceptatie, met approval) ─
+  deploy-acceptatie:
+    if: github.ref_name == 'acceptatie'
+    needs: build
+    runs-on: ubuntu-latest
+    environment: acceptatie
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy Acceptatie
+        run: ./scripts/deploy.sh acceptatie "${{ needs.build.outputs.image_tag }}"
+        env:
+          DEPLOY_HOST: ${{ secrets.ACC_DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.ACC_DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.ACC_DEPLOY_SSH_KEY }}
+
+  # ── 2c. Deploy naar PRODUCTIE (branch main, met approval) ─────
+  deploy-productie:
+    if: github.ref_name == 'main'
+    needs: build
+    runs-on: ubuntu-latest
+    environment: productie
+    steps:
+      - uses: actions/checkout@v4
+      - name: Deploy Productie
+        run: ./scripts/deploy.sh productie "${{ needs.build.outputs.image_tag }}"
+        env:
+          DEPLOY_HOST: ${{ secrets.PROD_DEPLOY_HOST }}
+          DEPLOY_USER: ${{ secrets.PROD_DEPLOY_USER }}
+          DEPLOY_SSH_KEY: ${{ secrets.PROD_DEPLOY_SSH_KEY }}

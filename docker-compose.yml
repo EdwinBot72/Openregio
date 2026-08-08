@@ -1,0 +1,66 @@
+# ─────────────────────────────────────────────────────────────
+# OpenRegio — basis compose (gedeeld door alle OTAP-omgevingen)
+#
+# Draai nooit dit bestand los; combineer altijd met een omgeving-
+# override en een --env-file. Gebruik de Makefile:
+#   make test-up | make acc-up | make prod-up
+#
+# Handmatig voorbeeld (Test):
+#   docker compose -p openregio-test --env-file env/test.env \
+#     -f docker-compose.yml -f docker-compose.test.yml up -d --build
+# ─────────────────────────────────────────────────────────────
+
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-openregio}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-openregio}
+      POSTGRES_DB: ${POSTGRES_DB:-openregio}
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-openregio} -d ${POSTGRES_DB:-openregio}"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: runtime
+    restart: unless-stopped
+    env_file:
+      - ${ENV_FILE:-env/test.env}
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - uploads:/app/uploads
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://localhost:'+(process.env.PORT||5000)+'/').then(r=>process.exit(r.ok||r.status<500?0:1)).catch(()=>process.exit(1))\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
+  # Eenmalige schema-sync (drizzle-kit push). Draait alleen met profiel "tools".
+  #   make db-push-test | make db-push-acc | make db-push-prod
+  migrate:
+    profiles: ["tools"]
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    env_file:
+      - ${ENV_FILE:-env/test.env}
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["npm", "run", "db:push"]
+
+volumes:
+  db-data:
+  uploads:

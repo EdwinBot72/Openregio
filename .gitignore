@@ -1,9 +1,21 @@
 node_modules
 dist
 .DS_Store
+
+# OTAP — echte secrets nooit committen (alleen *.example)
+.env
+.env.*
+env/*.env
+!env/*.env.example
+
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# Replit-runtime + lokale back-ups (niet naar GitHub)
+.config/
+.local/
+*.replit-bak
 # Playwright
 /test-results/
 /playwright-report/

@@ -1,0 +1,9 @@
+# Override: TEST-straat
+# App op host-poort 5001, DB op 5433 (los van Acceptatie/Productie).
+services:
+  app:
+    ports:
+      - "5001:5000"
+  db:
+    ports:
+      - "5433:5432"
