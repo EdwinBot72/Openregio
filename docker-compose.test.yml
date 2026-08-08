@@ -1,9 +1,10 @@
 # Override: TEST-straat
-# App op host-poort 5001, DB op 5433 (los van Acceptatie/Productie).
+# App alleen op localhost:5001 — uitsluitend bereikbaar via Caddy (HTTPS).
+# DB op 127.0.0.1:5433 (niet naar buiten geëxposeerd).
 services:
   app:
     ports:
-      - "5001:5000"
+      - "127.0.0.1:5001:5000"
   db:
     ports:
-      - "5433:5432"
+      - "127.0.0.1:5433:5432"
