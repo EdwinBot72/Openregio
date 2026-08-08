@@ -13,7 +13,7 @@ import bcrypt from "bcrypt";
 import { uploadMemory, getDocumentType } from "./middleware/upload";
 import { publicAiRateLimit, authenticatedAiRateLimit } from "./middleware/aiRateLimit";
 import { mollieStartRateLimit, contactFormRateLimit, geocodeRateLimit } from "./middleware/rateLimits";
-import { objectStorageClient } from "./replit_integrations/object_storage";
+import { ObjectStorageService } from "./replit_integrations/object_storage";
 import { randomUUID, createHash } from "crypto";
 import { runRegioBot } from "./regiobot";
 import { db } from "db";
@@ -1246,23 +1246,16 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
       // Determine document type from mime type
       const docType = getDocumentType(req.file.mimetype);
 
-      // Upload buffer to Object Storage (private dir) instead of local disk
-      const privateDir = process.env.PRIVATE_OBJECT_DIR || "";
-      let storedPath = `local:${req.user.id}/${req.file.originalname}`;
-
-      if (privateDir) {
-        const ext = req.file.originalname.substring(req.file.originalname.lastIndexOf("."));
-        const objectId = randomUUID();
-        const fullPath = `${privateDir}/regiobot-docs/${req.user.id}/${objectId}${ext}`;
-        const parts = fullPath.replace(/^\//, "").split("/");
-        const bucketName = parts[0];
-        const objectName = parts.slice(1).join("/");
-
-        const bucket = objectStorageClient.bucket(bucketName);
-        const gcsFile = bucket.file(objectName);
-        await gcsFile.save(req.file.buffer, { contentType: req.file.mimetype });
-        storedPath = `/${fullPath.replace(/^\//, "")}`;
-      }
+      // Sla het document op lokale schijf op (los van Replit/GCS).
+      const ext = req.file.originalname.substring(req.file.originalname.lastIndexOf("."));
+      const objectId = randomUUID();
+      const objectName = `regiobot-docs/${req.user.id}/${objectId}${ext}`;
+      await new ObjectStorageService().uploadBuffer(
+        objectName,
+        req.file.buffer,
+        req.file.mimetype,
+      );
+      const storedPath = `/objects/${objectName}`;
 
       // Store document metadata in database
       const document = await storage.createDocument({

@@ -1,9 +1,12 @@
 import type { Express, Request, Response, NextFunction } from "express";
-import { ObjectStorageService, ObjectNotFoundError, objectStorageClient } from "./objectStorage";
+import { ObjectStorageService, ObjectNotFoundError, verifyUploadToken } from "./objectStorage";
 import { setObjectAclPolicy } from "./objectAcl";
 import { db } from "db";
 import { sql } from "drizzle-orm";
 import { randomUUID } from "crypto";
+
+// Maximale uploadgrootte (bytes) voor de directe PUT-endpoint.
+const MAX_UPLOAD_BYTES = 25 * 1024 * 1024; // 25 MB
 
 /**
  * Register object storage routes for file uploads.
@@ -43,6 +46,52 @@ export function registerObjectStorageRoutes(app: Express, requireAuth: any): voi
       console.error("Error generating upload URL:", error);
       res.status(500).json({ error: "Failed to generate upload URL" });
     }
+  });
+
+  /**
+   * Ontvangt de daadwerkelijke bytes van een geüpload bestand.
+   * De URL is ondertekend (HMAC + vervaltijd) — die ondertekening is de
+   * toegangscontrole, net als bij een presigned URL.
+   */
+  app.put("/api/uploads/put/:objectId", (req: Request, res: Response) => {
+    const { objectId } = req.params;
+    const exp = Number(req.query.exp);
+    const token = String(req.query.token || "");
+
+    if (!/^[a-zA-Z0-9-]+$/.test(objectId) || !verifyUploadToken(objectId, exp, token)) {
+      return res.status(403).json({ error: "Ongeldige of verlopen upload-URL" });
+    }
+
+    const chunks: Buffer[] = [];
+    let total = 0;
+    let aborted = false;
+
+    req.on("data", (chunk: Buffer) => {
+      total += chunk.length;
+      if (total > MAX_UPLOAD_BYTES) {
+        aborted = true;
+        res.status(413).json({ error: "Bestand te groot (max 25 MB)" });
+        req.destroy();
+        return;
+      }
+      chunks.push(chunk);
+    });
+
+    req.on("end", async () => {
+      if (aborted) return;
+      try {
+        const contentType = req.get("content-type") || "application/octet-stream";
+        await objectStorageService.writeUpload(objectId, Buffer.concat(chunks), contentType);
+        res.status(200).json({ success: true });
+      } catch (error) {
+        console.error("Error writing upload:", error);
+        if (!res.headersSent) res.status(500).json({ error: "Opslaan mislukt" });
+      }
+    });
+
+    req.on("error", () => {
+      if (!res.headersSent) res.status(500).json({ error: "Upload onderbroken" });
+    });
   });
 
   /**
@@ -126,7 +175,7 @@ export function registerObjectStorageRoutes(app: Express, requireAuth: any): voi
       // Delete from object storage
       try {
         const objectFile = await objectStorageService.getObjectEntityFile(objectPath);
-        await objectFile.delete();
+        await objectStorageService.deleteObject(objectFile);
       } catch (deleteError) {
         console.warn("Could not delete from storage:", deleteError);
       }

@@ -1,7 +1,6 @@
 export {
   ObjectStorageService,
   ObjectNotFoundError,
-  objectStorageClient,
 } from "./objectStorage";
 
 export type {
@@ -18,4 +17,3 @@ export {
 } from "./objectAcl";
 
 export { registerObjectStorageRoutes } from "./routes";
-
