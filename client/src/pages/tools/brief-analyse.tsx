@@ -21,6 +21,7 @@ import {
   Upload,
   X,
   AlertCircle,
+  Mail,
   Send,
   Bot,
 } from "lucide-react";

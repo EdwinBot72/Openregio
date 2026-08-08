@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
-import { ArrowLeft, Building2, Calendar, CheckCircle, Clock, Globe, MapPin, User } from "lucide-react";
+import { ArrowLeft, BookOpen, Building2, Calendar, CheckCircle, Clock, Globe, MapPin, User } from "lucide-react";
 import { Link } from "wouter";
 
 type Inzending = {

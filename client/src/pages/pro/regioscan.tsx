@@ -29,6 +29,7 @@ import {
   RotateCw,
   Download,
   Mail,
+  MapPin,
   Send,
 } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
