@@ -1689,6 +1689,94 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
     }
   });
 
+  // ─── Diepe juridische analyse (lokale Ollama-agent, admin-only, async) ────────
+  // Gemini blijft de snelle standaard; dit is een optionele grondige analyse die
+  // op de achtergrond door de lokale agent wordt gedraaid (kan enkele minuten duren).
+  const AGENT_ANALYSE_URL = process.env.AGENT_ANALYSE_URL || "http://172.16.0.1:8090/api/analyse";
+  const deepQueue: string[] = [];
+  let deepBusy = false;
+
+  async function runDeepAnalysis(id: string, tekst: string) {
+    try {
+      const resp = await fetch(AGENT_ANALYSE_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          checkType: "algemeen",
+          userGoal: "Geef een grondige juridische analyse en concrete vervolgstappen.",
+          pastedText: tekst,
+        }),
+        signal: AbortSignal.timeout(600_000),
+      });
+      if (!resp.ok) throw new Error(`Agent gaf status ${resp.status}`);
+      const data = (await resp.json()) as { result?: string };
+      const result = data.result || "Geen resultaat ontvangen.";
+      await db.execute(sql`UPDATE deep_analyses SET status='klaar', result=${result}, completed_at=NOW() WHERE id=${id}`);
+    } catch (err: any) {
+      const message = err?.message || String(err);
+      console.error("[DeepAnalyse] mislukt:", message);
+      await db.execute(sql`UPDATE deep_analyses SET status='fout', error=${message}, completed_at=NOW() WHERE id=${id}`);
+    }
+  }
+
+  // Serialiseer: de CPU-agent kan maar één analyse tegelijk aan.
+  function processDeepQueue() {
+    if (deepBusy) return;
+    const next = deepQueue.shift();
+    if (!next) return;
+    deepBusy = true;
+    (async () => {
+      try {
+        const rows = (await db.execute(sql`SELECT tekst FROM deep_analyses WHERE id=${next}`)).rows as any[];
+        if (rows.length) await runDeepAnalysis(next, rows[0].tekst);
+      } finally {
+        deepBusy = false;
+        processDeepQueue();
+      }
+    })();
+  }
+
+  // Start een diepe analyse (admin-only). Antwoordt direct met een job-id.
+  app.post("/api/brief-analyse/deep", requireAdmin, async (req, res) => {
+    try {
+      const { tekst } = req.body;
+      if (!tekst || typeof tekst !== "string" || tekst.trim().length < 20) {
+        return res.status(400).json({ error: "Tekst te kort of ontbrekend (minimaal 20 tekens)" });
+      }
+      if (tekst.length > 20000) {
+        return res.status(400).json({ error: "Tekst te lang (maximaal 20000 tekens)" });
+      }
+      const userId = req.user!.id;
+      const rows = (await db.execute(sql`
+        INSERT INTO deep_analyses (user_id, tekst, status) VALUES (${userId}, ${tekst.trim()}, 'bezig') RETURNING id
+      `)).rows as any[];
+      const id = rows[0].id as string;
+      deepQueue.push(id);
+      const positie = deepQueue.length + (deepBusy ? 1 : 0);
+      processDeepQueue();
+      res.status(202).json({ id, status: "bezig", positieInWachtrij: positie });
+    } catch (err: any) {
+      console.error("[DeepAnalyse] start-fout:", err);
+      res.status(500).json({ error: "Kon diepe analyse niet starten" });
+    }
+  });
+
+  // Poll status/resultaat van een diepe analyse (admin-only, eigen job).
+  app.get("/api/brief-analyse/deep/:id", requireAdmin, async (req, res) => {
+    try {
+      const userId = req.user!.id;
+      const rows = (await db.execute(sql`
+        SELECT id, status, result, error, created_at, completed_at
+        FROM deep_analyses WHERE id=${req.params.id} AND user_id=${userId}
+      `)).rows as any[];
+      if (!rows.length) return res.status(404).json({ error: "Niet gevonden" });
+      res.json(rows[0]);
+    } catch (err: any) {
+      console.error("[DeepAnalyse] poll-fout:", err);
+      res.status(500).json({ error: "Kon status niet ophalen" });
+    }
+  });
+
   // Brief Analyse — bestand uploaden (PDF / afbeelding / tekst)
   app.post("/api/brief-analyse/upload", requirePro, uploadMemory.single('file'), async (req, res) => {
     try {

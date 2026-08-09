@@ -488,6 +488,22 @@ export async function runMigrations(): Promise<void> {
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_lokale_acties_interesse_actie ON lokale_acties_interesse(actie_id);`);
     console.log("[Migration] ✓ lokale_acties_interesse table ensured");
 
+    // Diepe juridische analyse (lokale Ollama-agent) — async job + resultaat.
+    await db.execute(sql`
+      CREATE TABLE IF NOT EXISTS deep_analyses (
+        id VARCHAR PRIMARY KEY DEFAULT gen_random_uuid()::text,
+        user_id VARCHAR NOT NULL,
+        tekst TEXT NOT NULL,
+        status VARCHAR(20) NOT NULL DEFAULT 'bezig',
+        result TEXT,
+        error TEXT,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        completed_at TIMESTAMPTZ
+      );
+    `);
+    await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_deep_analyses_user ON deep_analyses(user_id, created_at DESC);`);
+    console.log("[Migration] ✓ deep_analyses table ensured");
+
     console.log("[Migration] Database schema is up to date");
   } catch (error) {
     console.error("[Migration] Error running migrations:", error);
