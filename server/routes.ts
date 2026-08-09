@@ -1696,21 +1696,52 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
   const deepQueue: string[] = [];
   let deepBusy = false;
 
+  // Aanroep via de ingebouwde http-module: `fetch` (undici) kapt de response na
+  // 5 min headers-timeout af ("fetch failed"), en die kan hier niet verhoogd
+  // worden. De agent doet er bij lange brieven langer over, dus http met een
+  // socket-timeout van 15 min.
+  async function callAgent(tekst: string): Promise<string> {
+    const http = await import("node:http");
+    const url = new URL(AGENT_ANALYSE_URL);
+    const payload = JSON.stringify({
+      checkType: "algemeen",
+      userGoal: "Geef een grondige juridische analyse en concrete vervolgstappen.",
+      pastedText: tekst,
+    });
+    return await new Promise<string>((resolve, reject) => {
+      const req = http.request(
+        {
+          hostname: url.hostname,
+          port: url.port,
+          path: url.pathname,
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(payload) },
+          timeout: 900_000,
+        },
+        (res) => {
+          let data = "";
+          res.setEncoding("utf8");
+          res.on("data", (c) => (data += c));
+          res.on("end", () => {
+            if ((res.statusCode || 0) >= 400) return reject(new Error(`Agent gaf status ${res.statusCode}`));
+            try {
+              resolve((JSON.parse(data).result as string) || "Geen resultaat ontvangen.");
+            } catch {
+              reject(new Error("Ongeldig antwoord van agent"));
+            }
+          });
+        },
+      );
+      req.on("timeout", () => req.destroy(new Error("Agent-timeout (15 min)")));
+      req.on("error", reject);
+      req.write(payload);
+      req.end();
+    });
+  }
+
   async function runDeepAnalysis(id: string, tekst: string) {
     try {
-      const resp = await fetch(AGENT_ANALYSE_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          checkType: "algemeen",
-          userGoal: "Geef een grondige juridische analyse en concrete vervolgstappen.",
-          pastedText: tekst,
-        }),
-        signal: AbortSignal.timeout(600_000),
-      });
-      if (!resp.ok) throw new Error(`Agent gaf status ${resp.status}`);
-      const data = (await resp.json()) as { result?: string };
-      const result = data.result || "Geen resultaat ontvangen.";
+      const result = await callAgent(tekst);
       await db.execute(sql`UPDATE deep_analyses SET status='klaar', result=${result}, completed_at=NOW() WHERE id=${id}`);
     } catch (err: any) {
       const message = err?.message || String(err);
