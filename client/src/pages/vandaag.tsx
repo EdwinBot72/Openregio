@@ -150,8 +150,8 @@ export default function VandaagPage() {
                   </div>
                   <ArrowRight style={{ width: 16, height: 16, color: ORANJE, flexShrink: 0 }} />
                 </div>
-              ))
-            }
+              </Link>
+            ))}
           </div>
 
           <div style={{ ...card, padding: 20 }}>
