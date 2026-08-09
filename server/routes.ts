@@ -16,7 +16,7 @@ import { mollieStartRateLimit, contactFormRateLimit, geocodeRateLimit } from "./
 import { ObjectStorageService } from "./replit_integrations/object_storage";
 import { randomUUID, createHash } from "crypto";
 import { runRegioBot } from "./regiobot";
-import { BRIEFTYPES, isBrieftype, buildSystemPrompt, buildUserPrompt } from "./brieftypes";
+import { BRIEFTYPES, isBrieftype, buildSystemPrompt, buildUserPrompt, buildControleSystemPrompt, buildControleUserPrompt, CONTROLE_PUNTEN } from "./brieftypes";
 import { db } from "db";
 import { eq, sql, gte, lte, gt, and, count } from "drizzle-orm";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
@@ -2498,6 +2498,68 @@ Maak een complete, direct bruikbare WOO-brief.`;
         error: "Brief genereren mislukt",
         message: err?.message ?? String(err),
         action: "Probeer het opnieuw of neem contact op met support.",
+      });
+    }
+  });
+
+  // Controle-check — beoordeelt een ONTVANGEN besluit op bevoegdheid, motivering,
+  // zorgvuldigheid, termijn en rechtsmiddelen. Werkt uitsluitend op de aangeleverde
+  // tekst (geen verzonnen feiten). Gevonden gebreken = mogelijke gronden voor bezwaar.
+  app.get("/api/brieven/controle/punten", async (_req, res) => {
+    res.json(CONTROLE_PUNTEN.map((p) => ({ titel: p.titel, vraag: p.vraag, grondslag: p.grondslag })));
+  });
+
+  app.post("/api/brieven/controle", requirePro, authenticatedAiRateLimit, async (req, res) => {
+    try {
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({
+          error: "Controle is tijdelijk niet beschikbaar",
+          details: "De AI-configuratie is nog niet voltooid.",
+        });
+      }
+
+      const { besluitTekst, context } = req.body ?? {};
+      if (!besluitTekst || String(besluitTekst).trim().length < 40) {
+        return res.status(400).json({
+          error: "Geen besluittekst",
+          details: "Plak de tekst van het ontvangen besluit (minimaal enkele zinnen), zodat de controle iets heeft om te beoordelen.",
+        });
+      }
+
+      const OpenAI = (await import("openai")).default;
+      const openai = new OpenAI();
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: buildControleSystemPrompt() },
+          { role: "user", content: buildControleUserPrompt({ besluitTekst: String(besluitTekst).slice(0, 12000), context }) },
+        ],
+        temperature: 0.1,
+      });
+
+      const full = completion.choices[0]?.message?.content || "";
+      const pick = (label: string, next?: string) => {
+        const start = full.indexOf(`=== ${label} ===`);
+        if (start === -1) return "";
+        const from = start + `=== ${label} ===`.length;
+        const end = next ? full.indexOf(`=== ${next} ===`, from) : -1;
+        return full.slice(from, end === -1 ? undefined : end).trim();
+      };
+
+      res.json({
+        success: true,
+        controle: pick("CONTROLE", "AANDACHTSPUNTEN") || full,
+        aandachtspunten: pick("AANDACHTSPUNTEN", "LET OP"),
+        letop: pick("LET OP"),
+        fullContent: full,
+        metadata: { generatedAt: new Date().toISOString() },
+      });
+    } catch (err: any) {
+      console.error("Controle-check error:", err);
+      res.status(500).json({
+        error: "Controle mislukt",
+        message: err?.message ?? String(err),
       });
     }
   });

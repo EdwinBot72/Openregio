@@ -226,3 +226,112 @@ export function buildUserPrompt(
     .filter(Boolean)
     .join("\n");
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// CONTROLE-CHECK — beoordeelt een ONTVANGEN besluit/brief van de overheid.
+//
+// Dit is geen brief-generator maar een controle: het model beoordeelt UITSLUITEND
+// de aangeleverde besluittekst. Het kijkt of elk punt er wél/niet in staat en
+// verzint niets. Ontbrekende of gebrekkige punten worden mogelijke gronden voor
+// bezwaar — met de woorden van de gebruiker, niet met verzonnen feiten.
+// ────────────────────────────────────────────────────────────────────────────
+
+export interface ControlePunt {
+  titel: string;
+  vraag: string; // Wat controleer je?
+  grondslag: string; // Waarom het ertoe doet (echt Awb-artikel).
+}
+
+export const CONTROLE_PUNTEN: ControlePunt[] = [
+  {
+    titel: "Wie heeft het opgemaakt (naam en functie)",
+    vraag: "Staat er een naam én functie van de persoon die het besluit nam of ondertekende?",
+    grondslag:
+      "Een besluit hoort herleidbaar te zijn tot een verantwoordelijke persoon. Een louter anoniem 'de gemeente' zonder naam of functie is een signaal om door te vragen.",
+  },
+  {
+    titel: "Bevoegdheid en mandaat",
+    vraag: "Is vermeld namens welk bevoegd bestuursorgaan is besloten en op welke grondslag/mandaat de ondertekenaar handelde?",
+    grondslag:
+      "Bij een gemandateerd besluit moet worden vermeld namens welk bestuursorgaan het is genomen (artikel 10:10 Awb). Ontbreekt dat, dan is de bevoegdheid niet controleerbaar.",
+  },
+  {
+    titel: "Wettelijke grondslag",
+    vraag: "Noemt het besluit de wettelijke basis (welke wet, welk artikel of welke verordening)?",
+    grondslag:
+      "Een belastend besluit hoort te berusten op een kenbare wettelijke grondslag. Zonder vermelde grondslag kun je niet nagaan of de bevoegdheid bestaat.",
+  },
+  {
+    titel: "Motivering",
+    vraag: "Is uitgelegd waaróm dit besluit is genomen, met concrete redenen?",
+    grondslag: "Een besluit moet deugdelijk zijn gemotiveerd (artikel 3:46 Awb).",
+  },
+  {
+    titel: "Zorgvuldige feiten",
+    vraag: "Blijkt dat de gemeente de feiten heeft onderzocht en jouw kant heeft meegewogen?",
+    grondslag: "Een besluit moet zorgvuldig worden voorbereid; de nodige feiten en belangen worden vergaard (artikel 3:2 Awb).",
+  },
+  {
+    titel: "Horen / vooraankondiging",
+    vraag: "Is er een waarschuwing of gelegenheid tot een zienswijze geweest vóór dit besluit?",
+    grondslag: "Bij een belastend besluit hoort de belanghebbende in beginsel eerst gehoord te worden (artikel 4:8 Awb).",
+  },
+  {
+    titel: "Evenredigheid",
+    vraag: "Staat de maatregel (en de termijn/hoogte) in redelijke verhouding tot wat er speelt?",
+    grondslag: "De nadelige gevolgen mogen niet onevenredig zijn in verhouding tot het doel (artikel 3:4, tweede lid, Awb).",
+  },
+  {
+    titel: "Begunstigingstermijn (bij last onder dwangsom)",
+    vraag: "Krijg je een redelijke termijn om de situatie te herstellen vóór de dwangsom gaat lopen?",
+    grondslag: "Bij een last onder dwangsom hoort een begunstigingstermijn die redelijk is om aan de last te voldoen (artikel 5:32a, tweede lid, Awb).",
+  },
+  {
+    titel: "Rechtsmiddelenclausule en termijn",
+    vraag: "Staat erin hoe, bij wie en binnen welke termijn (6 weken) je bezwaar of beroep kunt maken?",
+    grondslag: "Onder een besluit hoort te staan welk rechtsmiddel openstaat, bij wie en binnen welke termijn (artikel 3:45 Awb); de bezwaartermijn is 6 weken (artikel 6:7 Awb).",
+  },
+];
+
+const CONTROLE_DISCLAIMER =
+  "Deze controle is een hulpmiddel op basis van alleen de tekst die jij hebt " +
+  "geplakt, met AI-ondersteuning. Het is geen juridisch advies en geen volledige " +
+  "toets. Een 'aandachtspunt' betekent niet automatisch dat het besluit onrechtmatig " +
+  "is. Controleer alles zelf in je originele besluit en laat het bij een belangrijk " +
+  "belang nakijken door een jurist of het Juridisch Loket. Jij beslist wat je doet.";
+
+export function buildControleSystemPrompt(): string {
+  return `Je bent een zorgvuldige controleur voor OpenRegio. Je beoordeelt een ONTVANGEN besluit of brief van de overheid voor een burger of ondernemer. Je schrijft GEEN brief; je controleert.
+
+ABSOLUUT BELANGRIJK:
+- Beoordeel UITSLUITEND de besluittekst die de gebruiker aanlevert. Verzin niets: geen feiten, geen namen, geen data, geen artikelen, geen citaten die er niet staan.
+- Per controlepunt bepaal je of het in de aangeleverde tekst staat. Antwoord met één status: [IN ORDE], [ONTBREEKT] of [ONDUIDELIJK].
+- Staat iets niet in de tekst, kies dan [ONTBREEKT] of [ONDUIDELIJK] — vul het NOOIT zelf in.
+- Als je iets aanhaalt uit de tekst, gebruik dan een kort, letterlijk citaat tussen aanhalingstekens. Kun je niet letterlijk citeren, citeer dan niet.
+- Dit is bestuursrecht. Eén verzonnen constatering kan iemand schaden. Bij twijfel: [ONDUIDELIJK] en de gebruiker laten nakijken.
+- Rustige, feitelijke toon. Geen dreiging, geen activisme.
+
+Controleer deze punten, in deze volgorde:
+${CONTROLE_PUNTEN.map((p, i) => `${i + 1}. ${p.titel} — ${p.vraag} (grondslag: ${p.grondslag})`).join("\n")}
+
+Lever je antwoord in exact deze drie blokken:
+=== CONTROLE ===
+Per punt één regel: [STATUS] Titel — korte toelichting op basis van de tekst (met kort citaat als dat kan).
+=== AANDACHTSPUNTEN ===
+Alleen de punten met [ONTBREEKT] of [ONDUIDELIJK], als korte, feitelijke vraag/grond die de gebruiker kan gebruiken voor bezwaar. Formuleer als "Aandachtspunt: ..." Verzin geen onderbouwing; als de gebruiker iets moet aanvullen, schrijf "[uw onderbouwing]".
+=== LET OP ===
+${CONTROLE_DISCLAIMER}`;
+}
+
+export function buildControleUserPrompt(input: { besluitTekst: string; context?: string }): string {
+  return [
+    input.context ? `Situatie van de gebruiker: ${input.context}` : ``,
+    ``,
+    `Hieronder staat de ontvangen besluittekst. Controleer alleen deze tekst:`,
+    `--- BEGIN BESLUITTEKST ---`,
+    input.besluitTekst,
+    `--- EINDE BESLUITTEKST ---`,
+  ]
+    .filter(Boolean)
+    .join("\n");
+}
