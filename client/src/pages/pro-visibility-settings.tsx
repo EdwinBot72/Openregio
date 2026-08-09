@@ -43,7 +43,7 @@ export default function ProVisibilitySettings() {
             ))}
           </ul>
           <Button className="w-full" asChild data-testid="button-upgrade-pro">
-            <Link href="/lidmaatschap?plan=pro">Upgrade naar Pro — €59/mnd</Link>
+            <Link href="/lidmaatschap?plan=pro">Upgrade naar Pro — €24/mnd</Link>
           </Button>
           <p className="text-xs text-muted-foreground text-center">excl. btw · maandelijks opzegbaar</p>
         </div>

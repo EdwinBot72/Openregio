@@ -25,8 +25,8 @@ export default function VoorwaardenPage() {
           <h3>2.1 Typen lidmaatschap</h3>
           <p>OpenRegio biedt twee soorten lidmaatschappen:</p>
           <ul>
-            <li><strong>Basis (€14,95/maand excl. BTW):</strong> Meekijken, bedrijfsprofiel, lokaal meedoen</li>
-            <li><strong>Pro (€59/maand excl. BTW):</strong> Alle Basis functies plus alle tools, AI, WOO en volledige zichtbaarheid</li>
+            <li><strong>Basis (€12,95/maand excl. BTW):</strong> Meekijken, bedrijfsprofiel, lokaal meedoen</li>
+            <li><strong>Pro (€24/maand excl. BTW):</strong> Alle Basis functies plus alle tools, AI, WOO en volledige zichtbaarheid</li>
           </ul>
           <h3>2.2 Registratie</h3>
           <p>Door een account aan te maken, ga je akkoord met deze voorwaarden. Je bent verantwoordelijk voor de juistheid van je gegevens en het geheimhouden van je inloggegevens.</p>

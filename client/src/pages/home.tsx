@@ -405,7 +405,7 @@ export default function HomePage() {
                 <div style={{ fontSize: 13, color: "#64748b", marginTop: 4 }}>Voor ondernemers die willen starten</div>
               </div>
               <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-                <span style={{ fontSize: 40, fontWeight: 900, color: BLAUW }}>€14,95</span>
+                <span style={{ fontSize: 40, fontWeight: 900, color: BLAUW }}>€12,95</span>
                 <span style={{ fontSize: 14, color: "#64748b" }}>/maand</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
@@ -432,7 +432,7 @@ export default function HomePage() {
                 <div style={{ fontSize: 13, color: "rgba(255,255,255,0.65)", marginTop: 4 }}>Alles wat een ondernemer nodig heeft</div>
               </div>
               <div style={{ display: "flex", alignItems: "baseline", gap: 4 }}>
-                <span style={{ fontSize: 40, fontWeight: 900, color: "#fff" }}>€59</span>
+                <span style={{ fontSize: 40, fontWeight: 900, color: "#fff" }}>€24</span>
                 <span style={{ fontSize: 14, color: "rgba(255,255,255,0.65)" }}>/maand</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
