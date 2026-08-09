@@ -16,6 +16,7 @@ import { mollieStartRateLimit, contactFormRateLimit, geocodeRateLimit } from "./
 import { ObjectStorageService } from "./replit_integrations/object_storage";
 import { randomUUID, createHash } from "crypto";
 import { runRegioBot } from "./regiobot";
+import { BRIEFTYPES, isBrieftype, buildSystemPrompt, buildUserPrompt } from "./brieftypes";
 import { db } from "db";
 import { eq, sql, gte, lte, gt, and, count } from "drizzle-orm";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
@@ -2391,6 +2392,112 @@ Maak een complete, direct bruikbare WOO-brief.`;
         error: "WOO-brief genereren mislukt",
         message: err?.message ?? String(err),
         action: "Probeer het opnieuw of neem contact op met support."
+      });
+    }
+  });
+
+  // Brieven-motor — meerdere briefsoorten (WOO, bezwaar, zienswijze, regels-vraag)
+  // met vaste structuur, échte juridische grondslag, controleslag en jurist-check.
+  app.get("/api/brieven/types", async (_req, res) => {
+    res.json(
+      Object.values(BRIEFTYPES).map((s) => ({
+        type: s.type,
+        label: s.label,
+        wanneer: s.wanneer,
+        verplichteVelden: s.verplichteVelden,
+      })),
+    );
+  });
+
+  app.post("/api/brieven/generate", requirePro, authenticatedAiRateLimit, async (req, res) => {
+    try {
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({
+          error: "Brieven-motor is tijdelijk niet beschikbaar",
+          details: "De AI-configuratie is nog niet voltooid.",
+          action: "Vraag de beheerder om de AI te configureren.",
+        });
+      }
+
+      const { brieftype, bestuursorgaan, onderwerp, context, gevraagd } = req.body ?? {};
+
+      if (!isBrieftype(brieftype)) {
+        return res.status(400).json({
+          error: "Onbekende briefsoort",
+          details: `Kies een geldige briefsoort: ${Object.keys(BRIEFTYPES).join(", ")}.`,
+        });
+      }
+      if (!bestuursorgaan || !onderwerp) {
+        return res.status(400).json({
+          error: "Onvolledige aanvraag",
+          details: "Bestuursorgaan en onderwerp zijn verplicht.",
+          action: "Vul alle verplichte velden in.",
+        });
+      }
+
+      const spec = BRIEFTYPES[brieftype];
+      const today = new Date().toLocaleDateString("nl-NL", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+
+      const OpenAI = (await import("openai")).default;
+      const openai = new OpenAI();
+
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o-mini",
+        messages: [
+          { role: "system", content: buildSystemPrompt(spec) },
+          {
+            role: "user",
+            content: buildUserPrompt(spec, {
+              bestuursorgaan,
+              onderwerp,
+              context,
+              gevraagd,
+              datum: today,
+            }),
+          },
+        ],
+        temperature: 0.4,
+      });
+
+      const full = completion.choices[0]?.message?.content || "";
+
+      // Splits op de vaste koppen; val terug op de hele tekst als een kop mist.
+      const pick = (label: string, next?: string) => {
+        const start = full.indexOf(`=== ${label} ===`);
+        if (start === -1) return "";
+        const from = start + `=== ${label} ===`.length;
+        const end = next ? full.indexOf(`=== ${next} ===`, from) : -1;
+        return full.slice(from, end === -1 ? undefined : end).trim();
+      };
+
+      const brief = pick("BRIEF", "CONTROLESLAG");
+      const controleslag = pick("CONTROLESLAG", "LET OP");
+      const letop = pick("LET OP");
+
+      res.json({
+        success: true,
+        brieftype,
+        label: spec.label,
+        letter: brief || full,
+        controleslag: controleslag || spec.controleslag.map((c) => `- ${c}`).join("\n"),
+        letop,
+        fullContent: full,
+        metadata: {
+          bestuursorgaan,
+          onderwerp,
+          generatedAt: new Date().toISOString(),
+        },
+      });
+    } catch (err: any) {
+      console.error("Brieven-motor error:", err);
+      res.status(500).json({
+        error: "Brief genereren mislukt",
+        message: err?.message ?? String(err),
+        action: "Probeer het opnieuw of neem contact op met support.",
       });
     }
   });
