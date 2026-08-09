@@ -542,7 +542,7 @@ export default function RegioBotPage() {
                   <p className="text-xs text-center text-muted-foreground">
                     Basis: 3 routes per dag &nbsp;·&nbsp;{" "}
                     <Link href="/lidmaatschap?plan=pro" className="text-primary hover:underline">
-                      Upgrade naar Pro voor 50/maand
+                      Upgrade naar Pro voor €24/maand
                     </Link>
                   </p>
                 ) : null}
