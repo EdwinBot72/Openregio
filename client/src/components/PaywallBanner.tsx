@@ -52,7 +52,7 @@ export function PaywallBanner({
                   Coöperatief platform
                 </Badge>
                 <span className="text-xs text-muted-foreground">
-                  Vanaf €14,95/maand excl. BTW
+                  Vanaf €12,95/maand excl. BTW
                 </span>
               </div>
             </div>
