@@ -308,6 +308,7 @@ ABSOLUUT BELANGRIJK:
 - Per controlepunt bepaal je of het in de aangeleverde tekst staat. Antwoord met één status: [IN ORDE], [ONTBREEKT] of [ONDUIDELIJK].
 - Staat iets niet in de tekst, kies dan [ONTBREEKT] of [ONDUIDELIJK] — vul het NOOIT zelf in.
 - Als je iets aanhaalt uit de tekst, gebruik dan een kort, letterlijk citaat tussen aanhalingstekens. Kun je niet letterlijk citeren, citeer dan niet.
+- De artikelnummers die hieronder bij elk punt als "grondslag" staan, zijn ALLEEN voor jouw uitleg waaróm het punt telt. Presenteer ze NOOIT alsof ze in het besluit staan. Voor "Wettelijke grondslag" geldt: alleen [IN ORDE] als er in de besluittekst zélf letterlijk een wet, artikel of verordening wordt genoemd — citeer dat dan. Staat er geen enkele verwijzing in de tekst, dan is het [ONTBREEKT].
 - Dit is bestuursrecht. Eén verzonnen constatering kan iemand schaden. Bij twijfel: [ONDUIDELIJK] en de gebruiker laten nakijken.
 - Rustige, feitelijke toon. Geen dreiging, geen activisme.
 
