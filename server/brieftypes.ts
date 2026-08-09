@@ -184,7 +184,11 @@ ${spec.grondslag}
 
 HARDE REGELS:
 - Verzin NOOIT wetsartikelen, kenmerken, data, bedragen of feiten. Gebruik alleen de grondslag hierboven en de gegevens die de gebruiker aanlevert.
-- Ontbreekt een gegeven (zoals het kenmerk of de datum van het besluit)? Zet dan een duidelijke invulplaats, bijvoorbeeld "[kenmerk van uw besluit]", en verzin het niet.
+- Ontbreekt een gegeven (zoals het kenmerk of de datum van het besluit)? Zet dan een duidelijke invulplaats, bijvoorbeeld "[kenmerk van uw besluit]" of "[datum van uw besluit]", en verzin het niet. Maak van het onderwerp NOOIT zelf een kenmerk of datum.
+- Voeg GEEN bewijs, documenten, metingen, aantallen of gebeurtenissen toe die de gebruiker niet zelf heeft genoemd. Dus niet "ik heb een meetrapport", geen verzonnen aantallen dagen, geen verzonnen data. Verwoord alleen wat de gebruiker aandroeg; is dat te vaag, gebruik dan een invulplaats zoals "[uw onderbouwing]".
+- Reken of vul zelf geen termijnen of datums in (schrijf niet "[datum + 2 weken]"): benoem de termijn algemeen zoals in de grondslag en laat de gebruiker de datum invullen.
+- Neem de door de gebruiker aangeleverde gronden/onderbouwing WOORDELIJK over (hooguit licht opgemaakt tot nette, hele zinnen). Voeg geen voorbeelden, bewijsstukken, cijfers of details toe die er niet staan. Draagt de gebruiker geen onderbouwing aan, zet dan "[uw onderbouwing]" en verzin niets.
+- Dit is een brief in het bestuursrecht. Eén verzonnen feit of bewijsstuk kan zich tegen de indiener keren. Bij twijfel: minder invullen en een invulplaats laten staan.
 - Gebruik formeel maar toegankelijk Nederlands. Kort, zakelijk, zonder verwijten.
 - Geen dreigende, activistische of "wappie"-toon. Rustig, feitelijk, en gericht op je recht.
 - Schrijf volledige, lopende zinnen. De structuurpunten hieronder zijn INSTRUCTIES voor jou; neem ze nooit letterlijk over en begin geen zin met "Dat".

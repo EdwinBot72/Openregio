@@ -2460,7 +2460,7 @@ Maak een complete, direct bruikbare WOO-brief.`;
             }),
           },
         ],
-        temperature: 0.4,
+        temperature: 0.2,
       });
 
       const full = completion.choices[0]?.message?.content || "";
