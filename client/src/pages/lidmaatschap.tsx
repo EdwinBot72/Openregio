@@ -11,7 +11,7 @@ const PLANS = {
   basic: {
     id: "basic" as PlanId,
     name: "Basis",
-    price: "€14,95",
+    price: "€12,95",
     period: "excl. btw per maand",
     tagline: "Meekijken, profiel aanmaken en lokaal meedoen.",
     affiliate: "€4,95 affiliate per aangebrachte klant",
@@ -32,7 +32,7 @@ const PLANS = {
   pro: {
     id: "pro" as PlanId,
     name: "Pro",
-    price: "€59",
+    price: "€24",
     period: "excl. btw per maand",
     tagline: "Alle tools, onbeperkt gebruik en maximale zichtbaarheid.",
     affiliate: "€9 affiliate per aangebrachte klant",
