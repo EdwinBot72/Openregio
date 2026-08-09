@@ -187,6 +187,8 @@ HARDE REGELS:
 - Ontbreekt een gegeven (zoals het kenmerk of de datum van het besluit)? Zet dan een duidelijke invulplaats, bijvoorbeeld "[kenmerk van uw besluit]", en verzin het niet.
 - Gebruik formeel maar toegankelijk Nederlands. Kort, zakelijk, zonder verwijten.
 - Geen dreigende, activistische of "wappie"-toon. Rustig, feitelijk, en gericht op je recht.
+- Schrijf volledige, lopende zinnen. De structuurpunten hieronder zijn INSTRUCTIES voor jou; neem ze nooit letterlijk over en begin geen zin met "Dat".
+- Zet bovenaan de brief de plaats en de datum (gebruik "[plaats]" als de plaats onbekend is), daaronder het bestuursorgaan als geadresseerde, en pas daarna de aanhef.
 - Volg exact deze structuur, in deze volgorde:
 ${spec.structuur.map((s, i) => `  ${i + 1}. ${s}`).join("\n")}
 
