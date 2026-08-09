@@ -335,7 +335,7 @@ async function fetchContext({ question, regionSlug, authoritySlug, tags, limit }
         from woo_requests r
         left join regions rg on rg.id = r.region_id
         left join authorities au on au.id = r.authority_id
-        ${where.replaceAll("d.", "''::text || ")}
+        ${where.replace(/d\.\w+/g, "''::text")}
         order by coalesce(r.sent_at, r.created_at) desc
         limit $${p2.length}
         `,
