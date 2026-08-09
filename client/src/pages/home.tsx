@@ -409,7 +409,7 @@ export default function HomePage() {
                 <span style={{ fontSize: 14, color: "#64748b" }}>/maand</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                {["Regio updates", "Gemeentepublicaties", "Subsidieoverzicht", "Basis netwerk", "Lokale marktplaats", "Brief analyse (beperkt)"].map((f) => (
+                {["Regio updates", "Gemeentepublicaties", "Kansen in je regio", "Basis netwerk", "Lokale marktplaats", "Brief analyse (beperkt)"].map((f) => (
                   <div key={f} style={{ display: "flex", alignItems: "center", gap: 10, fontSize: 14, color: "#374151" }}>
                     <span style={{ color: "#10b981", fontWeight: 700, fontSize: 15 }}>✓</span> {f}
                   </div>

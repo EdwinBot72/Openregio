@@ -64,7 +64,6 @@ export const MAIN_NAV: NavSection[] = [
     icon: TrendingUp,
     sub: [
       { title: "Opdrachten", url: "/kansen/opdrachten", icon: Landmark },
-      { title: "Subsidies", url: "/kansen/subsidies", icon: Euro },
       { title: "In de buurt", url: "/kansen/in-de-buurt", icon: MapPin },
       { title: "Marktanalyse", url: "/kansen/marktanalyse", icon: BarChart },
       { title: "Marktplaats (vraag & rommelmarkt)", url: "/lokaal-marktplaats", icon: Handshake },

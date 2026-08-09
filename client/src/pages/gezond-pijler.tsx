@@ -33,17 +33,17 @@ const PIJLERS: Record<string, Pijler> = {
     eyebrow: "Pijler 1 — Financieel gezond",
     title: "Financieel gezond ondernemen",
     intro:
-      "Vind opdrachten, subsidies en kansen in je regio voordat ze elders weglopen.",
+      "Vind opdrachten en kansen in je regio voordat ze elders weglopen.",
     lead:
-      "Financieel gezond betekent dat er regelmatig nieuw werk binnenkomt en dat je geen kansen mist die nét om de hoek liggen. OpenRegio brengt opdrachten, subsidies en lokale signalen samen, zodat je niet hoeft te speuren maar kunt kiezen.",
+      "Financieel gezond betekent dat er regelmatig nieuw werk binnenkomt en dat je geen kansen mist die nét om de hoek liggen. OpenRegio brengt opdrachten en lokale signalen samen, zodat je niet hoeft te speuren maar kunt kiezen.",
     acties: [
       {
         title: "Bekijk de aanbestedingen en opdrachten in jouw regio",
         text: "Filter op gemeente en branche en zie meteen wat past bij wat jij doet — zonder eindeloze TenderNed-zoektocht.",
       },
       {
-        title: "Check welke subsidies en regelingen voor jou gelden",
-        text: "Krijg een overzicht van regelingen, fondsen en MKB-subsidies die op jouw situatie van toepassing zijn.",
+        title: "Houd grip op je verplichtingen en risico's",
+        text: "Zie in één oogopslag welke regels, termijnen en verplichtingen spelen — zodat je niets mist en niet verrast wordt.",
       },
       {
         title: "Volg kansen-signalen uit je buurt",
@@ -52,7 +52,7 @@ const PIJLERS: Record<string, Pijler> = {
     ],
     modules: [
       { href: "/kansen/opdrachten", label: "Opdrachten & aanbestedingen", description: "Lokale en landelijke aanbestedingen op één plek." },
-      { href: "/kansen/subsidies", label: "Subsidies & financiering", description: "Regelingen die bij jouw bedrijf passen." },
+      { href: "/regels/updates", label: "Regels & verplichtingen", description: "Wat er verandert en wat het voor jou betekent." },
       { href: "/kansen/in-de-buurt", label: "Kansen in de buurt", description: "Wat speelt er nu rond jouw vestiging?" },
     ],
   },

@@ -183,7 +183,7 @@ function AuthenticatedRouter() {
         <Redirect to="/vandaag/acties" />
       </Route>
       <Route path="/kansen/financiering">
-        <Redirect to="/kansen/subsidies" />
+        <Redirect to="/kansen/opdrachten" />
       </Route>
 
       {/* ── Basis-sectie redirects ────────────────────────────────────────── */}
@@ -224,7 +224,9 @@ function AuthenticatedRouter() {
 
       {/* ── Kansen (Sectie 2) ─────────────────────────────────────────────── */}
       <Route path="/kansen/opdrachten" component={AanbestedingenPage} />
-      <Route path="/kansen/subsidies" component={FinancieringPage} />
+      <Route path="/kansen/subsidies">
+        <Redirect to="/kansen/opdrachten" />
+      </Route>
       <Route path="/kansen/in-de-buurt" component={KansenInDeBuurtPage} />
       <Route path="/kansen/marktanalyse" component={KansenMarktanalysePage} />
       <Route path="/kansen/samenwerkingen">

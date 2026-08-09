@@ -49,7 +49,7 @@ const KEUZE_BLOKKEN = [
   {
     icon: TrendingUp,
     label: "Ik wil kansen in mijn regio zien",
-    sub: "Subsidies, aanbestedingen en regio-updates",
+    sub: "Aanbestedingen, opdrachten en regio-updates",
     href: "/kansen-in-de-buurt",
     color: "text-[#f28a1a] dark:text-[#f28a1a]",
     bg: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/40",
@@ -82,7 +82,7 @@ const STAPPEN = [
   {
     nr: 3,
     titel: "Bekijk regio-updates",
-    omschrijving: "Bekijk welke regelgeving, subsidies en beleid er actueel zijn.",
+    omschrijving: "Bekijk welke regelgeving en beleid er actueel zijn.",
     icon: TrendingUp,
     url: "/intel",
     kleur: "text-[#0b2240] dark:text-[#0b2240]",

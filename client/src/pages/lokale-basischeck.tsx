@@ -160,19 +160,19 @@ const CATEGORIEEN: Categorie[] = [
   },
   {
     id: "subsidies",
-    titel: "Subsidies & Kansen",
-    subtitel: "Laat je geen geld liggen?",
+    titel: "Kansen & weerbaarheid",
+    subtitel: "Pak je de kansen die er echt zijn?",
     icon: Euro,
     kleur: "text-[#f28a1a] dark:text-[#f28a1a]",
     bg: "bg-[#f28a1a]/10 dark:bg-[#f28a1a]/10",
     vragen: [
       {
         id: "gemeentelijk_subsidie",
-        titel: "Ben je op de hoogte van subsidies van jouw gemeente voor ondernemers?",
-        toelichting: "Denk aan starterssubsidies, verduurzamingsfondsen, innovatievouchers of coronaherstelfondsen.",
-        tip: "Kijk op de website van je gemeente onder 'subsidies voor ondernemers'. Veel regelingen zijn onbekend maar beschikbaar.",
-        href: "/kansen/financiering",
-        hrefLabel: "Bekijk subsidie-overzicht",
+        titel: "Weet je welke regels en verplichtingen jouw gemeente voor ondernemers hanteert?",
+        toelichting: "Denk aan vergunningen, lokale verordeningen en meldplichten die jouw bedrijf raken.",
+        tip: "Kijk op de website van je gemeente onder 'ondernemers', of gebruik OpenRegio om de regels helder te krijgen.",
+        href: "/regels/updates",
+        hrefLabel: "Bekijk regels in je regio",
       },
       {
         id: "aanbestedingen",
@@ -184,16 +184,16 @@ const CATEGORIEEN: Categorie[] = [
       },
       {
         id: "verduurzaming",
-        titel: "Ken je de energiesubsidies en verduurzamingsregelingen voor jouw sector?",
-        toelichting: "ISDE, EIA en SEEH zijn regelingen die veel ondernemers onbenut laten. Samen kan dit tienduizenden euros schelen.",
-        tip: "Gebruik de subsidiewijzer op rvo.nl voor een overzicht van regelingen passend bij jouw sector en investeringsplan.",
+        titel: "Volg je de ontwikkelingen in jouw sector die kansen of risico's brengen?",
+        toelichting: "Marktveranderingen, nieuwe regels en lokale ontwikkelingen kunnen jouw bedrijf raken — vaak eerder dan je denkt.",
+        tip: "Houd sector- en regiosignalen bij via OpenRegio, zodat je niet verrast wordt maar kunt kiezen.",
         href: "/intel",
-        hrefLabel: "Bekijk energie-updates",
+        hrefLabel: "Bekijk sector-updates",
       },
       {
         id: "ondernemersloket",
         titel: "Heb je contact gehad met het Ondernemersloket van je gemeente?",
-        toelichting: "Gemeenten hebben speciale loketten voor ondernemers met informatie over vergunningen, subsidies en regelgeving.",
+        toelichting: "Gemeenten hebben speciale loketten voor ondernemers met informatie over vergunningen en regelgeving.",
         tip: "Vraag een gesprek aan bij het Ondernemersloket. Zij kennen lokale regelingen die je online niet makkelijk vindt.",
       },
     ],
@@ -329,7 +329,7 @@ export default function LokaleBasischeckPage() {
           </div>
           <h1 className="text-2xl font-black text-white mb-2">Uitgebreide Lokale Basischeck</h1>
           <p className="text-white/75 text-sm leading-relaxed max-w-lg">
-            In 5 thema's en {totaalVragen} gerichte vragen breng je in kaart hoe je bedrijf ervoor staat — op regelgeving, online zichtbaarheid, lokale verankering, subsidies en omgang met de overheid.
+            In 5 thema's en {totaalVragen} gerichte vragen breng je in kaart hoe je bedrijf ervoor staat — op regelgeving, online zichtbaarheid, lokale verankering, weerbaarheid en omgang met de overheid.
           </p>
           <div className="flex items-center gap-4 mt-5 flex-wrap">
             <span className="text-xs text-white/60">{totaalVragen} vragen</span>

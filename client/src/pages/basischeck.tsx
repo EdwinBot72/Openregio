@@ -420,7 +420,7 @@ export default function BasischeckPage() {
               </div>
               <h2 style={{ color: "#fff", fontSize: 18, fontWeight: 800, margin: "0 0 8px", justifyContent: "center" }}>Wil je dit elke week automatisch?</h2>
               <p style={{ fontSize: 13, color: "rgba(255,255,255,.75)", margin: "0 auto 16px", maxWidth: 420, lineHeight: 1.6 }}>
-                Als lid van OpenRegio ontvang je gepersonaliseerde updates, subsidie-alerts en een uitgebreide basischeck — elke week vers voor jouw sector en regio.
+                Als lid van OpenRegio ontvang je gepersonaliseerde updates, regel-alerts en een uitgebreide basischeck — elke week vers voor jouw sector en regio.
               </p>
               <div style={{ display: "flex", gap: 10, justifyContent: "center", flexWrap: "wrap" }}>
                 <Link href="/lidmaatschap">

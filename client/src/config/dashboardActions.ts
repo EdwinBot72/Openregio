@@ -60,7 +60,7 @@ export const DASHBOARD_ACTIONS: DashboardAction[] = [
     id: "regio",
     label: "Regio volgen",
     description: () =>
-      "Beleidsupdates, aanbestedingen en subsidies in jouw gemeente — dagelijks ververst. Wie het eerst weet, heeft een voorsprong.",
+      "Beleidsupdates en aanbestedingen in jouw gemeente — dagelijks ververst. Wie het eerst weet, heeft een voorsprong.",
     icon: Activity,
     href: () => "/kansen/gemeente-updates",
     cta: () => "Regio volgen",
