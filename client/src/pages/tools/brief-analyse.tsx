@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -28,6 +28,7 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/useAuth";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 interface AnalyseResultaat {
@@ -88,6 +89,44 @@ export default function BriefAnalysePage() {
   const [resultaat, setResultaat] = useState<AnalyseResultaat | null>(null);
   const [stappen, setStappen] = useState<Stappen>({ analyse: "wachten", verstuur: "wachten" });
   const [verstuurFout, setVerstuurFout] = useState<string | null>(null);
+
+  // ── Diepe analyse (admin-only, lokaal model, async) ──────────────────────
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin" || user?.role === "master";
+  const [deepId, setDeepId] = useState<string | null>(null);
+  const [deepStatus, setDeepStatus] = useState<"idle" | "bezig" | "klaar" | "fout">("idle");
+  const [deepResult, setDeepResult] = useState<string>("");
+  const [deepError, setDeepError] = useState<string>("");
+  const [deepSeconds, setDeepSeconds] = useState(0);
+
+  async function startDiepeAnalyse() {
+    if (tekst.trim().length < 20) return;
+    setDeepStatus("bezig"); setDeepResult(""); setDeepError(""); setDeepSeconds(0);
+    try {
+      const res = await apiRequest("POST", "/api/brief-analyse/deep", { tekst: tekst.trim() });
+      const data = await res.json();
+      setDeepId(data.id);
+    } catch (err) {
+      setDeepStatus("fout");
+      setDeepError(err instanceof Error ? err.message : "Kon diepe analyse niet starten");
+    }
+  }
+
+  // Poll de status zolang de analyse loopt.
+  useEffect(() => {
+    if (deepStatus !== "bezig" || !deepId) return;
+    const tick = setInterval(() => setDeepSeconds((s) => s + 1), 1000);
+    const poll = setInterval(async () => {
+      try {
+        const res = await fetch(`/api/brief-analyse/deep/${deepId}`, { credentials: "include" });
+        if (!res.ok) return;
+        const d = await res.json();
+        if (d.status === "klaar") { setDeepResult(d.result || ""); setDeepStatus("klaar"); }
+        else if (d.status === "fout") { setDeepError(d.error || "Onbekende fout"); setDeepStatus("fout"); }
+      } catch { /* blijf pollen bij tijdelijke fout */ }
+    }, 5000);
+    return () => { clearInterval(tick); clearInterval(poll); };
+  }, [deepStatus, deepId]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   /** Stuur bestand door naar externe AI agent */
@@ -330,6 +369,62 @@ export default function BriefAnalysePage() {
             </Button>
           </CardContent>
         </Card>
+
+        {/* ── Diepe analyse (admin-only, lokaal model) ──────────────── */}
+        {isAdmin && (
+          <Card className="border-dashed">
+            <CardContent className="pt-5 pb-5 space-y-3">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-md bg-muted"><Scale className="h-4 w-4 text-muted-foreground" /></div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-semibold">Diepe juridische analyse (lokaal)</h3>
+                  <p className="text-xs text-muted-foreground">Alleen voor beheerders. Draait op de eigen server en kan enkele minuten duren.</p>
+                </div>
+                <Badge variant="outline" className="text-xs shrink-0">Admin</Badge>
+              </div>
+
+              {deepStatus === "idle" && (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  onClick={startDiepeAnalyse}
+                  disabled={tekst.trim().length < 20}
+                  data-testid="button-diepe-analyse"
+                >
+                  <Scale className="h-4 w-4 mr-2" />
+                  Start diepe analyse
+                </Button>
+              )}
+              {deepStatus === "idle" && tekst.trim().length < 20 && (
+                <p className="text-xs text-muted-foreground">Plak eerst de brieftekst hierboven (modus “Tekst plakken”).</p>
+              )}
+
+              {deepStatus === "bezig" && (
+                <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Bezig met analyseren… ({deepSeconds}s) — je kunt dit rustig laten staan.
+                </div>
+              )}
+
+              {deepStatus === "fout" && (
+                <div className="flex items-start gap-2 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
+                  <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                  <span>Diepe analyse mislukt: {deepError}</span>
+                </div>
+              )}
+
+              {deepStatus === "klaar" && (
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-medium"><Scale className="h-4 w-4" />Resultaat diepe analyse</div>
+                  <pre className="whitespace-pre-wrap text-sm bg-muted rounded-lg p-3 max-h-[28rem] overflow-auto" data-testid="text-diepe-analyse">{deepResult}</pre>
+                  <Button size="sm" variant="ghost" onClick={() => { setDeepStatus("idle"); setDeepResult(""); setDeepId(null); }}>
+                    Opnieuw
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* ── Stappen-voortgang ─────────────────────────────────────── */}
         {(isBezig || resultaat) && (
