@@ -65,6 +65,7 @@ import RegelkaartPage from "@/pages/informatie/regelkaart";
 import CheckSituatiePage from "@/pages/actie/check-situatie";
 import KennisbankPage from "@/pages/informatie/kennisbank";
 import BriefAnalysePage from "@/pages/tools/brief-analyse";
+import ControlePage from "@/pages/tools/controle";
 import WebsiteScanPage from "@/pages/tools/website-scan";
 import RegelgevingVerkennerPage from "@/pages/regelgeving-verkenner";
 import IntelPage from "@/pages/intel";
@@ -241,6 +242,7 @@ function AuthenticatedRouter() {
       <Route path="/regels/help/:flowId" component={RegelsHelpFlowPage} />
       <Route path="/regels/check" component={CheckSituatiePage} />
       <Route path="/regels/documenten" component={BriefAnalysePage} />
+      <Route path="/regels/controle" component={ControlePage} />
       <Route path="/regels" component={RegelsOverzichtPage} />
 
       {/* ── Groei (Sectie 4) ──────────────────────────────────────────────── */}
