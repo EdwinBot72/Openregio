@@ -141,14 +141,17 @@ export default function HomePage() {
           <div className="or-hero-text" style={{ maxWidth: 460 }}>
             <div style={{ width: 40, height: 4, background: ORANJE, borderRadius: 2, margin: "0 0 20px" }} />
             <h1 style={{ fontSize: 36, fontWeight: 900, color: "#fff", lineHeight: 1.2, margin: "0 0 16px" }}>
-              Regels en kansen<br />zichtbaar in jouw regio.
+              Wij maken het systeem<br />zichtbaar voor jou.
             </h1>
-            <p style={{ fontSize: 16, color: "rgba(255,255,255,0.88)", lineHeight: 1.6, margin: "0 0 28px", maxWidth: 400 }}>
-              Vanuit de onderneming én de mens daarachter — met inzicht, workshops en praktische ondersteuning.
+            <p style={{ fontSize: 16, color: "rgba(255,255,255,0.88)", lineHeight: 1.6, margin: "0 0 14px", maxWidth: 430 }}>
+              Digitale ID, milieuzones, nieuwe regels — er komt veel op je af, en veel mensen zijn bang. Een bang mens tekent alles en vraagt niets.
+            </p>
+            <p style={{ fontSize: 16, color: "#fff", fontWeight: 700, lineHeight: 1.5, margin: "0 0 24px", maxWidth: 430 }}>
+              Wij helpen je het om te draaien: weet wat er speelt, begrijp of het eigenlijk wel mág, en kom in actie met je rechten in de hand.
             </p>
             <a href="#pricing">
               <button style={{ padding: "13px 28px", borderRadius: 8, fontSize: 15, fontWeight: 700, background: ORANJE, color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
-                Bekijk lidmaatschap <ArrowRight style={{ width: 16, height: 16 }} />
+                Begin vandaag <ArrowRight style={{ width: 16, height: 16 }} />
               </button>
             </a>
           </div>
@@ -164,6 +167,61 @@ export default function HomePage() {
           <p style={{ fontSize: 16, color: "#475569", lineHeight: 1.85, margin: 0 }}>
             Wij nemen wet- en regelgeving onder de loep, helpen bij gezond ondernemen en zorgen dat ondernemers sterker op de kaart staan in hun eigen regio. Praktisch, duidelijk en gericht op wat nú nodig is.
           </p>
+        </div>
+      </section>
+
+      {/* ── REBELS, MAAR GROUNDED ─────────────────────────────────────────── */}
+      <section style={{ background: BLAUW, padding: "56px 24px" }}>
+        <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
+          <p style={{ fontSize: 24, fontWeight: 900, color: "#fff", lineHeight: 1.4, margin: 0 }}>
+            Moed is niet de afwezigheid van angst.<br />
+            <span style={{ color: ORANJE }}>Het is je rechten kennen ondanks de angst.</span>
+          </p>
+        </div>
+
+        <div className="or-rebel-grid" style={{ maxWidth: 1120, margin: "40px auto 0", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 22 }}>
+          {[
+            {
+              label: "Jouw gegevens",
+              title: "Jouw keuze, niet je plicht",
+              spanning: "Er komt een digitale identiteit aan. Handig, zeggen ze. Maar wie heeft straks toegang tot jouw gegevens, en kun je nog nee zeggen?",
+              antwoord: "Digitaal waar het kan, menselijk waar het moet. Het recht om niet álles te delen en zelf te kiezen wanneer je iets gebruikt is geen achterlijkheid — dat is vrijheid.",
+            },
+            {
+              label: "Regels",
+              title: "Kloppen ze wel?",
+              spanning: "Een milieuzone, een vergunning, een nieuwe verplichting. Waarom raakt het de zzp'er met één bestelbus harder dan de vervuiler met een hele vloot?",
+              antwoord: "Wij zijn niet tegen schoon. Wij zijn tegen onevenredig. Bij elke regel: is dit proportioneel, en zijn de mensen die het raakt gehoord?",
+            },
+            {
+              label: "Van angst naar grip",
+              title: "Rust in plaats van angst",
+              spanning: "Er wordt veel met angst geregeerd — voor oorlog, voor tekort, voor de ander. En angst maakt volgzaam.",
+              antwoord: "Wij kiezen voor rust en helderheid: wat is er écht aan de hand, wat mag de overheid wel en niet, en waar sta jij in je recht? Je hoeft niet boos te zijn om sterk te staan.",
+            },
+          ].map((b) => (
+            <div key={b.title} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 12, padding: "26px 24px", textAlign: "left" }}>
+              <div style={{ fontSize: 12, fontWeight: 800, color: ORANJE, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>{b.label}</div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginBottom: 10 }}>{b.title}</div>
+              <p style={{ fontSize: 14, color: "rgba(255,255,255,0.6)", lineHeight: 1.7, margin: "0 0 10px" }}>{b.spanning}</p>
+              <p style={{ fontSize: 14, color: "rgba(255,255,255,0.9)", lineHeight: 1.7, margin: 0 }}>{b.antwoord}</p>
+            </div>
+          ))}
+        </div>
+
+        <div className="or-welniet-grid" style={{ maxWidth: 1120, margin: "22px auto 0", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 22, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 12, padding: "24px 26px" }}>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 800, color: "#4ade80", marginBottom: 6 }}>Wel</div>
+            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.72)", lineHeight: 1.7, margin: 0 }}>
+              Kritisch, onafhankelijk, aan de kant van de ondernemer en de burger. Gebouwd op de Grondwet, het EVRM, de privacywet en het beginsel dat de overheid haar eigen regels moet volgen.
+            </p>
+          </div>
+          <div>
+            <div style={{ fontSize: 14, fontWeight: 800, color: "#f87171", marginBottom: 6 }}>Niet</div>
+            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.72)", lineHeight: 1.7, margin: 0 }}>
+              Een complotkanaal. We roepen niet dat "ze" liegen of dat alles in scène staat. We doen iets sterkers: we vragen bewijs, en we houden de overheid aan de wet.
+            </p>
+          </div>
         </div>
       </section>
 
@@ -481,6 +539,8 @@ export default function HomePage() {
         @media (max-width: 960px) {
           .or-hero { min-height: 360px !important; }
           .or-pillars-grid { grid-template-columns: 1fr !important; }
+          .or-rebel-grid { grid-template-columns: 1fr !important; }
+          .or-welniet-grid { grid-template-columns: 1fr !important; }
           .or-agents-grid { grid-template-columns: 1fr !important; }
           .or-bottom-grid { grid-template-columns: 1fr !important; }
           .or-pricing-grid { grid-template-columns: 1fr !important; }
