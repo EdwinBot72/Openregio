@@ -213,6 +213,12 @@ export default function ControlePage() {
             {controleMutatie.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ShieldCheck className="w-4 h-4 mr-2" />}
             {controleMutatie.isPending ? "Bezig met controleren…" : "Controleer besluit"}
           </Button>
+          {controleMutatie.isPending && (
+            <p className="text-xs text-muted-foreground mt-2">
+              De controle draait op onze eigen server (jouw tekst blijft privé). Dit duurt
+              meestal ongeveer een minuut — laat dit venster open staan.
+            </p>
+          )}
         </CardContent>
       </Card>
 

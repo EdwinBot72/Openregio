@@ -2530,7 +2530,10 @@ Maak een complete, direct bruikbare WOO-brief.`;
       const openai = new OpenAI();
 
       const completion = await openai.chat.completions.create({
-        model: "gpt-4o-mini",
+        // Controle-check draait op het lichtere model: leest de aangeleverde tekst,
+        // past in het RAM (geen swap) en antwoordt in ~30-45s i.p.v. minuten.
+        // Brieven schrijven blijft op het zwaardere model (gpt-4o-mini alias = 7B).
+        model: "qwen2.5:3b",
         messages: [
           { role: "system", content: buildControleSystemPrompt() },
           { role: "user", content: buildControleUserPrompt({ besluitTekst: String(besluitTekst).slice(0, 12000), context }) },
