@@ -83,6 +83,7 @@ export const MAIN_NAV: NavSection[] = [
       { title: "Sectorregels", url: "/regels/sectorregels", icon: Shield },
       { title: "Wat komt eraan?", url: "/regels/ontwikkelingen", icon: Bell },
       { title: "Documenten opvragen", url: "/regels/documenten", icon: FileText },
+      { title: "Besluit controleren", url: "/regels/controle", icon: ShieldCheck },
     ],
   },
 
