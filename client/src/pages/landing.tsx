@@ -57,6 +57,39 @@ const audience = [
   },
 ];
 
+const rebelBlokken = [
+  {
+    spanningLabel: "Jouw gegevens",
+    title: "Jouw keuze, niet je plicht",
+    spanning:
+      "Er komt een digitale identiteit aan. Handig, zeggen ze. Maar wie heeft straks toegang tot jouw gegevens, en kun je nog nee zeggen?",
+    antwoord:
+      "Digitaal waar het kan, menselijk waar het moet. Het recht om niet álles te delen en zelf te kiezen wanneer je iets gebruikt is geen achterlijkheid — dat is vrijheid. Wij leggen uit wat mag en wat vrijwillig is.",
+    cta: "Ken je privacyrechten",
+    href: "#wordlid",
+  },
+  {
+    spanningLabel: "Regels",
+    title: "Kloppen ze wel?",
+    spanning:
+      "Een milieuzone, een vergunning, een nieuwe verplichting. Waarom raakt het de zzp'er met één bestelbus harder dan de vervuiler met een hele vloot?",
+    antwoord:
+      "Wij zijn niet tegen schoon. Wij zijn tegen onevenredig. Bij elke regel stellen we twee vragen: is dit proportioneel, en zijn de mensen die het raakt gehoord? Zo niet, dan is er een grond om iets te zeggen — netjes en op de wet.",
+    cta: "Controleer een besluit",
+    href: "#wordlid",
+  },
+  {
+    spanningLabel: "Van angst naar grip",
+    title: "Rust in plaats van angst",
+    spanning:
+      "Er wordt veel met angst geregeerd — voor oorlog, voor tekort, voor de ander. En angst maakt volgzaam.",
+    antwoord:
+      "Wij kiezen voor rust en helderheid. Wat is er écht aan de hand, wat mag de overheid wel en niet, en waar sta jij in je recht? Je hoeft niet boos te zijn om sterk te staan — je hoeft alleen te weten hoe het werkt.",
+    cta: "Begrijp je situatie",
+    href: "#wordlid",
+  },
+];
+
 const pillars = [
   {
     title: "RegioMarkt",
@@ -701,33 +734,32 @@ export default function LandingPage() {
         <div className="grid items-center gap-8 lg:grid-cols-2">
           <div>
             <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">
-              Inzicht maakt ondernemen voorspelbaarder.
+              Wij maken het systeem zichtbaar voor jou.
             </h1>
 
             <p className="mt-4 max-w-xl text-base text-white/70">
-              Onduidelijke regels en versnipperd werk kosten ondernemers meer tijd dan hun eigen vak.
+              Digitale ID, milieuzones, nieuwe regels — er komt veel op je af, en veel mensen
+              zijn bang. Begrijpelijk. Maar een bang mens tekent alles en vraagt niets.
             </p>
 
             <p className="mt-3 max-w-xl text-base text-white/70">
-              OpenRegio organiseert lokaal ondernemen rond vier vaste pijlers: werk in de regio, inzicht in regelgeving, lokale zichtbaarheid en operationele betrouwbaarheid.
+              Wij helpen je het om te draaien: weet wat er speelt, begrijp of het eigenlijk wel
+              mág, en kom in actie met je rechten in de hand.
             </p>
 
-            <p className="mt-3 max-w-xl text-base text-white/70">
-              Ondersteund door AI-agenten en RegioBot die documenten lezen zoals ze bedoeld zijn.
+            <p className="mt-4 max-w-xl text-base font-semibold" style={{ color: "#f28a1a" }}>
+              Je vecht niet tégen het systeem. Je houdt het systeem aan zijn eigen regels.
             </p>
 
-            <p className="mt-3 max-w-xl text-sm font-medium text-white/90">
-              Zo ontstaat rust, overzicht en continuïteit.
-            </p>
-
-            <p className="mt-3 text-sm font-semibold" style={{ color: "#0b2240" }}>
-              Elke regio die dit niet organiseert, verliest werk en grip zonder het te merken.
+            <p className="mt-3 max-w-xl text-sm text-white/60">
+              Geen complot, geen bangmakerij. Wel je rechten, de wet en de vraag: is dit
+              proportioneel — en wie heeft hierover beslist?
             </p>
 
             <div className="mt-6 flex flex-wrap gap-3">
-              <LandingButton href="#wordlid">Claim je regio</LandingButton>
-              <LandingButton href="/regiobot" variant="secondary">
-                Organiseer werk en regels
+              <LandingButton href="#wordlid">Begin vandaag</LandingButton>
+              <LandingButton href="#pijlers" variant="secondary">
+                Bekijk wat OpenRegio doet
               </LandingButton>
             </div>
           </div>
@@ -779,29 +811,50 @@ export default function LandingPage() {
       </section>
 
       <section className="mx-auto max-w-6xl px-4 pt-10">
-        <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-8">
-          <h2 className="text-2xl font-semibold sm:text-3xl">
-            Inzicht maakt ondernemen voorspelbaarder.
-          </h2>
-          
-          <p className="mt-4 max-w-2xl text-base text-white/70">
-            Onduidelijke regels en versnipperd werk kosten ondernemers meer tijd dan hun eigen vak.
+        <div className="rounded-2xl border border-white/10 bg-white/5 px-6 py-8 text-center">
+          <p className="mx-auto max-w-3xl text-xl font-semibold sm:text-2xl">
+            Moed is niet de afwezigheid van angst. Het is je rechten kennen ondanks de angst.
           </p>
+        </div>
+      </section>
 
-          <p className="mt-3 max-w-2xl text-base text-white/70">
-            OpenRegio organiseert lokaal ondernemen rond vier vaste pijlers:
-            werk in de regio, inzicht in regelgeving, lokale zichtbaarheid
-            en operationele betrouwbaarheid.
-          </p>
+      <section className="mx-auto max-w-6xl px-4 pt-10 pb-2">
+        <div className="grid gap-4 lg:grid-cols-3">
+          {rebelBlokken.map((b) => (
+            <LandingCard key={b.title} className="flex flex-col">
+              <div className="text-xs font-semibold uppercase tracking-wide" style={{ color: "#f28a1a" }}>
+                {b.spanningLabel}
+              </div>
+              <div className="mt-2 text-lg font-semibold">{b.title}</div>
+              <p className="mt-2 text-sm text-white/60">{b.spanning}</p>
+              <p className="mt-3 text-sm text-white/80">{b.antwoord}</p>
+              <div className="mt-auto pt-4">
+                <a href={b.href} className="text-sm font-semibold text-white hover:opacity-90">
+                  {b.cta} →
+                </a>
+              </div>
+            </LandingCard>
+          ))}
+        </div>
+      </section>
 
-          <p className="mt-3 max-w-2xl text-base text-white/70">
-            Ondersteund door AI-agenten
-            en RegioBot dat documenten leest zoals ze bedoeld zijn.
-          </p>
-
-          <p className="mt-4 text-sm font-medium text-white/90">
-            Zo ontstaat rust, overzicht en continuïteit.
-          </p>
+      <section className="mx-auto max-w-6xl px-4 pt-6">
+        <div className="grid gap-4 rounded-2xl border border-white/10 bg-white/5 px-6 py-6 sm:grid-cols-2">
+          <div>
+            <div className="text-sm font-semibold" style={{ color: "#1a6b3a" }}>Wel</div>
+            <p className="mt-1 text-sm text-white/70">
+              Kritisch, onafhankelijk, aan de kant van de ondernemer en de burger. Gebouwd op
+              de Grondwet, het EVRM, de privacywet en het beginsel dat de overheid haar eigen
+              regels moet volgen.
+            </p>
+          </div>
+          <div>
+            <div className="text-sm font-semibold" style={{ color: "#b3261e" }}>Niet</div>
+            <p className="mt-1 text-sm text-white/70">
+              Een complotkanaal. We roepen niet dat "ze" liegen of dat alles in scène staat.
+              We doen iets sterkers: we vragen bewijs, en we houden de overheid aan de wet.
+            </p>
+          </div>
         </div>
       </section>
 
