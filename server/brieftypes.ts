@@ -336,3 +336,165 @@ export function buildControleUserPrompt(input: { besluitTekst: string; context?:
     .filter(Boolean)
     .join("\n");
 }
+
+// ────────────────────────────────────────────────────────────────────────────
+// DETERMINISTISCHE CONTROLE — geen AI.
+//
+// Code zoekt in de aangeleverde besluittekst naar herkenbare kenmerken. De vaste
+// Awb-checklist is het juridische anker. "Niet gevonden" betekent: de tekst bevat
+// geen herkenbare vermelding — het kan met andere woorden toch bedoeld zijn, dus
+// de gebruiker controleert altijd zelf. Punten die alleen menselijk te wegen zijn
+// (motivering, evenredigheid) worden als vraag gepresenteerd, niet als oordeel.
+// ────────────────────────────────────────────────────────────────────────────
+
+export interface Bevinding {
+  titel: string;
+  grondslag: string;
+  soort: "check" | "oordeel";
+  status: "gevonden" | "niet_gevonden" | "beoordeel";
+  bewijs?: string;
+  toelichting: string;
+}
+
+function snippet(tekst: string, re: RegExp): string | undefined {
+  const m = tekst.match(re);
+  if (!m || m.index === undefined) return undefined;
+  const start = Math.max(0, m.index - 25);
+  const end = Math.min(tekst.length, m.index + m[0].length + 45);
+  const kern = tekst.slice(start, end).replace(/\s+/g, " ").trim();
+  return `${start > 0 ? "…" : ""}${kern}${end < tekst.length ? "…" : ""}`;
+}
+
+export function controleerBesluit(ruw: string): Bevinding[] {
+  const t = (ruw || "").normalize("NFC");
+  const heeftDwangsom = /dwangsom|last onder/i.test(t);
+  const bevindingen: Bevinding[] = [];
+
+  const check = (
+    titel: string,
+    grondslag: string,
+    re: RegExp,
+    okTekst: string,
+    nietTekst: string,
+  ): void => {
+    const hit = re.test(t);
+    bevindingen.push({
+      titel,
+      grondslag,
+      soort: "check",
+      status: hit ? "gevonden" : "niet_gevonden",
+      bewijs: hit ? snippet(t, re) : undefined,
+      toelichting: hit ? okTekst : nietTekst,
+    });
+  };
+
+  const oordeel = (titel: string, grondslag: string, vraag: string): void => {
+    bevindingen.push({ titel, grondslag, soort: "oordeel", status: "beoordeel", toelichting: vraag });
+  };
+
+  // 1. Wie heeft het opgemaakt — semi: functiewoorden detecteren, maar laten wegen.
+  const functieRe = /\b(burgemeester|wethouder|teamleider|afdelingshoofd|manager|directeur|medewerker|ambtenaar|handhaver|inspecteur|toezichthouder|jurist)\b/i;
+  const heeftFunctie = functieRe.test(t);
+  bevindingen.push({
+    titel: "Wie heeft het opgemaakt (naam en functie)",
+    grondslag: "Een besluit hoort herleidbaar te zijn tot een verantwoordelijke persoon; een louter anoniem 'de gemeente' zonder naam of functie is een signaal om door te vragen.",
+    soort: "oordeel",
+    status: "beoordeel",
+    toelichting: heeftFunctie
+      ? "De tekst noemt een functie. Controleer zelf: staat er ook een náám bij van wie het besluit nam of ondertekende?"
+      : "Er is geen duidelijke functie of naam gevonden. Controleer zelf: staat er wie dit besluit nam, of alleen 'de gemeente'/'het college'?",
+    bewijs: heeftFunctie ? snippet(t, functieRe) : undefined,
+  });
+
+  // 2. Bevoegdheid en mandaat
+  check(
+    "Bevoegdheid en mandaat",
+    "Bij een gemandateerd besluit moet worden vermeld namens welk bestuursorgaan het is genomen (art. 10:10 Awb).",
+    /namens\s+(het|de)\b|gemandateerd|\bmandaat\b|college van burgemeester en wethouders|de burgemeester/i,
+    "De tekst vermeldt namens welk orgaan is besloten.",
+    "Geen vermelding gevonden namens welk bevoegd orgaan is besloten. Controleer dit.",
+  );
+
+  // 3. Wettelijke grondslag
+  check(
+    "Wettelijke grondslag",
+    "Een belastend besluit hoort te berusten op een kenbare wettelijke grondslag.",
+    /artikel\s+\d|\bart\.?\s*\d|\bAwb\b|\bWabo\b|\bAPV\b|\bOmgevingswet\b|verordening|\bwet\s+[A-Z]/i,
+    "De tekst noemt een wet, artikel of verordening.",
+    "Geen wet, artikel of verordening gevonden in de tekst. Vraag de grondslag op.",
+  );
+
+  // 4. Motivering — oordeel
+  oordeel(
+    "Motivering",
+    "Een besluit moet deugdelijk zijn gemotiveerd (art. 3:46 Awb).",
+    "Beoordeel zelf: geeft het besluit een échte reden waaróm, of stelt het alleen vast dat iets 'is geconstateerd'?",
+  );
+
+  // 5. Zorgvuldige feiten — oordeel
+  oordeel(
+    "Zorgvuldige feiten",
+    "Een besluit moet zorgvuldig worden voorbereid; de nodige feiten en belangen worden vergaard (art. 3:2 Awb).",
+    "Beoordeel zelf: blijkt dat de gemeente de feiten heeft onderzocht en jouw kant heeft meegewogen?",
+  );
+
+  // 6. Horen / vooraankondiging
+  check(
+    "Horen / vooraankondiging",
+    "Bij een belastend besluit hoort de belanghebbende in beginsel eerst gehoord te worden (art. 4:8 Awb).",
+    /zienswijze|voornemen|voorgenomen|waarschuwing|gewaarschuwd|gehoord|hoorzitting|in de gelegenheid gesteld/i,
+    "De tekst noemt een zienswijze/waarschuwing vooraf.",
+    "Geen waarschuwing of zienswijze vooraf gevonden. Ben je vooraf in de gelegenheid gesteld te reageren?",
+  );
+
+  // 7. Evenredigheid — oordeel
+  oordeel(
+    "Evenredigheid",
+    "De nadelige gevolgen mogen niet onevenredig zijn in verhouding tot het doel (art. 3:4, tweede lid, Awb).",
+    "Beoordeel zelf: staat de maatregel (en de termijn/hoogte) in redelijke verhouding tot wat er speelt?",
+  );
+
+  // 8. Begunstigingstermijn — alleen relevant bij dwangsom
+  if (heeftDwangsom) {
+    check(
+      "Begunstigingstermijn (bij last onder dwangsom)",
+      "Bij een last onder dwangsom hoort een begunstigingstermijn die redelijk is om aan de last te voldoen (art. 5:32a, tweede lid, Awb).",
+      /begunstigingstermijn|binnen\s+[^.]{0,30}(weken|week|dagen|maand)/i,
+      "De tekst noemt een termijn om de situatie te herstellen.",
+      "Geen duidelijke hersteltermijn gevonden. Krijg je wel tijd om te voldoen vóór de dwangsom gaat lopen?",
+    );
+  }
+
+  // 9. Rechtsmiddelenclausule en termijn
+  const heeftBezwaar = /bezwaar/i.test(t);
+  const heeftTermijn = /(zes|6)\s*weken|binnen\s+[^.]{0,20}\bweken\b/i.test(t);
+  bevindingen.push({
+    titel: "Rechtsmiddelenclausule en termijn",
+    grondslag: "Onder een besluit hoort te staan hoe, bij wie en binnen welke termijn je bezwaar kunt maken (art. 3:45 Awb); de bezwaartermijn is 6 weken (art. 6:7 Awb).",
+    soort: "check",
+    status: heeftBezwaar && heeftTermijn ? "gevonden" : "niet_gevonden",
+    bewijs: heeftBezwaar ? snippet(t, /bezwaar/i) : undefined,
+    toelichting:
+      heeftBezwaar && heeftTermijn
+        ? "De tekst noemt de mogelijkheid van bezwaar en een termijn."
+        : heeftBezwaar
+          ? "Bezwaar wordt genoemd, maar geen duidelijke termijn (6 weken). Controleer dit."
+          : "Geen bezwaarclausule gevonden in de tekst. Controleer hoe en binnen welke termijn je kunt reageren.",
+  });
+
+  return bevindingen;
+}
+
+// Leidt uit de bevindingen concrete aandachtspunten voor een bezwaar af:
+// alleen de 'niet gevonden'-checks (feitelijke gebreken in de tekst).
+export function aandachtspuntenUit(bevindingen: Bevinding[]): string[] {
+  return bevindingen
+    .filter((b) => b.soort === "check" && b.status === "niet_gevonden")
+    .map((b) => `${b.titel}: ${b.toelichting}`);
+}
+
+export const CONTROLE_METHODE_DISCLAIMER =
+  "Deze controle zoekt in jouw tekst naar herkenbare kenmerken en legt ze naast de " +
+  "wet (Awb). 'Niet gevonden' kan ook betekenen dat het er met andere woorden tóch " +
+  "staat — controleer elk punt zelf in je originele besluit. Dit is een hulpmiddel, " +
+  "geen juridisch advies en geen volledige toets. Jij beslist wat je doet.";

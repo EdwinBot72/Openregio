@@ -30,9 +30,17 @@ const GROEN = "#1a6b3a";
 const ORANJE = "#f28a1a";
 const ROOD = "#b3261e";
 
+interface Bevinding {
+  titel: string;
+  grondslag: string;
+  soort: "check" | "oordeel";
+  status: "gevonden" | "niet_gevonden" | "beoordeel";
+  bewijs?: string;
+  toelichting: string;
+}
 interface ControleRespons {
-  controle: string;
-  aandachtspunten: string;
+  bevindingen: Bevinding[];
+  aandachtspunten: string[];
   letop: string;
 }
 interface BezwaarRespons {
@@ -41,37 +49,24 @@ interface BezwaarRespons {
   letop: string;
 }
 
-type Status = "IN ORDE" | "ONTBREEKT" | "ONDUIDELIJK" | "ONBEKEND";
-
-function statusVan(regel: string): { status: Status; tekst: string } {
-  const m = regel.match(/^\s*\[(.+?)\]\s*(.*)$/);
-  if (!m) return { status: "ONBEKEND", tekst: regel.trim() };
-  const ruw = m[1].toUpperCase().trim();
-  const status: Status =
-    ruw.includes("IN ORDE") ? "IN ORDE" : ruw.includes("ONTBREEKT") ? "ONTBREEKT" : ruw.includes("ONDUIDELIJK") ? "ONDUIDELIJK" : "ONBEKEND";
-  return { status, tekst: m[2].trim() };
-}
-
-function StatusBadge({ status }: { status: Status }) {
-  if (status === "IN ORDE")
+function StatusBadge({ status }: { status: Bevinding["status"] }) {
+  if (status === "gevonden")
     return (
       <Badge style={{ background: GROEN }} className="text-white shrink-0">
-        <CheckCircle2 className="w-3 h-3 mr-1" /> In orde
+        <CheckCircle2 className="w-3 h-3 mr-1" /> Gevonden
       </Badge>
     );
-  if (status === "ONTBREEKT")
+  if (status === "niet_gevonden")
     return (
       <Badge style={{ background: ROOD }} className="text-white shrink-0">
-        <AlertTriangle className="w-3 h-3 mr-1" /> Ontbreekt
+        <AlertTriangle className="w-3 h-3 mr-1" /> Niet gevonden
       </Badge>
     );
-  if (status === "ONDUIDELIJK")
-    return (
-      <Badge style={{ background: ORANJE }} className="text-white shrink-0">
-        <HelpCircle className="w-3 h-3 mr-1" /> Onduidelijk
-      </Badge>
-    );
-  return <Badge variant="secondary" className="shrink-0">—</Badge>;
+  return (
+    <Badge style={{ background: ORANJE }} className="text-white shrink-0">
+      <HelpCircle className="w-3 h-3 mr-1" /> Beoordeel zelf
+    </Badge>
+  );
 }
 
 function KopieerKnop({ tekst }: { tekst: string }) {
@@ -117,9 +112,8 @@ export default function ControlePage() {
       setControle(data);
       setBezwaar(null);
       // Alle aandachtspunten standaard aangevinkt.
-      const punten = splitsPunten(data.aandachtspunten);
       const init: Record<number, boolean> = {};
-      punten.forEach((_, i) => (init[i] = true));
+      (data.aandachtspunten || []).forEach((_, i) => (init[i] = true));
       setGekozen(init);
     },
     onError: (err) => toast({ title: "Controle mislukt", description: parseApiError(err), variant: "destructive" }),
@@ -140,11 +134,8 @@ export default function ControlePage() {
     onError: (err) => toast({ title: "Bezwaar genereren mislukt", description: parseApiError(err), variant: "destructive" }),
   });
 
-  const controleRegels = useMemo(
-    () => (controle?.controle || "").split("\n").map((r) => r.trim()).filter(Boolean),
-    [controle],
-  );
-  const aandachtspunten = useMemo(() => splitsPunten(controle?.aandachtspunten || ""), [controle]);
+  const bevindingen = controle?.bevindingen ?? [];
+  const aandachtspunten = controle?.aandachtspunten ?? [];
 
   const kanControleren = besluitTekst.trim().length >= 40;
   const geselecteerdePunten = aandachtspunten.filter((_, i) => gekozen[i]);
@@ -213,12 +204,9 @@ export default function ControlePage() {
             {controleMutatie.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <ShieldCheck className="w-4 h-4 mr-2" />}
             {controleMutatie.isPending ? "Bezig met controleren…" : "Controleer besluit"}
           </Button>
-          {controleMutatie.isPending && (
-            <p className="text-xs text-muted-foreground mt-2">
-              De controle draait op onze eigen server (jouw tekst blijft privé). Dit duurt
-              meestal ongeveer een minuut — laat dit venster open staan.
-            </p>
-          )}
+          <p className="text-xs text-muted-foreground mt-2">
+            De controle draait op onze eigen server en zoekt alleen in jouw tekst — je gegevens blijven privé en er wordt niets verzonnen.
+          </p>
         </CardContent>
       </Card>
 
@@ -226,17 +214,25 @@ export default function ControlePage() {
       {controle && (
         <Card className="mb-6">
           <CardContent className="p-5">
-            <h2 className="text-lg font-semibold mb-3" style={{ color: BLAUW }}>Resultaat van de controle</h2>
-            <div className="space-y-2">
-              {controleRegels.map((regel, i) => {
-                const { status, tekst } = statusVan(regel);
-                return (
-                  <div key={i} className="flex items-start gap-2 text-sm">
-                    <StatusBadge status={status} />
-                    <span>{tekst}</span>
+            <h2 className="text-lg font-semibold mb-1" style={{ color: BLAUW }}>Resultaat van de controle</h2>
+            <p className="text-sm text-muted-foreground mb-3">
+              We zochten in jouw tekst naar de punten die volgens de wet in een besluit horen.
+              "Niet gevonden" kan ook betekenen dat het er met andere woorden tóch staat — controleer elk punt zelf.
+            </p>
+            <div className="space-y-3">
+              {bevindingen.map((b, i) => (
+                <div key={i} className="border rounded-md p-3">
+                  <div className="flex items-start justify-between gap-2">
+                    <span className="font-medium text-sm">{b.titel}</span>
+                    <StatusBadge status={b.status} />
                   </div>
-                );
-              })}
+                  <p className="text-sm text-muted-foreground mt-1">{b.toelichting}</p>
+                  {b.bewijs && (
+                    <p className="text-xs mt-1 italic" style={{ color: "#334155" }}>Gevonden: “{b.bewijs}”</p>
+                  )}
+                  <p className="text-xs text-muted-foreground mt-1">Grondslag: {b.grondslag}</p>
+                </div>
+              ))}
             </div>
 
             {aandachtspunten.length > 0 && (
@@ -263,6 +259,11 @@ export default function ControlePage() {
                   {bezwaarMutatie.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Scale className="w-4 h-4 mr-2" />}
                   {bezwaarMutatie.isPending ? "Bezwaar opstellen…" : "Maak bezwaar van geselecteerde punten"}
                 </Button>
+                {bezwaarMutatie.isPending && (
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Het opstellen van de bezwaarbrief gebruikt de AI-schrijver en kan een paar minuten duren — laat dit venster open staan.
+                  </p>
+                )}
                 {(!bestuursorgaan || !onderwerp) && (
                   <p className="text-xs text-muted-foreground mt-2">Vul hierboven bestuursorgaan en onderwerp in om een bezwaar te maken.</p>
                 )}

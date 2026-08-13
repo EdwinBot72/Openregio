@@ -16,7 +16,7 @@ import { mollieStartRateLimit, contactFormRateLimit, geocodeRateLimit } from "./
 import { ObjectStorageService } from "./replit_integrations/object_storage";
 import { randomUUID, createHash } from "crypto";
 import { runRegioBot } from "./regiobot";
-import { BRIEFTYPES, isBrieftype, buildSystemPrompt, buildUserPrompt, buildControleSystemPrompt, buildControleUserPrompt, CONTROLE_PUNTEN } from "./brieftypes";
+import { BRIEFTYPES, isBrieftype, buildSystemPrompt, buildUserPrompt, CONTROLE_PUNTEN, controleerBesluit, aandachtspuntenUit, CONTROLE_METHODE_DISCLAIMER } from "./brieftypes";
 import { db } from "db";
 import { eq, sql, gte, lte, gt, and, count } from "drizzle-orm";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
@@ -2509,16 +2509,9 @@ Maak een complete, direct bruikbare WOO-brief.`;
     res.json(CONTROLE_PUNTEN.map((p) => ({ titel: p.titel, vraag: p.vraag, grondslag: p.grondslag })));
   });
 
-  app.post("/api/brieven/controle", requirePro, authenticatedAiRateLimit, async (req, res) => {
+  app.post("/api/brieven/controle", requirePro, async (req, res) => {
     try {
-      if (!process.env.OPENAI_API_KEY) {
-        return res.status(503).json({
-          error: "Controle is tijdelijk niet beschikbaar",
-          details: "De AI-configuratie is nog niet voltooid.",
-        });
-      }
-
-      const { besluitTekst, context } = req.body ?? {};
+      const { besluitTekst } = req.body ?? {};
       if (!besluitTekst || String(besluitTekst).trim().length < 40) {
         return res.status(400).json({
           error: "Geen besluittekst",
@@ -2526,37 +2519,16 @@ Maak een complete, direct bruikbare WOO-brief.`;
         });
       }
 
-      const OpenAI = (await import("openai")).default;
-      const openai = new OpenAI();
-
-      const completion = await openai.chat.completions.create({
-        // Controle-check draait op het lichtere model: leest de aangeleverde tekst,
-        // past in het RAM (geen swap) en antwoordt in ~30-45s i.p.v. minuten.
-        // Brieven schrijven blijft op het zwaardere model (gpt-4o-mini alias = 7B).
-        model: "qwen2.5:3b",
-        messages: [
-          { role: "system", content: buildControleSystemPrompt() },
-          { role: "user", content: buildControleUserPrompt({ besluitTekst: String(besluitTekst).slice(0, 12000), context }) },
-        ],
-        temperature: 0.1,
-      });
-
-      const full = completion.choices[0]?.message?.content || "";
-      const pick = (label: string, next?: string) => {
-        const start = full.indexOf(`=== ${label} ===`);
-        if (start === -1) return "";
-        const from = start + `=== ${label} ===`.length;
-        const end = next ? full.indexOf(`=== ${next} ===`, from) : -1;
-        return full.slice(from, end === -1 ? undefined : end).trim();
-      };
+      // Deterministische controle: geen AI. Code zoekt in de tekst naar de
+      // kenmerken uit de vaste Awb-checklist. Direct klaar, betrouwbaar, privé.
+      const bevindingen = controleerBesluit(String(besluitTekst).slice(0, 20000));
 
       res.json({
         success: true,
-        controle: pick("CONTROLE", "AANDACHTSPUNTEN") || full,
-        aandachtspunten: pick("AANDACHTSPUNTEN", "LET OP"),
-        letop: pick("LET OP"),
-        fullContent: full,
-        metadata: { generatedAt: new Date().toISOString() },
+        bevindingen,
+        aandachtspunten: aandachtspuntenUit(bevindingen),
+        letop: CONTROLE_METHODE_DISCLAIMER,
+        metadata: { generatedAt: new Date().toISOString(), methode: "deterministisch" },
       });
     } catch (err: any) {
       console.error("Controle-check error:", err);
