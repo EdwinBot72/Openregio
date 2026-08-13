@@ -144,10 +144,10 @@ export default function HomePage() {
               Wij maken het systeem<br />zichtbaar voor jou.
             </h1>
             <p style={{ fontSize: 16, color: "rgba(255,255,255,0.88)", lineHeight: 1.6, margin: "0 0 14px", maxWidth: 430 }}>
-              Digitale ID, milieuzones, nieuwe regels — er komt veel op je af, en veel mensen zijn bang. Een bang mens tekent alles en vraagt niets.
+              Regels, brieven en besluiten van de overheid kunnen overweldigend voelen. Dat hoeft niet.
             </p>
             <p style={{ fontSize: 16, color: "#fff", fontWeight: 700, lineHeight: 1.5, margin: "0 0 24px", maxWidth: 430 }}>
-              Wij helpen je het om te draaien: weet wat er speelt, begrijp of het eigenlijk wel mág, en kom in actie met je rechten in de hand.
+              OpenRegio helpt je rustig begrijpen wat er speelt, wat mag en wat je kunt doen — in gewone taal, stap voor stap.
             </p>
             <a href="#pricing">
               <button style={{ padding: "13px 28px", borderRadius: 8, fontSize: 15, fontWeight: 700, background: ORANJE, color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
@@ -174,8 +174,8 @@ export default function HomePage() {
       <section style={{ background: BLAUW, padding: "56px 24px" }}>
         <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
           <p style={{ fontSize: 24, fontWeight: 900, color: "#fff", lineHeight: 1.4, margin: 0 }}>
-            Moed is niet de afwezigheid van angst.<br />
-            <span style={{ color: ORANJE }}>Het is je rechten kennen ondanks de angst.</span>
+            Je hoeft geen jurist te zijn om je recht te kennen.<br />
+            <span style={{ color: ORANJE }}>Je hoeft alleen te weten waar je staat.</span>
           </p>
         </div>
 
@@ -183,21 +183,21 @@ export default function HomePage() {
           {[
             {
               label: "Jouw gegevens",
-              title: "Jouw keuze, niet je plicht",
-              spanning: "Er komt een digitale identiteit aan. Handig, zeggen ze. Maar wie heeft straks toegang tot jouw gegevens, en kun je nog nee zeggen?",
-              antwoord: "Digitaal waar het kan, menselijk waar het moet. Het recht om niet álles te delen en zelf te kiezen wanneer je iets gebruikt is geen achterlijkheid — dat is vrijheid.",
+              title: "Rustig wegwijs in je gegevens",
+              spanning: "Rondom de digitale identiteit leven veel vragen. Wat deel je, met wie, en wat kun je zelf kiezen?",
+              antwoord: "Wij leggen rustig uit wat mag en wat vrijwillig is, zodat je zelf een weloverwogen keuze maakt. Digitaal waar het kan, menselijk waar het moet.",
             },
             {
               label: "Regels",
-              title: "Kloppen ze wel?",
-              spanning: "Een milieuzone, een vergunning, een nieuwe verplichting. Waarom raakt het de zzp'er met één bestelbus harder dan de vervuiler met een hele vloot?",
-              antwoord: "Wij zijn niet tegen schoon. Wij zijn tegen onevenredig. Bij elke regel: is dit proportioneel, en zijn de mensen die het raakt gehoord?",
+              title: "Wat betekent een regel voor jou?",
+              spanning: "Een milieuzone, een vergunning, een nieuwe verplichting kan groot voelen. Wat geldt er nu écht, en voor wie?",
+              antwoord: "Wij helpen je zien wat een regel in de praktijk betekent en of hij redelijk is toegepast. Je mag altijd vragen: klopt dit, en is het proportioneel?",
             },
             {
-              label: "Van angst naar grip",
-              title: "Rust in plaats van angst",
-              spanning: "Er wordt veel met angst geregeerd — voor oorlog, voor tekort, voor de ander. En angst maakt volgzaam.",
-              antwoord: "Wij kiezen voor rust en helderheid: wat is er écht aan de hand, wat mag de overheid wel en niet, en waar sta jij in je recht? Je hoeft niet boos te zijn om sterk te staan.",
+              label: "Grip",
+              title: "Van ruis naar overzicht",
+              spanning: "Het systeem kan groot en ondoorzichtig lijken. Waar begin je, en waar sta je eigenlijk?",
+              antwoord: "Wij helpen je stap voor stap: wat is er aan de hand, wat mag de overheid wel en niet, en wat kun jij doen. Rust en helderheid, in gewone taal.",
             },
           ].map((b) => (
             <div key={b.title} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 12, padding: "26px 24px", textAlign: "left" }}>
@@ -211,15 +211,15 @@ export default function HomePage() {
 
         <div className="or-welniet-grid" style={{ maxWidth: 1120, margin: "22px auto 0", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 22, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 12, padding: "24px 26px" }}>
           <div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: "#4ade80", marginBottom: 6 }}>Wel</div>
+            <div style={{ fontSize: 14, fontWeight: 800, color: "#4ade80", marginBottom: 6 }}>Wat je van ons mag verwachten</div>
             <p style={{ fontSize: 14, color: "rgba(255,255,255,0.72)", lineHeight: 1.7, margin: 0 }}>
-              Kritisch, onafhankelijk, aan de kant van de ondernemer en de burger. Gebouwd op de Grondwet, het EVRM, de privacywet en het beginsel dat de overheid haar eigen regels moet volgen.
+              Rustig, feitelijk en aan jouw kant. Gebouwd op je echte rechten — de Grondwet, het EVRM en de privacywet — en op het beginsel dat de overheid zich aan haar eigen regels houdt.
             </p>
           </div>
           <div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: "#f87171", marginBottom: 6 }}>Niet</div>
+            <div style={{ fontSize: 14, fontWeight: 800, color: "rgba(255,255,255,0.9)", marginBottom: 6 }}>En wat niet</div>
             <p style={{ fontSize: 14, color: "rgba(255,255,255,0.72)", lineHeight: 1.7, margin: 0 }}>
-              Een complotkanaal. We roepen niet dat "ze" liegen of dat alles in scène staat. We doen iets sterkers: we vragen bewijs, en we houden de overheid aan de wet.
+              We overdrijven niet en maken je niet bang. Geen grote woorden en geen paniek — we kijken rustig naar wat er staat en helpen je de juiste vragen te stellen.
             </p>
           </div>
         </div>
