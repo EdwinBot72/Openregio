@@ -60,6 +60,7 @@ import RegiodealsPage from "@/pages/regio-deals";
 import RegiodealsAdminPage from "@/pages/admin/regio-deals-admin";
 import AdminOndernemersPage from "@/pages/admin/ondernemers";
 import AdminIntelPage from "@/pages/admin/intel";
+import AdviseurPage from "@/pages/admin/adviseur";
 import WebsiteOnderhoudPage from "@/pages/zichtbaarheid/website-onderhoud";
 import RegelkaartPage from "@/pages/informatie/regelkaart";
 import CheckSituatiePage from "@/pages/actie/check-situatie";
@@ -267,6 +268,7 @@ function AuthenticatedRouter() {
 
       {/* ── Beheer (admin) ────────────────────────────────────────────────── */}
       <Route path="/admin"><AdminGate><AdminIndexPage /></AdminGate></Route>
+      <Route path="/admin/adviseur"><AdminGate><AdviseurPage /></AdminGate></Route>
       <Route path="/admin/woo"><AdminGate><AdminWooPage /></AdminGate></Route>
       <Route path="/admin/regios"><AdminGate><AdminRegiosPage /></AdminGate></Route>
       <Route path="/admin/inzicht"><AdminGate><AdminInzichtPage /></AdminGate></Route>

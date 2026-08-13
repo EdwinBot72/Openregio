@@ -330,6 +330,7 @@ export function OpenRegioShell({ children }: { children: ReactNode }) {
                   numClass="or-num-admin"
                 />
                 <NavItem icon={BarChart2} href="/admin" label="Dashboard" currentPath={location} />
+                <NavItem icon={Scale} href="/admin/adviseur" label="Adviseur" currentPath={location} />
                 <NavItem icon={Users} href="/admin/users" label="Gebruikers" currentPath={location} />
                 <NavItem icon={Building2} href="/admin/ondernemers" label="Ondernemers" currentPath={location} />
                 <NavItem icon={FileText} href="/admin/blogs" label="Content" currentPath={location} />

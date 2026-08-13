@@ -2540,6 +2540,50 @@ Maak een complete, direct bruikbare WOO-brief.`;
     }
   });
 
+  // Beheerders-adviseur — vertrouwelijk overleg met de eigen lokale AI (geen OpenAI).
+  // Alleen voor admin/master. Grounded in mensenrechten + burgerlijk/handelsrecht;
+  // uitdrukkelijk GEEN soevereine-mens/pseudorecht.
+  app.post("/api/admin/adviseur", requireAdmin, async (req, res) => {
+    try {
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({ error: "De adviseur is nog niet geconfigureerd." });
+      }
+      const inMsgs = Array.isArray(req.body?.messages) ? req.body.messages : [];
+      const messages = inMsgs
+        .filter((m: any) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
+        .slice(-12)
+        .map((m: any) => ({ role: m.role, content: String(m.content).slice(0, 4000) }));
+      if (messages.length === 0 || messages[messages.length - 1].role !== "user") {
+        return res.status(400).json({ error: "Geen vraag ontvangen." });
+      }
+
+      const systemPrompt = `Je bent de vertrouwelijke adviseur van OpenRegio, uitsluitend voor de beheerder. Je denkt rustig mee met een ondernemer die de overheid kritisch maar correct wil kunnen bevragen.
+
+Vertrekpunt is de MENSENRECHTEN en de rechtsstaat: de overheid ontleent haar gezag aan de mensen en moet zich kunnen verantwoorden; de burger en ondernemer mogen dat controleren. Afdwingbare verankering: EVRM, Grondwet en EU-Handvest, met de Universele Verklaring van de Rechten van de Mens als morele basis. Waar het om handel en onderneming gaat, gebruik je aanvullend het burgerlijk recht en handelsrecht (Burgerlijk Wetboek, Wetboek van Koophandel).
+
+Je helpt met: besluiten, brieven en regels begrijpen; welke rechten iemand heeft; hoe je iets controleert of opvraagt (Wet open overheid, motivering art. 3:46 Awb, bevoegdheid/mandaat art. 10:10 Awb, evenredigheid art. 3:4 Awb); en welke stappen openstaan (bezwaar, beroep, voorlopige voorziening, klacht, Nationale ombudsman).
+
+HARDE GRENZEN:
+- Geef NOOIT soevereine-mens- of "strawman"-advies. De "natuurlijk persoon vs. rechtspersoon"-leer, "belasting is vrijwillig", "geen handtekening dus geen schuld" en dergelijke zijn pseudorecht; ze houden bij geen enkele rechter stand en kunnen de gebruiker schaden. Kom je zoiets tegen, benoem dat eerlijk en bied de juridisch houdbare route aan.
+- Onderscheid feit, aanname en mening. Verzin geen wetsartikelen, uitspraken of feiten. Weet je iets niet zeker, zeg dat.
+- Bij een echt of spoedeisend belang: adviseer een jurist, het Juridisch Loket of een advocaat.
+- Rustige, heldere toon in gewone taal. Aan de kant van de ondernemer, maar altijd binnen de wet.`;
+
+      const OpenAI = (await import("openai")).default;
+      const openai = new OpenAI();
+      const completion = await openai.chat.completions.create({
+        model: "gpt-4o",
+        messages: [{ role: "system", content: systemPrompt }, ...messages],
+        temperature: 0.5,
+      });
+
+      res.json({ answer: completion.choices[0]?.message?.content || "" });
+    } catch (err: any) {
+      console.error("Adviseur error:", err);
+      res.status(500).json({ error: "De adviseur kon niet antwoorden", message: err?.message ?? String(err) });
+    }
+  });
+
   // WOO Dossiers - save and retrieve generated WOO letters
   app.post("/api/woo/dossiers", requirePro, async (req, res) => {
     try {
