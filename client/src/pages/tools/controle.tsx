@@ -127,11 +127,15 @@ export default function ControlePage() {
         </div>
         <h1 className="text-2xl font-bold" style={{ color: BLAUW }}>Besluit controleren</h1>
       </div>
-      <p className="text-muted-foreground mb-6">
+      <p className="text-muted-foreground mb-2">
         Plak de brief of het besluit dat je van de overheid kreeg. Wij controleren op de punten die er
         volgens de wet in horen te staan — wie het opmaakte, wie bevoegd is, de motivering, de termijn en
         je rechtsmiddelen. <strong>Wij controleren, jij beslist.</strong> Er wordt niets verzonnen: we kijken
         alleen naar de tekst die je zelf aanlevert.
+      </p>
+      <p className="text-sm mb-6" style={{ color: BLAUW }}>
+        Je vraagt en controleert als <strong>gelijkwaardige partij</strong> — dat is je recht. De overheid moet
+        kunnen laten zien wie besloot en waarom; jij mag dat rustig toetsen.
       </p>
 
       {!isPro && (
