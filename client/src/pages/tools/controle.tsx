@@ -100,45 +100,20 @@ export default function ControlePage() {
   const [besluitTekst, setBesluitTekst] = useState("");
 
   const [controle, setControle] = useState<ControleRespons | null>(null);
-  const [gekozen, setGekozen] = useState<Record<number, boolean>>({});
-  const [bezwaar, setBezwaar] = useState<BezwaarRespons | null>(null);
 
   const controleMutatie = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", "/api/brieven/controle", { besluitTekst, context });
       return (await res.json()) as ControleRespons;
     },
-    onSuccess: (data) => {
-      setControle(data);
-      setBezwaar(null);
-      // Alle aandachtspunten standaard aangevinkt.
-      const init: Record<number, boolean> = {};
-      (data.aandachtspunten || []).forEach((_, i) => (init[i] = true));
-      setGekozen(init);
-    },
+    onSuccess: (data) => setControle(data),
     onError: (err) => toast({ title: "Controle mislukt", description: parseApiError(err), variant: "destructive" }),
-  });
-
-  const bezwaarMutatie = useMutation({
-    mutationFn: async (gronden: string) => {
-      const res = await apiRequest("POST", "/api/brieven/generate", {
-        brieftype: "bezwaar",
-        bestuursorgaan,
-        onderwerp,
-        context,
-        gevraagd: gronden,
-      });
-      return (await res.json()) as BezwaarRespons;
-    },
-    onSuccess: (data) => setBezwaar(data),
-    onError: (err) => toast({ title: "Bezwaar genereren mislukt", description: parseApiError(err), variant: "destructive" }),
   });
 
   const bevindingen = controle?.bevindingen ?? [];
   const aandachtspunten = controle?.aandachtspunten ?? [];
 
   const kanControleren = besluitTekst.trim().length >= 40;
-  const geselecteerdePunten = aandachtspunten.filter((_, i) => gekozen[i]);
 
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
@@ -238,35 +213,21 @@ export default function ControlePage() {
             {aandachtspunten.length > 0 && (
               <>
                 <Separator className="my-4" />
-                <h3 className="font-semibold mb-1" style={{ color: BLAUW }}>Aandachtspunten voor bezwaar</h3>
+                <h3 className="font-semibold mb-1" style={{ color: BLAUW }}>Wat je nu kunt controleren</h3>
                 <p className="text-sm text-muted-foreground mb-3">
-                  Vink aan welke punten je in je bezwaar wilt gebruiken. Controleer elk punt eerst tegen je eigen besluit.
+                  Deze punten staan niet duidelijk in de tekst. Je hebt het recht om te weten wie dit besluit nam en op welke grondslag — en om dat te controleren.
                 </p>
-                <div className="space-y-2">
+                <ul className="space-y-2">
                   {aandachtspunten.map((punt, i) => (
-                    <label key={i} className="flex items-start gap-2 text-sm cursor-pointer">
-                      <Checkbox checked={!!gekozen[i]} onCheckedChange={(v) => setGekozen((g) => ({ ...g, [i]: !!v }))} className="mt-0.5" />
+                    <li key={i} className="flex items-start gap-2 text-sm">
+                      <span className="mt-1.5 inline-block h-1.5 w-1.5 rounded-full shrink-0" style={{ background: ORANJE }} />
                       <span>{punt}</span>
-                    </label>
+                    </li>
                   ))}
+                </ul>
+                <div className="mt-4 p-3 rounded-md text-sm" style={{ background: "#eff6ff", color: "#1e3a5f" }}>
+                  <strong>Volgende controleslag: vraag de stukken op.</strong> Je mag de onderliggende documenten opvragen via de Wet open overheid (Woo) — bijvoorbeeld het mandaatbesluit en de grondslag waarop dit besluit rust. Zo controleer je zelf of het klopt, met de wet in de hand.
                 </div>
-                <Button
-                  className="mt-4 text-white"
-                  style={{ background: GROEN }}
-                  disabled={geselecteerdePunten.length === 0 || !bestuursorgaan || !onderwerp || bezwaarMutatie.isPending}
-                  onClick={() => bezwaarMutatie.mutate(geselecteerdePunten.map((p, i) => `${i + 1}. ${p}`).join("\n"))}
-                >
-                  {bezwaarMutatie.isPending ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Scale className="w-4 h-4 mr-2" />}
-                  {bezwaarMutatie.isPending ? "Bezwaar opstellen…" : "Maak bezwaar van geselecteerde punten"}
-                </Button>
-                {bezwaarMutatie.isPending && (
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Het opstellen van de bezwaarbrief gebruikt de AI-schrijver en kan een paar minuten duren — laat dit venster open staan.
-                  </p>
-                )}
-                {(!bestuursorgaan || !onderwerp) && (
-                  <p className="text-xs text-muted-foreground mt-2">Vul hierboven bestuursorgaan en onderwerp in om een bezwaar te maken.</p>
-                )}
               </>
             )}
 
@@ -279,29 +240,6 @@ export default function ControlePage() {
         </Card>
       )}
 
-      {/* Stap 3 — bezwaar */}
-      {bezwaar && (
-        <Card className="mb-10 border-2" style={{ borderColor: GROEN }}>
-          <CardContent className="p-5">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-lg font-semibold" style={{ color: BLAUW }}>Concept-bezwaarschrift</h2>
-              <KopieerKnop tekst={bezwaar.letter} />
-            </div>
-            <pre className="whitespace-pre-wrap text-sm font-sans bg-muted/40 p-4 rounded-md">{bezwaar.letter}</pre>
-            {bezwaar.controleslag && (
-              <div className="mt-4">
-                <h3 className="font-semibold mb-1" style={{ color: BLAUW }}>Controleslag vóór verzenden</h3>
-                <pre className="whitespace-pre-wrap text-sm font-sans">{bezwaar.controleslag}</pre>
-              </div>
-            )}
-            {bezwaar.letop && (
-              <div className="mt-4 p-3 rounded-md text-xs" style={{ background: "#fff7ed", color: "#7c2d12" }}>
-                <strong>Let op. </strong>{bezwaar.letop}
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 }
