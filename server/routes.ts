@@ -16,7 +16,7 @@ import { mollieStartRateLimit, contactFormRateLimit, geocodeRateLimit } from "./
 import { ObjectStorageService } from "./replit_integrations/object_storage";
 import { randomUUID, createHash } from "crypto";
 import { runRegioBot } from "./regiobot";
-import { BRIEFTYPES, isBrieftype, buildSystemPrompt, buildUserPrompt, CONTROLE_PUNTEN, controleerBesluit, aandachtspuntenUit, CONTROLE_METHODE_DISCLAIMER } from "./brieftypes";
+import { BRIEFTYPES, isBrieftype, buildSystemPrompt, buildUserPrompt, CONTROLE_PUNTEN, controleerBesluit, aandachtspuntenUit, stelWooVerzoekOp, CONTROLE_METHODE_DISCLAIMER } from "./brieftypes";
 import { db } from "db";
 import { eq, sql, gte, lte, gt, and, count } from "drizzle-orm";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
@@ -2527,6 +2527,7 @@ Maak een complete, direct bruikbare WOO-brief.`;
         success: true,
         bevindingen,
         aandachtspunten: aandachtspuntenUit(bevindingen),
+        wooVerzoek: stelWooVerzoekOp(bevindingen),
         letop: CONTROLE_METHODE_DISCLAIMER,
         metadata: { generatedAt: new Date().toISOString(), methode: "deterministisch" },
       });

@@ -493,6 +493,65 @@ export function aandachtspuntenUit(bevindingen: Bevinding[]): string[] {
     .map((b) => `${b.titel}: ${b.toelichting}`);
 }
 
+// Zet — deterministisch, geen AI — een concreet Woo-verzoek klaar dat precies de
+// stukken opvraagt die nodig zijn om de niet-gevonden/te-beoordelen punten te
+// controleren. Uitsluitend invulplaatsen voor de eigen gegevens; niets verzonnen.
+const WOO_OPVRAAG: Record<string, string> = {
+  "Wie heeft het opgemaakt (naam en functie)":
+    "de naam en functie van de persoon die dit besluit heeft genomen en ondertekend",
+  "Bevoegdheid en mandaat":
+    "het mandaatbesluit of de mandaatregeling waaruit blijkt dat de ondertekenaar bevoegd was om namens het bestuursorgaan te besluiten",
+  "Wettelijke grondslag":
+    "de wettelijke grondslag (wet, artikel of verordening) waarop dit besluit berust",
+  "Motivering":
+    "de stukken waaruit de motivering van dit besluit blijkt",
+  "Zorgvuldige feiten":
+    "de onderzoeks-, controle- of inspectierapporten en overige stukken die aan dit besluit ten grondslag liggen",
+  "Horen / vooraankondiging":
+    "de vooraankondiging, waarschuwing of het voornemen en de correspondentie die aan dit besluit voorafging",
+  "Evenredigheid":
+    "de belangenafweging die ten grondslag ligt aan de hoogte en de termijn van de opgelegde maatregel",
+  "Begunstigingstermijn (bij last onder dwangsom)":
+    "de onderbouwing van de gestelde begunstigingstermijn",
+  "Rechtsmiddelenclausule en termijn":
+    "informatie over hoe, bij wie en binnen welke termijn ik bezwaar of beroep kan maken tegen dit besluit",
+};
+
+export function stelWooVerzoekOp(bevindingen: Bevinding[]): string {
+  const items: string[] = [
+    "een kopie van het volledige besluit met alle bijbehorende dossierstukken",
+  ];
+  for (const b of bevindingen) {
+    if (b.status === "gevonden") continue; // alleen wat ontbreekt of te beoordelen is
+    const opvraag = WOO_OPVRAAG[b.titel];
+    if (opvraag && !items.includes(opvraag)) items.push(opvraag);
+  }
+
+  return [
+    "[Plaats], [datum]",
+    "",
+    "Aan: [naam bestuursorgaan]",
+    "",
+    "Betreft: verzoek op grond van de Wet open overheid (Woo)",
+    "",
+    "Geachte heer/mevrouw,",
+    "",
+    "Op grond van artikel 4.1 van de Wet open overheid verzoek ik u mij de volgende " +
+      "informatie te verstrekken over het besluit met kenmerk [kenmerk van uw besluit], " +
+      "gedateerd [datum van uw besluit]:",
+    "",
+    ...items.map((s, i) => `${i + 1}. ${s};`),
+    "",
+    "Ik verzoek u de informatie digitaal aan te leveren. Op grond van artikel 4.4 van de " +
+      "Wet open overheid beslist u in beginsel binnen vier weken op dit verzoek.",
+    "",
+    "Met vriendelijke groet,",
+    "",
+    "[Uw naam]",
+    "[Uw adres]",
+  ].join("\n");
+}
+
 export const CONTROLE_METHODE_DISCLAIMER =
   "Deze controle zoekt in jouw tekst naar herkenbare kenmerken en legt ze naast de " +
   "wet (Awb). 'Niet gevonden' kan ook betekenen dat het er met andere woorden tóch " +

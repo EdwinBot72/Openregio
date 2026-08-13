@@ -18,6 +18,7 @@ import {
   Copy,
   Check,
   Info,
+  FileText,
 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
@@ -41,6 +42,7 @@ interface Bevinding {
 interface ControleRespons {
   bevindingen: Bevinding[];
   aandachtspunten: string[];
+  wooVerzoek: string;
   letop: string;
 }
 interface BezwaarRespons {
@@ -100,13 +102,17 @@ export default function ControlePage() {
   const [besluitTekst, setBesluitTekst] = useState("");
 
   const [controle, setControle] = useState<ControleRespons | null>(null);
+  const [wooZichtbaar, setWooZichtbaar] = useState(false);
 
   const controleMutatie = useMutation({
     mutationFn: async () => {
       const res = await apiRequest("POST", "/api/brieven/controle", { besluitTekst, context });
       return (await res.json()) as ControleRespons;
     },
-    onSuccess: (data) => setControle(data),
+    onSuccess: (data) => {
+      setControle(data);
+      setWooZichtbaar(false);
+    },
     onError: (err) => toast({ title: "Controle mislukt", description: parseApiError(err), variant: "destructive" }),
   });
 
@@ -232,6 +238,31 @@ export default function ControlePage() {
                 <div className="mt-4 p-3 rounded-md text-sm" style={{ background: "#eff6ff", color: "#1e3a5f" }}>
                   <strong>Volgende controleslag: vraag de stukken op.</strong> Je mag de onderliggende documenten opvragen via de Wet open overheid (Woo) — bijvoorbeeld het mandaatbesluit en de grondslag waarop dit besluit rust. Zo controleer je zelf of het klopt, met de wet in de hand.
                 </div>
+
+                {controle.wooVerzoek && (
+                  <div className="mt-3">
+                    <Button
+                      variant="outline"
+                      onClick={() => setWooZichtbaar((v) => !v)}
+                    >
+                      <FileText className="w-4 h-4 mr-2" />
+                      {wooZichtbaar ? "Verberg het WOO-verzoek" : "Zet hiervan een WOO-verzoek klaar"}
+                    </Button>
+
+                    {wooZichtbaar && (
+                      <div className="mt-3 border rounded-md p-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <h4 className="font-semibold text-sm" style={{ color: BLAUW }}>Concept WOO-verzoek</h4>
+                          <KopieerKnop tekst={controle.wooVerzoek} />
+                        </div>
+                        <p className="text-xs text-muted-foreground mb-3">
+                          Vul de plekken tussen [haakjes] in met je eigen gegevens en het kenmerk van je besluit. Verstuur naar het bestuursorgaan en bewaar een kopie — de termijn van vier weken loopt vanaf verzending.
+                        </p>
+                        <pre className="whitespace-pre-wrap text-sm font-sans bg-muted/40 p-4 rounded-md">{controle.wooVerzoek}</pre>
+                      </div>
+                    )}
+                  </div>
+                )}
               </>
             )}
 
