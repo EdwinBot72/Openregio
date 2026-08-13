@@ -2575,6 +2575,7 @@ HARDE GRENZEN:
         model: "gpt-4o",
         messages: [{ role: "system", content: systemPrompt }, ...messages],
         temperature: 0.5,
+        max_tokens: 700,
       });
 
       res.json({ answer: completion.choices[0]?.message?.content || "" });
