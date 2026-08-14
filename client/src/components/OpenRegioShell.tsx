@@ -47,9 +47,20 @@ type PijlerHeaderProps = {
   num: ReactNode;
   name: string;
   numClass?: string;
+  img?: string;
+  sub?: string;
 };
 
-function PijlerHeader({ num, name, numClass = "" }: PijlerHeaderProps) {
+function PijlerHeader({ num, name, numClass = "", img, sub }: PijlerHeaderProps) {
+  if (img) {
+    return (
+      <div className="or-pijler-card" style={{ backgroundImage: `linear-gradient(180deg, rgba(21,35,59,.15) 0%, rgba(21,35,59,.82) 100%), url(${img})` }}>
+        <div className={`or-pijler-card-num ${numClass}`}>{num}</div>
+        <div className="or-pijler-card-name">{name}</div>
+        {sub && <div className="or-pijler-card-sub">{sub}</div>}
+      </div>
+    );
+  }
   return (
     <div className="or-pijler-nav-header">
       <div className={`or-pijler-nav-num ${numClass}`}>{num}</div>
@@ -155,7 +166,7 @@ export function OpenRegioShell({ children }: { children: ReactNode }) {
             <div className="or-sb-div" />
 
             {/* Pijler 1: Grip op Regels */}
-            <PijlerHeader num="1" name="GRIP OP REGELS" numClass="or-num-p1" />
+            <PijlerHeader num="1" name="GRIP OP REGELS" numClass="or-num-p1" img="/images/pijlers/regels.jpg" sub="Regels, brieven & besluiten" />
             <NavItem
               icon={Mail}
               href="/regels/documenten"
@@ -195,7 +206,7 @@ export function OpenRegioShell({ children }: { children: ReactNode }) {
             <div className="or-sb-div" />
 
             {/* Pijler 2: Lokale Zichtbaarheid */}
-            <PijlerHeader num="2" name="LOKALE ZICHTBAARHEID" numClass="or-num-p2" />
+            <PijlerHeader num="2" name="LOKALE ZICHTBAARHEID" numClass="or-num-p2" img="/images/pijlers/zichtbaarheid.jpg" sub="Op de kaart in je regio" />
             <NavItem
               icon={Globe}
               href="/groei/website-check"
@@ -235,7 +246,7 @@ export function OpenRegioShell({ children }: { children: ReactNode }) {
             <div className="or-sb-div" />
 
             {/* Pijler 3: Lokale Kracht */}
-            <PijlerHeader num="3" name="LOKALE KRACHT" numClass="or-num-p3" />
+            <PijlerHeader num="3" name="LOKALE KRACHT" numClass="or-num-p3" img="/images/pijlers/kracht.jpg" sub="Samen sterker, lokaal" />
             <NavItem
               icon={Users}
               href="/network"

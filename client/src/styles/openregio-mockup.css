@@ -264,6 +264,45 @@
   color: #94a3b8;
 }
 
+/* Foto-pijlerkaart (zip-huisstijl) */
+.or-pijler-card {
+  position: relative;
+  margin: 12px 4px 8px;
+  min-height: 84px;
+  border-radius: 12px;
+  background-size: cover;
+  background-position: center;
+  overflow: hidden;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+.or-pijler-card-num {
+  position: absolute;
+  top: 8px; left: 8px;
+  width: 24px; height: 24px;
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Barlow Condensed', 'Barlow', sans-serif;
+  font-size: 13px; font-weight: 700; color: #fff;
+}
+.or-pijler-card-name {
+  font-family: 'Barlow Condensed', 'Barlow', sans-serif;
+  text-transform: uppercase;
+  font-weight: 700;
+  font-size: 17px;
+  letter-spacing: .02em;
+  color: #fff;
+  line-height: 1;
+}
+.or-pijler-card-sub {
+  font-size: 10.5px;
+  font-weight: 500;
+  color: rgba(255,255,255,.85);
+  margin-top: 3px;
+}
+
 /* Divider in body */
 .or-sb-div {
   height: 1px;
