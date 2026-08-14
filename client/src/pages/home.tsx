@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -22,9 +22,12 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-const BLAUW = "#0b2240";
-const ORANJE = "#f28a1a";
-const FF = "Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+const BLAUW = "#15233b";
+const ORANJE = "#e8772e";
+const FF = "'Barlow', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+// Compacte display-koppen (zip-huisstijl): groot, in hoofdletters.
+const DISP = "'Barlow Condensed', 'Barlow', sans-serif";
+const disp = (extra: CSSProperties = {}): CSSProperties => ({ fontFamily: DISP, textTransform: "uppercase", letterSpacing: ".01em", ...extra });
 
 export default function HomePage() {
   usePageTitle("OpenRegio — Grip op regels. Kracht in de regio.");
@@ -32,7 +35,7 @@ export default function HomePage() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   return (
-    <div style={{ fontFamily: FF, background: "#f8f7f4", margin: 0, padding: 0 }}>
+    <div style={{ fontFamily: FF, background: "#faf9f5", margin: 0, padding: 0 }}>
 
       {/* ── STICKY NAV ────────────────────────────────────────────────────── */}
       <header style={{
@@ -45,11 +48,11 @@ export default function HomePage() {
             {/* Logo */}
             <Link href="/">
               <div style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", flexShrink: 0 }}>
-                <div style={{ width: 34, height: 34, borderRadius: "50%", background: ORANJE, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <div style={{ width: 36, height: 36, borderRadius: 10, background: ORANJE, display: "flex", alignItems: "center", justifyContent: "center" }}>
                   <MapPin style={{ width: 18, height: 18, color: "#fff" }} />
                 </div>
                 <div>
-                  <div style={{ fontSize: 17, fontWeight: 900, color: BLAUW, lineHeight: 1 }}>OpenRegio</div>
+                  <div style={disp({ fontSize: 22, fontWeight: 700, color: BLAUW, lineHeight: 1, letterSpacing: ".02em" })}>OpenRegio</div>
                 </div>
               </div>
             </Link>
@@ -140,7 +143,7 @@ export default function HomePage() {
         <div className="or-hero-content" style={{ position: "relative", zIndex: 1, maxWidth: 1200, width: "100%", margin: "0 auto", padding: "0 24px" }}>
           <div className="or-hero-text" style={{ maxWidth: 460 }}>
             <div style={{ width: 40, height: 4, background: ORANJE, borderRadius: 2, margin: "0 0 20px" }} />
-            <h1 style={{ fontSize: 36, fontWeight: 900, color: "#fff", lineHeight: 1.2, margin: "0 0 16px" }}>
+            <h1 style={disp({ fontSize: "clamp(38px,5vw,60px)", fontWeight: 700, color: "#fff", lineHeight: 1.02, margin: "0 0 16px", letterSpacing: ".005em" })}>
               Wij maken het systeem<br />zichtbaar voor jou.
             </h1>
             <p style={{ fontSize: 16, color: "rgba(255,255,255,0.88)", lineHeight: 1.6, margin: "0 0 14px", maxWidth: 430 }}>
@@ -150,7 +153,7 @@ export default function HomePage() {
               OpenRegio helpt je rustig begrijpen wat er speelt, wat mag en wat je kunt doen — in gewone taal, stap voor stap.
             </p>
             <a href="#pricing">
-              <button style={{ padding: "13px 28px", borderRadius: 8, fontSize: 15, fontWeight: 700, background: ORANJE, color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 }}>
+              <button style={disp({ padding: "13px 28px", borderRadius: 8, fontSize: 16, fontWeight: 700, letterSpacing: ".04em", background: ORANJE, color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 })}>
                 Begin vandaag <ArrowRight style={{ width: 16, height: 16 }} />
               </button>
             </a>
@@ -161,7 +164,7 @@ export default function HomePage() {
       {/* ── KORTE INTRO ───────────────────────────────────────────────────── */}
       <section style={{ background: "#fff", padding: "64px 24px" }}>
         <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
-          <h1 style={{ fontSize: 30, fontWeight: 900, color: BLAUW, lineHeight: 1.3, margin: "0 0 18px" }}>
+          <h1 style={disp({ fontSize: "clamp(30px,4vw,46px)", fontWeight: 700, color: BLAUW, lineHeight: 1.05, margin: "0 0 18px" })}>
             OpenRegio helpt lokale ondernemers vooruit.
           </h1>
           <p style={{ fontSize: 16, color: "#475569", lineHeight: 1.85, margin: 0 }}>
@@ -280,7 +283,7 @@ export default function HomePage() {
       <section style={{ background: BLAUW, padding: "80px 24px" }}>
         <div style={{ maxWidth: 780, margin: "0 auto" }}>
           <div style={{ width: 44, height: 4, background: ORANJE, borderRadius: 2, margin: "0 auto 32px" }} />
-          <h2 style={{ fontSize: 30, fontWeight: 900, color: "#fff", lineHeight: 1.4, textAlign: "center", margin: "0 0 40px" }}>
+          <h2 style={disp({ fontSize: "clamp(28px,3.5vw,42px)", fontWeight: 700, color: "#fff", lineHeight: 1.1, textAlign: "center", margin: "0 0 40px" })}>
             Als ondernemer ben je zichtbaar voor het systeem.<br />
             <span style={{ color: ORANJE }}>OpenRegio maakt het systeem zichtbaar voor jou.</span>
           </h2>
@@ -308,7 +311,7 @@ export default function HomePage() {
             <div style={{ fontSize: 11, fontWeight: 700, color: ORANJE, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 12 }}>
               Praktische hulp
             </div>
-            <h2 style={{ fontSize: 30, fontWeight: 900, color: BLAUW, margin: "0 0 14px" }}>
+            <h2 style={disp({ fontSize: "clamp(28px,3.5vw,40px)", fontWeight: 700, color: BLAUW, lineHeight: 1.05, margin: "0 0 14px" })}>
               Hulp waar je echt iets aan hebt
             </h2>
             <p style={{ fontSize: 15, color: "#475569", lineHeight: 1.75, margin: "0 auto", maxWidth: 520 }}>
@@ -365,7 +368,7 @@ export default function HomePage() {
 
           {/* Left */}
           <div>
-            <h2 style={{ fontSize: 26, fontWeight: 900, color: "#fff", lineHeight: 1.2, textTransform: "uppercase", margin: "0 0 20px" }}>
+            <h2 style={disp({ fontSize: "clamp(26px,3vw,38px)", fontWeight: 700, color: "#fff", lineHeight: 1.1, margin: "0 0 20px" })}>
               JOUW BEDRIJF.<br />JOUW REGIO.<br />ONZE TOEKOMST.
             </h2>
             <p style={{ fontSize: 14, color: "#94a3b8", margin: "0 0 16px", lineHeight: 1.6 }}>
@@ -419,7 +422,7 @@ export default function HomePage() {
       {/* ── CTA-SECTIE ────────────────────────────────────────────────────── */}
       <section style={{ background: "#fff", padding: "64px 24px" }}>
         <div style={{ maxWidth: 700, margin: "0 auto", textAlign: "center" }}>
-          <h2 style={{ fontSize: 26, fontWeight: 900, color: BLAUW, lineHeight: 1.35, margin: "0 0 10px" }}>
+          <h2 style={disp({ fontSize: "clamp(26px,3vw,36px)", fontWeight: 700, color: BLAUW, lineHeight: 1.1, margin: "0 0 10px" })}>
             OpenRegio helpt de lokale ondernemer in moeilijke tijden.
           </h2>
           <p style={{ fontSize: 17, color: ORANJE, fontWeight: 700, margin: "0 0 32px" }}>
@@ -447,7 +450,7 @@ export default function HomePage() {
             <div style={{ fontSize: 11, fontWeight: 700, color: ORANJE, letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: 12 }}>
               Transparante prijzen
             </div>
-            <h2 style={{ fontSize: 34, fontWeight: 900, color: BLAUW, margin: "0 0 14px", textTransform: "uppercase" }}>
+            <h2 style={disp({ fontSize: "clamp(30px,4vw,46px)", fontWeight: 700, color: BLAUW, margin: "0 0 14px" })}>
               KIES JE LIDMAATSCHAP
             </h2>
             <p style={{ fontSize: 15, color: "#475569", margin: 0, lineHeight: 1.7 }}>
