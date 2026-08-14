@@ -128,33 +128,31 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* ── HERO — full-width photo with left-aligned text ───────────────── */}
-      <section id="platform" className="or-hero" style={{ position: "relative", minHeight: 620, display: "flex", alignItems: "center", overflow: "hidden" }}>
-        <div style={{ position: "absolute", inset: 0, background: `linear-gradient(135deg, ${BLAUW} 0%, #1a3a5c 100%)`, zIndex: -1 }} />
-        <img
-          src="/images/hero-entrepreneur.jpg"
-          alt="Lokale ondernemer"
-          style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "center top", display: "block", position: "absolute", inset: 0 }}
-          onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-        />
-        {/* Dark wash on the left so light text stays readable over the photo */}
-        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(90deg, rgba(11,34,64,0.92) 0%, rgba(11,34,64,0.72) 42%, rgba(11,34,64,0.15) 68%, rgba(11,34,64,0) 85%)" }} />
-
-        <div className="or-hero-content" style={{ position: "relative", zIndex: 1, maxWidth: 1200, width: "100%", margin: "0 auto", padding: "0 24px" }}>
-          <div className="or-hero-text" style={{ maxWidth: 460 }}>
-            <div style={{ width: 40, height: 4, background: ORANJE, borderRadius: 2, margin: "0 0 20px" }} />
-            <h1 style={disp({ fontSize: "clamp(38px,5vw,60px)", fontWeight: 700, color: "#fff", lineHeight: 1.02, margin: "0 0 16px", letterSpacing: ".005em" })}>
-              Wij maken het systeem<br />zichtbaar voor jou.
-            </h1>
-            <p style={{ fontSize: 16, color: "rgba(255,255,255,0.88)", lineHeight: 1.6, margin: "0 0 14px", maxWidth: 430 }}>
-              Regels, brieven en besluiten van de overheid kunnen overweldigend voelen. Dat hoeft niet.
-            </p>
-            <p style={{ fontSize: 16, color: "#fff", fontWeight: 700, lineHeight: 1.5, margin: "0 0 24px", maxWidth: 430 }}>
-              OpenRegio helpt je rustig begrijpen wat er speelt, wat mag en wat je kunt doen — in gewone taal, stap voor stap.
-            </p>
+      {/* ── HERO — donkerblauw blok (zip-huisstijl) ───────────────────────── */}
+      <section id="platform" style={{ background: `linear-gradient(160deg, ${BLAUW} 0%, #1d3050 100%)`, padding: "clamp(56px,8vw,104px) 24px" }}>
+        <div style={{ maxWidth: 1120, margin: "0 auto" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.16)", borderRadius: 999, padding: "6px 14px", marginBottom: 22 }}>
+            <span style={{ width: 7, height: 7, borderRadius: "50%", background: ORANJE }} />
+            <span style={disp({ fontSize: 12.5, fontWeight: 600, letterSpacing: ".08em", color: "rgba(255,255,255,0.9)" })}>Grip op regels · Kracht in de regio</span>
+          </div>
+          <h1 style={disp({ fontSize: "clamp(40px,6.5vw,84px)", fontWeight: 700, color: "#fff", lineHeight: 0.98, margin: "0 0 20px", letterSpacing: ".005em", maxWidth: "16ch" })}>
+            Wij maken het systeem <span style={{ color: ORANJE }}>zichtbaar voor jou.</span>
+          </h1>
+          <p style={{ fontSize: 17, color: "rgba(255,255,255,0.82)", lineHeight: 1.65, margin: "0 0 8px", maxWidth: "56ch" }}>
+            Regels, brieven en besluiten van de overheid kunnen overweldigend voelen. Dat hoeft niet.
+          </p>
+          <p style={{ fontSize: 17, color: "#fff", fontWeight: 600, lineHeight: 1.55, margin: "0 0 30px", maxWidth: "56ch" }}>
+            OpenRegio helpt je rustig begrijpen wat er speelt, wat mag en wat je kunt doen — in gewone taal, stap voor stap.
+          </p>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <a href="#pricing">
-              <button style={disp({ padding: "13px 28px", borderRadius: 8, fontSize: 16, fontWeight: 700, letterSpacing: ".04em", background: ORANJE, color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 })}>
+              <button style={disp({ padding: "14px 30px", borderRadius: 9, fontSize: 16, fontWeight: 700, letterSpacing: ".04em", background: ORANJE, color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 })}>
                 Begin vandaag <ArrowRight style={{ width: 16, height: 16 }} />
+              </button>
+            </a>
+            <a href="#pricing">
+              <button style={disp({ padding: "14px 30px", borderRadius: 9, fontSize: 16, fontWeight: 700, letterSpacing: ".04em", background: "transparent", color: "#fff", border: "1px solid rgba(255,255,255,0.28)", cursor: "pointer" })}>
+                Bekijk lidmaatschap
               </button>
             </a>
           </div>
@@ -228,33 +226,36 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── 3 PIJLERS ─────────────────────────────────────────────────────── */}
-      <section id="hulp" style={{ background: "#f8f7f4", padding: "64px 24px" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto" }}>
-          <div className="or-pillars-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 28 }}>
+      {/* ── DE DRIE PIJLERS (zip-huisstijl) ───────────────────────────────── */}
+      <section id="hulp" style={{ background: "#faf9f5", padding: "72px 24px" }}>
+        <div style={{ maxWidth: 1120, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 44 }}>
+            <div style={disp({ fontSize: 12, fontWeight: 600, color: ORANJE, letterSpacing: ".14em", marginBottom: 10 })}>De drie pijlers</div>
+            <h2 style={disp({ fontSize: "clamp(28px,3.6vw,44px)", fontWeight: 700, color: BLAUW, lineHeight: 1.05, margin: 0 })}>Waar OpenRegio mee helpt</h2>
+          </div>
+          <div className="or-pillars-grid" style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
             {[
-              {
-                Icon: ClipboardCheck,
-                title: "Regelgeving onder de loep",
-                body: "Wij helpen ondernemers om scherper te kijken naar regels, besluiten en verplichtingen die invloed hebben op hun bedrijf. Wat betekent een regel echt in de praktijk? Wat geldt wel, wat geldt niet, en waar liggen aandachtspunten?",
-              },
-              {
-                Icon: ShieldCheck,
-                title: "Gezond ondernemen",
-                body: "OpenRegio helpt ondernemers om grip te houden op hun bedrijf. Van praktische vragen en risico's tot kansen, structuur en continuïteit: wij helpen overzicht creëren in lastige tijden.",
-              },
-              {
-                Icon: Compass,
-                title: "Zichtbaar in jouw regio",
-                body: "Wij helpen lokale ondernemers om beter op de kaart te staan in hun eigen regio. Denk aan zichtbaarheid, positionering, lokale vindbaarheid en aansluiting bij kansen in de omgeving.",
-              },
-            ].map(({ Icon, title, body }) => (
-              <div key={title} style={{ background: "#fff", borderRadius: 12, padding: "32px 26px", boxShadow: "0 1px 4px rgba(0,0,0,0.06)" }}>
-                <div style={{ width: 52, height: 52, borderRadius: "50%", background: BLAUW, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20 }}>
-                  <Icon style={{ width: 24, height: 24, color: ORANJE }} />
+              { num: "01", kleur: BLAUW, naam: "Grip op regels", sub: "Voor ondernemers die duidelijkheid willen.", items: ["Brieven begrijpen", "Regels uitleggen", "Vergunningen volgen", "Informatie opvragen", "Praktische vervolgstappen"], kort: "Weet wat er speelt en wat je moet doen." },
+              { num: "02", kleur: "#3c4860", naam: "Lokale zichtbaarheid", sub: "Voor ondernemers die beter gevonden willen worden.", items: ["Website-check", "Lokale vindbaarheid", "Google-bedrijfsprofiel", "Online basis op orde", "Minder afhankelijk van platforms"], kort: "Zorg dat klanten je lokaal blijven vinden." },
+              { num: "03", kleur: ORANJE, naam: "Lokale kracht", sub: "Voor ondernemers die sterker willen staan in hun regio.", items: ["Samenwerken", "Lokale acties organiseren", "Personeel & kennis delen", "Klantenbinding versterken", "Elkaar versterken"], kort: "Samen maak je de regio sterker." },
+            ].map((p) => (
+              <div key={p.num} style={{ background: "#fff", border: "1px solid #e6e2d6", borderRadius: 14, padding: "26px 24px", display: "flex", flexDirection: "column" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
+                  <div style={disp({ width: 42, height: 42, borderRadius: 10, background: p.kleur, color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 19, fontWeight: 700 })}>{p.num}</div>
+                  <div style={disp({ fontSize: 22, fontWeight: 700, color: BLAUW, lineHeight: 1 })}>{p.naam}</div>
                 </div>
-                <div style={{ fontSize: 18, fontWeight: 800, color: BLAUW, marginBottom: 12 }}>{title}</div>
-                <p style={{ fontSize: 14, color: "#475569", lineHeight: 1.8, margin: 0 }}>{body}</p>
+                <p style={{ fontSize: 14, color: "#5a6680", margin: "0 0 16px", lineHeight: 1.55 }}>{p.sub}</p>
+                <div style={{ display: "flex", flexDirection: "column", gap: 9, marginBottom: 18 }}>
+                  {p.items.map((it) => (
+                    <div key={it} style={{ display: "flex", alignItems: "center", gap: 9, fontSize: 14, color: "#334155" }}>
+                      <CheckCircle2 style={{ width: 16, height: 16, color: ORANJE, flexShrink: 0 }} /> {it}
+                    </div>
+                  ))}
+                </div>
+                <div style={{ marginTop: "auto", borderTop: "1px solid #f0ede4", paddingTop: 14, display: "flex", alignItems: "flex-start", gap: 8 }}>
+                  <span style={disp({ fontSize: 10.5, fontWeight: 700, color: ORANJE, letterSpacing: ".1em", background: "#fbeee2", padding: "3px 7px", borderRadius: 5, flexShrink: 0 })}>Kort</span>
+                  <span style={{ fontSize: 13.5, color: "#15233b", fontWeight: 600, lineHeight: 1.4 }}>{p.kort}</span>
+                </div>
               </div>
             ))}
           </div>
