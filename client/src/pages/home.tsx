@@ -130,7 +130,8 @@ export default function HomePage() {
 
       {/* ── HERO — donkerblauw blok (zip-huisstijl) ───────────────────────── */}
       <section id="platform" style={{ background: `linear-gradient(160deg, ${BLAUW} 0%, #1d3050 100%)`, padding: "clamp(56px,8vw,104px) 24px" }}>
-        <div style={{ maxWidth: 1120, margin: "0 auto" }}>
+        <div className="or-herowrap" style={{ maxWidth: 1120, margin: "0 auto", display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: 44, alignItems: "center" }}>
+          <div>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.16)", borderRadius: 999, padding: "6px 14px", marginBottom: 22 }}>
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: ORANJE }} />
             <span style={disp({ fontSize: 12.5, fontWeight: 600, letterSpacing: ".08em", color: "rgba(255,255,255,0.9)" })}>Grip op regels · Kracht in de regio</span>
@@ -155,6 +156,10 @@ export default function HomePage() {
                 Bekijk lidmaatschap
               </button>
             </a>
+          </div>
+          </div>
+          <div className="or-hero-img" style={{ borderRadius: 16, overflow: "hidden", border: "1px solid rgba(255,255,255,0.14)", boxShadow: "0 24px 60px rgba(0,0,0,0.35)" }}>
+            <img src="/images/hero-open.jpg" alt="Lokale ondernemer met open bordje" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", minHeight: 340 }} />
           </div>
         </div>
       </section>
@@ -543,6 +548,8 @@ export default function HomePage() {
         @media (max-width: 960px) {
           .or-hero { min-height: 360px !important; }
           .or-pillars-grid { grid-template-columns: 1fr !important; }
+          .or-herowrap { grid-template-columns: 1fr !important; }
+          .or-hero-img { max-width: 460px; }
           .or-rebel-grid { grid-template-columns: 1fr !important; }
           .or-welniet-grid { grid-template-columns: 1fr !important; }
           .or-agents-grid { grid-template-columns: 1fr !important; }
