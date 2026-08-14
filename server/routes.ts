@@ -2572,17 +2572,37 @@ HARDE GRENZEN:
 
       const OpenAI = (await import("openai")).default;
       const openai = new OpenAI();
-      const completion = await openai.chat.completions.create({
+
+      // Streaming: tokens komen live binnen zodat het niet lijkt te bevriezen.
+      res.setHeader("Content-Type", "text/event-stream; charset=utf-8");
+      res.setHeader("Cache-Control", "no-cache, no-transform");
+      res.setHeader("Connection", "keep-alive");
+      res.setHeader("X-Accel-Buffering", "no");
+      res.flushHeaders?.();
+
+      const stream = await openai.chat.completions.create({
         model: "gpt-4o",
         messages: [{ role: "system", content: systemPrompt }, ...messages],
         temperature: 0.5,
         max_tokens: 700,
+        stream: true,
       });
 
-      res.json({ answer: completion.choices[0]?.message?.content || "" });
+      for await (const chunk of stream) {
+        const delta = chunk.choices?.[0]?.delta?.content || "";
+        if (delta) res.write(`data: ${JSON.stringify(delta)}\n\n`);
+      }
+      res.write("data: [DONE]\n\n");
+      res.end();
     } catch (err: any) {
       console.error("Adviseur error:", err);
-      res.status(500).json({ error: "De adviseur kon niet antwoorden", message: err?.message ?? String(err) });
+      if (res.headersSent) {
+        res.write(`data: ${JSON.stringify("\n\n[De adviseur werd onderbroken. Probeer het opnieuw.]")}\n\n`);
+        res.write("data: [DONE]\n\n");
+        res.end();
+      } else {
+        res.status(500).json({ error: "De adviseur kon niet antwoorden", message: err?.message ?? String(err) });
+      }
     }
   });
 

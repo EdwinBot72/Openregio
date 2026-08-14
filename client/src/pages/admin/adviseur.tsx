@@ -1,9 +1,7 @@
 import { useState, useRef, useEffect } from "react";
-import { useMutation } from "@tanstack/react-query";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -29,31 +27,70 @@ export default function AdviseurPage() {
 
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
+  const [bezig, setBezig] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
-
-  const vraag = useMutation({
-    mutationFn: async (history: Msg[]) => {
-      const res = await apiRequest("POST", "/api/admin/adviseur", { messages: history });
-      return (await res.json()) as { answer: string };
-    },
-    onSuccess: (data) => setMessages((m) => [...m, { role: "assistant", content: data.answer || "(geen antwoord)" }]),
-    onError: (err) => {
-      toast({ title: "De adviseur kon niet antwoorden", description: parseApiError(err), variant: "destructive" });
-      setMessages((m) => m.slice(0, -1)); // haal de zojuist toegevoegde vraag weg
-    },
-  });
 
   useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: "smooth" });
-  }, [messages, vraag.isPending]);
+  }, [messages, bezig]);
 
-  function verstuur(tekst: string) {
+  async function verstuur(tekst: string) {
     const t = tekst.trim();
-    if (!t || vraag.isPending) return;
-    const nieuw: Msg[] = [...messages, { role: "user", content: t }];
-    setMessages(nieuw);
+    if (!t || bezig) return;
+    const history: Msg[] = [...messages, { role: "user", content: t }];
+    // voeg meteen een lege assistent-bubbel toe die live volstroomt
+    setMessages([...history, { role: "assistant", content: "" }]);
     setInput("");
-    vraag.mutate(nieuw);
+    setBezig(true);
+
+    try {
+      const res = await fetch("/api/admin/adviseur", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ messages: history }),
+      });
+      if (!res.ok || !res.body) throw new Error("Verbinding mislukt (" + res.status + ")");
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let gotSomething = false;
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n");
+        buffer = lines.pop() || "";
+        for (const line of lines) {
+          const s = line.trim();
+          if (!s.startsWith("data:")) continue;
+          const payload = s.slice(5).trim();
+          if (payload === "[DONE]") continue;
+          try {
+            const delta = JSON.parse(payload) as string;
+            gotSomething = true;
+            setMessages((m) => {
+              const copy = m.slice();
+              copy[copy.length - 1] = { role: "assistant", content: copy[copy.length - 1].content + delta };
+              return copy;
+            });
+          } catch { /* onvolledige regel, negeren */ }
+        }
+      }
+      if (!gotSomething) {
+        setMessages((m) => {
+          const copy = m.slice();
+          copy[copy.length - 1] = { role: "assistant", content: "(geen antwoord ontvangen)" };
+          return copy;
+        });
+      }
+    } catch (err: any) {
+      toast({ title: "De adviseur kon niet antwoorden", description: String(err?.message || err), variant: "destructive" });
+      setMessages((m) => m.slice(0, -2)); // haal vraag + lege bubbel weg
+    } finally {
+      setBezig(false);
+    }
   }
 
   if (!isAdmin) {
@@ -111,18 +148,16 @@ export default function AdviseurPage() {
                       : { background: "#f4f6f9", color: "#1f2937" }
                   }
                 >
-                  {m.content}
+                  {m.content
+                    ? m.content
+                    : (
+                      <span className="flex items-center gap-2" style={{ color: "#6b7280" }}>
+                        <Loader2 className="w-4 h-4 animate-spin" /> De adviseur denkt na…
+                      </span>
+                    )}
                 </div>
               </div>
             ))}
-
-            {vraag.isPending && (
-              <div className="flex justify-start">
-                <div className="rounded-2xl px-4 py-2.5 text-sm flex items-center gap-2" style={{ background: "#f4f6f9", color: "#6b7280" }}>
-                  <Loader2 className="w-4 h-4 animate-spin" /> De adviseur denkt na…
-                </div>
-              </div>
-            )}
           </div>
 
           <div className="border-t p-3 flex items-end gap-2">
@@ -141,11 +176,11 @@ export default function AdviseurPage() {
             />
             <Button
               onClick={() => verstuur(input)}
-              disabled={!input.trim() || vraag.isPending}
+              disabled={!input.trim() || bezig}
               style={{ background: ORANJE }}
               className="text-white shrink-0"
             >
-              {vraag.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+              {bezig ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
             </Button>
           </div>
         </CardContent>
