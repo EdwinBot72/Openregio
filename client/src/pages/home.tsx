@@ -134,29 +134,18 @@ export default function HomePage() {
           <div>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.16)", borderRadius: 999, padding: "6px 14px", marginBottom: 22 }}>
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: ORANJE }} />
-            <span style={disp({ fontSize: 12.5, fontWeight: 600, letterSpacing: ".08em", color: "rgba(255,255,255,0.9)" })}>Grip op regels · Kracht in de regio</span>
+            <span style={disp({ fontSize: 12.5, fontWeight: 600, letterSpacing: ".08em", color: "rgba(255,255,255,0.9)" })}>Alles begint dichtbij</span>
           </div>
-          <h1 style={disp({ fontSize: "clamp(40px,6.5vw,84px)", fontWeight: 700, color: "#fff", lineHeight: 0.98, margin: "0 0 20px", letterSpacing: ".005em", maxWidth: "16ch" })}>
-            Wij maken het systeem <span style={{ color: ORANJE }}>zichtbaar voor jou.</span>
+          <h1 style={disp({ fontSize: "clamp(38px,6vw,76px)", fontWeight: 700, color: "#fff", lineHeight: 0.98, margin: "0 0 18px", letterSpacing: ".005em", maxWidth: "17ch" })}>
+            Alles wat jouw regio <span style={{ color: ORANJE }}>te bieden heeft.</span>
           </h1>
-          <p style={{ fontSize: 17, color: "rgba(255,255,255,0.82)", lineHeight: 1.65, margin: "0 0 8px", maxWidth: "56ch" }}>
-            Regels, brieven en besluiten van de overheid kunnen overweldigend voelen. Dat hoeft niet.
+          <p style={{ fontSize: 17, color: "rgba(255,255,255,0.85)", lineHeight: 1.6, margin: "0 0 24px", maxWidth: "54ch" }}>
+            Koop lokaal. Ontdek workshops. Vind ondernemers. Werk samen. En krijg hulp als ondernemen ingewikkeld wordt.
           </p>
-          <p style={{ fontSize: 17, color: "#fff", fontWeight: 600, lineHeight: 1.55, margin: "0 0 30px", maxWidth: "56ch" }}>
-            OpenRegio helpt je rustig begrijpen wat er speelt, wat mag en wat je kunt doen — in gewone taal, stap voor stap.
-          </p>
-          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <a href="#pricing">
-              <button style={disp({ padding: "14px 30px", borderRadius: 9, fontSize: 16, fontWeight: 700, letterSpacing: ".04em", background: ORANJE, color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 })}>
-                Begin vandaag <ArrowRight style={{ width: 16, height: 16 }} />
-              </button>
-            </a>
-            <a href="#pricing">
-              <button style={disp({ padding: "14px 30px", borderRadius: 9, fontSize: 16, fontWeight: 700, letterSpacing: ".04em", background: "transparent", color: "#fff", border: "1px solid rgba(255,255,255,0.28)", cursor: "pointer" })}>
-                Bekijk lidmaatschap
-              </button>
-            </a>
-          </div>
+          <form action="/doe-en-leer" style={{ display: "flex", gap: 10, maxWidth: 520, flexWrap: "wrap" }}>
+            <input name="q" placeholder="Wat zoek je? Bijv. workshop pizza bakken, fietsenmaker…" style={{ flex: "1 1 240px", padding: "14px 16px", borderRadius: 10, border: "none", fontSize: 15, outline: "none", fontFamily: "inherit" }} />
+            <button type="submit" style={disp({ padding: "14px 26px", borderRadius: 10, fontSize: 15, fontWeight: 700, letterSpacing: ".03em", background: ORANJE, color: "#fff", border: "none", cursor: "pointer" })}>Zoeken</button>
+          </form>
           </div>
           <div className="or-hero-img" style={{ borderRadius: 16, overflow: "hidden", border: "1px solid rgba(255,255,255,0.14)", boxShadow: "0 24px 60px rgba(0,0,0,0.35)" }}>
             <img src="/images/hero-open.jpg" alt="Lokale ondernemer met open bordje" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", minHeight: 340 }} />
@@ -176,57 +165,29 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── REBELS, MAAR GROUNDED ─────────────────────────────────────────── */}
-      <section style={{ background: BLAUW, padding: "56px 24px" }}>
-        <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
-          <p style={{ fontSize: 24, fontWeight: 900, color: "#fff", lineHeight: 1.4, margin: 0 }}>
-            Je hoeft geen jurist te zijn om je recht te kennen.<br />
-            <span style={{ color: ORANJE }}>Je hoeft alleen te weten waar je staat.</span>
-          </p>
-        </div>
-
-        <div className="or-rebel-grid" style={{ maxWidth: 1120, margin: "40px auto 0", display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 22 }}>
-          {[
-            {
-              label: "Jouw gegevens",
-              title: "Rustig wegwijs in je gegevens",
-              spanning: "Rondom de digitale identiteit leven veel vragen. Wat deel je, met wie, en wat kun je zelf kiezen?",
-              antwoord: "Wij leggen rustig uit wat mag en wat vrijwillig is, zodat je zelf een weloverwogen keuze maakt. Digitaal waar het kan, menselijk waar het moet.",
-            },
-            {
-              label: "Regels",
-              title: "Wat betekent een regel voor jou?",
-              spanning: "Een milieuzone, een vergunning, een nieuwe verplichting kan groot voelen. Wat geldt er nu écht, en voor wie?",
-              antwoord: "Wij helpen je zien wat een regel in de praktijk betekent en of hij redelijk is toegepast. Je mag altijd vragen: klopt dit, en is het proportioneel?",
-            },
-            {
-              label: "Grip",
-              title: "Van ruis naar overzicht",
-              spanning: "Het systeem kan groot en ondoorzichtig lijken. Waar begin je, en waar sta je eigenlijk?",
-              antwoord: "Wij helpen je stap voor stap: wat is er aan de hand, wat mag de overheid wel en niet, en wat kun jij doen. Rust en helderheid, in gewone taal.",
-            },
-          ].map((b) => (
-            <div key={b.title} style={{ background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 12, padding: "26px 24px", textAlign: "left" }}>
-              <div style={{ fontSize: 12, fontWeight: 800, color: ORANJE, textTransform: "uppercase", letterSpacing: "0.08em", marginBottom: 8 }}>{b.label}</div>
-              <div style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginBottom: 10 }}>{b.title}</div>
-              <p style={{ fontSize: 14, color: "rgba(255,255,255,0.6)", lineHeight: 1.7, margin: "0 0 10px" }}>{b.spanning}</p>
-              <p style={{ fontSize: 14, color: "rgba(255,255,255,0.9)", lineHeight: 1.7, margin: 0 }}>{b.antwoord}</p>
-            </div>
-          ))}
-        </div>
-
-        <div className="or-welniet-grid" style={{ maxWidth: 1120, margin: "22px auto 0", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 22, background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)", borderRadius: 12, padding: "24px 26px" }}>
-          <div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: "#4ade80", marginBottom: 6 }}>Wat je van ons mag verwachten</div>
-            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.72)", lineHeight: 1.7, margin: 0 }}>
-              Rustig, feitelijk en aan jouw kant. Gebouwd op je echte rechten — de Grondwet, het EVRM en de privacywet — en op het beginsel dat de overheid zich aan haar eigen regels houdt.
-            </p>
+      {/* ── ONTDEK LOKAAL — vier ingangen (2.0) ───────────────────────────── */}
+      <section id="ontdek" style={{ background: "#faf9f5", padding: "72px 24px" }}>
+        <div style={{ maxWidth: 1120, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 40 }}>
+            <div style={disp({ fontSize: 12, fontWeight: 600, color: ORANJE, letterSpacing: ".14em", marginBottom: 10 })}>Ontdek lokaal</div>
+            <h2 style={disp({ fontSize: "clamp(28px,3.6vw,44px)", fontWeight: 700, color: BLAUW, lineHeight: 1.05, margin: 0 })}>Waar wil je beginnen?</h2>
           </div>
-          <div>
-            <div style={{ fontSize: 14, fontWeight: 800, color: "rgba(255,255,255,0.9)", marginBottom: 6 }}>En wat niet</div>
-            <p style={{ fontSize: 14, color: "rgba(255,255,255,0.72)", lineHeight: 1.7, margin: 0 }}>
-              We overdrijven niet en maken je niet bang. Geen grote woorden en geen paniek — we kijken rustig naar wat er staat en helpen je de juiste vragen te stellen.
-            </p>
+          <div className="or-ingangen-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20 }}>
+            {[
+              { emoji: "🛍", titel: "Koop lokaal", tekst: "Producten van ondernemers uit jouw buurt.", href: "/koop-lokaal" },
+              { emoji: "🎓", titel: "Doe & leer", tekst: "Workshops en activiteiten door lokale ondernemers.", href: "/doe-en-leer" },
+              { emoji: "🔧", titel: "Vind een ondernemer", tekst: "Vind diensten en vakmensen dichtbij.", href: "/lokaal-marktplaats" },
+              { emoji: "🤝", titel: "Ondernemersmarktplaats", tekst: "Zoeken, aanbieden en samenwerken.", href: "/regiocrew" },
+            ].map((i) => (
+              <Link key={i.titel} href={i.href}>
+                <div style={{ background: "#fff", border: "1px solid #e6e2d6", borderRadius: 14, padding: "26px 22px", cursor: "pointer", height: "100%", display: "flex", flexDirection: "column" }}>
+                  <div style={{ fontSize: 34, marginBottom: 12 }}>{i.emoji}</div>
+                  <div style={disp({ fontSize: 20, fontWeight: 700, color: BLAUW, textTransform: "uppercase", lineHeight: 1.05, marginBottom: 8 })}>{i.titel}</div>
+                  <p style={{ fontSize: 14, color: "#5a6680", lineHeight: 1.6, margin: 0, flexGrow: 1 }}>{i.tekst}</p>
+                  <div style={{ marginTop: 14, color: ORANJE, fontWeight: 700, fontSize: 14, display: "flex", alignItems: "center", gap: 6 }}>Bekijken <ArrowRight style={{ width: 15, height: 15 }} /></div>
+                </div>
+              </Link>
+            ))}
           </div>
         </div>
       </section>
@@ -548,6 +509,7 @@ export default function HomePage() {
         @media (max-width: 960px) {
           .or-hero { min-height: 360px !important; }
           .or-pillars-grid { grid-template-columns: 1fr !important; }
+          .or-ingangen-grid { grid-template-columns: repeat(2, 1fr) !important; }
           .or-herowrap { grid-template-columns: 1fr !important; }
           .or-hero-img { max-width: 460px; }
           .or-rebel-grid { grid-template-columns: 1fr !important; }
