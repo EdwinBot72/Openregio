@@ -174,17 +174,22 @@ export default function HomePage() {
           </div>
           <div className="or-ingangen-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20 }}>
             {[
-              { emoji: "🛍", titel: "Koop lokaal", tekst: "Producten van ondernemers uit jouw buurt.", href: "/koop-lokaal" },
-              { emoji: "🎓", titel: "Doe & leer", tekst: "Workshops en activiteiten door lokale ondernemers.", href: "/doe-en-leer" },
-              { emoji: "🔧", titel: "Vind een ondernemer", tekst: "Vind diensten en vakmensen dichtbij.", href: "/lokaal-marktplaats" },
-              { emoji: "🤝", titel: "Ondernemersmarktplaats", tekst: "Zoeken, aanbieden en samenwerken.", href: "/regiocrew" },
+              { emoji: "🛍", titel: "Koop lokaal", tekst: "Producten van ondernemers uit jouw buurt.", href: "/koop-lokaal", img: "/images/workshops/ws9.jpg" },
+              { emoji: "🎓", titel: "Doe & leer", tekst: "Workshops en activiteiten door lokale ondernemers.", href: "/doe-en-leer", img: "/images/workshops/ws4.jpg" },
+              { emoji: "🔧", titel: "Vind een ondernemer", tekst: "Vind diensten en vakmensen dichtbij.", href: "/lokaal-marktplaats", img: "/images/workshops/ws3.jpg" },
+              { emoji: "🤝", titel: "Ondernemersmarktplaats", tekst: "Zoeken, aanbieden en samenwerken.", href: "/regiocrew", img: "/images/workshops/ws8.jpg" },
             ].map((i) => (
               <Link key={i.titel} href={i.href}>
-                <div style={{ background: "#fff", border: "1px solid #e6e2d6", borderRadius: 14, padding: "26px 22px", cursor: "pointer", height: "100%", display: "flex", flexDirection: "column" }}>
-                  <div style={{ fontSize: 34, marginBottom: 12 }}>{i.emoji}</div>
-                  <div style={disp({ fontSize: 20, fontWeight: 700, color: BLAUW, textTransform: "uppercase", lineHeight: 1.05, marginBottom: 8 })}>{i.titel}</div>
-                  <p style={{ fontSize: 14, color: "#5a6680", lineHeight: 1.6, margin: 0, flexGrow: 1 }}>{i.tekst}</p>
-                  <div style={{ marginTop: 14, color: ORANJE, fontWeight: 700, fontSize: 14, display: "flex", alignItems: "center", gap: 6 }}>Bekijken <ArrowRight style={{ width: 15, height: 15 }} /></div>
+                <div style={{ background: "#fff", border: "1px solid #e6e2d6", borderRadius: 14, overflow: "hidden", cursor: "pointer", height: "100%", display: "flex", flexDirection: "column" }}>
+                  <div style={{ position: "relative", height: 150, overflow: "hidden" }}>
+                    <img src={i.img} alt={i.titel} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} loading="lazy" />
+                    <div style={{ position: "absolute", top: 10, left: 10, width: 38, height: 38, borderRadius: 10, background: "rgba(255,255,255,0.93)", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 20 }}>{i.emoji}</div>
+                  </div>
+                  <div style={{ padding: "18px 20px", display: "flex", flexDirection: "column", flexGrow: 1 }}>
+                    <div style={disp({ fontSize: 20, fontWeight: 700, color: BLAUW, textTransform: "uppercase", lineHeight: 1.05, marginBottom: 8 })}>{i.titel}</div>
+                    <p style={{ fontSize: 14, color: "#5a6680", lineHeight: 1.6, margin: 0, flexGrow: 1 }}>{i.tekst}</p>
+                    <div style={{ marginTop: 14, color: ORANJE, fontWeight: 700, fontSize: 14, display: "flex", alignItems: "center", gap: 6 }}>Bekijken <ArrowRight style={{ width: 15, height: 15 }} /></div>
+                  </div>
                 </div>
               </Link>
             ))}
