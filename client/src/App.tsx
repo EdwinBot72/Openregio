@@ -106,7 +106,7 @@ import PijlerZichtbaarheidPage from "@/pages/pijler-zichtbaarheid";
 import PijlerKrachtPage from "@/pages/pijler-kracht";
 
 // Routes that should NOT have the sidebar/header layout
-const PUBLIC_ROUTES = ["/", "/landing", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse", "/koop-lokaal", "/gezond/:slug", "/acties", "/acties/:id", "/p/lokale-acties/:id"];
+const PUBLIC_ROUTES = ["/", "/landing", "/login", "/register", "/start", "/lidmaatschap", "/betaling-geslaagd", "/first-login", "/privacy", "/voorwaarden", "/basischeck", "/blog/:slug", "/blogs", "/forgot-password", "/reset-password", "/disclaimer", "/cookiebeleid", "/regio-analyse", "/koop-lokaal", "/doe-en-leer", "/gezond/:slug", "/acties", "/acties/:id", "/p/lokale-acties/:id"];
 
 function PublicRouter() {
   return (
