@@ -148,7 +148,7 @@ export default function HomePage() {
           </form>
           </div>
           <div className="or-hero-img" style={{ borderRadius: 16, overflow: "hidden", border: "1px solid rgba(255,255,255,0.14)", boxShadow: "0 24px 60px rgba(0,0,0,0.35)" }}>
-            <img src="/images/hero-open.jpg" alt="Lokale ondernemer met open bordje" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", minHeight: 340 }} />
+            <img src="/images/workshops/ws1.jpg" alt="Lokale bakkerij in jouw regio" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", minHeight: 340 }} />
           </div>
         </div>
       </section>

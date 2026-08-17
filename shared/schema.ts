@@ -1310,6 +1310,7 @@ export const workshops = pgTable("workshops", {
   plaatsen: integer("plaatsen").notNull().default(1),
   bedrijfsnaam: varchar("bedrijfsnaam", { length: 255 }),
   contactEmail: varchar("contact_email", { length: 255 }),
+  afbeelding: varchar("afbeelding", { length: 500 }),
   status: varchar("status", { length: 20 }).notNull().default("actief"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
 });

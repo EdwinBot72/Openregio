@@ -12,6 +12,7 @@ const DISP = "'Barlow Condensed', 'Barlow', sans-serif";
 type Workshop = {
   id: string; titel: string; beschrijving: string; datum: string; locatie: string;
   regio: string; prijsCent: number; plaatsen: number; plaatsenVrij: number; bedrijfsnaam?: string;
+  afbeelding?: string;
 };
 
 function euro(cent: number) {
@@ -72,7 +73,13 @@ export default function DoeEnLeerPage() {
 
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(300px, 1fr))", gap: 20 }}>
           {workshops.map((w) => (
-            <div key={w.id} style={{ background: "#fff", border: "1px solid #e6e2d6", borderRadius: 14, padding: "22px 22px 20px", display: "flex", flexDirection: "column" }}>
+            <div key={w.id} style={{ background: "#fff", border: "1px solid #e6e2d6", borderRadius: 14, overflow: "hidden", display: "flex", flexDirection: "column" }}>
+              {w.afbeelding && (
+                <div style={{ height: 170, overflow: "hidden" }}>
+                  <img src={w.afbeelding} alt={w.titel} style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                </div>
+              )}
+              <div style={{ padding: "20px 22px", display: "flex", flexDirection: "column", flexGrow: 1 }}>
               <div style={{ fontFamily: DISP, textTransform: "uppercase", fontSize: 21, fontWeight: 700, color: BLAUW, lineHeight: 1.05 }}>{w.titel}</div>
               {w.bedrijfsnaam && <div style={{ fontSize: 13, color: ORANJE, fontStyle: "italic", marginTop: 3 }}>{w.bedrijfsnaam}</div>}
               <p style={{ fontSize: 14, color: "#475569", lineHeight: 1.6, margin: "12px 0 14px", flexGrow: 1 }}>{w.beschrijving}</p>
@@ -107,6 +114,7 @@ export default function DoeEnLeerPage() {
                   <p style={{ fontSize: 11.5, color: "#94a3b8", margin: 0, textAlign: "center" }}>Reservering; betaling regel je met de ondernemer.</p>
                 </div>
               )}
+              </div>
             </div>
           ))}
         </div>
