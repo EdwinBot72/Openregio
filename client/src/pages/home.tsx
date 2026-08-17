@@ -134,26 +134,23 @@ export default function HomePage() {
           <div>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.16)", borderRadius: 999, padding: "6px 14px", marginBottom: 22 }}>
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: ORANJE }} />
-            <span style={disp({ fontSize: 12.5, fontWeight: 600, letterSpacing: ".08em", color: "rgba(255,255,255,0.9)" })}>Wat OpenRegio uniek maakt</span>
+            <span style={disp({ fontSize: 12.5, fontWeight: 600, letterSpacing: ".08em", color: "rgba(255,255,255,0.9)" })}>Alles begint dichtbij</span>
           </div>
-          <h1 style={disp({ fontSize: "clamp(38px,5.6vw,72px)", fontWeight: 700, color: "#fff", lineHeight: 0.98, margin: "0 0 18px", letterSpacing: ".005em", maxWidth: "15ch" })}>
-            Grip op regels <span style={{ color: ORANJE }}>van de overheid.</span>
+          <h1 style={disp({ fontSize: "clamp(37px,5.4vw,70px)", fontWeight: 700, color: "#fff", lineHeight: 0.99, margin: "0 0 18px", letterSpacing: ".005em", maxWidth: "16ch" })}>
+            Alles wat lokaal ondernemen <span style={{ color: ORANJE }}>sterker maakt.</span>
           </h1>
-          <p style={{ fontSize: 17, color: "rgba(255,255,255,0.85)", lineHeight: 1.6, margin: "0 0 14px", maxWidth: "54ch" }}>
-            Kreeg je een brief, besluit of regel waar je niet uitkomt? Wij leggen rustig uit wat het betekent, of het klopt en wat je kunt doen — in gewone taal.
-          </p>
-          <p style={{ fontSize: 15.5, color: "rgba(255,255,255,0.62)", lineHeight: 1.6, margin: "0 0 26px", maxWidth: "54ch" }}>
-            En ontdek wat je regio verder te bieden heeft: lokaal kopen, workshops en ondernemers dichtbij.
+          <p style={{ fontSize: 17, color: "rgba(255,255,255,0.85)", lineHeight: 1.6, margin: "0 0 26px", maxWidth: "56ch" }}>
+            Vind klanten, werk samen met ondernemers uit de buurt, verkoop lokaal, organiseer workshops en krijg hulp als ondernemen ingewikkeld wordt.
           </p>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
-            <Link href="/regels/controle">
-              <button style={disp({ padding: "14px 28px", borderRadius: 10, fontSize: 16, fontWeight: 700, letterSpacing: ".04em", background: ORANJE, color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 })}>
-                Controleer een besluit <ArrowRight style={{ width: 16, height: 16 }} />
-              </button>
-            </Link>
             <a href="#ontdek">
+              <button style={disp({ padding: "14px 28px", borderRadius: 10, fontSize: 16, fontWeight: 700, letterSpacing: ".04em", background: ORANJE, color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 })}>
+                Ontdek je regio <ArrowRight style={{ width: 16, height: 16 }} />
+              </button>
+            </a>
+            <a href="#pricing">
               <button style={disp({ padding: "14px 28px", borderRadius: 10, fontSize: 16, fontWeight: 700, letterSpacing: ".04em", background: "transparent", color: "#fff", border: "1px solid rgba(255,255,255,0.28)", cursor: "pointer" })}>
-                Ontdek je regio
+                Voor ondernemers
               </button>
             </a>
           </div>
@@ -180,15 +177,15 @@ export default function HomePage() {
       <section id="ontdek" style={{ background: "#faf9f5", padding: "72px 24px" }}>
         <div style={{ maxWidth: 1120, margin: "0 auto" }}>
           <div style={{ textAlign: "center", marginBottom: 40 }}>
-            <div style={disp({ fontSize: 12, fontWeight: 600, color: ORANJE, letterSpacing: ".14em", marginBottom: 10 })}>Ontdek lokaal</div>
+            <div style={disp({ fontSize: 12, fontWeight: 600, color: ORANJE, letterSpacing: ".14em", marginBottom: 10 })}>Begin hier</div>
             <h2 style={disp({ fontSize: "clamp(28px,3.6vw,44px)", fontWeight: 700, color: BLAUW, lineHeight: 1.05, margin: 0 })}>Waar wil je beginnen?</h2>
           </div>
           <div className="or-ingangen-grid" style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20 }}>
             {[
-              { emoji: "🛍", titel: "Koop lokaal", tekst: "Producten van ondernemers uit jouw buurt.", href: "/koop-lokaal", img: "/images/workshops/ws9.jpg" },
-              { emoji: "🎓", titel: "Doe & leer", tekst: "Workshops en activiteiten door lokale ondernemers.", href: "/doe-en-leer", img: "/images/workshops/ws4.jpg" },
-              { emoji: "🔧", titel: "Vind een ondernemer", tekst: "Vind diensten en vakmensen dichtbij.", href: "/lokaal-marktplaats", img: "/images/workshops/ws3.jpg" },
-              { emoji: "🤝", titel: "Ondernemersmarktplaats", tekst: "Zoeken, aanbieden en samenwerken.", href: "/regiocrew", img: "/images/workshops/ws8.jpg" },
+              { emoji: "🛍", titel: "Ontdek lokaal", tekst: "Producten, diensten, workshops en activiteiten uit de buurt.", href: "/koop-lokaal", img: "/images/workshops/ws9.jpg" },
+              { emoji: "🤝", titel: "Ondernemersmarktplaats", tekst: "Zoek of bied materiaal, diensten, werk, ruimte en samenwerking aan.", href: "/regiocrew", img: "/images/workshops/ws8.jpg" },
+              { emoji: "📈", titel: "Groei met je bedrijf", tekst: "Websitecheck, lokale vindbaarheid, kansen en slimme tools.", href: "/groei/website-check", img: "/images/workshops/ws7.jpg" },
+              { emoji: "⚖️", titel: "Regels & overheid", tekst: "Vertel gewoon wat er speelt. RegioBot zoekt uit waarop het is gebaseerd en welke documenten erbij horen.", href: "/regels/controle", img: "/images/workshops/ws1.jpg" },
             ].map((i) => (
               <Link key={i.titel} href={i.href}>
                 <div style={{ background: "#fff", border: "1px solid #e6e2d6", borderRadius: 14, overflow: "hidden", cursor: "pointer", height: "100%", display: "flex", flexDirection: "column" }}>
@@ -205,6 +202,33 @@ export default function HomePage() {
               </Link>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* ── VRAAG REGIOBOT — universele ingang ────────────────────────────── */}
+      <section id="regiobot" style={{ background: `linear-gradient(160deg, ${BLAUW} 0%, #1d3050 100%)`, padding: "72px 24px" }}>
+        <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>
+          <div style={disp({ fontSize: 12, fontWeight: 600, color: ORANJE, letterSpacing: ".14em", marginBottom: 12 })}>De navigator van OpenRegio</div>
+          <h2 style={disp({ fontSize: "clamp(28px,3.6vw,44px)", fontWeight: 700, color: "#fff", lineHeight: 1.05, margin: "0 0 14px" })}>Vraag RegioBot</h2>
+          <p style={{ fontSize: 16.5, color: "rgba(255,255,255,0.82)", lineHeight: 1.6, margin: "0 auto 26px", maxWidth: "50ch" }}>
+            Je hoeft niet te weten waar je moet zoeken. Vertel gewoon wat je nodig hebt.
+          </p>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 10, justifyContent: "center", marginBottom: 30 }}>
+            {[
+              "Ik zoek een lokale fotograaf.",
+              "Ik wil een workshop aanbieden.",
+              "Mijn bedrijfsbus mag Amsterdam niet meer in.",
+              "Ik heb twintig stoelen over.",
+              "Waarom krijg ik zo weinig aanvragen via mijn website?",
+            ].map((q) => (
+              <span key={q} style={{ background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.16)", borderRadius: 999, padding: "9px 16px", fontSize: 14, color: "rgba(255,255,255,0.9)" }}>“{q}”</span>
+            ))}
+          </div>
+          <Link href="/regiobot">
+            <button style={disp({ padding: "14px 30px", borderRadius: 10, fontSize: 16, fontWeight: 700, letterSpacing: ".04em", background: ORANJE, color: "#fff", border: "none", cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 8 })}>
+              Vraag het RegioBot <ArrowRight style={{ width: 16, height: 16 }} />
+            </button>
+          </Link>
         </div>
       </section>
 
