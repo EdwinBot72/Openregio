@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema, insertBedrijfsprofielSchema, regioBotChatSchema, visibilitySettingsSchema, DEFAULT_VISIBILITY_SETTINGS, insertCrewProfileSchema, insertCrewRequestSchema, insertCrewApplicationSchema, CREW_CATEGORIES, users, ragDocuments, documents, insertRegioDealSchema, crewApplications, crewRequests, bedrijfsprofielen, dailyCourses, dailyCourseProgress, insertDailyCourseSchema, LOKALE_ACTIE_DOELGROEPEN, insertLokaleActieInteresseSchema, ZICHTBAARHEID_OPTIES } from "@shared/schema";
+import { insertEntrepreneurSchema, strictEntrepreneurSchema, insertProposalSchema, insertVoteSchema, insertChatRoomSchema, insertChatMessageSchema, insertPostSchema, insertUserProfileSchema, insertSubscriptionSchema, insertBedrijfsprofielSchema, regioBotChatSchema, visibilitySettingsSchema, DEFAULT_VISIBILITY_SETTINGS, insertCrewProfileSchema, insertCrewRequestSchema, insertCrewApplicationSchema, CREW_CATEGORIES, users, ragDocuments, documents, insertRegioDealSchema, crewApplications, crewRequests, bedrijfsprofielen, dailyCourses, dailyCourseProgress, insertDailyCourseSchema, LOKALE_ACTIE_DOELGROEPEN, insertLokaleActieInteresseSchema, ZICHTBAARHEID_OPTIES, workshops, workshopBoekingen, insertWorkshopSchema } from "@shared/schema";
 import { z } from "zod";
 import { fromZodError } from "zod-validation-error";
 import { createMollieClient } from "@mollie/api-client";
@@ -18,7 +18,7 @@ import { randomUUID, createHash } from "crypto";
 import { runRegioBot } from "./regiobot";
 import { BRIEFTYPES, isBrieftype, buildSystemPrompt, buildUserPrompt, CONTROLE_PUNTEN, controleerBesluit, aandachtspuntenUit, stelWooVerzoekOp, CONTROLE_METHODE_DISCLAIMER } from "./brieftypes";
 import { db } from "db";
-import { eq, sql, gte, lte, gt, and, count } from "drizzle-orm";
+import { eq, sql, gte, lte, gt, and, count, inArray } from "drizzle-orm";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 import { BEROEP_DATA } from "@shared/seo-data";
 import type { Request, Response, NextFunction } from "express";
@@ -2603,6 +2603,85 @@ HARDE GRENZEN:
       } else {
         res.status(500).json({ error: "De adviseur kon niet antwoorden", message: err?.message ?? String(err) });
       }
+    }
+  });
+
+  // OpenRegio 2.0 — Workshops (Doen & leren) + boekingen
+  const workshopMetPlaatsen = async (rows: any[]) => {
+    if (rows.length === 0) return [];
+    const ids = rows.map((w) => w.id);
+    const geboekt = await db
+      .select({ workshopId: workshopBoekingen.workshopId, som: sql<number>`coalesce(sum(${workshopBoekingen.aantal}),0)` })
+      .from(workshopBoekingen)
+      .where(inArray(workshopBoekingen.workshopId, ids))
+      .groupBy(workshopBoekingen.workshopId);
+    const map = new Map(geboekt.map((g) => [g.workshopId, Number(g.som)]));
+    return rows.map((w) => ({ ...w, geboekt: map.get(w.id) ?? 0, plaatsenVrij: Math.max(0, w.plaatsen - (map.get(w.id) ?? 0)) }));
+  };
+
+  // Publieke lijst: actieve, toekomstige workshops
+  app.get("/api/workshops", async (_req, res) => {
+    try {
+      const rows = await db.select().from(workshops)
+        .where(and(eq(workshops.status, "actief"), gte(workshops.datum, new Date())))
+        .orderBy(workshops.datum);
+      res.json(await workshopMetPlaatsen(rows));
+    } catch (err: any) {
+      console.error("Workshops ophalen mislukt:", err);
+      res.status(500).json({ error: "Workshops ophalen mislukt", message: err?.message ?? String(err) });
+    }
+  });
+
+  app.get("/api/workshops/:id", async (req, res) => {
+    try {
+      const rows = await db.select().from(workshops).where(eq(workshops.id, req.params.id)).limit(1);
+      if (!rows[0]) return res.status(404).json({ error: "Workshop niet gevonden" });
+      const [met] = await workshopMetPlaatsen(rows);
+      res.json(met);
+    } catch (err: any) {
+      res.status(500).json({ error: "Workshop ophalen mislukt", message: err?.message ?? String(err) });
+    }
+  });
+
+  // Workshop aanmaken (ingelogde ondernemer)
+  app.post("/api/workshops", requireAuth, async (req: any, res) => {
+    try {
+      const parsed = insertWorkshopSchema.safeParse({
+        ...req.body,
+        datum: req.body?.datum ? new Date(req.body.datum) : undefined,
+      });
+      if (!parsed.success) {
+        return res.status(400).json({ error: "Onvolledige workshop", details: fromZodError(parsed.error).message });
+      }
+      const [row] = await db.insert(workshops).values({ ...parsed.data, ownerUserId: req.user.id }).returning();
+      res.status(201).json(row);
+    } catch (err: any) {
+      console.error("Workshop aanmaken mislukt:", err);
+      res.status(500).json({ error: "Workshop aanmaken mislukt", message: err?.message ?? String(err) });
+    }
+  });
+
+  // Workshop boeken (plaatsen aftellen)
+  app.post("/api/workshops/:id/boeking", async (req: any, res) => {
+    try {
+      const { naam, email, aantal } = req.body ?? {};
+      const n = Math.max(1, parseInt(aantal, 10) || 1);
+      if (!naam || !email) return res.status(400).json({ error: "Naam en e-mail zijn verplicht" });
+
+      const rows = await db.select().from(workshops).where(eq(workshops.id, req.params.id)).limit(1);
+      const w = rows[0];
+      if (!w) return res.status(404).json({ error: "Workshop niet gevonden" });
+      const [met] = await workshopMetPlaatsen([w]);
+      if (met.plaatsenVrij < n) {
+        return res.status(409).json({ error: "Niet genoeg plaatsen meer", plaatsenVrij: met.plaatsenVrij });
+      }
+      const [boeking] = await db.insert(workshopBoekingen).values({
+        workshopId: w.id, userId: req.user?.id ?? null, naam: String(naam).slice(0, 255), email: String(email).slice(0, 255), aantal: n,
+      }).returning();
+      res.status(201).json({ success: true, boeking, plaatsenVrij: met.plaatsenVrij - n });
+    } catch (err: any) {
+      console.error("Workshop boeken mislukt:", err);
+      res.status(500).json({ error: "Boeken mislukt", message: err?.message ?? String(err) });
     }
   });
 

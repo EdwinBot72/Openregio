@@ -1297,6 +1297,37 @@ export type InsertLokaleActie = z.infer<typeof insertLokaleActieSchema>;
 export type LokaleActie = typeof lokaleActies.$inferSelect;
 
 // ── Lokale Acties RSVP ───────────────────────────────────────────────────────
+// OpenRegio 2.0 — Doen & leren: workshops door ondernemers, met boekingen.
+export const workshops = pgTable("workshops", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  ownerUserId: varchar("owner_user_id").notNull().references(() => users.id),
+  titel: varchar("titel", { length: 255 }).notNull(),
+  beschrijving: text("beschrijving").notNull(),
+  datum: timestamp("datum", { withTimezone: true }).notNull(),
+  locatie: varchar("locatie", { length: 255 }).notNull(),
+  regio: varchar("regio", { length: 255 }).notNull(),
+  prijsCent: integer("prijs_cent").notNull().default(0),
+  plaatsen: integer("plaatsen").notNull().default(1),
+  bedrijfsnaam: varchar("bedrijfsnaam", { length: 255 }),
+  contactEmail: varchar("contact_email", { length: 255 }),
+  status: varchar("status", { length: 20 }).notNull().default("actief"),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const workshopBoekingen = pgTable("workshop_boekingen", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  workshopId: varchar("workshop_id").notNull().references(() => workshops.id),
+  userId: varchar("user_id").references(() => users.id),
+  naam: varchar("naam", { length: 255 }).notNull(),
+  email: varchar("email", { length: 255 }).notNull(),
+  aantal: integer("aantal").notNull().default(1),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const insertWorkshopSchema = createInsertSchema(workshops).omit({
+  id: true, createdAt: true, ownerUserId: true, status: true,
+});
+
 export const lokaleActiesRsvp = pgTable("lokale_acties_rsvp", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   actieId: varchar("actie_id").notNull().references(() => lokaleActies.id, { onDelete: "cascade" }),
