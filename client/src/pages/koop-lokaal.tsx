@@ -80,6 +80,23 @@ export default function KoopLokaalPage() {
         </div>
       </div>
 
+      {/* Lokale sfeer — foto's */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { src: "/images/workshops/ws7.jpg", label: "Vers van de bakker" },
+          { src: "/images/workshops/ws9.jpg", label: "Streekproducten" },
+          { src: "/images/workshops/ws8.jpg", label: "Lokaal bezorgd" },
+          { src: "/images/workshops/ws5.jpg", label: "Bij jou om de hoek" },
+        ].map((p) => (
+          <div key={p.label} className="relative rounded-xl overflow-hidden aspect-[4/5]">
+            <img src={p.src} alt={p.label} className="w-full h-full object-cover" loading="lazy" />
+            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent p-2.5">
+              <span className="text-white text-xs font-semibold">{p.label}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* Filters */}
       <div className="grid sm:grid-cols-3 gap-3">
         <div className="relative sm:col-span-1">
