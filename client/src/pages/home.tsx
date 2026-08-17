@@ -134,18 +134,29 @@ export default function HomePage() {
           <div>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.16)", borderRadius: 999, padding: "6px 14px", marginBottom: 22 }}>
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: ORANJE }} />
-            <span style={disp({ fontSize: 12.5, fontWeight: 600, letterSpacing: ".08em", color: "rgba(255,255,255,0.9)" })}>Alles begint dichtbij</span>
+            <span style={disp({ fontSize: 12.5, fontWeight: 600, letterSpacing: ".08em", color: "rgba(255,255,255,0.9)" })}>Wat OpenRegio uniek maakt</span>
           </div>
-          <h1 style={disp({ fontSize: "clamp(38px,6vw,76px)", fontWeight: 700, color: "#fff", lineHeight: 0.98, margin: "0 0 18px", letterSpacing: ".005em", maxWidth: "17ch" })}>
-            Alles wat jouw regio <span style={{ color: ORANJE }}>te bieden heeft.</span>
+          <h1 style={disp({ fontSize: "clamp(38px,5.6vw,72px)", fontWeight: 700, color: "#fff", lineHeight: 0.98, margin: "0 0 18px", letterSpacing: ".005em", maxWidth: "15ch" })}>
+            Grip op regels <span style={{ color: ORANJE }}>van de overheid.</span>
           </h1>
-          <p style={{ fontSize: 17, color: "rgba(255,255,255,0.85)", lineHeight: 1.6, margin: "0 0 24px", maxWidth: "54ch" }}>
-            Koop lokaal. Ontdek workshops. Vind ondernemers. Werk samen. En krijg hulp als ondernemen ingewikkeld wordt.
+          <p style={{ fontSize: 17, color: "rgba(255,255,255,0.85)", lineHeight: 1.6, margin: "0 0 14px", maxWidth: "54ch" }}>
+            Kreeg je een brief, besluit of regel waar je niet uitkomt? Wij leggen rustig uit wat het betekent, of het klopt en wat je kunt doen — in gewone taal.
           </p>
-          <form action="/doe-en-leer" style={{ display: "flex", gap: 10, maxWidth: 520, flexWrap: "wrap" }}>
-            <input name="q" placeholder="Wat zoek je? Bijv. workshop pizza bakken, fietsenmaker…" style={{ flex: "1 1 240px", padding: "14px 16px", borderRadius: 10, border: "none", fontSize: 15, outline: "none", fontFamily: "inherit" }} />
-            <button type="submit" style={disp({ padding: "14px 26px", borderRadius: 10, fontSize: 15, fontWeight: 700, letterSpacing: ".03em", background: ORANJE, color: "#fff", border: "none", cursor: "pointer" })}>Zoeken</button>
-          </form>
+          <p style={{ fontSize: 15.5, color: "rgba(255,255,255,0.62)", lineHeight: 1.6, margin: "0 0 26px", maxWidth: "54ch" }}>
+            En ontdek wat je regio verder te bieden heeft: lokaal kopen, workshops en ondernemers dichtbij.
+          </p>
+          <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+            <Link href="/regels/controle">
+              <button style={disp({ padding: "14px 28px", borderRadius: 10, fontSize: 16, fontWeight: 700, letterSpacing: ".04em", background: ORANJE, color: "#fff", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: 8 })}>
+                Controleer een besluit <ArrowRight style={{ width: 16, height: 16 }} />
+              </button>
+            </Link>
+            <a href="#ontdek">
+              <button style={disp({ padding: "14px 28px", borderRadius: 10, fontSize: 16, fontWeight: 700, letterSpacing: ".04em", background: "transparent", color: "#fff", border: "1px solid rgba(255,255,255,0.28)", cursor: "pointer" })}>
+                Ontdek je regio
+              </button>
+            </a>
+          </div>
           </div>
           <div className="or-hero-img" style={{ borderRadius: 16, overflow: "hidden", border: "1px solid rgba(255,255,255,0.14)", boxShadow: "0 24px 60px rgba(0,0,0,0.35)" }}>
             <img src="/images/workshops/ws1.jpg" alt="Lokale bakkerij in jouw regio" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block", minHeight: 340 }} />
