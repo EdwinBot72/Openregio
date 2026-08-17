@@ -61,6 +61,7 @@ import RegiodealsAdminPage from "@/pages/admin/regio-deals-admin";
 import AdminOndernemersPage from "@/pages/admin/ondernemers";
 import AdminIntelPage from "@/pages/admin/intel";
 import AdviseurPage from "@/pages/admin/adviseur";
+import DoeEnLeerPage from "@/pages/doe-en-leer";
 import WebsiteOnderhoudPage from "@/pages/zichtbaarheid/website-onderhoud";
 import RegelkaartPage from "@/pages/informatie/regelkaart";
 import CheckSituatiePage from "@/pages/actie/check-situatie";
@@ -112,6 +113,7 @@ function PublicRouter() {
     <Switch>
       <Route path="/" component={HomePage} />
       <Route path="/landing" component={LandingPage} />
+      <Route path="/doe-en-leer" component={DoeEnLeerPage} />
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />
       <Route path="/start" component={StartPage} />
