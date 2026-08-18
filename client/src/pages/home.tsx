@@ -136,11 +136,11 @@ export default function HomePage() {
             <span style={{ width: 7, height: 7, borderRadius: "50%", background: ORANJE }} />
             <span style={disp({ fontSize: 12.5, fontWeight: 600, letterSpacing: ".08em", color: "rgba(255,255,255,0.9)" })}>Alles begint dichtbij</span>
           </div>
-          <h1 style={disp({ fontSize: "clamp(37px,5.4vw,70px)", fontWeight: 700, color: "#fff", lineHeight: 0.99, margin: "0 0 18px", letterSpacing: ".005em", maxWidth: "16ch" })}>
-            Alles van je regio. <span style={{ color: ORANJE }}>En grip op de regels.</span>
+          <h1 style={disp({ fontSize: "clamp(33px,4.8vw,60px)", fontWeight: 700, color: "#fff", lineHeight: 1.0, margin: "0 0 18px", letterSpacing: ".005em", maxWidth: "20ch" })}>
+            Ontdek, koop en leer lokaal. <span style={{ color: ORANJE }}>En snap de regels.</span>
           </h1>
-          <p style={{ fontSize: 17, color: "rgba(255,255,255,0.85)", lineHeight: 1.6, margin: "0 0 26px", maxWidth: "54ch" }}>
-            Koop lokaal, ontdek workshops, vind ondernemers en werk samen — en krijg hulp als de overheid met regels, brieven of besluiten komt.
+          <p style={{ fontSize: 16.5, color: "rgba(255,255,255,0.85)", lineHeight: 1.62, margin: "0 0 26px", maxWidth: "56ch" }}>
+            OpenRegio verbindt lokale ondernemers en inwoners — koop bij de buurt, volg workshops, vind vakmensen en werk samen. En loopt ondernemen vast op een regel of een brief van de overheid? Dan leggen we uit wat het betekent en wat je kunt doen.
           </p>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <a href="#ontdek">
