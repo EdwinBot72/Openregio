@@ -129,7 +129,7 @@ export default function HomePage() {
       </header>
 
       {/* ── HERO — donkerblauw blok (zip-huisstijl) ───────────────────────── */}
-      <section id="platform" style={{ background: `linear-gradient(160deg, ${BLAUW} 0%, #1d3050 100%)`, padding: "clamp(56px,8vw,104px) 24px" }}>
+      <section id="platform" style={{ background: `linear-gradient(160deg, ${BLAUW} 0%, #1d3050 100%)`, padding: "clamp(44px,6vw,80px) 24px" }}>
         <div className="or-herowrap" style={{ maxWidth: 1120, margin: "0 auto", display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: 44, alignItems: "center" }}>
           <div>
           <div style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(255,255,255,0.08)", border: "1px solid rgba(255,255,255,0.16)", borderRadius: 999, padding: "6px 14px", marginBottom: 22 }}>
@@ -137,10 +137,10 @@ export default function HomePage() {
             <span style={disp({ fontSize: 12.5, fontWeight: 600, letterSpacing: ".08em", color: "rgba(255,255,255,0.9)" })}>Alles begint dichtbij</span>
           </div>
           <h1 style={disp({ fontSize: "clamp(37px,5.4vw,70px)", fontWeight: 700, color: "#fff", lineHeight: 0.99, margin: "0 0 18px", letterSpacing: ".005em", maxWidth: "16ch" })}>
-            Alles wat lokaal ondernemen <span style={{ color: ORANJE }}>sterker maakt.</span>
+            Alles van je regio. <span style={{ color: ORANJE }}>En grip op de regels.</span>
           </h1>
-          <p style={{ fontSize: 17, color: "rgba(255,255,255,0.85)", lineHeight: 1.6, margin: "0 0 26px", maxWidth: "56ch" }}>
-            Vind klanten, werk samen met ondernemers uit de buurt, verkoop lokaal, organiseer workshops en krijg hulp als ondernemen ingewikkeld wordt.
+          <p style={{ fontSize: 17, color: "rgba(255,255,255,0.85)", lineHeight: 1.6, margin: "0 0 26px", maxWidth: "54ch" }}>
+            Koop lokaal, ontdek workshops, vind ondernemers en werk samen — en krijg hulp als de overheid met regels, brieven of besluiten komt.
           </p>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <a href="#ontdek">
@@ -161,17 +161,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ── KORTE INTRO ───────────────────────────────────────────────────── */}
-      <section style={{ background: "#fff", padding: "64px 24px" }}>
-        <div style={{ maxWidth: 760, margin: "0 auto", textAlign: "center" }}>
-          <h1 style={disp({ fontSize: "clamp(30px,4vw,46px)", fontWeight: 700, color: BLAUW, lineHeight: 1.05, margin: "0 0 18px" })}>
-            OpenRegio verbindt wat er lokaal al is.
-          </h1>
-          <p style={{ fontSize: 16, color: "#475569", lineHeight: 1.85, margin: 0 }}>
-            Ondernemers, vakmanschap, producten, kennis en inwoners — vraag en aanbod uit je eigen regio, bij elkaar gebracht. En loopt ondernemen ergens vast? Dan helpen we je verder. Alles begint dichtbij.
-          </p>
-        </div>
-      </section>
 
       {/* ── ONTDEK LOKAAL — vier ingangen (2.0) ───────────────────────────── */}
       <section id="ontdek" style={{ background: "#faf9f5", padding: "72px 24px" }}>
