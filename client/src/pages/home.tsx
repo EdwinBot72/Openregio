@@ -139,8 +139,11 @@ export default function HomePage() {
           <h1 style={disp({ fontSize: "clamp(33px,4.8vw,60px)", fontWeight: 700, color: "#fff", lineHeight: 1.0, margin: "0 0 18px", letterSpacing: ".005em", maxWidth: "20ch" })}>
             Ontdek, koop en leer lokaal. <span style={{ color: ORANJE }}>En snap de regels.</span>
           </h1>
-          <p style={{ fontSize: 16.5, color: "rgba(255,255,255,0.85)", lineHeight: 1.62, margin: "0 0 26px", maxWidth: "56ch" }}>
-            OpenRegio verbindt lokale ondernemers en inwoners — koop bij de buurt, volg workshops, vind vakmensen en werk samen. En loopt ondernemen vast op een regel of een brief van de overheid? Dan leggen we uit wat het betekent en wat je kunt doen.
+          <p style={{ fontSize: 18, color: "#fff", fontWeight: 600, lineHeight: 1.45, margin: "0 0 12px", maxWidth: "52ch" }}>
+            Het platform dat ondernemers én inwoners uit de regio verbindt.
+          </p>
+          <p style={{ fontSize: 16, color: "rgba(255,255,255,0.78)", lineHeight: 1.62, margin: "0 0 26px", maxWidth: "56ch" }}>
+            Koop bij de buurt, volg workshops, vind vakmensen en werk samen. En loopt ondernemen vast op een regel of een brief van de overheid? Dan leggen we uit wat het betekent en wat je kunt doen.
           </p>
           <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
             <a href="#ontdek">
