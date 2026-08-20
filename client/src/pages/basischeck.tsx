@@ -263,6 +263,9 @@ export default function BasischeckPage() {
               <RotateCcw className="h-3 w-3" /> Opnieuw
             </button>
           </div>
+          <div style={{ margin: "0 0 18px", padding: "10px 12px", borderRadius: 8, fontSize: 12.5, lineHeight: 1.5, background: "#fff7ed", color: "#7c2d12" }}>
+            <strong>Controleer dit zelf. </strong>Deze analyse is met AI gemaakt en is een hulpmiddel, geen juridisch advies. Regels en vergunningen verschillen per gemeente en veranderen — controleer wat geldt bij je eigen gemeente of via het Ondernemersplein voordat je erop vertrouwt.
+          </div>
 
           {/* Samenvatting */}
           <div
