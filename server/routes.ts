@@ -1450,6 +1450,9 @@ Schrijf in het Nederlands. Toon: scherp, concreet, als een insider die de regio 
       // Try Gemini first, fallback to OpenAI
       let antwoordText = "";
       try {
+        if (!process.env.AI_INTEGRATIONS_GEMINI_API_KEY) {
+          throw new Error("Gemini niet geconfigureerd — direct naar lokale AI");
+        }
         const { GoogleGenAI } = await import("@google/genai");
         const ai = new GoogleGenAI({
           apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
@@ -1544,6 +1547,9 @@ Schrijf in het Nederlands. Toon: helder, gezaghebbend, praktisch. Geef geen juri
 
       let antwoordText = "";
       try {
+        if (!process.env.AI_INTEGRATIONS_GEMINI_API_KEY) {
+          throw new Error("Gemini niet geconfigureerd — direct naar lokale AI");
+        }
         const { GoogleGenAI } = await import("@google/genai");
         const ai = new GoogleGenAI({
           apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
@@ -1630,6 +1636,9 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
       let resultaatText = "";
 
       try {
+        if (!process.env.AI_INTEGRATIONS_GEMINI_API_KEY) {
+          throw new Error("Gemini niet geconfigureerd — direct naar lokale AI");
+        }
         const { GoogleGenAI } = await import("@google/genai");
         const ai = new GoogleGenAI({
           apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
@@ -1895,6 +1904,9 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
 
       let resultaatText = "";
       try {
+        if (!process.env.AI_INTEGRATIONS_GEMINI_API_KEY) {
+          throw new Error("Gemini niet geconfigureerd — direct naar lokale AI");
+        }
         const { GoogleGenAI } = await import("@google/genai");
         const ai = new GoogleGenAI({
           apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
@@ -7825,6 +7837,9 @@ BELANGRIJK:
 
       let resultJson: any = null;
       try {
+        if (!process.env.AI_INTEGRATIONS_GEMINI_API_KEY) {
+          throw new Error("Gemini niet geconfigureerd — direct naar lokale AI");
+        }
         const { GoogleGenAI } = await import("@google/genai");
         const ai = new GoogleGenAI({
           apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
@@ -7917,6 +7932,9 @@ Geef alleen de brieftekst terug, zonder commentaar, zonder markdown, zonder JSON
 
       let conceptText = "";
       try {
+        if (!process.env.AI_INTEGRATIONS_GEMINI_API_KEY) {
+          throw new Error("Gemini niet geconfigureerd — direct naar lokale AI");
+        }
         const { GoogleGenAI } = await import("@google/genai");
         const ai = new GoogleGenAI({
           apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
