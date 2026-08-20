@@ -7694,25 +7694,33 @@ Geef een JSON-object (ALLEEN JSON, geen tekst eromheen) met precies deze structu
 Wees specifiek en praktisch. Schrijf in zakelijk maar toegankelijk Nederlands.`;
 
     try {
-      const { GoogleGenAI } = await import("@google/genai");
-      const ai = new GoogleGenAI({
-        apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
-        httpOptions: { apiVersion: "", baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL! },
-      });
-
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: [{ role: "user", parts: [{ text: prompt }] }],
-        config: {
-          maxOutputTokens: 2400,
+      let rawText = "";
+      if (process.env.AI_INTEGRATIONS_GEMINI_API_KEY) {
+        const { GoogleGenAI } = await import("@google/genai");
+        const ai = new GoogleGenAI({
+          apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY!,
+          httpOptions: { apiVersion: "", baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL! },
+        });
+        const response = await ai.models.generateContent({
+          model: "gemini-2.5-flash",
+          contents: [{ role: "user", parts: [{ text: prompt }] }],
+          config: { maxOutputTokens: 2400, temperature: 0.7, responseMimeType: "application/json", thinkingConfig: { thinkingBudget: 0 } },
+        });
+        const parts = response.candidates?.[0]?.content?.parts;
+        rawText = parts ? parts.filter((p: any) => p.text && !p.thought).map((p: any) => p.text).join("") : "";
+      } else if (process.env.OPENAI_API_KEY) {
+        const OpenAI = (await import("openai")).default;
+        const openai = new OpenAI();
+        const completion = await openai.chat.completions.create({
+          model: "gpt-4o-mini",
+          messages: [{ role: "user", content: prompt + "\n\nGeef uitsluitend geldige JSON terug." }],
+          max_tokens: 2000,
           temperature: 0.7,
-          responseMimeType: "application/json",
-          thinkingConfig: { thinkingBudget: 0 },
-        },
-      });
-
-      const parts = response.candidates?.[0]?.content?.parts;
-      let rawText = parts ? parts.filter((p: any) => p.text && !p.thought).map((p: any) => p.text).join("") : "";
+        });
+        rawText = completion.choices[0]?.message?.content || "";
+      } else {
+        throw new Error("Geen AI geconfigureerd");
+      }
       rawText = rawText.replace(/```json\n?/g, "").replace(/```\n?/g, "").trim();
 
       // Sommige modellen sluiten af zonder eind-bracket bij token-limiet — pak alleen
