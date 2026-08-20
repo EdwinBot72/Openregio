@@ -501,6 +501,9 @@ export default function BriefAnalysePage() {
                   );
                 })}
               </div>
+              <div className="mt-4 p-3 rounded-md text-xs" style={{ background: "#fff7ed", color: "#7c2d12" }}>
+                <strong>Controleer dit zelf. </strong>Deze analyse is met AI gemaakt en kan fouten bevatten. De velden zijn uit jóuw brief gehaald — leg ze naast het origineel. Het genoemde wetsartikel en de termijn: kijk die na in je eigen besluit. Dit is geen juridisch advies; bij een belangrijk belang, raadpleeg een jurist of het Juridisch Loket.
+              </div>
               <div className="mt-5 pt-4 border-t flex flex-col sm:flex-row sm:items-center gap-3">
                 <p className="text-sm text-muted-foreground flex-1">
                   Wil je hier direct iets mee doen? Open de hulp-engine met deze gegevens als startpunt.
