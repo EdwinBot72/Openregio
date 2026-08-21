@@ -197,6 +197,19 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* ── MEESTERSCHAP — kort ───────────────────────────────────────────── */}
+      <section style={{ background: "#faf9f5", padding: "48px 24px", textAlign: "center" }}>
+        <div style={{ maxWidth: 760, margin: "0 auto" }}>
+          <h2 style={disp({ fontSize: "clamp(22px,2.8vw,32px)", fontWeight: 700, color: BLAUW, lineHeight: 1.1, margin: "0 0 12px" })}>
+            Je hoeft geen jurist te worden
+          </h2>
+          <p style={{ fontSize: 17, color: "#4a556b", lineHeight: 1.6, margin: 0 }}>
+            Vertel gewoon je probleem. OpenRegio zoekt stap voor stap uit wie iets van je verlangt en
+            waarop dat is gebaseerd. <strong style={{ color: BLAUW }}>Jij begrijpt zelf waar je staat — en houdt de regie.</strong>
+          </p>
+        </div>
+      </section>
+
       {/* ── VRAAG REGIOBOT — universele ingang ────────────────────────────── */}
       <section id="regiobot" style={{ background: `linear-gradient(160deg, ${BLAUW} 0%, #1d3050 100%)`, padding: "72px 24px" }}>
         <div style={{ maxWidth: 900, margin: "0 auto", textAlign: "center" }}>

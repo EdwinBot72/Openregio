@@ -133,6 +133,13 @@ export default function ControlePage() {
         </div>
         <h1 className="text-2xl font-bold" style={{ color: BLAUW }}>Besluit controleren</h1>
       </div>
+      <p className="text-base mb-3" style={{ color: BLAUW }}>
+        Je hoeft niet te weten hoe regels, besluiten of bevoegdheden precies in elkaar zitten.
+        OpenRegio begint bij jouw probleem en zoekt stap voor stap uit wie iets van je verlangt,
+        waarop dat is gebaseerd en welke documenten daarbij horen. Antwoorden worden gecontroleerd
+        en naast de oorspronkelijke vragen gelegd. Zo krijg je een helder dossier en begrijp je zelf
+        waar je staat — zonder dat je jurist hoeft te worden.
+      </p>
       <p className="text-muted-foreground mb-2">
         Plak de brief of het besluit dat je van de overheid kreeg. Wij controleren op de punten die er
         volgens de wet in horen te staan — wie het opmaakte, wie bevoegd is, de motivering, de termijn en
