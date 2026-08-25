@@ -352,14 +352,19 @@ async function fetchContext({ question, regionSlug, authoritySlug, tags, limit }
 }
 
 // ---- Main function ----
-export async function runRegioBot(rawInput) {
+// Bereidt alles voor tot vlak vóór de model-aanroep: RAG-bronnen, messages en
+// citations. Zo kan zowel de blocking runRegioBot als het streaming-endpoint
+// exact dezelfde context gebruiken. Retourneert { earlyAnswer, citations } als
+// er al een vast antwoord is (verboden vraag of test-fixture), anders
+// { messages, model, citations }.
+export async function prepareRegioBot(rawInput) {
   const input = RegioBotInput.parse(rawInput);
 
   // Hard filter: weiger verkeerszaken en persoonlijke boetes
   const forbidden = /(snelheid|rood licht|mulder|cjib|parkeerboete|kenteken|verkeersboete)/i;
   if (forbidden.test(input.question)) {
     return {
-      answer: `Deze vraag valt buiten OpenRegio.
+      earlyAnswer: `Deze vraag valt buiten OpenRegio.
 
 OpenRegio behandelt uitsluitend:
 - wet- en regelgeving
@@ -457,22 +462,30 @@ Persoonlijke verkeerszaken of boetes worden niet opgenomen.`,
       ? citationIndex.map((c) => `bron ${c.sourceNo}`).join(", ")
       : "geen bronnen";
     return {
-      answer:
+      earlyAnswer:
         `Test-antwoord (fixture): RegioBot zou hier een analyse geven voor taak "${input.task ?? "vrije vraag"}" met ${refs}.`,
       citations: citationIndex,
     };
   }
 
   const model = process.env.OPENAI_MODEL || "gpt-4o";
+  return { messages, model, citations: citationIndex };
+}
+
+export async function runRegioBot(rawInput) {
+  const prep = await prepareRegioBot(rawInput);
+  if (prep.earlyAnswer !== undefined) {
+    return { answer: prep.earlyAnswer, citations: prep.citations };
+  }
 
   const completion = await getOpenAI().chat.completions.create({
-    model,
-    messages,
+    model: prep.model,
+    messages: prep.messages,
     temperature: 0.2
   });
 
   const answer = completion.choices?.[0]?.message?.content ?? "";
 
-  return { answer, citations: citationIndex };
+  return { answer, citations: prep.citations };
 }
 

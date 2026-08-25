@@ -299,23 +299,78 @@ export default function RegioBotPage() {
   });
 
   // WOO mutation
+  // Streaming: tokens komen live binnen (SSE) zodat het niet lijkt te bevriezen
+  // tijdens de trage inferentie. We tonen direct een lege bot-bubbel die volloopt.
   const askMutation = useMutation({
     mutationFn: async (finalQuestion: string) => {
-      const res = await apiRequest("POST", "/api/regiobot", {
-        task,
-        question: finalQuestion,
-        dossierRequestId: selectedDossierId === "none" ? undefined : Number(selectedDossierId),
-        regionSlug: selectedRegion === "all" ? undefined : selectedRegion,
-        authoritySlug: selectedAuthority === "all" ? undefined : selectedAuthority,
-        limit: 6,
+      setMessages((prev) => [...prev, { role: "bot", text: "", citations: [] }]);
+      const updateLastBot = (fn: (m: Message) => Message) =>
+        setMessages((prev) => {
+          const copy = [...prev];
+          for (let i = copy.length - 1; i >= 0; i--) {
+            if (copy[i].role === "bot") { copy[i] = fn(copy[i]); break; }
+          }
+          return copy;
+        });
+
+      const res = await fetch("/api/regiobot/stream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          task,
+          question: finalQuestion,
+          dossierRequestId: selectedDossierId === "none" ? undefined : Number(selectedDossierId),
+          regionSlug: selectedRegion === "all" ? undefined : selectedRegion,
+          authoritySlug: selectedAuthority === "all" ? undefined : selectedAuthority,
+          limit: 6,
+        }),
       });
-      return res.json() as Promise<WooResponse>;
-    },
-    onSuccess: (data) => {
-      setMessages((prev) => [...prev, { role: "bot", text: data.answer, citations: data.citations }]);
+
+      if (!res.ok || !res.body) {
+        let msg = "RegioBot kon niet antwoorden.";
+        try { const j = await res.json(); msg = j.error || j.message || msg; } catch { /* ignore */ }
+        throw new Error(msg);
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buf = "";
+      let acc = "";
+      let citations: Citation[] = [];
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buf += decoder.decode(value, { stream: true });
+        const parts = buf.split("\n\n");
+        buf = parts.pop() || "";
+        for (const part of parts) {
+          const line = part.trim();
+          if (!line.startsWith("data:")) continue;
+          const payload = line.slice(5).trim();
+          if (payload === "[DONE]") continue;
+          let obj: any;
+          try { obj = JSON.parse(payload); } catch { continue; }
+          if (obj.citations) { citations = obj.citations; updateLastBot((m) => ({ ...m, citations })); }
+          if (obj.delta) { acc += obj.delta; updateLastBot((m) => ({ ...m, text: acc, citations })); }
+        }
+      }
+
+      if (!acc.trim()) {
+        updateLastBot((m) => ({ ...m, text: "RegioBot gaf geen antwoord. Probeer het opnieuw.", isError: true }));
+      }
+      return { answer: acc, citations };
     },
     onError: (err: any) => {
-      setMessages((prev) => [...prev, { role: "bot", text: parseApiError(err), isError: true }]);
+      // Vervang de (lege) placeholder door de foutmelding.
+      setMessages((prev) => {
+        const copy = [...prev];
+        for (let i = copy.length - 1; i >= 0; i--) {
+          if (copy[i].role === "bot") { copy[i] = { role: "bot", text: parseApiError(err), isError: true }; break; }
+        }
+        return copy;
+      });
     },
   });
 
@@ -828,7 +883,8 @@ export default function RegioBotPage() {
                     )}
                   </div>
                 ))}
-                {askMutation.isPending && (
+                {askMutation.isPending &&
+                  !(messages[messages.length - 1]?.role === "bot" && messages[messages.length - 1]?.text) && (
                   <div className="bg-muted rounded-md px-3 py-2 text-sm text-muted-foreground" data-testid="message-loading">
                     RegioBot denkt na...
                   </div>

@@ -15,7 +15,7 @@ import { publicAiRateLimit, authenticatedAiRateLimit } from "./middleware/aiRate
 import { mollieStartRateLimit, contactFormRateLimit, geocodeRateLimit } from "./middleware/rateLimits";
 import { ObjectStorageService } from "./replit_integrations/object_storage";
 import { randomUUID, createHash } from "crypto";
-import { runRegioBot } from "./regiobot";
+import { runRegioBot, prepareRegioBot } from "./regiobot";
 import { BRIEFTYPES, isBrieftype, buildSystemPrompt, buildUserPrompt, CONTROLE_PUNTEN, controleerBesluit, aandachtspuntenUit, stelWooVerzoekOp, CONTROLE_METHODE_DISCLAIMER } from "./brieftypes";
 import { db } from "db";
 import { eq, sql, gte, lte, gt, and, count, inArray } from "drizzle-orm";
@@ -1326,10 +1326,69 @@ Schrijf altijd in het Nederlands en denk mee met lokale trends en actualiteit.`,
       res.status(isConfigError ? 503 : 400).json({
         error: isConfigError ? "RegioBot configuratiefout" : "RegioBot fout",
         message: errorMessage,
-        action: isConfigError 
-          ? "Controleer of OPENAI_API_KEY correct is geconfigureerd." 
+        action: isConfigError
+          ? "Controleer of OPENAI_API_KEY correct is geconfigureerd."
           : "Controleer je invoer en probeer opnieuw."
       });
+    }
+  });
+
+  // Streaming-variant van RegioBot: zelfde RAG-context en citations, maar de
+  // tokens komen live binnen (SSE) zodat het niet lijkt te bevriezen tijdens de
+  // trage CPU-inferentie. Eerst één citations-event, dan delta-events, dan [DONE].
+  app.post("/api/regiobot/stream", requirePro, authenticatedAiRateLimit, async (req, res) => {
+    try {
+      if (!process.env.OPENAI_API_KEY) {
+        return res.status(503).json({
+          error: "WOO RegioBot is tijdelijk niet beschikbaar",
+          details: "De AI-configuratie is nog niet voltooid.",
+          action: "Vraag de beheerder om OPENAI_API_KEY te configureren.",
+        });
+      }
+
+      const prep = await prepareRegioBot(req.body ?? {});
+
+      res.setHeader("Content-Type", "text/event-stream; charset=utf-8");
+      res.setHeader("Cache-Control", "no-cache, no-transform");
+      res.setHeader("Connection", "keep-alive");
+      res.setHeader("X-Accel-Buffering", "no");
+      res.flushHeaders?.();
+
+      // Citations vooraf, zodat de client de bronnen direct heeft.
+      res.write(`data: ${JSON.stringify({ citations: prep.citations ?? [] })}\n\n`);
+
+      // Vast antwoord (verboden vraag of test-fixture): geen model-aanroep.
+      if (prep.earlyAnswer !== undefined) {
+        res.write(`data: ${JSON.stringify({ delta: prep.earlyAnswer })}\n\n`);
+        res.write("data: [DONE]\n\n");
+        return res.end();
+      }
+
+      const OpenAI = (await import("openai")).default;
+      const openai = new OpenAI();
+
+      const stream = await openai.chat.completions.create({
+        model: prep.model || process.env.OPENAI_MODEL || "gpt-4o",
+        messages: prep.messages as any,
+        temperature: 0.2,
+        stream: true,
+      });
+
+      for await (const chunk of stream) {
+        const delta = chunk.choices?.[0]?.delta?.content || "";
+        if (delta) res.write(`data: ${JSON.stringify({ delta })}\n\n`);
+      }
+      res.write("data: [DONE]\n\n");
+      res.end();
+    } catch (err: any) {
+      console.error("RegioBot stream error:", err);
+      if (res.headersSent) {
+        res.write(`data: ${JSON.stringify({ delta: "\n\n[RegioBot werd onderbroken. Probeer het opnieuw.]" })}\n\n`);
+        res.write("data: [DONE]\n\n");
+        res.end();
+      } else {
+        res.status(500).json({ error: "RegioBot kon niet antwoorden", message: err?.message ?? String(err) });
+      }
     }
   });
 
