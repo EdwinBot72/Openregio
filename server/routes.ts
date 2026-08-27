@@ -16,6 +16,7 @@ import { mollieStartRateLimit, contactFormRateLimit, geocodeRateLimit } from "./
 import { ObjectStorageService } from "./replit_integrations/object_storage";
 import { randomUUID, createHash } from "crypto";
 import { runRegioBot, prepareRegioBot } from "./regiobot";
+import { createStripeCheckout, handleStripeWebhook, stripeConfigured } from "./stripe";
 import { BRIEFTYPES, isBrieftype, buildSystemPrompt, buildUserPrompt, CONTROLE_PUNTEN, controleerBesluit, aandachtspuntenUit, stelWooVerzoekOp, CONTROLE_METHODE_DISCLAIMER } from "./brieftypes";
 import { db } from "db";
 import { eq, sql, gte, lte, gt, and, count, inArray } from "drizzle-orm";
@@ -3398,6 +3399,29 @@ Maak het verzoek professioneel en juridisch correct.`;
   });
 
   // Billing & Subscription routes
+  // Stripe Checkout (abonnement) — nieuwe betaalprovider. Additief naast Mollie;
+  // actief zodra STRIPE_* env-variabelen zijn gezet. Plan basic (€12,95) of pro (€24).
+  app.post("/api/billing/stripe/checkout", requireAuth, async (req: any, res) => {
+    try {
+      if (!stripeConfigured()) {
+        return res.status(503).json({ error: "Stripe is nog niet geconfigureerd. Neem contact op met de beheerder." });
+      }
+      const { plan } = z.object({ plan: z.enum(["basic", "pro"]) }).parse(req.body);
+      const reqUser = req.user as any;
+      const baseUrl = process.env.PUBLIC_BASE_URL || getBaseUrl(req);
+      const checkoutUrl = await createStripeCheckout({
+        userId: reqUser.id,
+        email: reqUser.email,
+        plan,
+        baseUrl,
+      });
+      res.json({ checkoutUrl });
+    } catch (err: any) {
+      console.error("[Stripe] checkout-fout:", err?.message ?? err);
+      res.status(500).json({ error: "Kon Stripe-checkout niet starten", message: err?.message ?? String(err) });
+    }
+  });
+
   app.post("/api/billing/create-checkout", requireAuth, async (req, res) => {
     try {
       if (!mollieClient) {
@@ -3654,6 +3678,10 @@ Maak het verzoek professioneel en juridisch correct.`;
 
   // POST /api/webhooks/mollie — legacy alias, gedeelde handler
   app.post("/api/webhooks/mollie", mollieWebhookHandler);
+
+  // Stripe-webhook — verifieert de handtekening met de ruwe body (req.rawBody).
+  // Zet na een geslaagde betaling het plan actief en rondt de onboarding af.
+  app.post("/api/webhooks/stripe", (req, res) => handleStripeWebhook(req, res));
 
   // ===============================
   // ADMIN EXPORT ROUTES

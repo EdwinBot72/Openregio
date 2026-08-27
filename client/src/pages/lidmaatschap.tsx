@@ -154,12 +154,12 @@ export default function LidmaatschapPage() {
 
     try {
       if (isLoggedIn) {
-        const returnUrl = `${window.location.origin}/betaling-geslaagd?plan=${selected}`;
-        const res = await fetch("/api/billing/create-checkout", {
+        // Stripe Checkout (abonnement). De success/cancel-URL's zet de server zelf.
+        const res = await fetch("/api/billing/stripe/checkout", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify({ plan: selected, returnUrl }),
+          body: JSON.stringify({ plan: selected }),
         });
         const data = await res.json();
         if (!res.ok) {

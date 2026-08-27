@@ -350,6 +350,8 @@ export const subscriptions = pgTable("subscriptions", {
   molliePaymentId: text("mollie_payment_id").unique(),
   mollieCustomerId: text("mollie_customer_id"),
   mollieSubscriptionId: text("mollie_subscription_id"),
+  stripeCustomerId: text("stripe_customer_id"),
+  stripeSubscriptionId: text("stripe_subscription_id"),
   status: text("status").notNull().default("active"),
   plan: text("plan").notNull().default("basic"),
   currentPeriodEnd: timestamp("current_period_end"),
