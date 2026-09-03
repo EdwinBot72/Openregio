@@ -339,6 +339,17 @@ function AuthGuard({ children }: { children: React.ReactNode }) {
     return null;
   }
 
+  // Betaalde toegang: zolang er geen actief abonnement is (plan "pending"),
+  // stuur naar de plankeuze om te kiezen en te betalen. Dit dwingt "pas verder
+  // ná betalen" af én voorkomt de doodlopende /first-login voor zelf-geregistreerde
+  // gebruikers (die hebben geen activatie-token).
+  if (user.plan === "pending") {
+    setLocation("/lidmaatschap");
+    return null;
+  }
+
+  // Alleen nog van toepassing op door-de-beheerder-uitgenodigde accounts die
+  // via een e-mail-token hun wachtwoord moeten instellen.
   if (user.mustCompleteOnboarding) {
     setLocation("/first-login");
     return null;
