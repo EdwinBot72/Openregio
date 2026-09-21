@@ -62,9 +62,13 @@ export async function createStripeCheckout(opts: {
 
   const existing = await storage.getSubscription(opts.userId);
 
+  // BTW: als STRIPE_TAX_RATE (een 21%-tarief) is gezet, komt de BTW bovenop de
+  // prijs en verschijnt 'ie apart op de factuur. Prijzen zijn excl. btw.
+  const taxRate = process.env.STRIPE_TAX_RATE;
+
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
-    line_items: [{ price, quantity: 1 }],
+    line_items: [{ price, quantity: 1, ...(taxRate ? { tax_rates: [taxRate] } : {}) }],
     ...(existing?.stripeCustomerId
       ? { customer: existing.stripeCustomerId }
       : { customer_email: opts.email }),
