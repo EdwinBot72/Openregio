@@ -68,6 +68,9 @@ export async function createStripeCheckout(opts: {
 
   const session = await stripe.checkout.sessions.create({
     mode: "subscription",
+    // Alleen de relevante NL-methoden: kaart, iDEAL (eerste betaling) en SEPA
+    // (maandelijkse incasso). Zo geen Klarna/PayPal/Amazon Pay/Satispay op de pagina.
+    payment_method_types: ["card", "ideal", "sepa_debit"],
     line_items: [{ price, quantity: 1, ...(taxRate ? { tax_rates: [taxRate] } : {}) }],
     ...(existing?.stripeCustomerId
       ? { customer: existing.stripeCustomerId }
