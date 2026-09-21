@@ -14,7 +14,7 @@ const PLANS = {
     price: "€12,95",
     period: "excl. btw per maand",
     tagline: "Meekijken, profiel aanmaken en lokaal meedoen.",
-    affiliate: "€4,95 affiliate per aangebrachte klant",
+    affiliate: "€2,95 affiliate per aangebrachte klant",
     benefits: [
       "Bedrijfsprofiel aanmaken en beheren",
       "Sectorregels bekijken",
@@ -35,7 +35,7 @@ const PLANS = {
     price: "€24",
     period: "excl. btw per maand",
     tagline: "Alle tools, onbeperkt gebruik en maximale zichtbaarheid.",
-    affiliate: "€9 affiliate per aangebrachte klant",
+    affiliate: "€4 affiliate per aangebrachte klant",
     benefits: [
       "Alles van Basis",
       "Wat komt eraan? — volledig overzicht",

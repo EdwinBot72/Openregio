@@ -4610,10 +4610,10 @@ Maak het verzoek professioneel en juridisch correct.`;
         pendingCommission: stats.pendingCommission,
         paidCommission: stats.paidCommission,
         commissionRates: {
-          basic: 4.95,
-          pro: 9,
-          basicAmount: 4.95,
-          proAmount: 9,
+          basic: 2.95,
+          pro: 4,
+          basicAmount: 2.95,
+          proAmount: 4,
         },
       });
     } catch (error: any) {

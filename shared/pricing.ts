@@ -12,13 +12,13 @@ export const PRICING: Record<PlanKey, PlanConfig> = {
     key: "basic",
     name: "Basis",
     priceExVatMonthly: 12.95,
-    affiliateAmount: 4.95,
+    affiliateAmount: 2.95,
   },
   pro: {
     key: "pro",
     name: "Pro",
     priceExVatMonthly: 24,
-    affiliateAmount: 9,
+    affiliateAmount: 4,
   },
   coaching: {
     key: "coaching",
@@ -55,7 +55,7 @@ export function addVat(amountExVat: number, vatRate = 21): number {
 }
 
 export const PLAN_DISPLAY: Record<PlanKey, { label: string; priceLabel: string; affiliateLabel: string }> = {
-  basic:    { label: "Basis",           priceLabel: "€12,95 excl. btw/maand", affiliateLabel: "€4,95 per nieuwe klant" },
-  pro:      { label: "Pro",             priceLabel: "€24 excl. btw/maand",    affiliateLabel: "€9 per nieuwe klant" },
+  basic:    { label: "Basis",           priceLabel: "€12,95 excl. btw/maand", affiliateLabel: "€2,95 per nieuwe klant" },
+  pro:      { label: "Pro",             priceLabel: "€24 excl. btw/maand",    affiliateLabel: "€4 per nieuwe klant" },
   coaching: { label: "1-op-1 coaching", priceLabel: "Prijs op aanvraag",      affiliateLabel: "" },
 };

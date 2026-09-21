@@ -127,7 +127,7 @@ export default function AffiliatePage() {
           <div>
             <h1 style={{ margin: 0, fontSize: 22, fontWeight: 900, color: "#0b2240" }} data-testid="heading-affiliate">Affiliate programma</h1>
             <p style={{ margin: "4px 0 0", fontSize: 14, color: "#64748b" }}>
-              Verdien commissie door anderen te verwijzen naar OpenRegio. €{stats?.commissionRates?.basic?.toFixed(2) ?? "4,95"} per Basis-lid of €{stats?.commissionRates?.pro?.toFixed(2) ?? "9,00"} per Pro-lid.
+              Verdien commissie door anderen te verwijzen naar OpenRegio. €{stats?.commissionRates?.basic?.toFixed(2) ?? "2,95"} per Basis-lid of €{stats?.commissionRates?.pro?.toFixed(2) ?? "4,00"} per Pro-lid.
             </p>
           </div>
         </div>
