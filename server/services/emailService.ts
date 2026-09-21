@@ -1,38 +1,64 @@
 import * as postmark from 'postmark';
+import nodemailer from 'nodemailer';
 
 const POSTMARK_API_KEY = process.env.POSTMARK_API_KEY;
-const FROM_EMAIL = 'OpenRegio <info@openregio.nl>';
+const FROM_EMAIL = process.env.SMTP_FROM || 'OpenRegio <info@openregio.nl>';
 const BASE_URL = process.env.PUBLIC_BASE_URL || 'https://www.openregio.nl';
 
 let client: postmark.ServerClient | null = null;
-
 if (POSTMARK_API_KEY) {
   client = new postmark.ServerClient(POSTMARK_API_KEY);
-  console.log('[Email] Postmark client initialized');
-} else {
-  console.warn('[Email] POSTMARK_API_KEY not set - emails will not be sent');
+  console.log('[Email] Postmark client geïnitialiseerd');
+}
+
+// SMTP (nodemailer) — heeft voorrang zodra SMTP_HOST/USER/PASS zijn gezet.
+// Zo kan de app via het eigen domein (bijv. Hostinger) versturen.
+let smtp: nodemailer.Transporter | null = null;
+if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+  const port = Number(process.env.SMTP_PORT || 587);
+  smtp = nodemailer.createTransport({
+    host: process.env.SMTP_HOST,
+    port,
+    secure: port === 465, // 465 = SSL, 587 = STARTTLS
+    auth: { user: process.env.SMTP_USER, pass: process.env.SMTP_PASS },
+  });
+  console.log(`[Email] SMTP-transport ingesteld (${process.env.SMTP_HOST}:${port})`);
+}
+
+if (!smtp && !client) {
+  console.warn('[Email] Geen mailprovider geconfigureerd (SMTP of Postmark) — er worden geen mails verstuurd');
 }
 
 async function sendEmail(to: string, subject: string, htmlBody: string): Promise<boolean> {
-  if (!client) {
-    console.error('[Email] Postmark client not initialized');
-    return false;
+  // Voorkeur: SMTP (eigen domein); anders Postmark.
+  if (smtp) {
+    try {
+      const info = await smtp.sendMail({ from: FROM_EMAIL, to, subject, html: htmlBody });
+      console.log(`[Email] SMTP verstuurd naar ${to}: ${subject} (${info.messageId})`);
+      return true;
+    } catch (error: any) {
+      console.error(`[Email] SMTP mislukt naar ${to}:`, error.message || error);
+      if (!client) return false; // geen fallback beschikbaar
+    }
   }
-
-  try {
-    const result = await client.sendEmail({
-      From: FROM_EMAIL,
-      To: to,
-      Subject: subject,
-      HtmlBody: htmlBody,
-      MessageStream: 'outbound',
-    });
-    console.log(`[Email] Sent to ${to}: ${subject} (MessageID: ${result.MessageID})`);
-    return true;
-  } catch (error: any) {
-    console.error(`[Email] Failed to send to ${to}:`, error.message || error);
-    return false;
+  if (client) {
+    try {
+      const result = await client.sendEmail({
+        From: FROM_EMAIL,
+        To: to,
+        Subject: subject,
+        HtmlBody: htmlBody,
+        MessageStream: 'outbound',
+      });
+      console.log(`[Email] Postmark verstuurd naar ${to}: ${subject} (MessageID: ${result.MessageID})`);
+      return true;
+    } catch (error: any) {
+      console.error(`[Email] Postmark mislukt naar ${to}:`, error.message || error);
+      return false;
+    }
   }
+  console.error('[Email] Geen mailprovider beschikbaar — mail niet verstuurd');
+  return false;
 }
 
 export async function sendWelcomeEmail(to: string, firstName: string): Promise<boolean> {
