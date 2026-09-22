@@ -30,9 +30,9 @@ FROM node:22-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 
-# tini voor correcte signal-handling (SIGTERM -> nette shutdown)
+# tini voor signal-handling + poppler-utils (pdftoppm) voor OCR van gescande PDF's
 RUN apt-get update \
- && apt-get install -y --no-install-recommends tini \
+ && apt-get install -y --no-install-recommends tini poppler-utils \
  && rm -rf /var/lib/apt/lists/*
 
 # Hergebruik de reeds gebouwde artefacten (geen npm-install meer)

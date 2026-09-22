@@ -1916,6 +1916,19 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
       } else {
         const pdf = await extractTextFromPDF(file.buffer);
         tekst = pdf.text;
+        // Gescande PDF zonder tekstlaag → OCR-fallback (pdftoppm + tesseract).
+        if ((tekst || "").trim().length < 20) {
+          try {
+            const { ocrScannedPdf } = await import("./rag/pdf-ocr");
+            const ocrTekst = await ocrScannedPdf(file.buffer);
+            if (ocrTekst.length >= 20) {
+              tekst = ocrTekst;
+              console.log(`[BriefAnalyse/upload] OCR-fallback gescande PDF: ${ocrTekst.length} tekens`);
+            }
+          } catch (ocrErr: any) {
+            console.error("[BriefAnalyse/upload] PDF-OCR-fallback mislukt:", ocrErr?.message || ocrErr);
+          }
+        }
       }
 
       const tekstTrimmed = (tekst || "").trim();
@@ -2117,6 +2130,16 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
         text = pdfResult.text;
         needsOcr = pdfResult.needsOcr;
         pages = pdfResult.pages;
+        // Gescande PDF zonder tekstlaag → OCR-fallback (pdftoppm + tesseract).
+        if ((text || "").trim().length < 10) {
+          try {
+            const { ocrScannedPdf } = await import("./rag/pdf-ocr");
+            const ocrTekst = await ocrScannedPdf(file.buffer);
+            if (ocrTekst.length >= 10) { text = ocrTekst; needsOcr = false; }
+          } catch (ocrErr: any) {
+            console.error("[RAG/upload] PDF-OCR-fallback mislukt:", ocrErr?.message || ocrErr);
+          }
+        }
       }
 
       const trimmed = (text || "").trim();
