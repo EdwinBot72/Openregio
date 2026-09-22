@@ -351,6 +351,9 @@ export default function BriefAnalysePage() {
                   data-testid="textarea-document-tekst"
                 />
                 <p className="text-xs text-muted-foreground">{tekst.length} / 8000 tekens</p>
+                <div className="mt-2 flex items-start gap-2 rounded-md border p-2.5 text-xs" style={{ background: "#f0f7f4", borderColor: "#cfe8dd", color: "#2f5d4b" }}>
+                  <span>🔒 <strong>Veilig.</strong> Je brief wordt geanalyseerd op onze eigen server met een lokale AI — de tekst gaat niet naar externe partijen (zoals OpenAI of Google) en wordt niet opgeslagen. Je hoeft persoonlijke gegevens dus niet weg te lakken.</span>
+                </div>
               </div>
             )}
 

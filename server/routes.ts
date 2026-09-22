@@ -1670,7 +1670,8 @@ Schrijf in het Nederlands. Toon: helder, gezaghebbend, praktisch. Geef geen juri
   // Brief Analyse - gestructureerde analyse van overheidsbrieven (Basic+)
   app.post("/api/brief-analyse", requireBasic, authenticatedAiRateLimit, async (req, res) => {
     try {
-      const { tekst } = req.body;
+      // Accepteer zowel `tekst` als `content` — verschillende pagina's sturen een andere veldnaam.
+      const tekst = req.body?.tekst ?? req.body?.content;
       if (!tekst || typeof tekst !== "string" || tekst.trim().length < 20) {
         return res.status(400).json({ error: "Tekst te kort of ontbrekend (minimaal 20 tekens)" });
       }

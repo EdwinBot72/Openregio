@@ -180,6 +180,10 @@ export default function BrievenagentPage() {
         )}
       </div>
 
+      <div style={{ background: "#f0f7f4", border: "1px solid #cfe8dd", borderRadius: 8, padding: "10px 12px", fontSize: 12.5, color: "#2f5d4b", marginBottom: 16 }}>
+        🔒 <strong>Veilig.</strong> Je brief wordt geanalyseerd op onze eigen server met een lokale AI. De tekst gaat niet naar externe partijen (zoals OpenAI of Google) en wordt niet opgeslagen. Je hoeft persoonlijke gegevens dus niet weg te lakken.
+      </div>
+
       <Button
         disabled={!canSubmit || isPending}
         onClick={handleSubmit}
