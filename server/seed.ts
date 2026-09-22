@@ -21,12 +21,17 @@ export async function seedMasterAccount() {
     const existingMaster = await storage.getUserByEmail(masterEmail);
 
     if (existingMaster) {
-      const passwordHash = await bcrypt.hash(masterPassword, SALT_ROUNDS);
-      await storage.updateUserPassword(existingMaster.id, passwordHash);
+      // Wachtwoord NIET overschrijven bij elke boot — anders gaat een wijziging in
+      // de app verloren. Alleen resetten als MASTER_PASSWORD_RESET=true (noodklep
+      // voor als je echt bent buitengesloten; zet 'm daarna weer uit).
+      if (process.env.MASTER_PASSWORD_RESET === "true") {
+        const passwordHash = await bcrypt.hash(masterPassword, SALT_ROUNDS);
+        await storage.updateUserPassword(existingMaster.id, passwordHash);
+        console.log("✓ Master wachtwoord GERESET naar MASTER_PASSWORD (MASTER_PASSWORD_RESET=true):", existingMaster.email);
+      }
       if (existingMaster.plan !== "pro" || existingMaster.role !== "master") {
         await storage.updateUser(existingMaster.id, { plan: "pro", role: "master" });
       }
-      console.log("✓ Master account wachtwoord bijgewerkt:", existingMaster.email);
       return;
     }
 
