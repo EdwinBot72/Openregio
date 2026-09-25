@@ -61,31 +61,21 @@ Bij velden die op _citaat eindigen geef je een LETTERLIJK stukje tekst uit de br
 Antwoord uitsluitend met geldige JSON, zonder uitleg.`;
 
 function userPrompt(tekst: string): string {
-  return `Geef deze JSON terug:
+  return `Geef deze JSON terug (kort, alleen wat in de brief staat):
 {
  "geadresseerde": naam aan wie de brief gericht is (persoon of bedrijf) of null,
- "geadresseerde_citaat": citaat of null,
- "rechtsvorm": een van ${RECHTSVORMEN.map((x) => `"${x}"`).join(", ")},
- "rechtsvorm_citaat": citaat of null,
- "bestuurder_persoonlijk": true als een bestuurder/directeur persoonlijk wordt aangesproken, anders false,
+ "geadresseerde_citaat": letterlijk citaat van die adressering of null,
+ "bestuurder_persoonlijk": true als een bestuurder/directeur persoonlijk (privé) wordt aangesproken, anders false,
  "hoedanigheid": een van ${HOEDANIGHEDEN.map((x) => `"${x}"`).join(", ")},
- "hoedanigheid_citaat": citaat of null,
  "instantie": naam van de instantie die de brief stuurt of null,
  "afdeling": afdeling of null,
  "ondertekenaar": naam van wie ondertekent of null,
  "functie": functie van de ondertekenaar of null,
  "namens": namens wie getekend is (bijv. "namens burgemeester en wethouders") of null,
- "afzender_citaat": citaat van de ondertekening of null,
- "documenttype": een van ${DOCTYPES.map((x) => `"${x}"`).join(", ")},
- "documenttype_citaat": citaat of null,
  "verlangd_soort": een van ${VERLANGD.map((x) => `"${x}"`).join(", ")},
- "verlangd_omschrijving": korte omschrijving van wat van de ondernemer verlangd wordt of null,
- "bedrag": genoemd bedrag of null,
- "verlangd_citaat": citaat of null,
- "termijnen": [{"omschrijving": "...", "citaat": "..."}],
- "grondslagen": [{"regel": "wet/artikel/verordening zoals genoemd in de brief", "citaat": "..."}],
- "kenmerk": kenmerk of zaaknummer of null,
- "datum_brief": datum van de brief zoals vermeld of null
+ "verlangd_omschrijving": korte omschrijving van wat er van de ondernemer verlangd wordt of null,
+ "verlangd_citaat": letterlijk citaat daarvan of null,
+ "grondslagen": [{"regel": "wet/artikel/verordening zoals genoemd in de brief", "citaat": "letterlijk citaat"}]
 }
 
 BRIEF:
@@ -116,7 +106,7 @@ async function aiExtractie(tekst: string): Promise<{ ex: Extractie; ok: boolean 
         { role: "user", content: userPrompt(tekst.slice(0, 8000)) },
       ],
       temperature: 0.1,
-      max_tokens: 1100,
+      max_tokens: 650,
     });
     const raw = completion.choices[0]?.message?.content || "";
     const m = raw.match(/\{[\s\S]*\}/);
@@ -126,18 +116,15 @@ async function aiExtractie(tekst: string): Promise<{ ex: Extractie; ok: boolean 
     return {
       ok: true,
       ex: {
+        ...LEEG,
         geadresseerde: str(j.geadresseerde), geadresseerde_citaat: str(j.geadresseerde_citaat),
-        rechtsvorm: kies(j.rechtsvorm, RECHTSVORMEN, "onbekend"), rechtsvorm_citaat: str(j.rechtsvorm_citaat),
         bestuurder_persoonlijk: j.bestuurder_persoonlijk === true,
-        hoedanigheid: kies(j.hoedanigheid, HOEDANIGHEDEN, "onbekend"), hoedanigheid_citaat: str(j.hoedanigheid_citaat),
+        hoedanigheid: kies(j.hoedanigheid, HOEDANIGHEDEN, "onbekend"),
         instantie: str(j.instantie), afdeling: str(j.afdeling), ondertekenaar: str(j.ondertekenaar),
-        functie: str(j.functie), namens: str(j.namens), afzender_citaat: str(j.afzender_citaat),
-        documenttype: kies(j.documenttype, DOCTYPES, "overig"), documenttype_citaat: str(j.documenttype_citaat),
+        functie: str(j.functie), namens: str(j.namens),
         verlangd_soort: kies(j.verlangd_soort, VERLANGD, "overig"), verlangd_omschrijving: str(j.verlangd_omschrijving),
-        bedrag: str(j.bedrag), verlangd_citaat: str(j.verlangd_citaat),
-        termijnen: lijst(j.termijnen).map((t: any) => ({ omschrijving: str(t?.omschrijving) || "", citaat: str(t?.citaat) })).filter((t) => t.omschrijving).slice(0, 6),
+        verlangd_citaat: str(j.verlangd_citaat),
         grondslagen: lijst(j.grondslagen).map((g: any) => ({ regel: str(g?.regel) || "", citaat: str(g?.citaat) })).filter((g) => g.regel).slice(0, 8),
-        kenmerk: str(j.kenmerk), datum_brief: str(j.datum_brief),
       },
     };
   } catch (e: any) {
@@ -214,32 +201,125 @@ function parseDatum(s: string | null): Date | null {
 }
 const fmt = (d: Date) => `${d.getDate()} ${MAANDEN[d.getMonth()]} ${d.getFullYear()}`;
 
+// ── Vaste herkenning (geen AI): betrouwbaar en direct ────────
+/** De zin waarin een match staat, als letterlijk citaat. */
+function zinRond(t: string, idx: number, len: number): string {
+  let a = idx; while (a > 0 && !/[.\n]/.test(t[a - 1])) a--;
+  let b = idx + len; while (b < t.length && !/[.\n]/.test(t[b])) b++;
+  const z = t.slice(a, b + 1).replace(/\s+/g, " ").trim();
+  return z.length > 240 ? z.slice(0, 237) + "…" : z;
+}
+function eerste(t: string, re: RegExp): { m: RegExpMatchArray; zin: string } | null {
+  const m = t.match(re);
+  return m && m.index !== undefined ? { m, zin: zinRond(t, m.index, m[0].length) } : null;
+}
+
+function detecteerSoort(t: string): { dt: Dt; bron?: string } {
+  const heeftBezwaar = /bezwaar\s+(maken|indienen)|kunt u .{0,60}bezwaar/i.test(t);
+  const regels: [Dt, RegExp, boolean?][] = [
+    ["informatieverzoek", /(vorder(en|ing)[^.]{0,40}inlichtingen|verzoek(en)?\s+(wij\s+)?u[^.]{0,40}(inlichtingen|informatie|gegevens)[^.]{0,40}(te\s+verstrekken|toe\s+te\s+sturen|aan\s+te\s+leveren))/i, true],
+    ["voornemen", /(voornemen|vooraankondiging|zijn\s+(wij\s+)?voornemens|zijn\s+wij\s+van\s+plan)/i, true],
+    ["last_onder_dwangsom", /last\s+onder\s+dwangsom|dwangsom/i],
+    ["bestuursdwang", /bestuursdwang/i],
+    ["boete", /bestuurlijke\s+boete|boete\s+op\s+te\s+leggen|leggen\s+wij\s+u\s+een\s+boete|boetebeschikking/i],
+    ["aanslag", /naheffingsaanslag|aanslagbiljet|(belasting)?aanslag/i],
+    ["besluit", /\bbesluit\b|beschikking|hebben\s+(wij\s+)?besloten|besluiten\s+wij/i],
+  ];
+  for (const [dt, re, alleenZonderBezwaar] of regels) {
+    if (alleenZonderBezwaar && heeftBezwaar) continue;
+    const f = eerste(t, re);
+    if (f) return { dt, bron: `“${f.zin}”` };
+  }
+  return { dt: heeftBezwaar ? "besluit" : "overig" };
+}
+
+function detecteerKenmerk(t: string): string | null {
+  const m = t.match(/(?:ons\s+kenmerk|uw\s+kenmerk|kenmerk|zaaknummer|dossiernummer|referentie)\s*[:.]?\s*([A-Z0-9][A-Z0-9\/._-]{3,})/i);
+  return m ? m[1].replace(/[.,]$/, "") : null;
+}
+
+const MAAND_RE = "januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december";
+function detecteerDatum(t: string): string | null {
+  const kop = t.slice(0, 1500);
+  const m = kop.match(new RegExp(`\\b(\\d{1,2}\\s+(?:${MAAND_RE})\\s+\\d{4})\\b`, "i")) || kop.match(/\b(\d{1,2}[-/.]\d{1,2}[-/.]\d{4})\b/);
+  return m ? m[1] : null;
+}
+
+function detecteerTermijnen(t: string): string[] {
+  const res = new Set<string>();
+  const patronen = [
+    /binnen\s+(\d+|een|één|twee|drie|vier|vijf|zes|zeven|acht|tien|twaalf|veertien)\s+(werk)?(dagen|dag|weken|week|maanden|maand)/gi,
+    new RegExp(`(uiterlijk|vóór|voor|tot)\\s+(\\d{1,2}\\s+(?:${MAAND_RE})\\s+\\d{4})`, "gi"),
+  ];
+  for (const re of patronen) for (const m of t.matchAll(re)) if (m.index !== undefined) res.add(zinRond(t, m.index, m[0].length));
+  return [...res].slice(0, 6);
+}
+
+function detecteerBedragen(t: string): string[] {
+  const res = new Set<string>();
+  for (const m of t.matchAll(/(€\s?\d[\d.]*(,\d{2})?|\b\d[\d.]*(,\d{2})?\s?(euro|EUR)\b)/gi)) if (m.index !== undefined) res.add(zinRond(t, m.index, m[0].length));
+  return [...res].slice(0, 3);
+}
+
+function detecteerRechtsvorm(t: string): { rv: Rv; bron?: string; zeker: boolean } {
+  const kop = t.slice(0, 1200);
+  const regels: [Rv, RegExp, boolean][] = [
+    ["bv", /\bB\.\s?V\.|\bBV\b/, true],
+    ["vof", /\bV\.\s?O\.\s?F\.|\bVOF\b|\bv\.o\.f\./i, true],
+    ["nv", /\bN\.\s?V\.(?!\s?T)/, true],
+    ["stichting", /\bstichting\b/i, true],
+    ["vereniging", /\bvereniging\b/i, true],
+    ["eenmanszaak", /eenmanszaak|h\.?o\.?d\.?n\.?|handelend\s+onder\s+de\s+naam/i, false],
+  ];
+  for (const [rv, re, zeker] of regels) {
+    const f = eerste(kop, re);
+    if (f) return { rv, bron: `“${f.zin}”`, zeker };
+  }
+  return { rv: "onbekend", zeker: false };
+}
+
 // ── Rapport bouwen ───────────────────────────────────────────
 export async function maakRechtenRapport(brieftekst: string): Promise<Rapport> {
   const tekst = brieftekst.slice(0, 20000);
   const [{ ex, ok }, bevindingen] = await Promise.all([aiExtractie(tekst), Promise.resolve(controleerBesluit(tekst))]);
   const echt = makeVerifier(tekst);
-  const bronCitaat = (c: string | null | undefined) => { const v = echt(c); return v ? `“${v}”` : undefined; };
-  const feit = (tekst: string, citaat: string | null | undefined): RapportPunt => {
-    const bron = bronCitaat(citaat);
+  const bronVan = (...kandidaten: (string | null | undefined)[]) => {
+    for (const k of kandidaten) { const v = echt(k); if (v) return `“${v}”`; }
+    return undefined;
+  };
+  const feit = (tekst: string, ...kandidaten: (string | null | undefined)[]): RapportPunt => {
+    const bron = bronVan(...kandidaten);
     return bron ? { tekst, label: "vaststaand", bron } : { tekst: `${tekst} (niet letterlijk teruggevonden in je brief — controleer dit)`, label: "te_controleren" };
   };
+
+  const soort = detecteerSoort(tekst);
+  const dt = soort.dt;
+  const kenmerk = detecteerKenmerk(tekst);
+  const datumTekst = detecteerDatum(tekst);
+  const rechtsvorm = detecteerRechtsvorm(tekst);
   const secties: RapportSectie[] = [];
-  const dt = ex.documenttype;
 
   // 1. Juridische positie
   const positie: RapportPunt[] = [];
-  if (ex.geadresseerde) positie.push(feit(`De brief is gericht aan: ${ex.geadresseerde}.`, ex.geadresseerde_citaat));
+  if (ex.geadresseerde) positie.push(feit(`De brief is gericht aan: ${ex.geadresseerde}.`, ex.geadresseerde_citaat, ex.geadresseerde));
   else positie.push({ tekst: "Niet duidelijk aan wie de brief precies gericht is. Controleer naam en rechtsvorm in de adressering.", label: "te_controleren" });
-  if (ex.rechtsvorm !== "onbekend" && ex.rechtsvorm !== "privepersoon" && bronCitaat(ex.rechtsvorm_citaat)) {
-    positie.push({ tekst: `Rechtsvorm volgens de brief: ${ex.rechtsvorm}.`, label: "vaststaand", bron: bronCitaat(ex.rechtsvorm_citaat) });
+  if (rechtsvorm.rv !== "onbekend") {
+    positie.push({
+      tekst: rechtsvorm.zeker ? `Rechtsvorm volgens de adressering: ${rechtsvorm.rv}.` : `Waarschijnlijk een ${rechtsvorm.rv} (afgeleid uit de adressering — controleer dit).`,
+      label: rechtsvorm.zeker ? "vaststaand" : "interpretatie",
+      bron: rechtsvorm.bron,
+    });
   }
-  positie.push(RECHTSVORM_DUIDING[ex.rechtsvorm]);
+  positie.push(RECHTSVORM_DUIDING[rechtsvorm.rv]);
   if (ex.bestuurder_persoonlijk) {
     positie.push({ tekst: "Je wordt als bestuurder persoonlijk aangesproken. Persoonlijke aansprakelijkheid van een bestuurder is de uitzondering en moet apart onderbouwd worden. Vraag waarop dit gebaseerd is.", label: "te_controleren" });
   }
   if (ex.hoedanigheid !== "onbekend") {
-    positie.push(feit(`Je wordt aangesproken als ${HOEDANIGHEID_TEKST[ex.hoedanigheid]}. De verplichtingen horen bij die rol — controleer of die rol klopt.`, ex.hoedanigheid_citaat));
+    const rol = HOEDANIGHEID_TEKST[ex.hoedanigheid];
+    const f = eerste(tekst, new RegExp(`\\b${rol}`, "i"));
+    positie.push(f
+      ? { tekst: `Je wordt aangesproken als ${rol}. De verplichtingen horen bij die rol — controleer of die rol klopt.`, label: "vaststaand", bron: `“${f.zin}”` }
+      : { tekst: `Uit de inhoud leid ik af dat je wordt aangesproken als ${rol} (niet letterlijk zo genoemd). Controleer of die rol klopt: de verplichtingen horen bij die rol.`, label: "interpretatie" });
   } else {
     positie.push({ tekst: "Uit de brief blijkt niet in welke hoedanigheid je wordt aangesproken (bijv. als werkgever, vergunninghouder of belastingplichtige). Vraag dit zo nodig na.", label: "te_controleren" });
   }
@@ -248,14 +328,20 @@ export async function maakRechtenRapport(brieftekst: string): Promise<Rapport> {
 
   // 2. Wat wordt verlangd
   const verlangd: RapportPunt[] = [];
-  verlangd.push({ tekst: `Soort brief: ${DOCTYPE_TEKST[dt]}.`, label: bronCitaat(ex.documenttype_citaat) ? "vaststaand" : "interpretatie", bron: bronCitaat(ex.documenttype_citaat) });
-  verlangd.push(feit(`Wat er van je verlangd wordt: ${VERLANGD_TEKST[ex.verlangd_soort]}${ex.verlangd_omschrijving ? ` — ${ex.verlangd_omschrijving}` : ""}.`, ex.verlangd_citaat));
-  if (ex.bedrag) verlangd.push(feit(`Genoemd bedrag: ${ex.bedrag}.`, ex.verlangd_citaat));
+  verlangd.push(soort.bron
+    ? { tekst: `Soort brief: ${DOCTYPE_TEKST[dt]}.`, label: "vaststaand", bron: soort.bron }
+    : { tekst: `Soort brief: ${DOCTYPE_TEKST[dt]} (niet eenduidig te herkennen — controleer dit).`, label: "te_controleren" });
+  if (ex.verlangd_omschrijving || ex.verlangd_soort !== "overig") {
+    verlangd.push(feit(`Wat er van je verlangd wordt: ${VERLANGD_TEKST[ex.verlangd_soort]}${ex.verlangd_omschrijving ? ` — ${ex.verlangd_omschrijving}` : ""}.`, ex.verlangd_citaat, ex.verlangd_omschrijving));
+  } else {
+    verlangd.push({ tekst: "Niet eenduidig vast te stellen wat er precies van je verlangd wordt. Vraag de instantie dit schriftelijk te verduidelijken.", label: "te_controleren" });
+  }
+  for (const z of detecteerBedragen(tekst)) verlangd.push({ tekst: "Genoemd bedrag.", label: "vaststaand", bron: `“${z}”` });
   secties.push({ titel: "2. Wat er van je verlangd wordt", punten: verlangd });
 
   // 3. Grondslag
   const grond: RapportPunt[] = ex.grondslagen.map((g) => {
-    const bron = bronCitaat(g.citaat) || (echt(g.regel) ? `“${g.regel}”` : undefined);
+    const bron = bronVan(g.citaat, g.regel);
     return bron
       ? { tekst: `De brief noemt als grondslag: ${g.regel}. Of die regel deze verplichting echt toestaat, is een juridische vraag — controleer het artikel op wetten.overheid.nl.`, label: "vaststaand", bron }
       : { tekst: `Mogelijke grondslag: ${g.regel} (niet letterlijk teruggevonden in je brief — controleer dit).`, label: "te_controleren" };
@@ -268,10 +354,10 @@ export async function maakRechtenRapport(brieftekst: string): Promise<Rapport> {
   // 4. Wie handelt en is die bevoegd
   const wie: RapportPunt[] = [];
   const afz = [ex.instantie, ex.afdeling].filter(Boolean).join(", ");
-  if (afz) wie.push(feit(`Afzender: ${afz}.`, ex.afzender_citaat || ex.instantie));
-  if (ex.ondertekenaar || ex.functie) wie.push(feit(`Ondertekend door: ${[ex.ondertekenaar, ex.functie].filter(Boolean).join(", ")}.`, ex.afzender_citaat));
-  if (ex.namens) wie.push(feit(`Getekend ${ex.namens}.`, ex.afzender_citaat || ex.namens));
-  const isBevoegdheid = (b: Bevinding) => /bevoeg|mandaat|ondertek|namens/i.test(`${b.titel} ${b.grondslag}`);
+  if (afz) wie.push(feit(`Afzender: ${afz}.`, ex.instantie, ex.afdeling));
+  if (ex.ondertekenaar || ex.functie) wie.push(feit(`Ondertekend door: ${[ex.ondertekenaar, ex.functie].filter(Boolean).join(", ")}.`, ex.ondertekenaar, ex.functie));
+  if (ex.namens) wie.push(feit(`Getekend ${ex.namens}.`, ex.namens));
+  const isBevoegdheid = (b: Bevinding) => /bevoeg|mandaat|namens/i.test(`${b.titel} ${b.grondslag}`);
   for (const b of bevindingen.filter(isBevoegdheid)) wie.push({ tekst: `${b.titel}: ${b.toelichting}`, label: statusNaarLabel(b.status), bron: b.bewijs ? `“${b.bewijs}” — ${b.grondslag}` : b.grondslag });
   if (!wie.length) wie.push({ tekst: "Niet duidelijk wie de brief heeft opgesteld en ondertekend. Vraag wie besloten heeft en op welke bevoegdheid (of welk mandaat) dat berust.", label: "te_controleren", bron: "art. 10:10 Awb" });
   secties.push({ titel: "4. Wie handelt — en is die bevoegd?", punten: wie });
@@ -312,7 +398,7 @@ export async function maakRechtenRapport(brieftekst: string): Promise<Rapport> {
     rechten.push({ tekst: "Aan een rechtmatige vordering moet je wel meewerken — gelijkwaardig, niet tegenwerkend.", label: "interpretatie", bron: "art. 5:20 Awb" });
   }
   rechten.push({ tekst: "Je kunt de stukken opvragen die aan deze brief of dit besluit ten grondslag liggen, met een verzoek op grond van de Wet open overheid.", label: "interpretatie", bron: "art. 4.1 Woo" });
-  if (["eenmanszaak", "vof", "privepersoon", "onbekend"].includes(ex.rechtsvorm)) {
+  if (["eenmanszaak", "vof", "privepersoon", "onbekend"].includes(rechtsvorm.rv)) {
     rechten.push({ tekst: "Als natuurlijk persoon mag je de persoonsgegevens inzien die de instantie over jou verwerkt.", label: "interpretatie", bron: "art. 15 AVG" });
   }
   rechten.push({ tekst: "Ben je ontevreden over hoe de instantie zich gedroeg (bejegening, niet reageren), dan kun je een klacht indienen bij die instantie en daarna bij de (Nationale of gemeentelijke) ombudsman.", label: "interpretatie", bron: "art. 9:1 Awb" });
@@ -322,8 +408,8 @@ export async function maakRechtenRapport(brieftekst: string): Promise<Rapport> {
   secties.push({ titel: "7. Je rechten en mogelijke acties", punten: rechten });
 
   // 8. Termijnen
-  const termijnen: RapportPunt[] = ex.termijnen.map((t) => feit(t.omschrijving, t.citaat));
-  const datum = parseDatum(ex.datum_brief);
+  const termijnen: RapportPunt[] = detecteerTermijnen(tekst).map((z) => ({ tekst: "Termijn genoemd in de brief.", label: "vaststaand" as Label, bron: `“${z}”` }));
+  const datum = parseDatum(datumTekst);
   if (BESLUITACHTIG.includes(dt) && datum) {
     const uiterst = new Date(datum.getTime() + 42 * 86400000);
     termijnen.push({ tekst: `Indicatief: uiterste bezwaardatum rond ${fmt(uiterst)} (zes weken na de briefdatum ${fmt(datum)}). De termijn loopt vanaf de dag ná bekendmaking — controleer de precieze datum en dien bij twijfel eerder in.`, label: "te_controleren", bron: "art. 6:7 en 6:8 Awb" });
@@ -342,8 +428,8 @@ export async function maakRechtenRapport(brieftekst: string): Promise<Rapport> {
 
   // 10. Conceptbrieven (sjablonen, geen AI)
   const inst = ex.instantie || "[naam instantie]";
-  const kenm = ex.kenmerk || "[kenmerk]";
-  const dat = ex.datum_brief || "[datum brief]";
+  const kenm = kenmerk || "[kenmerk]";
+  const dat = datumTekst || "[datum brief]";
   const conceptbrieven: Conceptbrief[] = [{ titel: "Woo-verzoek (stukken opvragen)", tekst: stelWooVerzoekOp(bevindingen) }];
   if (BESLUITACHTIG.includes(dt)) {
     conceptbrieven.push({
@@ -359,7 +445,7 @@ export async function maakRechtenRapport(brieftekst: string): Promise<Rapport> {
   }
 
   return {
-    kop: { afzender: ex.instantie || undefined, kenmerk: ex.kenmerk || undefined, datum: ex.datum_brief || undefined, documenttype: DOCTYPE_TEKST[dt] },
+    kop: { afzender: ex.instantie || undefined, kenmerk: kenmerk || undefined, datum: datumTekst || undefined, documenttype: DOCTYPE_TEKST[dt] },
     secties,
     conceptbrieven,
     aiGebruikt: ok,
