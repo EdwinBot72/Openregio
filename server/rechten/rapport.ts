@@ -337,6 +337,74 @@ const NIET_ONDERTEKEND = /(niet\s+(persoonlijk\s+)?ondertekend|zonder\s+handteke
 const BEHANDELAAR = /(behandeld\s+door|behandelaar|contactpersoon|inlichtingen\s+bij|opgemaakt\s+door|zaakbehandelaar)\s*:?\s*([^\n]{3,70})/i;
 const IBAN = /\bNL\s?\d{2}\s?[A-Z]{4}(?:\s?\d{4}){2}\s?\d{2}\b/;
 
+// ── Reactiebrief: alleen bevoegdheid en herkomst, nooit de inhoud ──
+interface BriefGegevens {
+  overheid: boolean; org: string; afdeling: string | null; kenmerk: string | null; datum: string | null;
+  namens: string | null; ondertekenaar: string | null; functie: string | null; behandelaar: string | null;
+  opdrachtgever: string | null; besluit: boolean; incasso: boolean;
+}
+
+/**
+ * Vaste brief (geen AI) waarin de ontvanger vraagt wie bevoegd is, wie de brief heeft
+ * opgemaakt en ondertekend, en op grond waarvan. Gaat bewust niet in op de inhoud.
+ */
+function verificatiebrief(g: BriefGegevens): Conceptbrief {
+  const verwijzing = [g.datum && `van ${g.datum}`, g.kenmerk && `met kenmerk ${g.kenmerk}`].filter(Boolean).join(" ");
+  const ondertekend = g.ondertekenaar ? `${g.ondertekenaar}${g.functie ? ` (${g.functie})` : ""}` : null;
+  const vragen: string[] = [];
+  if (g.overheid) {
+    vragen.push(g.namens
+      ? `Uw brief is ondertekend namens ${g.namens}. Heeft dit bestuursorgaan zelf besloten, of is in mandaat besloten? Op welke datum is het besluit genomen?`
+      : "Welk bestuursorgaan heeft dit besluit genomen, en op welke datum? Uit de brief blijkt niet namens wie is ondertekend.");
+    vragen.push(ondertekend
+      ? `Op grond van welk mandaat- of machtigingsbesluit was ${ondertekend} bevoegd deze brief te ondertekenen? Graag de vindplaats of een kopie van dat besluit.`
+      : "Wie (naam en functie) heeft deze brief ondertekend, en op grond van welk mandaat- of machtigingsbesluit? Graag de vindplaats of een kopie van dat besluit.");
+    vragen.push(g.behandelaar
+      ? `U noemt ${g.behandelaar} als behandelaar. Heeft deze persoon de brief ook opgesteld? Zo niet: wie (naam en functie) heeft de brief opgemaakt?`
+      : "Wie (naam en functie) heeft deze brief opgemaakt?");
+    vragen.push("Op welk wettelijk voorschrift berust de bevoegdheid van het bestuursorgaan om mij dit op te leggen? Graag het artikel en de wet of verordening.");
+  } else {
+    vragen.push(g.opdrachtgever
+      ? `U schrijft namens ${g.opdrachtgever}. Graag een bewijs van uw opdracht of volmacht.`
+      : "Namens wie treedt u op? Graag de naam van uw opdrachtgever en een bewijs van uw opdracht of volmacht.");
+    vragen.push("Op welke overeenkomst, factuur, beslissing of welk vonnis berust de vordering? Graag een kopie.");
+    vragen.push("Wie (naam en functie) heeft deze brief opgemaakt en ondertekend, en is die persoon bevoegd uw organisatie te vertegenwoordigen?");
+    if (g.incasso) vragen.push("Onder welk nummer staat u ingeschreven in het incassoregister van Justis?");
+  }
+  const aan = [g.org, g.afdeling].filter(Boolean).join("\n") || "[Naam van de afzender]";
+  const regels = [
+    "[Je naam / bedrijfsnaam]",
+    "[Adres]",
+    "[Postcode en plaats]",
+    "",
+    aan,
+    "[Adres van de afzender]",
+    "",
+    "[Plaats], [datum]",
+    "",
+    `Betreft: uw brief${verwijzing ? ` ${verwijzing}` : ""}`,
+    "",
+    "Geachte heer, mevrouw,",
+    "",
+    `Ik heb uw brief${verwijzing ? ` ${verwijzing}` : ""} ontvangen. Voordat ik inhoudelijk reageer, wil ik vaststellen wie mij dit oplegt en of die daartoe bevoegd is. Ik verzoek u daarom om de volgende gegevens:`,
+    "",
+    ...vragen.map((v, i) => `${i + 1}. ${v}`),
+    "",
+    g.overheid
+      ? "Ik ga pas op de inhoud in nadat ik deze gegevens heb ontvangen."
+      : "Ik ga pas op de inhoud in nadat ik deze gegevens heb ontvangen. Tot die tijd verzoek ik u de invordering op te schorten en geen kosten in rekening te brengen.",
+  ];
+  if (g.overheid && g.besluit) {
+    regels.push(
+      "",
+      "[Laat deze alinea staan om je bezwaartermijn veilig te stellen:]",
+      "Voor zover uw brief een besluit is, maak ik hierbij pro forma bezwaar. De gronden vul ik aan zodra ik de gevraagde gegevens heb ontvangen. Ik verzoek u mij daarvoor een redelijke termijn te geven.",
+    );
+  }
+  regels.push("", "Met vriendelijke groet,", "", "[Naam]", "[Handtekening]");
+  return { titel: g.overheid ? "Verzoek: wie besliste, wie tekende, met welke bevoegdheid?" : "Verzoek: namens wie en op grond waarvan?", tekst: regels.join("\n") };
+}
+
 // ── Rapport bouwen ───────────────────────────────────────────
 export async function maakRechtenRapport(brieftekst: string): Promise<Rapport> {
   // Tot ca. 50 pagina's: de vaste controles doorzoeken de hele brief.
@@ -553,7 +621,11 @@ export async function maakRechtenRapport(brieftekst: string): Promise<Rapport> {
   return {
     kop: { afzender: org || undefined, kenmerk: kenmerk || undefined, datum: datumTekst || undefined, documenttype: DOCTYPE_TEKST[dt] },
     secties,
-    conceptbrieven: [],
+    conceptbrieven: [verificatiebrief({
+      overheid, org, afdeling, kenmerk, datum: datumTekst, namens,
+      ondertekenaar: ex.ondertekenaar, functie: ex.functie, behandelaar: ex.behandelaar || beh?.m[2].trim() || null,
+      opdrachtgever, besluit: BESLUITACHTIG.includes(dt), incasso: /incasso/i.test(`${org} ${tekst}`),
+    })],
     aiGebruikt: ok,
     besluitcontrole: overheid,
     omvang: { tekens: tekst.length, ingekort: brieftekst.length > MAX_TEKENS },

@@ -299,8 +299,12 @@ export default function RechtenRapportPage() {
 
           {rapport.conceptbrieven.length > 0 && (
             <section className="mb-6">
-              <h3 className="text-base font-bold mb-2" style={{ color: NAVY }}>10. Conceptbrieven</h3>
-              <p className="text-xs text-muted-foreground mb-3">Pas de tekst tussen [haken] aan en lees alles na voordat je verstuurt.</p>
+              <h3 className="text-base font-bold mb-1" style={{ color: NAVY }}>8. Je reactie: vraag eerst wie dit oplegt</h3>
+              <p className="text-xs text-muted-foreground mb-3">
+                Deze brief gaat <strong>niet</strong> in op de inhoud. Hij vraagt alleen wie bevoegd is, wie de brief heeft opgemaakt en
+                ondertekend, en op grond waarvan. Vul de tekst tussen [haken] in en lees alles na. Verstuur aangetekend of per e-mail
+                met ontvangstbevestiging en bewaar een kopie. Let op: termijnen lopen intussen door.
+              </p>
               {rapport.conceptbrieven.map((c) => (
                 <div key={c.titel} className="rr-sectie mb-4 border rounded-md p-3">
                   <div className="flex items-center justify-between gap-2 mb-2">
