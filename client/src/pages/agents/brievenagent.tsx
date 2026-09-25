@@ -193,6 +193,12 @@ export default function BrievenagentPage() {
         {isPending ? "Bezig met analyseren..." : <><Mail size={15} /> Brief analyseren</>}
       </Button>
 
+      {isPending && (
+        <p style={{ marginTop: -20, marginBottom: 28, fontSize: 13, color: "#64748b" }} data-testid="text-analyse-duur">
+          ⏳ Dit kan een paar minuten duren. De analyse draait op onze eigen server — daardoor blijven je gegevens veilig. Je kunt dit venster rustig open laten staan.
+        </p>
+      )}
+
       {/* Result */}
       {result && (
         <div style={{ background: "white", border: `1.5px solid ${ACCENT}30`, borderRadius: 14, padding: 24, marginBottom: 24 }}>

@@ -370,6 +370,11 @@ export default function BriefAnalysePage() {
                 <><ScanText className="h-4 w-4 mr-2" />Analyseer brief & stuur naar AI agent</>
               )}
             </Button>
+            {isBezig && (
+              <p className="mt-3 text-sm text-muted-foreground" data-testid="text-analyse-duur">
+                ⏳ Dit kan een paar minuten duren. De analyse draait op onze eigen server — daardoor blijven je gegevens veilig. Je kunt dit venster rustig open laten staan.
+              </p>
+            )}
           </CardContent>
         </Card>
 
