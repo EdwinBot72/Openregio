@@ -355,7 +355,9 @@ export async function maakRechtenRapport(brieftekst: string): Promise<Rapport> {
   const briefhoofd = detecteerAfzender(tekst);
   const org = briefhoofd || ex.instantie || "";
   const afdeling = ex.afdeling && !org.toLowerCase().includes(ex.afdeling.toLowerCase()) ? ex.afdeling : null;
-  const orgSoort: OrgSoort = org ? soortOrganisatie(`${org} ${afdeling || ""}`) : "onbekend";
+  // Eerst op de naam van de organisatie; de afdeling ("Team Belastingen") alleen als de naam niets zegt.
+  const orgSoort: OrgSoort = !org ? "onbekend"
+    : soortOrganisatie(org) !== "onbekend" ? soortOrganisatie(org) : soortOrganisatie(`${org} ${afdeling || ""}`);
   /** Overheid of (vermoedelijk) overheid: dan gelden bestuursorgaan, mandaat en Awb. */
   const overheid = orgSoort !== "bedrijf";
   if (org) van.push(feit(`Afzender volgens de brief: ${[org, afdeling].filter(Boolean).join(", ").replace(/\.$/, "")}.`, briefhoofd, ex.instantie, afdeling));
@@ -445,12 +447,14 @@ export async function maakRechtenRapport(brieftekst: string): Promise<Rapport> {
   wat.push(soort.bron
     ? { tekst: `Soort brief: ${DOCTYPE_TEKST[dt]}.`, label: "vaststaand", bron: soort.bron }
     : { tekst: `Soort brief: ${DOCTYPE_TEKST[dt]} (niet eenduidig te herkennen — controleer dit).`, label: "te_controleren" });
-  const opdracht = eerste(tekst, /(u\s+dient|dient\s+u|u\s+moet|moet\s+u|wij\s+verzoeken\s+u|verzoeken\s+wij\s+u|wordt\s+u\s+verzocht|u\s+wordt\s+verzocht|wij\s+vorderen|leggen\s+wij\s+u)/i);
+  const opdracht = eerste(tekst, /(u\s+dient|dient\s+u|u\s+bent\s+verplicht|u\s+moet|moet\s+u|wij\s+verzoeken\s+u|verzoeken\s+wij\s+u|wordt\s+u\s+verzocht|u\s+wordt\s+verzocht|wij\s+vorderen|leggen\s+wij\s+u)/i);
   if (opdracht) wat.push({ tekst: "Wat er van je gevraagd wordt (letterlijk).", label: "vaststaand", bron: `“${opdracht.zin}”` });
   else if (ex.verlangd_omschrijving) wat.push(feit(`Wat er van je verlangd wordt: ${ex.verlangd_omschrijving}.`, ex.verlangd_citaat, ex.verlangd_omschrijving));
   for (const z of bedragen) wat.push({ tekst: "Genoemd bedrag.", label: "vaststaand", bron: `“${z}”` });
   if (bedragen.length) vraag("Hoe is het bedrag berekend? Graag een specificatie.");
-  const grondslagen = ex.grondslagen.length ? ex.grondslagen : [...tekst.matchAll(/\b(?:artikel|art\.)\s*\d[\w:.]*(?:\s+lid\s+\d+)?\s+(?:van\s+)?(?:de|het)\s+[^.,;\n]{3,90}?(?=\s+en\s+(?:artikel|art\.)|[.,;\n]|$)/gi)]
+  // AI-grondslagen zonder echte inhoud (bijv. de voorbeeldtekst uit de opdracht) tellen niet mee.
+  const aiGrond = ex.grondslagen.filter((g) => !/zoals genoemd|wet\/artikel/i.test(g.regel) && /\d|wet|verordening|besluit|regeling/i.test(g.regel));
+  const grondslagen = aiGrond.length ? aiGrond : [...tekst.matchAll(/\b(?:artikel|art\.)\s*\d[\w:.]*(?:\s+lid\s+\d+)?\s+(?:van\s+)?(?:de|het)\s+[^.,;\n]{3,90}?(?=\s+en\s+(?:artikel|art\.)|[.,;\n]|$)/gi)]
     .slice(0, 6).map((m) => ({ regel: m[0].replace(/\s+/g, " ").trim(), citaat: m[0] }));
   const grond = grondslagen.map<RapportPunt>((g) => {
     const bron = bronVan(g.citaat, g.regel);
