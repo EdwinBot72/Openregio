@@ -203,9 +203,20 @@ const fmt = (d: Date) => `${d.getDate()} ${MAANDEN[d.getMonth()]} ${d.getFullYea
 
 // ── Vaste herkenning (geen AI): betrouwbaar en direct ────────
 /** De zin waarin een match staat, als letterlijk citaat. */
+const AFKORTING = /(?:\b(?:art|nr|lid|bijv|ca|jl|resp|mr|dr|ir|drs|ing|mw|dhr|t\.a\.v|m\.b\.t|i\.v\.m|o\.a)|\b[A-Za-z])$/i;
+/** Einde van een zin? Niet bij "5.000", "art. 5", "B.V." of "J. de Vries". */
+function isEinde(t: string, i: number): boolean {
+  const c = t[i];
+  if (c === "\n") return true;
+  if (c !== "." && c !== "!" && c !== "?") return false;
+  const volgend = t[i + 1];
+  if (volgend && !/\s/.test(volgend)) return false;
+  return !AFKORTING.test(t.slice(Math.max(0, i - 8), i));
+}
+/** De zin waarin een match staat, als letterlijk citaat. */
 function zinRond(t: string, idx: number, len: number): string {
-  let a = idx; while (a > 0 && !/[.\n]/.test(t[a - 1])) a--;
-  let b = idx + len; while (b < t.length && !/[.\n]/.test(t[b])) b++;
+  let a = idx; while (a > 0 && !isEinde(t, a - 1)) a--;
+  let b = idx + len; while (b < t.length && !isEinde(t, b)) b++;
   const z = t.slice(a, b + 1).replace(/\s+/g, " ").trim();
   return z.length > 240 ? z.slice(0, 237) + "…" : z;
 }
@@ -336,6 +347,8 @@ export async function maakRechtenRapport(brieftekst: string): Promise<Rapport> {
   } else {
     verlangd.push({ tekst: "Niet eenduidig vast te stellen wat er precies van je verlangd wordt. Vraag de instantie dit schriftelijk te verduidelijken.", label: "te_controleren" });
   }
+  const opdracht = eerste(tekst, /(u\s+dient|dient\s+u|u\s+moet|moet\s+u|wij\s+verzoeken\s+u|verzoeken\s+wij\s+u|wordt\s+u\s+verzocht|u\s+wordt\s+verzocht|wij\s+vorderen)/i);
+  if (opdracht) verlangd.push({ tekst: "Letterlijke opdracht in de brief.", label: "vaststaand", bron: `“${opdracht.zin}”` });
   for (const z of detecteerBedragen(tekst)) verlangd.push({ tekst: "Genoemd bedrag.", label: "vaststaand", bron: `“${z}”` });
   secties.push({ titel: "2. Wat er van je verlangd wordt", punten: verlangd });
 
