@@ -1,18 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, FileText, Loader2, Scale, Upload, X, Copy, Check, Printer, RotateCcw } from "lucide-react";
+import { ArrowLeft, FileText, Loader2, Scale, Upload, X, Copy, Check, Printer, RotateCcw, ShieldCheck } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { voerUitViaWachtrij, volgJob, wachtrijTekst, type WachtrijStatus } from "@/lib/wachtrij";
+import { geefBriefDoor } from "@/lib/briefOverdracht";
 
 const JOB_SLEUTEL = "openregio:job:rechten-rapport";
 
 type Label = "vaststaand" | "interpretatie" | "te_controleren";
-interface RapportPunt { tekst: string; label: Label; bron?: string }
+interface RapportPunt { tekst: string; label: Label; bron?: string; wet?: string; term?: string; controleer?: string; ermee?: string }
 interface RapportSectie { titel: string; uitleg?: string; punten: RapportPunt[] }
 interface Conceptbrief { titel: string; tekst: string }
 interface Rapport {
@@ -20,6 +21,7 @@ interface Rapport {
   secties: RapportSectie[];
   conceptbrieven: Conceptbrief[];
   aiGebruikt: boolean;
+  besluitcontrole?: boolean;
 }
 
 const NAVY = "#0b2240";
@@ -65,6 +67,14 @@ export default function RechtenRapportPage() {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [wachtStatus, setWachtStatus] = useState<WachtrijStatus | null>(null);
+  const [toonWet, setToonWet] = useState(false);
+  const [, navigeer] = useLocation();
+  // Doorgeven kan alleen als de brief nog in deze pagina staat (niet na hervatten via de mail-link).
+  const kanDoorgeven = modus === "upload" ? !!bestand : tekst.trim().length >= 40;
+  const naarBesluitControle = () => {
+    if (kanDoorgeven) geefBriefDoor(modus === "upload" ? { bestand: bestand! } : { tekst: tekst.trim() });
+    navigeer("/regels/controle");
+  };
 
   const mut = useMutation({
     mutationFn: async (hervatJobId?: string): Promise<Rapport> => {
@@ -134,8 +144,9 @@ export default function RechtenRapportPage() {
           <h1 className="text-2xl font-bold" style={{ color: NAVY }}>Brief analyseren</h1>
         </div>
         <p className="text-muted-foreground mb-1">
-          Heb je een brief, boete, aanslag of besluit gekregen? OpenRegio stelt vast <strong>van wie de brief komt</strong>, <strong>wie hem heeft
-          opgemaakt en ondertekend</strong>, of die daartoe <strong>bevoegd</strong> is en waarop het is gebaseerd — met bij elk punt de bron.
+          Heb je een brief, boete, aanslag of aanmaning gekregen? OpenRegio stelt vast <strong>wie je tegenpartij is</strong> en of die
+          <strong> bevoegd</strong> is, haalt de <strong>juridische taal</strong> uit je brief en legt per begrip uit wat het betekent,
+          wat je controleert en wat je ermee kunt.
         </p>
         <p className="text-sm mb-6" style={{ color: NAVY }}>
           <strong>Ken je positie. Controleer de bevoegdheid. Gebruik je rechten.</strong>
@@ -216,6 +227,10 @@ export default function RechtenRapportPage() {
               <span className="text-xs text-muted-foreground">Legenda:</span>
               <LabelChip label="vaststaand" /><LabelChip label="interpretatie" /><LabelChip label="te_controleren" />
             </div>
+            <label className="rr-no-print inline-flex items-center gap-2 text-xs text-muted-foreground mt-3 cursor-pointer">
+              <input type="checkbox" checked={toonWet} onChange={(e) => setToonWet(e.target.checked)} data-testid="checkbox-rr-wet" />
+              Toon wetsartikelen
+            </label>
             {!rapport.aiGebruikt && (
               <p className="text-xs mt-3" style={{ color: "#8a5300" }}>
                 Het automatisch uitlezen van je brief lukte niet volledig. Dit overzicht steunt vooral op de vaste controles;
@@ -229,11 +244,23 @@ export default function RechtenRapportPage() {
               <h3 className="text-base font-bold mb-1" style={{ color: NAVY }}>{s.titel}</h3>
               {s.uitleg && <p className="text-xs text-muted-foreground mb-2">{s.uitleg}</p>}
               <ul className="space-y-2.5">
-                {s.punten.map((p, i) => (
+                {s.punten.map((p, i) => p.term ? (
+                  <li key={i} className="rr-sectie text-sm border rounded-md p-3">
+                    <div className="font-semibold mb-1" style={{ color: NAVY }}>{p.term}</div>
+                    {p.bron && <div className="text-xs mb-2 pl-2 border-l-2" style={{ borderColor: LABELS.vaststaand.fg, color: LABELS.vaststaand.fg }}>In je brief: {p.bron}</div>}
+                    <dl className="grid gap-1.5">
+                      <div><dt className="text-xs font-semibold text-muted-foreground">Wat betekent dit</dt><dd>{p.tekst}</dd></div>
+                      {p.controleer && <div><dt className="text-xs font-semibold text-muted-foreground">Wat controleer je</dt><dd>{p.controleer}</dd></div>}
+                      {p.ermee && <div><dt className="text-xs font-semibold text-muted-foreground">Wat kun je ermee</dt><dd>{p.ermee}</dd></div>}
+                    </dl>
+                    {toonWet && p.wet && <div className="text-xs text-muted-foreground mt-1.5">Wet: {p.wet}</div>}
+                  </li>
+                ) : (
                   <li key={i} className="text-sm border-l-2 pl-3" style={{ borderColor: LABELS[p.label].fg }}>
                     <div className="mb-1"><LabelChip label={p.label} /></div>
                     <div>{p.tekst}</div>
-                    {p.bron && <div className="text-xs text-muted-foreground mt-0.5"><em>Bron: {p.bron}</em></div>}
+                    {p.bron && <div className="text-xs text-muted-foreground mt-0.5"><em>In je brief: {p.bron}</em></div>}
+                    {toonWet && p.wet && <div className="text-xs text-muted-foreground mt-0.5">Wet: {p.wet}</div>}
                   </li>
                 ))}
               </ul>
@@ -256,10 +283,22 @@ export default function RechtenRapportPage() {
             </section>
           )}
 
+          {rapport.besluitcontrole && (
+            <div className="rr-no-print rounded-md border p-4 mb-6" style={{ background: "#eaf0fb", borderColor: "#c9d8f2" }}>
+              <p className="text-sm mb-3" style={{ color: NAVY }}>
+                <strong>Is dit een besluit van een overheid?</strong> Laat het dan ook doorlichten: staan bevoegdheid, motivering,
+                grondslag en bezwaarclausule erin zoals de wet dat vraagt?
+              </p>
+              <Button onClick={naarBesluitControle} style={{ background: NAVY }} data-testid="button-rr-besluitcontrole">
+                <ShieldCheck className="h-4 w-4 mr-2" /> Controleer dit besluit
+              </Button>
+            </div>
+          )}
+
           <div className="rounded-md p-3 text-xs mb-6" style={{ background: "#fff7ed", color: "#7c2d12" }}>
             <strong>Controleer dit zelf.</strong> Dit overzicht is een hulpmiddel en geen juridisch advies. Punten met
-            “vaststaand” komen letterlijk uit je brief; “juridische duiding” volgt uit de algemene regels (vooral de Algemene
-            wet bestuursrecht) en kan in jouw situatie anders uitpakken; “nog te controleren” moet je zelf nagaan. OpenRegio
+            “vaststaand” komen letterlijk uit je brief; “juridische duiding” volgt uit de algemene regels (Algemene wet
+            bestuursrecht en Burgerlijk Wetboek) en kan in jouw situatie anders uitpakken; “nog te controleren” moet je zelf nagaan. OpenRegio
             gaat er niet vanuit dat een besluit ongeldig is — en ook niet dat de instantie altijd gelijk heeft. Bij een groot
             belang: raadpleeg een jurist of het Juridisch Loket.
           </div>

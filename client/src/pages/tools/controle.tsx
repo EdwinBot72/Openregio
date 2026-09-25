@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, parseApiError } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { neemBriefOver } from "@/lib/briefOverdracht";
 
 const BLAUW = "#0b2240";
 const GROEN = "#1a6b3a";
@@ -105,8 +106,8 @@ export default function ControlePage() {
   const [wooZichtbaar, setWooZichtbaar] = useState(false);
 
   const controleMutatie = useMutation({
-    mutationFn: async () => {
-      const res = await apiRequest("POST", "/api/brieven/controle", { besluitTekst, context });
+    mutationFn: async (tekstVanBrief?: string) => {
+      const res = await apiRequest("POST", "/api/brieven/controle", { besluitTekst: tekstVanBrief ?? besluitTekst, context });
       return (await res.json()) as ControleRespons;
     },
     onSuccess: (data) => {
@@ -116,6 +117,30 @@ export default function ControlePage() {
     onError: (err) => toast({ title: "Controle mislukt", description: parseApiError(err), variant: "destructive" }),
   });
 
+  // Brief doorgegeven vanuit "Brief analyseren": tekst overnemen (of uit het bestand halen) en meteen controleren.
+  const [overname, setOvername] = useState<"bezig" | "klaar" | null>(null);
+  useEffect(() => {
+    const brief = neemBriefOver();
+    if (!brief) return;
+    const start = (t: string) => { setBesluitTekst(t); setOvername("klaar"); controleMutatie.mutate(t); };
+    if (brief.tekst) { start(brief.tekst); return; }
+    if (!brief.bestand) return;
+    setOvername("bezig");
+    const form = new FormData();
+    form.append("file", brief.bestand);
+    fetch("/api/brieven/tekst", { method: "POST", body: form, credentials: "include" })
+      .then(async (r) => {
+        const j = await r.json().catch(() => ({}));
+        if (!r.ok) throw new Error(j.hint || j.error || "Het bestand kon niet worden gelezen.");
+        start(j.tekst);
+      })
+      .catch((e: Error) => {
+        setOvername(null);
+        toast({ title: "Brief overnemen mislukt", description: e.message, variant: "destructive" });
+      });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const bevindingen = controle?.bevindingen ?? [];
   const aandachtspunten = controle?.aandachtspunten ?? [];
 
@@ -124,8 +149,15 @@ export default function ControlePage() {
   return (
     <div className="max-w-3xl mx-auto px-4 py-8">
       <Link href="/regels/documenten" className="inline-flex items-center text-sm text-muted-foreground hover:underline mb-4">
-        <ArrowLeft className="w-4 h-4 mr-1" /> Terug naar tools
+        <ArrowLeft className="w-4 h-4 mr-1" /> Terug naar Brief analyseren
       </Link>
+      {overname && (
+        <div className="rounded-md border p-3 text-sm mb-4" style={{ background: "#eaf0fb", borderColor: "#c9d8f2", color: "#1d4a8f" }}>
+          {overname === "bezig"
+            ? "Je brief wordt overgenomen uit Brief analyseren…"
+            : "Je brief is overgenomen uit Brief analyseren. Hieronder zie je of het besluit de onderdelen bevat die er volgens de wet in horen."}
+        </div>
+      )}
 
       <div className="flex items-center gap-3 mb-2">
         <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: BLAUW }}>

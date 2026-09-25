@@ -2668,6 +2668,25 @@ Maak een complete, direct bruikbare WOO-brief.`;
     res.json(CONTROLE_PUNTEN.map((p) => ({ titel: p.titel, vraag: p.vraag, grondslag: p.grondslag })));
   });
 
+  // Tekst uit een geüploade brief halen (PDF/Word/foto, met OCR) — voor "Besluit controleren".
+  // Niets wordt opgeslagen; de tekst gaat alleen terug naar de gebruiker zelf.
+  app.post("/api/brieven/tekst", requireBasic, authenticatedAiRateLimit, (req: any, res: any) => {
+    uploadMemory.single("file")(req, res, async (uploadErr: any) => {
+      if (uploadErr || !req.file) {
+        return res.status(400).json({ error: uploadErr?.message || "Geen bestand ontvangen", hint: "Upload een PDF, Word-bestand of foto (max. 10 MB), of plak de tekst." });
+      }
+      try {
+        const { tekstUitBestand } = await import("./rechten/tekst");
+        const tekst = await tekstUitBestand(req.file);
+        if (tekst.length < 40) return res.status(400).json({ error: "Geen leesbare tekst gevonden in het bestand", hint: "Maak een scherpere scan/foto, of plak de tekst." });
+        res.json({ tekst });
+      } catch (err: any) {
+        console.error("[BriefTekst] Error:", err?.message || err);
+        res.status(500).json({ error: "Het bestand kon niet worden gelezen." });
+      }
+    });
+  });
+
   app.post("/api/brieven/controle", requirePro, async (req, res) => {
     try {
       const { besluitTekst } = req.body ?? {};
