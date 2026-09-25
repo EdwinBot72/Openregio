@@ -341,7 +341,7 @@ const IBAN = /\bNL\s?\d{2}\s?[A-Z]{4}(?:\s?\d{4}){2}\s?\d{2}\b/;
 interface BriefGegevens {
   overheid: boolean; org: string; afdeling: string | null; kenmerk: string | null; datum: string | null;
   namens: string | null; ondertekenaar: string | null; functie: string | null; behandelaar: string | null;
-  opdrachtgever: string | null; besluit: boolean; incasso: boolean;
+  opdrachtgever: string | null; incasso: boolean;
 }
 
 /**
@@ -394,13 +394,6 @@ function verificatiebrief(g: BriefGegevens): Conceptbrief {
       ? "Ik ga pas op de inhoud in nadat ik deze gegevens heb ontvangen."
       : "Ik ga pas op de inhoud in nadat ik deze gegevens heb ontvangen. Tot die tijd verzoek ik u de invordering op te schorten en geen kosten in rekening te brengen.",
   ];
-  if (g.overheid && g.besluit) {
-    regels.push(
-      "",
-      "[Laat deze alinea staan om je bezwaartermijn veilig te stellen:]",
-      "Voor zover uw brief een besluit is, maak ik hierbij pro forma bezwaar. De gronden vul ik aan zodra ik de gevraagde gegevens heb ontvangen. Ik verzoek u mij daarvoor een redelijke termijn te geven.",
-    );
-  }
   regels.push("", "Met vriendelijke groet,", "", "[Naam]", "[Handtekening]");
   return { titel: g.overheid ? "Verzoek: wie besliste, wie tekende, met welke bevoegdheid?" : "Verzoek: namens wie en op grond waarvan?", tekst: regels.join("\n") };
 }
@@ -624,7 +617,7 @@ export async function maakRechtenRapport(brieftekst: string): Promise<Rapport> {
     conceptbrieven: [verificatiebrief({
       overheid, org, afdeling, kenmerk, datum: datumTekst, namens,
       ondertekenaar: ex.ondertekenaar, functie: ex.functie, behandelaar: ex.behandelaar || beh?.m[2].trim() || null,
-      opdrachtgever, besluit: BESLUITACHTIG.includes(dt), incasso: /incasso/i.test(`${org} ${tekst}`),
+      opdrachtgever, incasso: /incasso/i.test(`${org} ${tekst}`),
     })],
     aiGebruikt: ok,
     besluitcontrole: overheid,
