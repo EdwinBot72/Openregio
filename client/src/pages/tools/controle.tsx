@@ -124,10 +124,10 @@ export default function ControlePage() {
     if (!brief) return;
     const start = (t: string) => { setBesluitTekst(t); setOvername("klaar"); controleMutatie.mutate(t); };
     if (brief.tekst) { start(brief.tekst); return; }
-    if (!brief.bestand) return;
+    if (!brief.bestanden?.length) return;
     setOvername("bezig");
     const form = new FormData();
-    form.append("file", brief.bestand);
+    for (const b of brief.bestanden) form.append("file", b);
     fetch("/api/brieven/tekst", { method: "POST", body: form, credentials: "include" })
       .then(async (r) => {
         const j = await r.json().catch(() => ({}));

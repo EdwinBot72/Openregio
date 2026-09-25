@@ -19,9 +19,16 @@ export async function tekstUitBestand(file: { buffer: Buffer; mimetype: string; 
     let t = ((await extractTextFromPDF(file.buffer)).text || "").trim();
     if (t.length < 20) {
       const { ocrScannedPdf } = await import("../rag/pdf-ocr");
-      t = await ocrScannedPdf(file.buffer);
+      t = await ocrScannedPdf(file.buffer, 20);
     }
     return t;
   }
   throw Object.assign(new Error("Bestandstype niet ondersteund. Upload een PDF, Word-bestand, foto (JPG/PNG) of plak de tekst."), { status: 400 });
+}
+
+/** Meerdere bestanden (bijv. een foto per pagina) na elkaar uitlezen tot één brieftekst. */
+export async function tekstUitBestanden(files: { buffer: Buffer; mimetype: string; originalname?: string }[]): Promise<string> {
+  const delen: string[] = [];
+  for (const f of files) delen.push(await tekstUitBestand(f));
+  return delen.filter(Boolean).join("\n\n");
 }

@@ -22,7 +22,10 @@ interface Rapport {
   conceptbrieven: Conceptbrief[];
   aiGebruikt: boolean;
   besluitcontrole?: boolean;
+  omvang?: { tekens: number; ingekort: boolean };
 }
+
+const MAX_BESTANDEN = 10;
 
 const NAVY = "#0b2240";
 const LABELS: Record<Label, { tekst: string; bg: string; fg: string }> = {
@@ -60,7 +63,7 @@ export default function RechtenRapportPage() {
   usePageTitle("Brief analyseren — wie legt je dit op, en mag dat?");
   const { toast } = useToast();
   const [modus, setModus] = useState<"upload" | "tekst">("upload");
-  const [bestand, setBestand] = useState<File | null>(null);
+  const [bestanden, setBestanden] = useState<File[]>([]);
   const [tekst, setTekst] = useState("");
   const [rapport, setRapport] = useState<Rapport | null>(null);
   const [seconden, setSeconden] = useState(0);
@@ -70,9 +73,9 @@ export default function RechtenRapportPage() {
   const [toonWet, setToonWet] = useState(false);
   const [, navigeer] = useLocation();
   // Doorgeven kan alleen als de brief nog in deze pagina staat (niet na hervatten via de mail-link).
-  const kanDoorgeven = modus === "upload" ? !!bestand : tekst.trim().length >= 40;
+  const kanDoorgeven = modus === "upload" ? bestanden.length > 0 : tekst.trim().length >= 40;
   const naarBesluitControle = () => {
-    if (kanDoorgeven) geefBriefDoor(modus === "upload" ? { bestand: bestand! } : { tekst: tekst.trim() });
+    if (kanDoorgeven) geefBriefDoor(modus === "upload" ? { bestanden } : { tekst: tekst.trim() });
     navigeer("/regels/controle");
   };
 
@@ -84,7 +87,7 @@ export default function RechtenRapportPage() {
       if (hervatJobId) return volgJob<Rapport>(hervatJobId, opts);
       if (modus === "upload") {
         const form = new FormData();
-        form.append("file", bestand!);
+        for (const b of bestanden) form.append("file", b);
         return voerUitViaWachtrij<Rapport>("/api/rechten-rapport", { method: "POST", body: form }, opts);
       }
       return voerUitViaWachtrij<Rapport>("/api/rechten-rapport", {
@@ -116,8 +119,19 @@ export default function RechtenRapportPage() {
     return () => clearInterval(t);
   }, [mut.isPending]);
 
-  const kan = modus === "upload" ? !!bestand : tekst.trim().length >= 40;
-  const opnieuw = () => { setRapport(null); setBestand(null); setTekst(""); if (fileRef.current) fileRef.current.value = ""; };
+  const kan = modus === "upload" ? bestanden.length > 0 : tekst.trim().length >= 40;
+  const opnieuw = () => { setRapport(null); setBestanden([]); setTekst(""); if (fileRef.current) fileRef.current.value = ""; };
+  const voegToe = (lijst: FileList | null) => {
+    const nieuw = Array.from(lijst ?? []);
+    if (!nieuw.length) return;
+    setBestanden((oud) => {
+      const samen = [...oud, ...nieuw];
+      if (samen.length > MAX_BESTANDEN) toast({ title: `Maximaal ${MAX_BESTANDEN} bestanden`, description: "Heeft je brief meer pagina's? Maak er één PDF van, of plak de tekst." });
+      return samen.slice(0, MAX_BESTANDEN);
+    });
+    setRapport(null);
+    if (fileRef.current) fileRef.current.value = "";
+  };
   const vandaag = new Date().toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" });
 
   return (
@@ -165,25 +179,33 @@ export default function RechtenRapportPage() {
           <CardContent className="pt-6 space-y-4">
             {modus === "upload" ? (
               <>
-                <input ref={fileRef} type="file" accept=".pdf,.docx,.jpg,.jpeg,.png,.txt" className="hidden" id="rr-file"
-                  onChange={(e) => { setBestand(e.target.files?.[0] ?? null); setRapport(null); }} data-testid="input-rr-bestand" />
-                {!bestand ? (
-                  <label htmlFor="rr-file" className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-muted-foreground/25 rounded-lg p-10 cursor-pointer">
+                <input ref={fileRef} type="file" multiple accept=".pdf,.docx,.jpg,.jpeg,.png,.txt" className="hidden" id="rr-file"
+                  onChange={(e) => voegToe(e.target.files)} data-testid="input-rr-bestand" />
+                {bestanden.length > 0 && (
+                  <ul className="space-y-2">
+                    {bestanden.map((b, i) => (
+                      <li key={`${b.name}-${i}`} className="flex items-center gap-3 p-3 rounded-lg border bg-muted/30">
+                        <FileText className="h-5 w-5 shrink-0" style={{ color: NAVY }} />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium truncate">{bestanden.length > 1 ? `${i + 1}. ` : ""}{b.name}</p>
+                          <p className="text-xs text-muted-foreground">{(b.size / 1024).toFixed(0)} KB</p>
+                        </div>
+                        <Button size="icon" variant="ghost" aria-label={`Verwijder ${b.name}`} onClick={() => setBestanden((oud) => oud.filter((_, j) => j !== i))}>
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {bestanden.length < MAX_BESTANDEN && (
+                  <label htmlFor="rr-file" className={`flex flex-col items-center justify-center gap-2 border-2 border-dashed border-muted-foreground/25 rounded-lg cursor-pointer ${bestanden.length ? "p-4" : "p-10"}`}>
                     <Upload className="h-6 w-6 text-muted-foreground" />
-                    <p className="text-sm font-medium">Klik om je brief te kiezen</p>
-                    <p className="text-xs text-muted-foreground">PDF (ook gescand), Word, foto (JPG/PNG) of TXT — max 10 MB</p>
+                    <p className="text-sm font-medium">{bestanden.length ? "Nog een pagina of bijlage toevoegen" : "Klik om je brief te kiezen"}</p>
+                    <p className="text-xs text-muted-foreground text-center">
+                      PDF (ook gescand), Word, foto (JPG/PNG) of TXT — max 10 MB per bestand.
+                      {!bestanden.length && <> Meerdere pagina's als foto? Kies ze allemaal, in de goede volgorde (max {MAX_BESTANDEN}).</>}
+                    </p>
                   </label>
-                ) : (
-                  <div className="flex items-center gap-3 p-4 rounded-lg border bg-muted/30">
-                    <FileText className="h-5 w-5" style={{ color: NAVY }} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">{bestand.name}</p>
-                      <p className="text-xs text-muted-foreground">{(bestand.size / 1024).toFixed(0)} KB</p>
-                    </div>
-                    <Button size="icon" variant="ghost" onClick={() => { setBestand(null); if (fileRef.current) fileRef.current.value = ""; }}>
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
                 )}
               </>
             ) : (
@@ -222,6 +244,9 @@ export default function RechtenRapportPage() {
               {rapport.kop.kenmerk && <span><strong>Kenmerk:</strong> {rapport.kop.kenmerk}</span>}
               {rapport.kop.datum && <span><strong>Datum brief:</strong> {rapport.kop.datum}</span>}
               <span><strong>Opgesteld:</strong> {vandaag}</span>
+              {rapport.omvang && (
+                <span><strong>Doorzocht:</strong> de hele brief, {rapport.omvang.tekens.toLocaleString("nl-NL")} tekens (± {Math.max(1, Math.round(rapport.omvang.tekens / 3000))} {Math.round(rapport.omvang.tekens / 3000) > 1 ? "pagina's" : "pagina"})</span>
+              )}
             </div>
             <div className="flex flex-wrap gap-2 mt-3 items-center">
               <span className="text-xs text-muted-foreground">Legenda:</span>
@@ -231,6 +256,11 @@ export default function RechtenRapportPage() {
               <input type="checkbox" checked={toonWet} onChange={(e) => setToonWet(e.target.checked)} data-testid="checkbox-rr-wet" />
               Toon wetsartikelen
             </label>
+            {rapport.omvang?.ingekort && (
+              <p className="text-xs mt-3" style={{ color: "#8a5300" }}>
+                Je brief is erg lang. Alleen het eerste deel (ca. 50 pagina's) is doorzocht; controleer de rest zelf.
+              </p>
+            )}
             {!rapport.aiGebruikt && (
               <p className="text-xs mt-3" style={{ color: "#8a5300" }}>
                 Het automatisch uitlezen van je brief lukte niet volledig. Dit overzicht steunt vooral op de vaste controles;

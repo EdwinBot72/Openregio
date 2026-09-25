@@ -1,6 +1,6 @@
 // Een brief doorgeven van "Brief analyseren" naar "Besluit controleren".
 // Alleen in het geheugen van dit tabblad — niets wordt opgeslagen.
-export interface DoorgegevenBrief { tekst?: string; bestand?: File }
+export interface DoorgegevenBrief { tekst?: string; bestanden?: File[] }
 
 let bewaard: DoorgegevenBrief | null = null;
 

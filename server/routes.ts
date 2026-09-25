@@ -1676,12 +1676,13 @@ Schrijf in het Nederlands. Toon: helder, gezaghebbend, praktisch. Geef geen juri
   // Accepteert een bestand (multipart 'file') óf geplakte tekst ({ tekst }).
   // Met ?async=1 gaat de aanvraag de wachtrij in (202 + jobId).
   // Verwerking volledig op de eigen server; de brief wordt niet opgeslagen.
-  async function maakRapportVoor(file: any, tekstInvoer: string): Promise<JobResultaat> {
+  async function maakRapportVoor(files: any[], tekstInvoer: string): Promise<JobResultaat> {
+    const file = files.length > 0;
     try {
       let tekst = tekstInvoer;
       if (file) {
-        const { tekstUitBestand } = await import("./rechten/tekst");
-        tekst = await tekstUitBestand(file);
+        const { tekstUitBestanden } = await import("./rechten/tekst");
+        tekst = await tekstUitBestanden(files);
       }
       if (tekst.length < 40) {
         return { status: 400, body: {
@@ -1703,11 +1704,13 @@ Schrijf in het Nederlands. Toon: helder, gezaghebbend, praktisch. Geef geen juri
   }
 
   app.post("/api/rechten-rapport", requireBasic, authenticatedAiRateLimit, (req: any, res: any) => {
-    uploadMemory.single("file")(req, res, async (uploadErr: any) => {
+    // Tot 10 bestanden: bijv. een foto per pagina, of een PDF met bijlagen.
+    uploadMemory.array("file", 10)(req, res, async (uploadErr: any) => {
       if (uploadErr) {
-        return res.status(400).json({ error: uploadErr.message || "Upload mislukt", hint: "Upload een PDF, Word-bestand of foto (max. 10 MB), of plak de tekst." });
+        return res.status(400).json({ error: uploadErr.message || "Upload mislukt", hint: "Upload maximaal 10 bestanden (PDF, Word of foto, elk max. 10 MB), of plak de tekst." });
       }
-      const file = req.file || null;
+      const files: any[] = Array.isArray(req.files) ? req.files : [];
+      const file = files.length > 0;
       const tekst = file ? "" : String(req.body?.tekst ?? req.body?.content ?? "").trim();
       // Te korte geplakte tekst meteen afwijzen — niet eerst laten wachten in de rij.
       if (!file && tekst.length < 40) {
@@ -1718,7 +1721,7 @@ Schrijf in het Nederlands. Toon: helder, gezaghebbend, praktisch. Geef geen juri
           const view = zetInRij({
             user: req.user,
             returnPath: typeof req.query?.returnPath === "string" ? req.query.returnPath : "/regels/documenten",
-            run: () => maakRapportVoor(file, tekst),
+            run: () => maakRapportVoor(files, tekst),
           });
           return res.status(202).json(view);
         } catch (e: any) {
@@ -1726,7 +1729,7 @@ Schrijf in het Nederlands. Toon: helder, gezaghebbend, praktisch. Geef geen juri
           return res.status(500).json({ error: "Kon de analyse niet in de wachtrij zetten." });
         }
       }
-      const r = await maakRapportVoor(file, tekst);
+      const r = await maakRapportVoor(files, tekst);
       res.status(r.status).json(r.body);
     });
   });
@@ -2671,13 +2674,14 @@ Maak een complete, direct bruikbare WOO-brief.`;
   // Tekst uit een geüploade brief halen (PDF/Word/foto, met OCR) — voor "Besluit controleren".
   // Niets wordt opgeslagen; de tekst gaat alleen terug naar de gebruiker zelf.
   app.post("/api/brieven/tekst", requireBasic, authenticatedAiRateLimit, (req: any, res: any) => {
-    uploadMemory.single("file")(req, res, async (uploadErr: any) => {
-      if (uploadErr || !req.file) {
-        return res.status(400).json({ error: uploadErr?.message || "Geen bestand ontvangen", hint: "Upload een PDF, Word-bestand of foto (max. 10 MB), of plak de tekst." });
+    uploadMemory.array("file", 10)(req, res, async (uploadErr: any) => {
+      const files: any[] = Array.isArray(req.files) ? req.files : [];
+      if (uploadErr || !files.length) {
+        return res.status(400).json({ error: uploadErr?.message || "Geen bestand ontvangen", hint: "Upload maximaal 10 bestanden (PDF, Word of foto, elk max. 10 MB), of plak de tekst." });
       }
       try {
-        const { tekstUitBestand } = await import("./rechten/tekst");
-        const tekst = await tekstUitBestand(req.file);
+        const { tekstUitBestanden } = await import("./rechten/tekst");
+        const tekst = await tekstUitBestanden(files);
         if (tekst.length < 40) return res.status(400).json({ error: "Geen leesbare tekst gevonden in het bestand", hint: "Maak een scherpere scan/foto, of plak de tekst." });
         res.json({ tekst });
       } catch (err: any) {
@@ -2699,7 +2703,7 @@ Maak een complete, direct bruikbare WOO-brief.`;
 
       // Deterministische controle: geen AI. Code zoekt in de tekst naar de
       // kenmerken uit de vaste Awb-checklist. Direct klaar, betrouwbaar, privé.
-      const bevindingen = controleerBesluit(String(besluitTekst).slice(0, 20000));
+      const bevindingen = controleerBesluit(String(besluitTekst).slice(0, 150000));
 
       res.json({
         success: true,

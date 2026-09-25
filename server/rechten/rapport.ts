@@ -32,7 +32,11 @@ export interface Rapport {
   aiGebruikt: boolean;
   /** Overheidsbrief: kan ook door "Besluit controleren". */
   besluitcontrole: boolean;
+  /** Hoeveel tekst er is doorzocht, en of de brief langer was dan de grens. */
+  omvang: { tekens: number; ingekort: boolean };
 }
+
+const MAX_TEKENS = 150_000;
 
 // ── AI-extractie ─────────────────────────────────────────────
 const RECHTSVORMEN = ["eenmanszaak", "vof", "bv", "nv", "stichting", "vereniging", "privepersoon", "onbekend"] as const;
@@ -110,6 +114,12 @@ const str = (v: unknown): string | null => {
   return s && s.toLowerCase() !== "null" ? s.slice(0, 400) : null;
 };
 
+/** Lange brief: het lokale model krijgt briefhoofd én slot (ondertekening, "namens"), niet alleen het begin. */
+function kopEnStaart(tekst: string): string {
+  if (tekst.length <= 8000) return tekst;
+  return `${tekst.slice(0, 5000)}\n\n[… middendeel van de brief weggelaten …]\n\n${tekst.slice(-3000)}`;
+}
+
 async function aiExtractie(tekst: string): Promise<{ ex: Extractie; ok: boolean }> {
   if (!process.env.OPENAI_API_KEY) return { ex: LEEG, ok: false };
   try {
@@ -119,7 +129,7 @@ async function aiExtractie(tekst: string): Promise<{ ex: Extractie; ok: boolean 
       model: "gpt-4o-mini",
       messages: [
         { role: "system", content: SYSTEEM },
-        { role: "user", content: userPrompt(tekst.slice(0, 8000)) },
+        { role: "user", content: userPrompt(kopEnStaart(tekst)) },
       ],
       temperature: 0.1,
       max_tokens: 700,
@@ -329,7 +339,8 @@ const IBAN = /\bNL\s?\d{2}\s?[A-Z]{4}(?:\s?\d{4}){2}\s?\d{2}\b/;
 
 // ── Rapport bouwen ───────────────────────────────────────────
 export async function maakRechtenRapport(brieftekst: string): Promise<Rapport> {
-  const tekst = brieftekst.slice(0, 20000);
+  // Tot ca. 50 pagina's: de vaste controles doorzoeken de hele brief.
+  const tekst = brieftekst.slice(0, MAX_TEKENS);
   const [{ ex, ok }, bevindingen] = await Promise.all([aiExtractie(tekst), Promise.resolve(controleerBesluit(tekst))]);
   const echt = makeVerifier(tekst);
   const bronVan = (...kandidaten: (string | null | undefined)[]) => {
@@ -545,5 +556,6 @@ export async function maakRechtenRapport(brieftekst: string): Promise<Rapport> {
     conceptbrieven: [],
     aiGebruikt: ok,
     besluitcontrole: overheid,
+    omvang: { tekens: tekst.length, ingekort: brieftekst.length > MAX_TEKENS },
   };
 }
