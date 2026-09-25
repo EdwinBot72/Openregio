@@ -659,13 +659,16 @@ export async function requirePro(req: Request, res: Response, next: NextFunction
       return next();
     }
 
-    // Check uitsluitend de subscriptions-tabel — niet user.plan
+    // Toegang bij een actief pro/coaching-abonnement, OF als het account zelf op
+    // pro/coaching staat (bijv. door de beheerder toegekend). Veilig: bij opzegging
+    // zet de betaal-webhook het plan terug op 'pending'.
     const subscription = await storage.getActiveSubscription(user.id);
-    if (
-      !subscription ||
-      subscription.status !== "active" ||
-      (subscription.plan !== "pro" && subscription.plan !== "coaching")
-    ) {
+    const subOk =
+      !!subscription &&
+      subscription.status === "active" &&
+      (subscription.plan === "pro" || subscription.plan === "coaching");
+    const planOk = user.plan === "pro" || user.plan === "coaching";
+    if (!subOk && !planOk) {
       return res.status(403).json({
         error: "Geen actief Pro-abonnement gevonden. Activeer je Pro-lidmaatschap om toegang te krijgen.",
         upgradeUrl: "/lidmaatschap",
@@ -690,13 +693,16 @@ export async function requireBasic(req: Request, res: Response, next: NextFuncti
       return next();
     }
 
-    // Check uitsluitend de subscriptions-tabel — niet user.plan
+    // Toegang bij een actief abonnement, OF als het account zelf op een betaald
+    // plan staat (bijv. door de beheerder toegekend). Bij opzegging zet de
+    // betaal-webhook het plan terug op 'pending'.
     const subscription = await storage.getActiveSubscription(user.id);
-    if (
-      !subscription ||
-      subscription.status !== "active" ||
-      !["basic", "pro", "coaching"].includes(subscription.plan)
-    ) {
+    const subOk =
+      !!subscription &&
+      subscription.status === "active" &&
+      ["basic", "pro", "coaching"].includes(subscription.plan);
+    const planOk = ["basic", "pro", "coaching"].includes(user.plan as string);
+    if (!subOk && !planOk) {
       return res.status(403).json({
         error: "Geen actief abonnement gevonden. Activeer je lidmaatschap om toegang te krijgen.",
         upgradeUrl: "/lidmaatschap",
