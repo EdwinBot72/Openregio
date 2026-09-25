@@ -1668,6 +1668,42 @@ Schrijf in het Nederlands. Toon: helder, gezaghebbend, praktisch. Geef geen juri
   });
 
   // Brief Analyse - gestructureerde analyse van overheidsbrieven (Basic+)
+  // "Ken je positie, gebruik je rechten" — rechtenrapport bij een overheidsbrief.
+  // Accepteert een bestand (multipart 'file') óf geplakte tekst ({ tekst }).
+  // Verwerking volledig op de eigen server; de brief wordt niet opgeslagen.
+  app.post("/api/rechten-rapport", requireBasic, authenticatedAiRateLimit, (req: any, res: any) => {
+    uploadMemory.single("file")(req, res, async (uploadErr: any) => {
+      if (uploadErr) {
+        return res.status(400).json({ error: uploadErr.message || "Upload mislukt", hint: "Upload een PDF, Word-bestand of foto (max. 10 MB), of plak de tekst." });
+      }
+      try {
+        let tekst = "";
+        if (req.file) {
+          const { tekstUitBestand } = await import("./rechten/tekst");
+          tekst = await tekstUitBestand(req.file);
+        } else {
+          tekst = String(req.body?.tekst ?? req.body?.content ?? "").trim();
+        }
+        if (tekst.length < 40) {
+          return res.status(400).json({
+            error: req.file ? "Geen leesbare tekst gevonden in het bestand" : "Tekst te kort",
+            hint: req.file
+              ? "Maak een scherpere scan/foto, of plak de tekst van de brief in het tekstvak."
+              : "Plak de volledige tekst van de brief (minimaal een paar zinnen).",
+          });
+        }
+        const { maakRechtenRapport } = await import("./rechten/rapport");
+        const t0 = Date.now();
+        const rapport = await maakRechtenRapport(tekst);
+        console.log(`[RechtenRapport] klaar in ${Math.round((Date.now() - t0) / 1000)}s, chars=${tekst.length}, ai=${rapport.aiGebruikt}`);
+        res.json(rapport);
+      } catch (err: any) {
+        console.error("[RechtenRapport] Error:", err?.message || err);
+        res.status(err?.status || 500).json({ error: err?.status ? err.message : "Het rapport kon niet worden gemaakt. Probeer het opnieuw." });
+      }
+    });
+  });
+
   app.post("/api/brief-analyse", requireBasic, authenticatedAiRateLimit, async (req, res) => {
     try {
       // Accepteer zowel `tekst` als `content` — verschillende pagina's sturen een andere veldnaam.

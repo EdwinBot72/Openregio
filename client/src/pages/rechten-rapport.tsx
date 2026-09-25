@@ -1,0 +1,267 @@
+import { useEffect, useRef, useState } from "react";
+import { Link } from "wouter";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
+import { ArrowLeft, FileText, Loader2, Scale, Upload, X, Copy, Check, Printer, RotateCcw } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
+import { usePageTitle } from "@/hooks/usePageTitle";
+
+type Label = "vaststaand" | "interpretatie" | "te_controleren";
+interface RapportPunt { tekst: string; label: Label; bron?: string }
+interface RapportSectie { titel: string; uitleg?: string; punten: RapportPunt[] }
+interface Conceptbrief { titel: string; tekst: string }
+interface Rapport {
+  kop: { afzender?: string; kenmerk?: string; datum?: string; documenttype: string };
+  secties: RapportSectie[];
+  conceptbrieven: Conceptbrief[];
+  aiGebruikt: boolean;
+}
+
+const NAVY = "#0b2240";
+const LABELS: Record<Label, { tekst: string; bg: string; fg: string }> = {
+  vaststaand: { tekst: "Vaststaand — uit je brief", bg: "#e8f5ee", fg: "#1f6b45" },
+  interpretatie: { tekst: "Juridische duiding", bg: "#eaf0fb", fg: "#1d4a8f" },
+  te_controleren: { tekst: "Nog te controleren", bg: "#fff4e0", fg: "#8a5300" },
+};
+
+function LabelChip({ label }: { label: Label }) {
+  const l = LABELS[label];
+  return (
+    <span style={{ background: l.bg, color: l.fg, fontSize: 11, fontWeight: 700, padding: "2px 8px", borderRadius: 999, whiteSpace: "nowrap" }}>
+      {l.tekst}
+    </span>
+  );
+}
+
+function KopieerKnop({ tekst }: { tekst: string }) {
+  const [ok, setOk] = useState(false);
+  return (
+    <Button
+      size="sm"
+      variant="outline"
+      className="rr-no-print"
+      onClick={async () => {
+        try { await navigator.clipboard.writeText(tekst); setOk(true); setTimeout(() => setOk(false), 1800); } catch { /* ignore */ }
+      }}
+    >
+      {ok ? <><Check className="h-4 w-4 mr-1" />Gekopieerd</> : <><Copy className="h-4 w-4 mr-1" />Kopieer</>}
+    </Button>
+  );
+}
+
+export default function RechtenRapportPage() {
+  usePageTitle("Brief analyseren — ken je positie, gebruik je rechten");
+  const { toast } = useToast();
+  const [modus, setModus] = useState<"upload" | "tekst">("upload");
+  const [bestand, setBestand] = useState<File | null>(null);
+  const [tekst, setTekst] = useState("");
+  const [rapport, setRapport] = useState<Rapport | null>(null);
+  const [seconden, setSeconden] = useState(0);
+  const fileRef = useRef<HTMLInputElement>(null);
+
+  const mut = useMutation({
+    mutationFn: async (): Promise<Rapport> => {
+      setRapport(null);
+      let res: Response;
+      if (modus === "upload") {
+        const form = new FormData();
+        form.append("file", bestand!);
+        res = await fetch("/api/rechten-rapport", { method: "POST", body: form, credentials: "include" });
+      } else {
+        res = await fetch("/api/rechten-rapport", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ tekst: tekst.trim() }),
+        });
+      }
+      const data = await res.json().catch(() => ({} as any));
+      if (!res.ok) throw new Error([data?.error, data?.hint].filter(Boolean).join(" — ") || `Het rapport kon niet worden gemaakt (${res.status})`);
+      return data as Rapport;
+    },
+    onSuccess: (r) => {
+      setRapport(r);
+      setTimeout(() => document.getElementById("rr-rapport")?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+    },
+    onError: (e: Error) => toast({ title: "Rapport maken mislukt", description: e.message, variant: "destructive" }),
+  });
+
+  useEffect(() => {
+    if (!mut.isPending) { setSeconden(0); return; }
+    const t = setInterval(() => setSeconden((s) => s + 1), 1000);
+    return () => clearInterval(t);
+  }, [mut.isPending]);
+
+  const kan = modus === "upload" ? !!bestand : tekst.trim().length >= 40;
+  const opnieuw = () => { setRapport(null); setBestand(null); setTekst(""); if (fileRef.current) fileRef.current.value = ""; };
+  const vandaag = new Date().toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" });
+
+  return (
+    <div className="max-w-3xl mx-auto px-4 py-8">
+      <style>{`
+        @media print {
+          body * { visibility: hidden !important; }
+          .rr-print, .rr-print * { visibility: visible !important; }
+          .rr-print { position: absolute; left: 0; top: 0; width: 100%; padding: 0 10mm; }
+          .rr-no-print { display: none !important; }
+          .rr-sectie { break-inside: avoid; }
+        }
+      `}</style>
+
+      <div className="rr-no-print">
+        <Link href="/regels" className="inline-flex items-center text-sm text-muted-foreground hover:underline mb-4">
+          <ArrowLeft className="w-4 h-4 mr-1" /> Grip op Regels
+        </Link>
+
+        <div className="flex items-center gap-3 mb-2">
+          <div className="w-10 h-10 rounded-lg flex items-center justify-center" style={{ background: NAVY }}>
+            <Scale className="w-5 h-5 text-white" />
+          </div>
+          <h1 className="text-2xl font-bold" style={{ color: NAVY }}>Brief analyseren</h1>
+        </div>
+        <p className="text-muted-foreground mb-1">
+          Upload een brief, besluit of aanslag van een overheidsinstantie. Je krijgt een overzicht van <strong>je juridische positie</strong>,
+          wat er van je verlangd wordt, wie bevoegd is, <strong>welke rechten je hebt</strong> en wat je praktisch kunt doen — met bij elk punt de bron.
+        </p>
+        <p className="text-sm mb-6" style={{ color: NAVY }}>
+          <strong>Ken je positie. Controleer de bevoegdheid. Gebruik je rechten.</strong>
+        </p>
+
+        <div className="flex gap-2 mb-4">
+          <Button variant={modus === "upload" ? "default" : "outline"} size="sm" onClick={() => setModus("upload")} data-testid="button-modus-upload">
+            <Upload className="h-4 w-4 mr-2" /> Bestand uploaden
+          </Button>
+          <Button variant={modus === "tekst" ? "default" : "outline"} size="sm" onClick={() => setModus("tekst")} data-testid="button-modus-tekst">
+            <FileText className="h-4 w-4 mr-2" /> Tekst plakken
+          </Button>
+        </div>
+
+        <Card className="mb-6">
+          <CardContent className="pt-6 space-y-4">
+            {modus === "upload" ? (
+              <>
+                <input ref={fileRef} type="file" accept=".pdf,.docx,.jpg,.jpeg,.png,.txt" className="hidden" id="rr-file"
+                  onChange={(e) => { setBestand(e.target.files?.[0] ?? null); setRapport(null); }} data-testid="input-rr-bestand" />
+                {!bestand ? (
+                  <label htmlFor="rr-file" className="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-muted-foreground/25 rounded-lg p-10 cursor-pointer">
+                    <Upload className="h-6 w-6 text-muted-foreground" />
+                    <p className="text-sm font-medium">Klik om je brief te kiezen</p>
+                    <p className="text-xs text-muted-foreground">PDF (ook gescand), Word, foto (JPG/PNG) of TXT — max 10 MB</p>
+                  </label>
+                ) : (
+                  <div className="flex items-center gap-3 p-4 rounded-lg border bg-muted/30">
+                    <FileText className="h-5 w-5" style={{ color: NAVY }} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium truncate">{bestand.name}</p>
+                      <p className="text-xs text-muted-foreground">{(bestand.size / 1024).toFixed(0)} KB</p>
+                    </div>
+                    <Button size="icon" variant="ghost" onClick={() => { setBestand(null); if (fileRef.current) fileRef.current.value = ""; }}>
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <Textarea value={tekst} onChange={(e) => setTekst(e.target.value)} className="min-h-48 text-sm"
+                placeholder="Plak hier de volledige tekst van de brief of het besluit..." data-testid="textarea-rr-tekst" />
+            )}
+
+            <div className="rounded-md border p-2.5 text-xs" style={{ background: "#f0f7f4", borderColor: "#cfe8dd", color: "#2f5d4b" }}>
+              🔒 <strong>Veilig.</strong> Je brief wordt verwerkt op onze eigen server met een lokale AI. De tekst gaat niet naar externe partijen
+              (zoals OpenAI of Google) en wordt niet opgeslagen. Je hoeft persoonlijke gegevens dus niet weg te lakken.
+            </div>
+
+            <Button onClick={() => mut.mutate()} disabled={!kan || mut.isPending} style={{ background: NAVY }} data-testid="button-rr-maak">
+              {mut.isPending
+                ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Bezig… ({seconden}s)</>
+                : <><Scale className="h-4 w-4 mr-2" />Maak mijn rechtenoverzicht</>}
+            </Button>
+            {mut.isPending && (
+              <p className="text-sm text-muted-foreground" data-testid="text-analyse-duur">
+                ⏳ Dit kan een paar minuten duren. De analyse draait op onze eigen server — daardoor blijven je gegevens veilig.
+                Je kunt dit venster rustig open laten staan.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      {rapport && (
+        <div id="rr-rapport" className="rr-print">
+          <div className="border-b pb-4 mb-5">
+            <p className="text-xs uppercase tracking-wider text-muted-foreground">OpenRegio — positie &amp; rechten</p>
+            <h2 className="text-xl font-bold mt-1" style={{ color: NAVY }}>Je positie en je rechten bij deze brief</h2>
+            <div className="text-sm text-muted-foreground mt-2 grid gap-0.5">
+              <span><strong>Soort:</strong> {rapport.kop.documenttype}</span>
+              {rapport.kop.afzender && <span><strong>Afzender:</strong> {rapport.kop.afzender}</span>}
+              {rapport.kop.kenmerk && <span><strong>Kenmerk:</strong> {rapport.kop.kenmerk}</span>}
+              {rapport.kop.datum && <span><strong>Datum brief:</strong> {rapport.kop.datum}</span>}
+              <span><strong>Opgesteld:</strong> {vandaag}</span>
+            </div>
+            <div className="flex flex-wrap gap-2 mt-3 items-center">
+              <span className="text-xs text-muted-foreground">Legenda:</span>
+              <LabelChip label="vaststaand" /><LabelChip label="interpretatie" /><LabelChip label="te_controleren" />
+            </div>
+            {!rapport.aiGebruikt && (
+              <p className="text-xs mt-3" style={{ color: "#8a5300" }}>
+                Het automatisch uitlezen van je brief lukte niet volledig. Dit overzicht steunt vooral op de vaste controles;
+                de punten over je positie kunnen onvolledig zijn.
+              </p>
+            )}
+          </div>
+
+          {rapport.secties.map((s) => (
+            <section key={s.titel} className="rr-sectie mb-6">
+              <h3 className="text-base font-bold mb-1" style={{ color: NAVY }}>{s.titel}</h3>
+              {s.uitleg && <p className="text-xs text-muted-foreground mb-2">{s.uitleg}</p>}
+              <ul className="space-y-2.5">
+                {s.punten.map((p, i) => (
+                  <li key={i} className="text-sm border-l-2 pl-3" style={{ borderColor: LABELS[p.label].fg }}>
+                    <div className="mb-1"><LabelChip label={p.label} /></div>
+                    <div>{p.tekst}</div>
+                    {p.bron && <div className="text-xs text-muted-foreground mt-0.5"><em>Bron: {p.bron}</em></div>}
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+
+          {rapport.conceptbrieven.length > 0 && (
+            <section className="mb-6">
+              <h3 className="text-base font-bold mb-2" style={{ color: NAVY }}>10. Conceptbrieven</h3>
+              <p className="text-xs text-muted-foreground mb-3">Pas de tekst tussen [haken] aan en lees alles na voordat je verstuurt.</p>
+              {rapport.conceptbrieven.map((c) => (
+                <div key={c.titel} className="rr-sectie mb-4 border rounded-md p-3">
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <strong className="text-sm">{c.titel}</strong>
+                    <KopieerKnop tekst={c.tekst} />
+                  </div>
+                  <pre className="whitespace-pre-wrap text-xs font-sans">{c.tekst}</pre>
+                </div>
+              ))}
+            </section>
+          )}
+
+          <div className="rounded-md p-3 text-xs mb-6" style={{ background: "#fff7ed", color: "#7c2d12" }}>
+            <strong>Controleer dit zelf.</strong> Dit overzicht is een hulpmiddel en geen juridisch advies. Punten met
+            “vaststaand” komen letterlijk uit je brief; “juridische duiding” volgt uit de algemene regels (vooral de Algemene
+            wet bestuursrecht) en kan in jouw situatie anders uitpakken; “nog te controleren” moet je zelf nagaan. OpenRegio
+            gaat er niet vanuit dat een besluit ongeldig is — en ook niet dat de instantie altijd gelijk heeft. Bij een groot
+            belang: raadpleeg een jurist of het Juridisch Loket.
+          </div>
+
+          <div className="flex gap-2 rr-no-print">
+            <Button onClick={() => window.print()} style={{ background: NAVY }} data-testid="button-rr-print">
+              <Printer className="h-4 w-4 mr-2" /> Download als PDF
+            </Button>
+            <Button variant="outline" onClick={opnieuw}>
+              <RotateCcw className="h-4 w-4 mr-2" /> Nieuwe brief
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
