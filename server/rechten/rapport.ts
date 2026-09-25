@@ -9,7 +9,7 @@
 //    (alleen artikelen waarvan de betekenis vaststaat).
 //  • De Awb-controles komen uit controleerBesluit() (deterministisch, geen AI).
 // ─────────────────────────────────────────────────────────────
-import { controleerBesluit, stelWooVerzoekOp, type Bevinding } from "../brieftypes";
+import { controleerBesluit, type Bevinding } from "../brieftypes";
 
 export type Label = "vaststaand" | "interpretatie" | "te_controleren";
 export interface RapportPunt { tekst: string; label: Label; bron?: string }
@@ -39,6 +39,7 @@ interface Extractie {
   bestuurder_persoonlijk: boolean;
   hoedanigheid: Hd; hoedanigheid_citaat: string | null;
   instantie: string | null; afdeling: string | null; ondertekenaar: string | null; functie: string | null; namens: string | null; afzender_citaat: string | null;
+  behandelaar: string | null; in_opdracht_van: string | null;
   documenttype: Dt; documenttype_citaat: string | null;
   verlangd_soort: Vl; verlangd_omschrijving: string | null; bedrag: string | null; verlangd_citaat: string | null;
   termijnen: { omschrijving: string; citaat: string | null }[];
@@ -50,6 +51,7 @@ const LEEG: Extractie = {
   geadresseerde: null, geadresseerde_citaat: null, rechtsvorm: "onbekend", rechtsvorm_citaat: null,
   bestuurder_persoonlijk: false, hoedanigheid: "onbekend", hoedanigheid_citaat: null,
   instantie: null, afdeling: null, ondertekenaar: null, functie: null, namens: null, afzender_citaat: null,
+  behandelaar: null, in_opdracht_van: null,
   documenttype: "overig", documenttype_citaat: null,
   verlangd_soort: "overig", verlangd_omschrijving: null, bedrag: null, verlangd_citaat: null,
   termijnen: [], grondslagen: [], kenmerk: null, datum_brief: null,
@@ -72,6 +74,8 @@ function userPrompt(tekst: string): string {
  "ondertekenaar": naam van wie ondertekent of null,
  "functie": functie van de ondertekenaar of null,
  "namens": namens wie getekend is (bijv. "namens burgemeester en wethouders") of null,
+ "in_opdracht_van": als de afzender (bijv. een bedrijf of incassobureau) schrijft in opdracht van of namens een andere organisatie: die organisatie, anders null,
+ "behandelaar": naam van de behandelaar/contactpersoon als die genoemd wordt (bijv. bij "behandeld door" of "contactpersoon") of null,
  "verlangd_soort": een van ${VERLANGD.map((x) => `"${x}"`).join(", ")},
  "verlangd_omschrijving": korte omschrijving van wat er van de ondernemer verlangd wordt of null,
  "verlangd_citaat": letterlijk citaat daarvan of null,
@@ -106,7 +110,7 @@ async function aiExtractie(tekst: string): Promise<{ ex: Extractie; ok: boolean 
         { role: "user", content: userPrompt(tekst.slice(0, 8000)) },
       ],
       temperature: 0.1,
-      max_tokens: 650,
+      max_tokens: 700,
     });
     const raw = completion.choices[0]?.message?.content || "";
     const m = raw.match(/\{[\s\S]*\}/);
@@ -122,6 +126,7 @@ async function aiExtractie(tekst: string): Promise<{ ex: Extractie; ok: boolean 
         hoedanigheid: kies(j.hoedanigheid, HOEDANIGHEDEN, "onbekend"),
         instantie: str(j.instantie), afdeling: str(j.afdeling), ondertekenaar: str(j.ondertekenaar),
         functie: str(j.functie), namens: str(j.namens),
+        behandelaar: str(j.behandelaar), in_opdracht_van: str(j.in_opdracht_van),
         verlangd_soort: kies(j.verlangd_soort, VERLANGD, "overig"), verlangd_omschrijving: str(j.verlangd_omschrijving),
         verlangd_citaat: str(j.verlangd_citaat),
         grondslagen: lijst(j.grondslagen).map((g: any) => ({ regel: str(g?.regel) || "", citaat: str(g?.citaat) })).filter((g) => g.regel).slice(0, 8),
@@ -289,6 +294,33 @@ function detecteerRechtsvorm(t: string): { rv: Rv; bron?: string; zeker: boolean
   return { rv: "onbekend", zeker: false };
 }
 
+// ── Wie zit erachter? ────────────────────────────────────────
+type OrgSoort = "gemeente" | "waterschap" | "provincie" | "rijk" | "uitvoerder" | "bedrijf" | "onbekend";
+function soortOrganisatie(naam: string): OrgSoort {
+  const n = naam.toLowerCase();
+  if (/(incasso|deurwaarder|advocat|juridisch adviesbureau|\bb\.\s?v\.|\bbv\b|\bn\.v\.|intrum|flanderijn)/i.test(naam)) return "bedrijf";
+  if (/(waternet|belastingsamenwerking|belastingen|gblt|bsgw|svhw|cocensus|bghu|omgevingsdienst|\brud\b|uitvoeringsdienst|veiligheidsregio|\bggd\b|werkbedrijf)/.test(n)) return "uitvoerder";
+  if (/(gemeente|college van burgemeester|burgemeester)/.test(n)) return "gemeente";
+  if (/(waterschap|hoogheemraadschap|wetterskip)/.test(n)) return "waterschap";
+  if (/(provincie|gedeputeerde staten)/.test(n)) return "provincie";
+  if (/(belastingdienst|ministerie|rijksdienst|\brvo\b|\buwv\b|\bcjib\b|\bduo\b|\bsvb\b|\bnvwa\b|inspectie|douane|toeslagen|kamer van koophandel|politie|openbaar ministerie)/.test(n)) return "rijk";
+  return "onbekend";
+}
+
+const ORG_DUIDING: Record<OrgSoort, { tekst: string; label: Label }> = {
+  gemeente: { tekst: "De brief komt van een gemeente: een overheidsorgaan. Een gemeente mag je alleen iets opleggen als een wet of verordening haar die bevoegdheid geeft én het juiste bestuursorgaan (meestal burgemeester en wethouders, of de burgemeester) het besluit neemt.", label: "interpretatie" },
+  waterschap: { tekst: "De brief komt van een waterschap: een overheidsorgaan. Ook een waterschap mag alleen iets opleggen op grond van een wet of verordening, via het juiste bestuursorgaan of een daartoe aangewezen ambtenaar.", label: "interpretatie" },
+  provincie: { tekst: "De brief komt van een provincie: een overheidsorgaan. Besluiten worden meestal genomen door gedeputeerde staten; controleer namens wie is getekend.", label: "interpretatie" },
+  rijk: { tekst: "De brief komt van de rijksoverheid of een zelfstandig bestuursorgaan. Ook dan moet duidelijk zijn welk orgaan besluit en op welke wettelijke grondslag.", label: "interpretatie" },
+  uitvoerder: { tekst: "Deze organisatie voert taken uit namens één of meer overheden (bijvoorbeeld belastingheffing, inning of handhaving). Ze beslist dus niet op eigen gezag: controleer namens welke overheid zij handelt en op grond waarvan (een samenwerkingsregeling, mandaat of opdracht).", label: "interpretatie" },
+  bedrijf: { tekst: "Dit lijkt een bedrijf (bijv. incassobureau, deurwaarderskantoor of advocatenkantoor), geen overheidsorgaan. Een incassobureau legt zelf geen boete op, maar int namens een ander. Een gerechtsdeurwaarder mag alleen beslag leggen met een executoriale titel (zoals een vonnis of dwangbevel) of met toestemming van de rechter. Vraag namens wie het bedrijf handelt en op welk besluit, vonnis of welke overeenkomst de vordering berust.", label: "interpretatie" },
+  onbekend: { tekst: "Uit de brief is niet duidelijk welke organisatie hem stuurt. Stel dat eerst vast voordat je betaalt of reageert.", label: "te_controleren" },
+};
+
+const NIET_ONDERTEKEND = /(niet\s+(persoonlijk\s+)?ondertekend|zonder\s+handtekening|geldig\s+zonder\s+handtekening|automatisch\s+(aangemaakt|verzonden|gegenereerd|verwerkt)|(computer|systeem)\s*(gegenereerd|aangemaakt))/i;
+const BEHANDELAAR = /(behandeld\s+door|behandelaar|contactpersoon|inlichtingen\s+bij|opgemaakt\s+door|zaakbehandelaar)\s*:?\s*([^\n]{3,70})/i;
+const IBAN = /\bNL\s?\d{2}\s?[A-Z]{4}(?:\s?\d{4}){2}\s?\d{2}\b/;
+
 // ── Rapport bouwen ───────────────────────────────────────────
 export async function maakRechtenRapport(brieftekst: string): Promise<Rapport> {
   const tekst = brieftekst.slice(0, 20000);
@@ -308,159 +340,156 @@ export async function maakRechtenRapport(brieftekst: string): Promise<Rapport> {
   const kenmerk = detecteerKenmerk(tekst);
   const datumTekst = detecteerDatum(tekst);
   const rechtsvorm = detecteerRechtsvorm(tekst);
+  const bedragen = detecteerBedragen(tekst);
   const secties: RapportSectie[] = [];
+  const vragen: RapportPunt[] = [];
+  const vraag = (t: string) => vragen.push({ tekst: t, label: "te_controleren" });
 
-  // 1. Juridische positie
+  // 1. Van wie komt deze brief?
+  const van: RapportPunt[] = [];
+  const org = ex.instantie || "";
+  const orgSoort: OrgSoort = org ? soortOrganisatie(`${org} ${ex.afdeling || ""}`) : "onbekend";
+  if (org) van.push(feit(`Afzender volgens de brief: ${[ex.instantie, ex.afdeling].filter(Boolean).join(", ")}.`, ex.instantie, ex.afdeling));
+  van.push(ORG_DUIDING[orgSoort]);
+  if (ex.in_opdracht_van) {
+    van.push(feit(`De afzender schrijft in opdracht van / namens: ${ex.in_opdracht_van}.`, ex.in_opdracht_van));
+    vraag(`Kan ${org || "de afzender"} de opdracht of volmacht van ${ex.in_opdracht_van} laten zien?`);
+  } else if (orgSoort === "uitvoerder" || orgSoort === "bedrijf") {
+    van.push({ tekst: "De brief vermeldt niet duidelijk namens welke overheid of opdrachtgever de afzender handelt.", label: "te_controleren" });
+    vraag("Namens welke overheid of opdrachtgever handelt u, en op grond waarvan (opdracht, volmacht, samenwerkingsregeling)?");
+  }
+  if (orgSoort === "bedrijf" && bedragen.length) vraag("Op welk besluit, vonnis, dwangbevel of welke overeenkomst is deze vordering gebaseerd? Graag een kopie.");
+  if (orgSoort === "onbekend") vraag("Welke organisatie heeft deze brief verstuurd, en in welke hoedanigheid?");
+  secties.push({ titel: "1. Van wie komt deze brief?", uitleg: "Is het echt een overheid — of een partij die namens een ander schrijft?", punten: van });
+
+  // 2. Wie besliste, wie ondertekende, wie maakte hem op?
+  const wie: RapportPunt[] = [];
+  if (ex.namens) {
+    wie.push(feit(`Verantwoordelijk (getekend namens): ${ex.namens}.`, ex.namens));
+    wie.push({ tekst: "“Namens” betekent: de ondertekenaar beslist niet op eigen gezag, maar in mandaat voor dit bestuursorgaan. Een algemeen mandaat moet schriftelijk zijn verleend; je mag vragen welk mandaatbesluit het is. Mandaatbesluiten worden vaak gepubliceerd op officielebekendmakingen.nl.", label: "interpretatie", bron: "art. 10:5 en 10:10 Awb" });
+    vraag(`Op grond van welk mandaatbesluit is namens ${ex.namens} ondertekend? Graag de vindplaats of een kopie.`);
+  } else {
+    wie.push({ tekst: "De brief vermeldt niet namens welk bestuursorgaan is besloten. Bij een besluit dat een medewerker in mandaat neemt, moet dat wel vermeld staan.", label: "te_controleren", bron: "art. 10:10 Awb" });
+    vraag("Welk bestuursorgaan heeft dit besluit genomen?");
+  }
+  const zonderHandtekening = eerste(tekst, NIET_ONDERTEKEND);
+  if (ex.ondertekenaar) {
+    wie.push(feit(`Ondertekend door: ${[ex.ondertekenaar, ex.functie].filter(Boolean).join(", ")}.`, ex.ondertekenaar, ex.functie));
+  } else if (ex.functie) {
+    wie.push(feit(`Er staat alleen een functie onder de brief: ${ex.functie} — geen naam.`, ex.functie));
+    vraag("Wie (naam en functie) heeft deze brief ondertekend?");
+  } else if (!zonderHandtekening) {
+    wie.push({ tekst: "Er staat geen naam van een ondertekenaar onder de brief.", label: "te_controleren" });
+    vraag("Wie (naam en functie) heeft dit besluit genomen en ondertekend?");
+  }
+  if (zonderHandtekening) {
+    wie.push({ tekst: "De brief is niet persoonlijk ondertekend / automatisch aangemaakt.", label: "vaststaand", bron: `“${zonderHandtekening.zin}”` });
+    wie.push({ tekst: "Een brief zonder handtekening is niet automatisch ongeldig — automatisch aangemaakte besluiten komen veel voor. Er moet wél een verantwoordelijk bestuursorgaan achter staan, en je mag vragen wie dat is.", label: "interpretatie" });
+  }
+  const beh = eerste(tekst, BEHANDELAAR);
+  if (ex.behandelaar || beh) {
+    wie.push(ex.behandelaar
+      ? feit(`Opgesteld / behandeld door: ${ex.behandelaar}.`, ex.behandelaar, beh?.zin)
+      : { tekst: "Behandelaar of contactpersoon genoemd in de brief.", label: "vaststaand", bron: `“${beh!.zin}”` });
+  } else {
+    wie.push({ tekst: "Niet vermeld wie de brief heeft opgesteld of behandelt.", label: "te_controleren" });
+    vraag("Welke medewerker heeft deze brief opgesteld en behandelt het dossier?");
+  }
+  for (const b of bevindingen.filter((b) => /bevoeg|mandaat|namens/i.test(`${b.titel} ${b.grondslag}`))) {
+    wie.push({ tekst: `${b.titel}: ${b.toelichting}`, label: statusNaarLabel(b.status), bron: b.bewijs ? `“${b.bewijs}” — ${b.grondslag}` : b.grondslag });
+  }
+  secties.push({ titel: "2. Wie besliste, wie ondertekende, wie maakte hem op?", uitleg: "Drie verschillende rollen: het bestuursorgaan dat beslist, de persoon die (in mandaat) ondertekent, en de medewerker die de brief opstelt.", punten: wie });
+
+  // 3. Is de brief echt?
+  const echtPunten: RapportPunt[] = [
+    { tekst: "Twijfel je of de brief echt is? Zoek zelf het telefoonnummer of e-mailadres op de officiële website van de instantie — niet het nummer uit de brief — en vraag of de brief van hen komt.", label: "interpretatie" },
+  ];
+  const iban = eerste(tekst, IBAN);
+  if (iban) {
+    echtPunten.push({ tekst: `De brief vraagt betaling op rekeningnummer ${iban.m[0]}. Controleer vóór je betaalt dat dit rekeningnummer van de instantie zelf is (bijv. via de officiële website of eerdere, zekere correspondentie).`, label: "te_controleren", bron: `“${iban.zin}”` });
+  }
+  secties.push({ titel: "3. Is de brief echt?", punten: echtPunten });
+
+  // 4. Wat leggen ze je op en waarop baseren ze het?
+  const wat: RapportPunt[] = [];
+  wat.push(soort.bron
+    ? { tekst: `Soort brief: ${DOCTYPE_TEKST[dt]}.`, label: "vaststaand", bron: soort.bron }
+    : { tekst: `Soort brief: ${DOCTYPE_TEKST[dt]} (niet eenduidig te herkennen — controleer dit).`, label: "te_controleren" });
+  const opdracht = eerste(tekst, /(u\s+dient|dient\s+u|u\s+moet|moet\s+u|wij\s+verzoeken\s+u|verzoeken\s+wij\s+u|wordt\s+u\s+verzocht|u\s+wordt\s+verzocht|wij\s+vorderen|leggen\s+wij\s+u)/i);
+  if (opdracht) wat.push({ tekst: "Wat er van je gevraagd wordt (letterlijk).", label: "vaststaand", bron: `“${opdracht.zin}”` });
+  else if (ex.verlangd_omschrijving) wat.push(feit(`Wat er van je verlangd wordt: ${ex.verlangd_omschrijving}.`, ex.verlangd_citaat, ex.verlangd_omschrijving));
+  for (const z of bedragen) wat.push({ tekst: "Genoemd bedrag.", label: "vaststaand", bron: `“${z}”` });
+  if (bedragen.length) vraag("Hoe is het bedrag berekend? Graag een specificatie.");
+  const grond = ex.grondslagen.map<RapportPunt>((g) => {
+    const bron = bronVan(g.citaat, g.regel);
+    return bron
+      ? { tekst: `Grondslag volgens de brief: ${g.regel}. Of die regel dit echt toestaat, kun je nalezen op wetten.overheid.nl.`, label: "vaststaand", bron }
+      : { tekst: `Mogelijke grondslag: ${g.regel} (niet letterlijk teruggevonden in je brief — controleer dit).`, label: "te_controleren" };
+  });
+  if (grond.length) wat.push(...grond);
+  else {
+    wat.push({ tekst: "De brief noemt geen duidelijke wettelijke grondslag. Een besluit moet vermelden op welk wettelijk voorschrift het berust (zo mogelijk) en deugdelijk gemotiveerd zijn.", label: "te_controleren", bron: "art. 3:46 en 3:47 Awb" });
+    vraag("Op welk wetsartikel of welke verordening baseert u dit?");
+  }
+  if (["boete", "last_onder_dwangsom", "bestuursdwang"].includes(dt)) vraag("Welke feiten liggen hieraan ten grondslag (bijv. het rapport van de controle, foto's of metingen)? Graag een kopie.");
+  secties.push({ titel: "4. Wat leggen ze je op — en waarop baseren ze het?", punten: wat });
+
+  // 5. Aan wie is de brief gericht — klopt dat?
   const positie: RapportPunt[] = [];
   if (ex.geadresseerde) positie.push(feit(`De brief is gericht aan: ${ex.geadresseerde}.`, ex.geadresseerde_citaat, ex.geadresseerde));
   else positie.push({ tekst: "Niet duidelijk aan wie de brief precies gericht is. Controleer naam en rechtsvorm in de adressering.", label: "te_controleren" });
   if (rechtsvorm.rv !== "onbekend") {
-    positie.push({
-      tekst: rechtsvorm.zeker ? `Rechtsvorm volgens de adressering: ${rechtsvorm.rv}.` : `Waarschijnlijk een ${rechtsvorm.rv} (afgeleid uit de adressering — controleer dit).`,
-      label: rechtsvorm.zeker ? "vaststaand" : "interpretatie",
-      bron: rechtsvorm.bron,
-    });
+    positie.push({ tekst: rechtsvorm.zeker ? `Rechtsvorm volgens de adressering: ${rechtsvorm.rv}.` : `Waarschijnlijk een ${rechtsvorm.rv} (afgeleid uit de adressering — controleer dit).`, label: rechtsvorm.zeker ? "vaststaand" : "interpretatie", bron: rechtsvorm.bron });
   }
   positie.push(RECHTSVORM_DUIDING[rechtsvorm.rv]);
   if (ex.bestuurder_persoonlijk) {
-    positie.push({ tekst: "Je wordt als bestuurder persoonlijk aangesproken. Persoonlijke aansprakelijkheid van een bestuurder is de uitzondering en moet apart onderbouwd worden. Vraag waarop dit gebaseerd is.", label: "te_controleren" });
+    positie.push({ tekst: "Je wordt als bestuurder persoonlijk aangesproken. Persoonlijke aansprakelijkheid van een bestuurder is de uitzondering en moet apart onderbouwd worden.", label: "te_controleren" });
+    vraag("Waarom word ik persoonlijk aangesproken en niet de onderneming?");
   }
   if (ex.hoedanigheid !== "onbekend") {
     const rol = HOEDANIGHEID_TEKST[ex.hoedanigheid];
     const f = eerste(tekst, new RegExp(`\\b${rol}`, "i"));
     positie.push(f
-      ? { tekst: `Je wordt aangesproken als ${rol}. De verplichtingen horen bij die rol — controleer of die rol klopt.`, label: "vaststaand", bron: `“${f.zin}”` }
-      : { tekst: `Uit de inhoud leid ik af dat je wordt aangesproken als ${rol} (niet letterlijk zo genoemd). Controleer of die rol klopt: de verplichtingen horen bij die rol.`, label: "interpretatie" });
-  } else {
-    positie.push({ tekst: "Uit de brief blijkt niet in welke hoedanigheid je wordt aangesproken (bijv. als werkgever, vergunninghouder of belastingplichtige). Vraag dit zo nodig na.", label: "te_controleren" });
+      ? { tekst: `Je wordt aangesproken als ${rol}.`, label: "vaststaand", bron: `“${f.zin}”` }
+      : { tekst: `Uit de inhoud leid ik af dat je wordt aangesproken als ${rol} (niet letterlijk zo genoemd) — controleer of die rol klopt.`, label: "interpretatie" });
   }
   positie.push({ tekst: "Een besluit moet gericht zijn aan de belanghebbende. Staat er een verkeerde naam of rechtsvorm, vraag dan om correctie.", label: "interpretatie", bron: "art. 1:2 Awb" });
-  secties.push({ titel: "1. Je juridische positie", uitleg: "Wie wordt aangesproken en in welke rol — dat bepaalt wat er van je gevraagd mag worden.", punten: positie });
+  secties.push({ titel: "5. Aan wie is de brief gericht — klopt dat?", punten: positie });
 
-  // 2. Wat wordt verlangd
-  const verlangd: RapportPunt[] = [];
-  verlangd.push(soort.bron
-    ? { tekst: `Soort brief: ${DOCTYPE_TEKST[dt]}.`, label: "vaststaand", bron: soort.bron }
-    : { tekst: `Soort brief: ${DOCTYPE_TEKST[dt]} (niet eenduidig te herkennen — controleer dit).`, label: "te_controleren" });
-  if (ex.verlangd_omschrijving || ex.verlangd_soort !== "overig") {
-    verlangd.push(feit(`Wat er van je verlangd wordt: ${VERLANGD_TEKST[ex.verlangd_soort]}${ex.verlangd_omschrijving ? ` — ${ex.verlangd_omschrijving}` : ""}.`, ex.verlangd_citaat, ex.verlangd_omschrijving));
-  } else {
-    verlangd.push({ tekst: "Niet eenduidig vast te stellen wat er precies van je verlangd wordt. Vraag de instantie dit schriftelijk te verduidelijken.", label: "te_controleren" });
-  }
-  const opdracht = eerste(tekst, /(u\s+dient|dient\s+u|u\s+moet|moet\s+u|wij\s+verzoeken\s+u|verzoeken\s+wij\s+u|wordt\s+u\s+verzocht|u\s+wordt\s+verzocht|wij\s+vorderen)/i);
-  if (opdracht) verlangd.push({ tekst: "Letterlijke opdracht in de brief.", label: "vaststaand", bron: `“${opdracht.zin}”` });
-  for (const z of detecteerBedragen(tekst)) verlangd.push({ tekst: "Genoemd bedrag.", label: "vaststaand", bron: `“${z}”` });
-  secties.push({ titel: "2. Wat er van je verlangd wordt", punten: verlangd });
-
-  // 3. Grondslag
-  const grond: RapportPunt[] = ex.grondslagen.map((g) => {
-    const bron = bronVan(g.citaat, g.regel);
-    return bron
-      ? { tekst: `De brief noemt als grondslag: ${g.regel}. Of die regel deze verplichting echt toestaat, is een juridische vraag — controleer het artikel op wetten.overheid.nl.`, label: "vaststaand", bron }
-      : { tekst: `Mogelijke grondslag: ${g.regel} (niet letterlijk teruggevonden in je brief — controleer dit).`, label: "te_controleren" };
-  });
-  if (!grond.length) {
-    grond.push({ tekst: "De brief noemt geen duidelijke wettelijke grondslag. Een besluit moet deugdelijk gemotiveerd zijn en zo mogelijk vermelden op welk wettelijk voorschrift het berust. Vraag naar de grondslag.", label: "te_controleren", bron: "art. 3:46 en 3:47 Awb" });
-  }
-  secties.push({ titel: "3. De grondslag", uitleg: "Waar komt de verplichting vandaan?", punten: grond });
-
-  // 4. Wie handelt en is die bevoegd
-  const wie: RapportPunt[] = [];
-  const afz = [ex.instantie, ex.afdeling].filter(Boolean).join(", ");
-  if (afz) wie.push(feit(`Afzender: ${afz}.`, ex.instantie, ex.afdeling));
-  if (ex.ondertekenaar || ex.functie) wie.push(feit(`Ondertekend door: ${[ex.ondertekenaar, ex.functie].filter(Boolean).join(", ")}.`, ex.ondertekenaar, ex.functie));
-  if (ex.namens) wie.push(feit(`Getekend ${ex.namens}.`, ex.namens));
-  const isBevoegdheid = (b: Bevinding) => /bevoeg|mandaat|namens/i.test(`${b.titel} ${b.grondslag}`);
-  for (const b of bevindingen.filter(isBevoegdheid)) wie.push({ tekst: `${b.titel}: ${b.toelichting}`, label: statusNaarLabel(b.status), bron: b.bewijs ? `“${b.bewijs}” — ${b.grondslag}` : b.grondslag });
-  if (!wie.length) wie.push({ tekst: "Niet duidelijk wie de brief heeft opgesteld en ondertekend. Vraag wie besloten heeft en op welke bevoegdheid (of welk mandaat) dat berust.", label: "te_controleren", bron: "art. 10:10 Awb" });
-  secties.push({ titel: "4. Wie handelt — en is die bevoegd?", punten: wie });
-
-  // 5. Wat moet aantoonbaar zijn
-  const aantoonbaar = bevindingen.filter((b) => !isBevoegdheid(b)).map<RapportPunt>((b) => ({
+  // 6. Klopt het besluit? (vaste Awb-controles)
+  const awb = bevindingen.filter((b) => !/bevoeg|mandaat|namens/i.test(`${b.titel} ${b.grondslag}`)).map<RapportPunt>((b) => ({
     tekst: `${b.titel}: ${b.toelichting}`, label: statusNaarLabel(b.status), bron: b.bewijs ? `“${b.bewijs}” — ${b.grondslag}` : b.grondslag,
   }));
-  secties.push({ titel: "5. Wat moet aantoonbaar zijn", uitleg: "De punten die volgens de Algemene wet bestuursrecht in een besluit horen.", punten: aantoonbaar });
+  secties.push({ titel: "6. Klopt het besluit?", uitleg: "De punten die volgens de Algemene wet bestuursrecht in een besluit horen.", punten: awb });
 
-  // 6. Wat ontbreekt
-  const ontbreekt: RapportPunt[] = bevindingen.filter((b) => b.status === "niet_gevonden").map((b) => ({ tekst: `${b.titel} — niet gevonden in de brief.`, label: "te_controleren" as Label, bron: b.grondslag }));
-  if (!ex.grondslagen.length) ontbreekt.push({ tekst: "Wettelijke grondslag niet genoemd.", label: "te_controleren", bron: "art. 3:47 Awb" });
-  if (!ex.ondertekenaar && !ex.namens) ontbreekt.push({ tekst: "Niet duidelijk wie ondertekend heeft / namens wie.", label: "te_controleren", bron: "art. 10:10 Awb" });
-  if (!ontbreekt.length) ontbreekt.push({ tekst: "Geen opvallende ontbrekende onderdelen gevonden bij de standaardcontrole. Dat zegt niets over de inhoudelijke juistheid.", label: "interpretatie" });
-  secties.push({ titel: "6. Ontbrekende informatie of documenten", punten: ontbreekt });
+  // 7. Vragen die je kunt stellen
+  if (!vragen.length) vragen.push({ tekst: "Geen openstaande vragen over wie de brief heeft gemaakt: afzender, verantwoordelijk orgaan en ondertekenaar staan erin. Controleer ze wel even zelf.", label: "interpretatie" });
+  secties.push({ titel: "7. Vragen die je kunt stellen", uitleg: "Je mag dit gewoon vragen aan de afzender — telefonisch, per mail of schriftelijk. Bewaar het antwoord.", punten: vragen });
 
-  // 7. Rechten en acties (vaste regels)
-  const rechten: RapportPunt[] = [];
+  // 8. Termijnen en je rechten
+  const rechten: RapportPunt[] = detecteerTermijnen(tekst).map((z) => ({ tekst: "Termijn genoemd in de brief.", label: "vaststaand" as Label, bron: `“${z}”` }));
+  const datum = parseDatum(datumTekst);
   if (BESLUITACHTIG.includes(dt)) {
-    rechten.push({ tekst: "Bezwaar maken: binnen zes weken na de dag waarop het besluit is bekendgemaakt, bij de instantie die het besluit nam.", label: "interpretatie", bron: "art. 6:4, 6:7 en 6:8 Awb" });
-    rechten.push({ tekst: "Nog niet alle informatie? Dien op tijd een kort (pro forma) bezwaar in en vul de gronden later aan — de instantie moet je daarvoor een termijn geven.", label: "interpretatie", bron: "art. 6:6 Awb" });
-    rechten.push({ tekst: "In de bezwaarprocedure heb je recht om gehoord te worden en om vooraf de stukken in te zien.", label: "interpretatie", bron: "art. 7:2 en 7:4 Awb" });
-    rechten.push({ tekst: "Bezwaar schort een besluit niet automatisch op. Is het spoedeisend (bijv. een lopende dwangsom of dreigende sluiting), dan kun je de voorzieningenrechter vragen het besluit te schorsen.", label: "interpretatie", bron: "art. 6:16 en 8:81 Awb" });
+    if (datum) {
+      const uiterst = new Date(datum.getTime() + 42 * 86400000);
+      rechten.push({ tekst: `Indicatief: uiterste bezwaardatum rond ${fmt(uiterst)} (zes weken na de briefdatum ${fmt(datum)}). De termijn loopt vanaf de dag ná bekendmaking — controleer de precieze datum en dien bij twijfel eerder in.`, label: "te_controleren", bron: "art. 6:7 en 6:8 Awb" });
+    }
+    rechten.push({ tekst: "Bezwaar maken: binnen zes weken, bij de instantie die het besluit nam. Heb je de antwoorden op je vragen nog niet? Dien dan op tijd een kort bezwaar in en vul de gronden later aan.", label: "interpretatie", bron: "art. 6:4, 6:6 en 6:7 Awb" });
+    rechten.push({ tekst: "Bezwaar schort het besluit niet automatisch op. Bij spoed (lopende dwangsom, dreigende sluiting of beslag) kun je de voorzieningenrechter om schorsing vragen.", label: "interpretatie", bron: "art. 6:16 en 8:81 Awb" });
   }
   if (dt === "last_onder_dwangsom") {
-    rechten.push({ tekst: "Een last onder dwangsom moet een begunstigingstermijn bevatten: de tijd om het zelf op te lossen voordat er een dwangsom verbeurt.", label: "interpretatie", bron: "art. 5:32a Awb" });
-    rechten.push({ tekst: "Een verbeurde dwangsom wordt pas ingevorderd na een aparte invorderingsbeschikking — daartegen kun je opnieuw bezwaar maken.", label: "interpretatie", bron: "art. 5:37 Awb" });
+    rechten.push({ tekst: "Een last onder dwangsom moet een begunstigingstermijn bevatten, en een verbeurde dwangsom wordt pas ingevorderd na een aparte invorderingsbeschikking — waartegen je opnieuw bezwaar kunt maken.", label: "interpretatie", bron: "art. 5:32a en 5:37 Awb" });
   }
-  if (dt === "aanslag") {
-    rechten.push({ tekst: "Vraag bij bezwaar tegen een aanslag uitdrukkelijk om uitstel van betaling zolang het bezwaar loopt. Of dat automatisch geldt, verschilt per belasting.", label: "te_controleren" });
-  }
-  if (dt === "voornemen") {
-    rechten.push({ tekst: "Dit lijkt een voornemen, nog geen definitief besluit. Je kunt eerst je zienswijze geven — doe dat binnen de genoemde termijn, dan moet je kant van het verhaal worden meegewogen.", label: "interpretatie", bron: "art. 4:8 Awb" });
-  }
-  if (dt === "informatieverzoek") {
-    rechten.push({ tekst: "Een toezichthouder mag inlichtingen vorderen, maar alleen voor zover dat redelijkerwijs nodig is. Vraag op welke bevoegdheid de vordering berust en welke gegevens echt nodig zijn.", label: "interpretatie", bron: "art. 5:13 en 5:16 Awb" });
-    rechten.push({ tekst: "Aan een rechtmatige vordering moet je wel meewerken — gelijkwaardig, niet tegenwerkend.", label: "interpretatie", bron: "art. 5:20 Awb" });
-  }
-  rechten.push({ tekst: "Je kunt de stukken opvragen die aan deze brief of dit besluit ten grondslag liggen, met een verzoek op grond van de Wet open overheid.", label: "interpretatie", bron: "art. 4.1 Woo" });
-  if (["eenmanszaak", "vof", "privepersoon", "onbekend"].includes(rechtsvorm.rv)) {
-    rechten.push({ tekst: "Als natuurlijk persoon mag je de persoonsgegevens inzien die de instantie over jou verwerkt.", label: "interpretatie", bron: "art. 15 AVG" });
-  }
-  rechten.push({ tekst: "Ben je ontevreden over hoe de instantie zich gedroeg (bejegening, niet reageren), dan kun je een klacht indienen bij die instantie en daarna bij de (Nationale of gemeentelijke) ombudsman.", label: "interpretatie", bron: "art. 9:1 Awb" });
-  if (BESLUITACHTIG.includes(dt)) {
-    rechten.push({ tekst: "Lijd je schade door een onrechtmatig besluit, dan kun je om schadevergoeding vragen.", label: "interpretatie", bron: "titel 8.4 Awb" });
-  }
-  secties.push({ titel: "7. Je rechten en mogelijke acties", punten: rechten });
-
-  // 8. Termijnen
-  const termijnen: RapportPunt[] = detecteerTermijnen(tekst).map((z) => ({ tekst: "Termijn genoemd in de brief.", label: "vaststaand" as Label, bron: `“${z}”` }));
-  const datum = parseDatum(datumTekst);
-  if (BESLUITACHTIG.includes(dt) && datum) {
-    const uiterst = new Date(datum.getTime() + 42 * 86400000);
-    termijnen.push({ tekst: `Indicatief: uiterste bezwaardatum rond ${fmt(uiterst)} (zes weken na de briefdatum ${fmt(datum)}). De termijn loopt vanaf de dag ná bekendmaking — controleer de precieze datum en dien bij twijfel eerder in.`, label: "te_controleren", bron: "art. 6:7 en 6:8 Awb" });
-  }
-  if (!termijnen.length) termijnen.push({ tekst: "Geen termijn gevonden in de brief. Controleer de brief zelf op een reactietermijn of bezwaartermijn.", label: "te_controleren" });
-  secties.push({ titel: "8. Belangrijke termijnen", punten: termijnen });
-
-  // 9. Vervolgstap
-  const stap: RapportPunt[] = [];
-  if (BESLUITACHTIG.includes(dt)) stap.push({ tekst: "Noteer de bezwaartermijn. Vraag de ontbrekende stukken op (Woo-verzoek hieronder) en dien bij twijfel binnen de termijn een pro forma bezwaar in; de gronden kun je later aanvullen.", label: "interpretatie" });
-  else if (dt === "voornemen") stap.push({ tekst: "Geef binnen de termijn je zienswijze (concept hieronder). Vraag zo nodig eerst de stukken op.", label: "interpretatie" });
-  else if (dt === "informatieverzoek") stap.push({ tekst: "Vraag schriftelijk naar de bevoegdheid en het doel van de vordering, en lever daarna wat redelijkerwijs nodig is.", label: "interpretatie" });
-  else stap.push({ tekst: "Vraag bij onduidelijkheid schriftelijk om uitleg: wat wordt er precies van je verlangd, op welke grondslag, en wat zijn de gevolgen als je niet reageert.", label: "interpretatie" });
-  stap.push({ tekst: "Gaat het om een groot belang (hoge bedragen, sluiting, je bedrijfsvoering)? Schakel dan een jurist of het Juridisch Loket in.", label: "interpretatie" });
-  secties.push({ titel: "9. Praktische vervolgstap", punten: stap });
-
-  // 10. Conceptbrieven (sjablonen, geen AI)
-  const inst = ex.instantie || "[naam instantie]";
-  const kenm = kenmerk || "[kenmerk]";
-  const dat = datumTekst || "[datum brief]";
-  const conceptbrieven: Conceptbrief[] = [{ titel: "Woo-verzoek (stukken opvragen)", tekst: stelWooVerzoekOp(bevindingen) }];
-  if (BESLUITACHTIG.includes(dt)) {
-    conceptbrieven.push({
-      titel: "Pro forma bezwaar",
-      tekst: `[Je naam / bedrijfsnaam]\n[Adres]\n\nAan: ${inst}\n\nBetreft: bezwaar tegen besluit van ${dat}, kenmerk ${kenm}\n\nGeachte heer, mevrouw,\n\nHierbij maak ik bezwaar tegen uw besluit van ${dat} met kenmerk ${kenm}.\n\nDe gronden van mijn bezwaar zal ik nader aanvullen. Ik verzoek u mij daarvoor een redelijke termijn te geven (art. 6:6 Awb) en mij de op de zaak betrekking hebbende stukken toe te sturen (art. 7:4 Awb). Ik wil graag gehoord worden (art. 7:2 Awb).\n\nMet vriendelijke groet,\n\n[Naam]\n[Datum]\n[Handtekening]`,
-    });
-  }
-  if (dt === "voornemen") {
-    conceptbrieven.push({
-      titel: "Zienswijze",
-      tekst: `[Je naam / bedrijfsnaam]\n[Adres]\n\nAan: ${inst}\n\nBetreft: zienswijze op uw voornemen van ${dat}, kenmerk ${kenm}\n\nGeachte heer, mevrouw,\n\nIn reactie op uw voornemen geef ik hierbij mijn zienswijze (art. 4:8 Awb).\n\n[Beschrijf hier rustig en feitelijk jouw situatie, wat volgens jou niet klopt of onvoldoende is meegewogen, en welke gevolgen het voornemen voor je onderneming heeft.]\n\nIk verzoek u deze zienswijze mee te wegen voordat u een besluit neemt.\n\nMet vriendelijke groet,\n\n[Naam]\n[Datum]`,
-    });
-  }
+  if (dt === "aanslag") rechten.push({ tekst: "Vraag bij bezwaar tegen een aanslag uitdrukkelijk om uitstel van betaling zolang het bezwaar loopt; of dat automatisch geldt, verschilt per belasting.", label: "te_controleren" });
+  if (dt === "voornemen") rechten.push({ tekst: "Dit lijkt een voornemen, nog geen definitief besluit: je kunt eerst je zienswijze geven.", label: "interpretatie", bron: "art. 4:8 Awb" });
+  if (dt === "informatieverzoek") rechten.push({ tekst: "Een toezichthouder mag inlichtingen vorderen voor zover dat redelijkerwijs nodig is; aan een rechtmatige vordering moet je meewerken.", label: "interpretatie", bron: "art. 5:13, 5:16 en 5:20 Awb" });
+  rechten.push({ tekst: "Gaat het om een groot belang (hoge bedragen, sluiting, beslag)? Schakel dan een jurist of het Juridisch Loket in.", label: "interpretatie" });
+  secties.push({ titel: "8. Termijnen en je rechten", punten: rechten });
 
   return {
     kop: { afzender: ex.instantie || undefined, kenmerk: kenmerk || undefined, datum: datumTekst || undefined, documenttype: DOCTYPE_TEKST[dt] },
     secties,
-    conceptbrieven,
+    conceptbrieven: [],
     aiGebruikt: ok,
   };
 }

@@ -609,8 +609,8 @@ export async function sendTestEmail(to: string): Promise<boolean> {
 export async function sendAnalyseKlaarEmail(to: string, firstName: string, link: string, gelukt: boolean): Promise<boolean> {
   const titel = gelukt ? "Je analyse is klaar" : "Je analyse kon niet worden afgerond";
   const tekst = gelukt
-    ? "Het overzicht van je positie en je rechten bij de brief die je hebt geüpload staat voor je klaar. Het blijft 24 uur beschikbaar; daarna wordt het automatisch verwijderd."
-    : "Het maken van je overzicht is helaas niet gelukt. Open OpenRegio en start de analyse opnieuw.";
+    ? "De controle van je brief staat voor je klaar: van wie hij komt, wie hem heeft opgemaakt en of die daartoe bevoegd is. Het blijft 24 uur beschikbaar; daarna wordt het automatisch verwijderd."
+    : "De controle van je brief is helaas niet gelukt. Open OpenRegio en start de analyse opnieuw.";
   const html = `
     <!DOCTYPE html>
     <html><head><meta charset="utf-8"></head>

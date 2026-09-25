@@ -55,7 +55,7 @@ function KopieerKnop({ tekst }: { tekst: string }) {
 }
 
 export default function RechtenRapportPage() {
-  usePageTitle("Brief analyseren — ken je positie, gebruik je rechten");
+  usePageTitle("Brief analyseren — wie legt je dit op, en mag dat?");
   const { toast } = useToast();
   const [modus, setModus] = useState<"upload" | "tekst">("upload");
   const [bestand, setBestand] = useState<File | null>(null);
@@ -134,8 +134,8 @@ export default function RechtenRapportPage() {
           <h1 className="text-2xl font-bold" style={{ color: NAVY }}>Brief analyseren</h1>
         </div>
         <p className="text-muted-foreground mb-1">
-          Upload een brief, besluit of aanslag van een overheidsinstantie. Je krijgt een overzicht van <strong>je juridische positie</strong>,
-          wat er van je verlangd wordt, wie bevoegd is, <strong>welke rechten je hebt</strong> en wat je praktisch kunt doen — met bij elk punt de bron.
+          Heb je een brief, boete, aanslag of besluit gekregen? OpenRegio stelt vast <strong>van wie de brief komt</strong>, <strong>wie hem heeft
+          opgemaakt en ondertekend</strong>, of die daartoe <strong>bevoegd</strong> is en waarop het is gebaseerd — met bij elk punt de bron.
         </p>
         <p className="text-sm mb-6" style={{ color: NAVY }}>
           <strong>Ken je positie. Controleer de bevoegdheid. Gebruik je rechten.</strong>
@@ -188,12 +188,12 @@ export default function RechtenRapportPage() {
             <Button onClick={() => mut.mutate(undefined)} disabled={!kan || mut.isPending} style={{ background: NAVY }} data-testid="button-rr-maak">
               {mut.isPending
                 ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Bezig… ({seconden}s)</>
-                : <><Scale className="h-4 w-4 mr-2" />Maak mijn rechtenoverzicht</>}
+                : <><Scale className="h-4 w-4 mr-2" />Controleer deze brief</>}
             </Button>
             {mut.isPending && (
               <p className="text-sm text-muted-foreground" data-testid="text-analyse-duur">
                 ⏳ <strong>{wachtrijTekst(wachtStatus)}</strong> De analyse draait op onze eigen server — daardoor blijven je
-                gegevens veilig. Sluit je dit venster, dan krijg je een mail zodra je overzicht klaar is.
+                gegevens veilig. Sluit je dit venster, dan krijg je een mail zodra de controle klaar is.
               </p>
             )}
           </CardContent>
@@ -203,8 +203,8 @@ export default function RechtenRapportPage() {
       {rapport && (
         <div id="rr-rapport" className="rr-print">
           <div className="border-b pb-4 mb-5">
-            <p className="text-xs uppercase tracking-wider text-muted-foreground">OpenRegio — positie &amp; rechten</p>
-            <h2 className="text-xl font-bold mt-1" style={{ color: NAVY }}>Je positie en je rechten bij deze brief</h2>
+            <p className="text-xs uppercase tracking-wider text-muted-foreground">OpenRegio — briefcontrole</p>
+            <h2 className="text-xl font-bold mt-1" style={{ color: NAVY }}>Wie legt je dit op — en mag dat?</h2>
             <div className="text-sm text-muted-foreground mt-2 grid gap-0.5">
               <span><strong>Soort:</strong> {rapport.kop.documenttype}</span>
               {rapport.kop.afzender && <span><strong>Afzender:</strong> {rapport.kop.afzender}</span>}
