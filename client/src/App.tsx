@@ -243,6 +243,10 @@ function AuthenticatedRouter() {
       <Route path="/regels/ontwikkelingen" component={RegelsOntwikkelingenPage} />
       <Route path="/regels/updates" component={IntelPage} />
       <Route path="/regels/help" component={RegelsHelpPage} />
+      {/* "Brief ontvangen" is vervangen door de briefcontrole (die maakt geen conceptbrief). */}
+      <Route path="/regels/help/brief-ontvangen">
+        <Redirect to="/regels/documenten" />
+      </Route>
       <Route path="/regels/help/:flowId" component={RegelsHelpFlowPage} />
       <Route path="/regels/check" component={CheckSituatiePage} />
       <Route path="/regels/documenten" component={RechtenRapportPage} />

@@ -69,7 +69,7 @@ export const briefOntvangenFlow: FlowSchema = {
     },
   ],
   outputTitle: "Concept-reactie + samenvatting",
-  outputTemplate: `Geachte {{afzender|gemeente/instantie}},
+  outputTemplate: `Geachte heer/mevrouw,
 
 Ik heb uw brief (kenmerk: {{kenmerk|onbekend}}) ontvangen en bevestig hierbij de ontvangst.
 

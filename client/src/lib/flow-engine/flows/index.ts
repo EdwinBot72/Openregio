@@ -9,8 +9,8 @@ export const FLOWS: Record<string, FlowSchema> = {
   [controleVergunningBoeteFlow.id]: controleVergunningBoeteFlow,
 };
 
+// "brief-ontvangen" staat niet meer in de lijst: /regels/help/brief-ontvangen verwijst door naar de briefcontrole.
 export const FLOW_LIST: FlowSchema[] = [
-  briefOntvangenFlow,
   regelOnduidelijkFlow,
   controleVergunningBoeteFlow,
 ];
