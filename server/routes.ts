@@ -17,6 +17,7 @@ import { ObjectStorageService } from "./replit_integrations/object_storage";
 import { randomUUID, createHash } from "crypto";
 import { runRegioBot, prepareRegioBot } from "./regiobot";
 import { createStripeCheckout, handleStripeWebhook, stripeConfigured } from "./stripe";
+import { viaWachtrij, zetInRij, WachtrijFout, registreerWachtrijRoutes, type JobResultaat } from "./analyseQueue";
 import { BRIEFTYPES, isBrieftype, buildSystemPrompt, buildUserPrompt, CONTROLE_PUNTEN, controleerBesluit, aandachtspuntenUit, stelWooVerzoekOp, CONTROLE_METHODE_DISCLAIMER } from "./brieftypes";
 import { db } from "db";
 import { eq, sql, gte, lte, gt, and, count, inArray } from "drizzle-orm";
@@ -1668,43 +1669,69 @@ Schrijf in het Nederlands. Toon: helder, gezaghebbend, praktisch. Geef geen juri
   });
 
   // Brief Analyse - gestructureerde analyse van overheidsbrieven (Basic+)
+  // Wachtrij-status (plek, schatting, resultaat) voor analyses die met ?async=1 zijn ingediend.
+  registreerWachtrijRoutes(app, requireAuth);
+
   // "Ken je positie, gebruik je rechten" — rechtenrapport bij een overheidsbrief.
   // Accepteert een bestand (multipart 'file') óf geplakte tekst ({ tekst }).
+  // Met ?async=1 gaat de aanvraag de wachtrij in (202 + jobId).
   // Verwerking volledig op de eigen server; de brief wordt niet opgeslagen.
+  async function maakRapportVoor(file: any, tekstInvoer: string): Promise<JobResultaat> {
+    try {
+      let tekst = tekstInvoer;
+      if (file) {
+        const { tekstUitBestand } = await import("./rechten/tekst");
+        tekst = await tekstUitBestand(file);
+      }
+      if (tekst.length < 40) {
+        return { status: 400, body: {
+          error: file ? "Geen leesbare tekst gevonden in het bestand" : "Tekst te kort",
+          hint: file
+            ? "Maak een scherpere scan/foto, of plak de tekst van de brief in het tekstvak."
+            : "Plak de volledige tekst van de brief (minimaal een paar zinnen).",
+        } };
+      }
+      const { maakRechtenRapport } = await import("./rechten/rapport");
+      const t0 = Date.now();
+      const rapport = await maakRechtenRapport(tekst);
+      console.log(`[RechtenRapport] klaar in ${Math.round((Date.now() - t0) / 1000)}s, chars=${tekst.length}, ai=${rapport.aiGebruikt}`);
+      return { status: 200, body: rapport };
+    } catch (err: any) {
+      console.error("[RechtenRapport] Error:", err?.message || err);
+      return { status: err?.status || 500, body: { error: err?.status ? err.message : "Het rapport kon niet worden gemaakt. Probeer het opnieuw." } };
+    }
+  }
+
   app.post("/api/rechten-rapport", requireBasic, authenticatedAiRateLimit, (req: any, res: any) => {
     uploadMemory.single("file")(req, res, async (uploadErr: any) => {
       if (uploadErr) {
         return res.status(400).json({ error: uploadErr.message || "Upload mislukt", hint: "Upload een PDF, Word-bestand of foto (max. 10 MB), of plak de tekst." });
       }
-      try {
-        let tekst = "";
-        if (req.file) {
-          const { tekstUitBestand } = await import("./rechten/tekst");
-          tekst = await tekstUitBestand(req.file);
-        } else {
-          tekst = String(req.body?.tekst ?? req.body?.content ?? "").trim();
-        }
-        if (tekst.length < 40) {
-          return res.status(400).json({
-            error: req.file ? "Geen leesbare tekst gevonden in het bestand" : "Tekst te kort",
-            hint: req.file
-              ? "Maak een scherpere scan/foto, of plak de tekst van de brief in het tekstvak."
-              : "Plak de volledige tekst van de brief (minimaal een paar zinnen).",
-          });
-        }
-        const { maakRechtenRapport } = await import("./rechten/rapport");
-        const t0 = Date.now();
-        const rapport = await maakRechtenRapport(tekst);
-        console.log(`[RechtenRapport] klaar in ${Math.round((Date.now() - t0) / 1000)}s, chars=${tekst.length}, ai=${rapport.aiGebruikt}`);
-        res.json(rapport);
-      } catch (err: any) {
-        console.error("[RechtenRapport] Error:", err?.message || err);
-        res.status(err?.status || 500).json({ error: err?.status ? err.message : "Het rapport kon niet worden gemaakt. Probeer het opnieuw." });
+      const file = req.file || null;
+      const tekst = file ? "" : String(req.body?.tekst ?? req.body?.content ?? "").trim();
+      // Te korte geplakte tekst meteen afwijzen — niet eerst laten wachten in de rij.
+      if (!file && tekst.length < 40) {
+        return res.status(400).json({ error: "Tekst te kort", hint: "Plak de volledige tekst van de brief (minimaal een paar zinnen)." });
       }
+      if (req.query?.async === "1") {
+        try {
+          const view = zetInRij({
+            user: req.user,
+            returnPath: typeof req.query?.returnPath === "string" ? req.query.returnPath : "/regels/documenten",
+            run: () => maakRapportVoor(file, tekst),
+          });
+          return res.status(202).json(view);
+        } catch (e: any) {
+          if (e instanceof WachtrijFout) return res.status(e.status).json({ error: e.message });
+          return res.status(500).json({ error: "Kon de analyse niet in de wachtrij zetten." });
+        }
+      }
+      const r = await maakRapportVoor(file, tekst);
+      res.status(r.status).json(r.body);
     });
   });
 
-  app.post("/api/brief-analyse", requireBasic, authenticatedAiRateLimit, async (req, res) => {
+  app.post("/api/brief-analyse", requireBasic, authenticatedAiRateLimit, viaWachtrij(async (req: any, res: any) => {
     try {
       // Accepteer zowel `tekst` als `content` — verschillende pagina's sturen een andere veldnaam.
       const tekst = req.body?.tekst ?? req.body?.content;
@@ -1794,7 +1821,7 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
       console.error("[BriefAnalyse] Error:", err);
       res.status(500).json({ error: "Analyse mislukt" });
     }
-  });
+  }));
 
   // ─── Diepe juridische analyse (lokale Ollama-agent, admin-only, async) ────────
   // Gemini blijft de snelle standaard; dit is een optionele grondige analyse die
@@ -1916,7 +1943,7 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
   });
 
   // Brief Analyse — bestand uploaden (PDF / afbeelding / tekst)
-  app.post("/api/brief-analyse/upload", requirePro, uploadMemory.single('file'), async (req, res) => {
+  app.post("/api/brief-analyse/upload", requirePro, uploadMemory.single('file'), viaWachtrij(async (req: any, res: any) => {
     try {
       const file = req.file;
       if (!file) return res.status(400).json({ error: "Geen bestand ontvangen" });
@@ -2052,7 +2079,7 @@ Gebruik "Onbekend" als een veld niet uit de tekst af te leiden is. Schrijf in he
       console.error("[BriefAnalyse/upload] Error:", err);
       res.status(500).json({ error: "Analyse mislukt" });
     }
-  });
+  }));
 
   // Proxy: stuur bestand door naar externe opslag-server
   // BACKEND_UPLOAD_URL moet expliciet zijn ingesteld — geen hardcoded fallback

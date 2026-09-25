@@ -604,3 +604,31 @@ export async function sendTestEmail(to: string): Promise<boolean> {
 
   return sendEmail(to, 'OpenRegio Test E-mail', html);
 }
+
+/** Mail als een analyse uit de wachtrij klaar is en de gebruiker het venster had gesloten. */
+export async function sendAnalyseKlaarEmail(to: string, firstName: string, link: string, gelukt: boolean): Promise<boolean> {
+  const titel = gelukt ? "Je analyse is klaar" : "Je analyse kon niet worden afgerond";
+  const tekst = gelukt
+    ? "Het overzicht van je positie en je rechten bij de brief die je hebt geüpload staat voor je klaar. Het blijft 24 uur beschikbaar; daarna wordt het automatisch verwijderd."
+    : "Het maken van je overzicht is helaas niet gelukt. Open OpenRegio en start de analyse opnieuw.";
+  const html = `
+    <!DOCTYPE html>
+    <html><head><meta charset="utf-8"></head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #1a1a1a;">
+      <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+        <div style="background: #0b2240; color: white; padding: 24px; border-radius: 8px 8px 0 0;">
+          <h1 style="margin: 0; font-size: 20px;">${titel}</h1>
+        </div>
+        <div style="background: #ffffff; padding: 24px; border: 1px solid #e5e7eb; border-top: none; border-radius: 0 0 8px 8px;">
+          <p>Beste ${firstName || "ondernemer"},</p>
+          <p>${tekst}</p>
+          <p style="text-align: center;">
+            <a href="${link}" style="display: inline-block; background: #0b2240; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px;">${gelukt ? "Bekijk je overzicht" : "Naar OpenRegio"}</a>
+          </p>
+          <p style="font-size: 13px; color: #6b7280;">Je brief is verwerkt op onze eigen server en niet opgeslagen.</p>
+          <p>Met vriendelijke groet,<br>OpenRegio</p>
+        </div>
+      </div>
+    </body></html>`;
+  return sendEmail(to, `${titel} — OpenRegio`, html);
+}

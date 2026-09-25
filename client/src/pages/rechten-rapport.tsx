@@ -7,6 +7,9 @@ import { ArrowLeft, FileText, Loader2, Scale, Upload, X, Copy, Check, Printer, R
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { usePageTitle } from "@/hooks/usePageTitle";
+import { voerUitViaWachtrij, volgJob, wachtrijTekst, type WachtrijStatus } from "@/lib/wachtrij";
+
+const JOB_SLEUTEL = "openregio:job:rechten-rapport";
 
 type Label = "vaststaand" | "interpretatie" | "te_controleren";
 interface RapportPunt { tekst: string; label: Label; bron?: string }
@@ -61,25 +64,24 @@ export default function RechtenRapportPage() {
   const [seconden, setSeconden] = useState(0);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const [wachtStatus, setWachtStatus] = useState<WachtrijStatus | null>(null);
+
   const mut = useMutation({
-    mutationFn: async (): Promise<Rapport> => {
+    mutationFn: async (hervatJobId?: string): Promise<Rapport> => {
       setRapport(null);
-      let res: Response;
+      setWachtStatus(null);
+      const opts = { returnPath: "/regels/documenten", onStatus: setWachtStatus, opslagSleutel: JOB_SLEUTEL };
+      if (hervatJobId) return volgJob<Rapport>(hervatJobId, opts);
       if (modus === "upload") {
         const form = new FormData();
         form.append("file", bestand!);
-        res = await fetch("/api/rechten-rapport", { method: "POST", body: form, credentials: "include" });
-      } else {
-        res = await fetch("/api/rechten-rapport", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          credentials: "include",
-          body: JSON.stringify({ tekst: tekst.trim() }),
-        });
+        return voerUitViaWachtrij<Rapport>("/api/rechten-rapport", { method: "POST", body: form }, opts);
       }
-      const data = await res.json().catch(() => ({} as any));
-      if (!res.ok) throw new Error([data?.error, data?.hint].filter(Boolean).join(" — ") || `Het rapport kon niet worden gemaakt (${res.status})`);
-      return data as Rapport;
+      return voerUitViaWachtrij<Rapport>("/api/rechten-rapport", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tekst: tekst.trim() }),
+      }, opts);
     },
     onSuccess: (r) => {
       setRapport(r);
@@ -87,6 +89,16 @@ export default function RechtenRapportPage() {
     },
     onError: (e: Error) => toast({ title: "Rapport maken mislukt", description: e.message, variant: "destructive" }),
   });
+
+  // Hervatten: vanuit de mail-link (?job=…) of een nog lopende analyse in deze browser.
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    let jobId = params.get("job");
+    if (jobId) window.history.replaceState(null, "", window.location.pathname);
+    if (!jobId) { try { jobId = localStorage.getItem(JOB_SLEUTEL); } catch { /* geen opslag */ } }
+    if (jobId) mut.mutate(jobId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!mut.isPending) { setSeconden(0); return; }
@@ -173,15 +185,15 @@ export default function RechtenRapportPage() {
               (zoals OpenAI of Google) en wordt niet opgeslagen. Je hoeft persoonlijke gegevens dus niet weg te lakken.
             </div>
 
-            <Button onClick={() => mut.mutate()} disabled={!kan || mut.isPending} style={{ background: NAVY }} data-testid="button-rr-maak">
+            <Button onClick={() => mut.mutate(undefined)} disabled={!kan || mut.isPending} style={{ background: NAVY }} data-testid="button-rr-maak">
               {mut.isPending
                 ? <><Loader2 className="h-4 w-4 mr-2 animate-spin" />Bezig… ({seconden}s)</>
                 : <><Scale className="h-4 w-4 mr-2" />Maak mijn rechtenoverzicht</>}
             </Button>
             {mut.isPending && (
               <p className="text-sm text-muted-foreground" data-testid="text-analyse-duur">
-                ⏳ Dit kan een paar minuten duren. De analyse draait op onze eigen server — daardoor blijven je gegevens veilig.
-                Je kunt dit venster rustig open laten staan.
+                ⏳ <strong>{wachtrijTekst(wachtStatus)}</strong> De analyse draait op onze eigen server — daardoor blijven je
+                gegevens veilig. Sluit je dit venster, dan krijg je een mail zodra je overzicht klaar is.
               </p>
             )}
           </CardContent>

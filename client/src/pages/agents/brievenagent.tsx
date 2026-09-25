@@ -1,8 +1,8 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Link } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { voerUitViaWachtrij, volgJob, wachtrijTekst, type WachtrijStatus } from "@/lib/wachtrij";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
@@ -30,27 +30,29 @@ export default function BrievenagentPage() {
   const [dragOver, setDragOver] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [result, setResult] = useState<AnalyseResult | null>(null);
+  const [wachtStatus, setWachtStatus] = useState<WachtrijStatus | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const uploadMutation = useMutation({
     mutationFn: async (file: File) => {
+      setWachtStatus(null);
       const fd = new FormData();
       fd.append("file", file);
-      const res = await fetch("/api/brief-analyse/upload", {
-        method: "POST",
-        body: fd,
-        credentials: "include",
-      });
-      if (!res.ok) throw new Error(await res.text());
-      return res.json();
+      return voerUitViaWachtrij("/api/brief-analyse/upload", { method: "POST", body: fd }, { returnPath: "/agents/brievenagent", onStatus: setWachtStatus, opslagSleutel: "openregio:job:brievenagent" });
     },
     onSuccess: (data) => setResult(data),
     onError: (e: Error) => toast({ title: "Fout bij uploaden", description: e.message, variant: "destructive" }),
   });
 
   const textMutation = useMutation({
-    mutationFn: async () =>
-      apiRequest("POST", "/api/brief-analyse", { content: text, type: "brief" }),
+    mutationFn: async () => {
+      setWachtStatus(null);
+      return voerUitViaWachtrij("/api/brief-analyse", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: text, type: "brief" }),
+      }, { returnPath: "/agents/brievenagent", onStatus: setWachtStatus, opslagSleutel: "openregio:job:brievenagent" });
+    },
     onSuccess: (data: any) => setResult(data),
     onError: (e: Error) => toast({ title: "Fout bij analyseren", description: e.message, variant: "destructive" }),
   });
@@ -75,7 +77,22 @@ export default function BrievenagentPage() {
     }
   }
 
-  const isPending = uploadMutation.isPending || textMutation.isPending;
+  // Hervatten: vanuit de mail-link (?job=…) of een nog lopende job in deze browser.
+  const volgMutation = useMutation({
+    mutationFn: (jobId: string) => volgJob(jobId, { onStatus: setWachtStatus, opslagSleutel: "openregio:job:brievenagent" }),
+    onSuccess: (data: any) => setResult(data),
+    onError: (e: Error) => toast({ title: "Analyse niet meer beschikbaar", description: e.message, variant: "destructive" }),
+  });
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    let jobId = params.get("job");
+    if (jobId) window.history.replaceState(null, "", window.location.pathname);
+    if (!jobId) { try { jobId = localStorage.getItem("openregio:job:brievenagent"); } catch { /* geen opslag */ } }
+    if (jobId) volgMutation.mutate(jobId);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const isPending = uploadMutation.isPending || textMutation.isPending || volgMutation.isPending;
   const canSubmit = mode === "upload" ? !!selectedFile : text.trim().length > 20;
 
   const resultFields = [
@@ -195,7 +212,7 @@ export default function BrievenagentPage() {
 
       {isPending && (
         <p style={{ marginTop: -20, marginBottom: 28, fontSize: 13, color: "#64748b" }} data-testid="text-analyse-duur">
-          ⏳ Dit kan een paar minuten duren. De analyse draait op onze eigen server — daardoor blijven je gegevens veilig. Je kunt dit venster rustig open laten staan.
+          ⏳ {wachtrijTekst(wachtStatus)} De analyse draait op onze eigen server — daardoor blijven je gegevens veilig. Sluit je dit venster, dan krijg je een mail als het klaar is.
         </p>
       )}
 
