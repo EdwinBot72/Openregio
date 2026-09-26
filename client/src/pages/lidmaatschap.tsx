@@ -524,7 +524,7 @@ export default function LidmaatschapPage() {
 
             <p className="openregio-upgrade-note">
               <Lock size={11} style={{ display: "inline", marginRight: 4 }} />
-              Veilige betaling via Mollie · maandelijks opzegbaar
+              Veilige betaling via Stripe (iDEAL, creditcard of SEPA) · maandelijks opzegbaar
             </p>
 
             {!isLoggedIn && (
