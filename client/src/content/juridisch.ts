@@ -12,8 +12,9 @@ export type Blok = { p: string } | { ul: string[] } | { h3: string } | { let: st
 export interface Sectie { titel: string; blokken: Blok[] }
 export interface JuridischDocument { titel: string; versie: string; bijgewerkt: string; intro: string[]; secties: Sectie[] }
 
-const AANBIEDER = "[● naam onderneming]";
-const AANBIEDER_VOLLEDIG = `${AANBIEDER}, [● rechtsvorm], ingeschreven bij de Kamer van Koophandel onder nummer [● KvK-nummer], gevestigd aan [● adres]`;
+// Gegevens uit het Handelsregister (KvK), opgezocht op 26 september 2026.
+const AANBIEDER = "Stroombox";
+const AANBIEDER_VOLLEDIG = `${AANBIEDER} (eenmanszaak), handelend onder de naam OpenRegio, ingeschreven bij de Kamer van Koophandel onder nummer 55672671, gevestigd aan de Van Meeuwenstraat 19, 2064 LD Spaarndam`;
 const CONTACT = "info@openregio.nl";
 const PRIVACYCONTACT = "privacy@openregio.nl";
 
