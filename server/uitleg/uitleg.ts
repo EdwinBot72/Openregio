@@ -3,8 +3,8 @@
 //
 // Lagen:
 //  • In gewone taal — door het lokale AI-model, alleen op basis van de tekst.
-//  • Juridisch — bij brieven vaste, gecontroleerde tekst per soort brief (geen AI);
-//    bij contracten door het AI-model, beperkt tot wat uit de tekst blijkt.
+//  • Juridisch — vaste, gecontroleerde tekst (geen AI): per soort brief, of voor
+//    contracten de algemene regels plus de bepalingen die in dit contract staan.
 //  • Begrippen, termijnen en bedragen — zonder AI, letterlijk uit de tekst.
 // Deze uitleg controleert niet wie bevoegd is; dat doet "Brief analyseren".
 // ─────────────────────────────────────────────────────────────
@@ -92,6 +92,18 @@ const JURIDISCH_BEDRIJF = [
   "Ben je het niet eens met de vordering, laat dat dan schriftelijk en met redenen weten; wil het bedrijf toch betaald krijgen, dan moet het naar de rechter.",
 ];
 
+// Juridische duiding van een contract: vaste tekst, aangevuld met de bepalingen die in dít contract staan.
+function contractJuridisch(begrippen: Begrip[]): string[] {
+  const uit = [
+    "Een contract dat beide partijen hebben aanvaard, is juridisch bindend: iedere partij moet zich aan de afspraken houden.",
+    "Houdt een partij zich niet aan de afspraken, dan kan de ander nakoming, schadevergoeding of ontbinding vragen — meestal pas na een schriftelijke ingebrekestelling met een redelijke termijn.",
+  ];
+  const letOp = begrippen.filter((b) => b.letOp).map((b) => b.term.toLowerCase());
+  if (letOp.length) uit.push(`In dit contract staan bepalingen die vaak nadelig uitpakken: ${letOp.join(", ")}. Hieronder staat per bepaling wat die betekent en wat je kunt doen.`);
+  if (begrippen.some((b) => b.term === "Algemene voorwaarden")) uit.push("Er wordt verwezen naar algemene voorwaarden. Die horen ook bij het contract — vraag ze op en lees ze voordat je tekent.");
+  return uit;
+}
+
 const SYSTEEM = `Je legt Nederlandse brieven en contracten uit aan een ondernemer zonder juridische achtergrond.
 Regels:
 - Gebruik ALLEEN wat in de tekst staat. Verzin niets. Weet je iets niet, zeg dan "Staat niet in de tekst".
@@ -107,7 +119,6 @@ function prompt(soort: UitlegSoort, tekst: string): string {
  "onderwerp": "waar gaat het contract over, in maximaal 10 woorden",
  "partijen": ["naam en rol van elke partij, bijv. 'Bakkerij X (klant)'"],
  "gewone_taal": ["3 tot 6 korte zinnen: wat spreken partijen af, in gewone taal"],
- "juridisch": ["2 tot 4 korte zinnen: wat voor soort overeenkomst is het, en wat gebeurt er als iemand zich niet aan de afspraken houdt — alleen wat uit de tekst blijkt"],
  "verplichtingen": [{"partij": "naam van de partij zoals in het contract", "moet": ["wat deze partij moet doen, leveren of betalen"]}]
 }
 
@@ -183,7 +194,7 @@ export async function maakUitleg(invoer: string, soort: UitlegSoort): Promise<Ui
     },
     partijen: soort === "contract" ? lijst(ai?.partijen, 6) : [],
     gewoneTaal: gewoneTaal.length ? gewoneTaal : ["Het automatisch uitleggen lukte deze keer niet. Hieronder staan wel de belangrijke begrippen, termijnen en bedragen uit de tekst."],
-    juridisch: soort === "brief" ? (vanBedrijf ? JURIDISCH_BEDRIJF : JURIDISCH[dt]) : lijst(ai?.juridisch, 4),
+    juridisch: soort === "brief" ? (vanBedrijf ? JURIDISCH_BEDRIJF : JURIDISCH[dt]) : contractJuridisch(begrippen),
     watMoetJe: soort === "brief" ? lijst(ai?.wat_moet_je) : [],
     verplichtingen: soort === "contract" ? verplichtingen : [],
     soortBrief: soort === "brief" ? (vanBedrijf ? "Vordering van een bedrijf" : SOORT_NAAM[dt]) : undefined,

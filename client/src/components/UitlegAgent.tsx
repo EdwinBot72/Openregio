@@ -235,7 +235,7 @@ export function UitlegAgent({ soort, icoon }: { soort: UitlegSoort; icoon: React
           </Blok>
 
           {uitleg.juridisch.length > 0 && (
-            <Blok titel="Juridisch uitgelegd" uitleg={soort === "brief" ? "Wat dit soort brief juridisch betekent. Algemene uitleg, geen advies over jouw situatie." : "Wat dit juridisch betekent, op basis van de tekst. Algemene duiding, geen advies over jouw situatie."}>
+            <Blok titel="Juridisch uitgelegd" uitleg={soort === "brief" ? "Wat dit soort brief juridisch betekent. Algemene uitleg, geen advies over jouw situatie." : "Wat dit contract juridisch betekent. Algemene uitleg, geen advies over jouw situatie."}>
               <Lijst items={uitleg.juridisch} />
             </Blok>
           )}
