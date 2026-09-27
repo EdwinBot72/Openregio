@@ -27,7 +27,14 @@ function Inline({ tekst }: { tekst: string }) {
 function BlokWeergave({ blok }: { blok: Blok }): ReactNode {
   if ("p" in blok) return <p><Inline tekst={blok.p} /></p>;
   if ("h3" in blok) return <h3>{blok.h3}</h3>;
-  if ("let" in blok) return <div className="openregio-soft-box"><p><Inline tekst={blok.let} /></p></div>;
+  if ("let" in blok) {
+    const regels = blok.let.split("\n");
+    return (
+      <div className="openregio-soft-box">
+        <p>{regels.map((r, i) => <Fragment key={i}>{i > 0 && <br />}<Inline tekst={r} /></Fragment>)}</p>
+      </div>
+    );
+  }
   return <ul>{blok.ul.map((li, i) => <li key={i}><Inline tekst={li} /></li>)}</ul>;
 }
 
