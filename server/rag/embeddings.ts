@@ -3,7 +3,8 @@ import OpenAI from "openai";
 const openai = new OpenAI();
 
 export async function embedTexts(texts: string[]): Promise<number[][]> {
-  const model = process.env.EMBEDDING_MODEL || "text-embedding-3-small";
+  // Lokaal model via Ollama (zelfde OpenAI-compatibele koppeling als de rest van de AI). 768 dimensies.
+  const model = process.env.EMBEDDING_MODEL || "nomic-embed-text";
   
   const response = await openai.embeddings.create({
     model,

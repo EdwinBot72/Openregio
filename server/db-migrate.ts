@@ -504,6 +504,16 @@ export async function runMigrations(): Promise<void> {
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_deep_analyses_user ON deep_analyses(user_id, created_at DESC);`);
     console.log("[Migration] ✓ deep_analyses table ensured");
 
+    // Zoeken in eigen documenten (RAG): vectorkolom voor het lokale model nomic-embed-text (768 dimensies).
+    // Apart afgevangen: als pgvector ontbreekt, mag de rest van de app gewoon starten.
+    try {
+      await db.execute(sql`CREATE EXTENSION IF NOT EXISTS vector;`);
+      await db.execute(sql`ALTER TABLE rag_embeddings ADD COLUMN IF NOT EXISTS embedding vector(768);`);
+      console.log("[Migration] ✓ rag_embeddings.embedding (vector 768) ensured");
+    } catch (e: any) {
+      console.error("[Migration] rag_embeddings.embedding niet aangemaakt:", e?.message || e);
+    }
+
     console.log("[Migration] Database schema is up to date");
   } catch (error) {
     console.error("[Migration] Error running migrations:", error);
