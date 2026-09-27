@@ -196,7 +196,7 @@ export const VOORWAARDEN: JuridischDocument = {
 
 export const PRIVACY: JuridischDocument = {
   titel: "Privacyverklaring",
-  versie: "2.1",
+  versie: "2.2",
   bijgewerkt: "27 september 2026",
   intro: [
     "In deze verklaring lees je welke persoonsgegevens OpenRegio verwerkt, waarom we dat doen, hoe lang we gegevens bewaren, met wie gegevens kunnen worden gedeeld en welke rechten je hebt. We houden dit zo concreet mogelijk en beschrijven hoe het platform daadwerkelijk werkt.",
@@ -221,6 +221,7 @@ export const PRIVACY: JuridischDocument = {
         { p: "Een document dat uitsluitend voor een losse briefanalyse wordt geüpload, wordt na verwerking verwijderd." },
         { p: "Het gegenereerde rapport wordt maximaal 24 uur tijdelijk beschikbaar gehouden zodat je het kunt terugvinden of ophalen. Daarna wordt het automatisch verwijderd." },
         { p: "Brieven en tijdelijke analyserapporten worden niet blijvend in onze database opgeslagen." },
+        { p: "Stuur je een brief of contract zelf naar OpenRegio (zie 3.3), dan bewaren we dat in onze mailbox zolang dat nodig is om je vraag te behandelen." },
         { h3: "Geen tracking" },
         { p: "OpenRegio gebruikt:" },
         { ul: [
@@ -268,6 +269,7 @@ export const PRIVACY: JuridischDocument = {
         { p: "**Gevoelige gegevens.** Documenten kunnen incidenteel bijzondere persoonsgegevens of strafrechtelijke persoonsgegevens bevatten. Voor strafrechtelijke persoonsgegevens gelden aanvullende wettelijke regels. OpenRegio gebruikt dergelijke gegevens niet voor eigen doeleinden, profilering, marketing of AI-training. Wanneer OpenRegio deze gegevens uitsluitend namens een zakelijke gebruiker verwerkt, is die gebruiker verantwoordelijk voor het bestaan van een geldige wettelijke basis om deze gegevens te verwerken." },
         { p: "**Dataminimalisatie.** Je hoeft gegevens die noodzakelijk zijn voor de analyse niet vooraf te verwijderen. We adviseren wel om persoonsgegevens die voor de analyse niet relevant zijn, waar mogelijk weg te laten of af te schermen." },
         { p: "**Bewaartermijn:** het oorspronkelijke document wordt na de analyse verwijderd. Het gegenereerde analyserapport blijft maximaal 24 uur tijdelijk beschikbaar en wordt daarna automatisch verwijderd. Deze documenten en rapporten worden niet blijvend in de database opgeslagen." },
+        { p: "**Brief of contract naar OpenRegio sturen.** Je kunt er zelf voor kiezen een brief of contract, met je vraag erbij, per e-mail naar OpenRegio (info@openregio.nl) te sturen. Dat gebeurt alleen nadat je daar uitdrukkelijk toestemming voor hebt gegeven. **Doel:** je vraag behandelen. **Grondslag:** jouw toestemming; die kun je altijd intrekken, waarna we het document verwijderen. **Bewaartermijn:** in onze mailbox (bij Hostinger) zolang nodig om je vraag te behandelen, en daarna maximaal 2 jaar. OpenRegio geeft daarbij geen juridisch advies en treedt niet namens je op." },
 
         { h3: "3.4 RegioBot" },
         { p: "Wanneer je RegioBot gebruikt, verwerken we de vragen en informatie die je zelf invoert." },

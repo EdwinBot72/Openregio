@@ -115,7 +115,7 @@ const str = (v: unknown): string | null => {
 };
 
 /** Lange brief: het lokale model krijgt briefhoofd én slot (ondertekening, "namens"), niet alleen het begin. */
-function kopEnStaart(tekst: string): string {
+export function kopEnStaart(tekst: string): string {
   if (tekst.length <= 8000) return tekst;
   return `${tekst.slice(0, 5000)}\n\n[… middendeel van de brief weggelaten …]\n\n${tekst.slice(-3000)}`;
 }
@@ -164,7 +164,7 @@ async function aiExtractie(tekst: string): Promise<{ ex: Extractie; ok: boolean 
 const norm = (s: string) =>
   s.toLowerCase().replace(/[“”„"'‘’`´]/g, "").replace(/[^\p{L}\p{N}€%]+/gu, " ").replace(/\s+/g, " ").trim();
 
-function makeVerifier(brief: string) {
+export function makeVerifier(brief: string) {
   const b = norm(brief);
   return (citaat: string | null | undefined): string | undefined => {
     if (!citaat) return undefined;
@@ -251,19 +251,19 @@ function detecteerSoort(t: string): { dt: Dt; bron?: string } {
   return { dt: heeftBezwaar ? "besluit" : "overig" };
 }
 
-function detecteerKenmerk(t: string): string | null {
+export function detecteerKenmerk(t: string): string | null {
   const m = t.match(/(?:ons\s+kenmerk|uw\s+kenmerk|kenmerk|zaaknummer|dossiernummer|referentie)\s*[:.]?\s*([A-Z0-9][A-Z0-9\/._-]{3,})/i);
   return m ? m[1].replace(/[.,]$/, "") : null;
 }
 
 const MAAND_RE = "januari|februari|maart|april|mei|juni|juli|augustus|september|oktober|november|december";
-function detecteerDatum(t: string): string | null {
+export function detecteerDatum(t: string): string | null {
   const kop = t.slice(0, 1500);
   const m = kop.match(new RegExp(`\\b(\\d{1,2}\\s+(?:${MAAND_RE})\\s+\\d{4})\\b`, "i")) || kop.match(/\b(\d{1,2}[-/.]\d{1,2}[-/.]\d{4})\b/);
   return m ? m[1] : null;
 }
 
-function detecteerTermijnen(t: string): string[] {
+export function detecteerTermijnen(t: string): string[] {
   const res = new Set<string>();
   const patronen = [
     /binnen\s+(\d+|een|één|twee|drie|vier|vijf|zes|zeven|acht|tien|twaalf|veertien)\s+(werk)?(dagen|dag|weken|week|maanden|maand)/gi,
@@ -273,7 +273,7 @@ function detecteerTermijnen(t: string): string[] {
   return [...res].slice(0, 6);
 }
 
-function detecteerBedragen(t: string): string[] {
+export function detecteerBedragen(t: string): string[] {
   const res = new Set<string>();
   for (const m of t.matchAll(/(€\s?\d[\d.]*(,\d{2})?|\b\d[\d.]*(,\d{2})?\s?(euro|EUR)\b)/gi)) if (m.index !== undefined) res.add(zinRond(t, m.index, m[0].length));
   return [...res].slice(0, 3);

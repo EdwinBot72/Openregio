@@ -1734,6 +1734,87 @@ Schrijf in het Nederlands. Toon: helder, gezaghebbend, praktisch. Geef geen juri
     });
   });
 
+  // Uitleg van een brief of contract (Brievenagent / Contractagent): in gewone taal en juridisch,
+  // plus begrippen, termijnen en bedragen uit de tekst. Wachtrij met ?async=1. Niets wordt opgeslagen.
+  app.post("/api/uitleg", requireBasic, authenticatedAiRateLimit, (req: any, res: any) => {
+    uploadMemory.array("file", 10)(req, res, async (uploadErr: any) => {
+      if (uploadErr) {
+        return res.status(400).json({ error: uploadErr.message || "Upload mislukt", hint: "Upload maximaal 10 bestanden (PDF, Word of foto, elk max. 10 MB), of plak de tekst." });
+      }
+      const soort = req.body?.soort === "contract" ? "contract" : "brief";
+      const files: any[] = Array.isArray(req.files) ? req.files : [];
+      const geplakt = files.length ? "" : String(req.body?.tekst ?? "").trim();
+      if (!files.length && geplakt.length < 40) {
+        return res.status(400).json({ error: "Tekst te kort", hint: "Plak de volledige tekst (minimaal een paar zinnen) of upload een bestand." });
+      }
+      const run = async (): Promise<JobResultaat> => {
+        try {
+          let tekst = geplakt;
+          if (files.length) {
+            const { tekstUitBestanden } = await import("./rechten/tekst");
+            tekst = await tekstUitBestanden(files);
+          }
+          if (tekst.length < 40) return { status: 400, body: { error: "Geen leesbare tekst gevonden", hint: "Maak een scherpere scan/foto, of plak de tekst." } };
+          const { maakUitleg } = await import("./uitleg/uitleg");
+          const t0 = Date.now();
+          const uitleg = await maakUitleg(tekst, soort);
+          console.log(`[Uitleg] ${soort} klaar in ${Math.round((Date.now() - t0) / 1000)}s, chars=${tekst.length}, ai=${uitleg.aiGebruikt}`);
+          return { status: 200, body: uitleg };
+        } catch (err: any) {
+          console.error("[Uitleg] Error:", err?.message || err);
+          return { status: err?.status || 500, body: { error: err?.status ? err.message : "De uitleg kon niet worden gemaakt. Probeer het opnieuw." } };
+        }
+      };
+      if (req.query?.async === "1") {
+        try {
+          const returnPath = typeof req.query?.returnPath === "string" ? req.query.returnPath : (soort === "contract" ? "/agents/contractagent" : "/agents/brievenagent");
+          return res.status(202).json(zetInRij({ user: req.user, returnPath, run }));
+        } catch (e: any) {
+          if (e instanceof WachtrijFout) return res.status(e.status).json({ error: e.message });
+          return res.status(500).json({ error: "Kon de uitleg niet in de wachtrij zetten." });
+        }
+      }
+      const r = await run();
+      res.status(r.status).json(r.body);
+    });
+  });
+
+  // Brief of contract doorsturen naar OpenRegio (info@openregio.nl) — alleen met uitdrukkelijke toestemming.
+  const doorstuurTeller = new Map<string, { dag: string; aantal: number }>();
+  app.post("/api/brieven/naar-openregio", requireBasic, (req: any, res: any) => {
+    uploadMemory.array("file", 10)(req, res, async (uploadErr: any) => {
+      if (uploadErr) return res.status(400).json({ error: uploadErr.message || "Upload mislukt" });
+      if (String(req.body?.toestemming) !== "true") {
+        return res.status(400).json({ error: "Geef eerst toestemming om je document naar OpenRegio te sturen." });
+      }
+      const files: any[] = Array.isArray(req.files) ? req.files : [];
+      const tekst = String(req.body?.tekst ?? "").trim().slice(0, 100_000);
+      if (!files.length && tekst.length < 20) return res.status(400).json({ error: "Voeg een bestand toe of plak de tekst." });
+      const userId = String(req.user?.id || "");
+      const dag = new Date().toISOString().slice(0, 10);
+      const t = doorstuurTeller.get(userId);
+      const aantal = t && t.dag === dag ? t.aantal : 0;
+      if (aantal >= 5) return res.status(429).json({ error: "Je kunt maximaal 5 documenten per dag doorsturen. Mail ons anders direct via info@openregio.nl." });
+      try {
+        const { sendBriefNaarOpenRegio } = await import("./services/emailService");
+        const naam = [req.user?.firstName, req.user?.lastName].filter(Boolean).join(" ") || req.user?.email || "Onbekende gebruiker";
+        const ok = await sendBriefNaarOpenRegio({
+          naam, email: String(req.user?.email || ""),
+          soort: req.body?.soort === "contract" ? "contract" : "brief",
+          bericht: String(req.body?.bericht ?? "").slice(0, 5000),
+          bijlagen: files.map((f) => ({ filename: f.originalname || "document", content: f.buffer, contentType: f.mimetype })),
+          tekst: files.length ? undefined : tekst,
+        });
+        if (!ok) return res.status(502).json({ error: "Versturen lukte niet. Mail je document zelf naar info@openregio.nl." });
+        doorstuurTeller.set(userId, { dag, aantal: aantal + 1 });
+        res.json({ success: true });
+      } catch (err: any) {
+        console.error("[NaarOpenRegio] Error:", err?.message || err);
+        res.status(500).json({ error: "Versturen lukte niet. Mail je document zelf naar info@openregio.nl." });
+      }
+    });
+  });
+
   app.post("/api/brief-analyse", requireBasic, authenticatedAiRateLimit, viaWachtrij(async (req: any, res: any) => {
     try {
       // Accepteer zowel `tekst` als `content` — verschillende pagina's sturen een andere veldnaam.

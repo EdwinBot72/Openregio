@@ -22,3 +22,17 @@ export function eerste(t: string, re: RegExp): { m: RegExpMatchArray; zin: strin
   return m && m.index !== undefined ? { m, zin: zinRond(t, m.index, m[0].length) } : null;
 }
 
+
+/** Zin rond de beste treffer: liever een echte zin dan een kopje ("Artikel 2 – Looptijd"). */
+export function besteZin(t: string, re: RegExp): string | null {
+  const g = new RegExp(re.source, re.flags.includes("g") ? re.flags : re.flags + "g");
+  let eersteZin: string | null = null;
+  for (const m of t.matchAll(g)) {
+    if (m.index === undefined) continue;
+    const zin = zinRond(t, m.index, m[0].length);
+    eersteZin ??= zin;
+    const kopje = zin.length < 45 || /^(artikel|art\.)\s*\d/i.test(zin) || zin === zin.toUpperCase();
+    if (!kopje) return zin;
+  }
+  return eersteZin;
+}

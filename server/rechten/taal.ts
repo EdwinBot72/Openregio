@@ -9,7 +9,7 @@
 // Het citaat komt letterlijk uit de brief. De uitleg is algemene duiding;
 // wetsartikelen staan apart in `wet` en worden alleen op verzoek getoond.
 // ─────────────────────────────────────────────────────────────
-import { zinRond } from "./zin";
+import { besteZin } from "./zin";
 
 export interface TaalPunt {
   term: string;
@@ -172,9 +172,9 @@ const REGELS: Regel[] = [
 export function vindJuridischeTaal(tekst: string): TaalPunt[] {
   const uit: TaalPunt[] = [];
   for (const r of REGELS) {
-    const m = r.re.exec(tekst);
-    if (!m || m.index === undefined) continue;
-    uit.push({ term: r.term, citaat: zinRond(tekst, m.index, m[0].length), betekenis: r.betekenis, controleer: r.controleer, ermee: r.ermee, wet: r.wet });
+    const citaat = besteZin(tekst, r.re);
+    if (!citaat) continue;
+    uit.push({ term: r.term, citaat, betekenis: r.betekenis, controleer: r.controleer, ermee: r.ermee, wet: r.wet });
   }
   return uit;
 }

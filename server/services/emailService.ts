@@ -632,3 +632,47 @@ export async function sendAnalyseKlaarEmail(to: string, firstName: string, link:
     </body></html>`;
   return sendEmail(to, `${titel} — OpenRegio`, html);
 }
+
+// ── Brief doorsturen naar OpenRegio (op verzoek en met toestemming van de gebruiker) ──
+const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]!));
+
+export interface BriefBijlage { filename: string; content: Buffer; contentType: string }
+
+export async function sendBriefNaarOpenRegio(opts: {
+  naam: string; email: string; soort: string; bericht: string; bijlagen: BriefBijlage[]; tekst?: string;
+}): Promise<boolean> {
+  const naar = process.env.BRIEVEN_INBOX || "info@openregio.nl";
+  const onderwerp = `Brief doorgestuurd via OpenRegio (${opts.soort}) — ${opts.naam}`;
+  const html = `
+    <p><strong>${esc(opts.naam)}</strong> (${esc(opts.email)}) heeft via OpenRegio een ${esc(opts.soort)} doorgestuurd.</p>
+    <p><strong>Bericht:</strong><br>${esc(opts.bericht || "(geen bericht)").replace(/\n/g, "<br>")}</p>
+    ${opts.bijlagen.length ? `<p><strong>Bijlagen:</strong> ${opts.bijlagen.map((b) => esc(b.filename)).join(", ")}</p>` : ""}
+    ${opts.tekst ? `<p><strong>Geplakte tekst:</strong></p><pre style="white-space:pre-wrap;font-family:inherit">${esc(opts.tekst)}</pre>` : ""}
+    <p style="color:#64748b;font-size:12px">De gebruiker heeft toestemming gegeven om dit document per e-mail naar OpenRegio te sturen. Beantwoorden gaat naar ${esc(opts.email)}.</p>`;
+  if (smtp) {
+    try {
+      const info = await smtp.sendMail({
+        from: FROM_EMAIL, to: naar, replyTo: opts.email, subject: onderwerp, html,
+        attachments: opts.bijlagen.map((b) => ({ filename: b.filename, content: b.content, contentType: b.contentType })),
+      });
+      console.log(`[Email] Brief doorgestuurd naar ${naar} (${info.messageId})`);
+      return true;
+    } catch (error: any) {
+      console.error("[Email] Brief doorsturen via SMTP mislukt:", error.message || error);
+      if (!client) return false;
+    }
+  }
+  if (client) {
+    try {
+      await client.sendEmail({
+        From: FROM_EMAIL, To: naar, ReplyTo: opts.email, Subject: onderwerp, HtmlBody: html, MessageStream: "outbound",
+        Attachments: opts.bijlagen.map((b) => ({ Name: b.filename, Content: b.content.toString("base64"), ContentType: b.contentType, ContentID: "" })),
+      });
+      return true;
+    } catch (error: any) {
+      console.error("[Email] Brief doorsturen via Postmark mislukt:", error.message || error);
+      return false;
+    }
+  }
+  return false;
+}
