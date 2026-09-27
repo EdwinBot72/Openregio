@@ -164,7 +164,7 @@ export const VOORWAARDEN: JuridischDocument = {
     {
       titel: "12. Partnerprogramma",
       blokken: [
-        { p: "Doe je mee aan het partnerprogramma, dan ontvang je een vergoeding per nieuwe betalende klant die via jouw persoonlijke link een abonnement afsluit. De hoogte staat op het platform. Een vergoeding is alleen verschuldigd voor klanten die daadwerkelijk hebben betaald en niet binnen de eerste betaalperiode zijn teruggeboekt. Bij misbruik — zoals aanmelden van jezelf, nepaccounts of misleidende reclame — vervalt de vergoeding en mogen wij je deelname beëindigen. [● uitbetalingsmoment en -wijze invullen]" },
+        { p: "Biedt OpenRegio een partnerprogramma aan, dan gelden daarvoor aanvullende voorwaarden die we bij aanmelding bekendmaken. Tot die tijd is er geen recht op een vergoeding voor het aanbrengen van klanten." },
       ],
     },
     {
@@ -214,7 +214,7 @@ export const PRIVACY: JuridischDocument = {
         { ul: [
           "**Je brieven blijven op onze eigen server.** Brieven die je laat controleren, worden verwerkt op onze eigen server met een lokaal AI-model. Ze gaan niet naar externe AI-diensten zoals OpenAI of Google.",
           "**Brieven worden niet bewaard.** Een geüploade brief wordt na de analyse uit het geheugen gewist. Alleen het rapport blijft maximaal 24 uur klaarstaan zodat je het kunt ophalen.",
-          "**Geen tracking.** Geen advertentiecookies, geen analytics, geen verkoop van gegevens.",
+          "**Geen tracking.** Geen advertentiecookies, geen analytics, geen verkoop van gegevens. Ook de lettertypen staan op onze eigen server.",
           "**Geen training.** Je documenten worden niet gebruikt om AI-modellen te trainen.",
         ] },
       ],
@@ -234,10 +234,8 @@ export const PRIVACY: JuridischDocument = {
         { p: "Wat je zelf in je bedrijfsprofiel, bij lokale acties, workshops of aanbod zet (zoals bedrijfsnaam, omschrijving, adres, website en contactgegevens). Deze gegevens zijn **openbaar zichtbaar**. Om je bedrijf op de kaart te tonen, zetten we het adres om in coördinaten. **Grondslag:** uitvoering van de overeenkomst. **Bewaartermijn:** zolang je profiel bestaat." },
         { h3: "E-mail" },
         { p: "Je e-mailadres, om je noodzakelijke berichten te sturen: activatie, wachtwoord herstellen, betaling en een melding als een analyse klaar is terwijl je weg was. **Grondslag:** uitvoering van de overeenkomst. Nieuwsbrieven sturen we alleen met je toestemming; die kun je altijd intrekken." },
-        { h3: "Partnerprogramma" },
-        { p: "Welke klanten via jouw link zijn aangemeld en welke vergoeding je daarvoor krijgt. **Grondslag:** uitvoering van de overeenkomst en wettelijke plicht (administratie). **Bewaartermijn:** 7 jaar." },
         { h3: "Beveiliging en foutopsporing" },
-        { p: "Technische gegevens zoals IP-adres, tijdstip en de opgevraagde pagina in serverlogs, en inlogpogingen. **Doel:** het platform beveiligen, misbruik tegengaan en fouten oplossen. **Grondslag:** gerechtvaardigd belang. **Bewaartermijn:** kort, [● bewaartermijn serverlogs invullen]." },
+        { p: "Je IP-adres gebruiken we alleen kort in het werkgeheugen van de server om misbruik af te remmen, zoals te veel inlog- of registratiepogingen (maximaal een uur). We slaan IP-adressen niet op in logbestanden. Technische foutmeldingen komen in logbestanden die automatisch worden overschreven (maximaal 30 MB) en bij elke update van het platform worden gewist. **Doel:** het platform beveiligen en fouten oplossen. **Grondslag:** gerechtvaardigd belang." },
         { h3: "Contact en support" },
         { p: "Wat je ons mailt of via het platform vraagt. **Grondslag:** gerechtvaardigd belang (je vraag beantwoorden) of uitvoering van de overeenkomst. **Bewaartermijn:** tot je vraag is afgehandeld en daarna maximaal 2 jaar." },
       ],
@@ -245,7 +243,7 @@ export const PRIVACY: JuridischDocument = {
     {
       titel: "4. Kunstmatige intelligentie",
       blokken: [
-        { p: "Voor de briefcontrole, RegioBot en de AI-agents gebruiken we een AI-model dat op onze eigen server draait. Je gegevens gaan daarvoor niet naar externe AI-aanbieders. Het model wordt niet getraind met jouw gegevens. [● controleren: draait ook de zoekfunctie in eigen documenten (embeddings) lokaal? Zo niet, dan hier de aanbieder noemen]" },
+        { p: "Voor de briefcontrole, RegioBot en de AI-agents gebruiken we een AI-model dat op onze eigen server draait. Je gegevens gaan daarvoor niet naar externe AI-aanbieders. Ook het doorzoeken van je eigen documenten gebeurt op onze eigen server. Het model wordt niet getraind met jouw gegevens." },
         { p: "De uitkomsten zijn hulpmiddelen. Er is geen sprake van een geautomatiseerd besluit met rechtsgevolgen voor jou (artikel 22 AVG): jij beslist zelf wat je met een uitkomst doet." },
       ],
     },
@@ -254,10 +252,10 @@ export const PRIVACY: JuridischDocument = {
       blokken: [
         { p: "We verkopen je gegevens nooit. We delen ze alleen met partijen die we nodig hebben om het platform te laten werken, en alleen voor zover nodig:" },
         { ul: [
-          "**Hostinger** — hosting van de server waarop het platform, de database en het AI-model draaien, en onze e-maildienst. [● locatie datacenter controleren en invullen]",
+          "**Hostinger** — hosting van de server waarop het platform, de database en het AI-model draaien (datacenter in Frankfurt, Duitsland), en onze e-maildienst.",
           "**Stripe** — betalingen en facturen.",
-          "**Google Fonts** — lettertypen op de website. Daarbij ontvangt Google je IP-adres. [● of lettertypen zelf hosten; dan vervalt dit punt]",
-          "**Google Maps en/of OpenStreetMap (Nominatim)** — het omzetten van een bedrijfsadres in coördinaten voor de kaart. Daarbij wordt het adres gedeeld, geen gegevens over jou als bezoeker.",
+          "**OpenStreetMap (Nominatim)** — het omzetten van een adres in coördinaten voor de kaart met lokale acties. Gebeurt dat vanuit je browser, dan ziet OpenStreetMap ook je IP-adres.",
+          "**Google** — alleen als je zelf de check van je Google-bedrijfsvermelding gebruikt: dan sturen we de bedrijfsnaam en plaats die je invult naar Google.",
           "**Overheden en rechters** — alleen als wij daartoe wettelijk verplicht zijn.",
         ] },
         { p: "Met partijen die namens ons gegevens verwerken, sluiten we een verwerkersovereenkomst of maken we gebruik van hun standaard verwerkersvoorwaarden." },
@@ -266,7 +264,7 @@ export const PRIVACY: JuridischDocument = {
     {
       titel: "6. Gegevens buiten de Europese Unie",
       blokken: [
-        { p: "Stripe en Google kunnen gegevens verwerken in de Verenigde Staten. Die doorgifte gebeurt op basis van het EU-VS-gegevensprivacykader (Data Privacy Framework) of de standaardcontractbepalingen van de Europese Commissie." },
+        { p: "Onze server staat in de Europese Unie (Duitsland). Stripe en Google kunnen gegevens ook verwerken in de Verenigde Staten; die doorgifte gebeurt op basis van het EU-VS-gegevensprivacykader (Data Privacy Framework) of de standaardcontractbepalingen van de Europese Commissie. OpenStreetMap is gevestigd in het Verenigd Koninkrijk, waarvoor de Europese Commissie heeft vastgesteld dat het een passend beschermingsniveau biedt." },
       ],
     },
     {

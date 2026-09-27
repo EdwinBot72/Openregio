@@ -5,7 +5,7 @@
    Variabelen + body-styling gescoped onder `.or-app`.
    ============================================================ */
 
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&family=Nunito+Sans:wght@400;600;700&display=swap');
+/* Nunito en Nunito Sans worden lokaal geladen via /fonts/fonts.css (index.html). */
 
 .or-app {
   --or-blauw:        #15233b;
