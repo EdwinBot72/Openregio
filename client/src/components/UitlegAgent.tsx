@@ -18,7 +18,8 @@ interface Uitleg {
   gewoneTaal: string[];
   juridisch: string[];
   watMoetJe: string[];
-  verplichtingen: { jij: string[]; zij: string[] };
+  verplichtingen: { partij: string; moet: string[] }[];
+  soortBrief?: string;
   termijnen: string[];
   bedragen: string[];
   begrippen: Begrip[];
@@ -218,6 +219,7 @@ export function UitlegAgent({ soort, icoon }: { soort: UitlegSoort; icoon: React
             <div style={{ fontSize: 11, fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#64748b" }}>OpenRegio — {t.titel.toLowerCase()}</div>
             <h2 style={{ margin: "4px 0 6px", fontSize: 20, fontWeight: 800, color: NAVY }}>{uitleg.kop.onderwerp || (soort === "contract" ? "Uitleg van je contract" : "Uitleg van je brief")}</h2>
             <div style={{ display: "grid", gap: 2, fontSize: 13, color: "#475569" }}>
+              {uitleg.soortBrief && <span><strong>Soort brief:</strong> {uitleg.soortBrief}</span>}
               {uitleg.kop.afzender && <span><strong>Afzender:</strong> {uitleg.kop.afzender}</span>}
               {uitleg.kop.datum && <span><strong>Datum:</strong> {uitleg.kop.datum}</span>}
               {uitleg.kop.kenmerk && <span><strong>Kenmerk:</strong> {uitleg.kop.kenmerk}</span>}
@@ -233,18 +235,22 @@ export function UitlegAgent({ soort, icoon }: { soort: UitlegSoort; icoon: React
           </Blok>
 
           {uitleg.juridisch.length > 0 && (
-            <Blok titel="Juridisch uitgelegd" uitleg="Wat dit juridisch betekent. Algemene duiding, geen advies over jouw situatie.">
+            <Blok titel="Juridisch uitgelegd" uitleg={soort === "brief" ? "Wat dit soort brief juridisch betekent. Algemene uitleg, geen advies over jouw situatie." : "Wat dit juridisch betekent, op basis van de tekst. Algemene duiding, geen advies over jouw situatie."}>
               <Lijst items={uitleg.juridisch} />
             </Blok>
           )}
 
           {uitleg.watMoetJe.length > 0 && <Blok titel="Wat wordt er van je gevraagd?"><Lijst items={uitleg.watMoetJe} /></Blok>}
 
-          {(uitleg.verplichtingen.jij.length > 0 || uitleg.verplichtingen.zij.length > 0) && (
-            <Blok titel="Wie moet wat doen?">
+          {uitleg.verplichtingen.length > 0 && (
+            <Blok titel="Wie moet wat doen?" uitleg="Automatisch uit het contract gehaald — controleer het zelf in de tekst.">
               <div style={{ display: "grid", gap: 12, gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))" }}>
-                {uitleg.verplichtingen.jij.length > 0 && <div><div style={{ fontSize: 12, fontWeight: 800, color: "#64748b", marginBottom: 4 }}>JIJ</div><Lijst items={uitleg.verplichtingen.jij} /></div>}
-                {uitleg.verplichtingen.zij.length > 0 && <div><div style={{ fontSize: 12, fontWeight: 800, color: "#64748b", marginBottom: 4 }}>DE ANDERE PARTIJ</div><Lijst items={uitleg.verplichtingen.zij} /></div>}
+                {uitleg.verplichtingen.map((v) => (
+                  <div key={v.partij}>
+                    <div style={{ fontSize: 12, fontWeight: 800, color: "#64748b", marginBottom: 4 }}>{v.partij}</div>
+                    <Lijst items={v.moet} />
+                  </div>
+                ))}
               </div>
             </Blok>
           )}

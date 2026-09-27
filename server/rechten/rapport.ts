@@ -46,7 +46,7 @@ const VERLANGD = ["betalen", "informatie_verstrekken", "stoppen_activiteit", "ve
 
 type Rv = typeof RECHTSVORMEN[number];
 type Hd = typeof HOEDANIGHEDEN[number];
-type Dt = typeof DOCTYPES[number];
+export type Dt = typeof DOCTYPES[number];
 type Vl = typeof VERLANGD[number];
 
 interface Extractie {
@@ -229,7 +229,7 @@ function parseDatum(s: string | null): Date | null {
 const fmt = (d: Date) => `${d.getDate()} ${MAANDEN[d.getMonth()]} ${d.getFullYear()}`;
 
 // ── Vaste herkenning (geen AI): betrouwbaar en direct ────────
-function detecteerSoort(t: string): { dt: Dt; bron?: string } {
+export function detecteerSoort(t: string): { dt: Dt; bron?: string } {
   const heeftBezwaar = /bezwaar\s+(maken|indienen)|kunt u .{0,60}bezwaar/i.test(t);
   const regels: [Dt, RegExp, boolean?][] = [
     ["informatieverzoek", /(vorder(en|ing)[^.]{0,40}inlichtingen|verzoek(en)?\s+(wij\s+)?u[^.]{0,40}(inlichtingen|informatie|gegevens)[^.]{0,40}(te\s+verstrekken|toe\s+te\s+sturen|aan\s+te\s+leveren))/i, true],
