@@ -1,3 +1,4 @@
+import { fetchMetSessie } from "./queryClient";
 // Client-helper voor de analyse-wachtrij: indienen met ?async=1, daarna de
 // plek in de rij volgen tot het resultaat klaar is. Werkt ook als de server
 // (nog) synchroon antwoordt.
@@ -33,7 +34,7 @@ export async function volgJob<T = any>(
   for (;;) {
     let res: Response;
     try {
-      res = await fetch(`/api/analyse-jobs/${encodeURIComponent(jobId)}`, { credentials: "include" });
+      res = await fetchMetSessie(`/api/analyse-jobs/${encodeURIComponent(jobId)}`);
     } catch {
       if (++netwerkFouten > 20) throw new Error("Geen verbinding met de server. Probeer het later opnieuw.");
       await wacht(5000);
@@ -59,7 +60,7 @@ export async function voerUitViaWachtrij<T = any>(
   opts: { returnPath: string; onStatus?: (s: WachtrijStatus) => void; opslagSleutel?: string },
 ): Promise<T> {
   const sep = url.includes("?") ? "&" : "?";
-  const res = await fetch(`${url}${sep}async=1&returnPath=${encodeURIComponent(opts.returnPath)}`, { credentials: "include", ...init });
+  const res = await fetchMetSessie(`${url}${sep}async=1&returnPath=${encodeURIComponent(opts.returnPath)}`, init);
   const data = await res.json().catch(() => ({} as any));
   if (res.status === 202 && data?.jobId) {
     slaOp(opts.opslagSleutel, data.jobId);

@@ -179,7 +179,7 @@ export default function RechtenRapportPage() {
           <CardContent className="pt-6 space-y-4">
             {modus === "upload" ? (
               <>
-                <input ref={fileRef} type="file" multiple accept=".pdf,.docx,.jpg,.jpeg,.png,.txt" className="hidden" id="rr-file"
+                <input ref={fileRef} type="file" multiple accept=".pdf,.doc,.docx,.odt,.rtf,.txt,.jpg,.jpeg,.jfif,.png,.webp,.bmp,.tif,.tiff,.heic,.heif" className="hidden" id="rr-file"
                   onChange={(e) => voegToe(e.target.files)} data-testid="input-rr-bestand" />
                 {bestanden.length > 0 && (
                   <ul className="space-y-2">
@@ -202,7 +202,7 @@ export default function RechtenRapportPage() {
                     <Upload className="h-6 w-6 text-muted-foreground" />
                     <p className="text-sm font-medium">{bestanden.length ? "Nog een pagina of bijlage toevoegen" : "Klik om je brief te kiezen"}</p>
                     <p className="text-xs text-muted-foreground text-center">
-                      PDF (ook gescand), Word, foto (JPG/PNG) of TXT — max 10 MB per bestand.
+                      PDF (ook gescand), Word, OpenDocument, RTF, TXT of foto (JPG, PNG, HEIC, WebP, TIFF) — max 10 MB per bestand.
                       {!bestanden.length && <> Meerdere pagina's als foto? Kies ze allemaal, in de goede volgorde (max {MAX_BESTANDEN}).</>}
                     </p>
                   </label>

@@ -172,7 +172,7 @@ export function UitlegAgent({ soort, icoon }: { soort: UitlegSoort; icoon: React
         <div style={{ background: "white", border: "1.5px solid #e2e8f0", borderRadius: 14, padding: 20, marginBottom: 14, display: "grid", gap: 10 }}>
           {modus === "upload" ? (
             <>
-              <input ref={fileRef} id={`ua-file-${soort}`} type="file" multiple accept=".pdf,.docx,.jpg,.jpeg,.png,.txt" style={{ display: "none" }}
+              <input ref={fileRef} id={`ua-file-${soort}`} type="file" multiple accept=".pdf,.doc,.docx,.odt,.rtf,.txt,.jpg,.jpeg,.jfif,.png,.webp,.bmp,.tif,.tiff,.heic,.heif" style={{ display: "none" }}
                 onChange={(e) => voegToe(e.target.files)} data-testid={`input-${soort}-bestand`} />
               {bestanden.map((b, i) => (
                 <div key={`${b.name}-${i}`} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", border: "1px solid #e2e8f0", borderRadius: 8, background: "#f8fafc" }}>
@@ -190,7 +190,7 @@ export function UitlegAgent({ soort, icoon }: { soort: UitlegSoort; icoon: React
                 <label htmlFor={`ua-file-${soort}`} style={{ border: "2px dashed #cbd5e1", borderRadius: 10, padding: bestanden.length ? "14px" : "32px 20px", textAlign: "center", cursor: "pointer", background: "#f8fafc" }}>
                   <Upload size={24} style={{ color: "#94a3b8", margin: "0 auto 6px" }} />
                   <div style={{ fontSize: 14, fontWeight: 600, color: "#334155" }}>{bestanden.length ? "Nog een pagina of bijlage toevoegen" : "Klik om je bestand te kiezen"}</div>
-                  <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 2 }}>PDF (ook gescand), Word, foto of TXT — max 10 MB per bestand, tot {MAX_BESTANDEN} bestanden</div>
+                  <div style={{ fontSize: 12, color: "#94a3b8", marginTop: 2 }}>PDF (ook gescand), Word, OpenDocument, RTF, TXT of foto (JPG, PNG, HEIC, WebP, TIFF) — max 10 MB per bestand, tot {MAX_BESTANDEN} bestanden</div>
                 </label>
               )}
             </>

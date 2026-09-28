@@ -10,7 +10,7 @@ import { seedMasterAccount, seedTestAccounts } from "./seed";
 import { generateRandomPassword, generateOnboardingToken, getPlanPrice, getPlanDisplayName, generateReferralCode } from "./utils/auth";
 import { sendOnboardingEmail, sendNotificationEmail, sendLokaleActieHerinneringEmail, sendPasswordResetNotificationEmail } from "./services/emailService";
 import bcrypt from "bcrypt";
-import { uploadMemory, getDocumentType } from "./middleware/upload";
+import { uploadMemory, uploadBrief, uploadFoutTekst, getDocumentType } from "./middleware/upload";
 import { publicAiRateLimit, authenticatedAiRateLimit } from "./middleware/aiRateLimit";
 import { mollieStartRateLimit, contactFormRateLimit, geocodeRateLimit } from "./middleware/rateLimits";
 import { ObjectStorageService } from "./replit_integrations/object_storage";
@@ -1705,9 +1705,9 @@ Schrijf in het Nederlands. Toon: helder, gezaghebbend, praktisch. Geef geen juri
 
   app.post("/api/rechten-rapport", requireBasic, authenticatedAiRateLimit, (req: any, res: any) => {
     // Tot 10 bestanden: bijv. een foto per pagina, of een PDF met bijlagen.
-    uploadMemory.array("file", 10)(req, res, async (uploadErr: any) => {
+    uploadBrief.array("file", 10)(req, res, async (uploadErr: any) => {
       if (uploadErr) {
-        return res.status(400).json({ error: uploadErr.message || "Upload mislukt", hint: "Upload maximaal 10 bestanden (PDF, Word of foto, elk max. 10 MB), of plak de tekst." });
+        return res.status(400).json({ error: uploadFoutTekst(uploadErr), hint: "Upload maximaal 10 bestanden (PDF, Word of foto, elk max. 10 MB), of plak de tekst." });
       }
       const files: any[] = Array.isArray(req.files) ? req.files : [];
       const file = files.length > 0;
@@ -1737,9 +1737,9 @@ Schrijf in het Nederlands. Toon: helder, gezaghebbend, praktisch. Geef geen juri
   // Uitleg van een brief of contract (Brievenagent / Contractagent): in gewone taal en juridisch,
   // plus begrippen, termijnen en bedragen uit de tekst. Wachtrij met ?async=1. Niets wordt opgeslagen.
   app.post("/api/uitleg", requireBasic, authenticatedAiRateLimit, (req: any, res: any) => {
-    uploadMemory.array("file", 10)(req, res, async (uploadErr: any) => {
+    uploadBrief.array("file", 10)(req, res, async (uploadErr: any) => {
       if (uploadErr) {
-        return res.status(400).json({ error: uploadErr.message || "Upload mislukt", hint: "Upload maximaal 10 bestanden (PDF, Word of foto, elk max. 10 MB), of plak de tekst." });
+        return res.status(400).json({ error: uploadFoutTekst(uploadErr), hint: "Upload maximaal 10 bestanden (PDF, Word of foto, elk max. 10 MB), of plak de tekst." });
       }
       const soort = req.body?.soort === "contract" ? "contract" : "brief";
       const files: any[] = Array.isArray(req.files) ? req.files : [];
@@ -1782,8 +1782,8 @@ Schrijf in het Nederlands. Toon: helder, gezaghebbend, praktisch. Geef geen juri
   // Brief of contract doorsturen naar OpenRegio (info@openregio.nl) — alleen met uitdrukkelijke toestemming.
   const doorstuurTeller = new Map<string, { dag: string; aantal: number }>();
   app.post("/api/brieven/naar-openregio", requireBasic, (req: any, res: any) => {
-    uploadMemory.array("file", 10)(req, res, async (uploadErr: any) => {
-      if (uploadErr) return res.status(400).json({ error: uploadErr.message || "Upload mislukt" });
+    uploadBrief.array("file", 10)(req, res, async (uploadErr: any) => {
+      if (uploadErr) return res.status(400).json({ error: uploadFoutTekst(uploadErr) });
       if (String(req.body?.toestemming) !== "true") {
         return res.status(400).json({ error: "Geef eerst toestemming om je document naar OpenRegio te sturen." });
       }
@@ -2755,10 +2755,10 @@ Maak een complete, direct bruikbare WOO-brief.`;
   // Tekst uit een geüploade brief halen (PDF/Word/foto, met OCR) — voor "Besluit controleren".
   // Niets wordt opgeslagen; de tekst gaat alleen terug naar de gebruiker zelf.
   app.post("/api/brieven/tekst", requireBasic, authenticatedAiRateLimit, (req: any, res: any) => {
-    uploadMemory.array("file", 10)(req, res, async (uploadErr: any) => {
+    uploadBrief.array("file", 10)(req, res, async (uploadErr: any) => {
       const files: any[] = Array.isArray(req.files) ? req.files : [];
       if (uploadErr || !files.length) {
-        return res.status(400).json({ error: uploadErr?.message || "Geen bestand ontvangen", hint: "Upload maximaal 10 bestanden (PDF, Word of foto, elk max. 10 MB), of plak de tekst." });
+        return res.status(400).json({ error: uploadErr ? uploadFoutTekst(uploadErr) : "Geen bestand ontvangen", hint: "Upload maximaal 10 bestanden (PDF, Word of foto, elk max. 10 MB), of plak de tekst." });
       }
       try {
         const { tekstUitBestanden } = await import("./rechten/tekst");

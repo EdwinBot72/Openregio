@@ -32,7 +32,7 @@ ENV NODE_ENV=production
 
 # tini voor signal-handling + poppler-utils (pdftoppm) voor OCR van gescande PDF's
 RUN apt-get update \
- && apt-get install -y --no-install-recommends tini poppler-utils \
+ && apt-get install -y --no-install-recommends tini poppler-utils antiword unzip libheif-examples libtiff-tools \
  && rm -rf /var/lib/apt/lists/*
 
 # Hergebruik de reeds gebouwde artefacten (geen npm-install meer)

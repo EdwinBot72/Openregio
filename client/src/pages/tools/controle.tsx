@@ -22,7 +22,7 @@ import {
 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest, parseApiError } from "@/lib/queryClient";
+import { apiRequest, fetchMetSessie, parseApiError } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/useAuth";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { neemBriefOver } from "@/lib/briefOverdracht";
@@ -128,7 +128,7 @@ export default function ControlePage() {
     setOvername("bezig");
     const form = new FormData();
     for (const b of brief.bestanden) form.append("file", b);
-    fetch("/api/brieven/tekst", { method: "POST", body: form, credentials: "include" })
+    fetchMetSessie("/api/brieven/tekst", { method: "POST", body: form })
       .then(async (r) => {
         const j = await r.json().catch(() => ({}));
         if (!r.ok) throw new Error(j.hint || j.error || "Het bestand kon niet worden gelezen.");

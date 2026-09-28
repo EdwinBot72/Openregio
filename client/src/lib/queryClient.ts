@@ -25,6 +25,17 @@ function isTokenExpiredResponse(res: Response): boolean {
   return res.status === 401;
 }
 
+/**
+ * fetch met sessieverlenging: bij een 401 wordt de sessie stil vernieuwd en het verzoek één keer herhaald.
+ * Voor eigen fetch-aanroepen (uploads, wachtrij) die niet via apiRequest lopen.
+ */
+export async function fetchMetSessie(url: string, init: RequestInit = {}): Promise<Response> {
+  const opts: RequestInit = { credentials: "include", ...init };
+  let res = await fetch(url, opts);
+  if (isTokenExpiredResponse(res) && (await tryRefreshToken())) res = await fetch(url, opts);
+  return res;
+}
+
 async function throwIfResNotOk(res: Response) {
   if (!res.ok) {
     const text = (await res.text()) || res.statusText;

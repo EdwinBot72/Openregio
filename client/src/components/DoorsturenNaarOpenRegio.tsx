@@ -4,6 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { fetchMetSessie } from "@/lib/queryClient";
 import { CheckCircle2, Loader2, Send } from "lucide-react";
 
 const NAVY = "#0b2240";
@@ -29,7 +30,7 @@ export function DoorsturenNaarOpenRegio({ soort, bestanden, tekst }: { soort: "b
       form.append("toestemming", String(toestemming));
       if (bestanden.length) for (const b of bestanden) form.append("file", b);
       else form.append("tekst", tekst.trim());
-      const r = await fetch("/api/brieven/naar-openregio", { method: "POST", body: form, credentials: "include" });
+      const r = await fetchMetSessie("/api/brieven/naar-openregio", { method: "POST", body: form });
       const j = await r.json().catch(() => ({}));
       if (!r.ok) throw new Error(j.error || "Versturen lukte niet.");
     },
