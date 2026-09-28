@@ -47,19 +47,41 @@ async function ocrAfbeelding(buffer: Buffer): Promise<string> {
   return ((await extractTextFromImage(buffer)).text || "").trim();
 }
 
-/** Eenvoudige RTF → tekst: stuurcodes en groepen weg, alinea's en speciale tekens behouden. */
+/** RTF → tekst: loopt de groepen langs en slaat opmaakblokken (lettertypen, stijlen, info, afbeeldingen) over. */
+const RTF_OVERSLAAN = new Set(["fonttbl", "colortbl", "stylesheet", "info", "pict", "header", "footer", "headerl", "headerr", "footerl", "footerr", "listtable", "listoverridetable", "rsidtbl", "generator", "xmlnstbl", "themedata", "colorschememapping", "latentstyles", "datastore", "object"]);
 function rtfNaarTekst(rtf: string): string {
-  return rtf
-    .replace(/\\'([0-9a-f]{2})/gi, (_, h) => Buffer.from([parseInt(h, 16)]).toString("latin1"))
-    .replace(/\\u(-?\d+)\??/g, (_, n) => String.fromCharCode(((Number(n) % 65536) + 65536) % 65536))
-    .replace(/\{\\\*[^{}]*\}/g, "")
-    .replace(/\{\\(fonttbl|colortbl|stylesheet|info)[\s\S]*?\}\}?/g, "")
-    .replace(/\\(par|line)\b ?/g, "\n")
-    .replace(/\\tab\b ?/g, "\t")
-    .replace(/\\[a-z]+-?\d* ?/gi, "")
-    .replace(/[{}]/g, "")
-    .replace(/\n{3,}/g, "\n\n")
-    .trim();
+  let uit = "";
+  const stapel: boolean[] = [];
+  let overslaan = false;
+  let i = 0;
+  while (i < rtf.length) {
+    const c = rtf[i];
+    if (c === "{") { stapel.push(overslaan); i++; continue; }
+    if (c === "}") { overslaan = stapel.pop() ?? false; i++; continue; }
+    if (c === "\\") {
+      const volgend = rtf[i + 1];
+      if (volgend === "*") { overslaan = true; i += 2; continue; }
+      if (volgend === "'") {
+        if (!overslaan) uit += Buffer.from([parseInt(rtf.slice(i + 2, i + 4), 16)]).toString("latin1");
+        i += 4; continue;
+      }
+      if (volgend === "\\" || volgend === "{" || volgend === "}") { if (!overslaan) uit += volgend; i += 2; continue; }
+      const m = /^\\([a-z]+)(-?\d+)? ?/i.exec(rtf.slice(i, i + 40));
+      if (!m) { i++; continue; }
+      const woord = m[1].toLowerCase();
+      i += m[0].length;
+      if (RTF_OVERSLAAN.has(woord)) { overslaan = true; continue; }
+      if (overslaan) continue;
+      if (woord === "par" || woord === "line") uit += "\n";
+      else if (woord === "tab") uit += "\t";
+      else if (woord === "u" && m[2]) { uit += String.fromCharCode(((Number(m[2]) % 65536) + 65536) % 65536); if (rtf[i] === "?") i++; }
+      continue;
+    }
+    if (c === "\r" || c === "\n") { i++; continue; }
+    if (!overslaan) uit += c;
+    i++;
+  }
+  return uit.replace(/[ \t]+\n/g, "\n").replace(/\n{3,}/g, "\n\n").trim();
 }
 
 export async function tekstUitBestand(file: Bestand): Promise<string> {
