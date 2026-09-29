@@ -3,13 +3,14 @@ import { Link, useLocation } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, FileText, Loader2, Scale, Upload, X, Copy, Check, Printer, RotateCcw, ShieldCheck } from "lucide-react";
+import { ArrowLeft, FileText, Loader2, Scale, Upload, X, Copy, Check, Printer, RotateCcw, ShieldCheck, Download } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { useToast } from "@/hooks/use-toast";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { voerUitViaWachtrij, volgJob, wachtrijTekst, type WachtrijStatus } from "@/lib/wachtrij";
 import { geefBriefDoor } from "@/lib/briefOverdracht";
 import { WooNamensFormulier } from "@/components/WooNamensFormulier";
+import { downloadRapportPdf } from "@/lib/rapport-pdf";
 
 const JOB_SLEUTEL = "openregio:job:rechten-rapport";
 
@@ -73,6 +74,14 @@ export default function RechtenRapportPage() {
   const [wachtStatus, setWachtStatus] = useState<WachtrijStatus | null>(null);
   const [toonWet, setToonWet] = useState(false);
   const [wooOpen, setWooOpen] = useState(false);
+  const [pdfBezig, setPdfBezig] = useState(false);
+  const bewaarPdf = async () => {
+    if (!rapport) return;
+    setPdfBezig(true);
+    try { await downloadRapportPdf(rapport, { metWet: toonWet }); }
+    catch { toast({ title: "PDF maken mislukt", description: "Probeer het opnieuw, of gebruik Printen.", variant: "destructive" }); }
+    finally { setPdfBezig(false); }
+  };
   const [, navigeer] = useLocation();
   // Doorgeven kan alleen als de brief nog in deze pagina staat (niet na hervatten via de mail-link).
   const kanDoorgeven = modus === "upload" ? bestanden.length > 0 : tekst.trim().length >= 40;
@@ -366,8 +375,11 @@ export default function RechtenRapportPage() {
           </div>
 
           <div className="flex gap-2 rr-no-print">
-            <Button onClick={() => window.print()} style={{ background: NAVY }} data-testid="button-rr-print">
-              <Printer className="h-4 w-4 mr-2" /> Download als PDF
+            <Button onClick={bewaarPdf} disabled={pdfBezig} style={{ background: NAVY }} data-testid="button-rr-pdf">
+              {pdfBezig ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />} Download als PDF
+            </Button>
+            <Button variant="outline" onClick={() => window.print()} data-testid="button-rr-print">
+              <Printer className="h-4 w-4 mr-2" /> Printen
             </Button>
             <Button variant="outline" onClick={opnieuw}>
               <RotateCcw className="h-4 w-4 mr-2" /> Nieuwe brief

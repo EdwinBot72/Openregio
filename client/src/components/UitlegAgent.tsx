@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { voerUitViaWachtrij, volgJob, wachtrijTekst, type WachtrijStatus } from "@/lib/wachtrij";
 import { DoorsturenNaarOpenRegio } from "@/components/DoorsturenNaarOpenRegio";
-import { AlertCircle, ArrowRight, CheckCircle2, FileText, Loader2, Printer, RotateCcw, Upload, X } from "lucide-react";
+import { AlertCircle, ArrowRight, CheckCircle2, Download, FileText, Loader2, Printer, RotateCcw, Upload, X } from "lucide-react";
+import { downloadUitlegPdf } from "@/lib/rapport-pdf";
 
 export type UitlegSoort = "brief" | "contract";
 
@@ -87,6 +88,7 @@ export function UitlegAgent({ soort, icoon }: { soort: UitlegSoort; icoon: React
   const [wachtStatus, setWachtStatus] = useState<WachtrijStatus | null>(null);
   const [seconden, setSeconden] = useState(0);
   const [toonWet, setToonWet] = useState(false);
+  const [pdfBezig, setPdfBezig] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const mut = useMutation({
@@ -291,7 +293,20 @@ export function UitlegAgent({ soort, icoon }: { soort: UitlegSoort; icoon: React
           </div>
 
           <div className="ua-no-print" style={{ display: "flex", flexWrap: "wrap", gap: 8, marginTop: 16 }}>
-            <Button onClick={() => window.print()} style={{ background: NAVY }}><Printer size={14} /> Download als PDF</Button>
+            <Button
+              disabled={pdfBezig}
+              onClick={async () => {
+                setPdfBezig(true);
+                try { await downloadUitlegPdf(uitleg, { metWet: toonWet }); }
+                catch { toast({ title: "PDF maken mislukt", description: "Probeer het opnieuw, of gebruik Printen.", variant: "destructive" }); }
+                finally { setPdfBezig(false); }
+              }}
+              style={{ background: NAVY }}
+              data-testid={`button-${soort}-pdf`}
+            >
+              {pdfBezig ? <Loader2 size={14} className="animate-spin" /> : <Download size={14} />} Download als PDF
+            </Button>
+            <Button variant="outline" onClick={() => window.print()}><Printer size={14} /> Printen</Button>
             <Button variant="outline" onClick={opnieuw}><RotateCcw size={14} /> Nieuwe {t.leeg}</Button>
             {soort === "brief" && (
               <Link href="/regels/documenten">
