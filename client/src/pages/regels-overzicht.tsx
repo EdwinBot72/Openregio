@@ -53,8 +53,8 @@ const NAV_CARDS = [
     id: "woo",
     href: "/woo-verzoeken",
     icon: Upload,
-    title: "WOO-verzoek",
-    description: "Vraag overheidsdocumenten op via een WOO-verzoek met conceptbrief.",
+    title: "Woo-verzoeken",
+    description: "OpenRegio vraagt namens jou overheidsdocumenten op via de Woo en bewaakt de termijn.",
   },
 ];
 
