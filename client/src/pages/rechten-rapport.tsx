@@ -300,11 +300,17 @@ export default function RechtenRapportPage() {
           {rapport.conceptbrieven.length > 0 && (
             <section className="mb-6">
               <h3 className="text-base font-bold mb-1" style={{ color: NAVY }}>8. Je reactie: vraag eerst wie dit oplegt</h3>
-              <p className="text-xs text-muted-foreground mb-3">
-                Deze brief gaat <strong>niet</strong> in op de inhoud. Hij vraagt alleen wie bevoegd is, wie de brief heeft opgemaakt en
-                ondertekend, en op grond waarvan. Vul de tekst tussen [haken] in en lees alles na. Verstuur aangetekend of per e-mail
-                met ontvangstbevestiging en bewaar een kopie. Let op: termijnen lopen intussen door.
+              <p className="text-xs text-muted-foreground mb-2">
+                Deze brief gaat op <strong>geen enkele wijze</strong> in op de inhoud en erkent niets: hij vraagt alleen wie verantwoordelijk is,
+                wie de brief heeft opgemaakt en ondertekend, en op grond van welke bevoegdheid.
               </p>
+              <ol className="text-xs text-muted-foreground mb-3 list-decimal pl-5 space-y-0.5">
+                <li>Vul de tekst tussen [haken] in en lees alles na.</li>
+                <li>Print de brief en zet je paraaf.</li>
+                <li>Bewaar het origineel zelf en breng een kopie weg (of verstuur aangetekend).</li>
+                <li>Vraag bij het afgeven om een ontvangstbevestiging — een stempel of handtekening met datum op jouw exemplaar.</li>
+              </ol>
+              <p className="text-xs mb-3" style={{ color: "#8a5300" }}>Let op: termijnen in de brief lopen intussen door. Deze vragen stellen houdt een termijn niet tegen.</p>
               {rapport.conceptbrieven.map((c) => (
                 <div key={c.titel} className="rr-sectie mb-4 border rounded-md p-3">
                   <div className="flex items-center justify-between gap-2 mb-2">

@@ -322,11 +322,19 @@ const ORG_DUIDING: Record<OrgSoort, { tekst: string; label: Label }> = {
 
 const ORG_WOORD = /(gemeente|waterschap|hoogheemraadschap|wetterskip|provincie|belastingdienst|belastingen|ministerie|rijksdienst|\buwv\b|\bcjib\b|\bduo\b|\bsvb\b|\bnvwa\b|inspectie|omgevingsdienst|incasso|deurwaarder|advocat|\bB\.\s?V\.|\bBV\b|\bN\.\s?V\.|bureau)/i;
 /** Afzender uit het briefhoofd: eerste regel(s) vóór de adressering die op een organisatie lijken. */
+/** OCR-rommel en stempels ("AFSCHRIFT", "KOPIE") uit een briefhoofdregel halen. */
+function schoonBriefhoofd(r: string): string {
+  return r
+    .replace(/\b(AFSCHRIFT|KOPIE|DUPLICAAT|ORIGINEEL)\b/gi, " ")
+    .replace(/^[^A-Za-zÀ-ÿ]*(?:\b[A-Za-z]{1,2}\b[^A-Za-zÀ-ÿ]+)*/, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
 function detecteerAfzender(t: string): string | null {
   const regels = t.slice(0, 800).split(/\n/).map((r) => r.trim()).filter(Boolean).slice(0, 6);
   for (const r of regels) {
     if (/^(aan|t\.a\.v|datum|kenmerk|betreft|onderwerp|geachte)\b/i.test(r)) break;
-    if (r.length <= 80 && ORG_WOORD.test(r)) return r;
+    if (r.length <= 80 && ORG_WOORD.test(r)) return schoonBriefhoofd(r);
   }
   return null;
 }
@@ -346,7 +354,9 @@ interface BriefGegevens {
 
 /**
  * Vaste brief (geen AI) waarin de ontvanger vraagt wie bevoegd is, wie de brief heeft
- * opgemaakt en ondertekend, en op grond waarvan. Gaat bewust niet in op de inhoud.
+ * opgemaakt en ondertekend, en op grond waarvan. Gaat bewust niet in op de inhoud en
+ * is neutraal geformuleerd: geen zin veronderstelt een besluit, plicht of schuld, en de
+ * afsluiting sluit erkenning uitdrukkelijk uit.
  */
 function verificatiebrief(g: BriefGegevens): Conceptbrief {
   const verwijzing = [g.datum && `van ${g.datum}`, g.kenmerk && `met kenmerk ${g.kenmerk}`].filter(Boolean).join(" ");
@@ -354,20 +364,20 @@ function verificatiebrief(g: BriefGegevens): Conceptbrief {
   const vragen: string[] = [];
   if (g.overheid) {
     vragen.push(g.namens
-      ? `Uw brief is ondertekend namens ${g.namens}. Heeft dit bestuursorgaan zelf besloten, of is in mandaat besloten? Op welke datum is het besluit genomen?`
-      : "Welk bestuursorgaan heeft dit besluit genomen, en op welke datum? Uit de brief blijkt niet namens wie is ondertekend.");
+      ? `Uw brief vermeldt dat is ondertekend namens ${g.namens}. Is de brief door dit bestuursorgaan zelf vastgesteld, of in mandaat? Op welke datum?`
+      : "Welk bestuursorgaan is verantwoordelijk voor deze brief, en op welke datum is die vastgesteld? Uit de brief blijkt niet namens wie is ondertekend.");
     vragen.push(ondertekend
       ? `Op grond van welk mandaat- of machtigingsbesluit was ${ondertekend} bevoegd deze brief te ondertekenen? Graag de vindplaats of een kopie van dat besluit.`
       : "Wie (naam en functie) heeft deze brief ondertekend, en op grond van welk mandaat- of machtigingsbesluit? Graag de vindplaats of een kopie van dat besluit.");
     vragen.push(g.behandelaar
       ? `U noemt ${g.behandelaar} als behandelaar. Heeft deze persoon de brief ook opgesteld? Zo niet: wie (naam en functie) heeft de brief opgemaakt?`
       : "Wie (naam en functie) heeft deze brief opgemaakt?");
-    vragen.push("Op welk wettelijk voorschrift berust de bevoegdheid van het bestuursorgaan om mij dit op te leggen? Graag het artikel en de wet of verordening.");
+    vragen.push("Op welk wettelijk voorschrift berust de bevoegdheid om deze brief aan mij te richten? Graag het artikel en de wet of verordening.");
   } else {
     vragen.push(g.opdrachtgever
       ? `U schrijft namens ${g.opdrachtgever}. Graag een bewijs van uw opdracht of volmacht.`
       : "Namens wie treedt u op? Graag de naam van uw opdrachtgever en een bewijs van uw opdracht of volmacht.");
-    vragen.push("Op welke overeenkomst, factuur, beslissing of welk vonnis berust de vordering? Graag een kopie.");
+    vragen.push("Op welke overeenkomst, factuur, beslissing of welk vonnis baseert u deze brief? Graag een kopie.");
     vragen.push("Wie (naam en functie) heeft deze brief opgemaakt en ondertekend, en is die persoon bevoegd uw organisatie te vertegenwoordigen?");
     if (g.incasso) vragen.push("Onder welk nummer staat u ingeschreven in het incassoregister van Justis?");
   }
@@ -386,16 +396,15 @@ function verificatiebrief(g: BriefGegevens): Conceptbrief {
     "",
     "Geachte heer, mevrouw,",
     "",
-    `Ik heb uw brief${verwijzing ? ` ${verwijzing}` : ""} ontvangen. Voordat ik inhoudelijk reageer, wil ik vaststellen wie mij dit oplegt en of die daartoe bevoegd is. Ik verzoek u daarom om de volgende gegevens:`,
+    `Ik verwijs naar uw brief${verwijzing ? ` ${verwijzing}` : ""}. Ik verzoek u mij de volgende gegevens te verstrekken:`,
     "",
     ...vragen.map((v, i) => `${i + 1}. ${v}`),
     "",
-    g.overheid
-      ? "Ik ga pas op de inhoud in nadat ik deze gegevens heb ontvangen."
-      : "Ik ga pas op de inhoud in nadat ik deze gegevens heb ontvangen. Tot die tijd verzoek ik u de invordering op te schorten en geen kosten in rekening te brengen.",
+    "Deze brief is uitsluitend een verzoek om deze gegevens. Hij houdt geen erkenning in van enige verplichting, schuld of aansprakelijkheid, en geen instemming met de inhoud van uw brief. Alle rechten blijven voorbehouden.",
   ];
-  regels.push("", "Met vriendelijke groet,", "", "[Naam]", "[Handtekening]");
-  return { titel: g.overheid ? "Verzoek: wie besliste, wie tekende, met welke bevoegdheid?" : "Verzoek: namens wie en op grond waarvan?", tekst: regels.join("\n") };
+  if (!g.overheid) regels.push("", "Ik verzoek u tot de ontvangst van deze gegevens geen verdere stappen te zetten en geen kosten in rekening te brengen.");
+  regels.push("", "Met vriendelijke groet,", "", "[Naam]", "[Paraaf]");
+  return { titel: g.overheid ? "Verzoek om gegevens: wie is verantwoordelijk, wie tekende, met welke bevoegdheid?" : "Verzoek om gegevens: namens wie en op grond waarvan?", tekst: regels.join("\n") };
 }
 
 // ── Rapport bouwen ───────────────────────────────────────────
