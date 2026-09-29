@@ -20,8 +20,8 @@ const PRIVACYCONTACT = "privacy@openregio.nl";
 
 export const VOORWAARDEN: JuridischDocument = {
   titel: "Algemene voorwaarden",
-  versie: "2.0",
-  bijgewerkt: "26 september 2026",
+  versie: "2.1",
+  bijgewerkt: "29 september 2026",
   intro: [
     "Deze voorwaarden gelden voor iedereen die een account heeft op OpenRegio of de diensten van OpenRegio gebruikt. Lees vooral artikel 3 (wat OpenRegio wel en niet is), artikel 4 (je eigen verantwoordelijkheid) en artikel 9 (aansprakelijkheid). Daar staat wat je van ons kunt verwachten — en wat niet.",
   ],
@@ -60,7 +60,7 @@ export const VOORWAARDEN: JuridischDocument = {
           "**Labels zijn een hulpmiddel.** Wat als “vaststaand” is gemarkeerd, is letterlijk teruggevonden in de tekst die je aanleverde — maar kan verkeerd zijn uitgelezen. “Juridische duiding” is algemene uitleg die in jouw situatie anders kan uitpakken. “Nog te controleren” moet je zelf nagaan.",
           "**Niet volledig.** Het platform bekijkt alleen de tekst die jij aanlevert. Andere stukken, eerdere besluiten, afspraken of omstandigheden kennen wij niet.",
           "**Regels veranderen.** Wetten, verordeningen, beleid en rechtspraak veranderen. Informatie op het platform kan verouderd zijn.",
-          "**Geen vertegenwoordiging.** Wij treden niet namens jou op, voeren geen correspondentie voor je en bewaken geen termijnen voor je.",
+          "**Geen vertegenwoordiging — met één uitzondering.** Behalve bij Woo-verzoeken die je ons uitdrukkelijk laat indienen (artikel 8a) treden wij niet namens jou op, voeren wij geen correspondentie voor je en bewaken wij geen termijnen voor je.",
         ] },
       ],
     },
@@ -121,6 +121,21 @@ export const VOORWAARDEN: JuridischDocument = {
           "Analyses draaien op onze eigen server. Bij drukte kom je in een wachtrij en kan een analyse enkele minuten duren. Er geldt een maximum aantal gelijktijdige analyses per gebruiker.",
           "Wij mogen onderdelen van het platform wijzigen, uitbreiden, beperken of stopzetten.",
           "Je gebruikt het platform niet op een manier die het platform, andere gebruikers of derden schaadt: geen misbruik, geen geautomatiseerd massaal opvragen, geen pogingen om beveiliging te omzeilen, geen onrechtmatige, misleidende of beledigende inhoud en geen spam.",
+        ] },
+      ],
+    },
+    {
+      titel: "8a. Woo-verzoeken namens jou",
+      blokken: [
+        { p: "Je kunt OpenRegio vragen om namens jou een verzoek op grond van de Wet open overheid (Woo) in te dienen, bijvoorbeeld om de stukken achter een brief of de achtergrond van een regel op te vragen. Daarvoor geldt:" },
+        { ul: [
+          "**Machtiging per verzoek.** Je geeft voor elk verzoek in het platform een machtiging. OpenRegio treedt dan op als jouw gemachtigde; jij blijft de verzoeker.",
+          "**Controle vooraf.** OpenRegio controleert elk verzoek voordat het wordt verstuurd en mag een verzoek weigeren, bijvoorbeeld als het onduidelijk, te breed of ongepast is. Je hoort dan waarom.",
+          "**Wat we wel en niet doen.** De machtiging geldt alleen voor het indienen van dat verzoek en de correspondentie daarover: de ontvangstbevestiging, een verdaging, het ontvangen van het besluit en de documenten, en een ingebrekestelling als het bestuursorgaan te laat beslist. Wij maken namens jou geen bezwaar of beroep en voeren geen inhoudelijke discussie over je zaak.",
+          "**Doorsturen.** Besluiten en documenten die we ontvangen, sturen we aan je door.",
+          "**Geen invloed op de uitkomst.** Het bestuursorgaan beslist of en welke documenten openbaar worden. Een Woo-verzoek houdt termijnen in je eigen zaak — zoals een betaal- of bezwaartermijn — niet tegen.",
+          "**Intrekken.** Zolang het verzoek nog niet is verstuurd, kun je het zelf intrekken. Daarna kun je ons vragen het namens jou in te trekken.",
+          "**Aansprakelijkheid.** Artikel 9 is volledig van toepassing, ook op Woo-verzoeken die wij namens jou indienen.",
         ] },
       ],
     },
@@ -196,8 +211,8 @@ export const VOORWAARDEN: JuridischDocument = {
 
 export const PRIVACY: JuridischDocument = {
   titel: "Privacyverklaring",
-  versie: "2.2",
-  bijgewerkt: "27 september 2026",
+  versie: "2.3",
+  bijgewerkt: "29 september 2026",
   intro: [
     "In deze verklaring lees je welke persoonsgegevens OpenRegio verwerkt, waarom we dat doen, hoe lang we gegevens bewaren, met wie gegevens kunnen worden gedeeld en welke rechten je hebt. We houden dit zo concreet mogelijk en beschrijven hoe het platform daadwerkelijk werkt.",
   ],
@@ -306,7 +321,14 @@ export const PRIVACY: JuridischDocument = {
         { p: "**Doel:** OpenRegio beveiligen, storingen onderzoeken en misbruik voorkomen." },
         { p: "**Grondslag:** gerechtvaardigd belang. Ons gerechtvaardigd belang is de bescherming van OpenRegio en zijn gebruikers tegen ongeautoriseerde toegang, misbruik, aanvallen en technische storingen." },
 
-        { h3: "3.9 Contact en support" },
+        { h3: "3.9 Woo-verzoeken namens jou" },
+        { p: "Als je OpenRegio een verzoek op grond van de Wet open overheid namens jou laat indienen, verwerken we je naam, bedrijfsnaam, adres en e-mailadres, de inhoud van het verzoek, je machtiging, en de correspondentie, besluiten en documenten die we van het bestuursorgaan ontvangen." },
+        { p: "**Doel:** het verzoek indienen, de termijn bewaken, zo nodig een ingebrekestelling sturen en jou de uitkomst doorsturen." },
+        { p: "**Grondslag:** uitvoering van de overeenkomst." },
+        { p: "**Ontvanger:** het bestuursorgaan waaraan het verzoek is gericht. In het verzoek staan je naam, bedrijfsnaam en adres en de machtiging; je e-mailadres niet. Een bestuursorgaan maakt besluiten op Woo-verzoeken vaak openbaar, in principe zonder persoonsgegevens van de verzoeker." },
+        { p: "**Bewaartermijn:** zolang het verzoek loopt en daarna maximaal 2 jaar. Afzendergegevens bewaren we versleuteld." },
+
+        { h3: "3.10 Contact en support" },
         { p: "Wanneer je contact met ons opneemt, verwerken we de informatie die je daarbij verstrekt." },
         { p: "**Doel:** je vraag beantwoorden, ondersteuning bieden en correspondentie kunnen afhandelen." },
         { p: "**Grondslag:** uitvoering van de overeenkomst of ons gerechtvaardigd belang bij het beantwoorden en administreren van vragen." },

@@ -676,3 +676,39 @@ export async function sendBriefNaarOpenRegio(opts: {
   }
   return false;
 }
+
+// ── Woo-verzoeken namens de ondernemer ──────────────────────────────────────
+const alsPre = (tekst: string) => `<pre style="white-space:pre-wrap;font-family:Georgia,serif;font-size:14px;line-height:1.55">${esc(tekst)}</pre>`;
+
+/** Het Woo-verzoek (of de ingebrekestelling) naar het bestuursorgaan. Antwoorden komen bij OpenRegio binnen. */
+export async function sendWooNaarOrgaan(naar: string, onderwerp: string, tekst: string): Promise<boolean> {
+  return sendEmail(naar, onderwerp, alsPre(tekst));
+}
+
+/** Melding aan beheer: nieuw Woo-verzoek wacht op goedkeuring. */
+export async function sendWooBeheerMelding(opts: { id: number; orgaan: string; onderwerp: string; ondernemer: string }): Promise<boolean> {
+  const naar = process.env.BRIEVEN_INBOX || "info@openregio.nl";
+  return sendEmail(naar, `Woo-verzoek ter goedkeuring — ${opts.orgaan}`, `
+    <p>Er staat een nieuw Woo-verzoek klaar dat OpenRegio namens <strong>${esc(opts.ondernemer)}</strong> moet indienen.</p>
+    <p><strong>Bestuursorgaan:</strong> ${esc(opts.orgaan)}<br><strong>Onderwerp:</strong> ${esc(opts.onderwerp)}</p>
+    <p><a href="${BASE_URL}/admin/woo-verzoeken">Bekijk en verstuur het verzoek</a> (dossier #${opts.id}).</p>`);
+}
+
+/** Statusmelding aan de ondernemer: verstuurd (met kopie) of niet ingediend (met reden). */
+export async function sendWooStatusAanOndernemer(opts: {
+  naar: string; voornaam: string; onderwerp: string; status: "verstuurd" | "afgewezen" | "ingebreke"; tekst?: string; reden?: string; deadline?: Date;
+}): Promise<boolean> {
+  const aanhef = `<p>Beste ${esc(opts.voornaam || "ondernemer")},</p>`;
+  const link = `<p><a href="${BASE_URL}/regels/woo">Bekijk je Woo-verzoeken</a></p>`;
+  if (opts.status === "afgewezen") {
+    return sendEmail(opts.naar, `Je Woo-verzoek is niet ingediend — ${opts.onderwerp}`, `${aanhef}
+      <p>OpenRegio heeft je Woo-verzoek over <strong>${esc(opts.onderwerp)}</strong> niet ingediend.</p>
+      ${opts.reden ? `<p><strong>Reden:</strong> ${esc(opts.reden)}</p>` : ""}${link}`);
+  }
+  const titel = opts.status === "ingebreke" ? "OpenRegio heeft het bestuursorgaan in gebreke gesteld" : "OpenRegio heeft je Woo-verzoek ingediend";
+  return sendEmail(opts.naar, `${titel} — ${opts.onderwerp}`, `${aanhef}
+    <p>${titel}.</p>
+    ${opts.deadline ? `<p>Het bestuursorgaan moet uiterlijk op <strong>${opts.deadline.toLocaleDateString("nl-NL", { day: "numeric", month: "long", year: "numeric" })}</strong> beslissen (verdaging met twee weken is mogelijk).</p>` : ""}
+    <p>Let op: dit verzoek houdt termijnen in je eigen zaak niet tegen.</p>
+    ${opts.tekst ? `<p>Kopie van wat is verstuurd:</p>${alsPre(opts.tekst)}` : ""}${link}`);
+}

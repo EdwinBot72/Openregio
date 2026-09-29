@@ -504,6 +504,25 @@ export async function runMigrations(): Promise<void> {
     await db.execute(sql`CREATE INDEX IF NOT EXISTS idx_deep_analyses_user ON deep_analyses(user_id, created_at DESC);`);
     console.log("[Migration] ✓ deep_analyses table ensured");
 
+    // Woo-verzoeken namens de ondernemer: machtiging en goedkeuring door beheer.
+    try {
+    await db.execute(sql`
+      ALTER TABLE woo_dossiers
+        ADD COLUMN IF NOT EXISTS bron VARCHAR(16),
+        ADD COLUMN IF NOT EXISTS namens BOOLEAN DEFAULT false,
+        ADD COLUMN IF NOT EXISTS machtiging_tekst TEXT,
+        ADD COLUMN IF NOT EXISTS machtiging_at TIMESTAMPTZ,
+        ADD COLUMN IF NOT EXISTS goedgekeurd_at TIMESTAMPTZ,
+        ADD COLUMN IF NOT EXISTS beheer_notitie TEXT,
+        ADD COLUMN IF NOT EXISTS indien_kanaal VARCHAR(16),
+        ADD COLUMN IF NOT EXISTS indien_ontvanger TEXT,
+        ADD COLUMN IF NOT EXISTS ingediend_op TIMESTAMPTZ;
+    `);
+    console.log("[Migration] ✓ woo_dossiers namens-kolommen ensured");
+    } catch (e: any) {
+      console.error("[Migration] woo_dossiers namens-kolommen niet aangemaakt:", e?.message || e);
+    }
+
     // Zoeken in eigen documenten (RAG): vectorkolom voor het lokale model nomic-embed-text (768 dimensies).
     // Apart afgevangen: als pgvector ontbreekt, mag de rest van de app gewoon starten.
     try {

@@ -20,6 +20,7 @@ import { createStripeCheckout, handleStripeWebhook, stripeConfigured } from "./s
 import { viaWachtrij, zetInRij, WachtrijFout, registreerWachtrijRoutes, type JobResultaat } from "./analyseQueue";
 import { BRIEFTYPES, isBrieftype, buildSystemPrompt, buildUserPrompt, CONTROLE_PUNTEN, controleerBesluit, aandachtspuntenUit, stelWooVerzoekOp, CONTROLE_METHODE_DISCLAIMER } from "./brieftypes";
 import { db } from "db";
+import { wooDossiers } from "@shared/schema";
 import { eq, sql, gte, lte, gt, and, count, inArray } from "drizzle-orm";
 import { registerObjectStorageRoutes } from "./replit_integrations/object_storage";
 import { BEROEP_DATA } from "@shared/seo-data";
@@ -2949,6 +2950,211 @@ HARDE GRENZEN:
   });
 
   // WOO Dossiers - save and retrieve generated WOO letters
+  // ── Woo-verzoeken die OpenRegio namens de ondernemer indient ─────────────
+  // Flow: ondernemer vult in + machtigt → status 'wacht_op_goedkeuring' → beheer
+  // controleert en verstuurt naar het bestuursorgaan → termijn loopt (4 weken).
+  const leesWooInvoer = (b: any, user: any) => {
+    const t = (x: unknown, max = 300) => String(x ?? "").trim().slice(0, max);
+    const invoer = {
+      bron: (b?.bron === "regel" ? "regel" : "brief") as "brief" | "regel",
+      orgaan: t(b?.orgaan, 200),
+      onderwerp: t(b?.onderwerp, 200),
+      kenmerk: t(b?.kenmerk, 80) || undefined,
+      datumBrief: t(b?.datumBrief, 40) || undefined,
+      regelNaam: t(b?.regelNaam, 200) || undefined,
+      regelLink: t(b?.regelLink, 300) || undefined,
+      periode: t(b?.periode, 100) || undefined,
+      extra: t(b?.extra, 1000) || undefined,
+      ondernemer: {
+        naam: t(b?.ondernemer?.naam, 120) || [user?.firstName, user?.lastName].filter(Boolean).join(" "),
+        bedrijf: t(b?.ondernemer?.bedrijf, 120) || user?.businessName || undefined,
+        adres: t(b?.ondernemer?.adres, 150),
+        postcodePlaats: t(b?.ondernemer?.postcodePlaats, 100),
+      },
+    };
+    const mist = [
+      !invoer.orgaan && "bestuursorgaan", !invoer.onderwerp && "onderwerp",
+      invoer.bron === "regel" && !invoer.regelNaam && "naam van de regel of verordening",
+      !invoer.ondernemer.naam && "je naam", !invoer.ondernemer.adres && "je adres", !invoer.ondernemer.postcodePlaats && "postcode en plaats",
+    ].filter(Boolean);
+    return { invoer, mist };
+  };
+
+  app.post("/api/woo/namens/voorbeeld", requirePro, async (req: any, res) => {
+    const { invoer, mist } = leesWooInvoer(req.body, req.user);
+    if (mist.length) return res.status(400).json({ error: `Vul nog in: ${mist.join(", ")}.` });
+    const { machtigingTekst, wooVerzoekTekst } = await import("./woo/namens");
+    const machtiging = machtigingTekst(invoer);
+    res.json({ machtiging, tekst: wooVerzoekTekst(invoer, { tekst: machtiging, op: new Date() }) });
+  });
+
+  app.post("/api/woo/namens", requirePro, async (req: any, res) => {
+    try {
+      if (req.body?.machtigingAkkoord !== true) return res.status(400).json({ error: "Geef eerst de machtiging, anders kan OpenRegio het verzoek niet namens je indienen." });
+      const { invoer, mist } = leesWooInvoer(req.body, req.user);
+      if (mist.length) return res.status(400).json({ error: `Vul nog in: ${mist.join(", ")}.` });
+      const { machtigingTekst, wooVerzoekTekst } = await import("./woo/namens");
+      const { encryptField } = await import("./utils/woo-crypto");
+      const nu = new Date();
+      const machtiging = machtigingTekst(invoer);
+      const tekst = wooVerzoekTekst(invoer, { tekst: machtiging, op: nu });
+      const dossier = await storage.createWooDossier({
+        userId: req.user.id,
+        authority: invoer.orgaan,
+        subject: invoer.onderwerp,
+        context: invoer.bron === "regel" ? `Regel: ${invoer.regelNaam}` : `Brief${invoer.kenmerk ? ` ${invoer.kenmerk}` : ""}`,
+        generatedLetter: encryptField(tekst),
+        status: "wacht_op_goedkeuring",
+        senderNameEncrypted: encryptField([invoer.ondernemer.naam, invoer.ondernemer.bedrijf].filter(Boolean).join(" — ")),
+        senderAddressEncrypted: encryptField(invoer.ondernemer.adres),
+        senderPostcodeEncrypted: encryptField(invoer.ondernemer.postcodePlaats),
+        extractedData: { ...invoer, ondernemer: undefined } as any,
+        bron: invoer.bron,
+        namens: true,
+        machtigingTekst: encryptField(machtiging),
+        machtigingAt: nu,
+      } as any);
+      const { sendWooBeheerMelding } = await import("./services/emailService");
+      sendWooBeheerMelding({ id: dossier.id, orgaan: invoer.orgaan, onderwerp: invoer.onderwerp, ondernemer: invoer.ondernemer.bedrijf || invoer.ondernemer.naam }).catch(() => {});
+      res.status(201).json({ id: dossier.id, status: dossier.status });
+    } catch (err: any) {
+      console.error("[WooNamens] aanmaken mislukt:", err?.message || err);
+      res.status(500).json({ error: "Het verzoek kon niet worden opgeslagen. Probeer het opnieuw." });
+    }
+  });
+
+  app.get("/api/woo/namens", requirePro, async (req: any, res) => {
+    try {
+      const { decryptField } = await import("./utils/woo-crypto");
+      const rijen = await db.select().from(wooDossiers)
+        .where(and(eq(wooDossiers.userId, req.user.id), eq(wooDossiers.namens, true)));
+      res.json(rijen.sort((a, b) => b.id - a.id).map((d) => ({
+        id: d.id, bron: d.bron, orgaan: d.authority, onderwerp: d.subject, status: d.status,
+        aangemaakt: d.createdAt, ingediendOp: d.ingediendOp, deadline: d.deadline, ingebrekeOp: d.ingebrekeSentAt,
+        reden: d.status === "afgewezen" ? d.beheerNotitie : undefined,
+        tekst: decryptField(d.generatedLetter),
+      })));
+    } catch (err: any) {
+      console.error("[WooNamens] lijst mislukt:", err?.message || err);
+      res.status(500).json({ error: "Je Woo-verzoeken konden niet worden opgehaald." });
+    }
+  });
+
+  app.post("/api/woo/namens/:id/intrekken", requirePro, async (req: any, res) => {
+    const id = Number(req.params.id);
+    const [d] = await db.select().from(wooDossiers).where(and(eq(wooDossiers.id, id), eq(wooDossiers.userId, req.user.id), eq(wooDossiers.namens, true)));
+    if (!d) return res.status(404).json({ error: "Verzoek niet gevonden." });
+    if (d.status !== "wacht_op_goedkeuring") return res.status(400).json({ error: "Dit verzoek is al verstuurd en kan niet meer worden ingetrokken. Mail ons via info@openregio.nl." });
+    await db.update(wooDossiers).set({ status: "ingetrokken" }).where(eq(wooDossiers.id, id));
+    res.json({ success: true });
+  });
+
+  // Beheer: overzicht, versturen, niet indienen, ingebrekestelling, status.
+  app.get("/api/admin/woo-namens", requireAdmin, async (_req, res) => {
+    try {
+      const { decryptField } = await import("./utils/woo-crypto");
+      const rijen = await db.select({ d: wooDossiers, email: users.email, voornaam: users.firstName, achternaam: users.lastName })
+        .from(wooDossiers).leftJoin(users, eq(users.id, wooDossiers.userId))
+        .where(eq(wooDossiers.namens, true));
+      res.json(rijen.sort((a, b) => b.d.id - a.d.id).map(({ d, email, voornaam, achternaam }) => ({
+        id: d.id, bron: d.bron, orgaan: d.authority, onderwerp: d.subject, status: d.status,
+        aangemaakt: d.createdAt, ingediendOp: d.ingediendOp, deadline: d.deadline, ingebrekeOp: d.ingebrekeSentAt,
+        ontvanger: d.indienOntvanger, notitie: d.beheerNotitie,
+        gebruiker: { email, naam: [voornaam, achternaam].filter(Boolean).join(" ") },
+        verzoeker: decryptField(d.senderNameEncrypted),
+        tekst: decryptField(d.generatedLetter),
+        machtigingOp: d.machtigingAt,
+      })));
+    } catch (err: any) {
+      console.error("[WooNamens] beheerlijst mislukt:", err?.message || err);
+      res.status(500).json({ error: "Overzicht ophalen mislukt." });
+    }
+  });
+
+  const haalNamensDossier = async (id: number) => {
+    const [r] = await db.select({ d: wooDossiers, email: users.email, voornaam: users.firstName })
+      .from(wooDossiers).leftJoin(users, eq(users.id, wooDossiers.userId))
+      .where(and(eq(wooDossiers.id, id), eq(wooDossiers.namens, true)));
+    return r;
+  };
+
+  app.post("/api/admin/woo-namens/:id/verstuur", requireAdmin, async (req: any, res) => {
+    try {
+      const r = await haalNamensDossier(Number(req.params.id));
+      if (!r) return res.status(404).json({ error: "Verzoek niet gevonden." });
+      if (r.d.status !== "wacht_op_goedkeuring") return res.status(400).json({ error: `Dit verzoek heeft status '${r.d.status}' en kan niet (opnieuw) worden verstuurd.` });
+      const ontvanger = String(req.body?.ontvanger ?? "").trim();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(ontvanger)) return res.status(400).json({ error: "Vul een geldig e-mailadres van het bestuursorgaan in (het Woo-adres)." });
+      const { decryptField, encryptField } = await import("./utils/woo-crypto");
+      const { wooVerzoekTekst, wooDeadline } = await import("./woo/namens");
+      const invoer = { ...(r.d.extractedData as any), ondernemer: {
+        naam: String(decryptField(r.d.senderNameEncrypted) || "").split(" — ")[0],
+        bedrijf: String(decryptField(r.d.senderNameEncrypted) || "").split(" — ")[1] || undefined,
+        adres: decryptField(r.d.senderAddressEncrypted) || "",
+        postcodePlaats: decryptField(r.d.senderPostcodeEncrypted) || "",
+      } };
+      const nu = new Date();
+      const tekst = wooVerzoekTekst(invoer, { tekst: decryptField(r.d.machtigingTekst) || "", op: r.d.machtigingAt || nu }, nu);
+      const { sendWooNaarOrgaan, sendWooStatusAanOndernemer } = await import("./services/emailService");
+      const ok = await sendWooNaarOrgaan(ontvanger, `Verzoek op grond van de Wet open overheid — ${r.d.subject}`, tekst);
+      if (!ok) return res.status(502).json({ error: "Versturen mislukt (mailserver). Er is niets gewijzigd; probeer het opnieuw." });
+      const deadline = wooDeadline(nu);
+      await db.update(wooDossiers).set({
+        status: "verstuurd", indienKanaal: "email", indienOntvanger: ontvanger, ingediendOp: nu, goedgekeurdAt: nu, deadline,
+        generatedLetter: encryptField(tekst),
+      } as any).where(eq(wooDossiers.id, r.d.id));
+      if (r.email) sendWooStatusAanOndernemer({ naar: r.email, voornaam: r.voornaam || "", onderwerp: r.d.subject, status: "verstuurd", tekst, deadline }).catch(() => {});
+      res.json({ success: true, deadline });
+    } catch (err: any) {
+      console.error("[WooNamens] versturen mislukt:", err?.message || err);
+      res.status(500).json({ error: "Versturen mislukt." });
+    }
+  });
+
+  app.post("/api/admin/woo-namens/:id/afwijzen", requireAdmin, async (req: any, res) => {
+    const r = await haalNamensDossier(Number(req.params.id));
+    if (!r) return res.status(404).json({ error: "Verzoek niet gevonden." });
+    if (r.d.status !== "wacht_op_goedkeuring") return res.status(400).json({ error: "Alleen verzoeken die nog wachten kun je niet indienen." });
+    const reden = String(req.body?.reden ?? "").trim().slice(0, 1000);
+    if (!reden) return res.status(400).json({ error: "Geef een reden op; die krijgt de ondernemer te zien." });
+    await db.update(wooDossiers).set({ status: "afgewezen", beheerNotitie: reden }).where(eq(wooDossiers.id, r.d.id));
+    const { sendWooStatusAanOndernemer } = await import("./services/emailService");
+    if (r.email) sendWooStatusAanOndernemer({ naar: r.email, voornaam: r.voornaam || "", onderwerp: r.d.subject, status: "afgewezen", reden }).catch(() => {});
+    res.json({ success: true });
+  });
+
+  app.post("/api/admin/woo-namens/:id/ingebreke", requireAdmin, async (req: any, res) => {
+    try {
+      const r = await haalNamensDossier(Number(req.params.id));
+      if (!r) return res.status(404).json({ error: "Verzoek niet gevonden." });
+      if (r.d.status !== "verstuurd" || !r.d.deadline || !r.d.ingediendOp || !r.d.indienOntvanger) return res.status(400).json({ error: "Een ingebrekestelling kan alleen bij een verstuurd verzoek." });
+      if (new Date(r.d.deadline).getTime() > Date.now()) return res.status(400).json({ error: "De beslistermijn is nog niet verstreken." });
+      const { decryptField } = await import("./utils/woo-crypto");
+      const { wooIngebrekeTekst } = await import("./woo/namens");
+      const [persoon, bedrijf] = String(decryptField(r.d.senderNameEncrypted) || "").split(" — ");
+      const naam = bedrijf || persoon;
+      const tekst = wooIngebrekeTekst({ orgaan: r.d.authority, onderwerp: r.d.subject, ondernemerNaam: naam, ingediendOp: new Date(r.d.ingediendOp), deadline: new Date(r.d.deadline) });
+      const { sendWooNaarOrgaan, sendWooStatusAanOndernemer } = await import("./services/emailService");
+      const ok = await sendWooNaarOrgaan(r.d.indienOntvanger, `Ingebrekestelling — Woo-verzoek ${r.d.subject}`, tekst);
+      if (!ok) return res.status(502).json({ error: "Versturen mislukt (mailserver)." });
+      await db.update(wooDossiers).set({ status: "ingebreke_gesteld", ingebrekeSentAt: new Date() }).where(eq(wooDossiers.id, r.d.id));
+      if (r.email) sendWooStatusAanOndernemer({ naar: r.email, voornaam: r.voornaam || "", onderwerp: r.d.subject, status: "ingebreke", tekst }).catch(() => {});
+      res.json({ success: true });
+    } catch (err: any) {
+      console.error("[WooNamens] ingebreke mislukt:", err?.message || err);
+      res.status(500).json({ error: "Ingebrekestelling versturen mislukt." });
+    }
+  });
+
+  app.post("/api/admin/woo-namens/:id/status", requireAdmin, async (req: any, res) => {
+    const status = String(req.body?.status ?? "");
+    if (!["beantwoord", "afgerond"].includes(status)) return res.status(400).json({ error: "Ongeldige status." });
+    const r = await haalNamensDossier(Number(req.params.id));
+    if (!r) return res.status(404).json({ error: "Verzoek niet gevonden." });
+    await db.update(wooDossiers).set({ status, beheerNotitie: String(req.body?.notitie ?? "").slice(0, 1000) || r.d.beheerNotitie }).where(eq(wooDossiers.id, r.d.id));
+    res.json({ success: true });
+  });
+
   app.post("/api/woo/dossiers", requirePro, async (req, res) => {
     try {
       const { authority, subject, context, requestedDocuments, generatedLetter, checklist, status,

@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { voerUitViaWachtrij, volgJob, wachtrijTekst, type WachtrijStatus } from "@/lib/wachtrij";
 import { geefBriefDoor } from "@/lib/briefOverdracht";
+import { WooNamensFormulier } from "@/components/WooNamensFormulier";
 
 const JOB_SLEUTEL = "openregio:job:rechten-rapport";
 
@@ -71,6 +72,7 @@ export default function RechtenRapportPage() {
 
   const [wachtStatus, setWachtStatus] = useState<WachtrijStatus | null>(null);
   const [toonWet, setToonWet] = useState(false);
+  const [wooOpen, setWooOpen] = useState(false);
   const [, navigeer] = useLocation();
   // Doorgeven kan alleen als de brief nog in deze pagina staat (niet na hervatten via de mail-link).
   const kanDoorgeven = modus === "upload" ? bestanden.length > 0 : tekst.trim().length >= 40;
@@ -332,6 +334,26 @@ export default function RechtenRapportPage() {
               <Button onClick={naarBesluitControle} style={{ background: NAVY }} data-testid="button-rr-besluitcontrole">
                 <ShieldCheck className="h-4 w-4 mr-2" /> Controleer dit besluit
               </Button>
+            </div>
+          )}
+
+          {rapport.besluitcontrole && (
+            <div className="rr-no-print rounded-md border p-4 mb-6" style={{ background: "#f8fafc", borderColor: "#e2e8f0" }}>
+              <div className="flex flex-wrap items-center gap-3">
+                <p className="text-sm flex-1 min-w-[220px]" style={{ color: NAVY }}>
+                  <strong>Uitzoeken via de Woo.</strong> Laat OpenRegio namens jou de stukken achter deze brief opvragen: het dossier,
+                  het besluit, het mandaat en de interne correspondentie.
+                </p>
+                {!wooOpen && <Button variant="outline" onClick={() => setWooOpen(true)} data-testid="button-rr-woo">Vraag de stukken op</Button>}
+              </div>
+              {wooOpen && (
+                <div className="mt-4">
+                  <WooNamensFormulier
+                    bron="brief"
+                    voorinvulling={{ orgaan: rapport.kop.afzender, onderwerp: rapport.kop.documenttype, kenmerk: rapport.kop.kenmerk, datumBrief: rapport.kop.datum }}
+                  />
+                </div>
+              )}
             </div>
           )}
 

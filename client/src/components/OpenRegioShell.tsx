@@ -182,6 +182,13 @@ export function OpenRegioShell({ children }: { children: ReactNode }) {
               pijler="p1"
             />
             <NavItem
+              icon={Landmark}
+              href="/regels/woo"
+              label="Woo-verzoeken"
+              currentPath={location}
+              pijler="p1"
+            />
+            <NavItem
               icon={Shield}
               href="/regels/sectorregels"
               label="Sectorregels"

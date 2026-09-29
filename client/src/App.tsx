@@ -15,6 +15,8 @@ import LandingPage from "@/pages/landing";
 import LoginPage from "@/pages/login";
 import RegisterPage from "@/pages/register";
 import BrievenagentPage from "@/pages/agents/brievenagent";
+import WooVerzoekenPage from "@/pages/woo-verzoeken";
+import AdminWooVerzoekenPage from "@/pages/admin/woo-verzoeken";
 import ContractagentPage from "@/pages/agents/contractagent";
 import SecretaressePage from "@/pages/agents/secretaresse";
 import VandaagPage from "@/pages/vandaag";
@@ -181,9 +183,7 @@ function AuthenticatedRouter() {
       <Route path="/woo-bibliotheek">
         <Redirect to="/regiobot" />
       </Route>
-      <Route path="/regels/woo">
-        <Redirect to="/regiobot" />
-      </Route>
+      <Route path="/regels/woo" component={WooVerzoekenPage} />
       <Route path="/cursussen">
         <Redirect to="/vandaag/acties" />
       </Route>
@@ -276,6 +276,7 @@ function AuthenticatedRouter() {
       {/* ── Beheer (admin) ────────────────────────────────────────────────── */}
       <Route path="/admin"><AdminGate><AdminIndexPage /></AdminGate></Route>
       <Route path="/admin/adviseur"><AdminGate><AdviseurPage /></AdminGate></Route>
+      <Route path="/admin/woo-verzoeken"><AdminGate><AdminWooVerzoekenPage /></AdminGate></Route>
       <Route path="/admin/woo"><AdminGate><AdminWooPage /></AdminGate></Route>
       <Route path="/admin/regios"><AdminGate><AdminRegiosPage /></AdminGate></Route>
       <Route path="/admin/inzicht"><AdminGate><AdminInzichtPage /></AdminGate></Route>

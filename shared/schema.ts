@@ -890,6 +890,13 @@ export const wooDossiers = pgTable("woo_dossiers", {
   indienKanaal: varchar("indien_kanaal", { length: 16 }), // 'email' | 'post'
   indienOntvanger: text("indien_ontvanger"),
   ingediendOp: timestamp("ingediend_op", { withTimezone: true }),
+  // Woo-verzoek dat OpenRegio namens de ondernemer indient (na machtiging en goedkeuring door beheer)
+  bron: varchar("bron", { length: 16 }), // 'brief' | 'regel'
+  namens: boolean("namens").default(false),
+  machtigingTekst: text("machtiging_tekst"),
+  machtigingAt: timestamp("machtiging_at", { withTimezone: true }),
+  goedgekeurdAt: timestamp("goedgekeurd_at", { withTimezone: true }),
+  beheerNotitie: text("beheer_notitie"),
   createdAt: timestamp("created_at", { withTimezone: true }).defaultNow(),
 }, (table) => [
   index("idx_woo_dossiers_user").on(table.userId),
