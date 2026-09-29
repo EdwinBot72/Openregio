@@ -229,7 +229,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(attachUser);
 
   // Server-side redirects voor hernoemde/verplaatste pagina's
-  app.get("/regels/woo", (_req, res) => res.redirect(301, "/regiobot"));
+  // /regels/woo is weer een eigen pagina (Woo-verzoeken namens de ondernemer).
   app.get("/woo-bibliotheek", (_req, res) => res.redirect(301, "/regiobot"));
 
   // Register object storage routes for user file uploads
@@ -3044,7 +3044,10 @@ HARDE GRENZEN:
     const id = Number(req.params.id);
     const [d] = await db.select().from(wooDossiers).where(and(eq(wooDossiers.id, id), eq(wooDossiers.userId, req.user.id), eq(wooDossiers.namens, true)));
     if (!d) return res.status(404).json({ error: "Verzoek niet gevonden." });
-    if (d.status !== "wacht_op_goedkeuring") return res.status(400).json({ error: "Dit verzoek is al verstuurd en kan niet meer worden ingetrokken. Mail ons via info@openregio.nl." });
+    if (d.status !== "wacht_op_goedkeuring") {
+      const al = ["verstuurd", "ingebreke_gesteld", "beantwoord"].includes(String(d.status));
+      return res.status(400).json({ error: al ? "Dit verzoek is al verstuurd en kan niet meer zelf worden ingetrokken. Mail ons via info@openregio.nl." : "Dit verzoek loopt niet meer en hoeft niet te worden ingetrokken." });
+    }
     await db.update(wooDossiers).set({ status: "ingetrokken" }).where(eq(wooDossiers.id, id));
     res.json({ success: true });
   });
