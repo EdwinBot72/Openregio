@@ -229,7 +229,7 @@ function IndienBlok({
           )}
         </div>
         <p style={{ fontSize: 12, color: "#475569", margin: "10px 0 0", lineHeight: 1.6 }}>
-          Status en eventuele reactie kun je bijhouden in je <Link href="/regels/woo" className="openregio-link" data-testid="link-woo-bibliotheek-indien">Woo-bibliotheek</Link>.
+          Status en eventuele reactie kun je bijhouden in je <Link href="/woo-verzoeken" className="openregio-link" data-testid="link-woo-bibliotheek-indien">Woo-bibliotheek</Link>.
           {isEmail && " De gemeente kan rechtstreeks reageren op je eigen e-mailadres (Reply-to)."}
         </p>
       </section>
@@ -624,7 +624,7 @@ function ResultaatWeergave({
               </button>
               {scan.wooDossierId ? (
                 <Link
-                  href="/regels/woo"
+                  href="/woo-verzoeken"
                   className="openregio-button openregio-button-primary"
                   data-testid="link-bekijk-dossier"
                 >
@@ -694,7 +694,7 @@ function ResultaatWeergave({
           </div>
         </div>
         <Link
-          href="/regels/woo"
+          href="/woo-verzoeken"
           className="openregio-button openregio-button-primary"
           data-testid="link-naar-ondernemersdossier"
         >

@@ -51,7 +51,7 @@ const NAV_CARDS = [
   },
   {
     id: "woo",
-    href: "/regels/woo",
+    href: "/woo-verzoeken",
     icon: Upload,
     title: "WOO-verzoek",
     description: "Vraag overheidsdocumenten op via een WOO-verzoek met conceptbrief.",
