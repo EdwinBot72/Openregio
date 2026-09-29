@@ -301,10 +301,10 @@ export default function RechtenRapportPage() {
 
           {rapport.conceptbrieven.length > 0 && (
             <section className="mb-6">
-              <h3 className="text-base font-bold mb-1" style={{ color: NAVY }}>8. Je reactie: vraag eerst wie dit oplegt</h3>
+              <h3 className="text-base font-bold mb-1" style={{ color: NAVY }}>8. Je reactie: controle van de opmaak</h3>
               <p className="text-xs text-muted-foreground mb-2">
-                Deze brief gaat op <strong>geen enkele wijze</strong> in op de inhoud en erkent niets: hij vraagt alleen wie verantwoordelijk is,
-                wie de brief heeft opgemaakt en ondertekend, en op grond van welke bevoegdheid.
+                Deze brief is <strong>geen verzoek maar een controle</strong>. Hij stelt vast wat er in de opmaak van de brief ontbreekt: wie hem heeft
+                opgemaakt, wie hem heeft ondertekend en op grond van welke bevoegdheid. Hij gaat op <strong>geen enkele wijze</strong> in op de inhoud en erkent niets.
               </p>
               <ol className="text-xs text-muted-foreground mb-3 list-decimal pl-5 space-y-0.5">
                 <li>Vul de tekst tussen [haken] in en lees alles na.</li>
