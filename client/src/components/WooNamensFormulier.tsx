@@ -85,7 +85,7 @@ export function WooNamensFormulier({ bron, voorinvulling = {}, onKlaar }: { bron
         <CheckCircle2 size={18} style={{ color: "#1f6b45", flexShrink: 0, marginTop: 2 }} />
         <div style={{ fontSize: 14, color: "#1f4d36", lineHeight: 1.6 }}>
           <strong>Je Woo-verzoek staat klaar.</strong> OpenRegio controleert het en dient het namens je in. Je krijgt een e-mail zodra het is
-          verstuurd, met de datum waarop het bestuursorgaan uiterlijk moet beslissen. <Link href="/regels/woo" style={{ color: NAVY, fontWeight: 700 }}>Bekijk je Woo-verzoeken</Link>
+          verstuurd, met de datum waarop het bestuursorgaan uiterlijk moet beslissen. <Link href="/woo-verzoeken" style={{ color: NAVY, fontWeight: 700 }}>Bekijk je Woo-verzoeken</Link>
         </div>
       </div>
     );

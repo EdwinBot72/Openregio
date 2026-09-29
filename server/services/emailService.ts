@@ -699,7 +699,7 @@ export async function sendWooStatusAanOndernemer(opts: {
   naar: string; voornaam: string; onderwerp: string; status: "verstuurd" | "afgewezen" | "ingebreke"; tekst?: string; reden?: string; deadline?: Date;
 }): Promise<boolean> {
   const aanhef = `<p>Beste ${esc(opts.voornaam || "ondernemer")},</p>`;
-  const link = `<p><a href="${BASE_URL}/regels/woo">Bekijk je Woo-verzoeken</a></p>`;
+  const link = `<p><a href="${BASE_URL}/woo-verzoeken">Bekijk je Woo-verzoeken</a></p>`;
   if (opts.status === "afgewezen") {
     return sendEmail(opts.naar, `Je Woo-verzoek is niet ingediend — ${opts.onderwerp}`, `${aanhef}
       <p>OpenRegio heeft je Woo-verzoek over <strong>${esc(opts.onderwerp)}</strong> niet ingediend.</p>

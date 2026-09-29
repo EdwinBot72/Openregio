@@ -183,6 +183,7 @@ function AuthenticatedRouter() {
       <Route path="/woo-bibliotheek">
         <Redirect to="/regiobot" />
       </Route>
+      <Route path="/woo-verzoeken" component={WooVerzoekenPage} />
       <Route path="/regels/woo" component={WooVerzoekenPage} />
       <Route path="/cursussen">
         <Redirect to="/vandaag/acties" />
