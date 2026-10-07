@@ -30,6 +30,8 @@ export interface Rapport {
   secties: RapportSectie[];
   conceptbrieven: Conceptbrief[];
   aiGebruikt: boolean;
+  /** "regels" = zonder AI (standaard), "regels+ai" = met aanvullende AI-uitlezing. */
+  methode: "regels" | "regels+ai";
   /** Overheidsbrief: kan ook door "Besluit controleren". */
   besluitcontrole: boolean;
   /** Hoeveel tekst er is doorzocht, en of de brief langer was dan de grens. */
@@ -73,29 +75,24 @@ const LEEG: Extractie = {
   termijnen: [], grondslagen: [], kenmerk: null, datum_brief: null,
 };
 
-const SYSTEEM = `Je leest een brief van een overheidsinstantie (gemeente, Belastingdienst, provincie, toezichthouder) aan een ondernemer.
-Je haalt ALLEEN feiten uit de tekst. Verzin niets en vul niets aan. Staat iets niet in de brief, gebruik dan null (of "onbekend"/"overig").
-Bij velden die op _citaat eindigen geef je een LETTERLIJK stukje tekst uit de brief (exact overgenomen, maximaal 25 woorden).
-Antwoord uitsluitend met geldige JSON, zonder uitleg.`;
+const SYSTEEM = `Je leest een brief aan een ondernemer en haalt er ALLEEN feiten uit. Verzin niets.
+Staat iets niet in de brief, gebruik dan null (of "onbekend"). Antwoord uitsluitend met korte, geldige JSON.`;
 
+// Bewust klein gehouden: hoe minder velden, hoe sneller het lokale model klaar is.
+// Afzender, "namens", wetsartikelen, termijnen en bedragen haalt de controle zelf (zonder AI) uit de brief.
 function userPrompt(tekst: string): string {
-  return `Geef deze JSON terug (kort, alleen wat in de brief staat):
+  return `Geef deze JSON terug:
 {
- "geadresseerde": naam aan wie de brief gericht is (persoon of bedrijf) of null,
- "geadresseerde_citaat": letterlijk citaat van die adressering of null,
- "bestuurder_persoonlijk": true als een bestuurder/directeur persoonlijk (privé) wordt aangesproken, anders false,
+ "geadresseerde": aan wie de brief gericht is (persoon of bedrijf) of null,
  "hoedanigheid": een van ${HOEDANIGHEDEN.map((x) => `"${x}"`).join(", ")},
- "instantie": naam van de instantie die de brief stuurt of null,
+ "bestuurder_persoonlijk": true als een bestuurder/directeur privé wordt aangesproken, anders false,
+ "instantie": organisatie die de brief stuurt of null,
  "afdeling": afdeling of null,
  "ondertekenaar": naam van wie ondertekent of null,
  "functie": functie van de ondertekenaar of null,
- "namens": namens wie getekend is (bijv. "namens burgemeester en wethouders") of null,
- "in_opdracht_van": als de afzender (bijv. een bedrijf of incassobureau) schrijft in opdracht van of namens een andere organisatie: die organisatie, anders null,
- "behandelaar": naam van de behandelaar/contactpersoon als die genoemd wordt (bijv. bij "behandeld door" of "contactpersoon") of null,
- "verlangd_soort": een van ${VERLANGD.map((x) => `"${x}"`).join(", ")},
- "verlangd_omschrijving": korte omschrijving van wat er van de ondernemer verlangd wordt of null,
- "verlangd_citaat": letterlijk citaat daarvan of null,
- "grondslagen": [{"regel": "wet/artikel/verordening zoals genoemd in de brief", "citaat": "letterlijk citaat"}]
+ "behandelaar": naam bij "behandeld door" of "contactpersoon" of null,
+ "in_opdracht_van": organisatie namens wie een bedrijf of incassobureau schrijft, of null,
+ "verlangd": wat er van de ondernemer verlangd wordt, in maximaal 15 woorden, of null
 }
 
 BRIEF:
@@ -132,7 +129,7 @@ async function aiExtractie(tekst: string): Promise<{ ex: Extractie; ok: boolean 
         { role: "user", content: userPrompt(kopEnStaart(tekst)) },
       ],
       temperature: 0.1,
-      max_tokens: 700,
+      max_tokens: 320,
     });
     const raw = completion.choices[0]?.message?.content || "";
     const m = raw.match(/\{[\s\S]*\}/);
@@ -143,15 +140,13 @@ async function aiExtractie(tekst: string): Promise<{ ex: Extractie; ok: boolean 
       ok: true,
       ex: {
         ...LEEG,
-        geadresseerde: str(j.geadresseerde), geadresseerde_citaat: str(j.geadresseerde_citaat),
+        geadresseerde: str(j.geadresseerde),
         bestuurder_persoonlijk: j.bestuurder_persoonlijk === true,
         hoedanigheid: kies(j.hoedanigheid, HOEDANIGHEDEN, "onbekend"),
         instantie: str(j.instantie), afdeling: str(j.afdeling), ondertekenaar: str(j.ondertekenaar),
-        functie: str(j.functie), namens: str(j.namens),
+        functie: str(j.functie),
         behandelaar: str(j.behandelaar), in_opdracht_van: str(j.in_opdracht_van),
-        verlangd_soort: kies(j.verlangd_soort, VERLANGD, "overig"), verlangd_omschrijving: str(j.verlangd_omschrijving),
-        verlangd_citaat: str(j.verlangd_citaat),
-        grondslagen: lijst(j.grondslagen).map((g: any) => ({ regel: str(g?.regel) || "", citaat: str(g?.citaat) })).filter((g) => g.regel).slice(0, 8),
+        verlangd_omschrijving: str(j.verlangd ?? j.verlangd_omschrijving),
       },
     };
   } catch (e: any) {
@@ -342,6 +337,38 @@ function detecteerAfzender(t: string): string | null {
 const NAMENS_ORGAAN = /namens\s+((?:het\s+)?(?:college\s+van\s+burgemeester\s+en\s+wethouders|burgemeester\s+en\s+wethouders|de\s+burgemeester|gedeputeerde\s+staten|(?:het\s+)?dagelijks\s+bestuur[^\n,.]{0,40}|de\s+inspecteur[^\n,.]{0,40}|de\s+minister[^\n,.]{0,60}|de\s+staatssecretaris[^\n,.]{0,60}|de\s+heffingsambtenaar[^\n,.]{0,40}|de\s+invorderingsambtenaar[^\n,.]{0,40}|de\s+directeur[^\n,.]{0,40}))/i;
 
 const NIET_ONDERTEKEND = /(niet\s+(persoonlijk\s+)?ondertekend|zonder\s+handtekening|geldig\s+zonder\s+handtekening|automatisch\s+(aangemaakt|verzonden|gegenereerd|verwerkt)|(computer|systeem)\s*(gegenereerd|aangemaakt))/i;
+// ── Ondertekening zonder AI: het blok onder "Met vriendelijke groet" ──
+const AFSLUITING = /(met\s+vriendelijke\s+groet(en)?|hoogachtend|met\s+(hartelijke|beleefde)\s+groet(en)?|vriendelijke\s+groet(en)?)\s*,?/gi;
+const TITEL = "(?:dhr\\.|mw\\.|mevr\\.|de heer|mevrouw|drs\\.|mr\\.|ir\\.|ing\\.|dr\\.|prof\\.)";
+const NAAM = new RegExp(`^(?:${TITEL}\\s+)*(?:(?:[A-Z]\\.\\s?){1,4}|[A-Z][a-zà-ÿ]+\\s+)(?:(?:van|de|der|den|ten|ter|het|'t|el|al)\\s+)*[A-Z][a-zà-ÿ'-]+(?:[- ][A-Z][a-zà-ÿ'-]+)?$`);
+const FUNCTIEWOORD = /(teamleider|team\s*manager|manager|hoofd|afdelingshoofd|medewerker|coördinator|coordinator|directeur|toezichthouder|handhaver|inspecteur|adviseur|jurist|wethouder|burgemeester|secretaris|ambtenaar|controleur|specialist|consulent|behandelaar|beleidsmedewerker|projectleider|invordering|heffing)/i;
+const GEEN_NAAMREGEL = /^(namens|voor\s+deze|i\.?o\.?|in\s+opdracht|het\s+college|de\s+burgemeester|burgemeester\s+en|gemeente|provincie|waterschap|afdeling|team\b|bijlage|cc\b|kopie)/i;
+
+/** Naam en functie van de ondertekenaar uit het slot van de brief, of null. */
+export function detecteerOndertekening(t: string): { naam: string; functie: string | null; zin: string } | null {
+  const treffers = [...t.matchAll(AFSLUITING)];
+  const laatste = treffers[treffers.length - 1];
+  if (!laatste || laatste.index === undefined) return null;
+  const regels = t.slice(laatste.index + laatste[0].length).split("\n").map((r) => r.trim()).filter(Boolean).slice(0, 8);
+  for (let i = 0; i < regels.length; i++) {
+    const r = regels[i].replace(/[,;]$/, "");
+    if (GEEN_NAAMREGEL.test(r) || r.length > 60) continue;
+    if (NAAM.test(r)) {
+      const volgende = regels[i + 1]?.replace(/[,;]$/, "") || "";
+      const functie = volgende && volgende.length <= 80 && !NAAM.test(volgende) && (FUNCTIEWOORD.test(volgende) || /^[a-z]/.test(volgende)) ? volgende : null;
+      return { naam: r, functie, zin: [r, functie].filter(Boolean).join(", ") };
+    }
+    if (/^behandeld\s+door|^contactpersoon/i.test(r)) break;
+  }
+  return null;
+}
+
+/** Rol waarin de ontvanger wordt aangesproken, als die letterlijk in de brief staat. */
+function detecteerHoedanigheid(t: string): Hd {
+  const m = t.match(/\b(overtreder|vergunninghouder|belastingplichtige|eigenaar|gebruiker|werkgever|aanvrager)\b/i);
+  return m ? (m[1].toLowerCase() as Hd) : "onbekend";
+}
+
 const BEHANDELAAR = /(behandeld\s+door|behandelaar|contactpersoon|inlichtingen\s+bij|opgemaakt\s+door|zaakbehandelaar)\s*:?\s*([^\n]{3,70})/i;
 const IBAN = /\bNL\s?\d{2}\s?[A-Z]{4}(?:\s?\d{4}){2}\s?\d{2}\b/;
 
@@ -418,7 +445,20 @@ function verificatiebrief(g: BriefGegevens): Conceptbrief {
 export async function maakRechtenRapport(brieftekst: string): Promise<Rapport> {
   // Tot ca. 50 pagina's: de vaste controles doorzoeken de hele brief.
   const tekst = brieftekst.slice(0, MAX_TEKENS);
-  const [{ ex, ok }, bevindingen] = await Promise.all([aiExtractie(tekst), Promise.resolve(controleerBesluit(tekst))]);
+  // Standaard zonder AI: de controle werkt met vaste regels en is daardoor in seconden klaar.
+  // Met BRIEFCONTROLE_AI=1 leest het lokale AI-model aanvullend uit (traag op de huidige server).
+  const metAi = process.env.BRIEFCONTROLE_AI === "1";
+  const [{ ex: aiEx, ok }, bevindingen] = await Promise.all([
+    metAi ? aiExtractie(tekst) : Promise.resolve({ ex: LEEG, ok: false }),
+    Promise.resolve(controleerBesluit(tekst)),
+  ]);
+  const ondertekening = detecteerOndertekening(tekst);
+  const ex: Extractie = {
+    ...aiEx,
+    ondertekenaar: aiEx.ondertekenaar || ondertekening?.naam || null,
+    functie: aiEx.functie || ondertekening?.functie || null,
+    hoedanigheid: aiEx.hoedanigheid !== "onbekend" ? aiEx.hoedanigheid : detecteerHoedanigheid(tekst),
+  };
   const echt = makeVerifier(tekst);
   const bronVan = (...kandidaten: (string | null | undefined)[]) => {
     for (const k of kandidaten) { const v = echt(k); if (v) return `“${v}”`; }
@@ -494,7 +534,7 @@ export async function maakRechtenRapport(brieftekst: string): Promise<Rapport> {
   if (ex.behandelaar || beh) {
     wie.push(ex.behandelaar
       ? feit(`Opgesteld / behandeld door: ${ex.behandelaar}.`, ex.behandelaar, beh?.zin)
-      : { tekst: "Behandelaar of contactpersoon genoemd in de brief.", label: "vaststaand", bron: `“${beh!.zin}”` });
+      : { tekst: `Opgesteld / behandeld door: ${beh!.m[2].trim().replace(/[.,;]$/, "")}.`, label: "vaststaand", bron: `“${beh!.zin}”` });
   } else {
     wie.push({ tekst: "Niet vermeld wie de brief heeft opgesteld of behandelt.", label: "te_controleren" });
     vraag("Welke medewerker heeft deze brief opgesteld en behandelt het dossier?");
@@ -636,6 +676,7 @@ export async function maakRechtenRapport(brieftekst: string): Promise<Rapport> {
       opdrachtgever, incasso: /incasso/i.test(`${org} ${tekst}`), grondslagGenoemd: grondslagen.length > 0,
     })],
     aiGebruikt: ok,
+    methode: metAi ? "regels+ai" : "regels",
     besluitcontrole: overheid,
     omvang: { tekens: tekst.length, ingekort: brieftekst.length > MAX_TEKENS },
   };

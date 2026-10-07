@@ -23,6 +23,7 @@ interface Rapport {
   secties: RapportSectie[];
   conceptbrieven: Conceptbrief[];
   aiGebruikt: boolean;
+  methode?: "regels" | "regels+ai";
   besluitcontrole?: boolean;
   omvang?: { tekens: number; ingekort: boolean };
 }
@@ -225,7 +226,7 @@ export default function RechtenRapportPage() {
             )}
 
             <div className="rounded-md border p-2.5 text-xs" style={{ background: "#f0f7f4", borderColor: "#cfe8dd", color: "#2f5d4b" }}>
-              🔒 <strong>Veilig.</strong> Je brief wordt verwerkt op onze eigen server met een lokale AI. De tekst gaat niet naar externe partijen
+              🔒 <strong>Veilig.</strong> Je brief wordt gecontroleerd op onze eigen server. De tekst gaat niet naar externe partijen
               (zoals OpenAI of Google) en wordt niet opgeslagen. Je hoeft persoonlijke gegevens dus niet weg te lakken.
             </div>
 
@@ -236,9 +237,8 @@ export default function RechtenRapportPage() {
             </Button>
             {mut.isPending && (
               <p className="text-sm text-muted-foreground" data-testid="text-analyse-duur">
-                ⏳ <strong>{wachtrijTekst(wachtStatus)}</strong> De analyse draait op onze eigen server — daardoor blijven je
-                gegevens veilig. Sluit je dit venster, dan krijg je een mail zodra de controle klaar is.
-              </p>
+                ⏳ <strong>{wachtrijTekst(wachtStatus)}</strong> Meestal binnen een halve minuut klaar; een scan of foto duurt iets langer.
+                Sluit je dit venster, dan krijg je een mail zodra de controle klaar is.</p>
             )}
           </CardContent>
         </Card>
@@ -272,7 +272,7 @@ export default function RechtenRapportPage() {
                 Je brief is erg lang. Alleen het eerste deel (ca. 50 pagina's) is doorzocht; controleer de rest zelf.
               </p>
             )}
-            {!rapport.aiGebruikt && (
+            {rapport.methode === "regels+ai" && !rapport.aiGebruikt && (
               <p className="text-xs mt-3" style={{ color: "#8a5300" }}>
                 Het automatisch uitlezen van je brief lukte niet volledig. Dit overzicht steunt vooral op de vaste controles;
                 de punten over je positie kunnen onvolledig zijn.
