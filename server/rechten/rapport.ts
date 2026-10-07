@@ -340,7 +340,8 @@ const NIET_ONDERTEKEND = /(niet\s+(persoonlijk\s+)?ondertekend|zonder\s+handteke
 // ── Ondertekening zonder AI: het blok onder "Met vriendelijke groet" ──
 const AFSLUITING = /(met\s+vriendelijke\s+groet(en)?|hoogachtend|met\s+(hartelijke|beleefde)\s+groet(en)?|vriendelijke\s+groet(en)?)\s*,?/gi;
 const TITEL = "(?:dhr\\.|mw\\.|mevr\\.|de heer|mevrouw|drs\\.|mr\\.|ir\\.|ing\\.|dr\\.|prof\\.)";
-const NAAM = new RegExp(`^(?:${TITEL}\\s+)*(?:(?:[A-Z]\\.\\s?){1,4}|[A-Z][a-zà-ÿ]+\\s+)(?:(?:van|de|der|den|ten|ter|het|'t|el|al)\\s+)*[A-Z][a-zà-ÿ'-]+(?:[- ][A-Z][a-zà-ÿ'-]+)?$`);
+// Initialen mogen ook "|" zijn: tekstherkenning leest een "J." of "I." vaak als "|.".
+const NAAM = new RegExp(`^(?:${TITEL}\\s+)*(?:(?:[A-Z|]\\.\\s?){1,4}|[A-Z][a-zà-ÿ]+\\s+)(?:(?:van|de|der|den|ten|ter|het|'t|el|al)\\s+)*[A-Z][a-zà-ÿ'-]+(?:[- ][A-Z][a-zà-ÿ'-]+)?$`);
 const FUNCTIEWOORD = /(teamleider|team\s*manager|manager|hoofd|afdelingshoofd|medewerker|coördinator|coordinator|directeur|toezichthouder|handhaver|inspecteur|adviseur|jurist|wethouder|burgemeester|secretaris|ambtenaar|controleur|specialist|consulent|behandelaar|beleidsmedewerker|projectleider|invordering|heffing)/i;
 const GEEN_NAAMREGEL = /^(namens|voor\s+deze|i\.?o\.?|in\s+opdracht|het\s+college|de\s+burgemeester|burgemeester\s+en|gemeente|provincie|waterschap|afdeling|team\b|bijlage|cc\b|kopie)/i;
 
